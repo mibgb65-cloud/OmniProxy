@@ -1,0 +1,234 @@
+.codex-login-backdrop {
+  top: 36px;
+  background: color-mix(in srgb, var(--bg) 44%, transparent);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.codex-login-modal.modal {
+  width: min(560px, calc(100vw - 40px));
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, transparent);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: 0 28px 84px color-mix(in srgb, #000 26%, transparent);
+}
+
+.codex-login-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.codex-login-head h2 {
+  margin: 4px 0 0;
+  color: var(--text-strong);
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.codex-login-head p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.codex-login-head .icon-button {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  border-radius: 999px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.codex-login-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 24%, var(--line));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+}
+
+.codex-login-status-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 15%, transparent);
+}
+
+.codex-login-status strong {
+  display: block;
+  color: var(--text-strong);
+  font-size: 13px;
+}
+
+.codex-login-status p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.codex-login-status.is-starting .codex-login-status-dot,
+.codex-login-status.is-completing .codex-login-status-dot {
+  animation: codex-login-pulse 1.3s ease-in-out infinite;
+}
+
+.codex-login-status.is-success {
+  border-color: color-mix(in srgb, var(--success) 36%, var(--line));
+  background: color-mix(in srgb, var(--success) 8%, var(--surface));
+}
+
+.codex-login-status.is-success .codex-login-status-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 15%, transparent);
+}
+
+.codex-login-status.is-error {
+  border-color: color-mix(in srgb, var(--danger) 34%, var(--line));
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.codex-login-status.is-error .codex-login-status-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 15%, transparent);
+}
+
+.codex-login-link-card,
+.codex-login-format {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-soft);
+}
+
+.codex-login-link-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.codex-login-link-head span,
+.codex-login-format span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.codex-login-link-card code {
+  display: block;
+  max-height: 88px;
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 82%, var(--surface-soft));
+  color: var(--text-strong);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.codex-login-open-button {
+  width: 100%;
+}
+
+.codex-login-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0 0 0 22px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.codex-login-steps li::marker {
+  color: var(--brand-strong);
+  font-weight: 800;
+}
+
+.codex-login-format strong {
+  color: var(--text-strong);
+  font-size: 14px;
+}
+
+.codex-login-format small {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.codex-login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.codex-login-actions .primary-button {
+  min-width: 132px;
+}
+
+.codex-login-actions .compact-button,
+.codex-login-link-head .compact-button {
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+@keyframes codex-login-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.86);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.shell.dark .codex-login-modal.modal {
+  border-color: color-mix(in srgb, var(--line) 92%, transparent);
+  background: #1e1e20;
+  box-shadow: 0 28px 86px rgba(0, 0, 0, 0.48);
+}
+
+.shell.dark .codex-login-link-card code {
+  background: #2a2b2f;
+}
+
+@media (max-width: 560px) {
+  .codex-login-modal.modal {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .codex-login-actions {
+    justify-content: stretch;
+  }
+
+  .codex-login-actions > button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codex-login-status.is-starting .codex-login-status-dot,
+  .codex-login-status.is-completing .codex-login-status-dot {
+    animation: none;
+  }
+}

@@ -355,7 +355,7 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 		lines = strings.Split(strings.TrimRight(text, "\n"), "\n")
 	}
 
-	lines = setRootStringKey(lines, "model_provider", "OpenAI")
+	lines = setRootStringKey(lines, "model_provider", "openai")
 	lines = setRootStringKey(lines, "model", model)
 	lines = setRootStringKey(lines, "review_model", model)
 	lines = setRootStringKey(lines, "model_reasoning_effort", "xhigh")
@@ -370,7 +370,7 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 	lines = setRootRawKey(lines, "model_context_window", fmt.Sprintf("%d", contextWindow))
 	lines = setRootRawKey(lines, "model_auto_compact_token_limit", fmt.Sprintf("%d", compactLimit))
 	lines = removeRootKey(lines, "preferred_auth_method")
-	lines = removeRootKey(lines, "openai_base_url")
+	lines = setRootStringKey(lines, "openai_base_url", baseURL)
 	lines = removeRootKey(lines, "chatgpt_base_url")
 	lines = removeRootKey(lines, "disable_response_storage")
 	lines = removeRootKey(lines, "profile")
@@ -382,13 +382,6 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 	lines = removeTomlSection(lines, "[model_providers.zo]")
 	lines = removeTomlSection(lines, "[model_providers.anyrouter]")
 	lines = removeTomlSection(lines, "[model_providers.prem]")
-	lines = appendTomlSection(lines, []string{
-		"[model_providers.OpenAI]",
-		`name = "OpenAI"`,
-		fmt.Sprintf(`base_url = "%s"`, tomlEscape(baseURL)),
-		`wire_api = "responses"`,
-		"requires_openai_auth = true",
-	})
 
 	next := strings.Join(lines, "\n") + "\n"
 	if len(content) > 0 {
@@ -512,16 +505,6 @@ func setRootLine(lines []string, key string, replacement string) []string {
 	}
 	next = append(next, lines[insertAt:]...)
 	return next
-}
-
-func appendTomlSection(lines []string, section []string) []string {
-	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
-		lines = lines[:len(lines)-1]
-	}
-	if len(lines) > 0 {
-		lines = append(lines, "")
-	}
-	return append(lines, section...)
 }
 
 func removeTomlSection(lines []string, section string) []string {

@@ -41,6 +41,22 @@ func TestCodexOAuthAuthJSONPreservesIdentityAndRefreshToken(t *testing.T) {
 	if fields.AccessToken != "access-token" || fields.RefreshToken != "refresh-token" {
 		t.Fatalf("unexpected credentials: %+v", fields)
 	}
+	var saved map[string]any
+	if err := json.Unmarshal([]byte(raw), &saved); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := saved["tokens"]; ok {
+		t.Fatalf("CPA Codex auth must keep token fields at the top level: %#v", saved)
+	}
+	if saved["type"] != "codex" || saved["email"] != "browser-login@example.com" {
+		t.Fatalf("unexpected CPA identity fields: %#v", saved)
+	}
+	if saved["account_id"] != "account-browser-login" || saved["expired"] != now.Add(time.Hour).Format(time.RFC3339) {
+		t.Fatalf("unexpected CPA account metadata: %#v", saved)
+	}
+	if saved["last_refresh"] != now.Format(time.RFC3339) {
+		t.Fatalf("unexpected CPA last_refresh: %#v", saved)
+	}
 }
 
 func TestCodexOAuthCallbackAcceptsCode(t *testing.T) {

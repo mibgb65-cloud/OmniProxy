@@ -51,6 +51,13 @@ export function createAppState() {
     windowMaximised: ref(false),
     loading: ref(false),
     codexLoggingIn: ref(false),
+    codexLoginDialog: reactive({
+      visible: false,
+      loginId: '',
+      authUrl: '',
+      status: 'idle',
+      message: '',
+    }),
     codexConfiguring: ref(false),
     codexRestoring: ref(false),
     claudeModelsConfiguring: ref(false),

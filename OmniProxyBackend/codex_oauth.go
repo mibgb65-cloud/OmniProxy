@@ -259,29 +259,30 @@ func codexOAuthRandomToken() (string, error) {
 }
 
 func codexOAuthAuthJSON(oauthTokens proxy.CodexOAuthTokens, now time.Time) (string, error) {
-	tokens := map[string]any{
+	payload := map[string]any{
+		"type":         "codex",
 		"access_token": oauthTokens.AccessToken,
 		"id_token":     oauthTokens.IDToken,
+		"last_refresh": now.UTC().Format(time.RFC3339),
 	}
 	if oauthTokens.RefreshToken != "" {
-		tokens["refresh_token"] = oauthTokens.RefreshToken
+		payload["refresh_token"] = oauthTokens.RefreshToken
 	}
 	if oauthTokens.ExpiresIn > 0 {
-		tokens["expires_at"] = now.UTC().Add(time.Duration(oauthTokens.ExpiresIn) * time.Second).Format(time.RFC3339)
-	}
-	payload := map[string]any{
-		"auth_mode":      "chatgpt",
-		"OPENAI_API_KEY": nil,
-		"tokens":         tokens,
-		"last_refresh":   now.UTC().Format(time.RFC3339Nano),
+		payload["expired"] = now.UTC().Add(time.Duration(oauthTokens.ExpiresIn) * time.Second).Format(time.RFC3339)
 	}
 	raw, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		return "", err
 	}
 	fields, ok := token.ExtractCodexAuthFields(string(raw))
-	if ok && fields.AccountID != "" {
-		tokens["account_id"] = fields.AccountID
+	if ok {
+		if fields.Email != "" {
+			payload["email"] = fields.Email
+		}
+		if fields.AccountID != "" {
+			payload["account_id"] = fields.AccountID
+		}
 		raw, err = json.MarshalIndent(payload, "", "  ")
 		if err != nil {
 			return "", err

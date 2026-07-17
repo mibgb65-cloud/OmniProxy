@@ -1,19 +1,17 @@
 import { ElMessageBox } from 'element-plus'
 import {
-  completeCodexOAuthLogin,
   consumeCodexResetCredit,
   createToken,
   deleteToken,
   importAPIKeys,
-  openExternalURL,
   refreshTokenAuth,
   setTokenDisabled,
   setTokenSelected,
-  startCodexOAuthLogin,
   updateToken,
   validateToken,
 } from '../services/api'
 import { codexResetCreditsAvailable, isCodexToken, validationSuccessMessage } from '../utils/tokenDisplay'
+import { createCodexLoginActions } from './appCodexLoginActions'
 import { codexIdentityFromAuthJSON } from './codexAuth'
 
 function codexIdentityKey(email, accountId = '') {
@@ -401,29 +399,6 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
       state.refreshingTokenIds[token.id] = false
     }
   }
-  async function loginCodex() {
-    if (state.codexLoggingIn.value) return
-    state.errorMessage.value = ''
-    state.successMessage.value = ''
-    state.activeProvider.value = 'openai'
-    state.codexLoggingIn.value = true
-    try {
-      const login = await startCodexOAuthLogin()
-      if (!login?.loginId || !login?.authUrl) {
-        throw new Error('Codex 登录会话创建失败')
-      }
-      openExternalURL(login.authUrl)
-      state.successMessage.value = '已打开浏览器，请完成 Codex 授权'
-      const updated = await completeCodexOAuthLogin(login.loginId)
-      replaceToken(updated)
-      await dataActions.refreshRealtime()
-      state.successMessage.value = `Codex 登录成功：${updated.name}`
-    } catch (error) {
-      state.errorMessage.value = error.message
-    } finally {
-      state.codexLoggingIn.value = false
-    }
-  }
   async function useCodexResetCredit(item) {
     if (!item?.id || state.consumingResetCreditIds[item.id]) return
     const available = codexResetCreditsAvailable(item)
@@ -685,7 +660,7 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
     selectTokenGroup,
     verifyToken,
     refreshAuthToken,
-    loginCodex,
+    ...createCodexLoginActions(state, dataActions, replaceToken),
     useCodexResetCredit,
     openCodexAuthFilePicker,
     importCodexAuthFiles,

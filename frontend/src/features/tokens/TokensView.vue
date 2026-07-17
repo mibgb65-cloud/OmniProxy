@@ -232,7 +232,7 @@ function apiBalanceSummaryMeta(summary) {
           :loading="codexLoggingIn"
           @click="$emit('login-codex')"
         >
-          {{ codexLoggingIn ? '等待浏览器授权' : '登录 Codex' }}
+          {{ codexLoggingIn ? '处理中' : '登录 Codex' }}
         </el-button>
         <el-button :icon="Download" :loading="exportingTokens" @click="$emit('export-token-backup')">
           {{ exportingTokens ? '导出中' : '导出账号池' }}

@@ -28,6 +28,7 @@ import { useOmniProxyApp } from '../../app/useOmniProxyApp'
 const DashboardView = defineAsyncComponent(() => import('../DashboardView.vue'))
 const AboutView = defineAsyncComponent(() => import('../AboutView.vue'))
 const BillingView = defineAsyncComponent(() => import('../../features/billing/BillingView.vue'))
+const CodexLoginModal = defineAsyncComponent(() => import('../CodexLoginModal.vue'))
 const FirstUseGuideModal = defineAsyncComponent(() => import('../FirstUseGuideModal.vue'))
 const GatewayRoutesView = defineAsyncComponent(() => import('../../features/gateway-routing/GatewayRoutesView.vue'))
 const HistoryView = defineAsyncComponent(() => import('../../features/history/HistoryView.vue'))
@@ -48,7 +49,7 @@ const {
   autoStartChanging, autoStartEnabled, batchImportForm, batchImportPlaceholder, batchImporting, billingDates, billingUsage, canConfigureClaudeModels, canConfigureCodexModels,
   changeBillingDate, changeQuotaOverviewPage, chooseDataDirectory, claudeCliRestoring, claudeDesktopConfiguring, claudeDesktopRestoring, claudeModelsConfiguring,
   clearBillingUsageData, clearRequestHistoryData, clearingBillingUsage, clearingRequestHistory, clientConfigPreviews, clientToolLabel, closeBatchImport, closeDeleteConfirm, closeFirstUseGuide,
-  closeForm, closeHistoryDiagnosis, closeTitlebarUpdatePopover, closeWindow, codexAuthImporting, codexConfiguring, codexLoggingIn, codexRestoring, config, configSnapshotBusy,
+  closeForm, closeHistoryDiagnosis, closeTitlebarUpdatePopover, closeWindow, closeCodexLoginDialog, codexAuthImporting, codexConfiguring, codexLoginDialog, codexLoggingIn, codexRestoring, config, configSnapshotBusy,
   configSnapshots, createCurrentConfigSnapshot,
   confirmRemoveToken, confirmTitlebarUpdatePopover, configureLocalClaudeDesktopModels, configureLocalClaudeModels, configureLocalCodex, configureLocalDeepSeekTUI,
   configureLocalGemini, configureLocalOpenCode, configureLocalPi, coolingTokens, copyEndpointValue, credentialDisplay, credentialLabel, credentialPlaceholder,
@@ -57,8 +58,8 @@ const {
   exportCurrentConfig, exportDiagnostics, exportRequestHistory, exportTokenBackup, exportingCodexAuth, exportingConfig, exportingDiagnostics, exportingHistory, exportingTokens, firstUseGuideStepIndex, firstUseGuideSteps, firstUseGuideVisible,
   form, geminiConfiguring, geminiRestoring, hasWailsRuntime, hideWorkspaceScrollbar, importCodexAuthFiles, importConfigFromFile, importingConfig, installReadyUpdateFromUpdateSurface, invalidTokens,
   isAutoNameForm, isClaudeModelOptionDisabled, isCodexModelOptionDisabled, isDark, isTokenActiveNow, lastUpdateCheckedAt, lastUpdateInfo, loading, logs,
-  loginCodex, lowTokens, manualCheckForUpdates, minimiseWindow, mobileSidebarOpen, navSections, nextFirstUseGuideStep, onBatchImportProviderChange, onProviderChange,
-  openBatchImport, openBillingView, openCodexAuthFilePicker, openCreateForm, openEditForm, openOpenRouterChat, openRouterModels, openRouterModelsCached,
+  completeCodexLogin, loginCodex, lowTokens, manualCheckForUpdates, minimiseWindow, mobileSidebarOpen, navSections, nextFirstUseGuideStep, onBatchImportProviderChange, onProviderChange,
+  openBatchImport, openBillingView, openCodexAuthFilePicker, openCodexLoginURL, openCreateForm, openEditForm, openOpenRouterChat, openRouterModels, openRouterModelsCached,
   openRouterModelsError, openRouterModelsFetchedAt, openRouterModelsLoading, openRouterTokens, opencodeConfiguring, opencodeRestoring, pagedApiOverviewTokens,
   pagedSubscriptionOverviewTokens, piConfiguring, piRestoring, persistConfig, previousFirstUseGuideStep, providerLabel, providerTokens, proxyEndpoint,
   proxyStatus, quotaOverviewRangeText, quotaRefreshProgress, rebuildHistorySummaryData, rebuildingHistorySummaries, refreshAll, refreshAuthToken, refreshBilling, refreshHistory, refreshOpenRouterModels,
@@ -538,6 +539,19 @@ const {
           @close="closeBatchImport"
           @submit="submitBatchImport"
           @provider-change="onBatchImportProviderChange"
+        />
+      </Transition>
+
+      <Transition name="modal-pop" appear>
+        <CodexLoginModal
+          v-if="codexLoginDialog.visible"
+          :dialog="codexLoginDialog"
+          :busy="codexLoggingIn"
+          @close="closeCodexLoginDialog"
+          @copy-url="copyEndpointValue"
+          @open-url="openCodexLoginURL"
+          @complete="completeCodexLogin"
+          @retry="loginCodex"
         />
       </Transition>
 

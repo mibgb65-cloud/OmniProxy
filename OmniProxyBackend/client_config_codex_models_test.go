@@ -16,6 +16,14 @@ func TestConfigureCodexWritesSelectedModelProfiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
+	codexDir := filepath.Join(home, ".codex")
+	if err := os.MkdirAll(codexDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	legacyConfig := "model_provider = \"OpenAI\"\n\n[model_providers.OpenAI]\nbase_url = \"http://127.0.0.1:3000/codex/v1\"\n"
+	if err := os.WriteFile(filepath.Join(codexDir, "config.toml"), []byte(legacyConfig), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
 	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
 	if err != nil {
@@ -56,15 +64,17 @@ func TestConfigureCodexWritesSelectedModelProfiles(t *testing.T) {
 		`model = "gpt-5.6-sol"`,
 		`review_model = "gpt-5.6-sol"`,
 		`model_context_window = 1050000`,
-		`model_provider = "OpenAI"`,
+		`model_provider = "openai"`,
+		`openai_base_url = "http://127.0.0.1:3000/codex/v1"`,
 		`forced_login_method = "chatgpt"`,
 		`cli_auth_credentials_store = "file"`,
-		`base_url = "http://127.0.0.1:3000/codex/v1"`,
-		`requires_openai_auth = true`,
 	} {
 		if !strings.Contains(text, expected) {
 			t.Fatalf("expected config to contain %q, got:\n%s", expected, text)
 		}
+	}
+	if strings.Contains(text, "[model_providers.OpenAI]") {
+		t.Fatalf("Codex gateway config must keep the built-in OpenAI provider so official and gateway conversations share history:\n%s", text)
 	}
 
 	profilePath := filepath.Join(home, ".codex", "omniproxy-gpt-5-6-luna.config.toml")
