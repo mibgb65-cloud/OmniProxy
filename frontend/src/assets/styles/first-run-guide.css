@@ -5,6 +5,14 @@
   font-size: 18px;
 }
 
+.first-run-body {
+  border-radius: 22px;
+}
+
+.first-run-progress button {
+  border-radius: 18px;
+}
+
 .first-run-endpoint {
   width: fit-content;
   margin-top: 12px;
@@ -12,8 +20,8 @@
   gap: 4px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-soft) 48%, var(--surface));
 }
 
 .first-run-endpoint code {
@@ -64,6 +72,24 @@
   border-radius: 8px;
   background: var(--surface-raised);
   box-shadow: var(--shadow-soft);
+}
+
+.help-readiness-card {
+  border-radius: 22px;
+}
+
+.help-section-block {
+  border-radius: 24px;
+}
+
+.help-flow-step,
+.help-credential-grid article {
+  border-radius: 20px;
+}
+
+.help-route-list article,
+.help-troubleshooting-list article {
+  border-radius: 18px;
 }
 
 .help-readiness-card {
@@ -165,7 +191,7 @@
   width: 34px;
   height: 34px;
   border: 1px solid color-mix(in srgb, var(--brand) 28%, var(--line));
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--brand-soft);
   color: var(--brand-strong);
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
@@ -249,7 +275,7 @@
 .endpoint-row {
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 18px;
   background: var(--surface-soft);
 }
 

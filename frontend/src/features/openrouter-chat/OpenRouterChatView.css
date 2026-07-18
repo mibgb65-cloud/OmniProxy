@@ -393,33 +393,33 @@
   background: color-mix(in srgb, var(--brand) 18%, var(--surface));
 }
 
-/* OpenRouter chat: compact header and keep responses visible. */
+/* Keep the chat viewport efficient while matching the shared page heading. */
 .workspace.openrouter-workspace {
-  padding-top: 18px;
+  padding-top: 24px;
 }
 
 .workspace.openrouter-workspace .topbar {
-  min-height: 0;
-  margin-bottom: 12px;
+  min-height: 56px;
+  margin-bottom: 18px;
 }
 
 .workspace.openrouter-workspace .topbar-title {
   min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+  display: grid;
+  gap: 0;
 }
 
 .workspace.openrouter-workspace .eyebrow {
-  display: none;
+  display: block;
 }
 
 .workspace.openrouter-workspace h1 {
-  font-size: 24px;
-  line-height: 1.1;
+  font-size: 30px;
+  line-height: 1.12;
 }
 
 .workspace.openrouter-workspace .topbar-subtitle {
+  margin-top: 4px;
   color: var(--text-muted);
   font-size: 12px;
   line-height: 1.35;

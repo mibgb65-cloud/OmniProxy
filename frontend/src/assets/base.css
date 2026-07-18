@@ -67,6 +67,11 @@ body {
     background-color 0.5s;
   line-height: 1.6;
   font-family:
+    'Google Sans Text',
+    'Google Sans',
+    Roboto,
+    'Noto Sans SC',
+    'Microsoft YaHei UI',
     Inter,
     -apple-system,
     BlinkMacSystemFont,

@@ -34,7 +34,7 @@
   --app-min-width: 1240px;
   --el-color-primary: #4f46e5;
   --el-border-radius-base: 12px;
-  --el-font-family: Inter, 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --el-font-family: 'Google Sans Text', 'Google Sans', Roboto, 'Noto Sans SC', 'Microsoft YaHei UI', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 * {
