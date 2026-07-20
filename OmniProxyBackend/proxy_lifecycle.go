@@ -255,13 +255,18 @@ func (a *appServer) restartControl() error {
 		return err
 	}
 
+	a.activateControlServer(server, listener, cfg.ControlPort)
+	return nil
+}
+
+func (a *appServer) activateControlServer(server *http.Server, listener net.Listener, port int) {
 	a.mu.Lock()
-	old = a.control
+	old := a.control
 	a.control = server
 	a.mu.Unlock()
 
 	a.serveControl(server, listener)
-	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("control API started on port %d", cfg.ControlPort)})
+	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("control API started on port %d", port)})
 	log.Printf("OmniProxy control API listening on http://%s", server.Addr)
 
 	if old != nil {
@@ -275,7 +280,6 @@ func (a *appServer) restartControl() error {
 			a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "control API stopped"})
 		}()
 	}
-	return nil
 }
 
 func proxyConfigChanged(oldCfg config.Config, nextCfg config.Config) bool {

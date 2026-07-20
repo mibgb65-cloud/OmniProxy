@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"omniproxy/internal/config"
 	"omniproxy/internal/history"
@@ -67,14 +68,31 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 		}
 	}
 
+	var preparedControlServer *http.Server
+	var preparedControlListener net.Listener
+	if shouldRestartProxy && shouldRestartControl {
+		var err error
+		preparedControlServer, preparedControlListener, err = a.newControlServer(cfg)
+		if err != nil {
+			return config.Config{}, a.rollbackConfigChange(oldCfg, false, err)
+		}
+	}
+
 	if shouldRestartProxy {
 		if err := a.restartProxy(); err != nil {
+			if preparedControlListener != nil {
+				_ = preparedControlListener.Close()
+			}
 			return config.Config{}, a.rollbackConfigChange(oldCfg, a.proxyServerChanged(oldProxyServer), err)
 		}
 	}
 	if shouldRestartControl {
-		if err := a.restartControl(); err != nil {
-			return config.Config{}, a.rollbackConfigChange(oldCfg, a.proxyServerChanged(oldProxyServer), err)
+		if preparedControlListener != nil {
+			a.activateControlServer(preparedControlServer, preparedControlListener, cfg.ControlPort)
+		} else {
+			if err := a.restartControl(); err != nil {
+				return config.Config{}, a.rollbackConfigChange(oldCfg, a.proxyServerChanged(oldProxyServer), err)
+			}
 		}
 	}
 	if a.tokens != nil {

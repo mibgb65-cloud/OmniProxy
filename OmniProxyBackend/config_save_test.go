@@ -171,6 +171,9 @@ func TestSaveConfigRestoresProxyAfterControlRestartFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer app.stopControl()
+	app.mu.Lock()
+	oldProxy := app.proxyServer
+	app.mu.Unlock()
 
 	next := initial
 	next.ProxyPort = newProxyPort
@@ -185,12 +188,16 @@ func TestSaveConfigRestoresProxyAfterControlRestartFails(t *testing.T) {
 	if app.proxyServer != nil {
 		proxyAddr = app.proxyServer.Addr
 	}
+	proxyPreserved := app.proxyServer == oldProxy
 	app.mu.Unlock()
 	if gotConfig.ProxyPort != oldProxyPort || gotConfig.ControlPort != controlPort {
 		t.Fatalf("expected complete config rollback, got proxy=%d control=%d", gotConfig.ProxyPort, gotConfig.ControlPort)
 	}
 	if wantAddr := fmt.Sprintf("127.0.0.1:%d", oldProxyPort); proxyAddr != wantAddr {
 		t.Fatalf("expected proxy rollback to %q, got %q", wantAddr, proxyAddr)
+	}
+	if !proxyPreserved {
+		t.Fatal("expected unavailable control port to leave the old proxy untouched")
 	}
 	persisted, err := store.Load()
 	if err != nil {
