@@ -161,6 +161,65 @@ func TestValidatorParsesCodexUsageByWindowMinutes(t *testing.T) {
 	}
 }
 
+func TestParseCodexUsageMapsWindowsByLimitSeconds(t *testing.T) {
+	tests := []struct {
+		name                   string
+		body                   string
+		wantPrimaryRemaining   int
+		wantSecondaryRemaining int
+		wantEffectiveRemaining int
+	}{
+		{
+			name: "weekly window returned in primary slot",
+			body: `{
+				"plan_type": "plus",
+				"rate_limit": {
+					"primary_window": {
+						"used_percent": 45,
+						"reset_at": 1785000000,
+						"limit_window_seconds": 604800
+					}
+				}
+			}`,
+			wantSecondaryRemaining: 55,
+			wantEffectiveRemaining: 55,
+		},
+		{
+			name: "five hour window restored in primary slot",
+			body: `{
+				"plan_type": "plus",
+				"rate_limit": {
+					"primary_window": {
+						"used_percent": 30,
+						"reset_at": 1785000000,
+						"limit_window_seconds": 18000
+					}
+				}
+			}`,
+			wantPrimaryRemaining:   70,
+			wantEffectiveRemaining: 70,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			usage, ok := parseCodexUsage([]byte(tt.body))
+			if !ok || !usage.SubscriptionQuotaAvailable {
+				t.Fatalf("expected subscription usage, got %#v", usage)
+			}
+			if usage.PrimaryRemainingPercent != tt.wantPrimaryRemaining {
+				t.Fatalf("primary remaining = %d, want %d", usage.PrimaryRemainingPercent, tt.wantPrimaryRemaining)
+			}
+			if usage.SecondaryRemainingPercent != tt.wantSecondaryRemaining {
+				t.Fatalf("secondary remaining = %d, want %d", usage.SecondaryRemainingPercent, tt.wantSecondaryRemaining)
+			}
+			if got := usage.EffectiveRemainingPercent(); got != tt.wantEffectiveRemaining {
+				t.Fatalf("effective remaining = %d, want %d", got, tt.wantEffectiveRemaining)
+			}
+		})
+	}
+}
+
 func TestValidatorParsesCodexFreeUsageWithoutPrimaryWindow(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer codex-access-token" {

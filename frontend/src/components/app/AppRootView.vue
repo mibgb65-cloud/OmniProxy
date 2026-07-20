@@ -17,9 +17,10 @@ import {
   formatBalance,
   healthSummary,
   quotaDisplay,
+  quotaOverviewLabel,
+  quotaOverviewRemainingField,
   quotaPercentText,
   quotaPercentValue,
-  quotaPrimaryLabel,
   weeklyLimitReached,
 } from '../../utils/tokenDisplay'
 import { openExternalURL } from '../../services/api'
@@ -217,7 +218,8 @@ const {
         :display-status-class="displayStatusClass"
         :display-status-label="displayStatusLabel"
         :provider-label="providerLabel"
-        :quota-primary-label="quotaPrimaryLabel"
+        :quota-overview-label="quotaOverviewLabel"
+        :quota-overview-remaining-field="quotaOverviewRemainingField"
         :quota-percent-value="quotaPercentValue"
         :quota-percent-text="quotaPercentText"
         :credential-label="credentialLabel"

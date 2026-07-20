@@ -55,7 +55,8 @@ defineProps({
   displayStatusClass: { type: Function, required: true },
   displayStatusLabel: { type: Function, required: true },
   providerLabel: { type: Function, required: true },
-  quotaPrimaryLabel: { type: Function, required: true },
+  quotaOverviewLabel: { type: Function, required: true },
+  quotaOverviewRemainingField: { type: Function, required: true },
   quotaPercentValue: { type: Function, required: true },
   quotaPercentText: { type: Function, required: true },
   credentialLabel: { type: Function, required: true },
@@ -216,14 +217,14 @@ function changeQuotaOverviewPage(type, direction) {
                       <span :class="['tag', displayStatusClass(item)]">{{ displayStatusLabel(item) }}</span>
                     </div>
                     <small class="current-usage-meta">
-                      {{ providerLabel(item.provider) }} · {{ quotaPrimaryLabel(item) }}
+                      {{ providerLabel(item.provider) }} · {{ quotaOverviewLabel(item) }}
                     </small>
                   </div>
                   <div class="progress">
-                    <span :style="{ width: `${quotaPercentValue(item, 'primaryRemainingPercent')}%` }"></span>
+                    <span :style="{ width: `${quotaPercentValue(item, quotaOverviewRemainingField(item))}%` }"></span>
                   </div>
                   <small class="quota-percent">
-                    {{ quotaPercentText(item, 'primaryRemainingPercent') }}
+                    {{ quotaPercentText(item, quotaOverviewRemainingField(item)) }}
                   </small>
                 </div>
                 <div v-if="!subscriptionOverviewTokens.length" class="empty">暂无订阅额度账号</div>

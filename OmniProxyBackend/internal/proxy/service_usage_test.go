@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"github.com/klauspost/compress/zstd"
 	"io"
 	"net/http"
@@ -71,6 +72,13 @@ func (repeatingReader) Read(p []byte) (int, error) {
 		p[i] = 'x'
 	}
 	return len(p), nil
+}
+
+func TestReadProxyResponseBodyRejectsOversizedPayload(t *testing.T) {
+	_, err := readProxyResponseBody(io.LimitReader(repeatingReader{}, maxProxyResponseBodyBytes+1))
+	if !errors.Is(err, errResponseBodyTooLarge) {
+		t.Fatalf("expected oversized response error, got %v", err)
+	}
 }
 
 func codexAuthJSONForServiceTest(t *testing.T, email string) string {

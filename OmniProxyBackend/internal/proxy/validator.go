@@ -217,9 +217,23 @@ func (v *Validator) clientForToken(selected token.Token) *http.Client {
 }
 
 type codexRateLimitWindow struct {
-	UsedPercent   float64 `json:"used_percent"`
-	ResetAt       int64   `json:"reset_at"`
-	WindowMinutes int     `json:"window_minutes"`
+	UsedPercent        float64 `json:"used_percent"`
+	ResetAt            int64   `json:"reset_at"`
+	WindowMinutes      int64   `json:"window_minutes"`
+	LimitWindowSeconds int64   `json:"limit_window_seconds"`
+}
+
+func (window *codexRateLimitWindow) durationMinutes() int64 {
+	if window == nil {
+		return 0
+	}
+	if window.WindowMinutes > 0 {
+		return window.WindowMinutes
+	}
+	if window.LimitWindowSeconds > 0 {
+		return (window.LimitWindowSeconds + 59) / 60
+	}
+	return 0
 }
 
 func parseCodexUsage(body []byte) (token.UsageInfo, bool) {
@@ -246,9 +260,11 @@ func parseCodexUsage(body []byte) (token.UsageInfo, bool) {
 	freePlan := strings.EqualFold(strings.TrimSpace(payload.PlanType), "free")
 	primaryWindow := payload.RateLimit.PrimaryWindow
 	secondaryWindow := payload.RateLimit.SecondaryWindow
+	primaryWindowMinutes := primaryWindow.durationMinutes()
+	secondaryWindowMinutes := secondaryWindow.durationMinutes()
 	switch {
-	case primaryWindow != nil && secondaryWindow != nil && primaryWindow.WindowMinutes > 0 && secondaryWindow.WindowMinutes > 0:
-		if primaryWindow.WindowMinutes <= secondaryWindow.WindowMinutes {
+	case primaryWindow != nil && secondaryWindow != nil && primaryWindowMinutes > 0 && secondaryWindowMinutes > 0:
+		if primaryWindowMinutes <= secondaryWindowMinutes {
 			assignCodexUsageWindow(&usage, "primary", primaryWindow)
 			assignCodexUsageWindow(&usage, "secondary", secondaryWindow)
 		} else {
@@ -257,21 +273,21 @@ func parseCodexUsage(body []byte) (token.UsageInfo, bool) {
 		}
 	default:
 		if primaryWindow != nil {
-			kind := codexQuotaKindFromWindowMinutes(primaryWindow.WindowMinutes, "primary")
-			if freePlan && primaryWindow.WindowMinutes <= 0 {
+			kind := codexQuotaKindFromWindowMinutes(primaryWindowMinutes, "primary")
+			if freePlan && primaryWindowMinutes <= 0 {
 				kind = "secondary"
 			}
 			assignCodexUsageWindow(&usage, kind, primaryWindow)
 		}
 		if secondaryWindow != nil {
-			assignCodexUsageWindow(&usage, codexQuotaKindFromWindowMinutes(secondaryWindow.WindowMinutes, "secondary"), secondaryWindow)
+			assignCodexUsageWindow(&usage, codexQuotaKindFromWindowMinutes(secondaryWindowMinutes, "secondary"), secondaryWindow)
 		}
 	}
 
 	return usage, usage.PlanType != "" || usage.SubscriptionQuotaAvailable
 }
 
-func codexQuotaKindFromWindowMinutes(windowMinutes int, fallback string) string {
+func codexQuotaKindFromWindowMinutes(windowMinutes int64, fallback string) string {
 	if windowMinutes <= 0 {
 		return fallback
 	}

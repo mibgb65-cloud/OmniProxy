@@ -46,7 +46,7 @@ export function quotaPercentValue(item, field) {
 }
 
 export function quotaPercentText(item, field) {
-  return item?.usage?.subscriptionQuotaAvailable ? `${quotaPercentValue(item, field)}%` : '-'
+  return field && item?.usage?.subscriptionQuotaAvailable ? `${quotaPercentValue(item, field)}%` : '-'
 }
 
 export function formatBalance(value) {
@@ -300,14 +300,14 @@ export function isCodexFreePlan(item) {
 
 export function showPrimaryQuotaWindow(item) {
   if (!showQuotaWindows(item)) return false
-  if (!item?.usage?.subscriptionQuotaAvailable) return true
+  if (!item?.usage?.subscriptionQuotaAvailable) return !isCodexToken(item)
   if (isCodexFreePlan(item) && quotaWindowAvailable(item, 'secondary')) return false
   return quotaWindowAvailable(item, 'primary')
 }
 
 export function showSecondaryQuotaWindow(item) {
   if (!showQuotaWindows(item)) return false
-  if (!item?.usage?.subscriptionQuotaAvailable) return true
+  if (!item?.usage?.subscriptionQuotaAvailable) return !isCodexToken(item)
   if (isCodexFreePlan(item) && quotaWindowAvailable(item, 'primary')) return false
   return quotaWindowAvailable(item, 'secondary')
 }
@@ -325,6 +325,23 @@ export function quotaPrimaryLabel(item) {
 export function quotaSecondaryLabel(item) {
   if (isZhipuCodingPlan(item)) return '周额度'
   return isMimoTokenPlan(item) ? '套餐额度' : '1 周额度'
+}
+
+export function quotaOverviewWindow(item) {
+  if (showPrimaryQuotaWindow(item)) return 'primary'
+  if (showSecondaryQuotaWindow(item)) return 'secondary'
+  return ''
+}
+
+export function quotaOverviewLabel(item) {
+  const windowName = quotaOverviewWindow(item)
+  if (!windowName) return '额度待刷新'
+  return windowName === 'secondary' ? quotaSecondaryLabel(item) : quotaPrimaryLabel(item)
+}
+
+export function quotaOverviewRemainingField(item) {
+  const windowName = quotaOverviewWindow(item)
+  return windowName ? `${windowName}RemainingPercent` : ''
 }
 
 export function codexWeeklyQuotaEstimate(item) {

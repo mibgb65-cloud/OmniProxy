@@ -338,7 +338,7 @@ func (s *Service) zoFetch(ctx context.Context, method string, route routeInfo, s
 		return 0, nil, nil, err
 	}
 	defer closeBody(resp.Body)
-	data, err := io.ReadAll(resp.Body)
+	data, err := readProxyResponseBody(resp.Body)
 	if err != nil {
 		return resp.StatusCode, resp.Header, nil, err
 	}

@@ -38,8 +38,10 @@ type Service struct {
 }
 
 const maxProxyRequestBodyBytes = 32 * 1024 * 1024
+const maxProxyResponseBodyBytes = 32 * 1024 * 1024
 
 var errRequestBodyTooLarge = errors.New("request body too large")
+var errResponseBodyTooLarge = errors.New("upstream response body too large")
 
 type TokenRefresher func(context.Context, token.Token, bool) (token.Token, bool, error)
 

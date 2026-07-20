@@ -40,6 +40,9 @@ import {
 
 export function createAppDataActions(state, navigation) {
   async function refreshAll() {
+    if (state.timers.refreshAllInFlight) return
+    state.timers.refreshAllInFlight = true
+    state.timers.realtimeRefreshSeq += 1
     state.loading.value = true
     state.errorMessage.value = ''
     try {
@@ -96,11 +99,14 @@ export function createAppDataActions(state, navigation) {
     } catch (error) {
       state.errorMessage.value = error.message
     } finally {
+      state.timers.refreshAllInFlight = false
       state.loading.value = false
     }
   }
 
   async function refreshRealtime() {
+    if (state.timers.refreshAllInFlight) return
+    const seq = ++state.timers.realtimeRefreshSeq
     try {
       const requests = [
         getLogs(),
@@ -114,6 +120,7 @@ export function createAppDataActions(state, navigation) {
       }
       const [loadedLogs, loadedStatus, loadedTokens, loadedActiveRequests, loadedBillingSummary, loadedHistory] =
         await Promise.all(requests)
+      if (seq !== state.timers.realtimeRefreshSeq) return
       state.logs.value = loadedLogs
       state.tokens.value = loadedTokens
       state.activeRequests.value = loadedActiveRequests
@@ -128,6 +135,7 @@ export function createAppDataActions(state, navigation) {
         await refreshBilling()
       }
     } catch (error) {
+      if (seq !== state.timers.realtimeRefreshSeq) return
       state.errorMessage.value = error.message
     }
   }
@@ -150,6 +158,7 @@ export function createAppDataActions(state, navigation) {
   }
 
   async function refreshBilling(date = state.selectedBillingDate.value) {
+    const seq = ++state.timers.billingRefreshSeq
     try {
       const normalizedDate = String(date || localDateKey()).trim() || localDateKey()
       state.selectedBillingDate.value = normalizedDate
@@ -158,10 +167,12 @@ export function createAppDataActions(state, navigation) {
         getBillingDates(30),
         getBillingSummary(30),
       ])
+      if (seq !== state.timers.billingRefreshSeq) return
       state.billingUsage.value = usage || []
       state.billingDates.value = dates || []
       state.billingSummary.value = summary || state.emptyBillingSummary()
     } catch (error) {
+      if (seq !== state.timers.billingRefreshSeq) return
       state.errorMessage.value = error.message
     }
   }

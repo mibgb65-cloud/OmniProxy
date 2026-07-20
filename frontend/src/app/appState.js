@@ -112,6 +112,9 @@ export function createAppState() {
     timers: {
       toastTimer: null,
       realtimeTimer: null,
+      refreshAllInFlight: false,
+      realtimeRefreshSeq: 0,
+      billingRefreshSeq: 0,
       historyRefreshSeq: 0,
       taskAutomationBrowserProfileSeq: 0,
     },

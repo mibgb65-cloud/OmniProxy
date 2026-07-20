@@ -13,7 +13,7 @@ import (
 
 func convertCodexResponsesToChat(resp *http.Response, requestedModel string, clientStream bool) (*http.Response, error) {
 	defer closeBody(resp.Body)
-	body, err := io.ReadAll(resp.Body)
+	body, err := readProxyResponseBody(resp.Body)
 	if err != nil {
 		return nil, err
 	}

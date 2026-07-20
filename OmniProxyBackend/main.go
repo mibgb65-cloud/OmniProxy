@@ -25,6 +25,7 @@ var assets embed.FS
 
 type appServer struct {
 	mu                    sync.Mutex
+	configMu              sync.Mutex
 	codexRefreshMu        sync.Mutex
 	codexOAuthMu          sync.Mutex
 	codexOAuthSession     *codexOAuthSession

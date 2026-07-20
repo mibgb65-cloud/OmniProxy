@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"omniproxy/internal/config"
 	"omniproxy/internal/history"
@@ -43,6 +44,9 @@ func (a *appServer) handleConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
+	a.configMu.Lock()
+	defer a.configMu.Unlock()
+
 	cfg = config.Normalize(cfg)
 	if err := a.validateConfigForSave(cfg); err != nil {
 		return config.Config{}, err
@@ -52,39 +56,71 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 	oldCfg := a.cfg
 	shouldRestartProxy := a.proxyServer != nil && proxyConfigChanged(oldCfg, cfg)
 	shouldRestartControl := a.control != nil && controlConfigChanged(oldCfg, cfg)
+	proxyWasRunning := a.proxyServer != nil
 	a.cfg = cfg
 	a.mu.Unlock()
-	if a.tokens != nil {
-		a.tokens.SetThreshold(cfg.SwitchThreshold)
-	}
-	if a.history != nil {
-		if err := a.history.SetRetentionDays(cfg.HistoryRetentionDays); err != nil {
+
+	if a.configStore != nil {
+		if err := a.configStore.Save(cfg); err != nil {
+			a.restoreConfigInMemory(oldCfg)
 			return config.Config{}, err
 		}
-	}
-	if a.taskAutomation != nil {
-		a.taskAutomation.UpdateConfig(cfg)
 	}
 
 	if shouldRestartProxy {
 		if err := a.restartProxy(); err != nil {
-			return config.Config{}, err
+			return config.Config{}, a.rollbackConfigChange(oldCfg, proxyWasRunning, err)
 		}
 	}
 	if shouldRestartControl {
 		if err := a.restartControl(); err != nil {
-			return config.Config{}, err
+			return config.Config{}, a.rollbackConfigChange(oldCfg, proxyWasRunning, err)
 		}
 	}
-	if a.configStore != nil {
-		if err := a.configStore.Save(cfg); err != nil {
-			return config.Config{}, err
+	if a.tokens != nil {
+		a.tokens.SetThreshold(cfg.SwitchThreshold)
+	}
+	if a.taskAutomation != nil {
+		a.taskAutomation.UpdateConfig(cfg)
+	}
+	if a.history != nil {
+		if err := a.history.SetRetentionDays(cfg.HistoryRetentionDays); err != nil {
+			if a.logs != nil {
+				a.logs.Add(logs.Entry{
+					Level:   logs.LevelWarn,
+					Message: fmt.Sprintf("apply request history retention failed: %v", err),
+				})
+			}
 		}
 	}
 	a.syncPremProxyAfterConfigChange(oldCfg, cfg)
 
-	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "configuration updated"})
+	if a.logs != nil {
+		a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "configuration updated"})
+	}
 	return cfg, nil
+}
+
+func (a *appServer) restoreConfigInMemory(cfg config.Config) {
+	a.mu.Lock()
+	a.cfg = cfg
+	a.mu.Unlock()
+}
+
+func (a *appServer) rollbackConfigChange(oldCfg config.Config, proxyWasRunning bool, cause error) error {
+	a.restoreConfigInMemory(oldCfg)
+	rollbackErrs := []error{cause}
+	if proxyWasRunning {
+		if err := a.restartProxy(); err != nil {
+			rollbackErrs = append(rollbackErrs, fmt.Errorf("restore proxy after config failure: %w", err))
+		}
+	}
+	if a.configStore != nil {
+		if err := a.configStore.Save(oldCfg); err != nil {
+			rollbackErrs = append(rollbackErrs, fmt.Errorf("restore persisted config after config failure: %w", err))
+		}
+	}
+	return errors.Join(rollbackErrs...)
 }
 
 func (a *appServer) validateConfigForSave(cfg config.Config) error {

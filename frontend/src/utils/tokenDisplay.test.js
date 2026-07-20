@@ -11,7 +11,10 @@ import {
   displayStatusClass,
   normalizeBillingDailyRows,
   openRouterQuotaRemaining,
+  quotaOverviewLabel,
+  quotaOverviewRemainingField,
   quotaPrimaryLabel,
+  quotaWindowCount,
   showPrimaryQuotaWindow,
   showSecondaryQuotaWindow,
   validationSuccessMessage,
@@ -94,6 +97,65 @@ test('Codex team plan shows the 5h quota label', () => {
     }),
     '5h额度',
   )
+})
+
+test('Codex quota display follows the windows returned by the backend', () => {
+  const weeklyOnlyToken = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      planType: 'plus',
+      subscriptionQuotaAvailable: true,
+      secondaryUsedPercent: 45,
+      secondaryRemainingPercent: 55,
+    },
+  }
+  const bothWindowsToken = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      planType: 'plus',
+      subscriptionQuotaAvailable: true,
+      primaryRemainingPercent: 80,
+      secondaryRemainingPercent: 55,
+    },
+  }
+  const missingWindowsToken = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      planType: 'plus',
+      subscriptionQuotaAvailable: true,
+    },
+  }
+  const pendingToken = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: { planType: 'plus' },
+  }
+
+  assert.equal(showPrimaryQuotaWindow(weeklyOnlyToken), false)
+  assert.equal(showSecondaryQuotaWindow(weeklyOnlyToken), true)
+  assert.equal(quotaWindowCount(weeklyOnlyToken), 1)
+  assert.equal(quotaOverviewLabel(weeklyOnlyToken), '1 周额度')
+  assert.equal(quotaOverviewRemainingField(weeklyOnlyToken), 'secondaryRemainingPercent')
+
+  assert.equal(showPrimaryQuotaWindow(bothWindowsToken), true)
+  assert.equal(showSecondaryQuotaWindow(bothWindowsToken), true)
+  assert.equal(quotaWindowCount(bothWindowsToken), 2)
+  assert.equal(quotaOverviewLabel(bothWindowsToken), '5h额度')
+  assert.equal(quotaOverviewRemainingField(bothWindowsToken), 'primaryRemainingPercent')
+
+  assert.equal(showPrimaryQuotaWindow(missingWindowsToken), false)
+  assert.equal(showSecondaryQuotaWindow(missingWindowsToken), false)
+  assert.equal(quotaWindowCount(missingWindowsToken), 0)
+  assert.equal(quotaOverviewLabel(missingWindowsToken), '额度待刷新')
+  assert.equal(quotaOverviewRemainingField(missingWindowsToken), '')
+
+  assert.equal(showPrimaryQuotaWindow(pendingToken), false)
+  assert.equal(showSecondaryQuotaWindow(pendingToken), false)
+  assert.equal(quotaOverviewLabel(pendingToken), '额度待刷新')
+  assert.equal(quotaOverviewRemainingField(pendingToken), '')
 })
 
 test('Codex weekly quota estimate uses current weekly tokens and remaining percent', () => {

@@ -82,6 +82,18 @@ func readProxyRequestBody(body io.ReadCloser, contentEncoding string) ([]byte, b
 	return data, decoded, nil
 }
 
+func readProxyResponseBody(body io.Reader) ([]byte, error) {
+	limited := io.LimitReader(body, maxProxyResponseBodyBytes+1)
+	data, err := io.ReadAll(limited)
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > maxProxyResponseBodyBytes {
+		return nil, errResponseBodyTooLarge
+	}
+	return data, nil
+}
+
 func decodedRequestBodyReader(body io.Reader, contentEncoding string) (io.Reader, bool, error) {
 	encoding := strings.ToLower(strings.TrimSpace(contentEncoding))
 	if encoding == "" || encoding == "identity" {

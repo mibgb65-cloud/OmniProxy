@@ -371,17 +371,19 @@ func (r *Recorder) Summary(filter Filter, days int) Summary {
 
 func (r *Recorder) SetRetentionDays(days int) error {
 	r.mu.Lock()
-	r.retentionDays = days
 	cutoffDate := retentionCutoffDate(time.Now(), days)
+	if days > 0 && r.usageStore != nil {
+		if err := r.usageStore.PruneBeforeDate(cutoffDate); err != nil {
+			r.mu.Unlock()
+			return err
+		}
+	}
+	r.retentionDays = days
 	if days > 0 {
 		r.pruneEntriesBeforeLocked(cutoffDate)
 	}
 	r.mu.Unlock()
-
-	if days <= 0 || r.usageStore == nil {
-		return nil
-	}
-	return r.usageStore.PruneBeforeDate(cutoffDate)
+	return nil
 }
 
 func (r *Recorder) ClearDailyUsage() error {
