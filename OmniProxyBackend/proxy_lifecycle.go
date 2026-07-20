@@ -22,23 +22,39 @@ func (a *appServer) startProxy() error {
 	if a.proxyServer != nil {
 		return nil
 	}
-	if err := validateConfiguredPorts(a.cfg); err != nil {
+	cfg := a.cfg
+
+	server, listener, svc, err := a.newProxyServer(cfg)
+	if err != nil {
 		return err
 	}
 
-	svc, err := proxy.NewService(a.cfg, a.tokens, a.logs, a.history)
+	a.proxyServer = server
+	a.proxyService = svc
+
+	a.serveProxy(server, listener)
+	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("proxy started on port %d", cfg.ProxyPort)})
+	return nil
+}
+
+func (a *appServer) newProxyServer(cfg config.Config) (*http.Server, net.Listener, *proxy.Service, error) {
+	if err := validateConfiguredPorts(cfg); err != nil {
+		return nil, nil, nil, err
+	}
+
+	svc, err := proxy.NewService(cfg, a.tokens, a.logs, a.history)
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	svc.SetTokenRefresher(a.refreshAuthTokenIfNeeded)
 	if a.taskAutomation != nil {
 		svc.SetActivityObserver(a.taskAutomation)
 	}
 
-	addr := fmt.Sprintf("127.0.0.1:%d", a.cfg.ProxyPort)
+	addr := fmt.Sprintf("127.0.0.1:%d", cfg.ProxyPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return fmt.Errorf("start proxy listener on %s: %w", addr, err)
+		return nil, nil, nil, fmt.Errorf("start proxy listener on %s: %w", addr, err)
 	}
 
 	server := &http.Server{
@@ -46,9 +62,10 @@ func (a *appServer) startProxy() error {
 		Handler:           svc,
 		ReadHeaderTimeout: 30 * time.Second,
 	}
-	a.proxyServer = server
-	a.proxyService = svc
+	return server, listener, svc, nil
+}
 
+func (a *appServer) serveProxy(server *http.Server, listener net.Listener) {
 	go func() {
 		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			a.logs.Add(logs.Entry{Level: logs.LevelError, Message: fmt.Sprintf("proxy stopped: %v", err)})
@@ -61,9 +78,6 @@ func (a *appServer) startProxy() error {
 		}
 		a.mu.Unlock()
 	}()
-
-	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("proxy started on port %d", a.cfg.ProxyPort)})
-	return nil
 }
 
 func (a *appServer) startControl() error {
@@ -145,6 +159,9 @@ func (a *appServer) stopProxy() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := server.Shutdown(ctx)
+	if err != nil {
+		_ = server.Close()
+	}
 	a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "proxy stopped"})
 	return err
 }
@@ -177,6 +194,46 @@ func (a *appServer) stopControl() error {
 }
 
 func (a *appServer) restartProxy() error {
+	a.mu.Lock()
+	old := a.proxyServer
+	cfg := a.cfg
+	a.mu.Unlock()
+
+	if old == nil {
+		return a.startProxy()
+	}
+
+	addr := fmt.Sprintf("127.0.0.1:%d", cfg.ProxyPort)
+	if old.Addr != addr {
+		server, listener, svc, err := a.newProxyServer(cfg)
+		if err != nil {
+			return err
+		}
+
+		a.mu.Lock()
+		if a.proxyServer != old {
+			a.mu.Unlock()
+			_ = listener.Close()
+			return errors.New("proxy state changed during restart")
+		}
+		a.proxyServer = server
+		a.proxyService = svc
+		a.mu.Unlock()
+
+		a.serveProxy(server, listener)
+		a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("proxy started on port %d", cfg.ProxyPort)})
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		err = old.Shutdown(ctx)
+		cancel()
+		if err != nil {
+			_ = old.Close()
+			a.logs.Add(logs.Entry{Level: logs.LevelWarn, Message: fmt.Sprintf("proxy restart shutdown failed: %v", err)})
+		} else {
+			a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "proxy stopped"})
+		}
+		return nil
+	}
+
 	if err := a.stopProxy(); err != nil {
 		return err
 	}

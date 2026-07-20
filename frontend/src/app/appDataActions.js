@@ -141,8 +141,8 @@ export function createAppDataActions(state, navigation) {
   }
 
   async function refreshHistory(filters = state.requestHistoryFilters.value) {
+    const seq = ++state.timers.historyRefreshSeq
     try {
-      const seq = ++state.timers.historyRefreshSeq
       const normalizedFilters = { ...(filters || {}) }
       state.requestHistoryFilters.value = normalizedFilters
       const [entries, summary] = await Promise.all([
@@ -153,6 +153,7 @@ export function createAppDataActions(state, navigation) {
       state.requestHistory.value = entries
       state.requestHistorySummary.value = summary
     } catch (error) {
+      if (seq !== state.timers.historyRefreshSeq) return
       state.errorMessage.value = error.message
     }
   }

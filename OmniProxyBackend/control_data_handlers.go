@@ -56,7 +56,7 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 	oldCfg := a.cfg
 	shouldRestartProxy := a.proxyServer != nil && proxyConfigChanged(oldCfg, cfg)
 	shouldRestartControl := a.control != nil && controlConfigChanged(oldCfg, cfg)
-	proxyWasRunning := a.proxyServer != nil
+	oldProxyServer := a.proxyServer
 	a.cfg = cfg
 	a.mu.Unlock()
 
@@ -69,12 +69,12 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 
 	if shouldRestartProxy {
 		if err := a.restartProxy(); err != nil {
-			return config.Config{}, a.rollbackConfigChange(oldCfg, proxyWasRunning, err)
+			return config.Config{}, a.rollbackConfigChange(oldCfg, a.proxyServerChanged(oldProxyServer), err)
 		}
 	}
 	if shouldRestartControl {
 		if err := a.restartControl(); err != nil {
-			return config.Config{}, a.rollbackConfigChange(oldCfg, proxyWasRunning, err)
+			return config.Config{}, a.rollbackConfigChange(oldCfg, a.proxyServerChanged(oldProxyServer), err)
 		}
 	}
 	if a.tokens != nil {
@@ -107,10 +107,16 @@ func (a *appServer) restoreConfigInMemory(cfg config.Config) {
 	a.mu.Unlock()
 }
 
-func (a *appServer) rollbackConfigChange(oldCfg config.Config, proxyWasRunning bool, cause error) error {
+func (a *appServer) proxyServerChanged(old *http.Server) bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.proxyServer != old
+}
+
+func (a *appServer) rollbackConfigChange(oldCfg config.Config, restoreProxy bool, cause error) error {
 	a.restoreConfigInMemory(oldCfg)
 	rollbackErrs := []error{cause}
-	if proxyWasRunning {
+	if restoreProxy {
 		if err := a.restartProxy(); err != nil {
 			rollbackErrs = append(rollbackErrs, fmt.Errorf("restore proxy after config failure: %w", err))
 		}
