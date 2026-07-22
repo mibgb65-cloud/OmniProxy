@@ -180,7 +180,7 @@ test('Codex weekly quota estimate uses current weekly tokens and remaining perce
   }
 
   assert.equal(codexWeeklyQuotaEstimateText(token), '$4.00 / 周')
-  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按当前周窗口 110,000 Token、已用成本 $0.8000 和已用 20% 估算 · OpenAI GPT-5.6 Sol')
+  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按本地代理当前周窗口 110,000 Token、基础计价成本 $0.8000 和上游已用 20% 粗估 · OpenAI GPT-5.6 Sol')
 })
 
 test('Codex weekly quota estimate prices cache tokens like sub2api', () => {
@@ -208,10 +208,10 @@ test('Codex weekly quota estimate prices cache tokens like sub2api', () => {
   }
 
   assert.equal(codexWeeklyQuotaEstimateText(token), '$2.41 / 周')
-  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按当前周窗口 130,000 Token、已用成本 $0.4813 和已用 20% 估算 · OpenAI GPT-5.6 Sol')
+  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按本地代理当前周窗口 130,000 Token、基础计价成本 $0.4813 和上游已用 20% 粗估 · OpenAI GPT-5.6 Sol')
 })
 
-test('Codex weekly quota estimate applies GPT-5.6 Sol long-context pricing', () => {
+test('Codex weekly quota estimate does not infer long-context pricing from weekly aggregates', () => {
   const resetAt = Math.floor(Date.parse('2026-06-18T00:00:00+08:00') / 1000)
   const token = {
     provider: 'openai',
@@ -233,8 +233,31 @@ test('Codex weekly quota estimate applies GPT-5.6 Sol long-context pricing', () 
     },
   }
 
-  assert.equal(codexWeeklyQuotaEstimateText(token), '$26.25 / 周')
-  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按当前周窗口 350,000 Token、已用成本 $5.25 和已用 20% 估算 · OpenAI GPT-5.6 Sol')
+  assert.equal(codexWeeklyQuotaEstimateText(token), '$15.00 / 周')
+  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按本地代理当前周窗口 350,000 Token、基础计价成本 $3.00 和上游已用 20% 粗估 · OpenAI GPT-5.6 Sol')
+})
+
+test('Codex weekly quota estimate uses exact upstream percentage and hides tiny samples', () => {
+  const resetAt = Math.floor(Date.parse('2026-06-18T00:00:00+08:00') / 1000)
+  const base = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      subscriptionQuotaAvailable: true,
+      secondaryUsedPercent: 5,
+      secondaryRemainingPercent: 95,
+      secondaryResetAt: resetAt,
+    },
+    stats: {
+      daily: [{ date: '2026-06-12', inputTokens: 100000, outputTokens: 10000, totalTokens: 110000 }],
+    },
+  }
+
+  assert.equal(codexWeeklyQuotaEstimateText({ ...base, usage: { ...base.usage, secondaryUsedPercent: 1 } }), '')
+  assert.equal(
+    codexWeeklyQuotaEstimateText({ ...base, usage: { ...base.usage, secondaryUsedPercentExact: 5.5 } }),
+    '$14.55 / 周',
+  )
 })
 
 test('Codex weekly quota estimate stays hidden without consumed weekly quota', () => {

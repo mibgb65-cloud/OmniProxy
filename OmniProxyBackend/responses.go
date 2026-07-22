@@ -60,9 +60,11 @@ type usageResponse struct {
 	PlanType                       string                     `json:"planType,omitempty"`
 	LimitReached                   bool                       `json:"limitReached,omitempty"`
 	PrimaryUsedPercent             int                        `json:"primaryUsedPercent"`
+	PrimaryUsedPercentExact        float64                    `json:"primaryUsedPercentExact,omitempty"`
 	PrimaryRemainingPercent        int                        `json:"primaryRemainingPercent"`
 	PrimaryResetAt                 int64                      `json:"primaryResetAt,omitempty"`
 	SecondaryUsedPercent           int                        `json:"secondaryUsedPercent"`
+	SecondaryUsedPercentExact      float64                    `json:"secondaryUsedPercentExact,omitempty"`
 	SecondaryRemainingPercent      int                        `json:"secondaryRemainingPercent"`
 	SecondaryResetAt               int64                      `json:"secondaryResetAt,omitempty"`
 	APIRemaining                   int                        `json:"apiRemaining,omitempty"`
@@ -322,9 +324,11 @@ func usageResponseFor(usage token.UsageInfo) usageResponse {
 		PlanType:                       usage.PlanType,
 		LimitReached:                   usage.LimitReached,
 		PrimaryUsedPercent:             usage.PrimaryUsedPercent,
+		PrimaryUsedPercentExact:        usage.PrimaryUsedPercentExact,
 		PrimaryRemainingPercent:        usage.PrimaryRemainingPercent,
 		PrimaryResetAt:                 usage.PrimaryResetAt,
 		SecondaryUsedPercent:           usage.SecondaryUsedPercent,
+		SecondaryUsedPercentExact:      usage.SecondaryUsedPercentExact,
 		SecondaryRemainingPercent:      usage.SecondaryRemainingPercent,
 		SecondaryResetAt:               usage.SecondaryResetAt,
 		APIRemaining:                   usage.APIRemaining,

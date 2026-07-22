@@ -124,9 +124,11 @@ export namespace main {
 	    planType?: string;
 	    limitReached?: boolean;
 	    primaryUsedPercent: number;
+	    primaryUsedPercentExact?: number;
 	    primaryRemainingPercent: number;
 	    primaryResetAt?: number;
 	    secondaryUsedPercent: number;
+	    secondaryUsedPercentExact?: number;
 	    secondaryRemainingPercent: number;
 	    secondaryResetAt?: number;
 	    apiRemaining?: number;
@@ -154,9 +156,11 @@ export namespace main {
 	        this.planType = source["planType"];
 	        this.limitReached = source["limitReached"];
 	        this.primaryUsedPercent = source["primaryUsedPercent"];
+	        this.primaryUsedPercentExact = source["primaryUsedPercentExact"];
 	        this.primaryRemainingPercent = source["primaryRemainingPercent"];
 	        this.primaryResetAt = source["primaryResetAt"];
 	        this.secondaryUsedPercent = source["secondaryUsedPercent"];
+	        this.secondaryUsedPercentExact = source["secondaryUsedPercentExact"];
 	        this.secondaryRemainingPercent = source["secondaryRemainingPercent"];
 	        this.secondaryResetAt = source["secondaryResetAt"];
 	        this.apiRemaining = source["apiRemaining"];

@@ -301,7 +301,8 @@ func assignCodexUsageWindow(usage *token.UsageInfo, kind string, window *codexRa
 	if usage == nil || window == nil {
 		return
 	}
-	used := percent(window.UsedPercent)
+	usedExact := normalizedPercent(window.UsedPercent)
+	used := percent(usedExact)
 	remaining := 100 - used
 	if remaining < 0 {
 		remaining = 0
@@ -309,10 +310,12 @@ func assignCodexUsageWindow(usage *token.UsageInfo, kind string, window *codexRa
 	switch kind {
 	case "secondary":
 		usage.SecondaryUsedPercent = used
+		usage.SecondaryUsedPercentExact = usedExact
 		usage.SecondaryRemainingPercent = remaining
 		usage.SecondaryResetAt = window.ResetAt
 	default:
 		usage.PrimaryUsedPercent = used
+		usage.PrimaryUsedPercentExact = usedExact
 		usage.PrimaryRemainingPercent = remaining
 		usage.PrimaryResetAt = window.ResetAt
 	}

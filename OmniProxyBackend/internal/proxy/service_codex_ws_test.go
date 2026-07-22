@@ -278,6 +278,14 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		err     error
 	}
 	captures := make(chan capture, 1)
+	releaseUpstream := make(chan struct{})
+	defer func() {
+		select {
+		case <-releaseUpstream:
+		default:
+			close(releaseUpstream)
+		}
+	}()
 	upgrader := websocket.Upgrader{CheckOrigin: func(*http.Request) bool { return true }}
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -300,10 +308,11 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 			origin:  r.Header.Get("Origin"),
 			message: string(payload),
 		}
-		responsePayload := `{"type":"response.completed","response":{"usage":{"input_tokens":11,"output_tokens":7,"total_tokens":18}}}`
+		responsePayload := `{"type":"response.completed","response":{"model":"gpt-5.6-sol","usage":{"input_tokens":11,"output_tokens":7,"total_tokens":18}}}`
 		if err := conn.WriteMessage(websocket.TextMessage, []byte(responsePayload)); err != nil {
 			t.Errorf("failed to write upstream websocket response: %v", err)
 		}
+		<-releaseUpstream
 	}))
 	defer upstream.Close()
 
@@ -321,6 +330,7 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	logRecorder := logs.NewRecorder(10)
 	service, err := NewService(config.Config{
 		ProxyPort:          3000,
 		ControlPort:        3890,
@@ -328,7 +338,7 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		SwitchThreshold:    15,
 		MaxRetries:         0,
 		CodexUsageEndpoint: "https://chatgpt.com/backend-api/wham/usage",
-	}, manager, logs.NewRecorder(10))
+	}, manager, logRecorder)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -347,14 +357,14 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 	}
 	defer conn.Close()
 
-	if err := conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"client_event"}`)); err != nil {
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"response.create","response":{"model":"gpt-5.6-sol"}}`)); err != nil {
 		t.Fatal(err)
 	}
 	messageType, payload, err := conn.ReadMessage()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if messageType != websocket.TextMessage || string(payload) != `{"type":"response.completed","response":{"usage":{"input_tokens":11,"output_tokens":7,"total_tokens":18}}}` {
+	if messageType != websocket.TextMessage || string(payload) != `{"type":"response.completed","response":{"model":"gpt-5.6-sol","usage":{"input_tokens":11,"output_tokens":7,"total_tokens":18}}}` {
 		t.Fatalf("unexpected websocket response type=%d payload=%q", messageType, string(payload))
 	}
 
@@ -382,11 +392,9 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 	if got.origin != "" {
 		t.Fatalf("expected local browser origin not to be forwarded upstream, got %q", got.origin)
 	}
-	if got.message != `{"type":"client_event"}` {
+	if got.message != `{"type":"response.create","response":{"model":"gpt-5.6-sol"}}` {
 		t.Fatalf("expected websocket message to be proxied, got %q", got.message)
 	}
-	_ = conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
-	_ = conn.Close()
 
 	deadline := time.After(2 * time.Second)
 	for {
@@ -394,8 +402,8 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if updated.Stats.RequestCount == 1 {
-			if updated.Stats.InputTokens != 11 || updated.Stats.OutputTokens != 7 || updated.Stats.TotalTokens != 18 {
+		if updated.Stats.RequestCount == 1 && updated.Stats.TotalTokens == 18 {
+			if updated.Stats.InputTokens != 11 || updated.Stats.OutputTokens != 7 {
 				t.Fatalf("unexpected websocket token stats: %#v", updated.Stats)
 			}
 			break
@@ -403,6 +411,27 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		select {
 		case <-deadline:
 			t.Fatalf("timed out waiting for websocket token stats: %#v", updated.Stats)
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+
+	close(releaseUpstream)
+	_ = conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+	_ = conn.Close()
+
+	deadline = time.After(2 * time.Second)
+	for {
+		entries := logRecorder.List()
+		if len(entries) > 0 {
+			if entries[len(entries)-1].Model != "gpt-5.6-sol" {
+				t.Fatalf("expected websocket model from response message, got %#v", entries[len(entries)-1])
+			}
+			break
+		}
+		select {
+		case <-deadline:
+			t.Fatal("timed out waiting for websocket log entry")
 		default:
 			time.Sleep(10 * time.Millisecond)
 		}

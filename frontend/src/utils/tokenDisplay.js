@@ -5,6 +5,7 @@ import { formatNumber, formatTime } from './format.js'
 const DAY_MS = 24 * 60 * 60 * 1000
 const WEEK_MS = 7 * DAY_MS
 const CODEX_WEEKLY_ESTIMATE_MODEL = 'gpt-5.6-sol'
+const MIN_CODEX_WEEKLY_ESTIMATE_USED_PERCENT = 5
 
 export function statusLabel(status) {
   return statusMeta[status]?.label || status
@@ -46,7 +47,12 @@ export function quotaPercentValue(item, field) {
 }
 
 export function quotaPercentText(item, field) {
-  return field && item?.usage?.subscriptionQuotaAvailable ? `${quotaPercentValue(item, field)}%` : '-'
+  if (!field || !item?.usage?.subscriptionQuotaAvailable) return '-'
+  if (field.endsWith('UsedPercent')) {
+    const exact = Number(item.usage?.[`${field}Exact`])
+    if (Number.isFinite(exact) && exact > 0) return `${formatPercent(exact)}%`
+  }
+  return `${quotaPercentValue(item, field)}%`
 }
 
 export function formatBalance(value) {
@@ -346,9 +352,8 @@ export function quotaOverviewRemainingField(item) {
 
 export function codexWeeklyQuotaEstimate(item) {
   if (!isCodexToken(item) || !quotaWindowAvailable(item, 'secondary')) return null
-  const remainingPercent = quotaPercentValue(item, 'secondaryRemainingPercent')
-  const usedPercent = 100 - remainingPercent
-  if (usedPercent <= 0) return null
+  const usedPercent = quotaUsedPercent(item, 'secondary')
+  if (usedPercent < MIN_CODEX_WEEKLY_ESTIMATE_USED_PERCENT) return null
 
   const usage = weeklyEstimateUsageStats(item)
   if (usage.totalTokens <= 0) return null
@@ -381,7 +386,7 @@ export function codexWeeklyQuotaEstimateText(item) {
 export function codexWeeklyQuotaEstimateMeta(item) {
   const estimate = codexWeeklyQuotaEstimate(item)
   if (!estimate) return ''
-  return `按当前周窗口 ${formatNumber(estimate.usedTokens)} Token、已用成本 ${estimate.usedCostText} 和已用 ${estimate.usedPercent}% 估算 · ${estimate.priceLabel}`
+  return `按本地代理当前周窗口 ${formatNumber(estimate.usedTokens)} Token、基础计价成本 ${estimate.usedCostText} 和上游已用 ${formatPercent(estimate.usedPercent)}% 粗估 · ${estimate.priceLabel}`
 }
 
 export function quotaResetLabel(item) {
@@ -406,15 +411,28 @@ export function tokenUsageMetrics(item) {
   const total = Number(item.stats?.totalTokens || 0)
   const input = Number(item.stats?.inputTokens || 0)
   const output = Number(item.stats?.outputTokens || 0)
+  const cacheRead = Number(item.stats?.cacheReadTokens || 0)
   const requests = Number(item.stats?.requestCount || 0)
   if (total > 0) {
-    return [
-      { label: 'Token', value: formatNumber(total) },
+    const metrics = [
+      { label: '累计 Token', value: formatNumber(total) },
       { label: '入', value: formatNumber(input) },
       { label: '出', value: formatNumber(output) },
     ]
+    if (cacheRead > 0) metrics.splice(1, 0, { label: '缓存读取', value: formatNumber(cacheRead) })
+    return metrics
   }
-  return [{ label: 'Token', value: requests > 0 ? '未上报' : '0' }]
+  return [{ label: '累计 Token', value: requests > 0 ? '未上报' : '0' }]
+}
+
+function quotaUsedPercent(item, windowName) {
+  const exact = Number(item?.usage?.[`${windowName}UsedPercentExact`])
+  if (Number.isFinite(exact) && exact > 0) return Math.max(0, Math.min(100, exact))
+  const rawUsed = item?.usage?.[`${windowName}UsedPercent`]
+  if (rawUsed !== undefined && rawUsed !== null && Number.isFinite(Number(rawUsed))) {
+    return Math.max(0, Math.min(100, Number(rawUsed)))
+  }
+  return 100 - quotaPercentValue(item, `${windowName}RemainingPercent`)
 }
 
 function weeklyEstimateUsageStats(item) {
@@ -486,17 +504,11 @@ function usageCostUSD(usage, price) {
   }
 
   const billableInputTokens = Math.max(0, inputTokens - cacheReadTokens)
-  const totalInputTokens = billableInputTokens + cacheReadTokens
-  const useLongContext =
-    price.longContextInputThreshold > 0 &&
-    totalInputTokens > price.longContextInputThreshold
-  const inputPrice = useLongContext ? price.input * priceValue(price.longContextInputMultiplier, 1) : price.input
-  const outputPrice = useLongContext ? price.output * priceValue(price.longContextOutputMultiplier, 1) : price.output
   const cacheCreationPrice = priceValue(price.cacheCreation, price.input)
   const cacheReadPrice = priceValue(price.cacheRead, price.input)
   return (
-    (billableInputTokens / 1_000_000) * inputPrice +
-    (outputTokens / 1_000_000) * outputPrice +
+    (billableInputTokens / 1_000_000) * price.input +
+    (outputTokens / 1_000_000) * price.output +
     (cacheCreationTokens / 1_000_000) * cacheCreationPrice +
     (cacheReadTokens / 1_000_000) * cacheReadPrice
   )
@@ -519,6 +531,10 @@ function formatUSD(value) {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(number)}`
+}
+
+function formatPercent(value) {
+  return new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 2 }).format(Number(value || 0))
 }
 
 export function normalizeBillingDailyRows(rows) {

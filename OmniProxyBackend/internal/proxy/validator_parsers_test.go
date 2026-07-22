@@ -63,7 +63,7 @@ func TestValidatorParsesCodexUsage(t *testing.T) {
 			"plan_type": "team",
 			"rate_limit": {
 				"limit_reached": false,
-				"primary_window": {"used_percent": 27, "reset_at": 1760000000},
+				"primary_window": {"used_percent": 27.4, "reset_at": 1760000000},
 				"secondary_window": {"used_percent": 41, "reset_at": 1760500000}
 			}
 		}`))
@@ -104,6 +104,9 @@ func TestValidatorParsesCodexUsage(t *testing.T) {
 	}
 	if result.Usage.PrimaryRemainingPercent != 73 {
 		t.Fatalf("expected 73 primary remaining, got %d", result.Usage.PrimaryRemainingPercent)
+	}
+	if result.Usage.PrimaryUsedPercentExact != 27.4 {
+		t.Fatalf("expected exact primary usage 27.4, got %v", result.Usage.PrimaryUsedPercentExact)
 	}
 	if result.Usage.SecondaryRemainingPercent != 59 {
 		t.Fatalf("expected 59 secondary remaining, got %d", result.Usage.SecondaryRemainingPercent)

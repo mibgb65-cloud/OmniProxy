@@ -72,9 +72,11 @@ type UsageInfo struct {
 	PlanType                       string             `json:"planType,omitempty"`
 	LimitReached                   bool               `json:"limitReached,omitempty"`
 	PrimaryUsedPercent             int                `json:"primaryUsedPercent,omitempty"`
+	PrimaryUsedPercentExact        float64            `json:"primaryUsedPercentExact,omitempty"`
 	PrimaryRemainingPercent        int                `json:"primaryRemainingPercent,omitempty"`
 	PrimaryResetAt                 int64              `json:"primaryResetAt,omitempty"`
 	SecondaryUsedPercent           int                `json:"secondaryUsedPercent,omitempty"`
+	SecondaryUsedPercentExact      float64            `json:"secondaryUsedPercentExact,omitempty"`
 	SecondaryRemainingPercent      int                `json:"secondaryRemainingPercent,omitempty"`
 	SecondaryResetAt               int64              `json:"secondaryResetAt,omitempty"`
 	APIRemaining                   int                `json:"apiRemaining,omitempty"`

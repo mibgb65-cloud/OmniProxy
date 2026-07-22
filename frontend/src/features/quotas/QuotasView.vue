@@ -523,7 +523,7 @@ function useResetCredit(item) {
                 <span>已用 <strong>{{ quotaPercentText(group.current, 'secondaryUsedPercent') }}</strong></span>
                 <span>{{ quotaResetLabel(group.current) }} <strong>{{ formatResetTime(group.current.usage.secondaryResetAt) }}</strong></span>
                 <span v-if="codexWeeklyQuotaEstimateText(group.current)" :title="codexWeeklyQuotaEstimateMeta(group.current)">
-                  预估 <strong>{{ codexWeeklyQuotaEstimateText(group.current) }}</strong>
+                  参考预估 <strong>{{ codexWeeklyQuotaEstimateText(group.current) }}</strong>
                 </span>
               </small>
               <small v-else>{{ quotaUnavailableText(group.current) }}</small>
@@ -536,7 +536,7 @@ function useResetCredit(item) {
             </div>
 
             <div class="quota-stat quota-stat-usage">
-              <span>代理请求</span>
+              <span>累计代理请求</span>
               <strong>{{ formatNumber(group.current.stats?.requestCount) }} 次</strong>
               <small class="quota-detail token-usage-detail">
                 <span v-for="metric in tokenUsageMetrics(group.current)" :key="metric.label">

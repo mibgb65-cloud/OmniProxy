@@ -213,6 +213,41 @@ func TestManagerRecordsProxyUsageTotalsAndDailyStats(t *testing.T) {
 	}
 }
 
+func TestManagerRecordsStreamingRequestAndConsumptionSeparately(t *testing.T) {
+	manager, err := NewManager(storage.NewJSONStore[[]Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := manager.Add(UpsertRequest{Name: "streaming", Provider: ProviderOpenAI, TokenValue: "sk-streaming-token"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := manager.RecordProxyRequest(item.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.RecordProxyConsumption(item.ID, TokenConsumption{InputTokens: 100, OutputTokens: 5, TotalTokens: 105, CacheReadTokens: 80}); err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.RecordProxyConsumption(item.ID, TokenConsumption{InputTokens: 20, OutputTokens: 2, TotalTokens: 22}); err != nil {
+		t.Fatal(err)
+	}
+
+	updated, err := manager.Get(item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Stats.RequestCount != 1 || updated.Stats.TotalTokens != 127 {
+		t.Fatalf("unexpected streaming stats: %#v", updated.Stats)
+	}
+	if len(updated.Stats.Daily) != 1 || updated.Stats.Daily[0].RequestCount != 1 || updated.Stats.Daily[0].TotalTokens != 127 {
+		t.Fatalf("unexpected streaming daily stats: %#v", updated.Stats.Daily)
+	}
+	if updated.Stats.LastTotalTokens != 22 || updated.Stats.CacheReadTokens != 80 {
+		t.Fatalf("unexpected streaming token details: %#v", updated.Stats)
+	}
+}
+
 func TestManagerRecordsBalanceUsageStatus(t *testing.T) {
 	manager, err := NewManager(storage.NewJSONStore[[]Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
 	if err != nil {

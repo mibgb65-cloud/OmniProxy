@@ -385,12 +385,15 @@ func boolFromAnyOK(value any) (bool, bool) {
 }
 
 func percent(value float64) int {
-	rounded := int(math.Round(value))
-	if rounded < 0 {
+	return int(math.Round(normalizedPercent(value)))
+}
+
+func normalizedPercent(value float64) float64 {
+	if value < 0 {
 		return 0
 	}
-	if rounded > 100 {
+	if value > 100 {
 		return 100
 	}
-	return rounded
+	return value
 }

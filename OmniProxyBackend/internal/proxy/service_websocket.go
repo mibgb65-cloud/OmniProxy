@@ -149,10 +149,15 @@ func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 	defer client.Close()
 
 	_ = s.tokens.RecordUsage(selected.ID, -1)
-	consumption, err := proxyWebSocketMessages(client, upstream)
+	_ = s.tokens.RecordProxyRequest(selected.ID)
+	consumption, responseModel, err := proxyWebSocketMessages(client, upstream, func(usage token.TokenConsumption) {
+		_ = s.tokens.RecordProxyConsumption(selected.ID, usage)
+	})
 	finishActive()
-	_ = s.tokens.RecordProxyUsage(selected.ID, consumption)
 	s.tokens.Release(selected.ID)
+	if responseModel != "" {
+		lastRoute.Model = responseModel
+	}
 
 	level := logs.LevelInfo
 	message := proxyLogMessage(lastRoute.Model, consumption, "websocket proxied")
@@ -232,13 +237,17 @@ func isWebSocketRequestHeader(key string) bool {
 	}
 }
 
-func proxyWebSocketMessages(client *websocket.Conn, upstream *websocket.Conn) (token.TokenConsumption, error) {
+func proxyWebSocketMessages(client *websocket.Conn, upstream *websocket.Conn, onUsage func(token.TokenConsumption)) (token.TokenConsumption, string, error) {
 	resultCh := make(chan websocketCopyResult, 2)
 	go func() {
-		resultCh <- copyWebSocketMessages(upstream, client, false)
+		result := copyWebSocketMessages(upstream, client, false, nil)
+		result.fromUpstream = false
+		resultCh <- result
 	}()
 	go func() {
-		resultCh <- copyWebSocketMessages(client, upstream, true)
+		result := copyWebSocketMessages(client, upstream, true, onUsage)
+		result.fromUpstream = true
+		resultCh <- result
 	}()
 
 	first := <-resultCh
@@ -249,43 +258,75 @@ func proxyWebSocketMessages(client *websocket.Conn, upstream *websocket.Conn) (t
 	_ = client.Close()
 	_ = upstream.Close()
 	second := <-resultCh
-	return addTokenConsumption(first.consumption, second.consumption), first.err
+	responseModel := ""
+	requestModel := ""
+	for _, result := range []websocketCopyResult{first, second} {
+		if result.fromUpstream && result.model != "" {
+			responseModel = result.model
+		}
+		if !result.fromUpstream && result.model != "" {
+			requestModel = result.model
+		}
+	}
+	if responseModel == "" {
+		responseModel = requestModel
+	}
+	return addTokenConsumption(first.consumption, second.consumption), responseModel, first.err
 }
 
 type websocketCopyResult struct {
-	consumption token.TokenConsumption
-	err         error
+	consumption  token.TokenConsumption
+	model        string
+	fromUpstream bool
+	err          error
 }
 
-func copyWebSocketMessages(dst *websocket.Conn, src *websocket.Conn, captureUsage bool) websocketCopyResult {
+func copyWebSocketMessages(dst *websocket.Conn, src *websocket.Conn, captureUsage bool, onUsage func(token.TokenConsumption)) websocketCopyResult {
 	var total token.TokenConsumption
+	model := ""
 	for {
 		messageType, reader, err := src.NextReader()
 		if err != nil {
-			return websocketCopyResult{consumption: total, err: err}
+			return websocketCopyResult{consumption: total, model: model, err: err}
 		}
 		writer, err := dst.NextWriter(messageType)
 		if err != nil {
-			return websocketCopyResult{consumption: total, err: err}
+			return websocketCopyResult{consumption: total, model: model, err: err}
 		}
 		target := io.Writer(writer)
 		capture := &usageCapture{}
-		if captureUsage && (messageType == websocket.TextMessage || messageType == websocket.BinaryMessage) {
+		if messageType == websocket.TextMessage || messageType == websocket.BinaryMessage {
 			target = io.MultiWriter(writer, capture)
 		}
 		_, copyErr := io.Copy(target, reader)
 		closeErr := writer.Close()
 		if copyErr != nil {
-			return websocketCopyResult{consumption: total, err: copyErr}
+			return websocketCopyResult{consumption: total, model: model, err: copyErr}
 		}
 		if closeErr != nil {
-			return websocketCopyResult{consumption: total, err: closeErr}
+			return websocketCopyResult{consumption: total, model: model, err: closeErr}
 		}
 		if capture.buf.Len() > 0 {
-			usage := parseTokenConsumption(http.Header{"Content-Type": []string{"application/json"}}, capture.Bytes())
-			total = addTokenConsumption(total, usage)
+			header := http.Header{"Content-Type": []string{"application/json"}}
+			if parsedModel := parseResponseModel(header, capture.Bytes()); parsedModel != "" {
+				model = parsedModel
+			}
+			if captureUsage {
+				usage := parseTokenConsumption(header, capture.Bytes())
+				if tokenConsumptionAvailable(usage) {
+					total = addTokenConsumption(total, usage)
+					if onUsage != nil {
+						onUsage(usage)
+					}
+				}
+			}
 		}
 	}
+}
+
+func tokenConsumptionAvailable(usage token.TokenConsumption) bool {
+	return usage.InputTokens > 0 || usage.OutputTokens > 0 || usage.TotalTokens > 0 ||
+		usage.CacheCreationTokens > 0 || usage.CacheReadTokens > 0
 }
 
 func addTokenConsumption(left token.TokenConsumption, right token.TokenConsumption) token.TokenConsumption {
