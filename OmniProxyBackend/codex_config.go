@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"omniproxy/internal/logs"
+	"omniproxy/internal/proxy"
 	"omniproxy/internal/token"
 )
 
@@ -80,6 +83,16 @@ func (a *appServer) configureCodex(requests ...codexConfigureRequest) (codexConf
 			a.logs.Add(logs.Entry{Level: logs.LevelWarn, Message: "codex auth skipped: auth.json is not importable Codex auth"})
 			break
 		}
+		authValue, err = a.refreshCodexAuthValueIfNeeded(context.Background(), authValue)
+		if err != nil {
+			a.logs.Add(logs.Entry{Level: logs.LevelWarn, Message: fmt.Sprintf("codex auth skipped: auth.json is expired or cannot be refreshed: %v", err)})
+			break
+		}
+		fields, ok = token.ExtractCodexAuthFields(authValue)
+		if !ok || strings.TrimSpace(fields.Email) == "" || !fields.HasSupportedToken() {
+			a.logs.Add(logs.Entry{Level: logs.LevelWarn, Message: "codex auth skipped: refreshed auth.json is not importable Codex auth"})
+			break
+		}
 		req := token.UpsertRequest{
 			Provider:       token.ProviderOpenAI,
 			CredentialType: token.CredentialTypeCodexAuthJSON,
@@ -116,7 +129,7 @@ func (a *appServer) configureCodex(requests ...codexConfigureRequest) (codexConf
 		return codexConfigureResult{}, err
 	}
 
-	clientAuth, hasClientAuth := selectCodexClientAuth(a.tokens.List(), preferredAuthID)
+	clientAuth, hasClientAuth := a.selectFreshCodexClientAuth(context.Background(), preferredAuthID)
 	loginMethod := "chatgpt"
 	if hasClientAuth {
 		authState, writeErr := writeCodexAccountAuth(result.AuthPath, clientAuth.TokenValue)
@@ -410,6 +423,50 @@ func selectCodexClientAuth(items []token.Token, preferredID string) (token.Token
 		}
 	}
 	return token.Token{}, false
+}
+
+func (a *appServer) selectFreshCodexClientAuth(ctx context.Context, preferredID string) (token.Token, bool) {
+	items := a.tokens.List()
+	for attempts := 0; attempts < len(items); attempts++ {
+		selected, ok := selectCodexClientAuth(a.tokens.List(), preferredID)
+		if !ok {
+			return token.Token{}, false
+		}
+
+		refreshed, _, err := a.refreshAuthTokenIfNeeded(ctx, selected, false)
+		if err == nil {
+			return refreshed, true
+		}
+		_ = a.tokens.MarkInvalid(selected.ID, fmt.Sprintf("OAuth token refresh failed: %v", err))
+		if a.logs != nil {
+			a.logs.Add(logs.Entry{Level: logs.LevelWarn, TokenName: a.tokenDisplayName(selected), Message: fmt.Sprintf("codex client auth skipped: expired or cannot be refreshed: %v", err)})
+		}
+		if selected.ID == preferredID {
+			preferredID = ""
+		}
+	}
+	return token.Token{}, false
+}
+
+func (a *appServer) refreshCodexAuthValueIfNeeded(ctx context.Context, authValue string) (string, error) {
+	a.mu.Lock()
+	cfg := a.cfg
+	a.mu.Unlock()
+
+	selected := token.Token{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     authValue,
+	}
+	client, err := proxy.NewTokenHTTPClient(cfg, selected, healthRequestTimeout)
+	if err != nil {
+		return "", err
+	}
+	updated, _, err := proxy.RefreshCodexAuthJSON(ctx, client, authValue, false, time.Now())
+	if err != nil {
+		return "", err
+	}
+	return updated, nil
 }
 
 func codexClientAuthUsable(item token.Token, status token.Status) bool {
