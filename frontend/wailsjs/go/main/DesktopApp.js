@@ -50,6 +50,10 @@ export function ClientConfigPreviews() {
   return window['go']['main']['DesktopApp']['ClientConfigPreviews']();
 }
 
+export function CodexOAuthLoginStatus(arg1) {
+  return window['go']['main']['DesktopApp']['CodexOAuthLoginStatus'](arg1);
+}
+
 export function CompleteCodexOAuthLogin(arg1) {
   return window['go']['main']['DesktopApp']['CompleteCodexOAuthLogin'](arg1);
 }
@@ -242,8 +246,8 @@ export function SetTokenSelected(arg1, arg2) {
   return window['go']['main']['DesktopApp']['SetTokenSelected'](arg1, arg2);
 }
 
-export function StartCodexOAuthLogin() {
-  return window['go']['main']['DesktopApp']['StartCodexOAuthLogin']();
+export function StartCodexOAuthLogin(arg1) {
+  return window['go']['main']['DesktopApp']['StartCodexOAuthLogin'](arg1);
 }
 
 export function StartProxy() {

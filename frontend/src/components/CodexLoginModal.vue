@@ -12,20 +12,20 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'copy-url', 'open-url', 'complete', 'retry'])
+const emit = defineEmits(['close', 'copy-url', 'open-url', 'complete', 'refresh'])
 
 const statusText = computed(() => {
   switch (props.dialog.status) {
     case 'starting':
       return '正在生成安全链接'
     case 'completing':
-      return '正在等待并导入授权结果'
+      return '正在验证并自动导入'
     case 'success':
       return '登录完成'
     case 'error':
       return '登录没有完成'
     default:
-      return '等待浏览器授权'
+      return '等待浏览器授权（自动检测中）'
   }
 })
 
@@ -47,7 +47,7 @@ function close() {
         <div>
           <span class="section-kicker">Codex OAuth</span>
           <h2 id="codex-login-title">获取 Codex 登录链接</h2>
-          <p id="codex-login-description">链接不会自动打开。你可以复制后在任意浏览器完成授权。</p>
+          <p id="codex-login-description">在任意浏览器完成授权后，OmniProxy 会自动识别并导入账号。</p>
         </div>
         <button type="button" class="icon-button" :disabled="busy" aria-label="关闭登录弹窗" @click="close">×</button>
       </header>
@@ -63,9 +63,20 @@ function close() {
       <div v-if="dialog.authUrl" class="codex-login-link-card">
         <div class="codex-login-link-head">
           <span>授权链接</span>
-          <button type="button" class="ghost-button compact-button" @click="emit('copy-url', dialog.authUrl, '授权链接')">
-            复制链接
-          </button>
+          <div class="codex-login-link-tools">
+            <button
+              v-if="dialog.status !== 'success'"
+              type="button"
+              class="ghost-button compact-button"
+              :disabled="busy"
+              @click="emit('refresh')"
+            >
+              刷新链接
+            </button>
+            <button type="button" class="ghost-button compact-button" @click="emit('copy-url', dialog.authUrl, '授权链接')">
+              复制链接
+            </button>
+          </div>
         </div>
         <code>{{ dialog.authUrl }}</code>
         <button type="button" class="primary-button codex-login-open-button" @click="emit('open-url')">
@@ -75,7 +86,7 @@ function close() {
 
       <ol v-if="dialog.status === 'ready' || dialog.status === 'completing'" class="codex-login-steps">
         <li>打开上面的登录页面并完成 ChatGPT 授权。</li>
-        <li>授权成功后返回 OmniProxy，点击“完成授权并导入”。</li>
+        <li>授权成功后返回 OmniProxy，账号会被自动识别并导入。</li>
       </ol>
 
       <div class="codex-login-format">
@@ -86,11 +97,11 @@ function close() {
 
       <div class="modal-actions codex-login-actions">
         <button type="button" class="ghost-button" :disabled="busy" @click="close">关闭</button>
-        <button v-if="dialog.status === 'error'" type="button" class="ghost-button" :disabled="busy" @click="emit('retry')">
-          重新生成链接
+        <button v-if="dialog.status === 'error' && !dialog.authUrl" type="button" class="ghost-button" :disabled="busy" @click="emit('refresh')">
+          生成新链接
         </button>
         <button v-if="dialog.status === 'ready'" type="button" class="primary-button" @click="emit('complete')">
-          完成授权并导入
+          立即检查并导入
         </button>
         <button v-else-if="dialog.status === 'success'" type="button" class="primary-button" @click="close">
           完成

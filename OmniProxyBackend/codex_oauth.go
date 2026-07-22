@@ -29,6 +29,10 @@ type codexOAuthLoginStartResponse struct {
 	AuthURL string `json:"authUrl"`
 }
 
+type codexOAuthLoginStatusResponse struct {
+	Ready bool `json:"ready"`
+}
+
 type codexOAuthLoginCompleteRequest struct {
 	LoginID string `json:"loginId"`
 }
@@ -51,12 +55,23 @@ type codexOAuthSession struct {
 	listener     net.Listener
 }
 
-func (a *appServer) startCodexOAuthLogin() (codexOAuthLoginStartResponse, error) {
+func (a *appServer) startCodexOAuthLogin(refresh bool) (codexOAuthLoginStartResponse, error) {
 	a.codexOAuthMu.Lock()
 	defer a.codexOAuthMu.Unlock()
 
-	if existing := a.codexOAuthSession; existing != nil && time.Now().Before(existing.expiresAt) {
-		return codexOAuthLoginStartResponse{LoginID: existing.id, AuthURL: existing.authURL}, nil
+	if existing := a.codexOAuthSession; existing != nil {
+		if !refresh && time.Now().Before(existing.expiresAt) {
+			return codexOAuthLoginStartResponse{LoginID: existing.id, AuthURL: existing.authURL}, nil
+		}
+		a.codexOAuthSession = nil
+		existing.callbackOnce.Do(func() {
+			if existing.callback != nil {
+				existing.callback <- codexOAuthCallbackResult{err: errors.New("Codex 登录链接已刷新")}
+			}
+		})
+		if existing.server != nil {
+			_ = existing.server.Close()
+		}
 	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", codexOAuthCallbackPort))
@@ -116,6 +131,21 @@ func (a *appServer) startCodexOAuthLogin() (codexOAuthLoginStartResponse, error)
 		a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "Codex browser login started"})
 	}
 	return codexOAuthLoginStartResponse{LoginID: loginID, AuthURL: authURL}, nil
+}
+
+func (a *appServer) codexOAuthLoginStatus(loginID string) (codexOAuthLoginStatusResponse, error) {
+	loginID = strings.TrimSpace(loginID)
+	a.codexOAuthMu.Lock()
+	defer a.codexOAuthMu.Unlock()
+
+	session := a.codexOAuthSession
+	if session == nil || session.id != loginID {
+		return codexOAuthLoginStatusResponse{}, errors.New("Codex 登录会话不存在或已失效")
+	}
+	if !time.Now().Before(session.expiresAt) {
+		return codexOAuthLoginStatusResponse{}, errors.New("Codex 浏览器登录已超时，请刷新登录链接")
+	}
+	return codexOAuthLoginStatusResponse{Ready: len(session.callback) > 0}, nil
 }
 
 func (a *appServer) completeCodexOAuthLogin(ctx context.Context, loginID string) (tokenResponse, error) {
@@ -217,7 +247,7 @@ func (a *appServer) handleCodexOAuthCallback(session *codexOAuthSession, w http.
 	session.callbackOnce.Do(func() {
 		session.callback <- codexOAuthCallbackResult{code: code}
 	})
-	_, _ = w.Write([]byte(codexOAuthResultPage(true, "授权完成，可以关闭此页面并返回 OmniProxy。")))
+	_, _ = w.Write([]byte(codexOAuthResultPage(true, "授权完成，OmniProxy 正在自动识别并导入账号。")))
 }
 
 func (a *appServer) expireCodexOAuthSession(loginID string, expiresAt time.Time) {

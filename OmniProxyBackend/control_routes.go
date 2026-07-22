@@ -45,6 +45,7 @@ func (a *appServer) routes() http.Handler {
 	mux.HandleFunc("/api/codex/configure", a.handleCodexConfigure)
 	mux.HandleFunc("/api/codex/restore", a.handleCodexRestore)
 	mux.HandleFunc("/api/codex/login/start", a.handleCodexOAuthLoginStart)
+	mux.HandleFunc("/api/codex/login/status", a.handleCodexOAuthLoginStatus)
 	mux.HandleFunc("/api/codex/login/complete", a.handleCodexOAuthLoginComplete)
 	mux.HandleFunc("/api/claude/models/configure", a.handleClaudeModelsConfigure)
 	mux.HandleFunc("/api/claude/restore", a.handleClaudeRestore)
@@ -300,7 +301,21 @@ func (a *appServer) handleCodexOAuthLoginStart(w http.ResponseWriter, r *http.Re
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	result, err := a.startCodexOAuthLogin()
+	refresh := strings.EqualFold(strings.TrimSpace(r.URL.Query().Get("refresh")), "true")
+	result, err := a.startCodexOAuthLogin(refresh)
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (a *appServer) handleCodexOAuthLoginStatus(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	result, err := a.codexOAuthLoginStatus(r.URL.Query().Get("loginId"))
 	if err != nil {
 		writeDomainError(w, err)
 		return

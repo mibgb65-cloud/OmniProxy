@@ -31,6 +31,8 @@ export function ClearRequestHistory():Promise<void>;
 
 export function ClientConfigPreviews():Promise<Array<main.clientConfigPreview>>;
 
+export function CodexOAuthLoginStatus(arg1:string):Promise<main.codexOAuthLoginStatusResponse>;
+
 export function CompleteCodexOAuthLogin(arg1:string):Promise<main.tokenResponse>;
 
 export function Config():Promise<config.Config>;
@@ -127,7 +129,7 @@ export function SetTokenDisabled(arg1:string,arg2:boolean):Promise<main.tokenRes
 
 export function SetTokenSelected(arg1:string,arg2:boolean):Promise<Array<main.tokenResponse>>;
 
-export function StartCodexOAuthLogin():Promise<main.codexOAuthLoginStartResponse>;
+export function StartCodexOAuthLogin(arg1:boolean):Promise<main.codexOAuthLoginStartResponse>;
 
 export function StartProxy():Promise<Record<string, any>>;
 

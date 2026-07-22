@@ -94,3 +94,41 @@ func TestCodexOAuthCallbackRejectsStateMismatch(t *testing.T) {
 		t.Fatalf("expected state validation error, got %+v", result)
 	}
 }
+
+func TestCodexOAuthLoginStatusTracksCallback(t *testing.T) {
+	session := &codexOAuthSession{
+		id:        "login-1",
+		expiresAt: time.Now().Add(time.Minute),
+		callback:  make(chan codexOAuthCallbackResult, 1),
+	}
+	server := &appServer{codexOAuthSession: session}
+
+	status, err := server.codexOAuthLoginStatus("login-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status.Ready {
+		t.Fatal("login must remain pending before the callback arrives")
+	}
+
+	session.callback <- codexOAuthCallbackResult{code: "authorization-code"}
+	status, err = server.codexOAuthLoginStatus("login-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !status.Ready {
+		t.Fatal("login must become ready after the callback arrives")
+	}
+}
+
+func TestCodexOAuthLoginStatusRejectsExpiredSession(t *testing.T) {
+	server := &appServer{codexOAuthSession: &codexOAuthSession{
+		id:        "expired-login",
+		expiresAt: time.Now().Add(-time.Second),
+		callback:  make(chan codexOAuthCallbackResult, 1),
+	}}
+
+	if _, err := server.codexOAuthLoginStatus("expired-login"); err == nil {
+		t.Fatal("expected an expired login error")
+	}
+}

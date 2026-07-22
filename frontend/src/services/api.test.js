@@ -92,7 +92,12 @@ test('HTTP API fallback supports Codex browser login and reset credits', async (
     const path = new URL(String(url)).pathname
     assert.equal(options.headers['X-OmniProxy-Control-Token'], 'codex-action-token')
     if (path.endsWith('/codex/login/start')) {
+      assert.equal(new URL(String(url)).searchParams.get('refresh'), 'true')
       return jsonResponse(200, { loginId: 'login-1', authUrl: 'https://auth.openai.com/oauth/authorize' })
+    }
+    if (path.endsWith('/codex/login/status')) {
+      assert.equal(new URL(String(url)).searchParams.get('loginId'), 'login-1')
+      return jsonResponse(200, { ready: true })
     }
     if (path.endsWith('/codex/login/complete')) {
       assert.deepEqual(JSON.parse(options.body), { loginId: 'login-1' })
@@ -105,12 +110,13 @@ test('HTTP API fallback supports Codex browser login and reset credits', async (
   }
 
   const api = await import(`./api.js?codex-actions-test=${Date.now()}`)
-  assert.equal((await api.startCodexOAuthLogin()).loginId, 'login-1')
+  assert.equal((await api.startCodexOAuthLogin(true)).loginId, 'login-1')
+  assert.equal((await api.getCodexOAuthLoginStatus('login-1')).ready, true)
   assert.equal((await api.completeCodexOAuthLogin('login-1')).id, 'account-1')
   assert.equal((await api.consumeCodexResetCredit('account-1')).consumed, true)
   assert.deepEqual(
     calls.map((call) => new URL(call.url).pathname),
-    ['/api/codex/login/start', '/api/codex/login/complete', '/api/tokens/account-1/reset-credit'],
+    ['/api/codex/login/start', '/api/codex/login/status', '/api/codex/login/complete', '/api/tokens/account-1/reset-credit'],
   )
   delete globalThis.__OMNIPROXY_CONTROL_TOKEN__
 })

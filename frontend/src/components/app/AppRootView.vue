@@ -64,7 +64,7 @@ const {
   openRouterModelsError, openRouterModelsFetchedAt, openRouterModelsLoading, openRouterTokens, opencodeConfiguring, opencodeRestoring, pagedApiOverviewTokens,
   pagedSubscriptionOverviewTokens, piConfiguring, piRestoring, persistConfig, previousFirstUseGuideStep, providerLabel, providerTokens, proxyEndpoint,
   proxyStatus, quotaOverviewRangeText, quotaRefreshProgress, rebuildHistorySummaryData, rebuildingHistorySummaries, refreshAll, refreshAuthToken, refreshBilling, refreshHistory, refreshOpenRouterModels,
-  refreshProviderQuotas, refreshQuota, refreshRealtime, refreshingProvider, refreshingTokenIds, refreshTaskAutomationBrowserProfiles, refreshUpdateDiagnostics, removeToken, requestHistory,
+  refreshCodexLoginLink, refreshProviderQuotas, refreshQuota, refreshRealtime, refreshingProvider, refreshingTokenIds, refreshTaskAutomationBrowserProfiles, refreshUpdateDiagnostics, removeToken, requestHistory,
   requestHistorySummary, requestTrendWidth, restoreActiveWorkspaceScroll, restoreConfigSnapshotById, restoreLocalClaude, restoreLocalClaudeDesktop, restoreLocalCodex, restoreLocalDeepSeekTUI,
   restoreLocalGemini, restoreLocalOpenCode, restoreLocalPi, runFirstUseGuideAction, selectOpenRouterChatModel, selectProvider, selectTab, selectTokenGroup, selectedBillingDate,
   riskTokens, routeDraftsDirty, selectedClaudeModelLabels, selectedClaudeModels, selectedCodexModelLabels, selectedCodexModels, selectedHistoryEntry, selectedOpenRouterChatModel, skipCurrentUpdate, snoozeTitlebarUpdate, startUpdateDownload, startWindowResize, submitBatchImport,
@@ -553,7 +553,7 @@ const {
           @copy-url="copyEndpointValue"
           @open-url="openCodexLoginURL"
           @complete="completeCodexLogin"
-          @retry="loginCodex"
+          @refresh="refreshCodexLoginLink"
         />
       </Transition>
 

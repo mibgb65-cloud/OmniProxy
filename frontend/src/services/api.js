@@ -191,10 +191,17 @@ export function consumeCodexResetCredit(id) {
   }))
 }
 
-export function startCodexOAuthLogin() {
-  return callDesktopOr('StartCodexOAuthLogin', [], () => request('/codex/login/start', {
+export function startCodexOAuthLogin(refresh = false) {
+  const forceRefresh = Boolean(refresh)
+  return callDesktopOr('StartCodexOAuthLogin', [forceRefresh], () => request(`/codex/login/start?refresh=${forceRefresh}`, {
     method: 'POST',
   }))
+}
+
+export function getCodexOAuthLoginStatus(loginId) {
+  const normalizedLoginId = String(loginId || '').trim()
+  const params = new URLSearchParams({ loginId: normalizedLoginId })
+  return callDesktopOr('CodexOAuthLoginStatus', [normalizedLoginId], () => request(`/codex/login/status?${params.toString()}`))
 }
 
 export function completeCodexOAuthLogin(loginId) {

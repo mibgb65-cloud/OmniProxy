@@ -8,7 +8,7 @@
     "build": "node scripts/split-wails-models.mjs && vite build && node scripts/sync-wails-dist.mjs",
     "preview": "vite preview",
     "check:lines": "node ../scripts/check-lines.mjs",
-    "test": "node --test src/utils/format.test.js src/utils/quota.test.js src/utils/tokenDisplay.test.js src/utils/appUpdate.test.js src/utils/helpContent.test.js src/utils/historyAnalytics.test.js src/services/api.test.js src/app/appConfigActions.test.js src/app/appDataActions.test.js src/app/codexAuth.test.js src/domain/billing/pricing.test.js src/features/billing/reporting/aggregate.test.js src/features/gateway-routing/gatewayRoutePresets.test.js src/features/quotas/quotaWorkspaceGroups.test.js"
+    "test": "node --test src/utils/format.test.js src/utils/quota.test.js src/utils/tokenDisplay.test.js src/utils/appUpdate.test.js src/utils/helpContent.test.js src/utils/historyAnalytics.test.js src/services/api.test.js src/app/appConfigActions.test.js src/app/appDataActions.test.js src/app/appCodexLoginActions.test.js src/app/codexAuth.test.js src/domain/billing/pricing.test.js src/features/billing/reporting/aggregate.test.js src/features/gateway-routing/gatewayRoutePresets.test.js src/features/quotas/quotaWorkspaceGroups.test.js"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

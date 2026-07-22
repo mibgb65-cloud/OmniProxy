@@ -37,6 +37,7 @@ export namespace main {
   export import codexConfigureRequest = mainModels.codexConfigureRequest
   export import codexConfigureResult = mainModels.codexConfigureResult
   export import codexOAuthLoginStartResponse = mainModels.codexOAuthLoginStartResponse
+  export import codexOAuthLoginStatusResponse = mainModels.codexOAuthLoginStatusResponse
   export import healthResponse = mainModels.healthResponse
   export import tokenStatsResponse = mainModels.tokenStatsResponse
   export import codexResetCreditResponse = mainModels.codexResetCreditResponse

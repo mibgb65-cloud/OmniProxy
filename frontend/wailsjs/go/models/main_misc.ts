@@ -55,6 +55,18 @@ export namespace main {
 	        this.authUrl = source["authUrl"];
 	    }
 	}
+	export class codexOAuthLoginStatusResponse {
+	    ready: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new codexOAuthLoginStatusResponse(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ready = source["ready"];
+	    }
+	}
 	export class codexResetCreditResponse {
 	    id?: string;
 	    status?: string;

@@ -19,6 +19,7 @@ export namespace main {
   export import codexConfigureRequest = main_miscModels.codexConfigureRequest
   export import codexConfigureResult = main_coreModels.codexConfigureResult
   export import codexOAuthLoginStartResponse = main_miscModels.codexOAuthLoginStartResponse
+  export import codexOAuthLoginStatusResponse = main_miscModels.codexOAuthLoginStatusResponse
   export import healthResponse = main_tokensModels.healthResponse
   export import tokenStatsResponse = main_tokensModels.tokenStatsResponse
   export import codexResetCreditResponse = main_miscModels.codexResetCreditResponse

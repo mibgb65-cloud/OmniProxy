@@ -119,6 +119,13 @@
   gap: 12px;
 }
 
+.codex-login-link-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .codex-login-link-head span,
 .codex-login-format span {
   color: var(--text-muted);
