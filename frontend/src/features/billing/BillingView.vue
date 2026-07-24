@@ -585,7 +585,13 @@ function drawBillingReport(ctx, width, height, templateKey = selectedTemplate.va
             <button type="button" aria-label="关闭预览" @click="closeReportPreview">×</button>
           </header>
           <div class="report-preview-image-frame">
-            <img v-if="reportPreviewUrl" :src="reportPreviewUrl" alt="模拟账单预览图" />
+            <img
+              v-if="reportPreviewUrl"
+              :src="reportPreviewUrl"
+              alt="模拟账单预览图"
+              width="1200"
+              height="2000"
+            />
           </div>
           <footer class="report-preview-modal-actions">
             <el-button @click="closeReportPreview">返回修改</el-button>

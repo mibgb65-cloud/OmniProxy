@@ -250,7 +250,7 @@
   --line-strong: #2d3f5a;
   --text: #c8d4e6;
   --text-strong: #f0f4f8;
-  --text-muted: #7a8ba3;
+  --text-muted: #8d9db4;
   --brand: #6c8cff;
   --brand-strong: #96b0ff;
   --brand-soft: rgba(108, 140, 255, 0.12);
@@ -267,7 +267,7 @@
   --sidebar-panel: rgba(21, 28, 44, 0.78);
   --sidebar-line: #22304a;
   --sidebar-text: #eef4ff;
-  --sidebar-muted: #8899b3;
+  --sidebar-muted: #95a5bd;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.2);
   --el-bg-color: #0f1420;
@@ -275,7 +275,7 @@
   --el-border-color: #1e2a3e;
   --el-text-color-primary: #f0f4f8;
   --el-text-color-regular: #c8d4e6;
-  --el-text-color-secondary: #7a8ba3;
+  --el-text-color-secondary: #8d9db4;
 }
 
 .shell {

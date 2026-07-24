@@ -35,7 +35,7 @@ defineEmits([
   <aside class="sidebar" :class="{ open: mobileSidebarOpen }">
     <div class="brand">
       <div class="brand-mark">
-        <img :src="appIconUrl" alt="" />
+        <img :src="appIconUrl" alt="" width="42" height="42" />
       </div>
       <div>
         <strong>OmniProxy</strong>

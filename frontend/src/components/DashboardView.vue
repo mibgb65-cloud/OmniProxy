@@ -98,20 +98,26 @@ function changeQuotaOverviewPage(type, direction) {
             <CircleCheckFilled class="metric-icon success-icon" aria-hidden="true" />
           </div>
           <div class="account-status-metrics">
-            <div>
+            <div class="account-status-metric is-healthy">
               <strong>{{ activeTokens.length }}</strong>
               <small>正常账号</small>
             </div>
-            <div>
+            <div :class="['account-status-metric', 'is-invalid', { 'has-alert': invalidTokens.length > 0 }]">
               <strong>{{ invalidTokens.length }}</strong>
               <small>无效账号</small>
             </div>
-            <div>
+            <div :class="['account-status-metric', 'is-risk', { 'has-alert': riskTokens.length > 0 }]">
               <strong>{{ riskTokens.length }}</strong>
               <small>高风险</small>
             </div>
           </div>
-          <small>关注 {{ watchTokens.length }} · 低额度 {{ lowTokens.length }} · 冷却 {{ coolingTokens.length }} · 耗尽 {{ exhaustedTokens.length }} · 停用 {{ disabledTokens.length }}</small>
+          <div class="account-status-details" aria-label="其他账号状态">
+            <span class="account-status-detail is-watch">关注 <b>{{ watchTokens.length }}</b></span>
+            <span class="account-status-detail is-low">低额度 <b>{{ lowTokens.length }}</b></span>
+            <span class="account-status-detail is-cooling">冷却 <b>{{ coolingTokens.length }}</b></span>
+            <span class="account-status-detail is-exhausted">耗尽 <b>{{ exhaustedTokens.length }}</b></span>
+            <span class="account-status-detail is-disabled">停用 <b>{{ disabledTokens.length }}</b></span>
+          </div>
         </article>
         <article class="metric-card">
           <div class="metric-card-head">

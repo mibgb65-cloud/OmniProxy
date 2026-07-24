@@ -29,7 +29,7 @@ defineEmits([
     @dblclick="$emit('toggle-window-maximise')"
   >
     <div class="window-titlebar-drag">
-      <img :src="appIconUrl" alt="" />
+      <img :src="appIconUrl" alt="" width="18" height="18" />
       <div>
         <strong>OmniProxy</strong>
         <span>{{ appInfo.isDevelopment ? 'Dev' : appInfo.version }} · {{ proxyStatus.running ? '代理运行中' : '代理未启动' }}</span>

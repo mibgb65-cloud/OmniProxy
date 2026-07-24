@@ -587,7 +587,7 @@ const {
         </div>
       </Transition>
 
-      <div v-if="loading" class="loading">加载中...</div>
+      <div v-if="loading" class="loading" role="status" aria-live="polite">加载中…</div>
     </main>
   </div>
 </template>
