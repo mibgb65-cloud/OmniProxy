@@ -40,6 +40,10 @@ export function updateDownloadPayload(update) {
   }
 }
 
+export function updateReleasePageUrl(update) {
+  return String(update?.releaseUrl || '').trim()
+}
+
 export function isUpdatePromptSuppressed(update, storage = defaultUpdateStorage(), now = Date.now()) {
   const latestVersion = updateVersionKey(update)
   if (!latestVersion || !storage) {

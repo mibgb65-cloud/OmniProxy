@@ -12,6 +12,7 @@ import {
   Setting,
   SwitchButton,
 } from '@element-plus/icons-vue'
+import { updateReleasePageUrl } from '../utils/appUpdate.js'
 
 const props = defineProps({
   appInfo: {
@@ -86,8 +87,7 @@ const isDevelopmentBuild = computed(() => {
   return Boolean(props.appInfo?.isDevelopment) || normalizedVersion === 'dev' || normalizedVersion === 'development'
 })
 const isMacOSPlatform = computed(() => String(props.appInfo?.platform || '').toLowerCase().startsWith('darwin/'))
-const releaseUrl = computed(() => props.updateInfo?.downloadUrl || props.updateInfo?.releaseUrl || '')
-const releasePageUrl = computed(() => props.updateInfo?.releaseUrl || props.updateInfo?.downloadUrl || '')
+const releasePageUrl = computed(() => updateReleasePageUrl(props.updateInfo))
 const updateDownloadState = computed(() => String(props.updateDownloadStatus?.state || 'idle'))
 const downloadMatchesCurrentUpdate = computed(() => {
   if (!props.updateInfo?.updateAvailable) return false
@@ -122,7 +122,9 @@ const releaseActionLabel = computed(() => {
 })
 const releaseActionIcon = computed(() => {
   if (updateDownloadReady.value || updateDownloadInstalling.value) return SwitchButton
-  return props.updateInfo?.updateAvailable ? Download : LinkIcon
+  return props.updateInfo?.updateAvailable && props.updateInfo?.downloadUrl && props.updateInfo?.checksumUrl
+    ? Download
+    : LinkIcon
 })
 const updateBadge = computed(() => {
   if (isDevelopmentBuild.value) return { type: 'info', label: '开发版本' }
@@ -413,11 +415,11 @@ function formatBytes(value) {
               {{ isDevelopmentBuild ? '开发版跳过更新' : updateChecking ? '检查中' : '检查更新' }}
             </el-button>
             <el-button
-              v-if="releaseUrl"
+              v-if="releasePageUrl"
               :icon="releaseActionIcon"
               :loading="updateDownloadActive"
               :disabled="updateDownloadActive || updateDownloadInstalling"
-              @click="updateDownloadReady ? $emit('install-update') : updateInfo?.updateAvailable && updateInfo?.downloadUrl && updateInfo?.checksumUrl ? $emit('download-update') : $emit('open-url', releaseUrl)"
+              @click="updateDownloadReady ? $emit('install-update') : updateInfo?.updateAvailable && updateInfo?.downloadUrl && updateInfo?.checksumUrl ? $emit('download-update') : $emit('open-url', releasePageUrl)"
             >
               {{ releaseActionLabel }}
             </el-button>

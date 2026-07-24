@@ -12,6 +12,7 @@ import {
   updateSnoozeMs,
   updateDownloadMatches,
   updateDownloadPayload,
+  updateReleasePageUrl,
 } from './appUpdate.js'
 
 test('updateDownloadMatches accepts matching version or download URL', () => {
@@ -53,6 +54,20 @@ test('updateDownloadPayload maps release info to backend request payload', () =>
       fileName: 'app.dmg',
       expectedSize: 42,
     },
+  )
+})
+
+test('updateReleasePageUrl prefers the release page over the installer asset', () => {
+  assert.equal(
+    updateReleasePageUrl({
+      releaseUrl: 'https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v1.2.7-beta.4',
+      downloadUrl: 'https://github.com/mibgb65-cloud/OmniProxy/releases/download/v1.2.7-beta.4/OmniProxy.exe',
+    }),
+    'https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v1.2.7-beta.4',
+  )
+  assert.equal(
+    updateReleasePageUrl({ downloadUrl: 'https://example.com/installer.exe' }),
+    '',
   )
 })
 
