@@ -22,6 +22,7 @@
 }
 
 .account-status-card .account-status-metrics {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   align-items: stretch;
@@ -50,7 +51,9 @@
 }
 
 .account-status-card .account-status-metric small {
+  display: block;
   line-height: 1.3;
+  white-space: nowrap;
 }
 
 .account-status-card .account-status-metric.is-healthy strong {
@@ -201,7 +204,7 @@
   place-items: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -441,7 +444,7 @@ body.dark .contribution-tooltip {
   transform: translate(-50%, var(--tooltip-y)) scale(0.96);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .dashboard-grid > .metric-card,
   .dashboard-grid > .tool-usage-panel,
   .dashboard-grid > .quota-overview-panel,

@@ -25,51 +25,6 @@
   padding: 7px 10px;
 }
 
-/* Native utility pass: remove AI/SaaS hero treatment and keep the app quiet. */
-:root {
-  --bg: #f3f4f6;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --surface-soft: #f7f8fa;
-  --surface-subtle: #edf0f3;
-  --line: #d9dde3;
-  --line-strong: #b8c0ca;
-  --text: #1d232a;
-  --text-strong: #0f1419;
-  --text-muted: #66707c;
-  --brand: #2f6fbd;
-  --brand-strong: #245b9c;
-  --accent: #2f6fbd;
-  --sidebar-bg: #f7f8fa;
-  --sidebar-panel: #ffffff;
-  --sidebar-line: #d9dde3;
-  --sidebar-text: #1d232a;
-  --sidebar-muted: #66707c;
-  --shadow: none;
-  --shadow-soft: none;
-}
-
-.shell.dark {
-  --bg: #111315;
-  --surface: #181b1f;
-  --surface-raised: #1c2025;
-  --surface-soft: #22272d;
-  --surface-subtle: #2a3037;
-  --line: #333a43;
-  --line-strong: #4d5661;
-  --text: #e5e9ee;
-  --text-strong: #f7f9fb;
-  --text-muted: #a1abb6;
-  --brand: #72a7e8;
-  --brand-strong: #9ac3f3;
-  --accent: #72a7e8;
-  --sidebar-bg: #171a1e;
-  --sidebar-panel: #1d2126;
-  --sidebar-line: #2c333a;
-  --sidebar-text: #e5e9ee;
-  --sidebar-muted: #9aa5b1;
-}
-
 .shell {
   background: var(--bg);
 }
@@ -261,8 +216,6 @@ h1 {
   min-height: 32px;
 }
 
-.metric-card,
-.panel,
 .table-wrap,
 .usage-table {
   border-color: var(--line);
@@ -271,32 +224,10 @@ h1 {
   border-radius: 12px;
 }
 
-.metric-card {
-  min-height: 92px;
-  padding: 12px;
-  border-radius: 12px;
-  transition:
-    background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.metric-card:hover,
 .quota-card:hover {
   border-color: var(--brand);
   box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.12);
   transform: translateY(-2px);
-}
-
-.metric-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-}
-
-.metric-card strong {
-  font-size: clamp(20px, 1.45vw, 24px);
 }
 
 .section-heading p {

@@ -35,45 +35,6 @@
   transform: rotate(-45deg);
 }
 
-.shell.dark {
-  --bg: #030712;
-  --surface: #0f172a;
-  --surface-raised: #1e293b;
-  --surface-soft: #1e293b;
-  --surface-subtle: #334155;
-  --line: #1e293b;
-  --line-strong: #334155;
-  --text: #94a3b8;
-  --text-strong: #f8fafc;
-  --text-muted: #64748b;
-  --brand: #6366f1;
-  --brand-strong: #818cf8;
-  --brand-soft: rgba(99, 102, 241, 0.15);
-  --accent: #22d3ee;
-  --accent-soft: rgba(34, 211, 238, 0.12);
-  --success: #34d399;
-  --success-bg: rgba(52, 211, 153, 0.12);
-  --warning: #fbbf24;
-  --warning-bg: rgba(251, 191, 36, 0.12);
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --toast-danger-bg: #271618;
-  --toast-danger-border: #7f1d1d;
-  --toast-success-bg: #064e3b;
-  --toast-success-border: #047857;
-  --muted-bg: #1e293b;
-  --shadow: none;
-  --shadow-soft: none;
-  --scroll-thumb: rgba(154, 160, 166, 0.22);
-  --scroll-thumb-hover: rgba(154, 160, 166, 0.38);
-  --el-bg-color: #0f172a;
-  --el-bg-color-overlay: #1e293b;
-  --el-border-color: #1e293b;
-  --el-text-color-primary: #f8fafc;
-  --el-text-color-regular: #cbd5e1;
-  --el-text-color-secondary: #94a3b8;
-}
-
 .sidebar {
   width: 236px;
   height: calc(100vh - 36px);
@@ -218,7 +179,7 @@ label span {
 
 .workspace {
   flex: 1;
-  min-width: calc(var(--app-min-width) - 236px);
+  min-width: 0;
   height: calc(100vh - 36px);
   overflow-x: hidden;
   overflow-y: auto;

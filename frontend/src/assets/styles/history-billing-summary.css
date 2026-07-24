@@ -36,49 +36,6 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Premium app layout pass: denser native chrome and dashboard command center. */
-:root {
-  --bg: #eef1ef;
-  --surface: #fcfcfb;
-  --surface-raised: #ffffff;
-  --surface-soft: #f5f7f5;
-  --surface-subtle: #eaeeeb;
-  --line: #d8dfda;
-  --line-strong: #b9c4bd;
-  --text: #18201e;
-  --text-strong: #090f0e;
-  --text-muted: #687672;
-  --brand: #116a5d;
-  --brand-strong: #0a4d44;
-  --accent: #315f9f;
-  --sidebar-bg: #151a1d;
-  --sidebar-panel: #1c2226;
-  --sidebar-line: #2b3439;
-  --sidebar-text: #edf3f1;
-  --sidebar-muted: #8e9b97;
-}
-
-.shell.dark {
-  --bg: #0f1214;
-  --surface: #171b1e;
-  --surface-raised: #1b2024;
-  --surface-soft: #20262a;
-  --surface-subtle: #283036;
-  --line: #30383e;
-  --line-strong: #4a565e;
-  --text: #eaf0ee;
-  --text-strong: #fbfdfc;
-  --text-muted: #9ca9a5;
-  --brand: #5bc8b7;
-  --brand-strong: #8fe2d4;
-  --accent: #8aaeff;
-  --sidebar-bg: #111518;
-  --sidebar-panel: #181e22;
-  --sidebar-line: #283137;
-  --sidebar-text: #edf3f1;
-  --sidebar-muted: #8e9b97;
-}
-
 body {
   background: var(--bg);
   font-size: 13px;
@@ -233,11 +190,6 @@ h1 {
   min-height: 30px;
 }
 
-.dashboard-grid {
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 12px;
-}
-
 .dashboard-command {
   grid-column: 1 / -1;
   min-height: 164px;
@@ -381,70 +333,6 @@ h1 {
   line-height: 1.05;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.dashboard-grid > .metric-card {
-  grid-column: span 3;
-}
-
-.dashboard-grid > .tool-usage-panel {
-  grid-column: span 5;
-}
-
-.dashboard-grid > .quota-overview-panel {
-  grid-column: span 7;
-}
-
-.dashboard-grid > .recent-log-panel {
-  grid-column: span 5;
-  height: 224px;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  overflow: hidden;
-}
-
-.dashboard-grid > .contribution-panel {
-  grid-column: span 7;
-  height: 224px;
-}
-
-.dashboard-grid > .usage-overview-panel {
-  grid-column: 1 / -1;
-}
-
-.metric-card,
-.panel {
-  border-radius: 12px;
-  background: var(--surface-raised);
-}
-
-.metric-card {
-  min-height: 104px;
-  padding: 13px;
-  transition:
-    background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.metric-card:hover {
-  border-color: var(--brand);
-  box-shadow: 0 12px 28px -8px rgba(99, 102, 241, 0.15), 0 4px 10px -4px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
-}
-
-.metric-card strong {
-  font-size: clamp(21px, 1.7vw, 27px);
-}
-
-.metric-icon {
-  width: 18px;
-  height: 18px;
-}
-
-.panel {
-  padding: 15px;
 }
 
 .section-kicker {

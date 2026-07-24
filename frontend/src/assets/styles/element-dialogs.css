@@ -123,53 +123,16 @@ button:disabled {
   transform: translateY(-6px);
 }
 
-.metric-card,
-.panel {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .metric-card {
-  min-height: 112px;
-  padding: 15px;
   display: grid;
   align-content: space-between;
 }
 
 .metric-card strong {
   display: block;
-  margin: 8px 0 4px;
-  font-size: 28px;
   line-height: 1.15;
   overflow-wrap: anywhere;
   word-break: break-word;
-}
-
-.account-status-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: end;
-}
-
-.account-status-metrics div {
-  min-width: 0;
-}
-
-.account-status-metrics strong {
-  margin-bottom: 2px;
-}
-
-.account-status-metrics small {
-  display: block;
-  white-space: nowrap;
-}
-
-.panel {
-  padding: 18px;
 }
 
 .wide {
