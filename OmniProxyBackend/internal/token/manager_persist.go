@@ -68,17 +68,22 @@ func recordDailyStats(existing []DailyTokenUsage, now time.Time, consumption Tok
 		if existing[i].Date != day {
 			continue
 		}
+		// List and Get hand out shallow Token copies that share this backing
+		// array, so today's row is updated in a fresh slice rather than in
+		// place. Mutating it here would race with anyone reading those copies.
+		updated := make([]DailyTokenUsage, len(existing))
+		copy(updated, existing)
 		if countRequest {
-			existing[i].RequestCount++
+			updated[i].RequestCount++
 		}
 		if countConsumption {
-			existing[i].InputTokens += int64(consumption.InputTokens)
-			existing[i].OutputTokens += int64(consumption.OutputTokens)
-			existing[i].TotalTokens += int64(consumption.TotalTokens)
-			existing[i].CacheCreationTokens += int64(consumption.CacheCreationTokens)
-			existing[i].CacheReadTokens += int64(consumption.CacheReadTokens)
+			updated[i].InputTokens += int64(consumption.InputTokens)
+			updated[i].OutputTokens += int64(consumption.OutputTokens)
+			updated[i].TotalTokens += int64(consumption.TotalTokens)
+			updated[i].CacheCreationTokens += int64(consumption.CacheCreationTokens)
+			updated[i].CacheReadTokens += int64(consumption.CacheReadTokens)
 		}
-		return trimDailyUsage(existing)
+		return trimDailyUsage(updated)
 	}
 
 	row := DailyTokenUsage{Date: day}
@@ -92,7 +97,9 @@ func recordDailyStats(existing []DailyTokenUsage, now time.Time, consumption Tok
 		row.CacheCreationTokens = int64(consumption.CacheCreationTokens)
 		row.CacheReadTokens = int64(consumption.CacheReadTokens)
 	}
-	next := append(existing, row)
+	next := make([]DailyTokenUsage, 0, len(existing)+1)
+	next = append(next, existing...)
+	next = append(next, row)
 	return trimDailyUsage(next)
 }
 

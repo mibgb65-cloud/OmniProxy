@@ -359,3 +359,38 @@ func TestManagerBatchesUsagePersistenceUntilFlush(t *testing.T) {
 		t.Fatalf("expected flushed stats, got %#v", store.tokens[0].Stats)
 	}
 }
+
+// List and Get return shallow Token copies, so their Stats.Daily slices share a
+// backing array with the manager. Recording usage must not write into it.
+func TestRecordDailyStatsLeavesPublishedSlicesAlone(t *testing.T) {
+	day := time.Date(2026, 7, 26, 10, 0, 0, 0, time.UTC)
+
+	published := recordDailyStats(nil, day, TokenConsumption{TotalTokens: 5, InputTokens: 2}, true, true)
+	if len(published) != 1 {
+		t.Fatalf("expected one day row, got %d", len(published))
+	}
+
+	updated := recordDailyStats(published, day, TokenConsumption{TotalTokens: 7, InputTokens: 3}, true, true)
+
+	if published[0].RequestCount != 1 || published[0].TotalTokens != 5 || published[0].InputTokens != 2 {
+		t.Fatalf("recording mutated an already-published row: %#v", published[0])
+	}
+	if updated[0].RequestCount != 2 || updated[0].TotalTokens != 12 || updated[0].InputTokens != 5 {
+		t.Fatalf("unexpected accumulated row: %#v", updated[0])
+	}
+}
+
+func TestRecordDailyStatsAppendsWithoutSharingStorage(t *testing.T) {
+	first := time.Date(2026, 7, 26, 10, 0, 0, 0, time.UTC)
+	second := first.AddDate(0, 0, 1)
+
+	published := recordDailyStats(nil, first, TokenConsumption{TotalTokens: 5}, true, true)
+	grown := recordDailyStats(published, second, TokenConsumption{TotalTokens: 9}, true, true)
+
+	if len(published) != 1 {
+		t.Fatalf("appending a new day changed the published slice: %#v", published)
+	}
+	if len(grown) != 2 || grown[1].TotalTokens != 9 {
+		t.Fatalf("unexpected grown rows: %#v", grown)
+	}
+}
