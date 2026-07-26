@@ -37,6 +37,7 @@ func TestSQLiteStoreListFiltersAndPrunes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	recorder.pruneEvery = 1
 	recorder.Add(Entry{
 		Time:        time.Now().Add(-2 * time.Minute),
 		Level:       "info",

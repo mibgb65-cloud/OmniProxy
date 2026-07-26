@@ -13,6 +13,9 @@ import (
 const (
 	defaultPersistDelay = 500 * time.Millisecond
 	defaultMaxEntries   = 50000
+	// Pruning scans the whole history table, so it runs periodically instead of
+	// on every insert. The row cap is allowed to overshoot by this much.
+	appendsPerPrune = 500
 )
 
 type Store interface {
@@ -151,17 +154,19 @@ type Summary struct {
 }
 
 type Recorder struct {
-	mu            sync.RWMutex
-	store         Store
-	queryStore    QueryStore
-	usageStore    UsageStore
-	max           int
-	retentionDays int
-	nextID        int64
-	entries       []Entry
-	persistDelay  time.Duration
-	saveTimer     *time.Timer
-	dirty         bool
+	mu                sync.RWMutex
+	store             Store
+	queryStore        QueryStore
+	usageStore        UsageStore
+	max               int
+	retentionDays     int
+	nextID            int64
+	entries           []Entry
+	persistDelay      time.Duration
+	saveTimer         *time.Timer
+	dirty             bool
+	pruneEvery        int
+	appendsSincePrune int
 }
 
 func NewRecorder(store Store, max int) (*Recorder, error) {
@@ -184,7 +189,7 @@ func NewRecorder(store Store, max int) (*Recorder, error) {
 		}
 	}
 
-	return &Recorder{
+	recorder := &Recorder{
 		store:        store,
 		queryStore:   queryStore(store),
 		usageStore:   usageStore(store),
@@ -192,7 +197,11 @@ func NewRecorder(store Store, max int) (*Recorder, error) {
 		nextID:       nextID,
 		entries:      entries,
 		persistDelay: defaultPersistDelay,
-	}, nil
+		pruneEvery:   appendsPerPrune,
+	}
+	// Add only prunes periodically, so enforce the cap once at startup.
+	recorder.pruneStoresLocked()
+	return recorder, nil
 }
 
 func (r *Recorder) Add(entry Entry) Entry {
@@ -218,9 +227,9 @@ func (r *Recorder) Add(entry Entry) Entry {
 	}
 	if r.queryStore != nil {
 		if err := r.queryStore.Append(entry); err == nil {
-			_ = r.queryStore.Prune(r.max)
-			if r.retentionDays > 0 && r.usageStore != nil {
-				_ = r.usageStore.PruneBeforeDate(retentionCutoffDate(time.Now(), r.retentionDays))
+			r.appendsSincePrune++
+			if r.pruneEvery > 0 && r.appendsSincePrune >= r.pruneEvery {
+				r.pruneStoresLocked()
 			}
 			return entry
 		}
@@ -230,6 +239,17 @@ func (r *Recorder) Add(entry Entry) Entry {
 	}
 	_ = r.schedulePersistLocked()
 	return entry
+}
+
+func (r *Recorder) pruneStoresLocked() {
+	if r.queryStore == nil {
+		return
+	}
+	r.appendsSincePrune = 0
+	_ = r.queryStore.Prune(r.max)
+	if r.retentionDays > 0 && r.usageStore != nil {
+		_ = r.usageStore.PruneBeforeDate(retentionCutoffDate(time.Now(), r.retentionDays))
+	}
 }
 
 func (r *Recorder) List(filter Filter) []Entry {

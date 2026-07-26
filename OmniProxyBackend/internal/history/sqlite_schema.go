@@ -20,7 +20,10 @@ func (s *SQLiteStore) PruneBeforeDate(cutoffDate string) error {
 		return err
 	}
 	defer tx.Rollback()
-	if _, err := tx.Exec(`DELETE FROM request_history WHERE substr(time, 1, 10) < ?`, cutoffDate); err != nil {
+	// Compared as a plain string so idx_request_history_time applies. RFC3339
+	// sorts lexically, and a same-day timestamp is longer than the bare date,
+	// so it still sorts after the cutoff and survives.
+	if _, err := tx.Exec(`DELETE FROM request_history WHERE time < ?`, cutoffDate); err != nil {
 		return err
 	}
 	if _, err := tx.Exec(`DELETE FROM billing_daily_usage WHERE date < ?`, cutoffDate); err != nil {
@@ -202,9 +205,14 @@ CREATE TABLE IF NOT EXISTS request_daily_summary (
 		return err
 	}
 	_, err = s.db.Exec(`
-CREATE INDEX IF NOT EXISTS idx_request_history_provider ON request_history(provider);
-CREATE INDEX IF NOT EXISTS idx_request_history_client_key ON request_history(client_key);
-CREATE INDEX IF NOT EXISTS idx_request_history_level ON request_history(level);
+CREATE INDEX IF NOT EXISTS idx_request_history_provider_nocase ON request_history(provider COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_request_history_client_key_nocase ON request_history(client_key COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_request_history_level_nocase ON request_history(level COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_request_history_token_id_nocase ON request_history(token_id COLLATE NOCASE);
+CREATE INDEX IF NOT EXISTS idx_request_history_token_id ON request_history(token_id);
+DROP INDEX IF EXISTS idx_request_history_provider;
+DROP INDEX IF EXISTS idx_request_history_client_key;
+DROP INDEX IF EXISTS idx_request_history_level;
 CREATE INDEX IF NOT EXISTS idx_request_history_status ON request_history(status);
 CREATE INDEX IF NOT EXISTS idx_request_history_model ON request_history(model);
 CREATE INDEX IF NOT EXISTS idx_request_history_token_name ON request_history(token_name);
