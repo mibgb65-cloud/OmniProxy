@@ -111,3 +111,29 @@ func replaceHTTPPostJSONForTest(fn func(context.Context, *http.Client, string, a
 		httpPostJSON = previous
 	}
 }
+
+func TestClaudeOAuthNeedsRefreshMatchesRefreshDecision(t *testing.T) {
+	now := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
+
+	fresh := `{"access_token":"fresh-access","refresh_token":"refresh","expired":"2026-05-01T02:00:00Z"}`
+	if ClaudeOAuthNeedsRefresh(fresh, now) {
+		t.Fatal("a token valid for another two hours must not need refreshing")
+	}
+
+	restore := replaceHTTPPostJSONForTest(func(context.Context, *http.Client, string, any) (*http.Response, error) {
+		t.Fatal("refresh endpoint must not be called for a fresh token")
+		return nil, nil
+	})
+	defer restore()
+	if _, refreshed, err := RefreshClaudeOAuthJSON(context.Background(), nil, fresh, false, now); err != nil || refreshed {
+		t.Fatalf("refresh path disagreed with the pre-check: refreshed=%v err=%v", refreshed, err)
+	}
+
+	expiring := `{"access_token":"stale","refresh_token":"refresh","expired":"2026-05-01T00:10:00Z"}`
+	if !ClaudeOAuthNeedsRefresh(expiring, now) {
+		t.Fatal("a token inside the refresh margin must need refreshing")
+	}
+	if !ClaudeOAuthNeedsRefresh("not json", now) {
+		t.Fatal("an unparseable credential must fall through to the refresh path")
+	}
+}

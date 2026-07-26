@@ -122,6 +122,19 @@ func (v *Validator) ExchangeClaudeAuthorizationCode(ctx context.Context, code st
 	}, nil
 }
 
+// ClaudeOAuthNeedsRefresh reports whether the stored OAuth JSON is expired or
+// close enough to expiry to be worth refreshing, without making a request.
+func ClaudeOAuthNeedsRefresh(raw string, now time.Time) bool {
+	if now.IsZero() {
+		now = time.Now()
+	}
+	_, credential, err := parseClaudeOAuth(raw)
+	if err != nil {
+		return true
+	}
+	return claudeOAuthExpiredOrExpiring(credential, now)
+}
+
 func RefreshClaudeOAuthJSON(ctx context.Context, client *http.Client, raw string, force bool, now time.Time) (string, bool, error) {
 	if client == nil {
 		client = http.DefaultClient

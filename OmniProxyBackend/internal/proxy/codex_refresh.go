@@ -107,6 +107,27 @@ func (v *Validator) ExchangeCodexAuthorizationCode(ctx context.Context, code str
 	}, nil
 }
 
+// CodexAuthNeedsRefresh reports whether the stored auth.json is expired or close
+// enough to expiry to be worth refreshing. It only parses, so callers can decide
+// before taking a refresh lock or building an HTTP client. A payload that fails
+// to parse reports true so the refresh path can surface the error.
+func CodexAuthNeedsRefresh(raw string, now time.Time) bool {
+	if now.IsZero() {
+		now = time.Now()
+	}
+	auth, tokens, _, err := parseCodexAuth(raw)
+	if err != nil {
+		return true
+	}
+	if codexAccessTokenExpiredOrExpiring(stringMapValue(tokens, "access_token"), now) {
+		return true
+	}
+	if codexAuthExpiredOrExpiring(tokens, now) {
+		return true
+	}
+	return codexAuthExpiredOrExpiring(auth, now)
+}
+
 func RefreshCodexAuthJSON(ctx context.Context, client *http.Client, raw string, force bool, now time.Time) (string, bool, error) {
 	if client == nil {
 		client = http.DefaultClient

@@ -268,8 +268,27 @@ func tokenMaintenanceHistoryMessage(label string, result proxy.ValidationResult,
 	return strings.Join(parts, " · ")
 }
 
+func authTokenNeedsRefresh(selected token.Token, now time.Time) bool {
+	switch {
+	case isCodexToken(selected):
+		return proxy.CodexAuthNeedsRefresh(selected.TokenValue, now)
+	case isClaudeOAuthToken(selected):
+		return proxy.ClaudeOAuthNeedsRefresh(selected.TokenValue, now)
+	default:
+		return false
+	}
+}
+
 func (a *appServer) refreshAuthTokenIfNeeded(ctx context.Context, selected token.Token, force bool) (token.Token, bool, error) {
 	if !isRefreshableAuthToken(selected) {
+		return selected, false, nil
+	}
+
+	// Expiry is decided by parsing alone, so it is checked before the refresh
+	// lock and before a client is built. Otherwise every Codex and Claude
+	// request funnels through one global mutex that a single in-flight refresh
+	// can hold for the whole request timeout.
+	if !force && !authTokenNeedsRefresh(selected, time.Now()) {
 		return selected, false, nil
 	}
 
@@ -278,6 +297,10 @@ func (a *appServer) refreshAuthTokenIfNeeded(ctx context.Context, selected token
 
 	if latest, err := a.tokens.Get(selected.ID); err == nil {
 		selected = latest
+	}
+	// Another request may have refreshed this token while we waited for the lock.
+	if !force && !authTokenNeedsRefresh(selected, time.Now()) {
+		return selected, false, nil
 	}
 
 	a.mu.Lock()

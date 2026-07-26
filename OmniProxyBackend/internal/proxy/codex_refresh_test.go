@@ -355,3 +355,27 @@ func jwtWithExp(t *testing.T, exp time.Time) string {
 	}
 	return "header." + base64.RawURLEncoding.EncodeToString(payload) + ".signature"
 }
+
+// The pre-check runs before the refresh lock, so it has to agree with the
+// refresh path. If it under-reports, tokens silently stop being refreshed.
+func TestCodexAuthNeedsRefreshMatchesRefreshDecision(t *testing.T) {
+	now := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
+
+	fresh := `{"tokens":{"access_token":"` + jwtWithExp(t, now.Add(2*time.Hour)) + `","refresh_token":"refresh-token"}}`
+	if CodexAuthNeedsRefresh(fresh, now) {
+		t.Fatal("a token valid for another two hours must not need refreshing")
+	}
+	updated, refreshed, err := RefreshCodexAuthJSON(context.Background(), nil, fresh, false, now)
+	if err != nil || refreshed || updated != fresh {
+		t.Fatalf("refresh path disagreed with the pre-check: refreshed=%v err=%v", refreshed, err)
+	}
+
+	expiring := `{"tokens":{"access_token":"` + jwtWithExp(t, now.Add(time.Minute)) + `","refresh_token":"refresh-token"}}`
+	if !CodexAuthNeedsRefresh(expiring, now) {
+		t.Fatal("a token inside the refresh margin must need refreshing")
+	}
+
+	if !CodexAuthNeedsRefresh("not json", now) {
+		t.Fatal("an unparseable credential must fall through to the refresh path")
+	}
+}
