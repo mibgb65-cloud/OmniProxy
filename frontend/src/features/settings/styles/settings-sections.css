@@ -236,7 +236,6 @@
 
 .settings-panel .data-directory-row,
 .shell.dark .settings-panel .data-directory-row {
-  min-height: 132px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -246,6 +245,13 @@
   border-radius: 22px;
   background: color-mix(in srgb, var(--surface-soft) 42%, var(--surface));
   box-shadow: none;
+}
+
+/* Maintenance rows carry buttons and snapshot lists, so they reserve height.
+   Rows elsewhere size to their content. */
+.settings-panel .settings-maintenance-section .data-directory-row,
+.shell.dark .settings-panel .settings-maintenance-section .data-directory-row {
+  min-height: 132px;
 }
 
 .settings-panel .settings-maintenance-section .data-directory-row:first-child {

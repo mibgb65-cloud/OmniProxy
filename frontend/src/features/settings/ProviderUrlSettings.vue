@@ -18,6 +18,9 @@ async function toggleClaudeSubscriptionUsage(event) {
     props.config.claudeSubscriptionUsageEnabled = false
     return
   }
+  // The browser flips the switch before this runs, so it would read as enabled
+  // while the risk dialog is still asking. Keep it off until it is acknowledged.
+  input.checked = false
   try {
     await ElMessageBox.confirm(
       '开启后，OmniProxy 会以 Claude Code 客户端的身份，向 Anthropic 未公开的用量接口查询你的订阅限额。<br /><br />'
