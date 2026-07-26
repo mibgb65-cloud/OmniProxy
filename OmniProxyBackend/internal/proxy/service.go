@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"omniproxy/internal/claudedesktop"
@@ -35,6 +36,9 @@ type Service struct {
 	activeSeq      int64
 	activeRequests map[int64]ActiveRequest
 	activity       ActivityObserver
+	wsMu           sync.Mutex
+	wsSessions     map[io.Closer]struct{}
+	wsClosed       bool
 }
 
 const maxProxyRequestBodyBytes = 32 * 1024 * 1024

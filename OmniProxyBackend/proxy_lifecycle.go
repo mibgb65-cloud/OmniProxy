@@ -169,11 +169,17 @@ func (a *appServer) serveControl(server *http.Server, listener net.Listener) {
 func (a *appServer) stopProxy() error {
 	a.mu.Lock()
 	server := a.proxyServer
+	service := a.proxyService
 	a.proxyServer = nil
 	a.proxyService = nil
 	a.mu.Unlock()
 	if a.taskAutomation != nil {
 		a.taskAutomation.Stop()
+	}
+	// Shutdown ignores hijacked connections, so the WebSocket bridges have to be
+	// closed explicitly or a stopped proxy keeps forwarding.
+	if service != nil {
+		service.Close()
 	}
 
 	if server == nil {
@@ -220,6 +226,7 @@ func (a *appServer) stopControl() error {
 func (a *appServer) restartProxy() error {
 	a.mu.Lock()
 	old := a.proxyServer
+	oldService := a.proxyService
 	cfg := a.cfg
 	a.mu.Unlock()
 
@@ -246,6 +253,9 @@ func (a *appServer) restartProxy() error {
 
 		a.serveProxy(server, listener)
 		a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: fmt.Sprintf("proxy started on port %d", cfg.ProxyPort)})
+		if oldService != nil {
+			oldService.Close()
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		err = old.Shutdown(ctx)
 		cancel()

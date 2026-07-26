@@ -14,6 +14,52 @@ import (
 	"time"
 )
 
+// trackWebSocketSession registers a hijacked connection pair so the service can
+// tear it down. http.Server.Shutdown leaves hijacked connections alone, so
+// without this a stopped proxy keeps relaying traffic and holding its token.
+func (s *Service) trackWebSocketSession(conns ...io.Closer) func() {
+	s.wsMu.Lock()
+	if s.wsClosed {
+		s.wsMu.Unlock()
+		for _, conn := range conns {
+			_ = conn.Close()
+		}
+		return func() {}
+	}
+	if s.wsSessions == nil {
+		s.wsSessions = make(map[io.Closer]struct{})
+	}
+	for _, conn := range conns {
+		s.wsSessions[conn] = struct{}{}
+	}
+	s.wsMu.Unlock()
+
+	return func() {
+		s.wsMu.Lock()
+		for _, conn := range conns {
+			delete(s.wsSessions, conn)
+		}
+		s.wsMu.Unlock()
+	}
+}
+
+// Close shuts every live WebSocket bridge down. Call it when the proxy stops or
+// moves to another port, otherwise the old sessions outlive the listener.
+func (s *Service) Close() {
+	s.wsMu.Lock()
+	s.wsClosed = true
+	conns := make([]io.Closer, 0, len(s.wsSessions))
+	for conn := range s.wsSessions {
+		conns = append(conns, conn)
+	}
+	s.wsSessions = nil
+	s.wsMu.Unlock()
+
+	for _, conn := range conns {
+		_ = conn.Close()
+	}
+}
+
 func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	route := routeWithClient(r, s.router.Route(r.URL, nil))
@@ -147,6 +193,8 @@ func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer client.Close()
+	untrackSession := s.trackWebSocketSession(client, upstream)
+	defer untrackSession()
 
 	_ = s.tokens.RecordUsage(selected.ID, -1)
 	_ = s.tokens.RecordProxyRequest(selected.ID)
