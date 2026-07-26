@@ -134,6 +134,7 @@ export namespace config {
 	    healthRiskThreshold: number;
 	    longRequestAlertSeconds: number;
 	    codexUsageEndpoint: string;
+	    claudeSubscriptionUsageEnabled: boolean;
 
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -202,6 +203,7 @@ export namespace config {
 	        this.healthRiskThreshold = source["healthRiskThreshold"];
 	        this.longRequestAlertSeconds = source["longRequestAlertSeconds"];
 	        this.codexUsageEndpoint = source["codexUsageEndpoint"];
+	        this.claudeSubscriptionUsageEnabled = source["claudeSubscriptionUsageEnabled"];
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

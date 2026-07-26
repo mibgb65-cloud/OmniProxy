@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue'
+import { ElMessageBox } from 'element-plus'
 
-defineProps({
+const props = defineProps({
   config: {
     type: Object,
     required: true,
@@ -10,6 +11,34 @@ defineProps({
 
 const coreUrlsExpanded = ref(false)
 const thirdPartyUrlsExpanded = ref(false)
+
+async function toggleClaudeSubscriptionUsage(event) {
+  const input = event.target
+  if (!input.checked) {
+    props.config.claudeSubscriptionUsageEnabled = false
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      '开启后，OmniProxy 会以 Claude Code 客户端的身份，向 Anthropic 未公开的用量接口查询你的订阅限额。<br /><br />'
+        + '· 该接口未在官方文档中公开，可能随时变更或失效。<br />'
+        + '· Anthropic 自 2026 年 2 月起限制订阅版（Free / Pro / Max）OAuth 凭据在第三方工具中使用。<br />'
+        + '· 由此产生的账号风险需要你自行承担。<br /><br />'
+        + '关闭此开关不影响 Claude 账号的正常代理转发。',
+      '开启 Claude 订阅额度读取',
+      {
+        confirmButtonText: '我已了解，开启',
+        cancelButtonText: '取消',
+        type: 'warning',
+        dangerouslyUseHTMLString: true,
+      },
+    )
+    props.config.claudeSubscriptionUsageEnabled = true
+  } catch {
+    props.config.claudeSubscriptionUsageEnabled = false
+    input.checked = false
+  }
+}
 </script>
 
 <template>
@@ -45,6 +74,25 @@ const thirdPartyUrlsExpanded = ref(false)
         <input v-model="config.upstreamBaseUrl" type="url" />
       </label>
     </div>
+    <label class="data-directory-row">
+      <div>
+        <span>Claude 订阅额度</span>
+        <strong>读取 Claude 订阅限额</strong>
+        <small>关闭时 Claude OAuth 账号只显示连通状态；开启后读取 5 小时与每周用量。该接口未公开，开启前会提示风险。</small>
+      </div>
+      <span class="toggle-field">
+        <input
+          :checked="config.claudeSubscriptionUsageEnabled"
+          class="toggle-input"
+          type="checkbox"
+          aria-label="读取 Claude 订阅限额"
+          @change="toggleClaudeSubscriptionUsage"
+        />
+        <span class="toggle-switch" aria-hidden="true">
+          <span class="toggle-thumb"></span>
+        </span>
+      </span>
+    </label>
   </section>
 
   <section class="settings-section settings-url-section settings-url-section-third-party">

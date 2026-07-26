@@ -108,6 +108,7 @@ type Config struct {
 	HealthRiskThreshold                int           `json:"healthRiskThreshold"`
 	LongRequestAlertSeconds            int           `json:"longRequestAlertSeconds"`
 	CodexUsageEndpoint                 string        `json:"codexUsageEndpoint"`
+	ClaudeSubscriptionUsageEnabled     bool          `json:"claudeSubscriptionUsageEnabled"`
 }
 
 type GatewayRouteConfig struct {

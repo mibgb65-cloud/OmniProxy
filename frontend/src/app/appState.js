@@ -218,6 +218,7 @@ export function createAppState() {
       },
       modelRoutes: {},
       codexUsageEndpoint: 'https://chatgpt.com/backend-api/wham/usage',
+      claudeSubscriptionUsageEnabled: false,
       switchThreshold: 15,
       maxRetries: 2,
       historyRetentionDays: 14,

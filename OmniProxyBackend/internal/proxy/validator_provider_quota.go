@@ -13,6 +13,10 @@ func (v *Validator) queryProviderQuota(ctx context.Context, selected token.Token
 		return v.queryZhipuCodingUsage(ctx, selected)
 	}
 
+	if token.NormalizeProvider(selected.Provider) == token.ProviderAnthropic && selected.CredentialType == token.CredentialTypeClaudeOAuth {
+		return v.queryClaudeSubscriptionUsage(ctx, selected)
+	}
+
 	if selected.CredentialType != "" && selected.CredentialType != token.CredentialTypeAPIKey {
 		return token.UsageInfo{}, nil, false
 	}

@@ -127,6 +127,34 @@ func TestStoreLoadPreservesPremAutoStartDisabled(t *testing.T) {
 	}
 }
 
+func TestStoreLoadClaudeSubscriptionUsageToggle(t *testing.T) {
+	dir := t.TempDir()
+
+	defaultPath := filepath.Join(dir, "default.json")
+	if err := os.WriteFile(defaultPath, []byte(`{}`), 0600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg, err := NewStore(defaultPath).Load()
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	if cfg.ClaudeSubscriptionUsageEnabled {
+		t.Fatal("expected Claude subscription usage to stay opt-in by default")
+	}
+
+	enabledPath := filepath.Join(dir, "enabled.json")
+	if err := os.WriteFile(enabledPath, []byte(`{"claudeSubscriptionUsageEnabled":true}`), 0600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg, err = NewStore(enabledPath).Load()
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	if !cfg.ClaudeSubscriptionUsageEnabled {
+		t.Fatal("expected saved Claude subscription usage=true to be preserved")
+	}
+}
+
 func TestStoreLoadLegacyGatewayRoutesWithoutFallbacks(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	raw := []byte(`{

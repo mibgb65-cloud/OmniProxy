@@ -14,6 +14,10 @@ import (
 )
 
 func (v *Validator) queryJSON(ctx context.Context, selected token.Token, target string) ([]byte, bool) {
+	return v.queryJSONWithHeaders(ctx, selected, target, nil)
+}
+
+func (v *Validator) queryJSONWithHeaders(ctx context.Context, selected token.Token, target string, extra map[string]string) ([]byte, bool) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {
 		return nil, false
@@ -21,6 +25,9 @@ func (v *Validator) queryJSON(ctx context.Context, selected token.Token, target 
 	req.Header.Set("Accept", "application/json")
 	if err := applyAuth(req.Header, selected); err != nil {
 		return nil, false
+	}
+	for key, value := range extra {
+		req.Header.Set(key, value)
 	}
 
 	resp, err := v.clientForToken(selected).Do(req)

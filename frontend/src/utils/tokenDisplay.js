@@ -292,7 +292,7 @@ export function isZhipuCodingPlan(item) {
 }
 
 export function showQuotaWindows(item) {
-  return isCodexToken(item) || isMimoTokenPlan(item) || Boolean(item?.usage?.subscriptionQuotaAvailable)
+  return isCodexToken(item) || isClaudeOAuthToken(item) || isMimoTokenPlan(item) || Boolean(item?.usage?.subscriptionQuotaAvailable)
 }
 
 export function quotaWindowAvailable(item, windowName) {
@@ -399,6 +399,7 @@ export function quotaResetLabel(item) {
 
 export function quotaUnavailableText(item) {
   if (isCodexToken(item)) return '点击刷新额度获取'
+  if (isClaudeOAuthToken(item)) return '需在设置中开启订阅额度读取'
   if (isMimoTokenPlan(item)) return 'Token Plan 暂无订阅额度'
   return '暂无订阅额度'
 }

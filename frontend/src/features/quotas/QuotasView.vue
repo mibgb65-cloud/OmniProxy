@@ -20,6 +20,7 @@ import {
   formatBalance,
   hasBalanceUsage,
   healthSummary,
+  isClaudeOAuthToken,
   isCodexToken,
   openRouterQuotaLimit,
   openRouterQuotaMeta,
@@ -529,7 +530,7 @@ function useResetCredit(item) {
               <small v-else>{{ quotaUnavailableText(group.current) }}</small>
             </div>
 
-            <div v-if="!isCodexToken(group.current)" class="quota-stat quota-stat-balance">
+            <div v-if="!isCodexToken(group.current) && !isClaudeOAuthToken(group.current)" class="quota-stat quota-stat-balance">
               <span>{{ quotaStatLabel(group.current) }}</span>
               <strong>{{ hasBalanceUsage(group.current) ? quotaDisplay(group.current) : `${group.current.usage?.apiRemaining || group.current.remaining}%` }}</strong>
               <small>{{ quotaStatMeta(group.current) }}</small>

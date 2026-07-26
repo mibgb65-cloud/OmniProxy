@@ -103,6 +103,7 @@ export function configPayload(config) {
     gatewayRoutes: gatewayRoutesPayload(source.gatewayRoutes),
     modelRoutes: modelRoutesPayload(source.modelRoutes),
     codexUsageEndpoint: trimText(source.codexUsageEndpoint),
+    claudeSubscriptionUsageEnabled: Boolean(source.claudeSubscriptionUsageEnabled),
     switchThreshold: Number(source.switchThreshold),
     maxRetries: Number(source.maxRetries),
     historyRetentionDays: Number(source.historyRetentionDays),
