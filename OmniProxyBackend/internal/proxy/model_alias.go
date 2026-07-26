@@ -17,23 +17,32 @@ func normalizeUpstreamModelID(model string) string {
 }
 
 func normalizeRequestBodyModel(body []byte, routeModel string) ([]byte, bool) {
-	var payload map[string]any
-	decoder := json.NewDecoder(bytes.NewReader(body))
-	decoder.UseNumber()
-	if err := decoder.Decode(&payload); err != nil {
+	// This runs on every forward attempt, and agent payloads reach megabytes.
+	// Decoding into map[string]any allocates a copy of the entire request, so
+	// the model is probed on its own first and the full decode only happens
+	// when the body actually has to be rewritten. A pointer distinguishes an
+	// absent model from an empty one, matching the previous type assertion.
+	var probe struct {
+		Model *string `json:"model"`
+	}
+	if err := json.Unmarshal(body, &probe); err != nil || probe.Model == nil {
 		return body, false
 	}
 
-	model, ok := payload["model"].(string)
-	if !ok {
-		return body, false
-	}
+	model := *probe.Model
 	normalized := normalizeUpstreamModelID(model)
 	target := normalizeUpstreamModelID(routeModel)
 	if target == "" {
 		target = normalized
 	}
 	if target == "" || target == strings.TrimSpace(model) {
+		return body, false
+	}
+
+	var payload map[string]any
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
+	if err := decoder.Decode(&payload); err != nil {
 		return body, false
 	}
 	payload["model"] = target
