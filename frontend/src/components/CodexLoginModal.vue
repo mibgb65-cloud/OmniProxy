@@ -10,6 +10,22 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  serviceName: {
+    type: String,
+    default: 'Codex',
+  },
+  authorizationName: {
+    type: String,
+    default: 'ChatGPT',
+  },
+  formatLabel: {
+    type: String,
+    default: 'CPA Codex JSON',
+  },
+  formatHint: {
+    type: String,
+    default: 'access_token、refresh_token、id_token 等字段使用 CLIProxyAPI 兼容的顶层格式。',
+  },
 })
 
 const emit = defineEmits(['close', 'copy-url', 'open-url', 'complete', 'refresh'])
@@ -45,8 +61,8 @@ function close() {
     >
       <header class="codex-login-head">
         <div>
-          <span class="section-kicker">Codex OAuth</span>
-          <h2 id="codex-login-title">获取 Codex 登录链接</h2>
+          <span class="section-kicker">{{ serviceName }} OAuth</span>
+          <h2 id="codex-login-title">获取 {{ serviceName }} 登录链接</h2>
           <p id="codex-login-description">在任意浏览器完成授权后，OmniProxy 会自动识别并导入账号。</p>
         </div>
         <button type="button" class="icon-button" :disabled="busy" aria-label="关闭登录弹窗" @click="close">×</button>
@@ -85,14 +101,14 @@ function close() {
       </div>
 
       <ol v-if="dialog.status === 'ready' || dialog.status === 'completing'" class="codex-login-steps">
-        <li>打开上面的登录页面并完成 ChatGPT 授权。</li>
+        <li>打开上面的登录页面并完成 {{ authorizationName }} 授权。</li>
         <li>授权成功后返回 OmniProxy，账号会被自动识别并导入。</li>
       </ol>
 
       <div class="codex-login-format">
         <span>导入格式</span>
-        <strong>CPA Codex JSON</strong>
-        <small>access_token、refresh_token、id_token 等字段使用 CLIProxyAPI 兼容的顶层格式。</small>
+        <strong>{{ formatLabel }}</strong>
+        <small>{{ formatHint }}</small>
       </div>
 
       <div class="modal-actions codex-login-actions">

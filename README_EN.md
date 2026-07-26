@@ -88,6 +88,7 @@ flowchart LR
 ## Latest Changes
 
 - **Codex browser login**: Account Management now provides **Log in to Codex**, using PKCE and a loopback callback to complete browser authorization and automatically add or update the OpenAI `auth.json` account.
+- **Claude browser login**: The Anthropic account page now provides **Log in to Claude**, using PKCE and a dynamic loopback callback to authorize, add or update a Claude OAuth account, and refresh its credentials.
 - **Codex quota reset credits**: The Quota page now shows reset-credit counts and grant / expiry / redemption history, with a confirmation step before consuming one to reset the current 5-hour quota.
 - **Gemini-style UI refresh**: The desktop console now uses a modern minimal visual system across Dashboard, Quota, Account Management, Request History, Realtime Logs, Usage Trends, Billing, One-click Setup, Global Settings, and OpenRouter Chat.
 - **Desktop interaction polish**: Dropdowns, dialogs, global snackbars, scrollbars, buttons, and cards now share one visual language. Each page keeps its own scroll position, and Realtime Logs now shows only the latest 5 minutes with internal scrolling.
@@ -168,7 +169,7 @@ Default data directories:
 | OpenAI | API Key | OpenAI-compatible requests and rate-limit header balance recording. |
 | OpenAI / Codex | `auth.json` | Parses email, access token, account id, refreshes Codex subscription quota, and supports Codex Responses / Chat Completions conversion. |
 | Anthropic | API Key | Anthropic-native requests and Claude Code routing. |
-| Anthropic / Claude | OAuth JSON | Supports Claude OAuth JSON with `access_token` / `refresh_token`. |
+| Anthropic / Claude | OAuth JSON | Supports browser OAuth login, automatic import and refresh, plus manual Claude OAuth JSON containing `access_token` / `refresh_token`. |
 | DeepSeek | API Key | OpenAI-compatible entrypoint and Anthropic router. |
 | Kimi | API Key | Kimi Code routing and subscription usage refresh. |
 | Xiaomi MiMo | API Key | Pay-as-you-go API key, usually starts with `sk-`. |

@@ -254,6 +254,10 @@ export function isCodexToken(item) {
   return item?.provider === 'openai' && item?.credentialType === 'codex_auth_json'
 }
 
+export function isClaudeOAuthToken(item) {
+  return item?.provider === 'anthropic' && item?.credentialType === 'claude_oauth_json'
+}
+
 export function codexResetCreditsAvailable(item) {
   const value = Number(item?.usage?.codexResetCreditsAvailable)
   if (!Number.isFinite(value)) return null

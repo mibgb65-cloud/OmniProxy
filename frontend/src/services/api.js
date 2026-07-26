@@ -211,6 +211,26 @@ export function completeCodexOAuthLogin(loginId) {
   }))
 }
 
+export function startClaudeOAuthLogin(refresh = false) {
+  const forceRefresh = Boolean(refresh)
+  return callDesktopOr('StartClaudeOAuthLogin', [forceRefresh], () => request(`/claude/login/start?refresh=${forceRefresh}`, {
+    method: 'POST',
+  }))
+}
+
+export function getClaudeOAuthLoginStatus(loginId) {
+  const normalizedLoginId = String(loginId || '').trim()
+  const params = new URLSearchParams({ loginId: normalizedLoginId })
+  return callDesktopOr('ClaudeOAuthLoginStatus', [normalizedLoginId], () => request(`/claude/login/status?${params.toString()}`))
+}
+
+export function completeClaudeOAuthLogin(loginId) {
+  return callDesktopOr('CompleteClaudeOAuthLogin', [loginId], () => request('/claude/login/complete', {
+    method: 'POST',
+    body: JSON.stringify({ loginId }),
+  }))
+}
+
 export function getOpenRouterModels(refresh = false) {
   const params = new URLSearchParams()
   if (refresh) params.set('refresh', 'true')

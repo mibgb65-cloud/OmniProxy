@@ -79,17 +79,17 @@ func (a *appServer) startCodexOAuthLogin(refresh bool) (codexOAuthLoginStartResp
 		return codexOAuthLoginStartResponse{}, fmt.Errorf("无法启动 Codex 登录回调端口 %d：%w", codexOAuthCallbackPort, err)
 	}
 
-	verifier, err := codexOAuthRandomToken()
+	verifier, err := oauthRandomToken()
 	if err != nil {
 		_ = listener.Close()
 		return codexOAuthLoginStartResponse{}, err
 	}
-	state, err := codexOAuthRandomToken()
+	state, err := oauthRandomToken()
 	if err != nil {
 		_ = listener.Close()
 		return codexOAuthLoginStartResponse{}, err
 	}
-	loginID, err := codexOAuthRandomToken()
+	loginID, err := oauthRandomToken()
 	if err != nil {
 		_ = listener.Close()
 		return codexOAuthLoginStartResponse{}, err
@@ -280,10 +280,10 @@ func (a *appServer) finishCodexOAuthSession(loginID string) {
 	}
 }
 
-func codexOAuthRandomToken() (string, error) {
+func oauthRandomToken() (string, error) {
 	value := make([]byte, 32)
 	if _, err := rand.Read(value); err != nil {
-		return "", fmt.Errorf("生成 Codex 登录安全参数失败: %w", err)
+		return "", fmt.Errorf("生成 OAuth 登录安全参数失败: %w", err)
 	}
 	return base64.RawURLEncoding.EncodeToString(value), nil
 }

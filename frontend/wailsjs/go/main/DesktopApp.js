@@ -38,6 +38,10 @@ export function ChooseDataDirectory(arg1) {
   return window['go']['main']['DesktopApp']['ChooseDataDirectory'](arg1);
 }
 
+export function ClaudeOAuthLoginStatus(arg1) {
+  return window['go']['main']['DesktopApp']['ClaudeOAuthLoginStatus'](arg1);
+}
+
 export function ClearBillingUsage() {
   return window['go']['main']['DesktopApp']['ClearBillingUsage']();
 }
@@ -52,6 +56,10 @@ export function ClientConfigPreviews() {
 
 export function CodexOAuthLoginStatus(arg1) {
   return window['go']['main']['DesktopApp']['CodexOAuthLoginStatus'](arg1);
+}
+
+export function CompleteClaudeOAuthLogin(arg1) {
+  return window['go']['main']['DesktopApp']['CompleteClaudeOAuthLogin'](arg1);
 }
 
 export function CompleteCodexOAuthLogin(arg1) {
@@ -244,6 +252,10 @@ export function SetTokenDisabled(arg1, arg2) {
 
 export function SetTokenSelected(arg1, arg2) {
   return window['go']['main']['DesktopApp']['SetTokenSelected'](arg1, arg2);
+}
+
+export function StartClaudeOAuthLogin(arg1) {
+  return window['go']['main']['DesktopApp']['StartClaudeOAuthLogin'](arg1);
 }
 
 export function StartCodexOAuthLogin(arg1) {

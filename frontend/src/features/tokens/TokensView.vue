@@ -39,6 +39,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  claudeLoggingIn: {
+    type: Boolean,
+    default: false,
+  },
   batchImporting: {
     type: Boolean,
     required: true,
@@ -121,6 +125,7 @@ const emit = defineEmits([
   'select-provider',
   'export-token-backup',
   'login-codex',
+  'login-claude',
   'open-codex-auth-file-picker',
   'import-codex-auth-files',
   'export-codex-auth-backups',
@@ -177,7 +182,10 @@ function changeOpenRouterModelPage(delta) {
 }
 
 function canRefreshAuthToken(item) {
-  return item?.provider === 'openai' && item?.credentialType === 'codex_auth_json'
+  return (
+    (item?.provider === 'openai' && item?.credentialType === 'codex_auth_json') ||
+    (item?.provider === 'anthropic' && item?.credentialType === 'claude_oauth_json')
+  )
 }
 
 function apiBalanceSummaryMeta(summary) {
@@ -233,6 +241,16 @@ function apiBalanceSummaryMeta(summary) {
           @click="$emit('login-codex')"
         >
           {{ codexLoggingIn ? '处理中' : '登录 Codex' }}
+        </el-button>
+        <el-button
+          v-if="activeProvider === 'anthropic'"
+          type="primary"
+          plain
+          :icon="UserFilled"
+          :loading="claudeLoggingIn"
+          @click="$emit('login-claude')"
+        >
+          {{ claudeLoggingIn ? '处理中' : '登录 Claude' }}
         </el-button>
         <el-button :icon="Download" :loading="exportingTokens" @click="$emit('export-token-backup')">
           {{ exportingTokens ? '导出中' : '导出账号池' }}

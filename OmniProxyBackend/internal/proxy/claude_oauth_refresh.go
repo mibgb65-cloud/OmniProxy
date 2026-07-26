@@ -8,15 +8,30 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"omniproxy/internal/token"
 	"strings"
 	"time"
 )
 
 const (
-	claudeOAuthClientID       = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
-	claudeOAuthTokenEndpoint  = "https://console.anthropic.com/v1/oauth/token"
-	claudeAccessRefreshMargin = 30 * time.Minute
+	claudeOAuthClientID          = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
+	claudeOAuthAuthorizeEndpoint = "https://claude.com/cai/oauth/authorize"
+	claudeOAuthTokenEndpoint     = "https://platform.claude.com/v1/oauth/token"
+	claudeOAuthLoginScope        = "org:create_api_key user:profile user:inference user:sessions:claude_code user:mcp_servers user:file_upload"
+	claudeOAuthRefreshScope      = "user:profile user:inference user:sessions:claude_code user:mcp_servers user:file_upload"
+	claudeAccessRefreshMargin    = 30 * time.Minute
 )
+
+type ClaudeOAuthTokens struct {
+	AccessToken    string
+	RefreshToken   string
+	ExpiresIn      int
+	Scope          string
+	Email          string
+	AccountID      string
+	OrganizationID string
+}
 
 type claudeOAuthRefreshResponse struct {
 	AccessToken  string      `json:"access_token"`
@@ -24,6 +39,14 @@ type claudeOAuthRefreshResponse struct {
 	TokenType    string      `json:"token_type"`
 	ExpiresIn    int         `json:"expires_in"`
 	ExpiresAt    json.Number `json:"expires_at"`
+	Scope        string      `json:"scope"`
+	Account      struct {
+		UUID         string `json:"uuid"`
+		EmailAddress string `json:"email_address"`
+	} `json:"account"`
+	Organization struct {
+		UUID string `json:"uuid"`
+	} `json:"organization"`
 }
 
 type claudeOAuthCredential struct {
@@ -45,6 +68,58 @@ var httpPostJSON = func(ctx context.Context, client *http.Client, endpoint strin
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	return client.Do(req)
+}
+
+func ClaudeOAuthAuthorizationURL(redirectURI string, codeChallenge string, state string) string {
+	values := url.Values{}
+	values.Set("code", "true")
+	values.Set("client_id", claudeOAuthClientID)
+	values.Set("response_type", "code")
+	values.Set("redirect_uri", strings.TrimSpace(redirectURI))
+	values.Set("scope", claudeOAuthLoginScope)
+	values.Set("code_challenge", strings.TrimSpace(codeChallenge))
+	values.Set("code_challenge_method", "S256")
+	values.Set("state", strings.TrimSpace(state))
+	return claudeOAuthAuthorizeEndpoint + "?" + values.Encode()
+}
+
+func (v *Validator) ExchangeClaudeAuthorizationCode(ctx context.Context, code string, state string, codeVerifier string, redirectURI string) (ClaudeOAuthTokens, error) {
+	payload := map[string]string{
+		"grant_type":    "authorization_code",
+		"code":          strings.TrimSpace(code),
+		"redirect_uri":  strings.TrimSpace(redirectURI),
+		"client_id":     claudeOAuthClientID,
+		"code_verifier": strings.TrimSpace(codeVerifier),
+		"state":         strings.TrimSpace(state),
+	}
+
+	client := v.clientForToken(token.Token{Provider: token.ProviderAnthropic})
+	resp, err := httpPostJSON(ctx, client, claudeOAuthTokenEndpoint, payload)
+	if err != nil {
+		return ClaudeOAuthTokens{}, fmt.Errorf("exchange claude authorization code: %w", err)
+	}
+	defer closeBody(resp.Body)
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return ClaudeOAuthTokens{}, fmt.Errorf("Claude 登录令牌交换返回 %d：%s", resp.StatusCode, codexRefreshErrorMessage(body, resp.Status))
+	}
+
+	var result claudeOAuthRefreshResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return ClaudeOAuthTokens{}, fmt.Errorf("decode claude authorization response: %w", err)
+	}
+	if strings.TrimSpace(result.AccessToken) == "" {
+		return ClaudeOAuthTokens{}, errors.New("Claude 登录响应缺少 access_token")
+	}
+	return ClaudeOAuthTokens{
+		AccessToken:    strings.TrimSpace(result.AccessToken),
+		RefreshToken:   strings.TrimSpace(result.RefreshToken),
+		ExpiresIn:      result.ExpiresIn,
+		Scope:          strings.TrimSpace(result.Scope),
+		Email:          strings.TrimSpace(result.Account.EmailAddress),
+		AccountID:      strings.TrimSpace(result.Account.UUID),
+		OrganizationID: strings.TrimSpace(result.Organization.UUID),
+	}, nil
 }
 
 func RefreshClaudeOAuthJSON(ctx context.Context, client *http.Client, raw string, force bool, now time.Time) (string, bool, error) {
@@ -73,6 +148,7 @@ func RefreshClaudeOAuthJSON(ctx context.Context, client *http.Client, raw string
 		"grant_type":    "refresh_token",
 		"client_id":     claudeOAuthClientID,
 		"refresh_token": credential.RefreshToken,
+		"scope":         claudeOAuthRefreshScope,
 	}
 	resp, err := httpPostJSON(ctx, client, claudeOAuthTokenEndpoint, payload)
 	if err != nil {

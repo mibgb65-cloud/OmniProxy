@@ -76,6 +76,18 @@ func (a *DesktopApp) CompleteCodexOAuthLogin(loginID string) (tokenResponse, err
 	return a.server.completeCodexOAuthLogin(a.callContext(), loginID)
 }
 
+func (a *DesktopApp) StartClaudeOAuthLogin(refresh bool) (claudeOAuthLoginStartResponse, error) {
+	return a.server.startClaudeOAuthLogin(refresh)
+}
+
+func (a *DesktopApp) ClaudeOAuthLoginStatus(loginID string) (claudeOAuthLoginStatusResponse, error) {
+	return a.server.claudeOAuthLoginStatus(loginID)
+}
+
+func (a *DesktopApp) CompleteClaudeOAuthLogin(loginID string) (tokenResponse, error) {
+	return a.server.completeClaudeOAuthLogin(a.callContext(), loginID)
+}
+
 func (a *DesktopApp) ImportAPIKeys(req apiKeyBatchImportRequest) (apiKeyBatchImportResult, error) {
 	return a.server.importAPIKeys(req)
 }

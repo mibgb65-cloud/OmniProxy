@@ -88,6 +88,7 @@ flowchart LR
 ## 最新变化
 
 - **Codex 浏览器登录**：账号管理页新增「登录 Codex」，通过 PKCE 和本机回调完成浏览器授权，并自动新增或更新 OpenAI `auth.json` 账号。
+- **Claude 浏览器登录**：Anthropic 账号页新增「登录 Claude」，通过 PKCE 和动态本机回调完成授权，自动新增或更新 Claude OAuth 账号并支持令牌续期。
 - **Codex 额度刷新卡**：额度页可查看刷新卡数量、发放/到期/使用记录，并可在二次确认后消耗刷新卡重置 5 小时额度。
 - **Gemini 风格界面重构**：桌面控制台统一为现代极简样式，覆盖仪表盘、额度、账号管理、请求历史、实时日志、用量趋势、费用账单、一键配置、全局设置和 OpenRouter 对话等页面。
 - **桌面交互优化**：统一下拉框、弹窗、全局消息提示、滚动条、按钮和卡片样式；各子页面独立记录滚动位置，实时日志改为仅展示最近 5 分钟并在页面内部滚动。
@@ -166,7 +167,7 @@ Codex、Claude、OpenAI compatible、Pi router 和 Gemini router 是面向客户
 | OpenAI | API Key | OpenAI 兼容请求、rate-limit header 余量记录。 |
 | OpenAI / Codex | `auth.json` | 自动解析邮箱、access token、account id，刷新 Codex 订阅额度，支持 Codex Responses 与 Chat Completions 兼容转换。 |
 | Anthropic | API Key | Anthropic 原生请求和 Claude Code 路由。 |
-| Anthropic / Claude | OAuth JSON | 支持 `access_token` / `refresh_token` 的 Claude OAuth JSON。 |
+| Anthropic / Claude | OAuth JSON | 支持浏览器 OAuth 登录、自动导入与刷新，也可手动粘贴包含 `access_token` / `refresh_token` 的 Claude OAuth JSON。 |
 | DeepSeek | API Key | OpenAI 兼容入口和 Anthropic router。 |
 | Kimi | API Key | Kimi Code 相关路由和订阅用量刷新。 |
 | Xiaomi MiMo | API Key | 按量 API Key，通常以 `sk-` 开头。 |

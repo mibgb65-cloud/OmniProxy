@@ -48,23 +48,23 @@ const {
   activeProvider, activeProviderAPIBalanceSummaries, activeProviderEnabledCount, activeProviderInfo, activeProviderTokens, activeRequests, activeTab, activeTokenIds,
   activeTokens, afterPageEnter, apiOverviewPageCount, apiOverviewTokens, apiQuotaPage, apiQuotaPageText, appInfo, appThemeLabel,
   autoStartChanging, autoStartEnabled, batchImportForm, batchImportPlaceholder, batchImporting, billingDates, billingUsage, canConfigureClaudeModels, canConfigureCodexModels,
-  changeBillingDate, changeQuotaOverviewPage, chooseDataDirectory, claudeCliRestoring, claudeDesktopConfiguring, claudeDesktopRestoring, claudeModelsConfiguring,
+  changeBillingDate, changeQuotaOverviewPage, chooseDataDirectory, claudeCliRestoring, claudeDesktopConfiguring, claudeDesktopRestoring, claudeLoginDialog, claudeLoggingIn, claudeModelsConfiguring,
   clearBillingUsageData, clearRequestHistoryData, clearingBillingUsage, clearingRequestHistory, clientConfigPreviews, clientToolLabel, closeBatchImport, closeDeleteConfirm, closeFirstUseGuide,
-  closeForm, closeHistoryDiagnosis, closeTitlebarUpdatePopover, closeWindow, closeCodexLoginDialog, codexAuthImporting, codexConfiguring, codexLoginDialog, codexLoggingIn, codexRestoring, config, configSnapshotBusy,
+  closeClaudeLoginDialog, closeCodexLoginDialog, closeForm, closeHistoryDiagnosis, closeTitlebarUpdatePopover, closeWindow, codexAuthImporting, codexConfiguring, codexLoginDialog, codexLoggingIn, codexRestoring, config, configSnapshotBusy,
   configSnapshots, createCurrentConfigSnapshot,
-  confirmRemoveToken, confirmTitlebarUpdatePopover, configureLocalClaudeDesktopModels, configureLocalClaudeModels, configureLocalCodex, configureLocalDeepSeekTUI,
+  completeClaudeLogin, completeCodexLogin, confirmRemoveToken, confirmTitlebarUpdatePopover, configureLocalClaudeDesktopModels, configureLocalClaudeModels, configureLocalCodex, configureLocalDeepSeekTUI,
   configureLocalGemini, configureLocalOpenCode, configureLocalPi, coolingTokens, copyEndpointValue, credentialDisplay, credentialLabel, credentialPlaceholder,
   currentFirstUseGuideStep, currentTabLabel, dailyUsageRows, dashboardDailyUsageRows, dashboardSignals, dashboardTrendRows, dataDirChanging, dataDirectory,
   consumingResetCreditIds, deepSeekTUIConfiguring, deepSeekTUIRestoring, deleteBusy, deleteCandidate, deleteConfigSnapshotById, disabledTokens, errorMessage, exhaustedTokens, exportCodexAuthBackups,
   exportCurrentConfig, exportDiagnostics, exportRequestHistory, exportTokenBackup, exportingCodexAuth, exportingConfig, exportingDiagnostics, exportingHistory, exportingTokens, firstUseGuideStepIndex, firstUseGuideSteps, firstUseGuideVisible,
   form, geminiConfiguring, geminiRestoring, hasWailsRuntime, hideWorkspaceScrollbar, importCodexAuthFiles, importConfigFromFile, importingConfig, installReadyUpdateFromUpdateSurface, invalidTokens,
   isAutoNameForm, isClaudeModelOptionDisabled, isCodexModelOptionDisabled, isDark, isTokenActiveNow, lastUpdateCheckedAt, lastUpdateInfo, loading, logs,
-  completeCodexLogin, loginCodex, lowTokens, manualCheckForUpdates, minimiseWindow, mobileSidebarOpen, navSections, nextFirstUseGuideStep, onBatchImportProviderChange, onProviderChange,
-  openBatchImport, openBillingView, openCodexAuthFilePicker, openCodexLoginURL, openCreateForm, openEditForm, openOpenRouterChat, openRouterModels, openRouterModelsCached,
+  loginClaude, loginCodex, lowTokens, manualCheckForUpdates, minimiseWindow, mobileSidebarOpen, navSections, nextFirstUseGuideStep, onBatchImportProviderChange, onProviderChange,
+  openBatchImport, openBillingView, openClaudeLoginURL, openCodexAuthFilePicker, openCodexLoginURL, openCreateForm, openEditForm, openOpenRouterChat, openRouterModels, openRouterModelsCached,
   openRouterModelsError, openRouterModelsFetchedAt, openRouterModelsLoading, openRouterTokens, opencodeConfiguring, opencodeRestoring, pagedApiOverviewTokens,
   pagedSubscriptionOverviewTokens, piConfiguring, piRestoring, persistConfig, previousFirstUseGuideStep, providerLabel, providerTokens, proxyEndpoint,
   proxyStatus, quotaOverviewRangeText, quotaRefreshProgress, rebuildHistorySummaryData, rebuildingHistorySummaries, refreshAll, refreshAuthToken, refreshBilling, refreshHistory, refreshOpenRouterModels,
-  refreshCodexLoginLink, refreshProviderQuotas, refreshQuota, refreshRealtime, refreshingProvider, refreshingTokenIds, refreshTaskAutomationBrowserProfiles, refreshUpdateDiagnostics, removeToken, requestHistory,
+  refreshClaudeLoginLink, refreshCodexLoginLink, refreshProviderQuotas, refreshQuota, refreshRealtime, refreshingProvider, refreshingTokenIds, refreshTaskAutomationBrowserProfiles, refreshUpdateDiagnostics, removeToken, requestHistory,
   requestHistorySummary, requestTrendWidth, restoreActiveWorkspaceScroll, restoreConfigSnapshotById, restoreLocalClaude, restoreLocalClaudeDesktop, restoreLocalCodex, restoreLocalDeepSeekTUI,
   restoreLocalGemini, restoreLocalOpenCode, restoreLocalPi, runFirstUseGuideAction, selectOpenRouterChatModel, selectProvider, selectTab, selectTokenGroup, selectedBillingDate,
   riskTokens, routeDraftsDirty, selectedClaudeModelLabels, selectedClaudeModels, selectedCodexModelLabels, selectedCodexModels, selectedHistoryEntry, selectedOpenRouterChatModel, skipCurrentUpdate, snoozeTitlebarUpdate, startUpdateDownload, startWindowResize, submitBatchImport,
@@ -289,6 +289,7 @@ const {
         :exporting-codex-auth="exportingCodexAuth"
         :codex-auth-importing="codexAuthImporting"
         :codex-logging-in="codexLoggingIn"
+        :claude-logging-in="claudeLoggingIn"
         :batch-importing="batchImporting"
         :open-router-models="openRouterModels"
         :open-router-models-loading="openRouterModelsLoading"
@@ -310,6 +311,7 @@ const {
         :quota-display="quotaDisplay"
         @select-provider="selectProvider"
         @login-codex="loginCodex"
+        @login-claude="loginClaude"
         @export-token-backup="exportTokenBackup"
         @open-codex-auth-file-picker="openCodexAuthFilePicker"
         @import-codex-auth-files="importCodexAuthFiles"
@@ -554,6 +556,23 @@ const {
           @open-url="openCodexLoginURL"
           @complete="completeCodexLogin"
           @refresh="refreshCodexLoginLink"
+        />
+      </Transition>
+
+      <Transition name="modal-pop" appear>
+        <CodexLoginModal
+          v-if="claudeLoginDialog.visible"
+          :dialog="claudeLoginDialog"
+          :busy="claudeLoggingIn"
+          service-name="Claude"
+          authorization-name="Claude"
+          format-label="Claude Code OAuth JSON"
+          format-hint="按 Claude Code 凭据结构保存 accessToken、refreshToken、expiresAt 和授权范围。"
+          @close="closeClaudeLoginDialog"
+          @copy-url="copyEndpointValue"
+          @open-url="openClaudeLoginURL"
+          @complete="completeClaudeLogin"
+          @refresh="refreshClaudeLoginLink"
         />
       </Transition>
 

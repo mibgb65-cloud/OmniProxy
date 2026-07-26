@@ -1,4 +1,30 @@
 export namespace main {
+	export class claudeOAuthLoginStartResponse {
+	    loginId: string;
+	    authUrl: string;
+
+	    static createFrom(source: any = {}) {
+	        return new claudeOAuthLoginStartResponse(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.loginId = source["loginId"];
+	        this.authUrl = source["authUrl"];
+	    }
+	}
+	export class claudeOAuthLoginStatusResponse {
+	    ready: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new claudeOAuthLoginStatusResponse(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ready = source["ready"];
+	    }
+	}
 	export class clientConfigPreview {
 	    client: string;
 	    configPath?: string;

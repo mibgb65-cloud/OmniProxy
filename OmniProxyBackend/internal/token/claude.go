@@ -9,6 +9,7 @@ type ClaudeOAuthFields struct {
 	AccessToken  string
 	RefreshToken string
 	Email        string
+	AccountID    string
 }
 
 func ExtractClaudeOAuthFields(raw string) (ClaudeOAuthFields, bool) {
@@ -23,6 +24,7 @@ func ExtractClaudeOAuthFields(raw string) (ClaudeOAuthFields, bool) {
 		AccessToken:  firstStringField(payload, "access_token", "accessToken"),
 		RefreshToken: firstStringField(payload, "refresh_token", "refreshToken"),
 		Email:        firstStringField(payload, "email"),
+		AccountID:    firstStringField(payload, "account_uuid", "accountUuid"),
 	}
 	if nested, ok := mapField(payload, "claudeAiOauth"); ok {
 		if fields.AccessToken == "" {
@@ -34,6 +36,9 @@ func ExtractClaudeOAuthFields(raw string) (ClaudeOAuthFields, bool) {
 		if fields.Email == "" {
 			fields.Email = firstStringField(nested, "email")
 		}
+		if fields.AccountID == "" {
+			fields.AccountID = firstStringField(nested, "account_uuid", "accountUuid")
+		}
 	}
 	if nested, ok := mapField(payload, "claude"); ok {
 		if fields.AccessToken == "" {
@@ -44,6 +49,9 @@ func ExtractClaudeOAuthFields(raw string) (ClaudeOAuthFields, bool) {
 		}
 		if fields.Email == "" {
 			fields.Email = firstStringField(nested, "email")
+		}
+		if fields.AccountID == "" {
+			fields.AccountID = firstStringField(nested, "account_uuid", "accountUuid")
 		}
 	}
 

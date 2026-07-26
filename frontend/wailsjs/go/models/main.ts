@@ -13,6 +13,8 @@ export namespace main {
   export import appInfo = main_coreModels.appInfo
   export import balancePackageResponse = main_tokensModels.balancePackageResponse
   export import claudeModelsConfigureRequest = main_coreModels.claudeModelsConfigureRequest
+  export import claudeOAuthLoginStartResponse = main_miscModels.claudeOAuthLoginStartResponse
+  export import claudeOAuthLoginStatusResponse = main_miscModels.claudeOAuthLoginStatusResponse
   export import clientConfigPreview = main_miscModels.clientConfigPreview
   export import clientConfigureResult = main_coreModels.clientConfigureResult
   export import codexAuthExportResult = main_coreModels.codexAuthExportResult

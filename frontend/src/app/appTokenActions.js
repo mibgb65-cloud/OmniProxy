@@ -10,7 +10,8 @@ import {
   updateToken,
   validateToken,
 } from '../services/api'
-import { codexResetCreditsAvailable, isCodexToken, validationSuccessMessage } from '../utils/tokenDisplay'
+import { codexResetCreditsAvailable, isClaudeOAuthToken, isCodexToken, validationSuccessMessage } from '../utils/tokenDisplay'
+import { createClaudeLoginActions } from './appClaudeLoginActions'
 import { createCodexLoginActions } from './appCodexLoginActions'
 import { codexIdentityFromAuthJSON } from './codexAuth'
 
@@ -381,7 +382,7 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
   }
 
   async function refreshAuthToken(token) {
-    if (!isCodexToken(token)) {
+    if (!isCodexToken(token) && !isClaudeOAuthToken(token)) {
       state.errorMessage.value = '当前账号不支持刷新令牌'
       return
     }
@@ -661,6 +662,7 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
     verifyToken,
     refreshAuthToken,
     ...createCodexLoginActions(state, dataActions, replaceToken),
+    ...createClaudeLoginActions(state, dataActions, replaceToken),
     useCodexResetCredit,
     openCodexAuthFilePicker,
     importCodexAuthFiles,

@@ -25,6 +25,8 @@ export function CheckForUpdates():Promise<main.updateInfo>;
 
 export function ChooseDataDirectory(arg1:boolean):Promise<config.DataDirectoryChangeResult>;
 
+export function ClaudeOAuthLoginStatus(arg1:string):Promise<main.claudeOAuthLoginStatusResponse>;
+
 export function ClearBillingUsage():Promise<void>;
 
 export function ClearRequestHistory():Promise<void>;
@@ -32,6 +34,8 @@ export function ClearRequestHistory():Promise<void>;
 export function ClientConfigPreviews():Promise<Array<main.clientConfigPreview>>;
 
 export function CodexOAuthLoginStatus(arg1:string):Promise<main.codexOAuthLoginStatusResponse>;
+
+export function CompleteClaudeOAuthLogin(arg1:string):Promise<main.tokenResponse>;
 
 export function CompleteCodexOAuthLogin(arg1:string):Promise<main.tokenResponse>;
 
@@ -128,6 +132,8 @@ export function SetAutoStart(arg1:boolean):Promise<Record<string, any>>;
 export function SetTokenDisabled(arg1:string,arg2:boolean):Promise<main.tokenResponse>;
 
 export function SetTokenSelected(arg1:string,arg2:boolean):Promise<Array<main.tokenResponse>>;
+
+export function StartClaudeOAuthLogin(arg1:boolean):Promise<main.claudeOAuthLoginStartResponse>;
 
 export function StartCodexOAuthLogin(arg1:boolean):Promise<main.codexOAuthLoginStartResponse>;
 

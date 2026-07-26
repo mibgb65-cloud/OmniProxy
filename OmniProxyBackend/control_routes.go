@@ -47,6 +47,9 @@ func (a *appServer) routes() http.Handler {
 	mux.HandleFunc("/api/codex/login/start", a.handleCodexOAuthLoginStart)
 	mux.HandleFunc("/api/codex/login/status", a.handleCodexOAuthLoginStatus)
 	mux.HandleFunc("/api/codex/login/complete", a.handleCodexOAuthLoginComplete)
+	mux.HandleFunc("/api/claude/login/start", a.handleClaudeOAuthLoginStart)
+	mux.HandleFunc("/api/claude/login/status", a.handleClaudeOAuthLoginStatus)
+	mux.HandleFunc("/api/claude/login/complete", a.handleClaudeOAuthLoginComplete)
 	mux.HandleFunc("/api/claude/models/configure", a.handleClaudeModelsConfigure)
 	mux.HandleFunc("/api/claude/restore", a.handleClaudeRestore)
 	mux.HandleFunc("/api/claude/desktop/models/configure", a.handleClaudeDesktopModelsConfigure)
@@ -334,6 +337,51 @@ func (a *appServer) handleCodexOAuthLoginComplete(w http.ResponseWriter, r *http
 		return
 	}
 	result, err := a.completeCodexOAuthLogin(r.Context(), req.LoginID)
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (a *appServer) handleClaudeOAuthLoginStart(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	refresh := strings.EqualFold(strings.TrimSpace(r.URL.Query().Get("refresh")), "true")
+	result, err := a.startClaudeOAuthLogin(refresh)
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (a *appServer) handleClaudeOAuthLoginStatus(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	result, err := a.claudeOAuthLoginStatus(r.URL.Query().Get("loginId"))
+	if err != nil {
+		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (a *appServer) handleClaudeOAuthLoginComplete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var req claudeOAuthLoginCompleteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	result, err := a.completeClaudeOAuthLogin(r.Context(), req.LoginID)
 	if err != nil {
 		writeDomainError(w, err)
 		return

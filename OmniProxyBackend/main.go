@@ -29,6 +29,8 @@ type appServer struct {
 	codexRefreshMu        sync.Mutex
 	codexOAuthMu          sync.Mutex
 	codexOAuthSession     *codexOAuthSession
+	claudeOAuthMu         sync.Mutex
+	claudeOAuthSession    *claudeOAuthSession
 	codexResetCreditMu    sync.Mutex
 	dataDir               string
 	cfg                   config.Config
