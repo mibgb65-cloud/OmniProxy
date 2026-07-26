@@ -100,6 +100,11 @@ func (s *SQLiteStore) init() error {
 	if _, err := s.db.Exec(`PRAGMA busy_timeout = 5000`); err != nil {
 		return err
 	}
+	// Best-effort: journal_mode=WAL needs shared-memory support, which some
+	// network-mounted home directories lack. The store stays correct on the
+	// default rollback journal, so a failure here must not break history.
+	_, _ = s.db.Exec(`PRAGMA journal_mode = WAL`)
+	_, _ = s.db.Exec(`PRAGMA synchronous = NORMAL`)
 	_, err := s.db.Exec(`
 CREATE TABLE IF NOT EXISTS request_history (
   id INTEGER PRIMARY KEY,

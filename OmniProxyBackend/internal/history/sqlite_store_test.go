@@ -3,11 +3,28 @@ package history
 import (
 	"database/sql"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	_ "modernc.org/sqlite"
 )
+
+func TestSQLiteStoreEnablesWALJournal(t *testing.T) {
+	store, err := NewSQLiteStore(filepath.Join(t.TempDir(), "request_history.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+
+	var mode string
+	if err := store.db.QueryRow(`PRAGMA journal_mode`).Scan(&mode); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.EqualFold(mode, "wal") {
+		t.Fatalf("expected WAL journal mode, got %q", mode)
+	}
+}
 
 func TestSQLiteStoreListFiltersAndPrunes(t *testing.T) {
 	store, err := NewSQLiteStore(filepath.Join(t.TempDir(), "request_history.db"))
