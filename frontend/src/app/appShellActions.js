@@ -125,6 +125,28 @@ export function createAppShellActions({
     }
   }
 
+  function startRealtimeTimer() {
+    if (state.timers.realtimeTimer) return
+    state.timers.realtimeTimer = window.setInterval(dataActions.refreshRealtime, 3000)
+  }
+
+  function stopRealtimeTimer() {
+    if (!state.timers.realtimeTimer) return
+    window.clearInterval(state.timers.realtimeTimer)
+    state.timers.realtimeTimer = null
+  }
+
+  // Closing the window only hides it to the tray, so polling would otherwise
+  // keep running against a UI nobody can see.
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      stopRealtimeTimer()
+      return
+    }
+    startRealtimeTimer()
+    void dataActions.refreshRealtime()
+  }
+
   onMounted(async () => {
     const savedAppTheme = window.localStorage?.getItem(state.appThemeStorageKey)
     if (savedAppTheme === 'dark' || savedAppTheme === 'light') {
@@ -141,17 +163,16 @@ export function createAppShellActions({
     update.notifyCompletedUpdateIfNeeded()
     await update.refreshUpdateDownloadStatus()
     update.scheduleUpdateChecks()
-    state.timers.realtimeTimer = window.setInterval(dataActions.refreshRealtime, 3000)
+    startRealtimeTimer()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
   })
 
   onBeforeUnmount(() => {
     window.removeEventListener('resize', refreshWindowState)
     window.removeEventListener('keydown', update.handleTitlebarUpdateKeydown)
     document.removeEventListener('pointerdown', update.handleTitlebarUpdateOutsidePointer)
-    if (state.timers.realtimeTimer) {
-      window.clearInterval(state.timers.realtimeTimer)
-      state.timers.realtimeTimer = null
-    }
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
+    stopRealtimeTimer()
     update.stopAppUpdateTimers()
     if (state.timers.toastTimer) {
       window.clearTimeout(state.timers.toastTimer)

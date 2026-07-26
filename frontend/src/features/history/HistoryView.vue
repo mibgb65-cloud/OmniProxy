@@ -162,10 +162,6 @@ const pagedHistory = computed(() => {
   return filteredHistory.value.slice(start, start + historyPageSize)
 })
 
-watch(() => props.entries, () => {
-  historyPage.value = 1
-})
-
 watch(filters, () => {
   historyPage.value = 1
   if (filterRefreshTimer) {

@@ -102,7 +102,7 @@ function historyFilter(filters = {}) {
     tokenId: filters.tokenId || 'all',
     token: filters.token || '',
     search: filters.search || '',
-    limit: Number(filters.limit || 10000),
+    limit: Number(filters.limit || 1000),
   }
 }
 

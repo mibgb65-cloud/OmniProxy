@@ -363,3 +363,30 @@ test('HTTP API fallback syncs provider models through the control API', async ()
   )
   delete globalThis.__OMNIPROXY_CONTROL_TOKEN__
 })
+
+test('HTTP API fallback keeps the default history page size bounded', async () => {
+  globalThis.__OMNIPROXY_CONTROL_TOKEN__ = 'history-limit-token'
+  const calls = []
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options })
+    if (new URL(String(url)).pathname.endsWith('/history')) {
+      return jsonResponse(200, [])
+    }
+    throw new Error(`unexpected fetch: ${url}`)
+  }
+
+  const { getHistory } = await import(`./api.js?history-limit-test=${Date.now()}`)
+
+  // The history tab re-fetches on every realtime tick, so an unbounded default
+  // would pull the whole table a few times a minute.
+  await getHistory()
+  const fallbackLimit = Number(new URL(calls[0].url).searchParams.get('limit'))
+  assert.ok(
+    fallbackLimit > 0 && fallbackLimit <= 1000,
+    `expected a bounded default history limit, got ${fallbackLimit}`,
+  )
+
+  await getHistory({ limit: 25 })
+  assert.equal(new URL(calls[1].url).searchParams.get('limit'), '25')
+  delete globalThis.__OMNIPROXY_CONTROL_TOKEN__
+})
