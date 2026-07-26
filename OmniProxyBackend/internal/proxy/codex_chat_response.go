@@ -12,30 +12,72 @@ import (
 )
 
 func convertCodexResponsesToChat(resp *http.Response, requestedModel string, clientStream bool) (*http.Response, error) {
+	header := resp.Header.Clone()
+	header.Del("Content-Length")
+	status := strconv.Itoa(resp.StatusCode) + " " + http.StatusText(resp.StatusCode)
+
+	if clientStream {
+		header.Set("Content-Type", "text/event-stream; charset=utf-8")
+		return &http.Response{
+			StatusCode: resp.StatusCode,
+			Status:     status,
+			Header:     header,
+			Body:       codexChatSSEBody(resp.Body, requestedModel),
+		}, nil
+	}
+
 	defer closeBody(resp.Body)
 	body, err := readProxyResponseBody(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	header := resp.Header.Clone()
-	var converted []byte
-	if clientStream {
-		converted, err = codexResponsesSSEToChatSSE(body, requestedModel)
-		header.Set("Content-Type", "text/event-stream; charset=utf-8")
-	} else {
-		converted, err = codexResponsesBodyToChatJSON(resp.Header, body, requestedModel)
-		header.Set("Content-Type", "application/json; charset=utf-8")
-	}
+	converted, err := codexResponsesBodyToChatJSON(resp.Header, body, requestedModel)
 	if err != nil {
 		return nil, err
 	}
-	header.Del("Content-Length")
+	header.Set("Content-Type", "application/json; charset=utf-8")
 	return &http.Response{
 		StatusCode: resp.StatusCode,
-		Status:     strconv.Itoa(resp.StatusCode) + " " + http.StatusText(resp.StatusCode),
+		Status:     status,
 		Header:     header,
 		Body:       io.NopCloser(bytes.NewReader(converted)),
 	}, nil
+}
+
+// codexChatSSEBody rewrites the upstream Responses stream into chat chunks as
+// they arrive. The upstream request always sets stream:true, so buffering the
+// whole body first would hold every token back until the generation finished.
+func codexChatSSEBody(src io.ReadCloser, requestedModel string) io.ReadCloser {
+	reader, writer := io.Pipe()
+	go func() {
+		defer closeBody(src)
+		_ = writer.CloseWithError(streamCodexResponsesToChatSSE(src, writer, requestedModel))
+	}()
+	return reader
+}
+
+func streamCodexResponsesToChatSSE(src io.Reader, dst io.Writer, requestedModel string) error {
+	stream := &codexChatSSEStream{
+		dst:     dst,
+		created: time.Now().Unix(),
+		id:      codexChatID(""),
+		model:   requestedModel,
+	}
+	scanner := bufio.NewScanner(src)
+	scanner.Buffer(make([]byte, 0, 64*1024), maxProxyRequestBodyBytes)
+	for scanner.Scan() {
+		event, ok := codexParseResponsesSSELine(scanner.Text())
+		if !ok {
+			continue
+		}
+		if err := stream.write(event); err != nil {
+			return err
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	return stream.finish()
 }
 
 func codexResponsesBodyToChatJSON(header http.Header, body []byte, requestedModel string) ([]byte, error) {
@@ -53,102 +95,87 @@ func codexResponsesBodyToChatJSON(header http.Header, body []byte, requestedMode
 	return json.Marshal(codexBuildChatCompletion(&resp, requestedModel, ""))
 }
 
-func codexResponsesSSEToChatSSE(body []byte, requestedModel string) ([]byte, error) {
-	events := codexParseResponsesSSE(body)
-	created := time.Now().Unix()
-	id := codexChatID("")
-	model := requestedModel
-	roleSent := false
-	finalized := false
-	var out bytes.Buffer
+// codexChatSSEStream turns Responses events into chat chunks one at a time so
+// the conversion can run while the upstream stream is still open.
+type codexChatSSEStream struct {
+	dst       io.Writer
+	created   int64
+	id        string
+	model     string
+	roleSent  bool
+	finalized bool
+}
 
-	writeChunk := func(chunk codexChatChunk) error {
-		data, err := json.Marshal(chunk)
-		if err != nil {
-			return err
-		}
-		_, err = out.WriteString("data: " + string(data) + "\n\n")
+func (s *codexChatSSEStream) chunk(delta codexChatDelta, finishReason *string) error {
+	data, err := json.Marshal(codexChatChunk{
+		ID:      s.id,
+		Object:  "chat.completion.chunk",
+		Created: s.created,
+		Model:   s.model,
+		Choices: []codexChunkChoice{{Index: 0, Delta: delta, FinishReason: finishReason}},
+	})
+	if err != nil {
 		return err
 	}
-	writeRole := func() error {
-		if roleSent {
-			return nil
+	_, err = s.dst.Write([]byte("data: " + string(data) + "\n\n"))
+	return err
+}
+
+func (s *codexChatSSEStream) role() error {
+	if s.roleSent {
+		return nil
+	}
+	s.roleSent = true
+	return s.chunk(codexChatDelta{Role: "assistant"}, nil)
+}
+
+func (s *codexChatSSEStream) write(event codexResponsesEvent) error {
+	if event.Response != nil {
+		if event.Response.ID != "" {
+			s.id = codexChatID(event.Response.ID)
 		}
-		roleSent = true
-		return writeChunk(codexChatChunk{
-			ID:      id,
-			Object:  "chat.completion.chunk",
-			Created: created,
-			Model:   model,
-			Choices: []codexChunkChoice{{Index: 0, Delta: codexChatDelta{Role: "assistant"}}},
-		})
+		if event.Response.Model != "" {
+			s.model = event.Response.Model
+		}
 	}
 
-	for _, event := range events {
-		if event.Response != nil {
-			if event.Response.ID != "" {
-				id = codexChatID(event.Response.ID)
-			}
-			if event.Response.Model != "" {
-				model = event.Response.Model
-			}
+	switch event.Type {
+	case "response.created":
+		return s.role()
+	case "response.output_text.delta":
+		if event.Delta == "" {
+			return nil
 		}
-		switch event.Type {
-		case "response.created":
-			if err := writeRole(); err != nil {
-				return nil, err
-			}
-		case "response.output_text.delta":
-			if event.Delta == "" {
-				continue
-			}
-			if err := writeRole(); err != nil {
-				return nil, err
-			}
-			content := event.Delta
-			if err := writeChunk(codexChatChunk{
-				ID:      id,
-				Object:  "chat.completion.chunk",
-				Created: created,
-				Model:   model,
-				Choices: []codexChunkChoice{{Index: 0, Delta: codexChatDelta{Content: &content}}},
-			}); err != nil {
-				return nil, err
-			}
-		case "response.completed", "response.done", "response.incomplete", "response.failed":
-			if err := writeRole(); err != nil {
-				return nil, err
-			}
-			finishReason := codexFinishReason(event.Response)
-			if err := writeChunk(codexChatChunk{
-				ID:      id,
-				Object:  "chat.completion.chunk",
-				Created: created,
-				Model:   model,
-				Choices: []codexChunkChoice{{Index: 0, Delta: codexChatDelta{}, FinishReason: &finishReason}},
-			}); err != nil {
-				return nil, err
-			}
-			finalized = true
+		if err := s.role(); err != nil {
+			return err
 		}
+		content := event.Delta
+		return s.chunk(codexChatDelta{Content: &content}, nil)
+	case "response.completed", "response.done", "response.incomplete", "response.failed":
+		if err := s.role(); err != nil {
+			return err
+		}
+		finishReason := codexFinishReason(event.Response)
+		if err := s.chunk(codexChatDelta{}, &finishReason); err != nil {
+			return err
+		}
+		s.finalized = true
 	}
-	if !finalized {
-		if err := writeRole(); err != nil {
-			return nil, err
+	return nil
+}
+
+func (s *codexChatSSEStream) finish() error {
+	if !s.finalized {
+		if err := s.role(); err != nil {
+			return err
 		}
 		finishReason := "stop"
-		if err := writeChunk(codexChatChunk{
-			ID:      id,
-			Object:  "chat.completion.chunk",
-			Created: created,
-			Model:   model,
-			Choices: []codexChunkChoice{{Index: 0, Delta: codexChatDelta{}, FinishReason: &finishReason}},
-		}); err != nil {
-			return nil, err
+		if err := s.chunk(codexChatDelta{}, &finishReason); err != nil {
+			return err
 		}
 	}
-	_, _ = out.WriteString("data: [DONE]\n\n")
-	return out.Bytes(), nil
+	_, err := s.dst.Write([]byte("data: [DONE]\n\n"))
+	return err
 }
 
 func codexParseResponsesSSE(body []byte) []codexResponsesEvent {
@@ -156,20 +183,27 @@ func codexParseResponsesSSE(body []byte) []codexResponsesEvent {
 	scanner.Buffer(make([]byte, 0, 64*1024), maxProxyRequestBodyBytes)
 	events := []codexResponsesEvent{}
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if !strings.HasPrefix(line, "data:") {
-			continue
-		}
-		data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
-		if data == "" || data == "[DONE]" {
-			continue
-		}
-		var event codexResponsesEvent
-		if err := json.Unmarshal([]byte(data), &event); err == nil && event.Type != "" {
+		if event, ok := codexParseResponsesSSELine(scanner.Text()); ok {
 			events = append(events, event)
 		}
 	}
 	return events
+}
+
+func codexParseResponsesSSELine(line string) (codexResponsesEvent, bool) {
+	trimmed := strings.TrimSpace(line)
+	if !strings.HasPrefix(trimmed, "data:") {
+		return codexResponsesEvent{}, false
+	}
+	data := strings.TrimSpace(strings.TrimPrefix(trimmed, "data:"))
+	if data == "" || data == "[DONE]" {
+		return codexResponsesEvent{}, false
+	}
+	var event codexResponsesEvent
+	if err := json.Unmarshal([]byte(data), &event); err != nil || event.Type == "" {
+		return codexResponsesEvent{}, false
+	}
+	return event, true
 }
 
 func codexTerminalResponse(events []codexResponsesEvent) (*codexResponsesPayload, string) {
