@@ -348,7 +348,9 @@ func writeCodexOmniProxyConfig(path string, baseURL string) error {
 	if len(content) > 0 {
 		backupPath := path + ".omniproxy.bak"
 		if _, err := os.Stat(backupPath); errors.Is(err, os.ErrNotExist) {
-			_ = os.WriteFile(backupPath, content, 0o600)
+			if err := os.WriteFile(backupPath, content, 0o600); err != nil {
+				return err
+			}
 		}
 	}
 	return os.WriteFile(path, []byte(next), 0o600)
@@ -400,7 +402,9 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 	if len(content) > 0 {
 		backupPath := path + ".omniproxy.bak"
 		if _, err := os.Stat(backupPath); errors.Is(err, os.ErrNotExist) {
-			_ = os.WriteFile(backupPath, content, 0o600)
+			if err := os.WriteFile(backupPath, content, 0o600); err != nil {
+				return err
+			}
 		}
 	}
 	return os.WriteFile(path, []byte(next), 0o600)
