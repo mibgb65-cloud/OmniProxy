@@ -234,8 +234,8 @@
   gap: 14px;
 }
 
-.settings-panel .settings-maintenance-section .data-directory-row,
-.shell.dark .settings-panel .settings-maintenance-section .data-directory-row {
+.settings-panel .data-directory-row,
+.shell.dark .settings-panel .data-directory-row {
   min-height: 132px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -264,11 +264,11 @@
   white-space: nowrap;
 }
 
-.settings-panel .settings-maintenance-section .update-channel-row {
+.settings-panel .update-channel-row {
   cursor: pointer;
 }
 
-.settings-panel .settings-maintenance-section .compact-toggle-field {
+.settings-panel .compact-toggle-field {
   width: 64px;
   min-width: 64px;
   min-height: 44px;
@@ -279,7 +279,7 @@
   padding: 0;
 }
 
-.settings-panel .settings-maintenance-section .compact-toggle-field .toggle-switch {
+.settings-panel .compact-toggle-field .toggle-switch {
   display: block;
   flex: 0 0 auto;
 }

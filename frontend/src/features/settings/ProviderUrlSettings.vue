@@ -74,13 +74,13 @@ async function toggleClaudeSubscriptionUsage(event) {
         <input v-model="config.upstreamBaseUrl" type="url" />
       </label>
     </div>
-    <label class="data-directory-row">
+    <label class="data-directory-row update-channel-row">
       <div>
         <span>Claude 订阅额度</span>
         <strong>读取 Claude 订阅限额</strong>
         <small>关闭时 Claude OAuth 账号只显示连通状态；开启后读取 5 小时与每周用量。该接口未公开，开启前会提示风险。</small>
       </div>
-      <span class="toggle-field">
+      <span class="toggle-field compact-toggle-field">
         <input
           :checked="config.claudeSubscriptionUsageEnabled"
           class="toggle-input"
