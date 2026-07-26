@@ -232,6 +232,7 @@ func TestUpdateDownloaderDownloadsAndVerifiesInstaller(t *testing.T) {
 		}
 	}))
 	defer server.Close()
+	allowLoopbackUpdateHost(t)
 
 	downloader := newUpdateDownloader()
 	status, err := downloader.Start(context.Background(), server.Client(), updateDownloadRequest{
@@ -297,6 +298,7 @@ func TestUpdateDownloaderFailsHungDownloadAfterTimeout(t *testing.T) {
 		}
 	}))
 	defer server.Close()
+	allowLoopbackUpdateHost(t)
 
 	downloader := newUpdateDownloader()
 	_, err := downloader.Start(context.Background(), server.Client(), updateDownloadRequest{
@@ -602,6 +604,41 @@ func useTestUpdateDirectory(t *testing.T) string {
 		updateTempDir = oldTempDir
 	})
 	return dir
+}
+
+func TestValidateUpdateDownloadURLRejectsUntrustedSources(t *testing.T) {
+	allowed := []string{
+		"https://github.com/mibgb65-cloud/OmniProxy/releases/download/v1.2.7/OmniProxy-Setup.exe",
+		"https://objects.githubusercontent.com/installer.exe",
+		"https://GitHub.com/installer.exe",
+	}
+	for _, raw := range allowed {
+		if err := validateUpdateDownloadURL("download", raw); err != nil {
+			t.Fatalf("expected %q to be allowed: %v", raw, err)
+		}
+	}
+
+	rejected := []string{
+		"http://github.com/installer.exe",
+		"https://evil.com/installer.exe",
+		"https://github.com.evil.com/installer.exe",
+		"file:///C:/Windows/System32/calc.exe",
+		"",
+	}
+	for _, raw := range rejected {
+		if err := validateUpdateDownloadURL("download", raw); err == nil {
+			t.Fatalf("expected %q to be rejected", raw)
+		}
+	}
+}
+
+func allowLoopbackUpdateHost(t *testing.T) {
+	t.Helper()
+	oldHosts := updateDownloadAllowedHosts
+	updateDownloadAllowedHosts = []string{"127.0.0.1"}
+	t.Cleanup(func() {
+		updateDownloadAllowedHosts = oldHosts
+	})
 }
 
 func expectedUpdateAsset(version string, stem string) (string, string, string, int64) {

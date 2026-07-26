@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	goruntime "runtime"
@@ -16,6 +17,38 @@ import (
 )
 
 var updateDownloadTimeout = 30 * time.Minute
+
+var updateDownloadAllowedHosts = []string{
+	"github.com",
+	"objects.githubusercontent.com",
+	"release-assets.githubusercontent.com",
+}
+
+// validateUpdateDownloadURL restricts installer and checksum downloads to the
+// release hosts. The downloaded file is later launched with elevation, so an
+// arbitrary URL accepted here would be a code-execution path. Plain HTTP is
+// tolerated only for loopback hosts, which no production allowlist contains.
+func validateUpdateDownloadURL(kind string, raw string) error {
+	parsed, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil {
+		return fmt.Errorf("%s URL is invalid: %w", kind, err)
+	}
+	host := strings.ToLower(parsed.Hostname())
+	allowed := false
+	for _, candidate := range updateDownloadAllowedHosts {
+		if host == candidate {
+			allowed = true
+			break
+		}
+	}
+	if !allowed {
+		return fmt.Errorf("%s URL host %q is not an allowed update host", kind, host)
+	}
+	if parsed.Scheme != "https" && !isLoopbackHost(host) {
+		return fmt.Errorf("%s URL must use https", kind)
+	}
+	return nil
+}
 
 func newUpdateDownloader() *updateDownloader {
 	status := loadUpdateStatus()
@@ -40,6 +73,12 @@ func (d *updateDownloader) Start(ctx context.Context, client *http.Client, req u
 	}
 	if strings.TrimSpace(req.ChecksumURL) == "" {
 		return updateDownloadStatus{}, fmt.Errorf("checksum URL is required")
+	}
+	if err := validateUpdateDownloadURL("download", req.DownloadURL); err != nil {
+		return updateDownloadStatus{}, err
+	}
+	if err := validateUpdateDownloadURL("checksum", req.ChecksumURL); err != nil {
+		return updateDownloadStatus{}, err
 	}
 	fileName, err := updateInstallerFileName(req)
 	if err != nil {
