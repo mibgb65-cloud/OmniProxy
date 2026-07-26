@@ -174,24 +174,41 @@ func NewRecorder(store Store, max int) (*Recorder, error) {
 		max = defaultMaxEntries
 	}
 
-	entries, err := store.Load()
-	if err != nil {
-		return nil, err
-	}
-	if len(entries) > max {
-		entries = entries[len(entries)-max:]
-	}
+	query := queryStore(store)
 
+	var entries []Entry
 	var nextID int64
-	for _, entry := range entries {
-		if entry.ID > nextID {
-			nextID = entry.ID
+	if query != nil {
+		// Reads are served from the query store; entries only exists as a
+		// fallback for when it errors. Loading the whole table here would parse
+		// every row and retry chain at startup for data that is normally never
+		// read. List orders by id descending, so one row yields the next id.
+		latest, err := query.List(Filter{}, 1)
+		if err != nil {
+			return nil, err
+		}
+		if len(latest) > 0 {
+			nextID = latest[0].ID
+		}
+	} else {
+		loaded, err := store.Load()
+		if err != nil {
+			return nil, err
+		}
+		if len(loaded) > max {
+			loaded = loaded[len(loaded)-max:]
+		}
+		entries = loaded
+		for _, entry := range loaded {
+			if entry.ID > nextID {
+				nextID = entry.ID
+			}
 		}
 	}
 
 	recorder := &Recorder{
 		store:        store,
-		queryStore:   queryStore(store),
+		queryStore:   query,
 		usageStore:   usageStore(store),
 		max:          max,
 		nextID:       nextID,

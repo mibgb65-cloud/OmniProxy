@@ -105,11 +105,11 @@ func (a *appServer) loadData(dataDir string) error {
 }
 
 func migrateLegacyRequestHistory(store history.Store, legacyPath string) error {
-	existing, err := store.Load()
+	populated, err := historyStoreHasEntries(store)
 	if err != nil {
 		return err
 	}
-	if len(existing) > 0 {
+	if populated {
 		return nil
 	}
 
@@ -122,6 +122,23 @@ func migrateLegacyRequestHistory(store history.Store, legacyPath string) error {
 		return nil
 	}
 	return store.Save(entries)
+}
+
+// historyStoreHasEntries probes for a single row. Loading the table just to ask
+// whether it is empty means reading every row and its retry chain at startup.
+func historyStoreHasEntries(store history.Store) (bool, error) {
+	if query, ok := store.(history.QueryStore); ok {
+		entries, err := query.List(history.Filter{}, 1)
+		if err != nil {
+			return false, err
+		}
+		return len(entries) > 0, nil
+	}
+	entries, err := store.Load()
+	if err != nil {
+		return false, err
+	}
+	return len(entries) > 0, nil
 }
 
 func tokenDisplayNamesByID(items []token.Token) map[string]string {

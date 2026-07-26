@@ -143,3 +143,34 @@ func TestRequestHistoryQueriesUseIndexes(t *testing.T) {
 		}
 	}
 }
+
+func TestNewRecorderContinuesIDsWithoutPreloading(t *testing.T) {
+	store := newPruneTestStore(t)
+
+	first, err := NewRecorder(store, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lastID int64
+	for i := 0; i < 3; i++ {
+		lastID = first.Add(Entry{Time: time.Now(), Level: "info", Message: "seed"}).ID
+	}
+
+	// Restarting against the same store must not reuse ids.
+	second, err := NewRecorder(store, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next := second.Add(Entry{Time: time.Now(), Level: "info", Message: "after restart"})
+	if next.ID != lastID+1 {
+		t.Fatalf("expected ids to continue at %d, got %d", lastID+1, next.ID)
+	}
+
+	// The fallback slice is not seeded from the table any more.
+	if len(second.entries) != 1 {
+		t.Fatalf("expected startup to skip preloading rows, got %d entries", len(second.entries))
+	}
+	if listed := second.List(Filter{}); len(listed) != 4 {
+		t.Fatalf("reads still come from the store, expected 4 entries, got %d", len(listed))
+	}
+}
