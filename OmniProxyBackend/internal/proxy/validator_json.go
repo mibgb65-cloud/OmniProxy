@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,13 +19,20 @@ func (v *Validator) queryJSON(ctx context.Context, selected token.Token, target 
 }
 
 func (v *Validator) queryJSONWithHeaders(ctx context.Context, selected token.Token, target string, extra map[string]string) ([]byte, bool) {
+	body, _, err := v.queryJSONStatus(ctx, selected, target, extra)
+	return body, err == nil
+}
+
+// queryJSONStatus reports why a lookup failed. The status is 0 when the request
+// never reached the upstream.
+func (v *Validator) queryJSONStatus(ctx context.Context, selected token.Token, target string, extra map[string]string) ([]byte, int, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {
-		return nil, false
+		return nil, 0, err
 	}
 	req.Header.Set("Accept", "application/json")
 	if err := applyAuth(req.Header, selected); err != nil {
-		return nil, false
+		return nil, 0, err
 	}
 	for key, value := range extra {
 		req.Header.Set(key, value)
@@ -32,17 +40,17 @@ func (v *Validator) queryJSONWithHeaders(ctx context.Context, selected token.Tok
 
 	resp, err := v.clientForToken(selected).Do(req)
 	if err != nil {
-		return nil, false
+		return nil, 0, err
 	}
 	defer closeBody(resp.Body)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, false
+		return nil, resp.StatusCode, fmt.Errorf("upstream returned %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
 	if err != nil {
-		return nil, false
+		return nil, resp.StatusCode, err
 	}
-	return body, true
+	return body, resp.StatusCode, nil
 }
 
 func usageWindowFromLimit(value map[string]any) (int, int, int64, bool) {

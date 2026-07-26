@@ -399,7 +399,13 @@ export function quotaResetLabel(item) {
 
 export function quotaUnavailableText(item) {
   if (isCodexToken(item)) return '点击刷新额度获取'
-  if (isClaudeOAuthToken(item)) return '需在设置中开启订阅额度读取'
+  if (isClaudeOAuthToken(item)) {
+    // Only trust a message the Claude usage lookup produced; other sources
+    // describe the liveness check, not the subscription quota.
+    const usage = item?.usage
+    if (usage?.source === 'claude' && usage.message) return usage.message
+    return '需在设置中开启订阅额度读取'
+  }
   if (isMimoTokenPlan(item)) return 'Token Plan 暂无订阅额度'
   return '暂无订阅额度'
 }

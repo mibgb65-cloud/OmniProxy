@@ -103,6 +103,51 @@ func TestValidatorSkipsClaudeUsageWhenDisabled(t *testing.T) {
 	}
 }
 
+func TestValidatorReportsClaudeUsageFailures(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	}))
+	defer upstream.Close()
+	useClaudeUsageEndpoint(t, upstream.URL)
+
+	validator, err := NewValidator(config.Config{ClaudeSubscriptionUsageEnabled: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	usage, _, ok := validator.queryClaudeSubscriptionUsage(context.Background(), claudeOAuthTestToken())
+	if !ok {
+		t.Fatal("expected the failure to be reported rather than dropped")
+	}
+	if usage.SubscriptionQuotaAvailable {
+		t.Fatal("a failed lookup must not claim quota is available")
+	}
+	if usage.Source != "claude" || !strings.Contains(usage.Message, "403") {
+		t.Fatalf("expected the status to be surfaced, got %#v", usage)
+	}
+}
+
+func TestValidatorSendsClaudeUsageContract(t *testing.T) {
+	var betaHeaders []string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		betaHeaders = r.Header.Values("anthropic-beta")
+		_, _ = w.Write([]byte(`{"five_hour": {"utilization": 10, "resets_at": "2026-07-26T18:00:00Z"}}`))
+	}))
+	defer upstream.Close()
+	useClaudeUsageEndpoint(t, upstream.URL)
+
+	validator, err := NewValidator(config.Config{ClaudeSubscriptionUsageEnabled: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, ok := validator.queryClaudeSubscriptionUsage(context.Background(), claudeOAuthTestToken()); !ok {
+		t.Fatal("expected usage to be fetched")
+	}
+	// The Messages API beta header applyAuth adds does not belong on this call.
+	if len(betaHeaders) != 1 || betaHeaders[0] != claudeSubscriptionUsageBeta {
+		t.Fatalf("expected only the oauth beta header, got %#v", betaHeaders)
+	}
+}
+
 func TestValidatorFetchesClaudeSubscriptionUsage(t *testing.T) {
 	var gotAuth, gotAgent, gotBeta string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

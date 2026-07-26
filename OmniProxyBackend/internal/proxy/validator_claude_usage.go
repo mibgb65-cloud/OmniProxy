@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -15,7 +16,10 @@ var claudeSubscriptionUsageEndpoint = "https://api.anthropic.com/api/oauth/usage
 // The endpoint throttles unrecognised clients aggressively, so it has to be
 // called the way Claude Code calls it. Bump this when the upstream client
 // version moves on.
-const claudeSubscriptionUsageUserAgent = "claude-code/2.0.0"
+const (
+	claudeSubscriptionUsageUserAgent = "claude-code/2.0.0"
+	claudeSubscriptionUsageBeta      = "oauth-2025-04-20"
+)
 
 type claudeUsageWindow struct {
 	Utilization *float64 `json:"utilization"`
@@ -31,19 +35,41 @@ func (v *Validator) queryClaudeSubscriptionUsage(ctx context.Context, selected t
 		return token.UsageInfo{}, nil, false
 	}
 
-	body, ok := v.queryJSONWithHeaders(ctx, selected, claudeSubscriptionUsageEndpoint, map[string]string{
-		"User-Agent": claudeSubscriptionUsageUserAgent,
+	body, status, err := v.queryJSONStatus(ctx, selected, claudeSubscriptionUsageEndpoint, map[string]string{
+		// applyAuth adds Messages API headers that do not belong on this call,
+		// so the beta header is narrowed to the one this endpoint expects.
+		"anthropic-beta": claudeSubscriptionUsageBeta,
+		"User-Agent":     claudeSubscriptionUsageUserAgent,
+		"Content-Type":   "application/json",
 	})
-	if !ok {
-		return token.UsageInfo{}, nil, false
+	if err != nil {
+		return claudeUsageUnavailable(status), nil, true
 	}
 
 	usage, ok := parseClaudeSubscriptionUsage(body)
 	if !ok {
-		return token.UsageInfo{}, nil, false
+		return token.UsageInfo{
+			Source:  "claude",
+			Message: "Claude 用量接口返回了无法识别的结构",
+		}, nil, true
 	}
 	remaining := usage.EffectiveRemainingPercent()
 	return usage, &remaining, true
+}
+
+// claudeUsageUnavailable reports the failure to the UI instead of silently
+// showing nothing, so an endpoint or credential problem is diagnosable.
+func claudeUsageUnavailable(status int) token.UsageInfo {
+	if status > 0 {
+		return token.UsageInfo{
+			Source:  "claude",
+			Message: fmt.Sprintf("Claude 用量接口返回 %d", status),
+		}
+	}
+	return token.UsageInfo{
+		Source:  "claude",
+		Message: "无法连接 Claude 用量接口",
+	}
 }
 
 func parseClaudeSubscriptionUsage(body []byte) (token.UsageInfo, bool) {
