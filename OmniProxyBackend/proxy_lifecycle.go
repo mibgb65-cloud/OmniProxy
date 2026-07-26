@@ -37,6 +37,30 @@ func (a *appServer) startProxy() error {
 	return nil
 }
 
+// withLoopbackHost rejects requests whose Host header is not a loopback name.
+// Both listeners bind 127.0.0.1, so any other Host means the request reached us
+// through a rebound DNS name instead of a local client.
+func withLoopbackHost(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !isLoopbackHostHeader(r.Host) {
+			http.Error(w, "host not allowed", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func isLoopbackHostHeader(hostHeader string) bool {
+	host := strings.TrimSpace(hostHeader)
+	if host == "" {
+		return false
+	}
+	if parsed, _, err := net.SplitHostPort(host); err == nil {
+		host = parsed
+	}
+	return isLoopbackHost(host)
+}
+
 func (a *appServer) newProxyServer(cfg config.Config) (*http.Server, net.Listener, *proxy.Service, error) {
 	if err := validateConfiguredPorts(cfg); err != nil {
 		return nil, nil, nil, err
@@ -59,7 +83,7 @@ func (a *appServer) newProxyServer(cfg config.Config) (*http.Server, net.Listene
 
 	server := &http.Server{
 		Addr:              addr,
-		Handler:           svc,
+		Handler:           withLoopbackHost(svc),
 		ReadHeaderTimeout: 30 * time.Second,
 	}
 	return server, listener, svc, nil
@@ -122,7 +146,7 @@ func (a *appServer) newControlServer(cfg config.Config) (*http.Server, net.Liste
 
 	server := &http.Server{
 		Addr:              addr,
-		Handler:           withCORS(a.routes()),
+		Handler:           withLoopbackHost(withCORS(a.routes())),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	return server, listener, nil
