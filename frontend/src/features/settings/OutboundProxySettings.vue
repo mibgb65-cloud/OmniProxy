@@ -234,6 +234,7 @@ function normalizeOutboundProxyProviders(providers) {
             type="button"
             class="settings-chip-button"
             :class="{ active: config.outboundProxyUrl === preset.url }"
+            :aria-pressed="config.outboundProxyUrl === preset.url"
             @click="setOutboundProxyUrl(preset.url)"
           >
             {{ preset.label }}
@@ -263,6 +264,7 @@ function normalizeOutboundProxyProviders(providers) {
               type="button"
               class="outbound-model-option"
               :class="{ active: isOutboundProxyProviderSelected(item), recommended: item.recommended }"
+              :aria-pressed="isOutboundProxyProviderSelected(item)"
               @click="toggleOutboundProxyProvider(item)"
             >
               <span class="outbound-model-option-title">
@@ -282,6 +284,7 @@ function normalizeOutboundProxyProviders(providers) {
               :key="provider"
               type="button"
               class="settings-chip-button active"
+              aria-pressed="true"
               @click="removeOutboundProxyProviders([provider])"
             >
               {{ provider }}

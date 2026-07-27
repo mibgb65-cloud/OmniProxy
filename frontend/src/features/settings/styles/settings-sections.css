@@ -30,7 +30,7 @@
 .settings-page-toolbar .primary-button {
   min-width: 104px;
   min-height: 38px;
-  border-radius: 999px;
+  border-radius: 10px;
 }
 
 .settings-panel .settings-stack {
@@ -165,7 +165,7 @@
 .settings-panel .settings-grid select,
 .settings-panel .inline-number-field input {
   min-height: 42px;
-  border-radius: 999px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--surface-soft) 58%, var(--surface));
 }
 

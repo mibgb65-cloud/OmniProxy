@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 import { ElMessageBox } from 'element-plus'
+import { WarningFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
   config: {
@@ -23,17 +24,29 @@ async function toggleClaudeSubscriptionUsage(event) {
   input.checked = false
   try {
     await ElMessageBox.confirm(
-      '开启后，OmniProxy 会以 Claude Code 客户端的身份，向 Anthropic 未公开的用量接口查询你的订阅限额。<br /><br />'
-        + '· 该接口未在官方文档中公开，可能随时变更或失效。<br />'
-        + '· Anthropic 自 2026 年 2 月起限制订阅版（Free / Pro / Max）OAuth 凭据在第三方工具中使用。<br />'
-        + '· 由此产生的账号风险需要你自行承担。<br /><br />'
-        + '关闭此开关不影响 Claude 账号的正常代理转发。',
+      h('div', { class: 'claude-usage-confirm-content' }, [
+        h(
+          'p',
+          '开启后，OmniProxy 将以 Claude Code 客户端身份，通过 Anthropic 未公开的用量接口查询你的订阅限额。',
+        ),
+        h('div', { class: 'claude-usage-risk-panel' }, [
+          h('div', { class: 'claude-usage-risk-title' }, [
+            h(WarningFilled, { 'aria-hidden': 'true' }),
+            h('strong', '使用前请确认以下风险'),
+          ]),
+          h('ul', [
+            h('li', '该接口未在官方文档中公开，可能随时变更或失效。'),
+            h('li', 'Anthropic 自 2026 年 2 月起限制订阅版（Free / Pro / Max）OAuth 凭据在第三方工具中使用。'),
+            h('li', '由此产生的账号风险需要你自行承担。'),
+          ]),
+        ]),
+        h('p', { class: 'claude-usage-confirm-note' }, '关闭此开关不会影响 Claude 账号的正常代理转发。'),
+      ]),
       '开启 Claude 订阅额度读取',
       {
         confirmButtonText: '我已了解，开启',
         cancelButtonText: '取消',
-        type: 'warning',
-        dangerouslyUseHTMLString: true,
+        customClass: 'claude-usage-confirm',
       },
     )
     props.config.claudeSubscriptionUsageEnabled = true
@@ -51,11 +64,17 @@ async function toggleClaudeSubscriptionUsage(event) {
         <h3>OpenAI / Anthropic / Codex</h3>
         <p>常用协议入口和 Codex 额度查询地址。</p>
       </div>
-      <button type="button" class="ghost-button compact-button" @click="coreUrlsExpanded = !coreUrlsExpanded">
+      <button
+        type="button"
+        class="ghost-button compact-button"
+        :aria-expanded="coreUrlsExpanded"
+        aria-controls="core-provider-urls"
+        @click="coreUrlsExpanded = !coreUrlsExpanded"
+      >
         {{ coreUrlsExpanded ? '收起地址' : '展开地址' }}
       </button>
     </div>
-    <div v-if="coreUrlsExpanded" class="settings-grid">
+    <div v-if="coreUrlsExpanded" id="core-provider-urls" class="settings-grid">
       <label class="wide-field">
         <span>OpenAI API Base URL</span>
         <input v-model="config.openaiBaseUrl" type="url" />
@@ -104,11 +123,17 @@ async function toggleClaudeSubscriptionUsage(event) {
         <h3>第三方路由</h3>
         <p>DeepSeek、Kimi、Zhipu GLM、MiniMax、Gemini、OpenRouter、TokenRouter、sub2api、new-api、AnyRouter、Zo Computer、Prem、Xiaomi MiMo 和自定义网关入口。</p>
       </div>
-      <button type="button" class="ghost-button compact-button" @click="thirdPartyUrlsExpanded = !thirdPartyUrlsExpanded">
+      <button
+        type="button"
+        class="ghost-button compact-button"
+        :aria-expanded="thirdPartyUrlsExpanded"
+        aria-controls="third-party-provider-urls"
+        @click="thirdPartyUrlsExpanded = !thirdPartyUrlsExpanded"
+      >
         {{ thirdPartyUrlsExpanded ? '收起地址' : '展开地址' }}
       </button>
     </div>
-    <div v-if="thirdPartyUrlsExpanded" class="settings-grid">
+    <div v-if="thirdPartyUrlsExpanded" id="third-party-provider-urls" class="settings-grid">
       <label class="wide-field">
         <span>DeepSeek API Base URL</span>
         <input v-model="config.deepseekBaseUrl" type="url" />

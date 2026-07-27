@@ -5,8 +5,8 @@
 
 .settings-panel .outbound-model-group {
   display: grid;
-  gap: 10px;
-  padding-top: 16px;
+  gap: 9px;
+  padding-top: 14px;
   border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
 }
 
@@ -21,33 +21,67 @@
 
 .settings-panel .outbound-model-options {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .settings-panel .outbound-model-option {
-  min-height: 108px;
-  padding: 14px;
+  min-height: 88px;
+  align-content: start;
+  gap: 6px;
+  padding: 12px 13px;
   border-color: color-mix(in srgb, var(--line) 82%, transparent);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--surface-soft) 34%, var(--surface));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-soft) 28%, var(--surface));
   box-shadow: none;
 }
 
 .settings-panel .outbound-model-option:hover {
   border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
-  background: color-mix(in srgb, var(--surface-soft) 50%, var(--surface));
+  background: color-mix(in srgb, var(--surface-soft) 46%, var(--surface));
   transform: none;
 }
 
 .settings-panel .outbound-model-option.active {
-  border-color: color-mix(in srgb, var(--brand) 34%, var(--line));
-  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
-  box-shadow: none;
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--brand) 8%, transparent), transparent 64%),
+    color-mix(in srgb, var(--brand) 5%, var(--surface));
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 72%, transparent);
+}
+
+.settings-panel .outbound-model-option-title {
+  align-items: center;
+}
+
+.settings-panel .outbound-model-option-title strong {
+  font-weight: 720;
+}
+
+.settings-panel .outbound-model-option-title em {
+  min-width: 44px;
+  padding: 3px 7px;
+  border-color: color-mix(in srgb, var(--line) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  text-align: center;
+}
+
+.settings-panel .outbound-model-option.active .outbound-model-option-title em {
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+  background: color-mix(in srgb, var(--brand) 11%, transparent);
+}
+
+.settings-panel .outbound-model-option small {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .settings-panel .outbound-model-option code {
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  width: max-content;
+  max-width: 100%;
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-subtle) 44%, transparent);
+  font-size: 11px;
 }
 
 .settings-panel .toggle-field {
