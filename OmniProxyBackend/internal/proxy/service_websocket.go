@@ -74,6 +74,7 @@ func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 	var lastStatus int
 	lastRoute := route
 	finishActive := func() {}
+	updateActiveModel := func(string) {}
 	retryChain := make([]history.RetryAttempt, 0, attempts)
 
 	for attempt := 1; attempt <= attempts; attempt++ {
@@ -107,7 +108,7 @@ func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		finishActive = s.beginActiveRequest(r, attemptRoute, selected)
+		finishActive, updateActiveModel = s.beginActiveRequest(r, attemptRoute, selected)
 		dialer := websocket.Dialer{
 			HandshakeTimeout:  45 * time.Second,
 			Proxy:             s.proxyForRoute(attemptRoute),
@@ -200,7 +201,7 @@ func (s *Service) serveCodexWebSocket(w http.ResponseWriter, r *http.Request) {
 	_ = s.tokens.RecordProxyRequest(selected.ID)
 	consumption, responseModel, err := proxyWebSocketMessages(client, upstream, func(usage token.TokenConsumption) {
 		_ = s.tokens.RecordProxyConsumption(selected.ID, usage)
-	})
+	}, updateActiveModel)
 	finishActive()
 	s.tokens.Release(selected.ID)
 	if responseModel != "" {
@@ -285,15 +286,15 @@ func isWebSocketRequestHeader(key string) bool {
 	}
 }
 
-func proxyWebSocketMessages(client *websocket.Conn, upstream *websocket.Conn, onUsage func(token.TokenConsumption)) (token.TokenConsumption, string, error) {
+func proxyWebSocketMessages(client *websocket.Conn, upstream *websocket.Conn, onUsage func(token.TokenConsumption), onRequestModel func(string)) (token.TokenConsumption, string, error) {
 	resultCh := make(chan websocketCopyResult, 2)
 	go func() {
-		result := copyWebSocketMessages(upstream, client, false, nil)
+		result := copyWebSocketMessages(upstream, client, false, nil, onRequestModel)
 		result.fromUpstream = false
 		resultCh <- result
 	}()
 	go func() {
-		result := copyWebSocketMessages(client, upstream, true, onUsage)
+		result := copyWebSocketMessages(client, upstream, true, onUsage, nil)
 		result.fromUpstream = true
 		resultCh <- result
 	}()
@@ -329,7 +330,7 @@ type websocketCopyResult struct {
 	err          error
 }
 
-func copyWebSocketMessages(dst *websocket.Conn, src *websocket.Conn, captureUsage bool, onUsage func(token.TokenConsumption)) websocketCopyResult {
+func copyWebSocketMessages(dst *websocket.Conn, src *websocket.Conn, captureUsage bool, onUsage func(token.TokenConsumption), onModel func(string)) websocketCopyResult {
 	var total token.TokenConsumption
 	model := ""
 	for {
@@ -358,6 +359,9 @@ func copyWebSocketMessages(dst *websocket.Conn, src *websocket.Conn, captureUsag
 			header := http.Header{"Content-Type": []string{"application/json"}}
 			if parsedModel := parseResponseModel(header, capture.Bytes()); parsedModel != "" {
 				model = parsedModel
+				if onModel != nil {
+					onModel(parsedModel)
+				}
 			}
 			if captureUsage {
 				usage := parseTokenConsumption(header, capture.Bytes())

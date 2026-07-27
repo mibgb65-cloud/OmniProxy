@@ -368,6 +368,20 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 		t.Fatalf("unexpected websocket response type=%d payload=%q", messageType, string(payload))
 	}
 
+	activeDeadline := time.After(2 * time.Second)
+	for {
+		active := service.ActiveRequests()
+		if len(active) == 1 && active[0].Model == "gpt-5.6-sol" {
+			break
+		}
+		select {
+		case <-activeDeadline:
+			t.Fatalf("expected active websocket request model gpt-5.6-sol, got %#v", active)
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+
 	var got capture
 	select {
 	case got = <-captures:

@@ -158,7 +158,7 @@ func (s *Service) proxyHTTPWithRetries(w http.ResponseWriter, r *http.Request, r
 		}
 		selected := tokenAttempt.selected
 
-		finishActive := s.beginActiveRequest(r, attemptRoute, selected)
+		finishActive, _ := s.beginActiveRequest(r, attemptRoute, selected)
 		resp, err := s.forward(r.Context(), r, attemptRoute, body, selected)
 		if err != nil {
 			finishActive()
@@ -196,9 +196,7 @@ func (s *Service) proxyHTTPWithRetries(w http.ResponseWriter, r *http.Request, r
 
 		consumption, responseBody := s.writeResponse(w, resp)
 		finishActive()
-		if responseModel := parseResponseModel(resp.Header, responseBody); responseModel != "" {
-			attemptRoute.Model = responseModel
-		}
+		attemptRoute.Model = completedRequestModel(r, attemptRoute.Model, resp.Header, responseBody)
 		_ = s.tokens.RecordProxyUsage(selected.ID, consumption)
 		cooldownUntil := s.cooldownUntilForUpstreamResponse(attemptRoute, selected, resp.StatusCode, resp.Header)
 		cooldownTriggered := cooldownUntil != nil

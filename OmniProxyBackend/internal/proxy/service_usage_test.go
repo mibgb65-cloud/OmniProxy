@@ -8,6 +8,7 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -32,6 +33,15 @@ func TestParseTokenConsumptionFromSSE(t *testing.T) {
 	}
 	if model := parseResponseModel(http.Header{"Content-Type": []string{"text/event-stream"}}, body); model != "gpt-5.5" {
 		t.Fatalf("expected response model gpt-5.5, got %q", model)
+	}
+}
+
+func TestCompletedRequestModelLeavesModelListUnlabelled(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/codex/v1/models?client_version=0.145.0", nil)
+	body := []byte(`{"data":[{"model":"gpt-5.6-terra"}]}`)
+
+	if model := completedRequestModel(req, "gpt-5.5", http.Header{"Content-Type": []string{"application/json"}}, body); model != "" {
+		t.Fatalf("expected model list response to have no recorded model, got %q", model)
 	}
 }
 

@@ -95,7 +95,7 @@ func (s *Service) recordHistory(r *http.Request, route routeInfo, selected *toke
 	s.history.Add(entry)
 }
 
-func (s *Service) beginActiveRequest(r *http.Request, route routeInfo, selected token.Token) func() {
+func (s *Service) beginActiveRequest(r *http.Request, route routeInfo, selected token.Token) (func(), func(string)) {
 	s.activeMu.Lock()
 
 	if s.activeRequests == nil {
@@ -130,16 +130,33 @@ func (s *Service) beginActiveRequest(r *http.Request, route routeInfo, selected 
 		s.activity.ActiveRequestStarted(entry)
 	}
 	var once sync.Once
-	return func() {
+	finish := func() {
 		once.Do(func() {
 			s.activeMu.Lock()
+			finished := entry
+			if current, ok := s.activeRequests[id]; ok {
+				finished = current
+			}
 			delete(s.activeRequests, id)
 			s.activeMu.Unlock()
 			if s.activity != nil {
-				s.activity.ActiveRequestFinished(entry)
+				s.activity.ActiveRequestFinished(finished)
 			}
 		})
 	}
+	updateModel := func(model string) {
+		model = strings.TrimSpace(model)
+		if model == "" {
+			return
+		}
+		s.activeMu.Lock()
+		if current, ok := s.activeRequests[id]; ok {
+			current.Model = model
+			s.activeRequests[id] = current
+		}
+		s.activeMu.Unlock()
+	}
+	return finish, updateModel
 }
 
 func appendRetryAttempt(chain []history.RetryAttempt, attempt int, route routeInfo, selected *token.Token, status int, duration int64, cooldownTriggered bool, message string) []history.RetryAttempt {

@@ -64,6 +64,19 @@ func parseResponseModel(header http.Header, body []byte) string {
 	return model
 }
 
+func completedRequestModel(r *http.Request, routedModel string, header http.Header, body []byte) string {
+	if r != nil && r.Method == http.MethodGet && r.URL != nil {
+		path := strings.TrimRight(strings.ToLower(r.URL.Path), "/")
+		if strings.HasSuffix(path, "/models") {
+			return ""
+		}
+	}
+	if model := parseResponseModel(header, body); model != "" {
+		return model
+	}
+	return strings.TrimSpace(routedModel)
+}
+
 func parseSSEResponseModel(body []byte) string {
 	scanner := bufio.NewScanner(bytes.NewReader(body))
 	scanner.Buffer(make([]byte, 0, 64*1024), maxUsageCaptureBytes)
