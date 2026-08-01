@@ -33,6 +33,9 @@ func TestExtractCodexAuthFieldsSupportsCLIProxyAPIFlatJSON(t *testing.T) {
 	if fields.AccountID != "flat-account" {
 		t.Fatalf("unexpected account id: %q", fields.AccountID)
 	}
+	if fields.PlanType != "plus" {
+		t.Fatalf("unexpected plan type: %q", fields.PlanType)
+	}
 
 	email, ok := ExtractCodexEmail(string(raw))
 	if !ok || email != "flat@example.com" {
@@ -60,6 +63,9 @@ func TestExtractCodexAuthFieldsFallsBackToFlatIDTokenClaims(t *testing.T) {
 	}
 	if fields.AccountID != "account-from-jwt" {
 		t.Fatalf("expected account id from id_token, got %q", fields.AccountID)
+	}
+	if fields.PlanType != "plus" {
+		t.Fatalf("expected plan type from id_token, got %q", fields.PlanType)
 	}
 }
 
@@ -115,6 +121,7 @@ func codexJWTForTest(t *testing.T, email string, accountID string) string {
 		"email": email,
 		"https://api.openai.com/auth": map[string]any{
 			"chatgpt_account_id": accountID,
+			"chatgpt_plan_type":  "plus",
 		},
 	})
 	if err != nil {

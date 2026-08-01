@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"omniproxy/internal/config"
 	"omniproxy/internal/logs"
@@ -99,6 +100,62 @@ func TestConfigureCodexCreatesAPIKeyFallbackWithoutAccount(t *testing.T) {
 	}
 	if !strings.Contains(string(configContent), `forced_login_method = "api"`) {
 		t.Fatalf("expected API login method, got:\n%s", configContent)
+	}
+}
+
+func TestConfigureCodexCreatesAPIKeyFallbackWhenAccountPlanTypeIsMissing(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+
+	idTokenPayload, err := json.Marshal(map[string]any{
+		"https://api.openai.com/profile": map[string]string{"email": "pool@example.com"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	authBytes, err := json.Marshal(map[string]any{
+		"tokens": map[string]string{
+			"access_token": "pool-access-token",
+			"account_id":   "pool-account",
+			"id_token":     "header." + base64.RawURLEncoding.EncodeToString(idTokenPayload) + ".signature",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := manager.Add(token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     string(authBytes),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	app := &appServer{cfg: config.Config{ProxyPort: 3000}, tokens: manager, logs: logs.NewRecorder(10)}
+	result, err := app.configureCodex()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(result.Message, "API 登录模式") {
+		t.Fatalf("expected API fallback result, got %#v", result)
+	}
+
+	authContent, err := os.ReadFile(filepath.Join(home, ".codex", "auth.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var authPayload map[string]any
+	if err := json.Unmarshal(authContent, &authPayload); err != nil {
+		t.Fatal(err)
+	}
+	if authPayload["OPENAI_API_KEY"] != codexLocalAPIKey {
+		t.Fatalf("expected local API fallback key, got %#v", authPayload)
 	}
 }
 

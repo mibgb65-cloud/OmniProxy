@@ -161,7 +161,7 @@ func (a *appServer) configureCodex(requests ...codexConfigureRequest) (codexConf
 
 	parts := []string{fmt.Sprintf("Codex 已配置 %d 个模型：%s，默认模型 %s", len(models), strings.Join(models, "、"), model)}
 	if !hasClientAuth {
-		parts = append(parts, "未找到可用 auth.json 账号，已自动切换为 API 登录模式")
+		parts = append(parts, "未找到包含套餐信息的可用 auth.json 账号，已自动切换为 API 登录模式")
 	} else if result.ImportedAuth {
 		parts = append(parts, "已导入现有 auth.json，并使用 ChatGPT 账号登录")
 	} else if result.AuthUpdated {
@@ -478,7 +478,7 @@ func codexClientAuthUsable(item token.Token, status token.Status) bool {
 		return false
 	}
 	fields, ok := token.ExtractCodexAuthFields(item.TokenValue)
-	return ok && strings.TrimSpace(fields.Email) != "" && strings.TrimSpace(fields.AccessToken) != ""
+	return ok && strings.TrimSpace(fields.Email) != "" && strings.TrimSpace(fields.PlanType) != "" && strings.TrimSpace(fields.AccessToken) != ""
 }
 
 func writeCodexAccountAuth(path string, authValue string) (string, error) {

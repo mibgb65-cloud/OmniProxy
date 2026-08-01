@@ -9,6 +9,7 @@ import (
 type CodexAuthFields struct {
 	Type         string
 	Email        string
+	PlanType     string
 	IDToken      string
 	AccessToken  string
 	RefreshToken string
@@ -103,6 +104,9 @@ func ExtractCodexAuthFields(authJSON string) (CodexAuthFields, bool) {
 			fields.AccountID = accountID
 		}
 	}
+	if planType, ok := planTypeFromCodexIDToken(fields.IDToken); ok {
+		fields.PlanType = planType
+	}
 	return fields, true
 }
 
@@ -176,6 +180,20 @@ func accountIDFromCodexIDToken(idToken string) (string, bool) {
 	}
 	if accountID := stringField(payload, "account_id"); accountID != "" {
 		return accountID, true
+	}
+	return "", false
+}
+
+func planTypeFromCodexIDToken(idToken string) (string, bool) {
+	payload, ok := decodeJWTPayload(idToken)
+	if !ok {
+		return "", false
+	}
+
+	if auth, ok := payload["https://api.openai.com/auth"].(map[string]any); ok {
+		if planType := stringField(auth, "chatgpt_plan_type"); planType != "" {
+			return planType, true
+		}
 	}
 	return "", false
 }

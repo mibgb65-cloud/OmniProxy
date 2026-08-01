@@ -579,6 +579,7 @@ func codexIDTokenForMainTest(t *testing.T, email string) string {
 
 	payload, err := json.Marshal(map[string]any{
 		"https://api.openai.com/profile": map[string]string{"email": email},
+		"https://api.openai.com/auth":    map[string]string{"chatgpt_plan_type": "plus"},
 	})
 	if err != nil {
 		t.Fatal(err)
