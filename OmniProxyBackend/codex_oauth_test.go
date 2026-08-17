@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"omniproxy/internal/logs"
 	"omniproxy/internal/proxy"
+	"omniproxy/internal/storage"
 	"omniproxy/internal/token"
 )
 
@@ -56,6 +60,46 @@ func TestCodexOAuthAuthJSONPreservesIdentityAndRefreshToken(t *testing.T) {
 	}
 	if saved["last_refresh"] != now.Format(time.RFC3339) {
 		t.Fatalf("unexpected CPA last_refresh: %#v", saved)
+	}
+}
+
+func TestUpsertCodexOAuthTokenKeepsDifferentEmailsWithSharedTeamAccountID(t *testing.T) {
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstAuth := codexAuthJSONForMainTestWithCredentials(t, "first@example.com", "shared-team-account", "first-access-token")
+	secondAuth := codexAuthJSONForMainTestWithCredentials(t, "second@example.com", "shared-team-account", "second-access-token")
+	first, err := manager.Add(token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     firstAuth,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	app := &appServer{tokens: manager, logs: logs.NewRecorder(10)}
+	created, err := app.upsertCodexOAuthToken(ctx, secondAuth)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if created.ID == first.ID {
+		t.Fatal("different email was treated as the existing Team account")
+	}
+	items := manager.List()
+	if len(items) != 2 {
+		t.Fatalf("expected both email accounts to be retained, got %#v", items)
+	}
+	storedFirst, err := manager.Get(first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedFirst.TokenValue != firstAuth {
+		t.Fatal("first email account credentials were replaced")
 	}
 }
 

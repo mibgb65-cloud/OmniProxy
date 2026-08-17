@@ -353,13 +353,17 @@ func (a *appServer) upsertCodexOAuthToken(ctx context.Context, raw string) (toke
 }
 
 func sameCodexOAuthIdentity(left token.CodexAuthFields, right token.CodexAuthFields) bool {
+	leftEmail := strings.TrimSpace(left.Email)
+	rightEmail := strings.TrimSpace(right.Email)
+	if leftEmail != "" && rightEmail != "" && !strings.EqualFold(leftEmail, rightEmail) {
+		return false
+	}
+
 	leftAccountID := strings.TrimSpace(left.AccountID)
 	rightAccountID := strings.TrimSpace(right.AccountID)
 	if leftAccountID != "" && rightAccountID != "" {
 		return leftAccountID == rightAccountID
 	}
-	leftEmail := strings.TrimSpace(left.Email)
-	rightEmail := strings.TrimSpace(right.Email)
 	return leftEmail != "" && rightEmail != "" && strings.EqualFold(leftEmail, rightEmail)
 }
 
