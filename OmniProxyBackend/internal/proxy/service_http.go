@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Service) serveSpecialProxyRequest(w http.ResponseWriter, r *http.Request) bool {
-	if isCodexResponsesWebSocket(r) {
+	if isCodexWebSocket(r) {
 		s.serveCodexWebSocketRequest(w, r)
 		return true
 	}

@@ -137,14 +137,14 @@ func isCodexResponsesProbe(r *http.Request) bool {
 	return path == "/responses"
 }
 
-func isCodexResponsesWebSocket(r *http.Request) bool {
+func isCodexWebSocket(r *http.Request) bool {
 	if r.URL == nil || r.Method != http.MethodGet || !isWebSocketUpgrade(r) {
 		return false
 	}
 	path := stripPathPrefix(r.URL.Path, "/backend-api/codex")
 	path = stripPathPrefix(path, "/codex")
 	path = stripPathPrefix(path, "/v1")
-	return path == "/responses"
+	return path == "/responses" || path == "/live"
 }
 
 func isWebSocketUpgrade(r *http.Request) bool {

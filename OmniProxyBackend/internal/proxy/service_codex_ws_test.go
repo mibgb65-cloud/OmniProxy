@@ -452,6 +452,103 @@ func TestServiceProxiesCodexResponsesWebSocket(t *testing.T) {
 	}
 }
 
+func TestServiceProxiesCodexLiveWebSocket(t *testing.T) {
+	type capture struct {
+		path    string
+		auth    string
+		account string
+		message string
+		err     error
+	}
+	captures := make(chan capture, 1)
+	upgrader := websocket.Upgrader{CheckOrigin: func(*http.Request) bool { return true }}
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			captures <- capture{err: err}
+			return
+		}
+		defer conn.Close()
+
+		_, payload, err := conn.ReadMessage()
+		captures <- capture{
+			path:    r.URL.Path,
+			auth:    r.Header.Get("Authorization"),
+			account: r.Header.Get("ChatGPT-Account-Id"),
+			message: string(payload),
+			err:     err,
+		}
+		if err == nil {
+			_ = conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"session.created"}`))
+		}
+	}))
+	defer upstream.Close()
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "live-ws-tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = manager.Add(token.UpsertRequest{
+		Name:           "coder@example.com",
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForServiceTestWithCredentials(t, "coder@example.com", "account-live", "live-access-token"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(config.Config{
+		ProxyPort:       3000,
+		ControlPort:     3890,
+		CodexBaseURL:    upstream.URL + "/backend-api/codex",
+		SwitchThreshold: 15,
+		MaxRetries:      0,
+	}, manager, logs.NewRecorder(10))
+	if err != nil {
+		t.Fatal(err)
+	}
+	local := httptest.NewServer(service)
+	defer local.Close()
+
+	dialURL := "ws" + strings.TrimPrefix(local.URL, "http") + "/codex/v1/live"
+	conn, _, err := websocket.DefaultDialer.Dial(dialURL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	requestPayload := `{"type":"session.update"}`
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(requestPayload)); err != nil {
+		t.Fatal(err)
+	}
+	_, responsePayload, err := conn.ReadMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(responsePayload) != `{"type":"session.created"}` {
+		t.Fatalf("unexpected live websocket response: %q", string(responsePayload))
+	}
+
+	select {
+	case got := <-captures:
+		if got.err != nil {
+			t.Fatal(got.err)
+		}
+		if got.path != "/backend-api/codex/live" {
+			t.Fatalf("unexpected live websocket path: %s", got.path)
+		}
+		if got.auth != "Bearer live-access-token" || got.account != "account-live" {
+			t.Fatalf("unexpected live websocket auth headers auth=%q account=%q", got.auth, got.account)
+		}
+		if got.message != requestPayload {
+			t.Fatalf("unexpected live websocket message: %q", got.message)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for live websocket capture")
+	}
+}
+
 func TestServiceRejectsCodexResponsesWebSocketFromNonLocalOrigin(t *testing.T) {
 	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "ws-origin-tokens.json")), 15)
 	if err != nil {
