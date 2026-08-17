@@ -25,7 +25,7 @@ export const routeDefinitions = [
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.codex),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-sol' },
     providers: openAICompatibleProviders,
-    modelPresets: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
+    modelPresets: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'deepseek-v4-flash', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
   },
   {
     key: 'claude',
@@ -115,7 +115,7 @@ export const gatewayPlatformPresets = [
         label: 'DeepSeek V4 Pro [1m]',
         routeModels: { claude: 'deepseek-v4-pro[1m]' },
       },
-      routeModel('deepseek-v4-flash', ['openai', 'claude'], 'DeepSeek V4 Flash'),
+      routeModel('deepseek-v4-flash', ['codex', 'openai', 'claude'], 'DeepSeek V4 Flash'),
     ],
   },
   {

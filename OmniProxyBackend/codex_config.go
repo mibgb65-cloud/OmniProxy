@@ -16,8 +16,11 @@ import (
 )
 
 const (
-	codexLocalAPIKey = "sk-omniproxy-local-sub2api"
-	maxCodexModels   = 4
+	codexLocalAPIKey          = "sk-omniproxy-local-sub2api"
+	codexDeepSeekProviderID   = "omniproxy_deepseek"
+	codexDeepSeekContext      = 1_048_576
+	codexDeepSeekCompactLimit = 996_147
+	maxCodexModels            = 4
 )
 
 var defaultCodexModels = []string{"gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"}
@@ -225,6 +228,8 @@ func writeCodexModelProfiles(codexDir string, models []string) ([]string, error)
 		lines := []string{
 			fmt.Sprintf(`model = "%s"`, tomlEscape(model)),
 			fmt.Sprintf(`review_model = "%s"`, tomlEscape(model)),
+			fmt.Sprintf(`model_provider = "%s"`, tomlEscape(codexModelProvider(model))),
+			fmt.Sprintf(`model_reasoning_effort = "%s"`, tomlEscape(codexModelReasoningEffort(model))),
 		}
 		if contextWindow, compactLimit, ok := codexModelContext(model); ok {
 			lines = append(lines,
@@ -279,6 +284,8 @@ func codexProfileName(model string) string {
 
 func codexModelContext(model string) (int, int, bool) {
 	switch strings.ToLower(strings.TrimSpace(model)) {
+	case "deepseek-v4-flash", "deepseek-v4-pro":
+		return codexDeepSeekContext, codexDeepSeekCompactLimit, true
 	case "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra":
 		return 1_050_000, 900_000, true
 	case "gpt-5.6-luna", "gpt-5.4-mini":
@@ -288,6 +295,33 @@ func codexModelContext(model string) (int, int, bool) {
 	default:
 		return 0, 0, false
 	}
+}
+
+func isCodexDeepSeekModel(model string) bool {
+	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(model)), "deepseek-")
+}
+
+func codexModelProvider(model string) string {
+	if isCodexDeepSeekModel(model) {
+		return codexDeepSeekProviderID
+	}
+	return "openai"
+}
+
+func codexModelReasoningEffort(model string) string {
+	if isCodexDeepSeekModel(model) {
+		return "high"
+	}
+	return "xhigh"
+}
+
+func containsCodexDeepSeekModel(models []string) bool {
+	for _, model := range models {
+		if isCodexDeepSeekModel(model) {
+			return true
+		}
+	}
+	return false
 }
 
 func (a *appServer) restoreCodexConfig() (codexConfigureResult, error) {
@@ -339,8 +373,11 @@ func writeCodexOmniProxyConfig(path string, baseURL string) error {
 	lines = removeRootKey(lines, "preferred_auth_method")
 	lines = removeRootKey(lines, "chatgpt_base_url")
 	lines = removeRootKey(lines, "disable_response_storage")
+	lines = removeRootKey(lines, "model_catalog_json")
 	lines = removeTomlSection(lines, "[model_providers.openai]")
 	lines = removeTomlSection(lines, "[model_providers.omniproxy]")
+	lines = removeTomlSection(lines, "[model_providers.deepseek]")
+	lines = removeTomlSection(lines, "[model_providers."+codexDeepSeekProviderID+"]")
 	lines = removeTomlSection(lines, "[model_providers.anyrouter]")
 	lines = removeTomlSection(lines, "[model_providers.prem]")
 
@@ -370,10 +407,10 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 		lines = strings.Split(strings.TrimRight(text, "\n"), "\n")
 	}
 
-	lines = setRootStringKey(lines, "model_provider", "openai")
+	lines = setRootStringKey(lines, "model_provider", codexModelProvider(model))
 	lines = setRootStringKey(lines, "model", model)
 	lines = setRootStringKey(lines, "review_model", model)
-	lines = setRootStringKey(lines, "model_reasoning_effort", "xhigh")
+	lines = setRootStringKey(lines, "model_reasoning_effort", codexModelReasoningEffort(model))
 	lines = setRootStringKey(lines, "network_access", "enabled")
 	lines = setRootStringKey(lines, "forced_login_method", loginMethod)
 	lines = setRootStringKey(lines, "cli_auth_credentials_store", "file")
@@ -388,15 +425,27 @@ func writeCodexOpenAIResponsesConfig(path string, baseURL string, models []strin
 	lines = setRootStringKey(lines, "openai_base_url", baseURL)
 	lines = removeRootKey(lines, "chatgpt_base_url")
 	lines = removeRootKey(lines, "disable_response_storage")
+	lines = removeRootKey(lines, "model_catalog_json")
 	lines = removeRootKey(lines, "profile")
 	lines = removeTomlSection(lines, "[model_providers.openai]")
 	lines = removeTomlSection(lines, "[model_providers.OpenAI]")
 	lines = removeTomlSection(lines, "[model_providers.omniproxy]")
+	lines = removeTomlSection(lines, "[model_providers.deepseek]")
 	lines = removeTomlSection(lines, "[model_providers.sub2api]")
 	lines = removeTomlSection(lines, "[model_providers.newapi]")
 	lines = removeTomlSection(lines, "[model_providers.zo]")
 	lines = removeTomlSection(lines, "[model_providers.anyrouter]")
 	lines = removeTomlSection(lines, "[model_providers.prem]")
+	lines = removeTomlSection(lines, "[model_providers."+codexDeepSeekProviderID+"]")
+	if containsCodexDeepSeekModel(models) {
+		lines = appendTomlSection(lines, "model_providers."+codexDeepSeekProviderID,
+			`name = "OmniProxy DeepSeek"`,
+			fmt.Sprintf(`base_url = "%s"`, tomlEscape(baseURL)),
+			`wire_api = "responses"`,
+			`requires_openai_auth = true`,
+			`supports_websockets = false`,
+		)
+	}
 
 	next := strings.Join(lines, "\n") + "\n"
 	if len(content) > 0 {
@@ -585,6 +634,14 @@ func removeTomlSection(lines []string, section string) []string {
 		}
 	}
 	return next
+}
+
+func appendTomlSection(lines []string, section string, values ...string) []string {
+	if len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) != "" {
+		lines = append(lines, "")
+	}
+	lines = append(lines, "["+section+"]")
+	return append(lines, values...)
 }
 
 func tomlKey(line string) string {

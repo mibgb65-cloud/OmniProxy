@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { inferGatewayProviderForModel, routeDefinitions, routeStrategyChain } from './gatewayRoutePresets.js'
+import { gatewayPlatformPresets, inferGatewayProviderForModel, routeDefinitions, routeStrategyChain } from './gatewayRoutePresets.js'
 
 test('routeDefinitions build stable local gateway endpoints', () => {
   const endpoints = Object.fromEntries(routeDefinitions.map((route) => [route.key, route.endpoint(3899)]))
@@ -22,6 +22,15 @@ test('routeDefinitions expose GPT-5.6 role-aware defaults and family presets', (
     assert.ok(codex.modelPresets.includes(model))
     assert.ok(openai.modelPresets.includes(model))
   }
+})
+
+test('DeepSeek Flash is available to the Codex gateway', () => {
+  const codex = routeDefinitions.find((route) => route.key === 'codex')
+  const deepseek = gatewayPlatformPresets.find((preset) => preset.key === 'deepseek')
+  const flash = deepseek.models.find((model) => model.routeModels?.openai === 'deepseek-v4-flash')
+
+  assert.ok(codex.modelPresets.includes('deepseek-v4-flash'))
+  assert.equal(flash.routeModels.codex, 'deepseek-v4-flash')
 })
 
 test('inferGatewayProviderForModel keeps provider inference stable', () => {

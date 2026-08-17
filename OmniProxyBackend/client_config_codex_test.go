@@ -598,6 +598,7 @@ func TestWriteCodexOmniProxyConfig(t *testing.T) {
 	initial := strings.Join([]string{
 		`model = "gpt-5.5"`,
 		`model_provider = "openai"`,
+		`model_catalog_json = "~/.codex/models.json"`,
 		`chatgpt_base_url = "http://127.0.0.1:3000/backend-api/"`,
 		`disable_response_storage = true`,
 		``,
@@ -606,6 +607,9 @@ func TestWriteCodexOmniProxyConfig(t *testing.T) {
 		``,
 		`[model_providers.omniproxy]`,
 		`base_url = "http://old.example/v1"`,
+		``,
+		`[model_providers.deepseek]`,
+		`experimental_bearer_token = "sk-fake-deepseek"`,
 	}, "\n")
 	if err := os.WriteFile(path, []byte(initial), 0o600); err != nil {
 		t.Fatal(err)
@@ -643,6 +647,9 @@ func TestWriteCodexOmniProxyConfig(t *testing.T) {
 	}
 	if strings.Contains(text, "disable_response_storage") {
 		t.Fatalf("disable_response_storage should not be kept for Codex history:\n%s", text)
+	}
+	if strings.Contains(text, "model_catalog_json") || strings.Contains(text, "[model_providers.deepseek]") || strings.Contains(text, "sk-fake-deepseek") {
+		t.Fatalf("DeepSeek-only catalog and provider should be removed:\n%s", text)
 	}
 	if _, err := os.Stat(path + ".omniproxy.bak"); err != nil {
 		t.Fatalf("expected backup file: %v", err)
