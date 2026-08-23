@@ -1,5 +1,25 @@
 export namespace token {
 
+	export class CodexWeeklyEstimateBaseline {
+	    inputTokens: number;
+	    outputTokens: number;
+	    totalTokens: number;
+	    cacheCreationTokens?: number;
+	    cacheReadTokens?: number;
+
+	    static createFrom(source: any = {}) {
+	        return new CodexWeeklyEstimateBaseline(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.inputTokens = source["inputTokens"];
+	        this.outputTokens = source["outputTokens"];
+	        this.totalTokens = source["totalTokens"];
+	        this.cacheCreationTokens = source["cacheCreationTokens"];
+	        this.cacheReadTokens = source["cacheReadTokens"];
+	    }
+	}
 	export class DailyTokenUsage {
 	    date: string;
 	    requestCount: number;

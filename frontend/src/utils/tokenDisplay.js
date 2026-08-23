@@ -379,6 +379,7 @@ export function codexWeeklyQuotaEstimate(item) {
     usedCost,
     usedCostText: formatUSD(usedCost),
     usedTokens: usage.totalTokens,
+    resetAdjusted: Boolean(usage.resetAdjusted),
   }
 }
 
@@ -390,7 +391,8 @@ export function codexWeeklyQuotaEstimateText(item) {
 export function codexWeeklyQuotaEstimateMeta(item) {
   const estimate = codexWeeklyQuotaEstimate(item)
   if (!estimate) return ''
-  return `按本地代理当前周窗口 ${formatNumber(estimate.usedTokens)} Token、基础计价成本 ${estimate.usedCostText} 和上游已用 ${formatPercent(estimate.usedPercent)}% 粗估 · ${estimate.priceLabel}`
+  const scope = estimate.resetAdjusted ? '最近一次刷新卡后的本地代理用量' : '本地代理当前周窗口'
+  return `按${scope} ${formatNumber(estimate.usedTokens)} Token、基础计价成本 ${estimate.usedCostText} 和上游已用 ${formatPercent(estimate.usedPercent)}% 粗估 · ${estimate.priceLabel}`
 }
 
 export function quotaResetLabel(item) {
@@ -449,15 +451,30 @@ function quotaUsedPercent(item, windowName) {
 function weeklyEstimateUsageStats(item) {
   const resetAt = numberValue(item?.usage?.secondaryResetAt)
   const daily = Array.isArray(item?.stats?.daily) ? item.stats.daily : []
-  if (resetAt <= 0 || !daily.length) return emptyTokenStats()
+  if (resetAt <= 0) return emptyTokenStats()
 
   const resetMs = resetAt * 1000
   const startMs = resetMs - WEEK_MS
+  const resetAdjustedStats = codexWeeklyResetAdjustedStats(item, startMs, resetMs)
+  if (resetAdjustedStats) return resetAdjustedStats
+  if (!daily.length) return emptyTokenStats()
+
   const windowStats = daily.reduce((sum, row) => {
     if (!dailyRowOverlapsWindow(row, startMs, resetMs)) return sum
     return addTokenStats(sum, normalizeTokenStats(row))
   }, emptyTokenStats())
-  return windowStats.totalTokens > 0 ? windowStats : emptyTokenStats()
+  return windowStats.totalTokens > 0 ? { ...windowStats, resetAdjusted: false } : emptyTokenStats()
+}
+
+function codexWeeklyResetAdjustedStats(item, startMs, resetMs) {
+  const estimateResetMs = numberValue(item?.stats?.codexWeeklyEstimateResetAt) * 1000
+  const baseline = item?.stats?.codexWeeklyEstimateBaseline
+  if (estimateResetMs < startMs || estimateResetMs > resetMs || !baseline) return null
+
+  const currentStats = normalizeTokenStats(item?.stats)
+  const baselineStats = normalizeTokenStats(baseline)
+  const adjusted = subtractTokenStats(currentStats, baselineStats)
+  return { ...adjusted, resetAdjusted: true }
 }
 
 function dailyRowOverlapsWindow(row, startMs, resetMs) {
@@ -498,8 +515,18 @@ function addTokenStats(left, right) {
   }
 }
 
+function subtractTokenStats(total, baseline) {
+  return {
+    inputTokens: Math.max(0, total.inputTokens - baseline.inputTokens),
+    outputTokens: Math.max(0, total.outputTokens - baseline.outputTokens),
+    totalTokens: Math.max(0, total.totalTokens - baseline.totalTokens),
+    cacheCreationTokens: Math.max(0, total.cacheCreationTokens - baseline.cacheCreationTokens),
+    cacheReadTokens: Math.max(0, total.cacheReadTokens - baseline.cacheReadTokens),
+  }
+}
+
 function emptyTokenStats() {
-  return { inputTokens: 0, outputTokens: 0, totalTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 }
+  return { inputTokens: 0, outputTokens: 0, totalTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, resetAdjusted: false }
 }
 
 function usageCostUSD(usage, price) {

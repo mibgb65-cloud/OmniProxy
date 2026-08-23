@@ -72,6 +72,8 @@ export namespace main {
 	    totalTokens: number;
 	    cacheCreationTokens?: number;
 	    cacheReadTokens?: number;
+	    codexWeeklyEstimateResetAt?: number;
+	    codexWeeklyEstimateBaseline?: token.CodexWeeklyEstimateBaseline;
 	    lastInputTokens?: number;
 	    lastOutputTokens?: number;
 	    lastTotalTokens?: number;
@@ -92,6 +94,8 @@ export namespace main {
 	        this.totalTokens = source["totalTokens"];
 	        this.cacheCreationTokens = source["cacheCreationTokens"];
 	        this.cacheReadTokens = source["cacheReadTokens"];
+	        this.codexWeeklyEstimateResetAt = source["codexWeeklyEstimateResetAt"];
+	        this.codexWeeklyEstimateBaseline = this.convertValues(source["codexWeeklyEstimateBaseline"], token.CodexWeeklyEstimateBaseline);
 	        this.lastInputTokens = source["lastInputTokens"];
 	        this.lastOutputTokens = source["lastOutputTokens"];
 	        this.lastTotalTokens = source["lastTotalTokens"];

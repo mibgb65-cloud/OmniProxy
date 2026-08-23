@@ -104,6 +104,28 @@ func (m *Manager) InvalidateCodexResetCredits(id string) error {
 	return ErrTokenNotFound
 }
 
+func (m *Manager) RecordCodexWeeklyEstimateReset(id string, resetAt time.Time, baseline TokenStats) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i := range m.tokens {
+		if m.tokens[i].ID != id {
+			continue
+		}
+		m.tokens[i].Stats.CodexWeeklyEstimateResetAt = resetAt.Unix()
+		m.tokens[i].Stats.CodexWeeklyEstimateBaseline = &CodexWeeklyEstimateBaseline{
+			InputTokens:         baseline.InputTokens,
+			OutputTokens:        baseline.OutputTokens,
+			TotalTokens:         baseline.TotalTokens,
+			CacheCreationTokens: baseline.CacheCreationTokens,
+			CacheReadTokens:     baseline.CacheReadTokens,
+		}
+		return m.schedulePersistLocked()
+	}
+
+	return ErrTokenNotFound
+}
+
 func balanceRemainingPercent(usage UsageInfo) int {
 	if usage.BalanceUnlimited {
 		return 100

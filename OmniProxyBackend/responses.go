@@ -106,19 +106,21 @@ type balancePackageResponse struct {
 }
 
 type tokenStatsResponse struct {
-	RequestCount            int64                   `json:"requestCount"`
-	InputTokens             int64                   `json:"inputTokens"`
-	OutputTokens            int64                   `json:"outputTokens"`
-	TotalTokens             int64                   `json:"totalTokens"`
-	CacheCreationTokens     int64                   `json:"cacheCreationTokens,omitempty"`
-	CacheReadTokens         int64                   `json:"cacheReadTokens,omitempty"`
-	LastInputTokens         int                     `json:"lastInputTokens,omitempty"`
-	LastOutputTokens        int                     `json:"lastOutputTokens,omitempty"`
-	LastTotalTokens         int                     `json:"lastTotalTokens,omitempty"`
-	LastCacheCreationTokens int                     `json:"lastCacheCreationTokens,omitempty"`
-	LastCacheReadTokens     int                     `json:"lastCacheReadTokens,omitempty"`
-	Daily                   []token.DailyTokenUsage `json:"daily,omitempty"`
-	UpdatedAt               string                  `json:"updatedAt,omitempty"`
+	RequestCount                int64                              `json:"requestCount"`
+	InputTokens                 int64                              `json:"inputTokens"`
+	OutputTokens                int64                              `json:"outputTokens"`
+	TotalTokens                 int64                              `json:"totalTokens"`
+	CacheCreationTokens         int64                              `json:"cacheCreationTokens,omitempty"`
+	CacheReadTokens             int64                              `json:"cacheReadTokens,omitempty"`
+	CodexWeeklyEstimateResetAt  int64                              `json:"codexWeeklyEstimateResetAt,omitempty"`
+	CodexWeeklyEstimateBaseline *token.CodexWeeklyEstimateBaseline `json:"codexWeeklyEstimateBaseline,omitempty"`
+	LastInputTokens             int                                `json:"lastInputTokens,omitempty"`
+	LastOutputTokens            int                                `json:"lastOutputTokens,omitempty"`
+	LastTotalTokens             int                                `json:"lastTotalTokens,omitempty"`
+	LastCacheCreationTokens     int                                `json:"lastCacheCreationTokens,omitempty"`
+	LastCacheReadTokens         int                                `json:"lastCacheReadTokens,omitempty"`
+	Daily                       []token.DailyTokenUsage            `json:"daily,omitempty"`
+	UpdatedAt                   string                             `json:"updatedAt,omitempty"`
 }
 
 type healthResponse struct {
@@ -390,19 +392,21 @@ func balancePackageResponses(items []token.BalancePackage) []balancePackageRespo
 
 func tokenStatsResponseFor(stats token.TokenStats) tokenStatsResponse {
 	return tokenStatsResponse{
-		RequestCount:            stats.RequestCount,
-		InputTokens:             stats.InputTokens,
-		OutputTokens:            stats.OutputTokens,
-		TotalTokens:             stats.TotalTokens,
-		CacheCreationTokens:     stats.CacheCreationTokens,
-		CacheReadTokens:         stats.CacheReadTokens,
-		LastInputTokens:         stats.LastInputTokens,
-		LastOutputTokens:        stats.LastOutputTokens,
-		LastTotalTokens:         stats.LastTotalTokens,
-		LastCacheCreationTokens: stats.LastCacheCreationTokens,
-		LastCacheReadTokens:     stats.LastCacheReadTokens,
-		Daily:                   append([]token.DailyTokenUsage(nil), stats.Daily...),
-		UpdatedAt:               timePtrString(stats.UpdatedAt),
+		RequestCount:                stats.RequestCount,
+		InputTokens:                 stats.InputTokens,
+		OutputTokens:                stats.OutputTokens,
+		TotalTokens:                 stats.TotalTokens,
+		CacheCreationTokens:         stats.CacheCreationTokens,
+		CacheReadTokens:             stats.CacheReadTokens,
+		CodexWeeklyEstimateResetAt:  stats.CodexWeeklyEstimateResetAt,
+		CodexWeeklyEstimateBaseline: stats.CodexWeeklyEstimateBaseline,
+		LastInputTokens:             stats.LastInputTokens,
+		LastOutputTokens:            stats.LastOutputTokens,
+		LastTotalTokens:             stats.LastTotalTokens,
+		LastCacheCreationTokens:     stats.LastCacheCreationTokens,
+		LastCacheReadTokens:         stats.LastCacheReadTokens,
+		Daily:                       append([]token.DailyTokenUsage(nil), stats.Daily...),
+		UpdatedAt:                   timePtrString(stats.UpdatedAt),
 	}
 }
 

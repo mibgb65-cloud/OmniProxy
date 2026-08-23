@@ -183,6 +183,38 @@ test('Codex weekly quota estimate uses current weekly tokens and remaining perce
   assert.equal(codexWeeklyQuotaEstimateMeta(token), '按本地代理当前周窗口 110,000 Token、基础计价成本 $0.8000 和上游已用 20% 粗估 · OpenAI GPT-5.6 Sol')
 })
 
+test('Codex weekly quota estimate uses the post-reset baseline when a reset credit changed the weekly window', () => {
+  const resetAt = Math.floor(Date.parse('2026-06-18T00:00:00+08:00') / 1000)
+  const creditResetAt = Math.floor(Date.parse('2026-06-13T12:00:00+08:00') / 1000)
+  const token = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      subscriptionQuotaAvailable: true,
+      secondaryRemainingPercent: 80,
+      secondaryResetAt: resetAt,
+    },
+    stats: {
+      inputTokens: 1000000,
+      outputTokens: 910000,
+      totalTokens: 1910000,
+      codexWeeklyEstimateResetAt: creditResetAt,
+      codexWeeklyEstimateBaseline: {
+        inputTokens: 900000,
+        outputTokens: 900000,
+        totalTokens: 1800000,
+      },
+      daily: [
+        { date: '2026-06-12', inputTokens: 900000, outputTokens: 900000, totalTokens: 1800000 },
+        { date: '2026-06-14', inputTokens: 100000, outputTokens: 10000, totalTokens: 110000 },
+      ],
+    },
+  }
+
+  assert.equal(codexWeeklyQuotaEstimateText(token), '$4.00 / 周')
+  assert.equal(codexWeeklyQuotaEstimateMeta(token), '按最近一次刷新卡后的本地代理用量 110,000 Token、基础计价成本 $0.8000 和上游已用 20% 粗估 · OpenAI GPT-5.6 Sol')
+})
+
 test('Codex weekly quota estimate prices cache tokens like sub2api', () => {
   const resetAt = Math.floor(Date.parse('2026-06-18T00:00:00+08:00') / 1000)
   const token = {

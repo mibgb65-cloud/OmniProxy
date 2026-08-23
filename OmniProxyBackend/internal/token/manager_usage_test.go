@@ -213,6 +213,49 @@ func TestManagerRecordsProxyUsageTotalsAndDailyStats(t *testing.T) {
 	}
 }
 
+func TestManagerRecordsCodexWeeklyEstimateResetBaseline(t *testing.T) {
+	manager, err := NewManager(storage.NewJSONStore[[]Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := manager.Add(UpsertRequest{
+		Name:           "codex",
+		Provider:       ProviderOpenAI,
+		CredentialType: CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForTest(t, "codex@example.com"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.RecordProxyUsage(item.ID, TokenConsumption{InputTokens: 100, OutputTokens: 20, TotalTokens: 120, CacheReadTokens: 80}); err != nil {
+		t.Fatal(err)
+	}
+
+	beforeReset, err := manager.Get(item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resetAt := time.Date(2026, 8, 23, 12, 0, 0, 0, time.UTC)
+	if err := manager.RecordCodexWeeklyEstimateReset(item.ID, resetAt, beforeReset.Stats); err != nil {
+		t.Fatal(err)
+	}
+	if err := manager.RecordProxyUsage(item.ID, TokenConsumption{InputTokens: 10, OutputTokens: 5, TotalTokens: 15}); err != nil {
+		t.Fatal(err)
+	}
+
+	updated, err := manager.Get(item.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline := updated.Stats.CodexWeeklyEstimateBaseline
+	if updated.Stats.CodexWeeklyEstimateResetAt != resetAt.Unix() || baseline == nil {
+		t.Fatalf("missing weekly estimate reset baseline: %#v", updated.Stats)
+	}
+	if baseline.InputTokens != 100 || baseline.OutputTokens != 20 || baseline.TotalTokens != 120 || baseline.CacheReadTokens != 80 {
+		t.Fatalf("unexpected weekly estimate baseline: %#v", baseline)
+	}
+}
+
 func TestManagerRecordsStreamingRequestAndConsumptionSeparately(t *testing.T) {
 	manager, err := NewManager(storage.NewJSONStore[[]Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
 	if err != nil {

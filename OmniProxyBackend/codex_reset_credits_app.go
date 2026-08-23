@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -61,6 +62,11 @@ func (a *appServer) consumeCodexResetCredit(ctx context.Context, id string) (cod
 		return codexResetCreditConsumeResponse{}, err
 	}
 
+	estimateResetAt := time.Now()
+	estimateBaseline := selected.Stats
+	if current, getErr := a.tokens.Get(id); getErr == nil {
+		estimateBaseline = current.Stats
+	}
 	_ = a.tokens.InvalidateCodexResetCredits(id)
 	selected.Usage.CodexResetCreditsCheckedAt = 0
 	selected.Usage.CodexResetCreditsError = ""
@@ -68,6 +74,13 @@ func (a *appServer) consumeCodexResetCredit(ctx context.Context, id string) (cod
 	latest, getErr := a.tokens.Get(id)
 	if getErr != nil {
 		latest = selected
+	}
+	if refreshErr == nil && validation.OK && codexWeeklyQuotaWindowReset(selected.Usage, latest.Usage, estimateResetAt) {
+		if baselineErr := a.tokens.RecordCodexWeeklyEstimateReset(id, estimateResetAt, estimateBaseline); baselineErr == nil {
+			if updated, updatedErr := a.tokens.Get(id); updatedErr == nil {
+				latest = updated
+			}
+		}
 	}
 	response := codexResetCreditConsumeResponse{
 		Consumed:  true,
@@ -86,4 +99,24 @@ func (a *appServer) consumeCodexResetCredit(ctx context.Context, id string) (cod
 		a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(latest), Message: "Codex quota reset credit consumed"})
 	}
 	return response, nil
+}
+
+func codexWeeklyQuotaWindowReset(before token.UsageInfo, after token.UsageInfo, consumedAt time.Time) bool {
+	if before.SecondaryResetAt <= 0 || after.SecondaryResetAt <= 0 {
+		return false
+	}
+	if before.SecondaryResetAt <= consumedAt.Unix() {
+		return false
+	}
+	if before.SecondaryResetAt != after.SecondaryResetAt {
+		return true
+	}
+	return codexWeeklyUsedPercent(before)-codexWeeklyUsedPercent(after) > 0.01
+}
+
+func codexWeeklyUsedPercent(usage token.UsageInfo) float64 {
+	if usage.SecondaryUsedPercentExact > 0 {
+		return usage.SecondaryUsedPercentExact
+	}
+	return float64(usage.SecondaryUsedPercent)
 }

@@ -83,6 +83,7 @@ export namespace taskautomation {
 }
 
 export namespace token {
+  export import CodexWeeklyEstimateBaseline = tokenModels.CodexWeeklyEstimateBaseline
   export import DailyTokenUsage = tokenModels.DailyTokenUsage
   export import UpsertRequest = tokenModels.UpsertRequest
 }

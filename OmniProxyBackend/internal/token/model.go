@@ -148,19 +148,29 @@ type BalancePackage struct {
 }
 
 type TokenStats struct {
-	RequestCount            int64             `json:"requestCount"`
-	InputTokens             int64             `json:"inputTokens"`
-	OutputTokens            int64             `json:"outputTokens"`
-	TotalTokens             int64             `json:"totalTokens"`
-	CacheCreationTokens     int64             `json:"cacheCreationTokens,omitempty"`
-	CacheReadTokens         int64             `json:"cacheReadTokens,omitempty"`
-	LastInputTokens         int               `json:"lastInputTokens,omitempty"`
-	LastOutputTokens        int               `json:"lastOutputTokens,omitempty"`
-	LastTotalTokens         int               `json:"lastTotalTokens,omitempty"`
-	LastCacheCreationTokens int               `json:"lastCacheCreationTokens,omitempty"`
-	LastCacheReadTokens     int               `json:"lastCacheReadTokens,omitempty"`
-	Daily                   []DailyTokenUsage `json:"daily,omitempty"`
-	UpdatedAt               *time.Time        `json:"updatedAt,omitempty"`
+	RequestCount                int64                        `json:"requestCount"`
+	InputTokens                 int64                        `json:"inputTokens"`
+	OutputTokens                int64                        `json:"outputTokens"`
+	TotalTokens                 int64                        `json:"totalTokens"`
+	CacheCreationTokens         int64                        `json:"cacheCreationTokens,omitempty"`
+	CacheReadTokens             int64                        `json:"cacheReadTokens,omitempty"`
+	CodexWeeklyEstimateResetAt  int64                        `json:"codexWeeklyEstimateResetAt,omitempty"`
+	CodexWeeklyEstimateBaseline *CodexWeeklyEstimateBaseline `json:"codexWeeklyEstimateBaseline,omitempty"`
+	LastInputTokens             int                          `json:"lastInputTokens,omitempty"`
+	LastOutputTokens            int                          `json:"lastOutputTokens,omitempty"`
+	LastTotalTokens             int                          `json:"lastTotalTokens,omitempty"`
+	LastCacheCreationTokens     int                          `json:"lastCacheCreationTokens,omitempty"`
+	LastCacheReadTokens         int                          `json:"lastCacheReadTokens,omitempty"`
+	Daily                       []DailyTokenUsage            `json:"daily,omitempty"`
+	UpdatedAt                   *time.Time                   `json:"updatedAt,omitempty"`
+}
+
+type CodexWeeklyEstimateBaseline struct {
+	InputTokens         int64 `json:"inputTokens"`
+	OutputTokens        int64 `json:"outputTokens"`
+	TotalTokens         int64 `json:"totalTokens"`
+	CacheCreationTokens int64 `json:"cacheCreationTokens,omitempty"`
+	CacheReadTokens     int64 `json:"cacheReadTokens,omitempty"`
 }
 
 type HealthInfo struct {
