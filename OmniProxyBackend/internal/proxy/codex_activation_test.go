@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"omniproxy/internal/config"
 	"omniproxy/internal/token"
 )
 
 func TestCodexUsageNeedsActivation(t *testing.T) {
+	now := time.Unix(1000, 0)
 	tests := []struct {
 		name  string
 		usage token.UsageInfo
@@ -26,7 +28,7 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 			name: "paid account without five hour window",
 			usage: token.UsageInfo{
 				PlanType:         "team",
-				SecondaryResetAt: 200,
+				SecondaryResetAt: 1200,
 			},
 			want: true,
 		},
@@ -34,7 +36,7 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 			name: "paid account without weekly window",
 			usage: token.UsageInfo{
 				PlanType:       "pro",
-				PrimaryResetAt: 100,
+				PrimaryResetAt: 1100,
 			},
 			want: true,
 		},
@@ -42,8 +44,8 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 			name: "paid account with both windows",
 			usage: token.UsageInfo{
 				PlanType:         "plus",
-				PrimaryResetAt:   100,
-				SecondaryResetAt: 200,
+				PrimaryResetAt:   1100,
+				SecondaryResetAt: 1200,
 			},
 			want: false,
 		},
@@ -51,7 +53,7 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 			name: "free account with weekly window",
 			usage: token.UsageInfo{
 				PlanType:         "free",
-				SecondaryResetAt: 200,
+				SecondaryResetAt: 1200,
 			},
 			want: false,
 		},
@@ -60,11 +62,28 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 			usage: token.UsageInfo{PlanType: "free"},
 			want:  true,
 		},
+		{
+			name: "paid account with expired five hour window",
+			usage: token.UsageInfo{
+				PlanType:         "plus",
+				PrimaryResetAt:   999,
+				SecondaryResetAt: 1200,
+			},
+			want: true,
+		},
+		{
+			name: "free account with expired weekly window",
+			usage: token.UsageInfo{
+				PlanType:         "free",
+				SecondaryResetAt: 1000,
+			},
+			want: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CodexUsageNeedsActivation(tt.usage); got != tt.want {
+			if got := CodexUsageNeedsActivationAt(tt.usage, now); got != tt.want {
 				t.Fatalf("CodexUsageNeedsActivation(%#v) = %v, want %v", tt.usage, got, tt.want)
 			}
 		})

@@ -28,6 +28,7 @@ export namespace main {
   export import usageResponse = main_tokensModels.usageResponse
   export import tokenResponse = main_tokensModels.tokenResponse
   export import codexResetCreditConsumeResponse = main_miscModels.codexResetCreditConsumeResponse
+  export import codexUsageActivationResponse = main_miscModels.codexUsageActivationResponse
   export import configExportResult = main_miscModels.configExportResult
   export import configImportResult = main_miscModels.configImportResult
   export import configSnapshotSummary = main_miscModels.configSnapshotSummary

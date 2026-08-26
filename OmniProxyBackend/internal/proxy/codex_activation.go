@@ -9,15 +9,23 @@ import (
 	"net/url"
 	"omniproxy/internal/token"
 	"strings"
+	"time"
 )
 
 const codexActivationRequestBody = `{"model":"gpt-5.6-luna","instructions":"Reply with OK only.","input":[{"type":"message","role":"user","content":"OK"}],"reasoning":{"effort":"low","summary":"auto"},"max_output_tokens":8,"stream":true,"store":false}`
 
 func CodexUsageNeedsActivation(usage token.UsageInfo) bool {
-	if strings.EqualFold(strings.TrimSpace(usage.PlanType), "free") {
-		return usage.SecondaryResetAt <= 0
+	return CodexUsageNeedsActivationAt(usage, time.Now())
+}
+
+func CodexUsageNeedsActivationAt(usage token.UsageInfo, now time.Time) bool {
+	resetExpired := func(resetAt int64) bool {
+		return resetAt <= now.Unix()
 	}
-	return usage.PrimaryResetAt <= 0 || usage.SecondaryResetAt <= 0
+	if strings.EqualFold(strings.TrimSpace(usage.PlanType), "free") {
+		return resetExpired(usage.SecondaryResetAt)
+	}
+	return resetExpired(usage.PrimaryResetAt) || resetExpired(usage.SecondaryResetAt)
 }
 
 func (v *Validator) ActivateCodexUsage(ctx context.Context, selected token.Token) error {

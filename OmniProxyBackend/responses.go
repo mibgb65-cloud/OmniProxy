@@ -141,6 +141,17 @@ type validationResponse struct {
 	CheckedPath string         `json:"checkedPath"`
 }
 
+type codexUsageActivationResponse struct {
+	Token                  tokenResponse `json:"token"`
+	Activated              bool          `json:"activated"`
+	AlreadyActive          bool          `json:"alreadyActive"`
+	BeforePrimaryResetAt   int64         `json:"beforePrimaryResetAt,omitempty"`
+	BeforeSecondaryResetAt int64         `json:"beforeSecondaryResetAt,omitempty"`
+	AfterPrimaryResetAt    int64         `json:"afterPrimaryResetAt,omitempty"`
+	AfterSecondaryResetAt  int64         `json:"afterSecondaryResetAt,omitempty"`
+	Message                string        `json:"message"`
+}
+
 type logResponse struct {
 	ID         int64      `json:"id"`
 	Time       string     `json:"time"`

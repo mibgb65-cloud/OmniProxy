@@ -7,6 +7,8 @@ import {token} from '../models';
 import {proxy} from '../models';
 import {taskautomation} from '../models';
 
+export function ActivateCodexUsage(arg1:string):Promise<main.codexUsageActivationResponse>;
+
 export function ActiveProxyRequests():Promise<Array<main.activeRequestResponse>>;
 
 export function AppInfo():Promise<main.appInfo>;

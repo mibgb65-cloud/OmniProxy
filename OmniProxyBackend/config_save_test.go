@@ -2,14 +2,61 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"omniproxy/internal/config"
 	"omniproxy/internal/logs"
 	"omniproxy/internal/storage"
 	"omniproxy/internal/token"
 )
+
+func TestSaveConfigImmediatelyScansCodexWhenAutoActivationIsEnabled(t *testing.T) {
+	scanStarted := make(chan struct{}, 1)
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/backend-api/wham/usage" {
+			return
+		}
+		select {
+		case scanStarted <- struct{}{}:
+		default:
+		}
+		_, _ = w.Write([]byte(`{"plan_type":"plus","rate_limit":{"primary_window":{"used_percent":2,"reset_at":1893456000,"window_minutes":300},"secondary_window":{"used_percent":3,"reset_at":1894060800,"window_minutes":10080}}}`))
+	}))
+	defer upstream.Close()
+
+	initial := config.Default()
+	initial.CodexBaseURL = upstream.URL + "/backend-api/codex"
+	initial.CodexUsageEndpoint = upstream.URL + "/backend-api/wham/usage"
+	app, _ := newConfigSaveTestApp(t, initial)
+	if _, err := app.tokens.Add(token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForMainTest(t, "settings-scan@example.com"),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	next := initial
+	next.CodexAutoActivateUsage = true
+	if _, err := app.saveConfig(next); err != nil {
+		t.Fatalf("saveConfig: %v", err)
+	}
+	select {
+	case <-scanStarted:
+	case <-time.After(2 * time.Second):
+		t.Fatal("expected Codex scan to start immediately after enabling setting")
+	}
+
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if !app.cfg.CodexAutoActivateUsage {
+		t.Fatal("expected the enabled Codex activation setting to be applied")
+	}
+}
 
 func TestSaveConfigRestoresProxyAndConfigWhenProxyRestartFails(t *testing.T) {
 	occupied, occupiedPort := listenOnLocalhost(t)

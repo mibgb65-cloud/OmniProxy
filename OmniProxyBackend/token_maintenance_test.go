@@ -33,8 +33,8 @@ func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 		_, _ = w.Write([]byte(`{
 			"plan_type": "team",
 			"rate_limit": {
-				"primary_window": {"used_percent": 23, "reset_at": 1777299888},
-				"secondary_window": {"used_percent": 41, "reset_at": 1777798105}
+				"primary_window": {"used_percent": 23, "reset_at": 1893456000},
+				"secondary_window": {"used_percent": 41, "reset_at": 1894060800}
 			}
 		}`))
 	}))
@@ -57,7 +57,6 @@ func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 		tokens: manager,
 		logs:   logs.NewRecorder(10),
 	}
-
 	payload, err := json.Marshal(token.UpsertRequest{
 		Provider:       token.ProviderOpenAI,
 		CredentialType: token.CredentialTypeCodexAuthJSON,
@@ -104,8 +103,8 @@ func TestAddCodexTokenAutoActivatesMissingUsageWindows(t *testing.T) {
 			_, _ = w.Write([]byte(`{
 				"plan_type":"plus",
 				"rate_limit":{
-					"primary_window":{"used_percent":1,"reset_at":1777299888,"window_minutes":300},
-					"secondary_window":{"used_percent":1,"reset_at":1777798105,"window_minutes":10080}
+					"primary_window":{"used_percent":1,"reset_at":1893456000,"window_minutes":300},
+					"secondary_window":{"used_percent":1,"reset_at":1894060800,"window_minutes":10080}
 				}
 			}`))
 		case r.Method == http.MethodPost && r.URL.Path == "/backend-api/codex/responses":
@@ -197,6 +196,139 @@ func TestAddCodexTokenDoesNotAutoActivateWhenDisabled(t *testing.T) {
 	}
 	if usageChecks != 1 || activationCalls != 0 {
 		t.Fatalf("usage checks = %d, activation calls = %d", usageChecks, activationCalls)
+	}
+}
+
+func TestManualCodexUsageActivationBypassesDisabledSettingAndSkipsActiveWindows(t *testing.T) {
+	usageChecks := 0
+	activationCalls := 0
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/backend-api/wham/usage":
+			usageChecks++
+			_, _ = w.Write([]byte(`{
+				"plan_type":"plus",
+				"rate_limit":{
+					"primary_window":{"used_percent":1,"reset_at":1893456000,"window_minutes":300},
+					"secondary_window":{"used_percent":1,"reset_at":1894060800,"window_minutes":10080}
+				}
+			}`))
+		case r.Method == http.MethodPost:
+			activationCalls++
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := manager.Add(token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForMainTest(t, "manual-active@example.com"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app := &appServer{
+		cfg: config.Config{
+			ProxyPort:          3000,
+			ControlPort:        3890,
+			CodexBaseURL:       upstream.URL + "/backend-api/codex",
+			SwitchThreshold:    15,
+			MaxRetries:         1,
+			CodexUsageEndpoint: upstream.URL + "/backend-api/wham/usage",
+		},
+		tokens: manager,
+		logs:   logs.NewRecorder(10),
+	}
+	result, err := app.activateCodexUsageManually(context.Background(), item.ID)
+	if err != nil {
+		t.Fatalf("activateCodexUsageManually: %v", err)
+	}
+	if result.Activated || !result.AlreadyActive {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+	if activationCalls != 0 || usageChecks != 1 {
+		t.Fatalf("activation calls = %d, usage checks = %d", activationCalls, usageChecks)
+	}
+}
+
+func TestManualCodexUsageActivationActivatesMissingWindowsWhenSettingDisabled(t *testing.T) {
+	usageChecks := 0
+	activationCalls := 0
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/backend-api/wham/usage":
+			usageChecks++
+			if usageChecks == 1 {
+				_, _ = w.Write([]byte(`{"plan_type":"plus","rate_limit":{}}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{
+				"plan_type":"plus",
+				"rate_limit":{
+					"primary_window":{"used_percent":1,"reset_at":1893456000,"window_minutes":300},
+					"secondary_window":{"used_percent":1,"reset_at":1894060800,"window_minutes":10080}
+				}
+			}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/backend-api/codex/responses":
+			activationCalls++
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = w.Write([]byte("data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}\n\ndata: [DONE]\n\n"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := manager.Add(token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForMainTest(t, "manual-missing@example.com"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	app := &appServer{
+		cfg: config.Config{
+			ProxyPort:          3000,
+			ControlPort:        3890,
+			CodexBaseURL:       upstream.URL + "/backend-api/codex",
+			SwitchThreshold:    15,
+			MaxRetries:         1,
+			CodexUsageEndpoint: upstream.URL + "/backend-api/wham/usage",
+		},
+		tokens: manager,
+		logs:   logs.NewRecorder(10),
+	}
+	historyRecorder, err := history.NewRecorder(storage.NewJSONStore[[]history.Entry](filepath.Join(t.TempDir(), "history.json")), 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	app.history = historyRecorder
+
+	result, err := app.activateCodexUsageManually(context.Background(), item.ID)
+	if err != nil {
+		t.Fatalf("activateCodexUsageManually: %v", err)
+	}
+	if !result.Activated || result.AlreadyActive || result.Token.Usage.PrimaryResetAt == 0 || result.Token.Usage.SecondaryResetAt == 0 {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+	if activationCalls != 1 || usageChecks != 2 {
+		t.Fatalf("activation calls = %d, usage checks = %d", activationCalls, usageChecks)
+	}
+	entries := historyRecorder.List(history.Filter{Search: "codex usage activation", Limit: 10})
+	if len(entries) != 2 || !strings.Contains(entries[1].Message, "started") || !strings.Contains(entries[0].Message, "completed") {
+		t.Fatalf("expected persisted start and completion history, got %#v", entries)
 	}
 }
 

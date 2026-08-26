@@ -58,13 +58,14 @@ const props = defineProps({
   refreshingProvider: { type: Boolean, default: false },
   switchingOnlyTokenIds: { type: Object, required: true },
   validatingIds: { type: Object, required: true },
+  activatingCodexUsageIds: { type: Object, required: true },
   consumingResetCreditIds: { type: Object, required: true },
   providerTokens: { type: Function, required: true },
   credentialLabel: { type: Function, required: true },
   providerLabel: { type: Function, required: true },
 })
 
-const emit = defineEmits(['refresh', 'refresh-provider-quotas', 'select-provider', 'toggle-token-selected', 'select-token-group', 'refresh-quota', 'use-reset-credit'])
+const emit = defineEmits(['refresh', 'refresh-provider-quotas', 'select-provider', 'toggle-token-selected', 'select-token-group', 'refresh-quota', 'activate-codex-usage', 'use-reset-credit'])
 
 const workspaceIndexes = reactive({})
 const resetCreditTokenId = ref('')
@@ -415,6 +416,25 @@ function useResetCredit(item) {
                     @click="$emit('refresh-quota', group.current)"
                   >
                     刷新
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip
+                  v-if="isCodexToken(group.current)"
+                  content="先检查额度窗口；仅在窗口缺失或已过期时发送一次最小激活消息"
+                  placement="top"
+                >
+                  <el-button
+                    size="small"
+                    class="account-action-button codex-activation-button"
+                    type="primary"
+                    plain
+                    :icon="CircleCheckFilled"
+                    :loading="activatingCodexUsageIds[group.current.id]"
+                    :disabled="group.current.disabled || validatingIds[group.current.id]"
+                    :aria-label="`检测并激活 ${group.current.name || 'Codex'} 的额度窗口`"
+                    @click="$emit('activate-codex-usage', group.current)"
+                  >
+                    {{ activatingCodexUsageIds[group.current.id] ? '激活中' : '检测并激活' }}
                   </el-button>
                 </el-tooltip>
               </div>

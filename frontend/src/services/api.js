@@ -179,6 +179,12 @@ export function validateToken(id) {
   }))
 }
 
+export function activateCodexUsage(id) {
+  return callDesktopOr('ActivateCodexUsage', [id], () => request(`/tokens/${id}/codex-usage-activation`, {
+    method: 'POST',
+  }))
+}
+
 export function refreshTokenAuth(id) {
   return callDesktopOr('RefreshTokenAuth', [id], () => request(`/tokens/${id}/refresh`, {
     method: 'POST',

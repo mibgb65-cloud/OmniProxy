@@ -69,6 +69,7 @@ const (
 	historyEventStartupCodexUsage = "startup-codex-usage-refresh"
 	historyEventCurrentQuota      = "current-quota-refresh"
 	historyEventHealthCheck       = "health-check"
+	historyEventCodexEnableScan   = "codex-activation-enable-scan"
 )
 
 func main() {

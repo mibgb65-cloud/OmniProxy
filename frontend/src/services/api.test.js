@@ -118,6 +118,10 @@ test('HTTP API fallback supports browser logins and reset credits', async () => 
     if (path.endsWith('/tokens/account-1/reset-credit')) {
       return jsonResponse(200, { consumed: true, token: { id: 'account-1' } })
     }
+    if (path.endsWith('/tokens/account-1/codex-usage-activation')) {
+      assert.equal(options.method, 'POST')
+      return jsonResponse(200, { activated: true, message: 'Codex 额度窗口已激活', token: { id: 'account-1' } })
+    }
     throw new Error(`unexpected fetch: ${url}`)
   }
 
@@ -129,6 +133,7 @@ test('HTTP API fallback supports browser logins and reset credits', async () => 
   assert.equal((await api.getClaudeOAuthLoginStatus('claude-login-1')).ready, true)
   assert.equal((await api.completeClaudeOAuthLogin('claude-login-1')).id, 'claude-account-1')
   assert.equal((await api.consumeCodexResetCredit('account-1')).consumed, true)
+  assert.equal((await api.activateCodexUsage('account-1')).activated, true)
   assert.deepEqual(
     calls.map((call) => new URL(call.url).pathname),
     [
@@ -139,6 +144,7 @@ test('HTTP API fallback supports browser logins and reset credits', async () => 
       '/api/claude/login/status',
       '/api/claude/login/complete',
       '/api/tokens/account-1/reset-credit',
+      '/api/tokens/account-1/codex-usage-activation',
     ],
   )
   delete globalThis.__OMNIPROXY_CONTROL_TOKEN__

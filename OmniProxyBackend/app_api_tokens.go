@@ -64,6 +64,10 @@ func (a *DesktopApp) ConsumeCodexResetCredit(id string) (codexResetCreditConsume
 	return a.server.consumeCodexResetCredit(a.callContext(), id)
 }
 
+func (a *DesktopApp) ActivateCodexUsage(id string) (codexUsageActivationResponse, error) {
+	return a.server.activateCodexUsageManually(a.callContext(), id)
+}
+
 func (a *DesktopApp) StartCodexOAuthLogin(refresh bool) (codexOAuthLoginStartResponse, error) {
 	return a.server.startCodexOAuthLogin(refresh)
 }

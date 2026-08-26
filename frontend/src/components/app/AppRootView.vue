@@ -45,7 +45,7 @@ const TokenTrendView = defineAsyncComponent(() => import('../TokenTrendView.vue'
 const TokensView = defineAsyncComponent(() => import('../../features/tokens/TokensView.vue'))
 
 const {
-  activeProvider, activeProviderAPIBalanceSummaries, activeProviderEnabledCount, activeProviderInfo, activeProviderTokens, activeRequests, activeTab, activeTokenIds,
+  activeProvider, activeProviderAPIBalanceSummaries, activeProviderEnabledCount, activeProviderInfo, activeProviderTokens, activeRequests, activeTab, activeTokenIds, activateCodexUsageWindow,
   activeTokens, afterPageEnter, apiOverviewPageCount, apiOverviewTokens, apiQuotaPage, apiQuotaPageText, appInfo, appThemeLabel,
   autoStartChanging, autoStartEnabled, batchImportForm, batchImportPlaceholder, batchImporting, billingDates, billingUsage, canConfigureClaudeModels, canConfigureCodexModels,
   changeBillingDate, changeQuotaOverviewPage, chooseDataDirectory, claudeCliRestoring, claudeDesktopConfiguring, claudeDesktopRestoring, claudeLoginDialog, claudeLoggingIn, claudeModelsConfiguring,
@@ -72,7 +72,7 @@ const {
   tabIcons, taskAutomationBrowserProfiles, taskAutomationBrowserProfilesError, taskAutomationBrowserProfilesLoading, titlebarUpdatePopoverOpen, titlebarUpdatePrompt,
   titlebarUpdateVisible, todayProxyRequests, todayProxyTokens, toggleAppTheme, toggleAutoStart, toggleProxy, toggleTitlebarUpdatePopover,
   toggleTokenEnabled, toggleTokenSelected, toggleWindowMaximise, togglingTokenIds, tokens, toolUsageDuration, toolUsageMeta, toolUsageRows,
-  totalProxyInputTokens, totalProxyOutputTokens, totalProxyRequests, totalProxyTokens, trendWidth, updateChecking, updateDiagnostics, updateDiagnosticsLoading, updateDownloadStatus, validatingIds,
+  totalProxyInputTokens, totalProxyOutputTokens, totalProxyRequests, totalProxyTokens, trendWidth, updateChecking, updateDiagnostics, updateDiagnosticsLoading, updateDownloadStatus, activatingCodexUsageIds, validatingIds,
   useCodexResetCredit, verifyToken, watchTokens, windowMaximised, workspaceRef, workspaceScrollbarVisible, handleWorkspacePointerMove, handleWorkspaceScroll,
 } = useOmniProxyApp()
 </script>
@@ -264,6 +264,7 @@ const {
         :refreshing-provider="refreshingProvider"
         :switching-only-token-ids="switchingOnlyTokenIds"
         :validating-ids="validatingIds"
+        :activating-codex-usage-ids="activatingCodexUsageIds"
         :consuming-reset-credit-ids="consumingResetCreditIds"
         :provider-tokens="providerTokens"
         :credential-label="credentialLabel"
@@ -274,6 +275,7 @@ const {
         @toggle-token-selected="toggleTokenSelected"
         @select-token-group="selectTokenGroup"
         @refresh-quota="refreshQuota"
+        @activate-codex-usage="activateCodexUsageWindow"
         @use-reset-credit="useCodexResetCredit"
       />
 

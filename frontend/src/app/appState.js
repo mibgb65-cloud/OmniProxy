@@ -127,6 +127,7 @@ export function createAppState() {
       taskAutomationBrowserProfileSeq: 0,
     },
     validatingIds: reactive({}),
+    activatingCodexUsageIds: reactive({}),
     refreshingTokenIds: reactive({}),
     consumingResetCreditIds: reactive({}),
     togglingTokenIds: reactive({}),

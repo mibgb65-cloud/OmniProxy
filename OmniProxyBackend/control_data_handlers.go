@@ -55,6 +55,7 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 
 	a.mu.Lock()
 	oldCfg := a.cfg
+	shouldScanCodexActivation := !oldCfg.CodexAutoActivateUsage && cfg.CodexAutoActivateUsage
 	shouldRestartProxy := a.proxyServer != nil && proxyConfigChanged(oldCfg, cfg)
 	shouldRestartControl := a.control != nil && controlConfigChanged(oldCfg, cfg)
 	oldProxyServer := a.proxyServer
@@ -112,6 +113,9 @@ func (a *appServer) saveConfig(cfg config.Config) (config.Config, error) {
 		}
 	}
 	a.syncPremProxyAfterConfigChange(oldCfg, cfg)
+	if shouldScanCodexActivation && a.tokens != nil {
+		go a.scanCodexUsageActivationOnEnable(context.Background())
+	}
 
 	if a.logs != nil {
 		a.logs.Add(logs.Entry{Level: logs.LevelInfo, Message: "configuration updated"})

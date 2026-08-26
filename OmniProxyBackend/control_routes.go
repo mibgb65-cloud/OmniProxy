@@ -149,6 +149,10 @@ func (a *appServer) handleTokenByID(w http.ResponseWriter, r *http.Request) {
 		a.handleCodexResetCredit(w, r, id)
 		return
 	}
+	if len(parts) == 2 && parts[1] == "codex-usage-activation" {
+		a.handleCodexUsageActivation(w, r, id)
+		return
+	}
 	if len(parts) == 2 && parts[1] == "disabled" {
 		a.handleTokenDisabled(w, r, id)
 		return
@@ -294,6 +298,19 @@ func (a *appServer) handleCodexResetCredit(w http.ResponseWriter, r *http.Reques
 	result, err := a.consumeCodexResetCredit(r.Context(), id)
 	if err != nil {
 		writeDomainError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (a *appServer) handleCodexUsageActivation(w http.ResponseWriter, r *http.Request, id string) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	result, err := a.activateCodexUsageManually(r.Context(), id)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
 		return
 	}
 	writeJSON(w, http.StatusOK, result)

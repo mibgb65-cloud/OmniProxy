@@ -14,10 +14,22 @@ import (
 )
 
 func (a *appServer) validateAndRecordToken(ctx context.Context, selected token.Token) (proxy.ValidationResult, error) {
+	result, activation, err := a.validateAndRecordTokenWithActivation(ctx, selected, false)
+	if activation.Attempted {
+		a.recordCodexUsageActivationHistory(selected, activation, err, "automatic")
+	}
+	return result, err
+}
+
+func (a *appServer) validateAndRecordTokenWithActivation(ctx context.Context, selected token.Token, forceActivation bool) (result proxy.ValidationResult, activation codexUsageActivationAttempt, err error) {
+	start := time.Now()
+	defer func() { activation.Duration = time.Since(start).Milliseconds() }()
+
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()
-	if isCodexToken(selected) && cfg.CodexAutoActivateUsage {
+	allowActivation := isCodexToken(selected) && (forceActivation || cfg.CodexAutoActivateUsage)
+	if allowActivation {
 		a.codexActivationMu.Lock()
 		defer a.codexActivationMu.Unlock()
 	}
@@ -25,40 +37,55 @@ func (a *appServer) validateAndRecordToken(ctx context.Context, selected token.T
 	refreshedSelected, _, refreshErr := a.refreshAuthTokenIfNeeded(ctx, selected, false)
 	if refreshErr != nil {
 		_ = a.tokens.MarkInvalid(selected.ID, fmt.Sprintf("OAuth token refresh failed: %v", refreshErr))
-		return proxy.ValidationResult{}, refreshErr
+		return proxy.ValidationResult{}, activation, refreshErr
 	}
 	selected = refreshedSelected
 
 	validator, err := proxy.NewValidator(cfg)
 	if err != nil {
-		return proxy.ValidationResult{}, err
+		return proxy.ValidationResult{}, activation, err
 	}
 
-	result, err := validator.Validate(ctx, selected)
+	result, err = validator.Validate(ctx, selected)
 	if err == nil && isRefreshableAuthToken(selected) && (result.Status == http.StatusUnauthorized || result.Status == http.StatusForbidden) {
 		refreshedSelected, refreshed, refreshErr := a.refreshAuthTokenIfNeeded(ctx, selected, true)
 		if refreshErr != nil {
 			_ = a.tokens.MarkInvalid(selected.ID, fmt.Sprintf("OAuth token refresh failed: %v", refreshErr))
-			return result, refreshErr
+			return result, activation, refreshErr
 		}
 		if refreshed {
 			selected = refreshedSelected
 			result, err = validator.Validate(ctx, selected)
 		}
 	}
-	if err == nil && result.OK && cfg.CodexAutoActivateUsage && isCodexToken(selected) && result.Usage != nil && proxy.CodexUsageNeedsActivation(*result.Usage) {
-		if a.logs != nil {
-			a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(selected), Message: "codex usage windows are inactive; automatic activation started"})
+	if result.Usage != nil {
+		activation.BeforePrimaryResetAt = result.Usage.PrimaryResetAt
+		activation.BeforeSecondaryResetAt = result.Usage.SecondaryResetAt
+	}
+	if err == nil && result.OK && allowActivation && result.Usage != nil && proxy.CodexUsageNeedsActivation(*result.Usage) {
+		activation.Attempted = true
+		activation.Duration = time.Since(start).Milliseconds()
+		source := "automatic"
+		if forceActivation {
+			source = "manual"
 		}
+		a.recordCodexUsageActivationStarted(selected, activation, source)
 		if activationErr := validator.ActivateCodexUsage(ctx, selected); activationErr != nil {
 			err = fmt.Errorf("Codex 自动激活失败: %w", activationErr)
 		} else {
 			result, err = validator.Validate(ctx, selected)
+			if result.Usage != nil {
+				activation.AfterPrimaryResetAt = result.Usage.PrimaryResetAt
+				activation.AfterSecondaryResetAt = result.Usage.SecondaryResetAt
+			}
 			if err == nil && (!result.OK || result.Usage == nil || proxy.CodexUsageNeedsActivation(*result.Usage)) {
 				err = errors.New("Codex 自动激活后仍未检测到完整的额度窗口")
 			}
+			if err == nil {
+				activation.Activated = true
+			}
 			if err == nil && a.logs != nil {
-				a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(selected), Message: "codex usage windows activated automatically"})
+				a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(selected), Message: "codex usage windows activated"})
 			}
 		}
 	}
@@ -77,7 +104,53 @@ func (a *appServer) validateAndRecordToken(ctx context.Context, selected token.T
 	if result.OK && result.Remaining == nil && result.Usage == nil {
 		_ = a.tokens.MarkActive(selected.ID)
 	}
-	return result, err
+	return result, activation, err
+}
+
+func (a *appServer) activateCodexUsageManually(ctx context.Context, id string) (codexUsageActivationResponse, error) {
+	selected, err := a.tokens.Get(id)
+	if err != nil {
+		return codexUsageActivationResponse{}, err
+	}
+	if !isCodexToken(selected) {
+		return codexUsageActivationResponse{}, errors.New("当前账号不是 Codex auth.json 账号")
+	}
+	if selected.Disabled {
+		return codexUsageActivationResponse{}, errors.New("当前 Codex 账号已停用")
+	}
+
+	result, activation, err := a.validateAndRecordTokenWithActivation(ctx, selected, true)
+	if err == nil && !result.OK {
+		err = fmt.Errorf("Codex 额度查询返回 %d", result.Status)
+	}
+	if err == nil && result.Usage == nil {
+		err = errors.New("Codex 额度接口未返回可判定的窗口信息")
+	}
+	a.recordCodexUsageActivationHistory(selected, activation, err, "manual")
+	updated := selected
+	if latest, getErr := a.tokens.Get(id); getErr == nil {
+		updated = latest
+	}
+	response := codexUsageActivationResponse{
+		Token:                  tokenResponseFor(updated),
+		Activated:              activation.Activated,
+		AlreadyActive:          !activation.Attempted && err == nil && result.OK && result.Usage != nil && !proxy.CodexUsageNeedsActivation(*result.Usage),
+		BeforePrimaryResetAt:   activation.BeforePrimaryResetAt,
+		BeforeSecondaryResetAt: activation.BeforeSecondaryResetAt,
+		AfterPrimaryResetAt:    activation.AfterPrimaryResetAt,
+		AfterSecondaryResetAt:  activation.AfterSecondaryResetAt,
+	}
+	switch {
+	case err != nil:
+		response.Message = err.Error()
+	case response.AlreadyActive:
+		response.Message = "Codex 额度窗口已启动，无需发送消息"
+	case response.Activated:
+		response.Message = "Codex 额度窗口已激活"
+	default:
+		response.Message = "Codex 额度窗口检查完成"
+	}
+	return response, err
 }
 
 func (a *appServer) refreshStoredAuthToken(ctx context.Context, id string) (token.Token, error) {
@@ -266,6 +339,8 @@ func tokenMaintenanceEventMeta(event string) (string, string, string) {
 		return "/maintenance/current-token-quota-refresh", "quota-refresh", "current token quota refresh completed"
 	case historyEventHealthCheck:
 		return "/maintenance/token-health-check", "health-check", "token health check completed"
+	case historyEventCodexEnableScan:
+		return "/maintenance/codex-activation-enable-scan", "quota-activation", "codex activation scan after enabling setting completed"
 	default:
 		return "/maintenance/token-validation", "token-validation", "manual token validation completed"
 	}

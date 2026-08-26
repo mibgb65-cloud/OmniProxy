@@ -226,6 +226,10 @@
   min-width: 58px !important;
 }
 
+.quotas-page-panel .quota-card-actions .codex-activation-button.el-button {
+  min-width: 106px !important;
+}
+
 .quotas-page-panel .quota-workspace-row {
   min-width: 0;
   display: flex;

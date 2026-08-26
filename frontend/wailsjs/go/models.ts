@@ -46,6 +46,7 @@ export namespace main {
   export import usageResponse = mainModels.usageResponse
   export import tokenResponse = mainModels.tokenResponse
   export import codexResetCreditConsumeResponse = mainModels.codexResetCreditConsumeResponse
+  export import codexUsageActivationResponse = mainModels.codexUsageActivationResponse
   export import configExportResult = mainModels.configExportResult
   export import configImportResult = mainModels.configImportResult
   export import configSnapshotSummary = mainModels.configSnapshotSummary
