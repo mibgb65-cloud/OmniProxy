@@ -168,6 +168,9 @@ func TestValidatorActivatesCodexUsageWithMinimalResponse(t *testing.T) {
 		if payload["model"] != "gpt-5.6-luna" || payload["stream"] != true || payload["store"] != false {
 			t.Errorf("unexpected activation body: %#v", payload)
 		}
+		if _, exists := payload["max_output_tokens"]; exists {
+			t.Errorf("activation body must not include unsupported max_output_tokens: %#v", payload)
+		}
 		input, ok := payload["input"].([]any)
 		if !ok || len(input) != 1 {
 			t.Errorf("unexpected activation input: %#v", payload["input"])

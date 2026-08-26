@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const codexActivationRequestBody = `{"model":"gpt-5.6-luna","instructions":"Reply with OK only.","input":[{"type":"message","role":"user","content":"OK"}],"reasoning":{"effort":"low","summary":"auto"},"max_output_tokens":8,"stream":true,"store":false}`
+const codexActivationRequestBody = `{"model":"gpt-5.6-luna","instructions":"Reply with OK only.","input":[{"type":"message","role":"user","content":"OK"}],"reasoning":{"effort":"low","summary":"auto"},"stream":true,"store":false}`
 
 const codexRollingWindowTolerance = 2 * time.Minute
 
