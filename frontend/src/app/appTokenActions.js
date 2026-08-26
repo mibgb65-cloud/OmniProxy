@@ -1,6 +1,5 @@
 import { ElMessageBox } from 'element-plus'
 import {
-  activateCodexUsage,
   consumeCodexResetCredit,
   createToken,
   deleteToken,
@@ -13,6 +12,7 @@ import {
 } from '../services/api'
 import { codexResetCreditsAvailable, isClaudeOAuthToken, isCodexToken, validationSuccessMessage } from '../utils/tokenDisplay'
 import { createClaudeLoginActions } from './appClaudeLoginActions'
+import { createCodexActivationActions } from './appCodexActivationActions.js'
 import { createCodexLoginActions } from './appCodexLoginActions'
 import { codexIdentityFromAuthJSON } from './codexAuth'
 
@@ -641,27 +641,6 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
   async function refreshQuota(item) {
     await verifyToken(item)
   }
-  async function activateCodexUsageWindow(item) {
-    if (!item?.id || state.activatingCodexUsageIds[item.id]) return
-    if (!isCodexToken(item)) {
-      state.errorMessage.value = '当前账号不是 Codex auth.json 账号'
-      return
-    }
-    state.errorMessage.value = ''
-    state.successMessage.value = ''
-    state.activatingCodexUsageIds[item.id] = true
-    try {
-      const result = await activateCodexUsage(item.id)
-      if (result?.token) replaceToken(result.token)
-      await dataActions.refreshRealtime()
-      state.successMessage.value = result?.message || 'Codex 额度窗口检查完成'
-    } catch (error) {
-      state.errorMessage.value = error.message
-      await dataActions.refreshRealtime()
-    } finally {
-      state.activatingCodexUsageIds[item.id] = false
-    }
-  }
 
   return {
     openCreateForm,
@@ -695,6 +674,6 @@ export function createTokenActions(state, derived, tokenHelpers, dataActions) {
     updateQuotaRefreshProgress,
     refreshProviderQuotas,
     refreshQuota,
-    activateCodexUsageWindow,
+    ...createCodexActivationActions(state, dataActions, replaceToken),
   }
 }

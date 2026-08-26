@@ -11,7 +11,6 @@ import {
   balancePackageTypeLabel,
   codexWeeklyQuotaEstimateMeta,
   codexWeeklyQuotaEstimateText,
-  codexUsagePendingActivation,
   quotaWindowPendingActivation,
   codexResetCreditStatusMeta,
   codexResetCreditTypeLabel,
@@ -73,6 +72,13 @@ const workspaceIndexes = reactive({})
 const resetCreditTokenId = ref('')
 
 const quotaCardGroups = computed(() => buildQuotaWorkspaceGroups(props.activeProviderTokens, workspaceIndexes))
+const codexActivationTargets = computed(() => quotaCardGroups.value
+  .map((group) => group.current)
+  .filter((item) => isCodexToken(item) && !item.disabled))
+const codexActivationLoading = computed(() => codexActivationTargets.value
+  .some((item) => props.activatingCodexUsageIds[item.id]))
+const codexActivationDisabled = computed(() => !codexActivationTargets.value.length
+  || codexActivationTargets.value.some((item) => props.validatingIds[item.id]))
 
 watch(
   quotaCardGroups,
@@ -195,27 +201,50 @@ function useResetCredit(item) {
         </p>
       </div>
       <div
-        v-if="activeProvider === 'openrouter' && activeProviderTokens.length"
-        class="provider-api-balance-summary openrouter-provider-summary"
-        aria-label="OpenRouter 额度"
+        v-if="activeProvider === 'openai' || (activeProvider === 'openrouter' && activeProviderTokens.length) || apiBalanceSummaries.length"
+        class="provider-summary-side"
       >
-        <article v-for="item in activeProviderTokens" :key="`openrouter-provider-summary-${item.id}`">
-          <span>{{ item.name }}</span>
-          <strong>{{ openRouterQuotaRemaining(item) }}</strong>
-          <small>{{ openRouterQuotaMeta(item) }}</small>
-          <small>已用 {{ openRouterQuotaValue(item, 'balanceUsed') }} · 上限 {{ openRouterQuotaLimit(item) }}</small>
-        </article>
-      </div>
-      <div
-        v-else-if="apiBalanceSummaries.length"
-        class="provider-api-balance-summary"
-        aria-label="API Key 总额度"
-      >
-        <article v-for="summary in apiBalanceSummaries" :key="summary.unit">
-          <span>API Key 总额度 · {{ summary.unit }}</span>
-          <strong>{{ formatBalance(summary.remaining) }} {{ summary.unit }}</strong>
-          <small>{{ apiBalanceSummaryMeta(summary) }}</small>
-        </article>
+        <div
+          v-if="activeProvider === 'openrouter' && activeProviderTokens.length"
+          class="provider-api-balance-summary openrouter-provider-summary"
+          aria-label="OpenRouter 额度"
+        >
+          <article v-for="item in activeProviderTokens" :key="`openrouter-provider-summary-${item.id}`">
+            <span>{{ item.name }}</span>
+            <strong>{{ openRouterQuotaRemaining(item) }}</strong>
+            <small>{{ openRouterQuotaMeta(item) }}</small>
+            <small>已用 {{ openRouterQuotaValue(item, 'balanceUsed') }} · 上限 {{ openRouterQuotaLimit(item) }}</small>
+          </article>
+        </div>
+        <div
+          v-else-if="apiBalanceSummaries.length"
+          class="provider-api-balance-summary"
+          aria-label="API Key 总额度"
+        >
+          <article v-for="summary in apiBalanceSummaries" :key="summary.unit">
+            <span>API Key 总额度 · {{ summary.unit }}</span>
+            <strong>{{ formatBalance(summary.remaining) }} {{ summary.unit }}</strong>
+            <small>{{ apiBalanceSummaryMeta(summary) }}</small>
+          </article>
+        </div>
+        <el-tooltip
+          v-if="activeProvider === 'openai'"
+          content="逐个检查当前显示的 Codex 账号；仅在额度窗口未启动、缺失或已过期时发送一次最小消息"
+          placement="top"
+        >
+          <el-button
+            class="provider-codex-activation-button"
+            type="primary"
+            plain
+            :icon="CircleCheckFilled"
+            :loading="codexActivationLoading"
+            :disabled="codexActivationDisabled"
+            :aria-label="`检测并激活 ${codexActivationTargets.length} 个 Codex 账号的额度窗口`"
+            @click="$emit('activate-codex-usage', codexActivationTargets)"
+          >
+            {{ codexActivationLoading ? '检测中' : '检测并激活' }}
+          </el-button>
+        </el-tooltip>
       </div>
     </div>
 
@@ -418,25 +447,6 @@ function useResetCredit(item) {
                     @click="$emit('refresh-quota', group.current)"
                   >
                     刷新
-                  </el-button>
-                </el-tooltip>
-                <el-tooltip
-                  v-if="isCodexToken(group.current)"
-                  :content="codexUsagePendingActivation(group.current) ? '已检测到未启动窗口；发送一次最小消息后会立即复查' : '先检查额度窗口；仅在窗口未启动、缺失或已过期时发送一次最小消息'"
-                  placement="top"
-                >
-                  <el-button
-                    size="small"
-                    class="account-action-button codex-activation-button"
-                    type="primary"
-                    plain
-                    :icon="CircleCheckFilled"
-                    :loading="activatingCodexUsageIds[group.current.id]"
-                    :disabled="group.current.disabled || validatingIds[group.current.id]"
-                    :aria-label="`检测并激活 ${group.current.name || 'Codex'} 的额度窗口`"
-                    @click="$emit('activate-codex-usage', group.current)"
-                  >
-                    {{ activatingCodexUsageIds[group.current.id] ? '激活中' : (codexUsagePendingActivation(group.current) ? '立即激活' : '检测并激活') }}
                   </el-button>
                 </el-tooltip>
               </div>

@@ -81,6 +81,21 @@
   color: var(--text-muted);
 }
 
+.quotas-page-panel .provider-summary-side {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.quotas-page-panel .provider-codex-activation-button.el-button {
+  flex: 0 0 auto;
+  margin-left: 0;
+  border-radius: 999px;
+}
+
 .quotas-page-panel .provider-api-balance-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(150px, 1fr));
@@ -224,10 +239,6 @@
 
 .quotas-page-panel .quota-card-actions .account-select-all-button.el-button {
   min-width: 58px !important;
-}
-
-.quotas-page-panel .quota-card-actions .codex-activation-button.el-button {
-  min-width: 106px !important;
 }
 
 .quotas-page-panel .quota-workspace-row {
@@ -441,7 +452,7 @@
 }
 
 @media (max-width: 960px) {
-  .quotas-page-panel .provider-summary,
+  .quotas-page-panel .provider-summary:has(.provider-api-balance-summary),
   .quotas-page-panel .quota-layout,
   .quotas-page-panel .quota-layout.codex-layout,
   .quotas-page-panel .quota-layout.single-window-layout,
@@ -456,6 +467,14 @@
 }
 
 @media (max-width: 640px) {
+  .quotas-page-panel .provider-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .quotas-page-panel .provider-summary-side {
+    justify-content: flex-start;
+  }
+
   .quotas-page-panel .quota-card-inner {
     padding: 16px;
   }
