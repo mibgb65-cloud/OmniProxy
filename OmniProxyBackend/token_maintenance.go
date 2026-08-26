@@ -61,8 +61,10 @@ func (a *appServer) validateAndRecordTokenWithActivation(ctx context.Context, se
 	if result.Usage != nil {
 		activation.BeforePrimaryResetAt = result.Usage.PrimaryResetAt
 		activation.BeforeSecondaryResetAt = result.Usage.SecondaryResetAt
+		result.Usage.PrimaryActivationPending, result.Usage.SecondaryActivationPending = proxy.CodexUsageActivationPendingAt(*result.Usage, selected.Usage, time.Now())
 	}
-	if err == nil && result.OK && allowActivation && result.Usage != nil && proxy.CodexUsageNeedsActivation(*result.Usage) {
+	needsActivation := result.Usage != nil && (result.Usage.PrimaryActivationPending || result.Usage.SecondaryActivationPending)
+	if err == nil && result.OK && allowActivation && needsActivation {
 		activation.Attempted = true
 		activation.Duration = time.Since(start).Milliseconds()
 		source := "automatic"
@@ -78,10 +80,12 @@ func (a *appServer) validateAndRecordTokenWithActivation(ctx context.Context, se
 				activation.AfterPrimaryResetAt = result.Usage.PrimaryResetAt
 				activation.AfterSecondaryResetAt = result.Usage.SecondaryResetAt
 			}
-			if err == nil && (!result.OK || result.Usage == nil || proxy.CodexUsageNeedsActivation(*result.Usage)) {
+			if err == nil && (!result.OK || result.Usage == nil || !proxy.CodexUsageHasCurrentWindowsAt(*result.Usage, time.Now())) {
 				err = errors.New("Codex 自动激活后仍未检测到完整的额度窗口")
 			}
 			if err == nil {
+				result.Usage.PrimaryActivationPending = false
+				result.Usage.SecondaryActivationPending = false
 				activation.Activated = true
 			}
 			if err == nil && a.logs != nil {
@@ -134,7 +138,7 @@ func (a *appServer) activateCodexUsageManually(ctx context.Context, id string) (
 	response := codexUsageActivationResponse{
 		Token:                  tokenResponseFor(updated),
 		Activated:              activation.Activated,
-		AlreadyActive:          !activation.Attempted && err == nil && result.OK && result.Usage != nil && !proxy.CodexUsageNeedsActivation(*result.Usage),
+		AlreadyActive:          !activation.Attempted && err == nil && result.OK && result.Usage != nil,
 		BeforePrimaryResetAt:   activation.BeforePrimaryResetAt,
 		BeforeSecondaryResetAt: activation.BeforeSecondaryResetAt,
 		AfterPrimaryResetAt:    activation.AfterPrimaryResetAt,

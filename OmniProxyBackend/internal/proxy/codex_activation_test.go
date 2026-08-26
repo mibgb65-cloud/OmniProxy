@@ -90,6 +90,57 @@ func TestCodexUsageNeedsActivation(t *testing.T) {
 	}
 }
 
+func TestCodexUsageNeedsActivationDetectsRollingUnusedWindows(t *testing.T) {
+	now := time.Unix(1_800_000_000, 0)
+	previous := token.UsageInfo{
+		PlanType:                  "plus",
+		PrimaryResetAt:            now.Add(4*time.Hour + 59*time.Minute).Unix(),
+		SecondaryUsedPercentExact: 8,
+		SecondaryResetAt:          now.Add(6 * 24 * time.Hour).Unix(),
+		PrimaryActivationPending:  true,
+	}
+	current := token.UsageInfo{
+		PlanType:                  "plus",
+		PrimaryResetAt:            now.Add(5 * time.Hour).Unix(),
+		SecondaryUsedPercentExact: 8,
+		SecondaryResetAt:          previous.SecondaryResetAt,
+	}
+
+	primary, secondary := CodexUsageActivationPendingAt(current, previous, now)
+	if !primary || secondary {
+		t.Fatalf("pending windows = primary:%v secondary:%v", primary, secondary)
+	}
+}
+
+func TestCodexUsageNeedsActivationKeepsStableUnusedWindowActive(t *testing.T) {
+	now := time.Unix(1_800_000_000, 0)
+	resetAt := now.Add(4 * time.Hour).Unix()
+	previous := token.UsageInfo{
+		PlanType:         "plus",
+		PrimaryResetAt:   resetAt,
+		SecondaryResetAt: now.Add(6 * 24 * time.Hour).Unix(),
+	}
+	current := previous
+
+	primary, secondary := CodexUsageActivationPendingAt(current, previous, now)
+	if primary || secondary {
+		t.Fatalf("pending windows = primary:%v secondary:%v", primary, secondary)
+	}
+}
+
+func TestCodexUsageNeedsActivationDetectsRollingFreeWeeklyWindow(t *testing.T) {
+	now := time.Unix(1_800_000_000, 0)
+	current := token.UsageInfo{
+		PlanType:         "free",
+		SecondaryResetAt: now.Add(7 * 24 * time.Hour).Unix(),
+	}
+
+	primary, secondary := CodexUsageActivationPendingAt(current, token.UsageInfo{}, now)
+	if primary || !secondary {
+		t.Fatalf("pending windows = primary:%v secondary:%v", primary, secondary)
+	}
+}
+
 func TestValidatorActivatesCodexUsageWithMinimalResponse(t *testing.T) {
 	var calls int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

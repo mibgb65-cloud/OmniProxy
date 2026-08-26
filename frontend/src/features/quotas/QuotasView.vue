@@ -11,6 +11,8 @@ import {
   balancePackageTypeLabel,
   codexWeeklyQuotaEstimateMeta,
   codexWeeklyQuotaEstimateText,
+  codexUsagePendingActivation,
+  quotaWindowPendingActivation,
   codexResetCreditStatusMeta,
   codexResetCreditTypeLabel,
   codexResetCredits,
@@ -420,7 +422,7 @@ function useResetCredit(item) {
                 </el-tooltip>
                 <el-tooltip
                   v-if="isCodexToken(group.current)"
-                  content="先检查额度窗口；仅在窗口缺失或已过期时发送一次最小激活消息"
+                  :content="codexUsagePendingActivation(group.current) ? '已检测到未启动窗口；发送一次最小消息后会立即复查' : '先检查额度窗口；仅在窗口未启动、缺失或已过期时发送一次最小消息'"
                   placement="top"
                 >
                   <el-button
@@ -434,7 +436,7 @@ function useResetCredit(item) {
                     :aria-label="`检测并激活 ${group.current.name || 'Codex'} 的额度窗口`"
                     @click="$emit('activate-codex-usage', group.current)"
                   >
-                    {{ activatingCodexUsageIds[group.current.id] ? '激活中' : '检测并激活' }}
+                    {{ activatingCodexUsageIds[group.current.id] ? '激活中' : (codexUsagePendingActivation(group.current) ? '立即激活' : '检测并激活') }}
                   </el-button>
                 </el-tooltip>
               </div>
@@ -514,17 +516,23 @@ function useResetCredit(item) {
             <div v-if="showPrimaryQuotaWindow(group.current)" class="quota-limit">
               <div class="quota-limit-title">
                 <span>{{ quotaPrimaryLabel(group.current) }}</span>
-                <strong v-if="group.current.usage?.subscriptionQuotaAvailable">{{ quotaPercentText(group.current, 'primaryRemainingPercent') }}</strong>
+                <strong v-if="quotaWindowPendingActivation(group.current, 'primary')" class="quota-pending-label">未启动</strong>
+                <strong v-else-if="group.current.usage?.subscriptionQuotaAvailable">{{ quotaPercentText(group.current, 'primaryRemainingPercent') }}</strong>
                 <strong v-else>-</strong>
               </div>
               <el-progress
-                :percentage="quotaPercentValue(group.current, 'primaryRemainingPercent')"
+                :percentage="quotaWindowPendingActivation(group.current, 'primary') ? 0 : quotaPercentValue(group.current, 'primaryRemainingPercent')"
                 :show-text="false"
                 :stroke-width="8"
               />
               <small v-if="group.current.usage?.subscriptionQuotaAvailable" class="quota-detail quota-reset-detail">
-                <span>已用 <strong>{{ quotaPercentText(group.current, 'primaryUsedPercent') }}</strong></span>
-                <span>{{ quotaResetLabel(group.current) }} <strong>{{ formatResetTime(group.current.usage.primaryResetAt) }}</strong></span>
+                <template v-if="quotaWindowPendingActivation(group.current, 'primary')">
+                  <span class="quota-pending-detail">等待首次使用后启动 5 小时窗口</span>
+                </template>
+                <template v-else>
+                  <span>已用 <strong>{{ quotaPercentText(group.current, 'primaryUsedPercent') }}</strong></span>
+                  <span>{{ quotaResetLabel(group.current) }} <strong>{{ formatResetTime(group.current.usage.primaryResetAt) }}</strong></span>
+                </template>
               </small>
               <small v-else>{{ quotaUnavailableText(group.current) }}</small>
             </div>
@@ -532,17 +540,23 @@ function useResetCredit(item) {
             <div v-if="showSecondaryQuotaWindow(group.current)" class="quota-limit">
               <div class="quota-limit-title">
                 <span>{{ quotaSecondaryLabel(group.current) }}</span>
-                <strong v-if="group.current.usage?.subscriptionQuotaAvailable">{{ quotaPercentText(group.current, 'secondaryRemainingPercent') }}</strong>
+                <strong v-if="quotaWindowPendingActivation(group.current, 'secondary')" class="quota-pending-label">未启动</strong>
+                <strong v-else-if="group.current.usage?.subscriptionQuotaAvailable">{{ quotaPercentText(group.current, 'secondaryRemainingPercent') }}</strong>
                 <strong v-else>-</strong>
               </div>
               <el-progress
-                :percentage="quotaPercentValue(group.current, 'secondaryRemainingPercent')"
+                :percentage="quotaWindowPendingActivation(group.current, 'secondary') ? 0 : quotaPercentValue(group.current, 'secondaryRemainingPercent')"
                 :show-text="false"
                 :stroke-width="8"
               />
               <small v-if="group.current.usage?.subscriptionQuotaAvailable" class="quota-detail quota-reset-detail">
-                <span>已用 <strong>{{ quotaPercentText(group.current, 'secondaryUsedPercent') }}</strong></span>
-                <span>{{ quotaResetLabel(group.current) }} <strong>{{ formatResetTime(group.current.usage.secondaryResetAt) }}</strong></span>
+                <template v-if="quotaWindowPendingActivation(group.current, 'secondary')">
+                  <span class="quota-pending-detail">等待首次使用后启动 1 周窗口</span>
+                </template>
+                <template v-else>
+                  <span>已用 <strong>{{ quotaPercentText(group.current, 'secondaryUsedPercent') }}</strong></span>
+                  <span>{{ quotaResetLabel(group.current) }} <strong>{{ formatResetTime(group.current.usage.secondaryResetAt) }}</strong></span>
+                </template>
                 <span v-if="codexWeeklyQuotaEstimateText(group.current)" :title="codexWeeklyQuotaEstimateMeta(group.current)">
                   参考预估 <strong>{{ codexWeeklyQuotaEstimateText(group.current) }}</strong>
                 </span>

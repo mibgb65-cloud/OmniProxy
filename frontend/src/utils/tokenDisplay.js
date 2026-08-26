@@ -55,6 +55,16 @@ export function quotaPercentText(item, field) {
   return `${quotaPercentValue(item, field)}%`
 }
 
+export function quotaWindowPendingActivation(item, windowName) {
+  if (!isCodexToken(item)) return false
+  const prefix = windowName === 'secondary' ? 'secondary' : 'primary'
+  return Boolean(item?.usage?.[`${prefix}WindowPendingActivation`])
+}
+
+export function codexUsagePendingActivation(item) {
+  return quotaWindowPendingActivation(item, 'primary') || quotaWindowPendingActivation(item, 'secondary')
+}
+
 export function formatBalance(value) {
   const number = Number(value || 0)
   const fractionDigits = Math.abs(number) > 0 && Math.abs(number) < 1 ? 4 : 2

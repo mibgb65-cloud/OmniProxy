@@ -14,18 +14,69 @@ import (
 
 const codexActivationRequestBody = `{"model":"gpt-5.6-luna","instructions":"Reply with OK only.","input":[{"type":"message","role":"user","content":"OK"}],"reasoning":{"effort":"low","summary":"auto"},"max_output_tokens":8,"stream":true,"store":false}`
 
+const codexRollingWindowTolerance = 2 * time.Minute
+
 func CodexUsageNeedsActivation(usage token.UsageInfo) bool {
 	return CodexUsageNeedsActivationAt(usage, time.Now())
 }
 
 func CodexUsageNeedsActivationAt(usage token.UsageInfo, now time.Time) bool {
-	resetExpired := func(resetAt int64) bool {
-		return resetAt <= now.Unix()
+	primary, secondary := CodexUsageActivationPendingAt(usage, token.UsageInfo{}, now)
+	return primary || secondary
+}
+
+func CodexUsageActivationPendingAt(usage, previous token.UsageInfo, now time.Time) (bool, bool) {
+	freePlan := strings.EqualFold(strings.TrimSpace(usage.PlanType), "free")
+	primaryPending := false
+	if !freePlan {
+		primaryPending = codexWindowPendingActivation(
+			usage.PrimaryUsedPercent,
+			usage.PrimaryUsedPercentExact,
+			usage.PrimaryResetAt,
+			previous.PrimaryResetAt,
+			previous.PrimaryActivationPending,
+			5*time.Hour,
+			now,
+		)
 	}
-	if strings.EqualFold(strings.TrimSpace(usage.PlanType), "free") {
-		return resetExpired(usage.SecondaryResetAt)
+	secondaryPending := codexWindowPendingActivation(
+		usage.SecondaryUsedPercent,
+		usage.SecondaryUsedPercentExact,
+		usage.SecondaryResetAt,
+		previous.SecondaryResetAt,
+		previous.SecondaryActivationPending,
+		7*24*time.Hour,
+		now,
+	)
+	return primaryPending, secondaryPending
+}
+
+func CodexUsageHasCurrentWindowsAt(usage token.UsageInfo, now time.Time) bool {
+	if usage.SecondaryResetAt <= now.Unix() {
+		return false
 	}
-	return resetExpired(usage.PrimaryResetAt) || resetExpired(usage.SecondaryResetAt)
+	return strings.EqualFold(strings.TrimSpace(usage.PlanType), "free") || usage.PrimaryResetAt > now.Unix()
+}
+
+func codexWindowPendingActivation(used int, usedExact float64, resetAt, previousResetAt int64, previousPending bool, window time.Duration, now time.Time) bool {
+	if resetAt <= now.Unix() {
+		return true
+	}
+	if used > 0 || usedExact > 0 {
+		return false
+	}
+	if previousPending {
+		return true
+	}
+	if previousResetAt == resetAt {
+		return false
+	}
+	expectedResetAt := now.Add(window).Unix()
+	difference := time.Duration(resetAt-expectedResetAt) * time.Second
+	if difference < 0 {
+		difference = -difference
+	}
+	return difference <= codexRollingWindowTolerance
 }
 
 func (v *Validator) ActivateCodexUsage(ctx context.Context, selected token.Token) error {

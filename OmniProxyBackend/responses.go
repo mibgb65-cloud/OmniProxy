@@ -63,10 +63,12 @@ type usageResponse struct {
 	PrimaryUsedPercentExact        float64                    `json:"primaryUsedPercentExact,omitempty"`
 	PrimaryRemainingPercent        int                        `json:"primaryRemainingPercent"`
 	PrimaryResetAt                 int64                      `json:"primaryResetAt,omitempty"`
+	PrimaryActivationPending       bool                       `json:"primaryWindowPendingActivation,omitempty"`
 	SecondaryUsedPercent           int                        `json:"secondaryUsedPercent"`
 	SecondaryUsedPercentExact      float64                    `json:"secondaryUsedPercentExact,omitempty"`
 	SecondaryRemainingPercent      int                        `json:"secondaryRemainingPercent"`
 	SecondaryResetAt               int64                      `json:"secondaryResetAt,omitempty"`
+	SecondaryActivationPending     bool                       `json:"secondaryWindowPendingActivation,omitempty"`
 	APIRemaining                   int                        `json:"apiRemaining,omitempty"`
 	BalanceRemaining               float64                    `json:"balanceRemaining,omitempty"`
 	BalanceTotal                   float64                    `json:"balanceTotal,omitempty"`
@@ -340,10 +342,12 @@ func usageResponseFor(usage token.UsageInfo) usageResponse {
 		PrimaryUsedPercentExact:        usage.PrimaryUsedPercentExact,
 		PrimaryRemainingPercent:        usage.PrimaryRemainingPercent,
 		PrimaryResetAt:                 usage.PrimaryResetAt,
+		PrimaryActivationPending:       usage.PrimaryActivationPending,
 		SecondaryUsedPercent:           usage.SecondaryUsedPercent,
 		SecondaryUsedPercentExact:      usage.SecondaryUsedPercentExact,
 		SecondaryRemainingPercent:      usage.SecondaryRemainingPercent,
 		SecondaryResetAt:               usage.SecondaryResetAt,
+		SecondaryActivationPending:     usage.SecondaryActivationPending,
 		APIRemaining:                   usage.APIRemaining,
 		BalanceRemaining:               usage.BalanceRemaining,
 		BalanceTotal:                   usage.BalanceTotal,

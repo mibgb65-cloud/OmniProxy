@@ -8,12 +8,14 @@ import {
   codexResetCreditsAvailable,
   codexWeeklyQuotaEstimateMeta,
   codexWeeklyQuotaEstimateText,
+  codexUsagePendingActivation,
   displayStatusClass,
   normalizeBillingDailyRows,
   openRouterQuotaRemaining,
   quotaOverviewLabel,
   quotaOverviewRemainingField,
   quotaPrimaryLabel,
+  quotaWindowPendingActivation,
   quotaWindowCount,
   showPrimaryQuotaWindow,
   showSecondaryQuotaWindow,
@@ -97,6 +99,23 @@ test('Codex team plan shows the 5h quota label', () => {
     }),
     '5h额度',
   )
+})
+
+test('Codex rolling quota window is shown as pending activation', () => {
+  const item = {
+    provider: 'openai',
+    credentialType: 'codex_auth_json',
+    usage: {
+      subscriptionQuotaAvailable: true,
+      primaryRemainingPercent: 100,
+      primaryResetAt: 1_800_018_000,
+      primaryWindowPendingActivation: true,
+    },
+  }
+
+  assert.equal(quotaWindowPendingActivation(item, 'primary'), true)
+  assert.equal(codexUsagePendingActivation(item), true)
+  assert.equal(quotaWindowPendingActivation(item, 'secondary'), false)
 })
 
 test('Codex quota display follows the windows returned by the backend', () => {

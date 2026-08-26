@@ -371,6 +371,11 @@
   color: var(--text-muted);
 }
 
+.quotas-page-panel .quota-pending-label,
+.quotas-page-panel .quota-pending-detail {
+  color: var(--warning);
+}
+
 .quotas-page-panel .balance-package-list {
   display: grid;
   gap: 9px;

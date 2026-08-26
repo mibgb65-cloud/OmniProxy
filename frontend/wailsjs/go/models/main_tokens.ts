@@ -131,10 +131,12 @@ export namespace main {
 	    primaryUsedPercentExact?: number;
 	    primaryRemainingPercent: number;
 	    primaryResetAt?: number;
+	    primaryWindowPendingActivation?: boolean;
 	    secondaryUsedPercent: number;
 	    secondaryUsedPercentExact?: number;
 	    secondaryRemainingPercent: number;
 	    secondaryResetAt?: number;
+	    secondaryWindowPendingActivation?: boolean;
 	    apiRemaining?: number;
 	    balanceRemaining?: number;
 	    balanceTotal?: number;
@@ -163,10 +165,12 @@ export namespace main {
 	        this.primaryUsedPercentExact = source["primaryUsedPercentExact"];
 	        this.primaryRemainingPercent = source["primaryRemainingPercent"];
 	        this.primaryResetAt = source["primaryResetAt"];
+	        this.primaryWindowPendingActivation = source["primaryWindowPendingActivation"];
 	        this.secondaryUsedPercent = source["secondaryUsedPercent"];
 	        this.secondaryUsedPercentExact = source["secondaryUsedPercentExact"];
 	        this.secondaryRemainingPercent = source["secondaryRemainingPercent"];
 	        this.secondaryResetAt = source["secondaryResetAt"];
+	        this.secondaryWindowPendingActivation = source["secondaryWindowPendingActivation"];
 	        this.apiRemaining = source["apiRemaining"];
 	        this.balanceRemaining = source["balanceRemaining"];
 	        this.balanceTotal = source["balanceTotal"];

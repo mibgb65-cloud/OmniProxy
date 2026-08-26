@@ -75,10 +75,12 @@ type UsageInfo struct {
 	PrimaryUsedPercentExact        float64            `json:"primaryUsedPercentExact,omitempty"`
 	PrimaryRemainingPercent        int                `json:"primaryRemainingPercent,omitempty"`
 	PrimaryResetAt                 int64              `json:"primaryResetAt,omitempty"`
+	PrimaryActivationPending       bool               `json:"primaryWindowPendingActivation,omitempty"`
 	SecondaryUsedPercent           int                `json:"secondaryUsedPercent,omitempty"`
 	SecondaryUsedPercentExact      float64            `json:"secondaryUsedPercentExact,omitempty"`
 	SecondaryRemainingPercent      int                `json:"secondaryRemainingPercent,omitempty"`
 	SecondaryResetAt               int64              `json:"secondaryResetAt,omitempty"`
+	SecondaryActivationPending     bool               `json:"secondaryWindowPendingActivation,omitempty"`
 	APIRemaining                   int                `json:"apiRemaining,omitempty"`
 	BalanceRemaining               float64            `json:"balanceRemaining,omitempty"`
 	BalanceTotal                   float64            `json:"balanceTotal,omitempty"`
