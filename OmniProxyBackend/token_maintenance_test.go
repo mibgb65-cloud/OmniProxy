@@ -20,7 +20,11 @@ import (
 
 func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 	var validationCalled bool
+	var activationCalled bool
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			activationCalled = true
+		}
 		validationCalled = true
 		if got := r.Header.Get("Authorization"); got != "Bearer codex-access-token" {
 			t.Fatalf("unexpected auth header: %q", got)
@@ -42,12 +46,13 @@ func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 	}
 	app := &appServer{
 		cfg: config.Config{
-			ProxyPort:          3000,
-			ControlPort:        3890,
-			UpstreamBaseURL:    "https://api.openai.com",
-			SwitchThreshold:    15,
-			MaxRetries:         1,
-			CodexUsageEndpoint: upstream.URL,
+			ProxyPort:              3000,
+			ControlPort:            3890,
+			UpstreamBaseURL:        "https://api.openai.com",
+			CodexAutoActivateUsage: true,
+			SwitchThreshold:        15,
+			MaxRetries:             1,
+			CodexUsageEndpoint:     upstream.URL,
 		},
 		tokens: manager,
 		logs:   logs.NewRecorder(10),
@@ -71,6 +76,9 @@ func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 	if !validationCalled {
 		t.Fatal("expected codex usage validation to be called after add")
 	}
+	if activationCalled {
+		t.Fatal("expected existing Codex usage windows not to trigger activation")
+	}
 
 	items := manager.List()
 	if len(items) != 1 {
@@ -78,6 +86,117 @@ func TestAddCodexTokenRefreshesUsage(t *testing.T) {
 	}
 	if items[0].Remaining != 77 || items[0].Usage.PrimaryRemainingPercent != 77 || items[0].Usage.SecondaryRemainingPercent != 59 {
 		t.Fatalf("expected usage to be refreshed after add, got remaining=%d usage=%#v", items[0].Remaining, items[0].Usage)
+	}
+}
+
+func TestAddCodexTokenAutoActivatesMissingUsageWindows(t *testing.T) {
+	usageChecks := 0
+	activationCalls := 0
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/backend-api/wham/usage":
+			usageChecks++
+			w.Header().Set("Content-Type", "application/json")
+			if usageChecks == 1 {
+				_, _ = w.Write([]byte(`{"plan_type":"plus","rate_limit":{}}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{
+				"plan_type":"plus",
+				"rate_limit":{
+					"primary_window":{"used_percent":1,"reset_at":1777299888,"window_minutes":300},
+					"secondary_window":{"used_percent":1,"reset_at":1777798105,"window_minutes":10080}
+				}
+			}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/backend-api/codex/responses":
+			activationCalls++
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = w.Write([]byte("data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}\n\ndata: [DONE]\n\n"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	app := &appServer{
+		cfg: config.Config{
+			ProxyPort:              3000,
+			ControlPort:            3890,
+			CodexBaseURL:           upstream.URL + "/backend-api/codex",
+			CodexAutoActivateUsage: true,
+			SwitchThreshold:        15,
+			MaxRetries:             1,
+			CodexUsageEndpoint:     upstream.URL + "/backend-api/wham/usage",
+		},
+		tokens: manager,
+		logs:   logs.NewRecorder(10),
+	}
+
+	created, err := app.createToken(context.Background(), token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForMainTest(t, "activate@example.com"),
+	})
+	if err != nil {
+		t.Fatalf("createToken: %v", err)
+	}
+	if activationCalls != 1 || usageChecks != 2 {
+		t.Fatalf("activation calls = %d, usage checks = %d", activationCalls, usageChecks)
+	}
+	updated, err := manager.Get(created.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updated.Usage.PrimaryResetAt == 0 || updated.Usage.SecondaryResetAt == 0 {
+		t.Fatalf("expected both usage windows after activation, got %#v", updated.Usage)
+	}
+}
+
+func TestAddCodexTokenDoesNotAutoActivateWhenDisabled(t *testing.T) {
+	usageChecks := 0
+	activationCalls := 0
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			usageChecks++
+			_, _ = w.Write([]byte(`{"plan_type":"plus","rate_limit":{}}`))
+		case http.MethodPost:
+			activationCalls++
+			w.WriteHeader(http.StatusNoContent)
+		}
+	}))
+	defer upstream.Close()
+
+	manager, err := token.NewManager(storage.NewJSONStore[[]token.Token](filepath.Join(t.TempDir(), "tokens.json")), 15)
+	if err != nil {
+		t.Fatal(err)
+	}
+	app := &appServer{
+		cfg: config.Config{
+			ProxyPort:          3000,
+			ControlPort:        3890,
+			CodexBaseURL:       upstream.URL + "/backend-api/codex",
+			SwitchThreshold:    15,
+			MaxRetries:         1,
+			CodexUsageEndpoint: upstream.URL + "/backend-api/wham/usage",
+		},
+		tokens: manager,
+		logs:   logs.NewRecorder(10),
+	}
+
+	if _, err := app.createToken(context.Background(), token.UpsertRequest{
+		Provider:       token.ProviderOpenAI,
+		CredentialType: token.CredentialTypeCodexAuthJSON,
+		TokenValue:     codexAuthJSONForMainTest(t, "disabled@example.com"),
+	}); err != nil {
+		t.Fatalf("createToken: %v", err)
+	}
+	if usageChecks != 1 || activationCalls != 0 {
+		t.Fatalf("usage checks = %d, activation calls = %d", usageChecks, activationCalls)
 	}
 }
 

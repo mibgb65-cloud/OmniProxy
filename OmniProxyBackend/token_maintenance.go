@@ -17,6 +17,10 @@ func (a *appServer) validateAndRecordToken(ctx context.Context, selected token.T
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()
+	if isCodexToken(selected) && cfg.CodexAutoActivateUsage {
+		a.codexActivationMu.Lock()
+		defer a.codexActivationMu.Unlock()
+	}
 
 	refreshedSelected, _, refreshErr := a.refreshAuthTokenIfNeeded(ctx, selected, false)
 	if refreshErr != nil {
@@ -40,6 +44,22 @@ func (a *appServer) validateAndRecordToken(ctx context.Context, selected token.T
 		if refreshed {
 			selected = refreshedSelected
 			result, err = validator.Validate(ctx, selected)
+		}
+	}
+	if err == nil && result.OK && cfg.CodexAutoActivateUsage && isCodexToken(selected) && result.Usage != nil && proxy.CodexUsageNeedsActivation(*result.Usage) {
+		if a.logs != nil {
+			a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(selected), Message: "codex usage windows are inactive; automatic activation started"})
+		}
+		if activationErr := validator.ActivateCodexUsage(ctx, selected); activationErr != nil {
+			err = fmt.Errorf("Codex 自动激活失败: %w", activationErr)
+		} else {
+			result, err = validator.Validate(ctx, selected)
+			if err == nil && (!result.OK || result.Usage == nil || proxy.CodexUsageNeedsActivation(*result.Usage)) {
+				err = errors.New("Codex 自动激活后仍未检测到完整的额度窗口")
+			}
+			if err == nil && a.logs != nil {
+				a.logs.Add(logs.Entry{Level: logs.LevelInfo, TokenName: a.tokenDisplayName(selected), Message: "codex usage windows activated automatically"})
+			}
 		}
 	}
 	if result.Remaining != nil {

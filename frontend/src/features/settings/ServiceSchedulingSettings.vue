@@ -48,6 +48,24 @@ defineProps({
       </div>
     </div>
     <div class="settings-grid compact-settings-grid">
+      <label class="toggle-field wide-field codex-auto-activation-field">
+        <span class="codex-auto-activation-copy">
+          <strong>自动激活 Codex 额度窗口</strong>
+          <small id="codex-auto-activation-help">
+            开启并保存后，检测到 5 小时或周额度尚未开始计时时，会用该账号自动发送一条最小消息并复查；已激活账号不会重复发送。
+          </small>
+        </span>
+        <input
+          v-model="config.codexAutoActivateUsage"
+          class="toggle-input"
+          type="checkbox"
+          aria-label="自动激活 Codex 额度窗口"
+          aria-describedby="codex-auto-activation-help"
+        />
+        <span class="toggle-switch" aria-hidden="true">
+          <span class="toggle-thumb"></span>
+        </span>
+      </label>
       <div class="settings-segmented-field">
         <span>账号调度模式</span>
         <div

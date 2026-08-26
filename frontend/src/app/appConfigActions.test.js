@@ -104,6 +104,11 @@ test('configPayload trims third-party URLs and preserves Prem autostart toggle',
   assert.equal(payload.premAutoStartPcciProxy, false)
 })
 
+test('configPayload preserves the Codex usage auto-activation toggle', () => {
+  assert.equal(configPayload({ codexAutoActivateUsage: true }).codexAutoActivateUsage, true)
+  assert.equal(configPayload({ codexAutoActivateUsage: false }).codexAutoActivateUsage, false)
+})
+
 function topLevelBackendConfigFields() {
   const source = readFileSync(new URL('../../../OmniProxyBackend/internal/config/config.go', import.meta.url), 'utf8')
   const match = source.match(/type Config struct \{([\s\S]*?)\n\}/)

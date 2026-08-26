@@ -22,6 +22,9 @@ func TestNormalizeSchedulingAndWebSocketModes(t *testing.T) {
 	if cfg.CheckBetaUpdates {
 		t.Fatal("expected beta update checks disabled by default")
 	}
+	if cfg.CodexAutoActivateUsage {
+		t.Fatal("expected Codex usage auto-activation disabled by default")
+	}
 	if cfg.OutboundProxyURL != "http://127.0.0.1:10808" {
 		t.Fatalf("expected default outbound proxy URL, got %q", cfg.OutboundProxyURL)
 	}
@@ -152,6 +155,20 @@ func TestStoreLoadClaudeSubscriptionUsageToggle(t *testing.T) {
 	}
 	if !cfg.ClaudeSubscriptionUsageEnabled {
 		t.Fatal("expected saved Claude subscription usage=true to be preserved")
+	}
+}
+
+func TestStoreLoadCodexAutoActivateUsageToggle(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.json")
+	if err := os.WriteFile(path, []byte(`{"codexAutoActivateUsage":true}`), 0600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+	cfg, err := NewStore(path).Load()
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	if !cfg.CodexAutoActivateUsage {
+		t.Fatal("expected saved Codex usage auto-activation=true to be preserved")
 	}
 }
 

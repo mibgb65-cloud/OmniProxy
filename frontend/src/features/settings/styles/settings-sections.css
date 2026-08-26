@@ -109,6 +109,41 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
 
+.settings-panel .settings-grid .codex-auto-activation-field,
+.shell.dark .settings-panel .settings-grid .codex-auto-activation-field {
+  min-height: 92px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-soft) 42%, var(--surface));
+  cursor: pointer;
+}
+
+.settings-panel .codex-auto-activation-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.settings-panel .settings-grid label > .codex-auto-activation-copy > strong {
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.settings-panel .settings-grid label > .codex-auto-activation-copy > small {
+  max-width: 76ch;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .settings-panel .settings-url-section .settings-grid {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
 }

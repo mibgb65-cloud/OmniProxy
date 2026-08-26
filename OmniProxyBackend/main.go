@@ -27,6 +27,7 @@ type appServer struct {
 	mu                    sync.Mutex
 	configMu              sync.Mutex
 	codexRefreshMu        sync.Mutex
+	codexActivationMu     sync.Mutex
 	codexOAuthMu          sync.Mutex
 	codexOAuthSession     *codexOAuthSession
 	claudeOAuthMu         sync.Mutex

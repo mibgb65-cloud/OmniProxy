@@ -92,6 +92,7 @@ func (s *Store) Load() (Config, error) {
 		HealthRiskThreshold                *int           `json:"healthRiskThreshold"`
 		LongRequestAlertSeconds            *int           `json:"longRequestAlertSeconds"`
 		CodexUsageEndpoint                 *string        `json:"codexUsageEndpoint"`
+		CodexAutoActivateUsage             *bool          `json:"codexAutoActivateUsage"`
 		ClaudeSubscriptionUsageEnabled     *bool          `json:"claudeSubscriptionUsageEnabled"`
 	}
 	if err := json.Unmarshal(data, &saved); err != nil {
@@ -284,6 +285,9 @@ func (s *Store) Load() (Config, error) {
 	}
 	if saved.CodexUsageEndpoint != nil && *saved.CodexUsageEndpoint != "" {
 		cfg.CodexUsageEndpoint = *saved.CodexUsageEndpoint
+	}
+	if saved.CodexAutoActivateUsage != nil {
+		cfg.CodexAutoActivateUsage = *saved.CodexAutoActivateUsage
 	}
 	if saved.ClaudeSubscriptionUsageEnabled != nil {
 		cfg.ClaudeSubscriptionUsageEnabled = *saved.ClaudeSubscriptionUsageEnabled

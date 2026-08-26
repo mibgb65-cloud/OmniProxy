@@ -108,6 +108,7 @@ type Config struct {
 	HealthRiskThreshold                int           `json:"healthRiskThreshold"`
 	LongRequestAlertSeconds            int           `json:"longRequestAlertSeconds"`
 	CodexUsageEndpoint                 string        `json:"codexUsageEndpoint"`
+	CodexAutoActivateUsage             bool          `json:"codexAutoActivateUsage"`
 	ClaudeSubscriptionUsageEnabled     bool          `json:"claudeSubscriptionUsageEnabled"`
 }
 
@@ -194,5 +195,6 @@ func Default() Config {
 		HealthRiskThreshold:     50,
 		LongRequestAlertSeconds: 120,
 		CodexUsageEndpoint:      "https://chatgpt.com/backend-api/wham/usage",
+		CodexAutoActivateUsage:  false,
 	}
 }
