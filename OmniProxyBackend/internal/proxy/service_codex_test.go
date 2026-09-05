@@ -15,6 +15,36 @@ import (
 	"time"
 )
 
+func TestBuildCodexResponsesRequestSupportsGPT6Astra(t *testing.T) {
+	for _, model := range []string{"gpt-6-astra", "openai/gpt-6-astra", " GPT-6 Astra "} {
+		for _, effort := range []string{"low", "medium", "high", "xhigh", "max"} {
+			t.Run(model+"/"+effort, func(t *testing.T) {
+				body, err := json.Marshal(map[string]any{
+					"model": model, "reasoning_effort": effort, "stream": true,
+					"messages": []map[string]string{{"role": "user", "content": "Hi"}},
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				body, stream, err := buildCodexResponsesRequestBody(body)
+				if err != nil {
+					t.Fatal(err)
+				}
+				var payload map[string]any
+				if err := json.Unmarshal(body, &payload); err != nil {
+					t.Fatal(err)
+				}
+				if payload["model"] != "gpt-6-astra" || !stream || payload["stream"] != true || payload["store"] != false {
+					t.Fatalf("unexpected Astra request: %s", body)
+				}
+				if reasoning, ok := payload["reasoning"].(map[string]any); !ok || reasoning["effort"] != effort {
+					t.Fatalf("reasoning effort was not preserved: %s", body)
+				}
+			})
+		}
+	}
+}
+
 func TestNormalizeCodexChatModelSupportsGPT56Family(t *testing.T) {
 	tests := map[string]string{
 		"":                         "gpt-5.6-sol",

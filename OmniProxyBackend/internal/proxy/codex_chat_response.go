@@ -334,6 +334,7 @@ func normalizeCodexChatModel(model string) string {
 		key = parts[len(parts)-1]
 	}
 	modelMap := map[string]string{
+		"gpt-6-astra":         "gpt-6-astra",
 		"gpt-5.6":             "gpt-5.6-sol",
 		"gpt-5.6-sol":         "gpt-5.6-sol",
 		"gpt-5.6-terra":       "gpt-5.6-terra",

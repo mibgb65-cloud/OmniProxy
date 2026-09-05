@@ -2,6 +2,19 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { gatewayPlatformPresets, inferGatewayProviderForModel, routeDefinitions, routeStrategyChain } from './gatewayRoutePresets.js'
+import { codexModelOptions, defaultCodexModels } from '../../constants/claudeModels.js'
+
+test('GPT-6 Astra is selectable without changing existing defaults', () => {
+  assert.ok(codexModelOptions.some((model) => model.id === 'gpt-6-astra'))
+  assert.deepEqual(defaultCodexModels, ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna'])
+  const openai = gatewayPlatformPresets.find((preset) => preset.key === 'openai')
+  const astra = openai.models.find((model) => model.routeModels?.codex === 'gpt-6-astra')
+  assert.equal(astra?.routeModels.openai, 'gpt-6-astra')
+  for (const key of ['codex', 'openai']) {
+    assert.ok(routeDefinitions.find((route) => route.key === key).modelPresets.includes('gpt-6-astra'))
+  }
+  assert.equal(inferGatewayProviderForModel('gpt-6-astra'), 'openai')
+})
 
 test('routeDefinitions build stable local gateway endpoints', () => {
   const endpoints = Object.fromEntries(routeDefinitions.map((route) => [route.key, route.endpoint(3899)]))

@@ -3,6 +3,11 @@ export const codexModelSelectionLimit = 4
 
 export const codexModelOptions = [
   {
+    id: 'gpt-6-astra',
+    label: 'GPT-6 Astra',
+    description: '最新旗舰模型，适合复杂编码、研究和多步骤任务。',
+  },
+  {
     id: 'gpt-5.6-sol',
     label: 'GPT-5.6 Sol',
     description: '旗舰模型，适合复杂编码、研究和高质量任务。',
@@ -79,7 +84,7 @@ export const codexModelOptions = [
   },
 ]
 
-export const defaultCodexModels = codexModelOptions.slice(0, 3).map((option) => option.id)
+export const defaultCodexModels = ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']
 
 export const claudeModelOptions = [
   {

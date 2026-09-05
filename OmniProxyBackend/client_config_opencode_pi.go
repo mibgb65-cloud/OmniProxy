@@ -169,6 +169,7 @@ func piRouterModels(openRouterModels []map[string]any) []map[string]any {
 		{"id": "gpt-5.6-sol", "name": "GPT-5.6 Sol"},
 		{"id": "gpt-5.6-terra", "name": "GPT-5.6 Terra"},
 		{"id": "gpt-5.6-luna", "name": "GPT-5.6 Luna"},
+		piReasoningModel("gpt-6-astra", "GPT-6 Astra"),
 		{"id": "gpt-5.4", "name": "GPT-5.4"},
 		{"id": "deepseek-v4-pro", "name": "DeepSeek V4 Pro"},
 		{"id": "kimi-for-coding", "name": "Kimi for Coding"},
@@ -308,6 +309,7 @@ func defaultPiOpenRouterModels() []map[string]any {
 
 func openCodeRouterProvider(baseURL string, extraModels map[string]any) map[string]any {
 	models := map[string]any{
+		"gpt-6-astra":     map[string]any{"name": "GPT-6 Astra"},
 		"gpt-5.6-sol":     map[string]any{"name": "GPT-5.6 Sol"},
 		"gpt-5.6-terra":   map[string]any{"name": "GPT-5.6 Terra"},
 		"gpt-5.6-luna":    map[string]any{"name": "GPT-5.6 Luna"},

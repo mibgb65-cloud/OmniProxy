@@ -25,7 +25,7 @@ export const routeDefinitions = [
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.codex),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-sol' },
     providers: openAICompatibleProviders,
-    modelPresets: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'deepseek-v4-flash', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
+    modelPresets: ['gpt-6-astra', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'deepseek-v4-flash', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
   },
   {
     key: 'claude',
@@ -68,7 +68,7 @@ export const routeDefinitions = [
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.opencodeRouter),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-terra' },
     providers: openAICompatibleProviders,
-    modelPresets: ['gpt-5.6-terra', 'gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.4', 'gpt-5.4-high', 'gpt-5.5', 'gpt-5.5-high', 'deepseek-v4-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
+    modelPresets: ['gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.4', 'gpt-5.4-high', 'gpt-5.5', 'gpt-5.5-high', 'deepseek-v4-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
   },
   {
     key: 'gemini',
@@ -86,6 +86,7 @@ export const gatewayPlatformPresets = [
     key: 'openai',
     routeCredentials: { codex: 'codex_auth_json', openai: 'api_key' },
     models: [
+      routeModel('gpt-6-astra', ['codex', 'openai'], 'GPT-6 Astra'),
       routeModel('gpt-5.6-sol', ['codex', 'openai'], 'GPT-5.6 Sol'),
       routeModel('gpt-5.6-terra', ['codex', 'openai'], 'GPT-5.6 Terra'),
       routeModel('gpt-5.6-luna', ['codex', 'openai'], 'GPT-5.6 Luna'),

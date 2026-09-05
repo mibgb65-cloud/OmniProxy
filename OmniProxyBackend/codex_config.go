@@ -286,7 +286,7 @@ func codexModelContext(model string) (int, int, bool) {
 	switch strings.ToLower(strings.TrimSpace(model)) {
 	case "deepseek-v4-flash", "deepseek-v4-pro":
 		return codexDeepSeekContext, codexDeepSeekCompactLimit, true
-	case "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra":
+	case "gpt-6-astra", "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra":
 		return 1_050_000, 900_000, true
 	case "gpt-5.6-luna", "gpt-5.4-mini":
 		return 400_000, 360_000, true
