@@ -6,7 +6,7 @@
 
 把 Codex、Claude Code、Claude Desktop、OpenCode、Pi Coding Agent、DeepSeek-TUI、Gemini CLI 以及 OpenAI / Anthropic 兼容客户端统一接入本机代理，由 OmniProxy 在本地完成账号选择、鉴权注入、失败重试、额度刷新、用量统计和客户端配置写入。
 
-[English](README_EN.md) · [发布记录](docs/releases) · [Releases](https://github.com/mibgb65-cloud/OmniProxy/releases)
+[English](README_EN.md) · [隐私政策](PRIVACY.md) · [安全政策](SECURITY.md) · [Code signing policy](CODE_SIGNING_POLICY.md) · [MIT 许可证](LICENSE) · [发布记录](docs/releases) · [Releases](https://github.com/mibgb65-cloud/OmniProxy/releases)
 
 ![Release](https://img.shields.io/github/v/release/mibgb65-cloud/OmniProxy?include_prereleases&label=release)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-0078D4)
@@ -296,6 +296,18 @@ Dev 版使用 `omniproxy_dev` build tag，应用标题、单实例 ID、数据�
 - Windows 上账号凭据使用当前用户 DPAPI 加密写入本地数据目录；macOS 上使用 Keychain 保存主密钥，再用本地加密信封写入数据目录。
 - 导出的账号池备份、Codex `auth.json` 和客户端配置备份可能包含真实凭据，请只保存到可信目录。
 - 分享日志、截图或 Issue 前，请检查账号名、路径、请求 ID、Base URL 和 provider metadata。
+
+完整的数据处理范围、外部通信目标和本地数据清理方式见[隐私政策](PRIVACY.md)。
+
+## Code signing policy / 代码签名策略
+
+OmniProxy 正在准备接入 SignPath Foundation 的免费开源代码签名。Windows 产物是否已签名，应通过文件“属性 → 数字签名”核验，不应仅凭文件名或历史 Release 描述判断。
+
+签名产物范围、受信任构建流程、团队角色和人工审批要求见 [Code signing policy](CODE_SIGNING_POLICY.md)。
+
+## 许可证
+
+OmniProxy 使用 [MIT License](LICENSE) 发布。第三方依赖仍受其各自许可证约束。
 
 ## 路线图
 

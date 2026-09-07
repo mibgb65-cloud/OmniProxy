@@ -8,6 +8,8 @@ Use this checklist before promoting a beta build to a stable release.
 - Confirm the worktree is clean: `git status --short`.
 - Confirm curated release notes exist: `docs/releases/<tag>.md`.
 - Confirm the version tag follows `vMAJOR.MINOR.PATCH` or `vMAJOR.MINOR.PATCH-beta.N`.
+- Confirm the README, Release description, [privacy policy](../PRIVACY.md), [code signing policy](../CODE_SIGNING_POLICY.md), and [MIT license](../LICENSE) remain mutually consistent.
+- Confirm every maintainer with a signing role has multi-factor authentication enabled for GitHub and SignPath.
 - Run local validation:
   - `cd OmniProxyBackend && go test ./...`
   - `cd frontend && npm test`
@@ -34,6 +36,8 @@ Use this checklist before promoting a beta build to a stable release.
 - Upgrade from the previous stable version.
 - Upgrade from the latest beta version.
 - Verify the installer:
+  - has `ProductName` and `CompanyName` set to `OmniProxy`;
+  - has `ProductVersion` and `FileVersion` matching the numeric part of the release tag;
   - keeps existing data under `%USERPROFILE%\.omniproxy`;
   - preserves user-deleted desktop shortcut during upgrade;
   - removes old autostart entries on uninstall;
@@ -75,6 +79,12 @@ Use this checklist before promoting a beta build to a stable release.
   - `OmniProxy-Setup-<tag>-windows-amd64.exe.sha256`
   - `OmniProxy-<tag>-darwin-universal-unsigned.dmg`
   - `OmniProxy-<tag>-darwin-universal-unsigned.dmg.sha256`
+- Confirm the Release description contains a `Code signing policy` link.
+- If SignPath signing is enabled for this release:
+  - confirm the signing request originated from the same GitHub Actions run and required manual approval;
+  - confirm only the signed Windows artifact is selected for publication;
+  - run `Get-AuthenticodeSignature` and verify a valid SignPath Foundation signature;
+  - confirm the Windows SHA-256 file was generated after signing.
 - Run the asset verifier when assets are available locally:
 
 ```powershell

@@ -12,7 +12,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   macos:
@@ -218,6 +218,12 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
 
+      - name: Set Windows product metadata
+        working-directory: OmniProxyBackend
+        run: |
+          $version = "${{ steps.release.outputs.tag }}"
+          powershell -NoProfile -ExecutionPolicy Bypass -File ..\scripts\set-wails-product-version.ps1 -Version $version -ConfigPath .\wails.json
+
       - name: Build NSIS installer
         working-directory: OmniProxyBackend
         run: |
@@ -229,7 +235,33 @@ jobs:
         working-directory: OmniProxyBackend
         run: |
           $version = "${{ steps.release.outputs.tag }}"
+          $numericVersion = ($version.TrimStart("v") -split "-", 2)[0]
           Get-ChildItem -Path "build" -Recurse -File | Select-Object FullName, Length, LastWriteTime | Format-Table -AutoSize
+
+          function Assert-OmniProxyMetadata([System.IO.FileInfo]$file) {
+            if (-not $file) {
+              throw "Expected Windows artifact was not found."
+            }
+            $metadata = $file.VersionInfo
+            $expectedVersion = "^$([Regex]::Escape($numericVersion))(?:\.0)?$"
+            if ($metadata.ProductName -ne "OmniProxy") {
+              throw "Unexpected ProductName for $($file.Name): '$($metadata.ProductName)'"
+            }
+            if ($metadata.CompanyName -ne "OmniProxy") {
+              throw "Unexpected CompanyName for $($file.Name): '$($metadata.CompanyName)'"
+            }
+            if ([string]$metadata.ProductVersion -notmatch $expectedVersion) {
+              throw "Unexpected ProductVersion for $($file.Name): '$($metadata.ProductVersion)', expected $numericVersion"
+            }
+            if ([string]$metadata.FileVersion -notmatch $expectedVersion) {
+              throw "Unexpected FileVersion for $($file.Name): '$($metadata.FileVersion)', expected $numericVersion"
+            }
+          }
+
+          $appBinary = Get-ChildItem -Path "build\bin" -Filter "OmniProxy*.exe" -File |
+            Where-Object { $_.Name -notmatch "(?i)installer|setup|WebView|MicrosoftEdge" } |
+            Sort-Object Length -Descending |
+            Select-Object -First 1
 
           $installer = Get-ChildItem -Path "build" -Recurse -Filter "*-installer.exe" |
             Where-Object { $_.FullName -notmatch "(?i)WebView|MicrosoftEdge" } |
@@ -239,6 +271,9 @@ jobs:
           if (-not $installer) {
             throw "NSIS installer was not found under build"
           }
+
+          Assert-OmniProxyMetadata $appBinary
+          Assert-OmniProxyMetadata $installer
 
           $installerAsset = "OmniProxy-Setup-$version-windows-amd64.exe"
           Copy-Item -LiteralPath $installer.FullName -Destination $installerAsset -Force
@@ -318,6 +353,27 @@ jobs:
           )
           $notes | Set-Content -Path release-notes.md -Encoding utf8
 
+      - name: Add code-signing policy to release notes
+        working-directory: OmniProxyBackend
+        run: |
+          $notesPath = Join-Path $PWD "release-notes.md"
+          if (-not (Test-Path -LiteralPath $notesPath -PathType Leaf)) {
+            throw "release-notes.md was not generated."
+          }
+          $content = Get-Content -LiteralPath $notesPath -Raw -Encoding UTF8
+          if ($content -notmatch '(?im)^## Code signing policy(?:\s*/\s*代码签名策略)?\s*$') {
+            $footer = @(
+              "",
+              "## Code signing policy / 代码签名策略",
+              "",
+              "See the [Code signing policy](https://github.com/mibgb65-cloud/OmniProxy/blob/master/CODE_SIGNING_POLICY.md) and verify the artifact's digital signature to determine whether this release is covered.",
+              "",
+              "请查看[代码签名策略](https://github.com/mibgb65-cloud/OmniProxy/blob/master/CODE_SIGNING_POLICY.md)，并核验产物的数字签名，以确认本版本是否已获得签名。"
+            ) -join "`r`n"
+            $content = $content.TrimEnd() + "`r`n" + $footer.TrimStart() + "`r`n"
+            Set-Content -LiteralPath $notesPath -Value $content -Encoding UTF8 -NoNewline
+          }
+
       - name: Upload Windows release artifact
         uses: actions/upload-artifact@v6
         with:
@@ -334,6 +390,9 @@ jobs:
     needs:
       - windows
       - macos
+
+    permissions:
+      contents: write
 
     defaults:
       run:

@@ -6,7 +6,7 @@
 
 Connect Codex, Claude Code, Claude Desktop, OpenCode, Pi Coding Agent, DeepSeek-TUI, Gemini CLI, and OpenAI / Anthropic-compatible clients to one local proxy. OmniProxy handles account selection, auth injection, failover retries, quota refresh, usage accounting, and local client configuration.
 
-[中文](README.md) · [Release Notes](docs/releases) · [Releases](https://github.com/mibgb65-cloud/OmniProxy/releases)
+[中文](README.md) · [Privacy policy](PRIVACY.md) · [Security policy](SECURITY.md) · [Code signing policy](CODE_SIGNING_POLICY.md) · [MIT License](LICENSE) · [Release Notes](docs/releases) · [Releases](https://github.com/mibgb65-cloud/OmniProxy/releases)
 
 ![Release](https://img.shields.io/github/v/release/mibgb65-cloud/OmniProxy?include_prereleases&label=release)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-0078D4)
@@ -298,6 +298,18 @@ After a stable release is published, the workflow automatically removes GitHub R
 - On Windows, account credentials are encrypted with the current user's DPAPI profile before being written to the local data directory. On macOS, OmniProxy stores a master key in Keychain and writes credentials through a local encrypted envelope.
 - Exported account-pool backups, Codex `auth.json`, and client configuration backups may contain real credentials; store them only in trusted directories.
 - Before sharing logs, screenshots, or Issues, check for account names, paths, request IDs, Base URLs, and provider metadata.
+
+See the [privacy policy](PRIVACY.md) for the complete data-handling scope, network destinations and local data-removal options.
+
+## Code signing policy
+
+OmniProxy is preparing to use the SignPath Foundation free code-signing program for open-source projects. Verify a Windows artifact through **Properties → Digital Signatures** instead of relying on its file name or a historical Release description.
+
+See the [Code signing policy](CODE_SIGNING_POLICY.md) for eligible artifacts, trusted build provenance, team roles and manual approval requirements.
+
+## License
+
+OmniProxy is released under the [MIT License](LICENSE). Third-party dependencies remain subject to their respective licenses.
 
 ## Roadmap
 

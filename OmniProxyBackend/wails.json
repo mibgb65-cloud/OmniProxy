@@ -10,5 +10,12 @@
   "author": {
     "name": "OmniProxy",
     "email": ""
+  },
+  "info": {
+    "companyName": "OmniProxy",
+    "productName": "OmniProxy",
+    "productVersion": "0.0.0",
+    "copyright": "Copyright (c) 2026 mibgb65-cloud and OmniProxy contributors",
+    "comments": "Local-first AI API gateway and account scheduler"
   }
 }
