@@ -28,7 +28,7 @@ func (s *Service) writeResponse(w http.ResponseWriter, resp *http.Response) (tok
 		target = flushWriter{writer: w, flusher: flusher}
 	}
 	_, _ = io.Copy(io.MultiWriter(target, capture), resp.Body)
-	body := capture.Bytes()
+	body := decodeCapturedBody(resp.Header, capture.Bytes())
 	return parseTokenConsumption(resp.Header, body), body
 }
 

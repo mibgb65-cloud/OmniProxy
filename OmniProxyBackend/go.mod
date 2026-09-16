@@ -3,6 +3,7 @@ module omniproxy
 go 1.26
 
 require (
+	github.com/andybalholm/brotli v1.1.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/klauspost/compress v1.18.2

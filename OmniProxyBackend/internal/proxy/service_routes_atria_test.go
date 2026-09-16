@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"omniproxy/internal/config"
+	"omniproxy/internal/history"
 	"omniproxy/internal/logs"
 	"omniproxy/internal/storage"
 	"omniproxy/internal/token"
@@ -15,12 +16,19 @@ func TestServiceRoutesAtriaRequests(t *testing.T) {
 	var upstreamPath string
 	var authorization string
 	var apiKey string
+	var upstreamBodies []string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		upstreamPath = r.URL.Path
 		authorization = r.Header.Get("Authorization")
 		apiKey = r.Header.Get("X-Api-Key")
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"usage":{"total_tokens":7}}`))
+		if upstreamPath == "/v1/chat/completions" {
+			_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"hi"}}],"usage":{"prompt_tokens":210,"completion_tokens":90}}`))
+		} else {
+			_, _ = w.Write([]byte(`{"content":[{"type":"text","text":"hi"}],"usage":{"input_tokens":210,"output_tokens":90}}`))
+		}
+		upstreamBodies = append(upstreamBodies, upstreamPath)
 	}))
 	defer upstream.Close()
 
@@ -31,13 +39,17 @@ func TestServiceRoutesAtriaRequests(t *testing.T) {
 	if _, err := manager.Add(token.UpsertRequest{Name: "atria", Provider: token.ProviderAtria, TokenValue: "atr_test_token"}); err != nil {
 		t.Fatal(err)
 	}
+	recorder, err := history.NewRecorder(storage.NewJSONStore[[]history.Entry](filepath.Join(t.TempDir(), "history.json")), 100)
+	if err != nil {
+		t.Fatal(err)
+	}
 	service, err := NewService(config.Config{
 		ProxyPort:       3000,
 		ControlPort:     3890,
 		AtriaBaseURL:    upstream.URL,
 		SwitchThreshold: 15,
 		MaxRetries:      0,
-	}, manager, logs.NewRecorder(10))
+	}, manager, logs.NewRecorder(10), recorder)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,6 +66,10 @@ func TestServiceRoutesAtriaRequests(t *testing.T) {
 		}
 		if upstreamPath != "/v1/chat/completions" || authorization != "Bearer atr_test_token" {
 			t.Fatalf("unexpected atria openai route path=%q authorization=%q", upstreamPath, authorization)
+		}
+		entry := lastHistoryEntry(recorder)
+		if entry.Provider != token.ProviderAtria || entry.InputTokens != 210 || entry.OutputTokens != 90 || entry.TotalTokens != 300 {
+			t.Fatalf("expected atria openai usage recorded, got %#v", entry)
 		}
 	})
 
@@ -73,5 +89,17 @@ func TestServiceRoutesAtriaRequests(t *testing.T) {
 		if authorization != "" {
 			t.Fatalf("expected anthropic protocol to drop Authorization header, got %q", authorization)
 		}
+		entry := lastHistoryEntry(recorder)
+		if entry.Provider != token.ProviderAtria || entry.InputTokens != 210 || entry.OutputTokens != 90 || entry.TotalTokens != 300 {
+			t.Fatalf("expected atria anthropic usage recorded, got %#v", entry)
+		}
 	})
+}
+
+func lastHistoryEntry(recorder *history.Recorder) history.Entry {
+	entries := recorder.List(history.Filter{Limit: 1})
+	if len(entries) == 0 {
+		return history.Entry{}
+	}
+	return entries[0]
 }

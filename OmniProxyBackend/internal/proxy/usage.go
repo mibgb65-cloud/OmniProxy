@@ -3,9 +3,14 @@ package proxy
 import (
 	"bufio"
 	"bytes"
+	"compress/flate"
+	"compress/gzip"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
+
+	"github.com/andybalholm/brotli"
 
 	"omniproxy/internal/token"
 )
@@ -30,6 +35,30 @@ func (c *usageCapture) Write(p []byte) (int, error) {
 
 func (c *usageCapture) Bytes() []byte {
 	return c.buf.Bytes()
+}
+
+// decodeCapturedBody unwraps the upstream content encoding of a captured
+// response so bookkeeping (usage, model, error summaries) can read it. The
+// bytes handed to the client are copied straight from the upstream body and
+// stay encoded; only this captured copy is decoded here.
+func decodeCapturedBody(header http.Header, body []byte) []byte {
+	switch strings.ToLower(strings.TrimSpace(header.Get("Content-Encoding"))) {
+	case "gzip":
+		if reader, err := gzip.NewReader(bytes.NewReader(body)); err == nil {
+			if decoded, err := io.ReadAll(reader); err == nil {
+				return decoded
+			}
+		}
+	case "deflate":
+		if decoded, err := io.ReadAll(flate.NewReader(bytes.NewReader(body))); err == nil {
+			return decoded
+		}
+	case "br":
+		if decoded, err := io.ReadAll(brotli.NewReader(bytes.NewReader(body))); err == nil {
+			return decoded
+		}
+	}
+	return body
 }
 
 func parseTokenConsumption(header http.Header, body []byte) token.TokenConsumption {
