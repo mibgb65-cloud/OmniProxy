@@ -14,6 +14,7 @@ const openAICompatibleProviders = [
   'anyrouter',
   'zo',
   'prem',
+  'atria',
   'custom',
 ]
 
@@ -45,6 +46,7 @@ export const routeDefinitions = [
       'anyrouter',
       'zo',
       'prem',
+      'atria',
       'custom',
     ],
     modelPresets: [
@@ -226,6 +228,13 @@ export const gatewayPlatformPresets = [
     ],
   },
   {
+    key: 'atria',
+    routeCredentials: { codex: 'api_key', openai: 'api_key', claude: 'api_key' },
+    models: [
+      routeModel('Atria-Dawn-Preview', ['codex', 'openai', 'claude'], 'Atria Dawn Preview'),
+    ],
+  },
+  {
     key: 'custom',
     routeCredentials: { codex: 'api_key', openai: 'api_key', claude: 'api_key' },
     models: [
@@ -239,25 +248,25 @@ export const routeStrategyPresets = [
     key: 'stable',
     label: '稳定优先',
     description: '官方与主流托管优先',
-    providers: ['openai', 'anthropic', 'gemini', 'deepseek', 'kimi', 'zhipu', 'minimax', 'openrouter', 'tokenrouter', 'prem', 'custom'],
+    providers: ['openai', 'anthropic', 'gemini', 'deepseek', 'kimi', 'zhipu', 'minimax', 'openrouter', 'tokenrouter', 'prem', 'atria', 'custom'],
   },
   {
     key: 'cost',
     label: '成本优先',
     description: '低成本和聚合网关优先',
-    providers: ['deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'tokenrouter', 'openrouter', 'sub2api', 'newapi', 'anyrouter', 'prem', 'custom', 'openai', 'anthropic', 'gemini'],
+    providers: ['deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'tokenrouter', 'openrouter', 'sub2api', 'newapi', 'anyrouter', 'prem', 'atria', 'custom', 'openai', 'anthropic', 'gemini'],
   },
   {
     key: 'speed',
     label: '速度优先',
     description: '本地和高速中转优先',
-    providers: ['prem', 'zo', 'openai', 'anthropic', 'gemini', 'tokenrouter', 'openrouter', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'custom'],
+    providers: ['prem', 'zo', 'openai', 'anthropic', 'gemini', 'tokenrouter', 'openrouter', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'atria', 'custom'],
   },
   {
     key: 'quota',
     label: '额度轮转',
     description: '尽量保留更多备用链',
-    providers: ['openai', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'anthropic', 'gemini', 'openrouter', 'tokenrouter', 'sub2api', 'newapi', 'anyrouter', 'zo', 'prem', 'custom'],
+    providers: ['openai', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'anthropic', 'gemini', 'openrouter', 'tokenrouter', 'sub2api', 'newapi', 'anyrouter', 'zo', 'prem', 'atria', 'custom'],
   },
 ]
 
@@ -285,6 +294,7 @@ export function inferGatewayProviderForModel(model) {
     return 'tokenrouter'
   }
   if (normalized.includes('/')) return 'openrouter'
+  if (normalized.startsWith('atria-')) return 'atria'
   if (normalized.startsWith('custom-')) return 'custom'
   return 'openai'
 }

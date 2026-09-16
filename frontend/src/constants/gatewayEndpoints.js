@@ -13,6 +13,8 @@ export const gatewayEndpointPaths = {
   anthropic: '/anthropic/v1',
   zoAnthropic: '/zo/v1',
   premAnthropic: '/prem/anthropic/v1',
+  atria: '/atria/v1',
+  atriaAnthropic: '/atria/anthropic/v1',
   sub2apiAnthropic: '/sub2api/anthropic/v1',
   newapiAnthropic: '/newapi/anthropic/v1',
   anyrouterAnthropic: '/anyrouter/anthropic/v1',

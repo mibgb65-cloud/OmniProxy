@@ -47,7 +47,7 @@ func applyAuthWithProtocol(header http.Header, selected token.Token, protocol st
 		if header.Get("anthropic-version") == "" {
 			header.Set("anthropic-version", "2023-06-01")
 		}
-	case token.ProviderDeepSeek, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderCustom:
+	case token.ProviderDeepSeek, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderAtria, token.ProviderCustom:
 		if protocol == "anthropic" {
 			header.Set("x-api-key", secret)
 			if header.Get("anthropic-version") == "" {

@@ -75,6 +75,8 @@ func normalizeOutboundProxyProvider(provider string) string {
 		return "zo"
 	case "prem", "premai", "prem-ai", "prem ai":
 		return "prem"
+	case "atria", "atria-asi", "atria asi":
+		return "atria"
 	case "custom":
 		return "custom"
 	default:
@@ -115,6 +117,8 @@ func providersFromOutboundProxyModels(models []string) []string {
 			providers = append(providers, "tokenrouter")
 		case strings.HasPrefix(model, "custom-"):
 			providers = append(providers, "custom")
+		case strings.HasPrefix(model, "atria-"):
+			providers = append(providers, "atria")
 		}
 	}
 	return normalizeOutboundProxyProviders(providers)

@@ -126,6 +126,8 @@ func normalizeOutboundProxyProvider(provider string) string {
 		return token.ProviderZo
 	case token.ProviderPrem, "premai", "prem-ai", "prem ai":
 		return token.ProviderPrem
+	case token.ProviderAtria, "atria-asi", "atria asi":
+		return token.ProviderAtria
 	case token.ProviderCustom:
 		return token.ProviderCustom
 	default:

@@ -27,6 +27,7 @@ const (
 	ProviderAnyRouter   = "anyrouter"
 	ProviderZo          = "zo"
 	ProviderPrem        = "prem"
+	ProviderAtria       = "atria"
 	ProviderCustom      = "custom"
 )
 

@@ -35,7 +35,7 @@ func protocolForRoute(provider string, path *string) string {
 		} else if isAnthropicMessagePath(*path) {
 			protocol = "anthropic"
 		}
-	case token.ProviderDeepSeek, token.ProviderKimi, token.ProviderXiaomi, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderZo, token.ProviderCustom:
+	case token.ProviderDeepSeek, token.ProviderKimi, token.ProviderXiaomi, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderZo, token.ProviderAtria, token.ProviderCustom:
 		if stripProtocolPrefix(path, "/anthropic") {
 			protocol = "anthropic"
 		}

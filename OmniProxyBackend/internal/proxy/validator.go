@@ -197,6 +197,8 @@ func (v *Validator) validationURL(selected token.Token) (string, error) {
 		path = "/models"
 	case token.ProviderZhipu, token.ProviderMiniMax, token.ProviderCustom:
 		path = "/models"
+	case token.ProviderAtria:
+		path = "/v1/models"
 	}
 
 	out := *base

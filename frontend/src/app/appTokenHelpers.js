@@ -97,6 +97,9 @@ export function createTokenHelpers(state) {
     if (state.form.provider === 'prem') {
       return '粘贴 Prem API Key'
     }
+    if (state.form.provider === 'atria') {
+      return '粘贴 atr_ 开头的 Atria API Key'
+    }
     if (state.form.provider === 'custom') {
       return '粘贴自定义网关 API Key'
     }

@@ -87,6 +87,7 @@ export function configPayload(config) {
     zoBaseUrl: trimText(source.zoBaseUrl),
     premBaseUrl: trimText(source.premBaseUrl),
     premAutoStartPcciProxy: Boolean(source.premAutoStartPcciProxy),
+    atriaBaseUrl: trimText(source.atriaBaseUrl),
     customGatewayBaseUrl: trimText(source.customGatewayBaseUrl),
     customGatewayAnthropicBaseUrl: trimText(source.customGatewayAnthropicBaseUrl),
     xiaomiBaseUrl: trimText(source.xiaomiBaseUrl),

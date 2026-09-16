@@ -34,6 +34,9 @@ func providerForModel(model string) string {
 	if model == "claude-opus-4-7" || model == "claude-sonnet-4-6" {
 		return token.ProviderZo
 	}
+	if strings.HasPrefix(model, "atria-") {
+		return token.ProviderAtria
+	}
 	return token.ProviderAnthropic
 }
 
@@ -62,6 +65,9 @@ func providerForOpenCodeModel(model string) string {
 	}
 	if strings.Contains(model, "/") {
 		return token.ProviderOpenRouter
+	}
+	if strings.HasPrefix(model, "atria-") {
+		return token.ProviderAtria
 	}
 	if strings.HasPrefix(model, "custom-") {
 		return token.ProviderCustom

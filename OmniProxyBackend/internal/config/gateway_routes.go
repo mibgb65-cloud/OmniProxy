@@ -149,6 +149,7 @@ func gatewayCodexProviders() map[string]bool {
 		token.ProviderAnyRouter,
 		token.ProviderZo,
 		token.ProviderPrem,
+		token.ProviderAtria,
 		token.ProviderCustom,
 	)
 }
@@ -166,6 +167,7 @@ func gatewayClaudeProviders() map[string]bool {
 		token.ProviderAnyRouter,
 		token.ProviderZo,
 		token.ProviderPrem,
+		token.ProviderAtria,
 		token.ProviderCustom,
 	)
 }
@@ -199,6 +201,7 @@ func gatewayModelRouteProviders() map[string]bool {
 		token.ProviderAnyRouter,
 		token.ProviderZo,
 		token.ProviderPrem,
+		token.ProviderAtria,
 		token.ProviderCustom,
 	)
 }

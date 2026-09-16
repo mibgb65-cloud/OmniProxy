@@ -160,6 +160,8 @@ func providerModelBaseURL(cfg config.Config, selected token.Token) string {
 		return cfg.ZoBaseURL
 	case token.ProviderPrem:
 		return cfg.PremBaseURL
+	case token.ProviderAtria:
+		return cfg.AtriaBaseURL
 	case token.ProviderCustom:
 		return cfg.CustomGatewayBaseURL
 	default:

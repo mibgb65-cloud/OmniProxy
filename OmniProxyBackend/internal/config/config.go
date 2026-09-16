@@ -86,6 +86,7 @@ type Config struct {
 	ZoBaseURL                          string        `json:"zoBaseUrl"`
 	PremBaseURL                        string        `json:"premBaseUrl"`
 	PremAutoStartPCCIProxy             bool          `json:"premAutoStartPcciProxy"`
+	AtriaBaseURL                       string        `json:"atriaBaseUrl"`
 	CustomGatewayBaseURL               string        `json:"customGatewayBaseUrl"`
 	CustomGatewayAnthropicBaseURL      string        `json:"customGatewayAnthropicBaseUrl"`
 	XiaomiBaseURL                      string        `json:"xiaomiBaseUrl"`
@@ -169,6 +170,7 @@ func Default() Config {
 		ZoBaseURL:                          "https://api.zo.computer",
 		PremBaseURL:                        "http://127.0.0.1:3100",
 		PremAutoStartPCCIProxy:             true,
+		AtriaBaseURL:                       "https://api.atria-asi.ai",
 		CustomGatewayBaseURL:               "",
 		CustomGatewayAnthropicBaseURL:      "",
 		XiaomiBaseURL:                      "",

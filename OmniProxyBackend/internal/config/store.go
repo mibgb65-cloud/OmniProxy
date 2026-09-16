@@ -70,6 +70,7 @@ func (s *Store) Load() (Config, error) {
 		ZoBaseURL                          *string        `json:"zoBaseUrl"`
 		PremBaseURL                        *string        `json:"premBaseUrl"`
 		PremAutoStartPCCIProxy             *bool          `json:"premAutoStartPcciProxy"`
+		AtriaBaseURL                       *string        `json:"atriaBaseUrl"`
 		CustomGatewayBaseURL               *string        `json:"customGatewayBaseUrl"`
 		CustomGatewayAnthropicBaseURL      *string        `json:"customGatewayAnthropicBaseUrl"`
 		XiaomiBaseURL                      *string        `json:"xiaomiBaseUrl"`
@@ -214,6 +215,9 @@ func (s *Store) Load() (Config, error) {
 	}
 	if saved.PremBaseURL != nil && *saved.PremBaseURL != "" {
 		cfg.PremBaseURL = *saved.PremBaseURL
+	}
+	if saved.AtriaBaseURL != nil && *saved.AtriaBaseURL != "" {
+		cfg.AtriaBaseURL = *saved.AtriaBaseURL
 	}
 	if saved.PremAutoStartPCCIProxy != nil {
 		cfg.PremAutoStartPCCIProxy = *saved.PremAutoStartPCCIProxy

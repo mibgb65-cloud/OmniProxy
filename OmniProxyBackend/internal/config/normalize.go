@@ -122,6 +122,9 @@ func Normalize(cfg Config) Config {
 	if cfg.PremBaseURL == "" {
 		cfg.PremBaseURL = defaults.PremBaseURL
 	}
+	if cfg.AtriaBaseURL == "" {
+		cfg.AtriaBaseURL = defaults.AtriaBaseURL
+	}
 	if cfg.CodexBaseURL == "" {
 		cfg.CodexBaseURL = defaults.CodexBaseURL
 	}

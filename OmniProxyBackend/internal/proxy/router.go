@@ -72,7 +72,7 @@ func (r Router) Route(incoming *url.URL, body []byte) routeInfo {
 	if len(parts) > 0 {
 		candidate := strings.ToLower(parts[0])
 		switch candidate {
-		case token.ProviderOpenAI, token.ProviderAnthropic, token.ProviderDeepSeek, token.ProviderKimi, token.ProviderXiaomi, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderGemini, token.ProviderOpenRouter, token.ProviderTokenRouter, token.ProviderSub2API, token.ProviderNewAPI, token.ProviderAnyRouter, token.ProviderZo, token.ProviderPrem, token.ProviderCustom:
+		case token.ProviderOpenAI, token.ProviderAnthropic, token.ProviderDeepSeek, token.ProviderKimi, token.ProviderXiaomi, token.ProviderZhipu, token.ProviderMiniMax, token.ProviderGemini, token.ProviderOpenRouter, token.ProviderTokenRouter, token.ProviderSub2API, token.ProviderNewAPI, token.ProviderAnyRouter, token.ProviderZo, token.ProviderPrem, token.ProviderAtria, token.ProviderCustom:
 			directProvider = true
 			provider = candidate
 			credentialType = ""
@@ -186,7 +186,8 @@ func isDirectClaudeProvider(provider string) bool {
 		token.ProviderXiaomi,
 		token.ProviderZhipu,
 		token.ProviderMiniMax,
-		token.ProviderZo:
+		token.ProviderZo,
+		token.ProviderAtria:
 		return true
 	default:
 		return false
@@ -204,6 +205,7 @@ func isDirectOpenAIProvider(provider string) bool {
 		token.ProviderOpenRouter,
 		token.ProviderTokenRouter,
 		token.ProviderZo,
+		token.ProviderAtria,
 		token.ProviderCustom:
 		return true
 	default:

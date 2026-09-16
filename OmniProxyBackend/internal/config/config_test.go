@@ -52,8 +52,8 @@ func TestNormalizeSchedulingAndWebSocketModes(t *testing.T) {
 	if cfg.TaskAutomationFallbackURL != "https://www.douyin.com" || cfg.TaskAutomationIdleSeconds != 5 || cfg.TaskAutomationReturnDelaySeconds != 3 {
 		t.Fatalf("expected default task automation timing, got fallback=%q idle=%d delay=%d", cfg.TaskAutomationFallbackURL, cfg.TaskAutomationIdleSeconds, cfg.TaskAutomationReturnDelaySeconds)
 	}
-	if cfg.ZhipuBaseURL == "" || cfg.MiniMaxBaseURL == "" || cfg.GeminiBaseURL == "" || cfg.OpenRouterBaseURL == "" || cfg.TokenRouterBaseURL == "" || cfg.Sub2APIBaseURL == "" || cfg.NewAPIBaseURL == "" || cfg.AnyRouterBaseURL == "" || cfg.ZoBaseURL == "" || cfg.PremBaseURL == "" {
-		t.Fatalf("expected new provider default base urls, got zhipu=%q minimax=%q gemini=%q openrouter=%q tokenrouter=%q sub2api=%q newapi=%q anyrouter=%q zo=%q prem=%q", cfg.ZhipuBaseURL, cfg.MiniMaxBaseURL, cfg.GeminiBaseURL, cfg.OpenRouterBaseURL, cfg.TokenRouterBaseURL, cfg.Sub2APIBaseURL, cfg.NewAPIBaseURL, cfg.AnyRouterBaseURL, cfg.ZoBaseURL, cfg.PremBaseURL)
+	if cfg.ZhipuBaseURL == "" || cfg.MiniMaxBaseURL == "" || cfg.GeminiBaseURL == "" || cfg.OpenRouterBaseURL == "" || cfg.TokenRouterBaseURL == "" || cfg.Sub2APIBaseURL == "" || cfg.NewAPIBaseURL == "" || cfg.AnyRouterBaseURL == "" || cfg.ZoBaseURL == "" || cfg.PremBaseURL == "" || cfg.AtriaBaseURL == "" {
+		t.Fatalf("expected new provider default base urls, got zhipu=%q minimax=%q gemini=%q openrouter=%q tokenrouter=%q sub2api=%q newapi=%q anyrouter=%q zo=%q prem=%q atria=%q", cfg.ZhipuBaseURL, cfg.MiniMaxBaseURL, cfg.GeminiBaseURL, cfg.OpenRouterBaseURL, cfg.TokenRouterBaseURL, cfg.Sub2APIBaseURL, cfg.NewAPIBaseURL, cfg.AnyRouterBaseURL, cfg.ZoBaseURL, cfg.PremBaseURL, cfg.AtriaBaseURL)
 	}
 	if cfg.GatewayRoutes.Codex.CredentialType != "" || cfg.GatewayRoutes.Claude.CredentialType != "" || cfg.GatewayRoutes.OpenAI.CredentialType != "" || cfg.GatewayRoutes.Gemini.CredentialType != "" {
 		t.Fatalf("expected default gateway routes to use automatic credential matching, got %#v", cfg.GatewayRoutes)

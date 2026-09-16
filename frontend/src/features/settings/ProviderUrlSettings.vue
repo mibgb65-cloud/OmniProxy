@@ -121,7 +121,7 @@ async function toggleClaudeSubscriptionUsage(event) {
     <div class="settings-section-head">
       <div>
         <h3>第三方路由</h3>
-        <p>DeepSeek、Kimi、Zhipu GLM、MiniMax、Gemini、OpenRouter、TokenRouter、sub2api、new-api、AnyRouter、Zo Computer、Prem、Xiaomi MiMo 和自定义网关入口。</p>
+        <p>DeepSeek、Kimi、Zhipu GLM、MiniMax、Gemini、OpenRouter、TokenRouter、sub2api、new-api、AnyRouter、Zo Computer、Prem、Atria、Xiaomi MiMo 和自定义网关入口。</p>
       </div>
       <button
         type="button"
@@ -198,6 +198,11 @@ async function toggleClaudeSubscriptionUsage(event) {
         <span>Prem confidential-proxy Base URL</span>
         <input v-model="config.premBaseUrl" type="url" />
         <small>填写本机 confidential-proxy 根地址，不要带 /v1；OmniProxy 会自动转发到 /openai/v1 或 /anthropic/v1。</small>
+      </label>
+      <label class="wide-field">
+        <span>Atria Base URL</span>
+        <input v-model="config.atriaBaseUrl" type="url" />
+        <small>Atria OpenAI / Anthropic / Responses 共用入口，不要带 /v1。</small>
       </label>
       <label class="toggle-field wide-field">
         <span>自动启动 Prem confidential-proxy</span>

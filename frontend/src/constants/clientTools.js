@@ -10,6 +10,7 @@ export const knownClientTools = [
   { key: 'tokenrouter', label: 'TokenRouter' },
   { key: 'sub2api', label: 'sub2api' },
   { key: 'newapi', label: 'new-api' },
+  { key: 'atria', label: 'Atria' },
   { key: 'cursor', label: 'Cursor' },
   { key: 'vscode', label: 'VS Code' },
   { key: 'windsurf', label: 'Windsurf' },

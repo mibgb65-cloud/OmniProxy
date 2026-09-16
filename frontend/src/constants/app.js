@@ -30,6 +30,7 @@ export const providers = [
   { key: 'anyrouter', label: 'AnyRouter', note: 'AnyRouter API Key，Codex / Claude Code 兼容网关' },
   { key: 'zo', label: 'Zo Computer', note: 'Zo Access Token，OpenAI / Anthropic 兼容适配' },
   { key: 'prem', label: 'Prem', note: 'Prem API Key，通过本机 confidential-proxy 双协议入口' },
+  { key: 'atria', label: 'Atria', note: 'Atria API Key（atr_ 开头），OpenAI / Anthropic 兼容，模型 Atria-Dawn-Preview' },
   { key: 'custom', label: '自定义网关', note: 'OpenAI / Anthropic 兼容网关 API Key' },
 ]
 

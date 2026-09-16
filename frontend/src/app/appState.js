@@ -198,6 +198,7 @@ export function createAppState() {
       zoBaseUrl: 'https://api.zo.computer',
       premBaseUrl: 'http://127.0.0.1:3100',
       premAutoStartPcciProxy: true,
+      atriaBaseUrl: 'https://api.atria-asi.ai',
       customGatewayBaseUrl: '',
       customGatewayAnthropicBaseUrl: '',
       xiaomiBaseUrl: '',

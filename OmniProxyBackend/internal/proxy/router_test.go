@@ -462,6 +462,30 @@ func TestRouterMapsNewProviderPrefixes(t *testing.T) {
 			protocol: "anthropic",
 			outPath:  "/anthropic/v1/messages",
 		},
+		{
+			name:     "atria direct",
+			path:     "/atria/v1/chat/completions",
+			body:     `{"model":"Atria-Dawn-Preview"}`,
+			provider: token.ProviderAtria,
+			protocol: "openai",
+			outPath:  "/v1/chat/completions",
+		},
+		{
+			name:     "atria responses direct",
+			path:     "/atria/v1/responses",
+			body:     `{"model":"Atria-Dawn-Preview"}`,
+			provider: token.ProviderAtria,
+			protocol: "openai",
+			outPath:  "/v1/responses",
+		},
+		{
+			name:     "atria anthropic direct",
+			path:     "/atria/anthropic/v1/messages",
+			body:     `{"model":"Atria-Dawn-Preview"}`,
+			provider: token.ProviderAtria,
+			protocol: "anthropic",
+			outPath:  "/v1/messages",
+		},
 	}
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {

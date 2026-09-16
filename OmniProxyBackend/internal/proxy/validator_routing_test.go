@@ -354,3 +354,40 @@ func TestValidatorUsesNewAPIUsageEndpoint(t *testing.T) {
 		})
 	}
 }
+
+func TestValidatorUsesAtriaModelsEndpoint(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/v1/models" {
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+		if r.Header.Get("Authorization") != "Bearer atr_test_token" {
+			t.Fatalf("unexpected Authorization header: %q", r.Header.Get("Authorization"))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"object":"list","data":[{"id":"Atria-Dawn-Preview"}]}`))
+	}))
+	defer upstream.Close()
+
+	validator, err := NewValidator(config.Config{
+		AtriaBaseURL: upstream.URL,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := validator.Validate(context.Background(), token.Token{
+		Provider:       token.ProviderAtria,
+		CredentialType: token.CredentialTypeAPIKey,
+		TokenValue:     "atr_test_token",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.OK {
+		t.Fatalf("expected atria validation to pass: %#v", result)
+	}
+	if result.CheckedPath == "" || result.Status != http.StatusOK {
+		t.Fatalf("expected atria validation to hit /v1/models, got %#v", result)
+	}
+}
