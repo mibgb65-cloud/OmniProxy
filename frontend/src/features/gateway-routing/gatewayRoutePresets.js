@@ -26,7 +26,7 @@ export const routeDefinitions = [
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.codex),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-sol' },
     providers: openAICompatibleProviders,
-    modelPresets: ['gpt-6-astra', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'deepseek-v4-flash', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
+    modelPresets: ['gpt-6-astra', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.6-sol-high', 'gpt-5.4-high', 'gpt-5.5-high', 'gpt-5-codex', 'deepseek-v4-pro', 'deepseek-v4-flash', 'mimo-v2.5-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7', 'Atria-Dawn-Preview'],
   },
   {
     key: 'claude',
@@ -61,6 +61,7 @@ export const routeDefinitions = [
       'mimo-v2.5-pro[1m]',
       'kimi-for-coding',
       'glm-5.1',
+      'Atria-Dawn-Preview',
     ],
   },
   {
@@ -70,7 +71,7 @@ export const routeDefinitions = [
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.opencodeRouter),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-terra' },
     providers: openAICompatibleProviders,
-    modelPresets: ['gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.4', 'gpt-5.4-high', 'gpt-5.5', 'gpt-5.5-high', 'deepseek-v4-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7'],
+    modelPresets: ['gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.4', 'gpt-5.4-high', 'gpt-5.5', 'gpt-5.5-high', 'deepseek-v4-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7', 'Atria-Dawn-Preview'],
   },
   {
     key: 'gemini',

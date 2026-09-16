@@ -82,6 +82,11 @@ export const codexModelOptions = [
     label: 'MiniMax M2.7',
     description: 'MiniMax-M2.7',
   },
+  {
+    id: 'Atria-Dawn-Preview',
+    label: 'Atria Dawn Preview',
+    description: 'Atria-Dawn-Preview，256K 上下文，需在令牌列表添加 Atria 账号',
+  },
 ]
 
 export const defaultCodexModels = ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']
@@ -151,5 +156,10 @@ export const claudeModelOptions = [
     id: 'claude-sonnet-4-6',
     label: 'Zo Claude Sonnet 4.6',
     description: 'claude-sonnet-4-6',
+  },
+  {
+    id: 'Atria-Dawn-Preview',
+    label: 'Atria Dawn Preview',
+    description: 'Atria-Dawn-Preview，256K 上下文，需在令牌列表添加 Atria 账号',
   },
 ]

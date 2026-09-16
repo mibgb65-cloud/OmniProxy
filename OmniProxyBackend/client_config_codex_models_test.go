@@ -165,6 +165,34 @@ func TestConfigureCodexWritesSelectedModelProfiles(t *testing.T) {
 	}
 }
 
+func TestWriteCodexModelProfilesUsesAtriaContextWindow(t *testing.T) {
+	codexDir := t.TempDir()
+	profiles, err := writeCodexModelProfiles(codexDir, []string{"Atria-Dawn-Preview"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(profiles) != 1 {
+		t.Fatalf("expected 1 Atria profile, got %#v", profiles)
+	}
+	content, err := os.ReadFile(profiles[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(content)
+	for _, expected := range []string{
+		`model = "Atria-Dawn-Preview"`,
+		`review_model = "Atria-Dawn-Preview"`,
+		`model_provider = "openai"`,
+		`model_reasoning_effort = "xhigh"`,
+		`model_context_window = 256000`,
+		`model_auto_compact_token_limit = 230400`,
+	} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("expected Atria profile to contain %q, got:\n%s", expected, text)
+		}
+	}
+}
+
 func TestConfigureCodexUsesDeepSeekProviderForDeepSeekDefault(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

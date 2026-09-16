@@ -30,6 +30,7 @@ const (
 	zoClaudeModel        = "claude-opus-4-7"
 	zoClaudeSonnetModel  = "claude-sonnet-4-6"
 	premClaudeModel      = "deepseek-v4-pro"
+	atriaClaudeModel     = "Atria-Dawn-Preview"
 	omniProxyMimoAuth    = "omniproxy"
 	maxClaudeModels      = 4
 )
@@ -127,6 +128,13 @@ var (
 		Model:       zoClaudeSonnetModel,
 		Name:        "Zo Claude Sonnet 4.6",
 		Description: "Claude Sonnet 4.6 routed through OmniProxy Zo Computer",
+	}
+	claudeAtriaTarget = claudeModelTarget{
+		Model:       atriaClaudeModel,
+		Name:        "Atria Dawn Preview",
+		Description: "Atria Atria-Dawn-Preview routed through OmniProxy",
+		LogMessage:  "atria claude configured",
+		Message:     "Claude Code 已配置为通过 OmniProxy 使用 Atria",
 	}
 )
 
@@ -451,6 +459,7 @@ func claudeSelectableTargets() []claudeModelTarget {
 		claudeZhipuTarget,
 		claudeZoTarget,
 		claudeZoSonnetTarget,
+		claudeAtriaTarget,
 	}
 }
 

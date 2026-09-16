@@ -292,6 +292,8 @@ func codexModelContext(model string) (int, int, bool) {
 		return 400_000, 360_000, true
 	case "gpt-5.5", "gpt-5.4":
 		return 1_000_000, 900_000, true
+	case "atria-dawn-preview":
+		return 256_000, 230_400, true
 	default:
 		return 0, 0, false
 	}

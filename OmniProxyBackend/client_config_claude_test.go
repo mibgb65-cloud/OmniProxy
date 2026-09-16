@@ -408,3 +408,41 @@ func TestWriteClaudeRouterSettingsAcceptsUTF8BOM(t *testing.T) {
 		t.Fatalf("expected router base url, got:\n%s", string(content))
 	}
 }
+
+func TestWriteSelectedClaudeSettingsSupportsAtriaModel(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "settings.json")
+	if err := os.WriteFile(path, []byte(`{"env":{"OTHER":"keep"}}`+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	targets, err := normalizeClaudeModelTargets([]string{"Atria-Dawn-Preview"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if models := claudeModelIDs(targets); len(models) != 1 || models[0] != atriaClaudeModel {
+		t.Fatalf("expected normalized Atria model %q, got %#v", atriaClaudeModel, models)
+	}
+
+	if err := writeSelectedClaudeSettings(path, "http://127.0.0.1:3000/anthropic-router", targets); err != nil {
+		t.Fatal(err)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(content)
+	for _, expected := range []string{
+		`"ANTHROPIC_MODEL": "Atria-Dawn-Preview"`,
+		`"ANTHROPIC_DEFAULT_OPUS_MODEL": "Atria-Dawn-Preview"`,
+		`"ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "Atria Dawn Preview"`,
+		`"CLAUDE_CODE_SUBAGENT_MODEL": "Atria-Dawn-Preview"`,
+		`"OTHER": "keep"`,
+	} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("expected settings to contain %q, got:\n%s", expected, text)
+		}
+	}
+	if strings.Contains(text, `"CLAUDE_CODE_EFFORT_LEVEL"`) {
+		t.Fatalf("expected Atria selection not to force max effort, got:\n%s", text)
+	}
+}
