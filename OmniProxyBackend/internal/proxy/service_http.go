@@ -194,6 +194,7 @@ func (s *Service) proxyHTTPWithRetries(w http.ResponseWriter, r *http.Request, r
 			continue
 		}
 
+		s.rewriteCodexModelsResponse(r, resp)
 		consumption, responseBody := s.writeResponse(w, resp)
 		finishActive()
 		attemptRoute.Model = completedRequestModel(r, attemptRoute.Model, resp.Header, responseBody)
