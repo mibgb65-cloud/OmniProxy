@@ -104,6 +104,9 @@ func Normalize(cfg Config) Config {
 	if cfg.OpenRouterBaseURL == "" {
 		cfg.OpenRouterBaseURL = defaults.OpenRouterBaseURL
 	}
+	if cfg.FeatherlessBaseURL == "" {
+		cfg.FeatherlessBaseURL = defaults.FeatherlessBaseURL
+	}
 	if cfg.TokenRouterBaseURL == "" {
 		cfg.TokenRouterBaseURL = defaults.TokenRouterBaseURL
 	}

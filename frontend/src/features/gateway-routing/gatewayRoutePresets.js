@@ -18,6 +18,8 @@ const openAICompatibleProviders = [
   'custom',
 ]
 
+const chatCompletionProviders = [...openAICompatibleProviders, 'featherless']
+
 export const routeDefinitions = [
   {
     key: 'codex',
@@ -70,7 +72,7 @@ export const routeDefinitions = [
     protocol: 'Chat / Responses',
     endpoint: (port) => localProxyEndpoint(port, gatewayEndpointPaths.opencodeRouter),
     fallback: { provider: 'openai', credentialType: '', model: 'gpt-5.6-terra' },
-    providers: openAICompatibleProviders,
+    providers: chatCompletionProviders,
     modelPresets: ['gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.4', 'gpt-5.4-high', 'gpt-5.5', 'gpt-5.5-high', 'deepseek-v4-pro', 'kimi-for-coding', 'glm-5.1', 'MiniMax-M2.7', 'Atria-Dawn-Preview'],
   },
   {
@@ -171,6 +173,14 @@ export const gatewayPlatformPresets = [
     ],
   },
   {
+    key: 'featherless',
+    routeCredentials: { openai: 'api_key' },
+    models: [
+      routeModel('Qwen/Qwen3-32B', ['openai'], 'Qwen3 32B via Featherless'),
+      routeModel('meta-llama/Llama-3.3-70B-Instruct', ['openai'], 'Llama 3.3 70B via Featherless'),
+    ],
+  },
+  {
     key: 'tokenrouter',
     routeCredentials: { codex: 'api_key', openai: 'api_key' },
     models: [
@@ -249,25 +259,25 @@ export const routeStrategyPresets = [
     key: 'stable',
     label: '稳定优先',
     description: '官方与主流托管优先',
-    providers: ['openai', 'anthropic', 'gemini', 'deepseek', 'kimi', 'zhipu', 'minimax', 'openrouter', 'tokenrouter', 'prem', 'atria', 'custom'],
+    providers: ['openai', 'anthropic', 'gemini', 'deepseek', 'kimi', 'zhipu', 'minimax', 'openrouter', 'featherless', 'tokenrouter', 'prem', 'atria', 'custom'],
   },
   {
     key: 'cost',
     label: '成本优先',
     description: '低成本和聚合网关优先',
-    providers: ['deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'tokenrouter', 'openrouter', 'sub2api', 'newapi', 'anyrouter', 'prem', 'atria', 'custom', 'openai', 'anthropic', 'gemini'],
+    providers: ['deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'tokenrouter', 'openrouter', 'featherless', 'sub2api', 'newapi', 'anyrouter', 'prem', 'atria', 'custom', 'openai', 'anthropic', 'gemini'],
   },
   {
     key: 'speed',
     label: '速度优先',
     description: '本地和高速中转优先',
-    providers: ['prem', 'zo', 'openai', 'anthropic', 'gemini', 'tokenrouter', 'openrouter', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'atria', 'custom'],
+    providers: ['prem', 'zo', 'openai', 'anthropic', 'gemini', 'tokenrouter', 'openrouter', 'featherless', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'atria', 'custom'],
   },
   {
     key: 'quota',
     label: '额度轮转',
     description: '尽量保留更多备用链',
-    providers: ['openai', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'anthropic', 'gemini', 'openrouter', 'tokenrouter', 'sub2api', 'newapi', 'anyrouter', 'zo', 'prem', 'atria', 'custom'],
+    providers: ['openai', 'deepseek', 'kimi', 'xiaomi', 'zhipu', 'minimax', 'anthropic', 'gemini', 'openrouter', 'featherless', 'tokenrouter', 'sub2api', 'newapi', 'anyrouter', 'zo', 'prem', 'atria', 'custom'],
   },
 ]
 

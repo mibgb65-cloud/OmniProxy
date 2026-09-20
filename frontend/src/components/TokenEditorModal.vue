@@ -84,6 +84,9 @@ function credentialHint() {
   if (props.form.provider === 'openrouter') {
     return '保存后可在账号管理刷新 OpenRouter 模型列表，模型 ID 会按 provider/model 展示。'
   }
+  if (props.form.provider === 'featherless') {
+    return '可添加多个 API Key；请求会按调度模式轮换，遇到 429 或 503 时自动切换可用 Key。'
+  }
   if (props.form.credentialType === 'claude_oauth_json') {
     return '支持包含 access_token / refresh_token / expired 的 Claude Code OAuth JSON。'
   }

@@ -121,7 +121,7 @@ async function toggleClaudeSubscriptionUsage(event) {
     <div class="settings-section-head">
       <div>
         <h3>第三方路由</h3>
-        <p>DeepSeek、Kimi、Zhipu GLM、MiniMax、Gemini、OpenRouter、TokenRouter、sub2api、new-api、AnyRouter、Zo Computer、Prem、Atria、Xiaomi MiMo 和自定义网关入口。</p>
+        <p>DeepSeek、Kimi、Zhipu GLM、MiniMax、Gemini、OpenRouter、Featherless AI、TokenRouter、sub2api、new-api、AnyRouter、Zo Computer、Prem、Atria、Xiaomi MiMo 和自定义网关入口。</p>
       </div>
       <button
         type="button"
@@ -169,6 +169,11 @@ async function toggleClaudeSubscriptionUsage(event) {
       <label class="wide-field">
         <span>OpenRouter OpenAI Base URL</span>
         <input v-model="config.openrouterBaseUrl" type="url" />
+      </label>
+      <label class="wide-field">
+        <span>Featherless AI OpenAI Base URL</span>
+        <input v-model="config.featherlessBaseUrl" type="url" />
+        <small>默认使用 https://api.featherless.ai/v1，可通过模型目录同步加载当前可用模型。</small>
       </label>
       <label class="wide-field">
         <span>TokenRouter OpenAI Base URL</span>

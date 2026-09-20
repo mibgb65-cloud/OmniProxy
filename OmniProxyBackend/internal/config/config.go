@@ -42,6 +42,7 @@ var defaultOutboundProxyProviders = []string{
 	"anthropic",
 	"gemini",
 	"openrouter",
+	"featherless",
 	"zo",
 	"prem",
 }
@@ -79,6 +80,7 @@ type Config struct {
 	MiniMaxAnthropicBaseURL            string        `json:"minimaxAnthropicBaseUrl"`
 	GeminiBaseURL                      string        `json:"geminiBaseUrl"`
 	OpenRouterBaseURL                  string        `json:"openrouterBaseUrl"`
+	FeatherlessBaseURL                 string        `json:"featherlessBaseUrl"`
 	TokenRouterBaseURL                 string        `json:"tokenrouterBaseUrl"`
 	Sub2APIBaseURL                     string        `json:"sub2apiBaseUrl"`
 	NewAPIBaseURL                      string        `json:"newapiBaseUrl"`
@@ -163,6 +165,7 @@ func Default() Config {
 		MiniMaxAnthropicBaseURL:            "https://api.minimaxi.com/anthropic",
 		GeminiBaseURL:                      "https://generativelanguage.googleapis.com",
 		OpenRouterBaseURL:                  "https://openrouter.ai/api/v1",
+		FeatherlessBaseURL:                 "https://api.featherless.ai/v1",
 		TokenRouterBaseURL:                 "https://api.tokenrouter.io",
 		Sub2APIBaseURL:                     "https://aiapi.aicnio.com",
 		NewAPIBaseURL:                      "http://127.0.0.1:3000",

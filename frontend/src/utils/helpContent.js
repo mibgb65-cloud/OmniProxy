@@ -49,6 +49,14 @@ export function buildThirdPartyEndpointGroups(port) {
           use: '使用 OpenRouter API Key 账号池。',
         },
         {
+          name: 'Featherless AI',
+          protocol: 'OpenAI Chat Completions',
+          baseUrl: localProxyEndpoint(safePort, gatewayEndpointPaths.featherless),
+          apiKey: 'omniproxy-local',
+          models: 'Qwen/Qwen3-32B 或 Featherless 模型目录中的完整模型 ID',
+          use: '固定使用 Featherless API Key 账号池，支持多 Key 轮换以及 429/503 自动切换。',
+        },
+        {
           name: 'TokenRouter',
           protocol: 'OpenAI Chat',
           baseUrl: localProxyEndpoint(safePort, gatewayEndpointPaths.tokenrouter),

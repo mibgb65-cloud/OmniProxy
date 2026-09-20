@@ -63,6 +63,7 @@ func (s *Store) Load() (Config, error) {
 		MiniMaxAnthropicBaseURL            *string        `json:"minimaxAnthropicBaseUrl"`
 		GeminiBaseURL                      *string        `json:"geminiBaseUrl"`
 		OpenRouterBaseURL                  *string        `json:"openrouterBaseUrl"`
+		FeatherlessBaseURL                 *string        `json:"featherlessBaseUrl"`
 		TokenRouterBaseURL                 *string        `json:"tokenrouterBaseUrl"`
 		Sub2APIBaseURL                     *string        `json:"sub2apiBaseUrl"`
 		NewAPIBaseURL                      *string        `json:"newapiBaseUrl"`
@@ -197,6 +198,9 @@ func (s *Store) Load() (Config, error) {
 	}
 	if saved.OpenRouterBaseURL != nil && *saved.OpenRouterBaseURL != "" {
 		cfg.OpenRouterBaseURL = *saved.OpenRouterBaseURL
+	}
+	if saved.FeatherlessBaseURL != nil && *saved.FeatherlessBaseURL != "" {
+		cfg.FeatherlessBaseURL = *saved.FeatherlessBaseURL
 	}
 	if saved.TokenRouterBaseURL != nil && *saved.TokenRouterBaseURL != "" {
 		cfg.TokenRouterBaseURL = *saved.TokenRouterBaseURL

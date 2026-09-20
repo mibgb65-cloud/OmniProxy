@@ -30,6 +30,7 @@ func proxyBaseURLFields(cfg config.Config) []providerURLField {
 		{Name: "minimax_anthropic", Value: cfg.MiniMaxAnthropicBaseURL},
 		{Name: token.ProviderGemini, Value: cfg.GeminiBaseURL},
 		{Name: token.ProviderOpenRouter, Value: cfg.OpenRouterBaseURL},
+		{Name: token.ProviderFeatherless, Value: cfg.FeatherlessBaseURL},
 		{Name: token.ProviderTokenRouter, Value: cfg.TokenRouterBaseURL},
 		{Name: token.ProviderSub2API, Value: cfg.Sub2APIBaseURL},
 		{Name: token.ProviderNewAPI, Value: cfg.NewAPIBaseURL},
@@ -108,6 +109,8 @@ func routeBaseURL(cfg config.Config, route routeInfo, selected token.Token) stri
 		return cfg.GeminiBaseURL
 	case token.ProviderOpenRouter:
 		return cfg.OpenRouterBaseURL
+	case token.ProviderFeatherless:
+		return cfg.FeatherlessBaseURL
 	case token.ProviderTokenRouter:
 		return cfg.TokenRouterBaseURL
 	case token.ProviderSub2API:
@@ -163,6 +166,8 @@ func validationBaseURL(cfg config.Config, selected token.Token) string {
 		return cfg.GeminiBaseURL
 	case token.ProviderOpenRouter:
 		return cfg.OpenRouterBaseURL
+	case token.ProviderFeatherless:
+		return cfg.FeatherlessBaseURL
 	case token.ProviderTokenRouter:
 		return cfg.TokenRouterBaseURL
 	case token.ProviderSub2API:

@@ -63,6 +63,8 @@ func normalizeOutboundProxyProvider(provider string) string {
 		return "gemini"
 	case "openrouter":
 		return "openrouter"
+	case "featherless", "featherless-ai", "featherless ai":
+		return "featherless"
 	case "tokenrouter":
 		return "tokenrouter"
 	case "sub2api":

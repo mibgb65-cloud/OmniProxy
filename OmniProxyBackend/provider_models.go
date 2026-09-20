@@ -150,6 +150,8 @@ func providerModelBaseURL(cfg config.Config, selected token.Token) string {
 		return cfg.GeminiBaseURL
 	case token.ProviderTokenRouter:
 		return cfg.TokenRouterBaseURL
+	case token.ProviderFeatherless:
+		return cfg.FeatherlessBaseURL
 	case token.ProviderSub2API:
 		return cfg.Sub2APIBaseURL
 	case token.ProviderNewAPI:
@@ -184,6 +186,19 @@ func fetchOpenAICompatibleCatalogModels(ctx context.Context, client *http.Client
 	target, err := joinExternalURLPath(baseURL, "/models")
 	if err != nil {
 		return nil, err
+	}
+	if provider == token.ProviderFeatherless {
+		parsed, err := url.Parse(target)
+		if err != nil {
+			return nil, err
+		}
+		query := parsed.Query()
+		query.Set("available_on_current_plan", "true")
+		query.Set("status", "active")
+		query.Set("sort", "-popularity")
+		query.Set("per_page", "1000")
+		parsed.RawQuery = query.Encode()
+		target = parsed.String()
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {

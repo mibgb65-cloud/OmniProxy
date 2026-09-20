@@ -6,7 +6,7 @@ export const helpCredentialGroups = [
   },
   {
     title: '按量 API Key',
-    summary: 'OpenAI、Anthropic、DeepSeek、Kimi、MiMo、Gemini、OpenRouter、TokenRouter、Zo Computer、Prem',
+    summary: 'OpenAI、Anthropic、DeepSeek、Kimi、MiMo、Gemini、OpenRouter、Featherless AI、TokenRouter、Zo Computer、Prem',
     detail: '适合 OpenAI / Anthropic 兼容接口转发，额度页会展示余额、剩余额度或最近统计。',
   },
   {

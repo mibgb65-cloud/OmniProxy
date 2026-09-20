@@ -233,6 +233,22 @@ func TestNormalizeGatewayRouteFallbacks(t *testing.T) {
 	}
 }
 
+func TestNormalizeGatewayRoutesAllowsFeatherlessForChatButNotCodexResponses(t *testing.T) {
+	cfg := Normalize(Config{
+		GatewayRoutes: GatewayRoutes{
+			Codex:  GatewayRouteConfig{Provider: token.ProviderFeatherless, Model: "Qwen/Qwen3-32B"},
+			OpenAI: GatewayRouteConfig{Provider: token.ProviderFeatherless, Model: "Qwen/Qwen3-32B"},
+		},
+	})
+
+	if cfg.GatewayRoutes.Codex.Provider != token.ProviderOpenAI {
+		t.Fatalf("expected Codex Responses route to reject Featherless, got %#v", cfg.GatewayRoutes.Codex)
+	}
+	if cfg.GatewayRoutes.OpenAI.Provider != token.ProviderFeatherless {
+		t.Fatalf("expected OpenAI-compatible chat route to allow Featherless, got %#v", cfg.GatewayRoutes.OpenAI)
+	}
+}
+
 func TestNormalizeGatewayRouteFallbacksDropsNestedAndDuplicateEntries(t *testing.T) {
 	cfg := Normalize(Config{
 		GatewayRoutes: GatewayRoutes{

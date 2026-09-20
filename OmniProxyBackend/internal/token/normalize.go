@@ -230,7 +230,7 @@ func NormalizeProviderAndCredential(provider string, credentialType string) (str
 		if credentialType != CredentialTypeAPIKey && credentialType != CredentialTypeCodingPlan {
 			return "", "", errors.New("zhipu supports API key or Coding Plan key only")
 		}
-	case ProviderDeepSeek, ProviderKimi, ProviderMiniMax, ProviderGemini, ProviderOpenRouter, ProviderTokenRouter, ProviderSub2API, ProviderNewAPI, ProviderAnyRouter, ProviderZo, ProviderPrem, ProviderAtria, ProviderCustom:
+	case ProviderDeepSeek, ProviderKimi, ProviderMiniMax, ProviderGemini, ProviderOpenRouter, ProviderFeatherless, ProviderTokenRouter, ProviderSub2API, ProviderNewAPI, ProviderAnyRouter, ProviderZo, ProviderPrem, ProviderAtria, ProviderCustom:
 		if credentialType == "" {
 			credentialType = CredentialTypeAPIKey
 		}

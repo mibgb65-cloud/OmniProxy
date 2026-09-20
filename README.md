@@ -70,7 +70,7 @@ flowchart LR
     DeepSeek["DeepSeek"]
     Kimi["Kimi"]
     Mimo["Xiaomi MiMo"]
-    More["Zhipu / MiniMax / Gemini / OpenRouter / TokenRouter / sub2api / new-api / AnyRouter / Zo / Prem / Custom"]
+    More["Zhipu / MiniMax / Gemini / OpenRouter / Featherless / TokenRouter / sub2api / new-api / AnyRouter / Zo / Prem / Custom"]
   end
 
   Clients --> Proxy
@@ -145,6 +145,7 @@ C:\Users\mimanchi\go\bin\wails.exe dev
 | Gemini router | `http://127.0.0.1:3000/gemini` | `http://127.0.0.1:3001/gemini` |
 | Pi router | `http://127.0.0.1:3000/pi-router/v1` | `http://127.0.0.1:3001/pi-router/v1` |
 | TokenRouter | `http://127.0.0.1:3000/tokenrouter/v1` | `http://127.0.0.1:3001/tokenrouter/v1` |
+| Featherless AI | `http://127.0.0.1:3000/featherless/v1` | `http://127.0.0.1:3001/featherless/v1` |
 | AnyRouter Codex / OpenAI | `http://127.0.0.1:3000/anyrouter/v1` | `http://127.0.0.1:3001/anyrouter/v1` |
 | AnyRouter Claude Code | `http://127.0.0.1:3000/anyrouter/anthropic` | `http://127.0.0.1:3001/anyrouter/anthropic` |
 | Zo Computer | `http://127.0.0.1:3000/zo/v1` | `http://127.0.0.1:3001/zo/v1` |
@@ -178,6 +179,7 @@ Codex、Claude、OpenAI compatible、Pi router 和 Gemini router 是面向客户
 | MiniMax | API Key | OpenAI 兼容入口和 Anthropic router。 |
 | Gemini | API Key | Gemini API 路由和 Gemini CLI 一键配置。 |
 | OpenRouter | API Key | 模型列表、余额查询、桌面端对话。 |
+| Featherless AI | API Key | OpenAI Chat Completions、模型目录同步、多 Key 调度，以及 429/503 自动切换。 |
 | TokenRouter | API Key | OpenAI 兼容路由，API Key 通常以 `tr_` 开头。 |
 | sub2api | API Key | OpenAI / Anthropic / Gemini 兼容网关，可作为网关路由后端或固定后端入口。 |
 | new-api | API Key | OpenAI / Anthropic / Gemini 兼容网关，默认 `http://127.0.0.1:3000`，通过 `/api/usage/token/` 刷新 Key 额度。 |

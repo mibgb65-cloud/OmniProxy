@@ -46,6 +46,17 @@ test('DeepSeek Flash is available to the Codex gateway', () => {
   assert.equal(flash.routeModels.codex, 'deepseek-v4-flash')
 })
 
+test('Featherless is exposed only on the OpenAI-compatible chat route', () => {
+  const codex = routeDefinitions.find((route) => route.key === 'codex')
+  const openai = routeDefinitions.find((route) => route.key === 'openai')
+  const featherless = gatewayPlatformPresets.find((preset) => preset.key === 'featherless')
+
+  assert.equal(codex.providers.includes('featherless'), false)
+  assert.equal(openai.providers.includes('featherless'), true)
+  assert.deepEqual(Object.keys(featherless.routeCredentials), ['openai'])
+  assert.ok(featherless.models.every((model) => model.routeModels.openai && !model.routeModels.codex))
+})
+
 test('inferGatewayProviderForModel keeps provider inference stable', () => {
   const cases = [
     ['claude-sonnet-4-6', 'zo'],

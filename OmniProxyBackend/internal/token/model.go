@@ -21,6 +21,7 @@ const (
 	ProviderMiniMax     = "minimax"
 	ProviderGemini      = "gemini"
 	ProviderOpenRouter  = "openrouter"
+	ProviderFeatherless = "featherless"
 	ProviderTokenRouter = "tokenrouter"
 	ProviderSub2API     = "sub2api"
 	ProviderNewAPI      = "newapi"

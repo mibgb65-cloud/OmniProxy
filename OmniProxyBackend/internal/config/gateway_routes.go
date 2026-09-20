@@ -173,7 +173,9 @@ func gatewayClaudeProviders() map[string]bool {
 }
 
 func gatewayOpenAIProviders() map[string]bool {
-	return gatewayCodexProviders()
+	providers := gatewayCodexProviders()
+	providers[token.ProviderFeatherless] = true
+	return providers
 }
 
 func gatewayGeminiProviders() map[string]bool {
@@ -195,6 +197,7 @@ func gatewayModelRouteProviders() map[string]bool {
 		token.ProviderMiniMax,
 		token.ProviderGemini,
 		token.ProviderOpenRouter,
+		token.ProviderFeatherless,
 		token.ProviderTokenRouter,
 		token.ProviderSub2API,
 		token.ProviderNewAPI,

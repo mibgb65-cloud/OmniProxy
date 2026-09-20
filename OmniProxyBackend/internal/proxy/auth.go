@@ -90,6 +90,14 @@ func applyAuthWithProtocol(header http.Header, selected token.Token, protocol st
 		} else {
 			header.Set("Authorization", "Bearer "+secret)
 		}
+	case token.ProviderFeatherless:
+		header.Set("Authorization", "Bearer "+secret)
+		if strings.TrimSpace(header.Get("HTTP-Referer")) == "" {
+			header.Set("HTTP-Referer", "https://github.com/mibgb65-cloud/OmniProxy")
+		}
+		if strings.TrimSpace(header.Get("X-Title")) == "" {
+			header.Set("X-Title", "OmniProxy")
+		}
 	default:
 		header.Set("Authorization", "Bearer "+secret)
 	}

@@ -4,6 +4,7 @@ export const gatewayEndpointPaths = {
   zo: '/zo/v1',
   prem: '/prem/v1',
   openrouter: '/openrouter/v1',
+  featherless: '/featherless/v1',
   tokenrouter: '/tokenrouter/v1',
   sub2api: '/sub2api/v1',
   newapi: '/newapi/v1',

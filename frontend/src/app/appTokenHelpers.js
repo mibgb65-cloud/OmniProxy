@@ -79,6 +79,9 @@ export function createTokenHelpers(state) {
     if (state.form.provider === 'openrouter') {
       return '粘贴 OpenRouter API Key'
     }
+    if (state.form.provider === 'featherless') {
+      return '粘贴 Featherless API Key'
+    }
     if (state.form.provider === 'tokenrouter') {
       return '粘贴 tr_ 开头的 TokenRouter API Key'
     }

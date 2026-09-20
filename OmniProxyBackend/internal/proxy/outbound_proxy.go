@@ -114,6 +114,8 @@ func normalizeOutboundProxyProvider(provider string) string {
 		return token.ProviderGemini
 	case token.ProviderOpenRouter:
 		return token.ProviderOpenRouter
+	case token.ProviderFeatherless, "featherless-ai", "featherless ai":
+		return token.ProviderFeatherless
 	case token.ProviderTokenRouter:
 		return token.ProviderTokenRouter
 	case token.ProviderSub2API:

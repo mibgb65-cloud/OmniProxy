@@ -11,7 +11,7 @@ const outboundProxyPresets = [
   { label: '7890 mixed', url: 'http://127.0.0.1:7890' },
   { label: 'SOCKS5 10808', url: 'socks5://127.0.0.1:10808' },
 ]
-const recommendedOutboundProxyProviders = ['openai', 'anthropic', 'gemini', 'openrouter', 'zo', 'prem']
+const recommendedOutboundProxyProviders = ['openai', 'anthropic', 'gemini', 'openrouter', 'featherless', 'zo', 'prem']
 const outboundProxyProviderGroups = [
   {
     title: '国内网络建议出站',
@@ -43,6 +43,13 @@ const outboundProxyProviderGroups = [
         label: 'OpenRouter',
         providers: ['openrouter'],
         description: 'OpenRouter 模型列表、测试对话、余额和代理转发',
+        recommended: true,
+      },
+      {
+        key: 'featherless',
+        label: 'Featherless AI',
+        providers: ['featherless'],
+        description: 'Featherless 模型目录和 OpenAI 兼容推理请求',
         recommended: true,
       },
       {

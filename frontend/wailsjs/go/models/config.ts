@@ -105,6 +105,7 @@ export namespace config {
 	    minimaxAnthropicBaseUrl: string;
 	    geminiBaseUrl: string;
 	    openrouterBaseUrl: string;
+	    featherlessBaseUrl: string;
 	    tokenrouterBaseUrl: string;
 	    sub2apiBaseUrl: string;
 	    newapiBaseUrl: string;
@@ -176,6 +177,7 @@ export namespace config {
 	        this.minimaxAnthropicBaseUrl = source["minimaxAnthropicBaseUrl"];
 	        this.geminiBaseUrl = source["geminiBaseUrl"];
 	        this.openrouterBaseUrl = source["openrouterBaseUrl"];
+	        this.featherlessBaseUrl = source["featherlessBaseUrl"];
 	        this.tokenrouterBaseUrl = source["tokenrouterBaseUrl"];
 	        this.sub2apiBaseUrl = source["sub2apiBaseUrl"];
 	        this.newapiBaseUrl = source["newapiBaseUrl"];

@@ -176,3 +176,25 @@ func TestApplyAuthUsesAnthropicHeadersForCompatibleProviders(t *testing.T) {
 		})
 	}
 }
+
+func TestApplyAuthUsesFeatherlessBearerAndAttributionHeaders(t *testing.T) {
+	header := http.Header{}
+	selected := token.Token{
+		Provider:       token.ProviderFeatherless,
+		CredentialType: token.CredentialTypeAPIKey,
+		TokenValue:     "featherless-api-key-token",
+	}
+
+	if err := applyRouteAuth(header, selected, routeInfo{Protocol: "openai"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := header.Get("Authorization"); got != "Bearer featherless-api-key-token" {
+		t.Fatalf("unexpected Authorization header: %q", got)
+	}
+	if got := header.Get("HTTP-Referer"); got != "https://github.com/mibgb65-cloud/OmniProxy" {
+		t.Fatalf("unexpected HTTP-Referer header: %q", got)
+	}
+	if got := header.Get("X-Title"); got != "OmniProxy" {
+		t.Fatalf("unexpected X-Title header: %q", got)
+	}
+}

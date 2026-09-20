@@ -168,6 +168,8 @@ func (v *Validator) validationURL(selected token.Token) (string, error) {
 		path = "/v1beta/models"
 	case token.ProviderOpenRouter:
 		path = "/key"
+	case token.ProviderFeatherless:
+		path = "/models"
 	case token.ProviderTokenRouter:
 		if basePathHasVersionSuffix(base.Path) {
 			path = "/routing-rules"

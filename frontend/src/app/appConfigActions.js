@@ -80,6 +80,7 @@ export function configPayload(config) {
     minimaxAnthropicBaseUrl: trimText(source.minimaxAnthropicBaseUrl),
     geminiBaseUrl: trimText(source.geminiBaseUrl),
     openrouterBaseUrl: trimText(source.openrouterBaseUrl),
+    featherlessBaseUrl: trimText(source.featherlessBaseUrl),
     tokenrouterBaseUrl: trimText(source.tokenrouterBaseUrl),
     sub2apiBaseUrl: trimText(source.sub2apiBaseUrl),
     newapiBaseUrl: trimText(source.newapiBaseUrl),
