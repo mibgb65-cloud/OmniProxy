@@ -45,6 +45,38 @@ func TestBuildCodexResponsesRequestSupportsGPT6Astra(t *testing.T) {
 	}
 }
 
+func TestBuildCodexResponsesRequestSupportsGPT6SolAndLuna(t *testing.T) {
+	for model, display := range map[string]string{"gpt-6-sol": "GPT-6 Sol", "gpt-6-luna": "GPT-6 Luna"} {
+		for _, variant := range []string{model, "openai/" + model, " " + display + " "} {
+			for _, effort := range []string{"none", "low", "medium", "high", "xhigh", "max"} {
+				t.Run(variant+"/"+effort, func(t *testing.T) {
+					body, err := json.Marshal(map[string]any{
+						"model": variant, "reasoning_effort": effort, "stream": true,
+						"messages": []map[string]string{{"role": "user", "content": "Hi"}},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					body, stream, err := buildCodexResponsesRequestBody(body)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var payload map[string]any
+					if err := json.Unmarshal(body, &payload); err != nil {
+						t.Fatal(err)
+					}
+					if payload["model"] != model || !stream || payload["stream"] != true || payload["store"] != false {
+						t.Fatalf("unexpected %s request: %s", model, body)
+					}
+					if reasoning, ok := payload["reasoning"].(map[string]any); !ok || reasoning["effort"] != effort {
+						t.Fatalf("reasoning effort was not preserved: %s", body)
+					}
+				})
+			}
+		}
+	}
+}
+
 func TestNormalizeCodexChatModelSupportsGPT56Family(t *testing.T) {
 	tests := map[string]string{
 		"":                         "gpt-5.6-sol",
@@ -52,6 +84,11 @@ func TestNormalizeCodexChatModelSupportsGPT56Family(t *testing.T) {
 		"gpt-5.6-sol-high":         "gpt-5.6-sol",
 		"openai/gpt-5.6-terra-low": "gpt-5.6-terra",
 		"gpt-5.6-luna-xhigh":       "gpt-5.6-luna",
+		"gpt-6-sol":                "gpt-6-sol",
+		"gpt-6-luna":               "gpt-6-luna",
+		"gpt-6-sol-high":           "gpt-6-sol",
+		"openai/gpt-6-luna-low":    "gpt-6-luna",
+		" GPT-6 Sol ":              "gpt-6-sol",
 	}
 	for input, expected := range tests {
 		if got := normalizeCodexChatModel(input); got != expected {

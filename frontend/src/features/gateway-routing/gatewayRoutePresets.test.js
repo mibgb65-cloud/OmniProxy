@@ -16,6 +16,22 @@ test('GPT-6 Astra is selectable without changing existing defaults', () => {
   assert.equal(inferGatewayProviderForModel('gpt-6-astra'), 'openai')
 })
 
+test('GPT-6 Sol and Luna are selectable without changing existing defaults', () => {
+  for (const id of ['gpt-6-sol', 'gpt-6-luna']) {
+    assert.ok(codexModelOptions.some((model) => model.id === id))
+    assert.ok(!defaultCodexModels.includes(id))
+  }
+  const openai = gatewayPlatformPresets.find((preset) => preset.key === 'openai')
+  for (const id of ['gpt-6-sol', 'gpt-6-luna']) {
+    const model = openai.models.find((entry) => entry.routeModels?.codex === id)
+    assert.equal(model?.routeModels.openai, id)
+    for (const key of ['codex', 'openai']) {
+      assert.ok(routeDefinitions.find((route) => route.key === key).modelPresets.includes(id))
+    }
+    assert.equal(inferGatewayProviderForModel(id), 'openai')
+  }
+})
+
 test('routeDefinitions build stable local gateway endpoints', () => {
   const endpoints = Object.fromEntries(routeDefinitions.map((route) => [route.key, route.endpoint(3899)]))
 

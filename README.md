@@ -87,6 +87,7 @@ flowchart LR
 
 ## 最新变化
 
+- **GPT-6 Sol / Luna 支持**：Codex 模型选择、Codex 与 OpenAI 兼容网关预设、OpenCode / Pi 模型列表和费用估算规则新增 `gpt-6-sol`、`gpt-6-luna`，现有默认模型保持不变。
 - **Codex 浏览器登录**：账号管理页新增「登录 Codex」，通过 PKCE 和本机回调完成浏览器授权，并自动新增或更新 OpenAI `auth.json` 账号。
 - **Claude 浏览器登录**：Anthropic 账号页新增「登录 Claude」，通过 PKCE 和动态本机回调完成授权，自动新增或更新 Claude OAuth 账号并支持令牌续期。
 - **Codex 额度刷新卡**：额度页可查看刷新卡数量、发放/到期/使用记录，并可在二次确认后消耗刷新卡重置 5 小时额度。
@@ -102,7 +103,7 @@ flowchart LR
 - **账单明细增强**：费用账单右侧明细区新增费用洞察、模型占比和未纳入模型摘要，并优化暗色模式海报预览。
 - **Codex Chat Completions 兼容入口**：新增 `/codex/v1/chat/completions`，可用 OpenAI `auth.json` 账号接入 OpenAI Chat Completions 客户端，内部自动转换到 Codex Responses 后端。
 - **Codex 流式响应转换**：Codex Responses 的 SSE 事件会转换为 `chat.completion.chunk`，非流式请求会汇总为 `chat.completion` 响应。
-- **Codex 模型与参数适配**：支持 GPT-5.6 Sol / Terra / Luna，以及 `gpt-5.6-sol-high` 等 Codex CLI 模型别名，并保留 `max_completion_tokens`、`reasoning_effort`、tools / function calling 等常用参数。
+- **Codex 模型与参数适配**：支持 GPT-6 Astra / Sol / Luna 与 GPT-5.6 Sol / Terra / Luna，以及 `gpt-5.6-sol-high`、`gpt-6-sol-high` 等 Codex CLI 模型别名，并保留 `max_completion_tokens`、`reasoning_effort`、tools / function calling 等常用参数。
 - **Codex 请求体兼容**：支持解码 Codex 发往本地 Responses 入口的 zstd / gzip 压缩请求体。
 
 ## 快速开始

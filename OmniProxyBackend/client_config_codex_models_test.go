@@ -43,6 +43,55 @@ func TestWriteCodexGPT6AstraConfigAndProfile(t *testing.T) {
 	}
 }
 
+func TestWriteCodexGPT6SolAndLunaConfigAndProfile(t *testing.T) {
+	codexDir := t.TempDir()
+	configPath := filepath.Join(codexDir, "config.toml")
+	models := []string{"gpt-6-sol", "gpt-6-luna"}
+	if err := writeCodexOpenAIResponsesConfig(configPath, "http://127.0.0.1:3000/codex/v1", models, "api"); err != nil {
+		t.Fatal(err)
+	}
+	profiles, err := writeCodexModelProfiles(codexDir, models)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(profiles) != len(models) {
+		t.Fatalf("expected %d model profiles, got %d", len(models), len(profiles))
+	}
+	for _, path := range []string{configPath, profiles[0]} {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, expected := range []string{
+			`model = "gpt-6-sol"`,
+			`review_model = "gpt-6-sol"`,
+			`model_provider = "openai"`,
+			`model_reasoning_effort = "xhigh"`,
+			`model_context_window = 1050000`,
+			`model_auto_compact_token_limit = 900000`,
+		} {
+			if !strings.Contains(string(content), expected) {
+				t.Errorf("expected %s to contain %q, got:\n%s", path, expected, content)
+			}
+		}
+	}
+	for i, model := range models {
+		content, err := os.ReadFile(profiles[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, expected := range []string{
+			`model = "` + model + `"`,
+			`model_context_window = 1050000`,
+			`model_auto_compact_token_limit = 900000`,
+		} {
+			if !strings.Contains(string(content), expected) {
+				t.Errorf("expected %s to contain %q, got:\n%s", profiles[i], expected, content)
+			}
+		}
+	}
+}
+
 func TestConfigureCodexWritesSelectedModelProfiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

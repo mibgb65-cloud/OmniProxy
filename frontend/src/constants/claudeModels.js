@@ -8,6 +8,16 @@ export const codexModelOptions = [
     description: '最新旗舰模型，适合复杂编码、研究和多步骤任务。',
   },
   {
+    id: 'gpt-6-sol',
+    label: 'GPT-6 Sol',
+    description: 'GPT-6 主力模型，适合复杂编码和 Agent 工作流。',
+  },
+  {
+    id: 'gpt-6-luna',
+    label: 'GPT-6 Luna',
+    description: 'GPT-6 高效模型，速度快、成本低，适合大批量任务。',
+  },
+  {
     id: 'gpt-5.6-sol',
     label: 'GPT-5.6 Sol',
     description: '旗舰模型，适合复杂编码、研究和高质量任务。',

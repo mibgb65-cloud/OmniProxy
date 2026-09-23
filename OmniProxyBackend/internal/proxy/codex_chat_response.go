@@ -335,6 +335,8 @@ func normalizeCodexChatModel(model string) string {
 	}
 	modelMap := map[string]string{
 		"gpt-6-astra":         "gpt-6-astra",
+		"gpt-6-sol":           "gpt-6-sol",
+		"gpt-6-luna":          "gpt-6-luna",
 		"gpt-5.6":             "gpt-5.6-sol",
 		"gpt-5.6-sol":         "gpt-5.6-sol",
 		"gpt-5.6-terra":       "gpt-5.6-terra",
@@ -365,7 +367,7 @@ func normalizeCodexChatModel(model string) string {
 	if mapped, ok := modelMap[key]; ok {
 		return mapped
 	}
-	for _, prefix := range []string{"gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.6", "gpt-5.5", "gpt-5.4-mini", "gpt-5.4", "gpt-5.3-codex-spark", "gpt-5.3-codex", "gpt-5.2"} {
+	for _, prefix := range []string{"gpt-6-astra", "gpt-6-sol", "gpt-6-luna", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.6", "gpt-5.5", "gpt-5.4-mini", "gpt-5.4", "gpt-5.3-codex-spark", "gpt-5.3-codex", "gpt-5.2"} {
 		if key == prefix || strings.HasPrefix(key, prefix+"-") {
 			return modelMap[prefix]
 		}
