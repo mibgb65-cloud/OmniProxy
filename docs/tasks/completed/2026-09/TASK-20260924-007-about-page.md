@@ -166,7 +166,7 @@ PASS（Go 全部通过；前端 36 个测试通过）
 ## Commit
 
 ```text
-docs: establish Task Record workflow
+80b3202 feat(about): add About page with version, runtime info and update check
 ```
 
 （本任务的 commit hash 由紧随其后的记录提交回填。）
