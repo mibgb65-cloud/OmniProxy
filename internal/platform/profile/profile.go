@@ -8,6 +8,7 @@ package profile
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -41,6 +42,7 @@ const AppName = "OmniProxy"
 const (
 	envProfile     = "OMNIPROXY_PROFILE"
 	envDataDir     = "OMNIPROXY_DATA_DIR"
+	envConfigDir   = "OMNIPROXY_CONFIG_DIR"
 	envProxyPort   = "OMNIPROXY_PROXY_PORT"
 	envControlPort = "OMNIPROXY_CONTROL_PORT"
 )
@@ -83,17 +85,47 @@ func New(kind Kind) (*Profile, error) {
 
 // Detect resolves the profile for the current process. The OMNIPROXY_PROFILE
 // environment variable overrides the build-tag default.
+//
+// The data directory resolves in this order: OMNIPROXY_DATA_DIR > persisted
+// app.json > profile default. An interrupted relocation (a crash between
+// persisting the new location and moving the data at shutdown) is detected
+// and reverted here.
 func Detect() (*Profile, error) {
 	kind := defaultKind
 	if v := strings.TrimSpace(os.Getenv(envProfile)); v != "" {
 		kind = Kind(strings.ToLower(v))
 	}
-	return New(kind)
+	p, err := New(kind)
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(os.Getenv(envDataDir)) != "" {
+		return p, nil // an explicit environment override always wins
+	}
+
+	cfg, err := LoadConfig(kind)
+	if err != nil {
+		return nil, err
+	}
+	dir := cfg.effectiveDataDir()
+	if dir == "" || pathsEqual(dir, p.DataDir) {
+		return p, nil
+	}
+	if !pathsEqual(dir, cfg.DataDir) {
+		// The stored location has no data while the previous one does: the
+		// shutdown migration never completed. Persist the correction.
+		if err := RevertDataDir(kind); err != nil {
+			slog.Error("failed to persist data directory revert", "error", err)
+		}
+	}
+	p.DataDir = dir
+	p.LogDir = filepath.Join(dir, "logs")
+	return p, nil
 }
 
 // DatabasePath returns the SQLite database file location for this profile.
 func (p *Profile) DatabasePath() string {
-	return filepath.Join(p.DataDir, "omniproxy.db")
+	return filepath.Join(p.DataDir, databaseFileName)
 }
 
 // IsProduction reports whether this is the production profile.

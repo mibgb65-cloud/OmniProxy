@@ -37,7 +37,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log, closeLog, err := logger.Setup(logger.Options{
+	log, logFiles, err := logger.Setup(logger.Options{
 		Profile: prof.Kind,
 		LogDir:  prof.LogDir,
 	})
@@ -45,7 +45,7 @@ func main() {
 		slog.Error("failed to initialise logger", "error", err)
 		os.Exit(1)
 	}
-	defer func() { _ = closeLog.Close() }()
+	defer func() { _ = logFiles.Close() }()
 
 	log.Info("starting OmniProxy",
 		"profile", prof.Kind,
@@ -68,12 +68,14 @@ func main() {
 	}
 
 	control := httpapi.New(prof)
-	service := wailsapp.NewAppService(prof, control, log)
+	service := wailsapp.NewAppService(prof, control, db, logFiles, log)
 
 	app := &wailsapp.App{
-		Profile: prof,
-		Service: service,
-		Assets:  assets,
+		Profile:  prof,
+		Service:  service,
+		Assets:   assets,
+		DB:       db,
+		LogFiles: logFiles,
 	}
 	if err := wailsapp.Run(app); err != nil {
 		log.Error("application exited with error", "error", err)

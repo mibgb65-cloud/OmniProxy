@@ -32,9 +32,9 @@ type Options struct {
 }
 
 // Setup builds the application logger and installs it as the slog default.
-// The returned Closer flushes and closes the log file and must be called on
-// shutdown.
-func Setup(opts Options) (*slog.Logger, io.Closer, error) {
+// The returned Files handle maintains the on-disk log files (close, clean)
+// and must be closed on shutdown.
+func Setup(opts Options) (*slog.Logger, *Files, error) {
 	level := resolveLevel(opts.Level, opts.Profile)
 	console := opts.Console
 	if console == nil {
@@ -52,7 +52,7 @@ func Setup(opts Options) (*slog.Logger, io.Closer, error) {
 		newRedactingHandler(slog.NewTextHandler(console, &slog.HandlerOptions{Level: level}), redactor),
 	}
 
-	var closer io.Closer = nopCloser{}
+	files := &Files{} // console-only logger: no file maintenance
 	if opts.LogDir != "" {
 		rot, err := NewRotatingFile(filepath.Join(opts.LogDir, "omniproxy.log"))
 		if err != nil {
@@ -62,12 +62,12 @@ func Setup(opts Options) (*slog.Logger, io.Closer, error) {
 			newRedactingHandler(slog.NewJSONHandler(rot, &slog.HandlerOptions{Level: level}), redactor),
 			newRedactingHandler(slog.NewTextHandler(&lineWriter{buf: uiBuffer}, &slog.HandlerOptions{Level: level}), redactor),
 		)
-		closer = rot
+		files = &Files{dir: opts.LogDir, path: rot.Path(), active: rot}
 	}
 
 	log := slog.New(fanoutHandler{handlers: sinks})
 	slog.SetDefault(log)
-	return log, closer, nil
+	return log, files, nil
 }
 
 func resolveLevel(level string, kind profile.Kind) slog.Level {
@@ -90,7 +90,3 @@ func resolveLevel(level string, kind profile.Kind) slog.Level {
 		return slog.LevelInfo
 	}
 }
-
-type nopCloser struct{}
-
-func (nopCloser) Close() error { return nil }

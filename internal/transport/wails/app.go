@@ -5,12 +5,15 @@ package wails
 
 import (
 	"context"
+	"database/sql"
 	"embed"
 	"log/slog"
+	"path/filepath"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
+	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/transport/httpapi"
 	"omniproxy/internal/version"
@@ -21,23 +24,33 @@ const shutdownTimeout = 5 * time.Second
 
 // App bundles everything the desktop shell needs to run OmniProxy.
 type App struct {
-	Profile *profile.Profile
-	Service *AppService
-	Assets  embed.FS
+	Profile  *profile.Profile
+	Service  *AppService
+	Assets   embed.FS
+	DB       *sql.DB
+	LogFiles *logger.Files
 }
 
 // AppService exposes application information to the desktop UI through Wails
 // typed bindings. It carries no business logic of its own: feature services
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
-	prof    *profile.Profile
-	control *httpapi.Server
-	log     *slog.Logger
+	prof     *profile.Profile
+	control  *httpapi.Server
+	db       *sql.DB
+	logFiles *logger.Files
+	log      *slog.Logger
 }
 
 // NewAppService creates the bound application service.
-func NewAppService(prof *profile.Profile, control *httpapi.Server, log *slog.Logger) *AppService {
-	return &AppService{prof: prof, control: control, log: log}
+func NewAppService(
+	prof *profile.Profile,
+	control *httpapi.Server,
+	db *sql.DB,
+	logFiles *logger.Files,
+	log *slog.Logger,
+) *AppService {
+	return &AppService{prof: prof, control: control, db: db, logFiles: logFiles, log: log}
 }
 
 // AppInfo is a snapshot of application runtime information for the UI.
@@ -80,11 +93,16 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 	return nil
 }
 
-// ServiceShutdown stops the local Control API when the application exits.
+// ServiceShutdown stops the local Control API and relocates the data
+// directory when the user changed it.
 func (s *AppService) ServiceShutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
-	return s.control.Shutdown(ctx)
+	if err := s.control.Shutdown(ctx); err != nil {
+		s.log.Error("control API shutdown failed", "error", err)
+	}
+	s.relocateIfPending()
+	return nil
 }
 
 // Run creates the Wails application, opens the main window and blocks until
@@ -111,4 +129,8 @@ func Run(app *App) error {
 	})
 
 	return wailsApp.Run()
+}
+
+func samePath(a, b string) bool {
+	return filepath.Clean(a) == filepath.Clean(b)
 }

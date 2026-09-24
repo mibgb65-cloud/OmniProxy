@@ -13,3 +13,42 @@ export interface AppInfo {
     "proxyPort": number;
     "controlPort": number;
 }
+
+/**
+ * CleanResult reports the space freed by a cleanup operation.
+ */
+export interface CleanResult {
+    "target": string;
+    "freedBytes": number;
+}
+
+/**
+ * SetDataDirResult reports the outcome of a data-directory change.
+ */
+export interface SetDataDirResult {
+    "previousDir": string;
+    "newDir": string;
+    "requiresRestart": boolean;
+    "existingDataSize": number;
+}
+
+/**
+ * StorageInfo is a snapshot of data storage usage for the settings page.
+ */
+export interface StorageInfo {
+    "dataDir": string;
+    "logDir": string;
+    "databasePath": string;
+    "pendingDataDir": string;
+    "items": StorageItem[] | null;
+    "totalBytes": number;
+}
+
+/**
+ * StorageItem describes one storage location and its size.
+ */
+export interface StorageItem {
+    "name": string;
+    "path": string;
+    "bytes": number;
+}

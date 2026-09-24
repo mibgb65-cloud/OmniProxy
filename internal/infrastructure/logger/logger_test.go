@@ -33,14 +33,14 @@ func readLogFile(t *testing.T, logDir string) []map[string]any {
 
 func TestSetupWritesRedactedStructuredLogs(t *testing.T) {
 	logDir := filepath.Join(t.TempDir(), "logs")
-	log, closer, err := Setup(Options{Profile: profile.Development, LogDir: logDir, Console: io.Discard})
+	log, files, err := Setup(Options{Profile: profile.Development, LogDir: logDir, Console: io.Discard})
 	if err != nil {
 		t.Fatalf("Setup error: %v", err)
 	}
 
 	const secret = "Bearer sk-1234567890abcdef"
 	log.Info("calling upstream provider", "authorization", secret, "provider", "openai", "model", "gpt-4")
-	if err := closer.Close(); err != nil {
+	if err := files.Close(); err != nil {
 		t.Fatalf("close: %v", err)
 	}
 
@@ -73,12 +73,12 @@ func TestSetupWritesRedactedStructuredLogs(t *testing.T) {
 
 func TestSetupRedactsSecretsInMessage(t *testing.T) {
 	logDir := filepath.Join(t.TempDir(), "logs")
-	log, closer, err := Setup(Options{Profile: profile.Production, LogDir: logDir, Console: io.Discard})
+	log, files, err := Setup(Options{Profile: profile.Production, LogDir: logDir, Console: io.Discard})
 	if err != nil {
 		t.Fatalf("Setup error: %v", err)
 	}
 	log.Error("upstream rejected request: Authorization: Bearer sk-ant-api03-999888777")
-	if err := closer.Close(); err != nil {
+	if err := files.Close(); err != nil {
 		t.Fatalf("close: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(logDir, "omniproxy.log"))
@@ -92,13 +92,13 @@ func TestSetupRedactsSecretsInMessage(t *testing.T) {
 
 func TestSetupHonoursLevel(t *testing.T) {
 	logDir := filepath.Join(t.TempDir(), "logs")
-	log, closer, err := Setup(Options{Profile: profile.Development, LogDir: logDir, Console: io.Discard, Level: "warn"})
+	log, files, err := Setup(Options{Profile: profile.Development, LogDir: logDir, Console: io.Discard, Level: "warn"})
 	if err != nil {
 		t.Fatalf("Setup error: %v", err)
 	}
 	log.Info("should be filtered")
 	log.Warn("should be kept")
-	if err := closer.Close(); err != nil {
+	if err := files.Close(); err != nil {
 		t.Fatalf("close: %v", err)
 	}
 	records := readLogFile(t, logDir)
@@ -111,12 +111,12 @@ func TestSetupHonoursLevel(t *testing.T) {
 }
 
 func TestSetupWithoutLogDirIsConsoleOnly(t *testing.T) {
-	log, closer, err := Setup(Options{Profile: profile.Test, Console: io.Discard})
+	log, files, err := Setup(Options{Profile: profile.Test, Console: io.Discard})
 	if err != nil {
 		t.Fatalf("Setup error: %v", err)
 	}
 	log.Info("console only")
-	if err := closer.Close(); err != nil {
+	if err := files.Close(); err != nil {
 		t.Fatalf("close: %v", err)
 	}
 }

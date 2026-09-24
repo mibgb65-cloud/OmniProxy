@@ -87,6 +87,7 @@ func TestNewRejectsInvalidPortOverride(t *testing.T) {
 }
 
 func TestDetectUsesProfileEnv(t *testing.T) {
+	useTempConfigDir(t)
 	t.Setenv(envProfile, "PRODUCTION")
 	p, err := Detect()
 	if err != nil {
@@ -101,6 +102,7 @@ func TestDetectUsesProfileEnv(t *testing.T) {
 }
 
 func TestDetectFallsBackToBuildDefault(t *testing.T) {
+	useTempConfigDir(t)
 	p, err := Detect()
 	if err != nil {
 		t.Fatal(err)

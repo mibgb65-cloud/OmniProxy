@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { PagePlaceholder } from "../../components/common/page-placeholder"
+import { useTranslation } from "react-i18next"
+import { DataDirForm } from "../../features/settings/data-dir-form"
+import { StorageOverview } from "../../features/settings/storage-overview"
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 })
 
 function SettingsPage() {
+  const { t } = useTranslation()
   return (
-    <PagePlaceholder titleKey="pages.settings.title" descriptionKey="pages.settings.description" />
+    <section className="mx-auto max-w-4xl space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">{t("settings.description")}</p>
+      </header>
+      <StorageOverview />
+      <DataDirForm />
+    </section>
   )
 }

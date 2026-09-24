@@ -7,5 +7,9 @@ export {
 };
 
 export type {
-    AppInfo
+    AppInfo,
+    CleanResult,
+    SetDataDirResult,
+    StorageInfo,
+    StorageItem
 } from "./models.js";

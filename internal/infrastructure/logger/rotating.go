@@ -93,6 +93,35 @@ func (w *rotatingFile) rotate() error {
 	return w.open()
 }
 
+// Path returns the path of the active log file.
+func (w *rotatingFile) Path() string {
+	return w.path
+}
+
+// Truncate empties the file and resets the size counter. It returns the
+// number of bytes freed.
+func (w *rotatingFile) Truncate() (int64, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.file == nil {
+		return 0, nil
+	}
+	previous := w.size
+	// On Windows, SetEndOfFile is denied on handles opened with O_APPEND
+	// (FILE_APPEND_DATA only), so close, truncate by path, and reopen.
+	if err := w.file.Close(); err != nil {
+		return 0, fmt.Errorf("logger: close before truncate: %w", err)
+	}
+	if err := os.Truncate(w.path, 0); err != nil {
+		_ = w.open() // best effort: keep logging alive
+		return 0, fmt.Errorf("logger: truncate log file: %w", err)
+	}
+	if err := w.open(); err != nil {
+		return 0, err
+	}
+	return previous, nil
+}
+
 // Close closes the underlying file. It is safe to call more than once.
 func (w *rotatingFile) Close() error {
 	w.mu.Lock()

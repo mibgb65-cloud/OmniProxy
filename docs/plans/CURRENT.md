@@ -8,11 +8,13 @@
 
 ## In Progress
 
-- TASK-20260924-005 Task Record workflow
+- (none)
 
 ## Recently Completed
 
-- TASK-20260924-004 Migrate i18n to i18next + react-i18next
+- TASK-20260924-006 Settings page: data storage management
+- TASK-20260924-005 Task Record workflow
+- TASK-20260924-004 Migrate i18n to i18next + react-i18n
 - TASK-20260924-003 Frontend i18n (Chinese/English)
 - TASK-20260924-002 State file/function size limits in coding rules
 - TASK-20260924-001 Project initialization foundation

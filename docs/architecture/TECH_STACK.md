@@ -37,7 +37,9 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - TanStack Query — server state (accounts, providers, quota, usage, …)
 - Zustand — UI state only (sidebar, theme, transient selections)
 - TanStack Table — planned for account/provider/request tables
-- React Hook Form + Zod — planned for account/provider/routing forms
+- React Hook Form + Zod — forms (settings, provider config, routing rules);
+  `@hookform/resolvers/zod` wires the schema in. Backend validation stays
+  authoritative; frontend schemas guard the obvious cases.
 - Apache ECharts — planned for usage/quota charts (aggregation happens in Go)
 - Internationalization: `i18next` + `react-i18n` (`frontend/src/i18n`). The
   Chinese dictionary (`locales/zh.ts`) is the key source of truth; the English
@@ -91,10 +93,11 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 | `radix-ui`                | Accessible headless primitives       | Backs shadcn/ui components                             |
 | `lucide-react`            | Icons                                | Single icon library                                    |
 | `class-variance-authority`, `clsx`, `tailwind-merge` | Component variants / class merging | Standard shadcn/ui companions             |
+| `react-hook-form`, `zod`, `@hookform/resolvers` | Form state + runtime validation    | Project-standard form stack (TECH_STACK)                 |
 
 Deferred until the feature that needs them lands: `@tanstack/react-table`,
-`react-hook-form` + `zod`, `echarts`, Playwright. Adding a dependency earlier
-than its first use is not allowed (see CODING_RULES).
+`echarts`, Playwright. Adding a dependency earlier than its first use is not
+allowed (see CODING_RULES).
 
 ## Platform Requirements
 

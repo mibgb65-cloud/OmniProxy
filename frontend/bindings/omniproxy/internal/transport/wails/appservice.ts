@@ -24,8 +24,40 @@ export function AppInfo(): $CancellablePromise<$models.AppInfo> {
 }
 
 /**
+ * CleanStorage runs a cleanup operation: "logs" removes rotated log backups
+ * and truncates the active log; "database" vacuums the SQLite database.
+ */
+export function CleanStorage(target: string): $CancellablePromise<$models.CleanResult> {
+    return $Call.ByID(1327547443, target);
+}
+
+/**
  * Ping is a liveness probe for the UI binding layer.
  */
 export function Ping(): $CancellablePromise<string> {
     return $Call.ByID(77535937);
+}
+
+/**
+ * SelectDirectory opens a native folder picker and returns the chosen path.
+ * An empty string means the user cancelled. The title is provided by the
+ * caller so the dialog follows the UI language.
+ */
+export function SelectDirectory(title: string): $CancellablePromise<string> {
+    return $Call.ByID(73503672, title);
+}
+
+/**
+ * SetDataDir validates and persists a new data directory. The change takes
+ * effect on the next start; the data itself is moved at shutdown.
+ */
+export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDirResult> {
+    return $Call.ByID(3348807762, path);
+}
+
+/**
+ * StorageInfo returns the current data storage locations and their sizes.
+ */
+export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
+    return $Call.ByID(3571019774);
 }
