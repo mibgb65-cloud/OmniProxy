@@ -177,10 +177,10 @@ PASS（Go 全部通过；前端 30 个测试通过）
 ## Commit
 
 ```text
-docs: establish Task Record workflow
+94fecf7 feat(settings): add data storage management to settings page
 ```
 
-（主提交与记录提交的 hash 由紧随其后的记录提交回填。）
+（本任务的 commit hash 由紧随其后的记录提交回填：提交内容无法包含自身 hash。）
 
 ---
 
