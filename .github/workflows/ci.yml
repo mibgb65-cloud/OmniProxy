@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    # Windows is the primary target platform; the Wails build and the
+    # Windows-specific code paths need it.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+        shell: bash
+
+      - name: Install Task
+        run: go install github.com/go-task/task/v3/cmd/task@latest
+        shell: bash
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+        shell: bash
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+        shell: bash
+
+      - name: Install frontend dependencies
+        run: task common:install:frontend:deps
+        shell: bash
+
+      - name: Format check
+        run: task format:check
+        shell: bash
+
+      - name: Lint
+        run: task lint
+        shell: bash
+
+      - name: Type check
+        run: task typecheck
+        shell: bash
+
+      - name: Test
+        run: task test
+        shell: bash
+
+      - name: Build
+        run: task build
+        shell: bash
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omniproxy-windows
+          path: bin/omniproxy.exe
+          if-no-files-found: error

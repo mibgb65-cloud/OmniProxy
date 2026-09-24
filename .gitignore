@@ -1,0 +1,48 @@
+# --- Build output ---
+bin/
+.task/
+frontend/dist/*
+!frontend/dist/.gitkeep
+build/linux/appimage/build
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+# --- Dependencies ---
+frontend/node_modules/
+
+# --- Mobile generated (per-machine; overlays hold absolute paths) ---
+build/ios/xcode/overlay.json
+build/ios/xcode/gen/
+build/android/overlay.json
+build/android/gen/
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.cer
+credentials*
+secrets*
+
+# --- Logs & local data ---
+*.log
+logs/
+coverage/
+omniproxy.db
+omniproxy.db-wal
+omniproxy.db-shm
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Temp ---
+tmp/
+temp/
+*.syso

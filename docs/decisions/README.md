@@ -1,0 +1,51 @@
+# Architecture Decision Records
+
+This directory records significant technical decisions as ADRs.
+
+An ADR is required when a decision:
+
+- changes the database or the core framework,
+- introduces important infrastructure,
+- changes how core components communicate,
+- designs an important abstraction,
+- modifies the overall architecture,
+- is hard to reverse.
+
+Ordinary code adjustments do not need an ADR.
+
+## Naming
+
+```text
+ADR-001-short-description.md
+ADR-002-short-description.md
+```
+
+## Template
+
+```md
+# ADR-XXX: Title
+
+## Status
+
+Proposed / Accepted / Deprecated / Superseded
+
+## Context
+
+## Decision
+
+## Alternatives Considered
+
+## Reasoning
+
+## Consequences
+```
+
+ADRs are never fabricated for decisions that were not actually made. When a
+decision replaces an older one, mark the old ADR as `Superseded by ADR-XXX`
+rather than editing history.
+
+## Index
+
+| ADR                                                              | Status  | Summary                                   |
+| ---------------------------------------------------------------- | ------- | ----------------------------------------- |
+| [ADR-001](ADR-001-wails3-go-react-stack.md)                      | Accepted| Wails 3 + Go core + React frontend stack  |
