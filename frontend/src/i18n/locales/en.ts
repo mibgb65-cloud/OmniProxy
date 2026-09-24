@@ -32,13 +32,13 @@ export const en: Record<keyof typeof zh, string> = {
   "dashboard.controlPort": "Control port",
   "dashboard.dataDirectory": "Data directory",
   "dashboard.loading": "Loading…",
-  "dashboard.loadFailed": "Failed to load app info: {error}",
+  "dashboard.loadFailed": "Failed to load app info: {{error}}",
   "dashboard.bindingCheck": "Binding check",
   "dashboard.bindingCheckDescription": "Wails typed binding round-trip",
   "dashboard.ping": "Ping backend",
   "dashboard.pinging": "Pinging…",
-  "dashboard.pingFailed": "Ping failed: {error}",
-  "dashboard.pingReply": "Backend replied: {result}",
+  "dashboard.pingFailed": "Ping failed: {{error}}",
+  "dashboard.pingReply": "Backend replied: {{result}}",
 
   "pages.accounts.title": "Accounts",
   "pages.accounts.description":

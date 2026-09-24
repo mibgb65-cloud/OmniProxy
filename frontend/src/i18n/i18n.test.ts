@@ -1,28 +1,9 @@
-import { describe, expect, it } from "vitest"
-import { defaultLanguage, isLanguage, languageOptions, translate } from "./translation"
+import i18next from "i18next"
+import { afterEach, describe, expect, it } from "vitest"
+import { initI18n } from "./config"
 import { en } from "./locales/en"
 import { zh } from "./locales/zh"
-
-describe("translate", () => {
-  it("returns the string for the selected language", () => {
-    expect(translate("zh", "nav.dashboard")).toBe("仪表盘")
-    expect(translate("en", "nav.dashboard")).toBe("Dashboard")
-  })
-
-  it("substitutes named variables", () => {
-    expect(translate("zh", "dashboard.pingReply", { result: "pong" })).toBe("后端回复：pong")
-    expect(translate("en", "dashboard.pingReply", { result: "pong" })).toBe("Backend replied: pong")
-  })
-
-  it("keeps placeholders that have no matching variable", () => {
-    expect(translate("en", "dashboard.loadFailed", {})).toBe("Failed to load app info: {error}")
-  })
-
-  it("falls back to the key itself for unknown keys", () => {
-    // Cast exercises the runtime fallback; the type system prevents this.
-    expect(translate("en", "nope.missing" as never)).toBe("nope.missing")
-  })
-})
+import { defaultLanguage, isLanguage, languageOptions } from "./translation"
 
 describe("dictionaries", () => {
   it("cover exactly the same keys", () => {
@@ -33,6 +14,29 @@ describe("dictionaries", () => {
     for (const [key, value] of Object.entries({ ...zh, ...en })) {
       expect(value.trim(), `empty value for ${key}`).not.toBe("")
     }
+  })
+})
+
+describe("i18next instance", () => {
+  afterEach(async () => {
+    await i18next.changeLanguage(defaultLanguage)
+  })
+
+  it("translates keys for the active language", async () => {
+    await initI18n()
+    expect(i18next.t("nav.dashboard")).toBe("仪表盘")
+
+    await i18next.changeLanguage("en")
+    expect(i18next.t("nav.dashboard")).toBe("Dashboard")
+  })
+
+  it("interpolates named variables", async () => {
+    await i18next.changeLanguage("zh")
+    expect(i18next.t("dashboard.pingReply", { result: "pong" })).toBe("后端回复：pong")
+  })
+
+  it("falls back to the key for unknown keys", () => {
+    expect(i18next.t("nope.missing" as never)).toBe("nope.missing")
   })
 })
 

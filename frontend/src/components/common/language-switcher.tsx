@@ -1,6 +1,6 @@
 import { Languages } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
-import { useTranslation } from "../../hooks/use-translation"
 import { languageOptions } from "../../i18n/translation"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
@@ -11,7 +11,8 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
-  const { t, language } = useTranslation()
+  const { t } = useTranslation()
+  const language = useUIStore((s) => s.language)
   const setLanguage = useUIStore((s) => s.setLanguage)
 
   if (collapsed) {

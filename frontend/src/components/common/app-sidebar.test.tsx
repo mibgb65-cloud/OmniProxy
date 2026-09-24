@@ -1,11 +1,12 @@
 import { createMemoryHistory, createRouter, RouterContextProvider } from "@tanstack/react-router"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
 import { routeTree } from "../../app/routeTree.gen"
-import { AppSidebar } from "./app-sidebar"
+import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
+import { AppSidebar } from "./app-sidebar"
 
 function renderSidebar() {
   const router = createRouter({
@@ -13,7 +14,11 @@ function renderSidebar() {
     history: createMemoryHistory({ initialEntries: ["/"] }),
   })
   function Wrapper({ children }: { children: ReactNode }) {
-    return <RouterContextProvider router={router}>{children}</RouterContextProvider>
+    return (
+      <I18nProvider>
+        <RouterContextProvider router={router}>{children}</RouterContextProvider>
+      </I18nProvider>
+    )
   }
   return render(<AppSidebar />, { wrapper: Wrapper })
 }
@@ -38,7 +43,9 @@ describe("AppSidebar", () => {
 
     await user.click(screen.getByRole("button", { name: "English" }))
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("Dashboard")).toBeInTheDocument()
+    })
     expect(screen.getByText("Accounts")).toBeInTheDocument()
     expect(screen.queryByText("仪表盘")).not.toBeInTheDocument()
   })

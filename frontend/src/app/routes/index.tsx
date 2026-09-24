@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { PagePlaceholder } from "../../components/common/page-placeholder"
 import { useAppInfo } from "../../hooks/use-app-info"
 import { usePing } from "../../hooks/use-ping"
-import { useTranslation } from "../../hooks/use-translation"
 
 export const Route = createFileRoute("/")({
   component: DashboardPage,

@@ -12,9 +12,9 @@ import {
   Settings,
   Users,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
 import { LanguageSwitcher } from "./language-switcher"
-import { useTranslation } from "../../hooks/use-translation"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
 import type { NavItem } from "../../types/ui"

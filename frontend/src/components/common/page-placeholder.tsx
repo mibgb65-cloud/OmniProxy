@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { useTranslation } from "../../hooks/use-translation"
+import { useTranslation } from "react-i18next"
 import type { TranslationKey } from "../../i18n/translation"
 
 interface PagePlaceholderProps {
