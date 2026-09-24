@@ -57,7 +57,21 @@ src/types/        Frontend-only TypeScript types
 - Frontend: co-locate tests with the code they test
   (`foo.ts` → `foo.test.ts`).
 - Generated code (`frontend/bindings/`, `src/app/routeTree.gen.ts`) is never
-  edited by hand.
+  edited by hand and is exempt from the size rules below.
+
+### File size limits
+
+From the technology baseline (技术架构选择.md §32):
+
+- A single hand-written file should stay **≤ 200 lines**.
+- Beyond roughly 200 lines, actively evaluate splitting the file.
+- The following are explicitly forbidden:
+  - 2000+ line React components
+  - "God" Service / Store / Provider / Handler files
+
+These are review criteria, not compiler errors: when a file must exceed the
+guideline (e.g. a table-driven test file with many cases), say why in the PR
+description.
 
 ## Naming
 
@@ -72,6 +86,8 @@ src/types/        Frontend-only TypeScript types
 
 - Keep functions small and single-purpose. If a function needs a paragraph of
   explanation, split it.
+- Guidance (not a hard limit): evaluate splitting functions beyond roughly 50
+  lines; a function should fit on one screen.
 - Avoid more than ~3 levels of nesting; prefer early returns.
 - No magic numbers or strings: name them or move them to a constant block.
 
