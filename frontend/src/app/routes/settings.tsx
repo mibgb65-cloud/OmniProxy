@@ -7,6 +7,6 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   return (
-    <PagePlaceholder title="Settings" description="Application settings and client integrations." />
+    <PagePlaceholder titleKey="pages.settings.title" descriptionKey="pages.settings.description" />
   )
 }

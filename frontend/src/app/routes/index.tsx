@@ -4,42 +4,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { PagePlaceholder } from "../../components/common/page-placeholder"
 import { useAppInfo } from "../../hooks/use-app-info"
 import { usePing } from "../../hooks/use-ping"
+import { useTranslation } from "../../hooks/use-translation"
 
 export const Route = createFileRoute("/")({
   component: DashboardPage,
 })
 
 function DashboardPage() {
+  const { t } = useTranslation()
   const { data, isPending, isError, error } = useAppInfo()
   const pingMutation = usePing()
 
   return (
-    <PagePlaceholder
-      title="Dashboard"
-      description="OmniProxy runtime overview. Feature panels arrive with their backends."
-    >
+    <PagePlaceholder titleKey="dashboard.title" descriptionKey="dashboard.description">
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Application</CardTitle>
-            <CardDescription>Runtime information from the Go backend</CardDescription>
+            <CardTitle>{t("dashboard.application")}</CardTitle>
+            <CardDescription>{t("dashboard.applicationDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="text-sm">
-            {isPending ? <p className="text-muted-foreground">Loading…</p> : null}
+            {isPending ? <p className="text-muted-foreground">{t("dashboard.loading")}</p> : null}
             {isError ? (
-              <p className="text-destructive">Failed to load app info: {error.message}</p>
+              <p className="text-destructive">
+                {t("dashboard.loadFailed", { error: error.message })}
+              </p>
             ) : null}
             {data ? (
               <dl className="grid grid-cols-2 gap-y-2">
-                <dt className="text-muted-foreground">Version</dt>
+                <dt className="text-muted-foreground">{t("dashboard.version")}</dt>
                 <dd className="text-right">{data.version}</dd>
-                <dt className="text-muted-foreground">Profile</dt>
+                <dt className="text-muted-foreground">{t("dashboard.profile")}</dt>
                 <dd className="text-right">{data.profile}</dd>
-                <dt className="text-muted-foreground">Proxy port</dt>
+                <dt className="text-muted-foreground">{t("dashboard.proxyPort")}</dt>
                 <dd className="text-right">{data.proxyPort}</dd>
-                <dt className="text-muted-foreground">Control port</dt>
+                <dt className="text-muted-foreground">{t("dashboard.controlPort")}</dt>
                 <dd className="text-right">{data.controlPort}</dd>
-                <dt className="text-muted-foreground">Data directory</dt>
+                <dt className="text-muted-foreground">{t("dashboard.dataDirectory")}</dt>
                 <dd className="truncate text-right" title={data.dataDir}>
                   {data.dataDir}
                 </dd>
@@ -50,8 +51,8 @@ function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Binding check</CardTitle>
-            <CardDescription>Wails typed binding round-trip</CardDescription>
+            <CardTitle>{t("dashboard.bindingCheck")}</CardTitle>
+            <CardDescription>{t("dashboard.bindingCheckDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <Button
@@ -59,15 +60,16 @@ function DashboardPage() {
               onClick={() => pingMutation.mutate()}
               disabled={pingMutation.isPending}
             >
-              {pingMutation.isPending ? "Pinging…" : "Ping backend"}
+              {pingMutation.isPending ? t("dashboard.pinging") : t("dashboard.ping")}
             </Button>
             {pingMutation.isError ? (
-              <p className="text-destructive">Ping failed: {pingMutation.error.message}</p>
+              <p className="text-destructive">
+                {t("dashboard.pingFailed", { error: pingMutation.error.message })}
+              </p>
             ) : null}
             {pingMutation.isSuccess ? (
               <p className="text-muted-foreground">
-                Backend replied:{" "}
-                <span className="text-foreground font-medium">{pingMutation.data}</span>
+                {t("dashboard.pingReply", { result: pingMutation.data })}
               </p>
             ) : null}
           </CardContent>

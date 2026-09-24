@@ -39,6 +39,13 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - TanStack Table — planned for account/provider/request tables
 - React Hook Form + Zod — planned for account/provider/routing forms
 - Apache ECharts — planned for usage/quota charts (aggregation happens in Go)
+- Internationalization: `frontend/src/i18n` — a small typed dictionary
+  (`locales/zh.ts` is the key source of truth, `locales/en.ts` is type-checked
+  against it) with a `useTranslation` hook. The selected language lives in the
+  Zustand UI store and is persisted to localStorage. No i18n dependency was
+  added: two static locales do not justify one under the dependency rules.
+  Revisit (e.g. i18next) if pluralization, date/number formatting or more than
+  a handful of locales become real needs.
 
 ## Storage
 

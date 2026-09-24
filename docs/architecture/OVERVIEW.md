@@ -31,7 +31,7 @@ Core would still compile and run behind the local HTTP Control API.
 | Client integrations  | `internal/integration/<client>`       | Detect/read/backup/apply/restore/validate client configs  |
 | Infrastructure       | `internal/infrastructure/…`           | SQLite database + migrations, credential store, logger    |
 | Runtime profile      | `internal/platform/profile`           | Production/development/test isolation (ports, data dirs)  |
-| Frontend             | `frontend/src/…`                      | React SPA: pages, features, components, hooks, services   |
+| Frontend             | `frontend/src/…`                      | React SPA: pages, features, components, hooks, services; all user-facing copy goes through `frontend/src/i18n` (zh/en) |
 
 ## Component Responsibilities
 

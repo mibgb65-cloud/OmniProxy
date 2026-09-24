@@ -6,5 +6,5 @@ export const Route = createFileRoute("/usage")({
 })
 
 function UsagePage() {
-  return <PagePlaceholder title="Usage" description="Token and request usage statistics." />
+  return <PagePlaceholder titleKey="pages.usage.title" descriptionKey="pages.usage.description" />
 }

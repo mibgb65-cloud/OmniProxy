@@ -6,10 +6,5 @@ export const Route = createFileRoute("/logs")({
 })
 
 function LogsPage() {
-  return (
-    <PagePlaceholder
-      title="Logs"
-      description="Structured application logs streamed from the Go backend."
-    />
-  )
+  return <PagePlaceholder titleKey="pages.logs.title" descriptionKey="pages.logs.description" />
 }

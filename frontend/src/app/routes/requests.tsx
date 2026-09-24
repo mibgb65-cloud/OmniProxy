@@ -6,5 +6,7 @@ export const Route = createFileRoute("/requests")({
 })
 
 function RequestsPage() {
-  return <PagePlaceholder title="Requests" description="Request history and failure analysis." />
+  return (
+    <PagePlaceholder titleKey="pages.requests.title" descriptionKey="pages.requests.description" />
+  )
 }

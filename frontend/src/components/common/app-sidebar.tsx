@@ -13,24 +13,27 @@ import {
   Users,
 } from "lucide-react"
 import { Button } from "../ui/button"
+import { LanguageSwitcher } from "./language-switcher"
+import { useTranslation } from "../../hooks/use-translation"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
 import type { NavItem } from "../../types/ui"
 
 const navItems: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/accounts", label: "Accounts", icon: Users },
-  { to: "/providers", label: "Providers", icon: Server },
-  { to: "/gateway", label: "Gateway", icon: Network },
-  { to: "/routing", label: "Routing", icon: RouteIcon },
-  { to: "/quota", label: "Quota", icon: Gauge },
-  { to: "/usage", label: "Usage", icon: BarChart3 },
-  { to: "/requests", label: "Requests", icon: History },
-  { to: "/logs", label: "Logs", icon: ScrollText },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { to: "/accounts", labelKey: "nav.accounts", icon: Users },
+  { to: "/providers", labelKey: "nav.providers", icon: Server },
+  { to: "/gateway", labelKey: "nav.gateway", icon: Network },
+  { to: "/routing", labelKey: "nav.routing", icon: RouteIcon },
+  { to: "/quota", labelKey: "nav.quota", icon: Gauge },
+  { to: "/usage", labelKey: "nav.usage", icon: BarChart3 },
+  { to: "/requests", labelKey: "nav.requests", icon: History },
+  { to: "/logs", labelKey: "nav.logs", icon: ScrollText },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ]
 
 export function AppSidebar() {
+  const { t } = useTranslation()
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
 
@@ -50,39 +53,48 @@ export function AppSidebar() {
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.to}>
-              <SidebarLink item={item} collapsed={collapsed} />
+              <SidebarLink item={item} collapsed={collapsed} label={t(item.labelKey)} />
             </li>
           ))}
         </ul>
       </nav>
 
-      <div className="border-sidebar-border border-t p-2">
+      <div className="border-sidebar-border space-y-2 border-t p-2">
+        <LanguageSwitcher collapsed={collapsed} />
         <Button
           variant="ghost"
           size="sm"
           className="w-full justify-start gap-2"
           onClick={toggleSidebar}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("common.expand") : t("common.collapse")}
         >
           <PanelLeftClose className={cn("size-4 shrink-0", collapsed && "rotate-180")} />
-          {collapsed ? null : <span>Collapse</span>}
+          {collapsed ? null : <span>{t("common.collapse")}</span>}
         </Button>
       </div>
     </aside>
   )
 }
 
-function SidebarLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
+function SidebarLink({
+  item,
+  collapsed,
+  label,
+}: {
+  item: NavItem
+  collapsed: boolean
+  label: string
+}) {
   const Icon = item.icon
   return (
     <Link
       to={item.to}
-      title={collapsed ? item.label : undefined}
+      title={collapsed ? label : undefined}
       className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm data-[active=true]:font-medium"
       activeProps={{ "data-active": "true" }}
     >
       <Icon className="size-4 shrink-0" />
-      {collapsed ? null : <span>{item.label}</span>}
+      {collapsed ? null : <span>{label}</span>}
     </Link>
   )
 }

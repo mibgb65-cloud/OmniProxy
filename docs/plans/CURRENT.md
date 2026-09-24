@@ -6,16 +6,19 @@
 
 ## Current Goal
 
-Project foundation is complete (architecture skeleton, tooling, CI). Feature
-development can start on this base.
+Frontend milestone 1: internationalization (Chinese/English) is done; next is
+wiring the first real feature pages once backends land.
 
 ## In Progress
 
-- Nothing. The foundation is verified and committed; the next milestone starts
-  with the credential store and the first application service.
+- Nothing in progress. Frontend i18n is complete and verified.
 
 ## Recently Completed
 
+- Frontend i18n: typed zh/en dictionaries (`frontend/src/i18n`), `useTranslation`
+  hook, language switcher in the sidebar, language persisted in the Zustand UI
+  store (localStorage). All existing UI copy migrated to translation keys;
+  document `lang`/title follow the selection.
 - Wails 3 + React + Vite project scaffold, restructured to the planned layout
   (`internal/…`, `frontend/src/…`; `main.go` stays at the root per Wails
   tooling).

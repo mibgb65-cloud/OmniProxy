@@ -8,8 +8,8 @@ export const Route = createFileRoute("/providers")({
 function ProvidersPage() {
   return (
     <PagePlaceholder
-      title="Providers"
-      description="Provider configuration and health. The provider backend lands in a later milestone."
+      titleKey="pages.providers.title"
+      descriptionKey="pages.providers.description"
     />
   )
 }

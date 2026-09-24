@@ -1,0 +1,60 @@
+/**
+ * Chinese translations — the single source of truth for translation keys.
+ * `en.ts` is type-checked against this dictionary, so a key added here must
+ * exist there (and vice versa is a compile error).
+ */
+export const zh = {
+  "app.title": "OmniProxy - 本地 AI API 网关",
+
+  "common.language": "语言",
+  "common.collapse": "折叠",
+  "common.expand": "展开",
+
+  "nav.dashboard": "仪表盘",
+  "nav.accounts": "账号",
+  "nav.providers": "提供商",
+  "nav.gateway": "网关",
+  "nav.routing": "路由",
+  "nav.quota": "配额",
+  "nav.usage": "用量",
+  "nav.requests": "请求",
+  "nav.logs": "日志",
+  "nav.settings": "设置",
+
+  "dashboard.title": "仪表盘",
+  "dashboard.description": "OmniProxy 运行时概览。功能面板将随后端功能陆续上线。",
+  "dashboard.application": "应用",
+  "dashboard.applicationDescription": "来自 Go 后端的运行时信息",
+  "dashboard.version": "版本",
+  "dashboard.profile": "运行配置",
+  "dashboard.proxyPort": "代理端口",
+  "dashboard.controlPort": "控制端口",
+  "dashboard.dataDirectory": "数据目录",
+  "dashboard.loading": "加载中…",
+  "dashboard.loadFailed": "加载应用信息失败：{error}",
+  "dashboard.bindingCheck": "绑定检查",
+  "dashboard.bindingCheckDescription": "Wails 类型绑定往返测试",
+  "dashboard.ping": "测试后端连接",
+  "dashboard.pinging": "连接中…",
+  "dashboard.pingFailed": "连接失败：{error}",
+  "dashboard.pingReply": "后端回复：{result}",
+
+  "pages.accounts.title": "账号",
+  "pages.accounts.description": "多账号管理。账号后端将在后续里程碑上线。",
+  "pages.providers.title": "提供商",
+  "pages.providers.description": "提供商配置与健康检测。提供商后端将在后续里程碑上线。",
+  "pages.gateway.title": "网关",
+  "pages.gateway.description": "代理服务器状态与控制。网关后端将在后续里程碑上线。",
+  "pages.routing.title": "路由",
+  "pages.routing.description": "模型路由规则。路由引擎将在后续里程碑上线。",
+  "pages.quota.title": "配额",
+  "pages.quota.description": "按账号与提供商的配额监控。",
+  "pages.usage.title": "用量",
+  "pages.usage.description": "Token 与请求用量统计。",
+  "pages.requests.title": "请求",
+  "pages.requests.description": "请求历史与失败分析。",
+  "pages.logs.title": "日志",
+  "pages.logs.description": "来自 Go 后端的结构化应用日志。",
+  "pages.settings.title": "设置",
+  "pages.settings.description": "应用设置与客户端集成管理。",
+} as const

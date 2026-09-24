@@ -98,6 +98,9 @@ description.
 - Components render; they do not compute business rules.
 - Server state goes through TanStack Query; only genuine UI state goes into
   Zustand. Never mix the two.
+- User-facing strings go through the i18n layer (`src/i18n` + the
+  `useTranslation` hook). Do not hardcode display text; add the key to
+  `locales/zh.ts` (source of truth) and `locales/en.ts` in the same change.
 
 ## Error Handling
 

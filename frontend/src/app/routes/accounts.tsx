@@ -7,9 +7,6 @@ export const Route = createFileRoute("/accounts")({
 
 function AccountsPage() {
   return (
-    <PagePlaceholder
-      title="Accounts"
-      description="Multi-account management. The account backend (internal/core/account) lands in a later milestone."
-    />
+    <PagePlaceholder titleKey="pages.accounts.title" descriptionKey="pages.accounts.description" />
   )
 }

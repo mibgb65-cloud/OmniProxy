@@ -7,9 +7,6 @@ export const Route = createFileRoute("/routing")({
 
 function RoutingPage() {
   return (
-    <PagePlaceholder
-      title="Routing"
-      description="Model routing rules. The routing engine lands in a later milestone."
-    />
+    <PagePlaceholder titleKey="pages.routing.title" descriptionKey="pages.routing.description" />
   )
 }

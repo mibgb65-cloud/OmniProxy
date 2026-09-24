@@ -6,5 +6,5 @@ export const Route = createFileRoute("/quota")({
 })
 
 function QuotaPage() {
-  return <PagePlaceholder title="Quota" description="Quota monitoring per account and provider." />
+  return <PagePlaceholder titleKey="pages.quota.title" descriptionKey="pages.quota.description" />
 }
