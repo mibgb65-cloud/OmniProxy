@@ -1,0 +1,2 @@
+# active/ 保存状态为 Planned、In Progress、Blocked 的任务。
+# 当前没有活动任务时此文件用于占位，保证目录结构存在。

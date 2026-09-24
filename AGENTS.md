@@ -14,7 +14,8 @@ When documents disagree, trust them in this order:
 4. `docs/architecture/TECH_STACK.md` (technology baseline)
 5. `docs/development/*` (coding, Git, testing, build rules)
 6. `docs/decisions/` (accepted architecture decisions)
-7. `docs/plans/CURRENT.md` (short-term status)
+7. `docs/plans/CURRENT.md` (short-term status dashboard)
+8. `docs/tasks/` (permanent task history: why, how, verification, commits)
 
 Never invent product requirements. If information is missing, mark it `TBD`
 or `Needs confirmation` — do not fabricate.
@@ -36,6 +37,9 @@ Additionally, when the task involves:
 - Building/packaging → `docs/development/BUILD.md`
 - Architecture changes → check `docs/decisions/` and consider a new ADR
 
+If you are continuing an existing task, read its Task Record in
+`docs/tasks/active/` first.
+
 Simple changes do not require reading the whole docs tree.
 
 ## 3. Non-negotiable rules
@@ -55,18 +59,26 @@ Simple changes do not require reading the whole docs tree.
 ## 4. Standard development flow
 
 ```text
-Understand the requirement
+User raises a requirement
+  → create the Task Record (docs/tasks/active/, Status: Planned)
+  → understand the requirement
   → read the relevant docs
   → inspect the existing code
   → confirm the impact scope
-  → plan the implementation
+  → fill in Analysis and Implementation Plan
+  → Status → In Progress
   → implement
   → test
   → run `task verify`
+  → fill in Implementation Result and Verification
   → update the affected docs
-  → update docs/plans/CURRENT.md
   → review `git diff`
+  → commit and write the commit hash into the Task Record
+  → Status → Completed, move to docs/tasks/completed/
 ```
+
+The Task Record must exist before any code, config or project file is
+modified. Never implement first and backfill the record afterwards.
 
 Do not add ceremonial steps that serve no purpose.
 
@@ -78,7 +90,8 @@ Do not add ceremonial steps that serve no purpose.
 format check → lint → typecheck → test → build
 ```
 
-Run it after any significant change. CI runs the same gate.
+Run it after any significant change. CI runs the same gate. The verification
+result must be written back into the Task Record.
 
 ## 6. Security rules
 
@@ -100,3 +113,37 @@ Without explicit user authorization, an agent must not:
 
 If the working tree contains changes that do not belong to the current task:
 leave them untouched — do not overwrite, delete or commit them.
+
+After committing, record the commit hash in the Task Record.
+
+## 8. Task Records
+
+任何开发任务，无论大小，在修改代码、配置或项目文件之前，都必须创建 Task Record。
+
+路径：
+
+`docs/tasks/`
+
+完整规范：
+
+`docs/tasks/README.md`
+
+基本流程：
+
+Request
+→ Task Record
+→ Analysis
+→ Implementation Plan
+→ Implementation
+→ Verification
+→ Documentation
+→ Git
+→ Result
+
+禁止先实现再补任务记录。
+
+任务完成后必须在 Task Record 中填写实际 Implementation Result 和 Verification Result。
+
+`docs/tasks/` 是任务历史的 Source of Truth。
+
+`docs/plans/CURRENT.md` 只维护当前任务概览。

@@ -9,7 +9,8 @@ current real state of the project — not chat logs, not wishful thinking.
 product/        Product requirements and product boundaries
 architecture/   System architecture and technology stack
 development/    Coding, Git, testing and build rules
-plans/          Current development status (short-lived)
+plans/          Current development status dashboard
+tasks/          Task records — the source of truth for task history
 decisions/      Architecture Decision Records (ADRs)
 ```
 
@@ -27,6 +28,7 @@ decisions/      Architecture Decision Records (ADRs)
 | "How do I build / package / run?"      | `development/BUILD.md`                           |
 | "What is happening right now?"         | `plans/CURRENT.md`                               |
 | "Why was X decided?"                   | `decisions/`                                     |
+| "Why was this change made, how, and which commit?" | `tasks/` (find by TASK ID)         |
 
 ## Rules
 
@@ -37,3 +39,5 @@ decisions/      Architecture Decision Records (ADRs)
   agents, not a changelog.
 - Record irreversible or cross-cutting technical choices as ADRs. Do not
   fabricate ADRs for decisions that were never made.
+- Every development task starts with a Task Record in `tasks/active/` before
+  any code is touched — see `tasks/README.md`.
