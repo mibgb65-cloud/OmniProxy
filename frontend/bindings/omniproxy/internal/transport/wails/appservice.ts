@@ -24,6 +24,15 @@ export function AppInfo(): $CancellablePromise<$models.AppInfo> {
 }
 
 /**
+ * CheckForUpdate compares the running version against the latest GitHub
+ * release of the configured repository. When no repository is configured it
+ * returns the "unconfigured" state instead of pretending to check.
+ */
+export function CheckForUpdate(): $CancellablePromise<$models.UpdateStatus> {
+    return $Call.ByID(649689971);
+}
+
+/**
  * CleanStorage runs a cleanup operation: "logs" removes rotated log backups
  * and truncates the active log; "database" vacuums the SQLite database.
  */
@@ -36,6 +45,13 @@ export function CleanStorage(target: string): $CancellablePromise<$models.CleanR
  */
 export function Ping(): $CancellablePromise<string> {
     return $Call.ByID(77535937);
+}
+
+/**
+ * RuntimeInfo returns the current application runtime information.
+ */
+export function RuntimeInfo(): $CancellablePromise<$models.RuntimeInfo> {
+    return $Call.ByID(747212535);
 }
 
 /**

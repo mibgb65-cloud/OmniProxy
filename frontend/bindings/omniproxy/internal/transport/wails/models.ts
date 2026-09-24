@@ -23,6 +23,26 @@ export interface CleanResult {
 }
 
 /**
+ * RuntimeInfo is a snapshot of the application runtime for the About page.
+ */
+export interface RuntimeInfo {
+    "version": string;
+    "appName": string;
+    "description": string;
+    "appId": string;
+    "profile": string;
+    "dataDir": string;
+    "logDir": string;
+    "proxyPort": number;
+    "controlPort": number;
+    "goVersion": string;
+    "wailsVersion": string;
+    "platform": string;
+    "sqliteVersion": string;
+    "startedAt": string;
+}
+
+/**
  * SetDataDirResult reports the outcome of a data-directory change.
  */
 export interface SetDataDirResult {
@@ -51,4 +71,16 @@ export interface StorageItem {
     "name": string;
     "path": string;
     "bytes": number;
+}
+
+/**
+ * UpdateStatus reports the result of an update check.
+ */
+export interface UpdateStatus {
+    "state": string;
+    "currentVersion": string;
+    "latestVersion": string;
+    "releaseUrl": string;
+    "publishedAt": string;
+    "message": string;
 }

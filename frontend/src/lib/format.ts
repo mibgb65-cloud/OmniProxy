@@ -17,3 +17,16 @@ export function formatBytes(bytes: number): string {
   const digits = value < 10 && unit > 0 ? 1 : 0
   return `${value.toFixed(digits)} ${UNITS[unit]}`
 }
+
+/** Formats a duration as HH:MM:SS (language-neutral). */
+export function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms < 0) {
+    ms = 0
+  }
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+}

@@ -3,6 +3,7 @@ import {
   BarChart3,
   Gauge,
   History,
+  Info,
   LayoutDashboard,
   Network,
   PanelLeftClose,
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { to: "/requests", labelKey: "nav.requests", icon: History },
   { to: "/logs", labelKey: "nav.logs", icon: ScrollText },
   { to: "/settings", labelKey: "nav.settings", icon: Settings },
+  { to: "/about", labelKey: "nav.about", icon: Info },
 ]
 
 export function AppSidebar() {

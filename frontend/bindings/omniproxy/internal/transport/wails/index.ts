@@ -9,7 +9,9 @@ export {
 export type {
     AppInfo,
     CleanResult,
+    RuntimeInfo,
     SetDataDirResult,
     StorageInfo,
-    StorageItem
+    StorageItem,
+    UpdateStatus
 } from "./models.js";

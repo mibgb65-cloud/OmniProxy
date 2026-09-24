@@ -35,11 +35,12 @@ type App struct {
 // typed bindings. It carries no business logic of its own: feature services
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
-	prof     *profile.Profile
-	control  *httpapi.Server
-	db       *sql.DB
-	logFiles *logger.Files
-	log      *slog.Logger
+	prof      *profile.Profile
+	control   *httpapi.Server
+	db        *sql.DB
+	logFiles  *logger.Files
+	log       *slog.Logger
+	startedAt time.Time
 }
 
 // NewAppService creates the bound application service.
@@ -50,7 +51,14 @@ func NewAppService(
 	logFiles *logger.Files,
 	log *slog.Logger,
 ) *AppService {
-	return &AppService{prof: prof, control: control, db: db, logFiles: logFiles, log: log}
+	return &AppService{
+		prof:      prof,
+		control:   control,
+		db:        db,
+		logFiles:  logFiles,
+		log:       log,
+		startedAt: time.Now(),
+	}
 }
 
 // AppInfo is a snapshot of application runtime information for the UI.

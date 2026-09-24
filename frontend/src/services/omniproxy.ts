@@ -2,11 +2,13 @@ import {
   AppService,
   type AppInfo,
   type CleanResult,
+  type RuntimeInfo,
   type SetDataDirResult,
   type StorageInfo,
+  type UpdateStatus,
 } from "../../bindings/omniproxy/internal/transport/wails"
 
-export type { AppInfo, CleanResult, SetDataDirResult, StorageInfo }
+export type { AppInfo, CleanResult, RuntimeInfo, SetDataDirResult, StorageInfo, UpdateStatus }
 
 /** getAppInfo returns the application runtime information from the Go backend. */
 export function getAppInfo(): Promise<AppInfo> {
@@ -39,4 +41,14 @@ export function selectDirectory(title: string): Promise<string> {
 /** cleanStorage runs a cleanup operation ("logs" | "database"). */
 export function cleanStorage(target: "logs" | "database"): Promise<CleanResult> {
   return AppService.CleanStorage(target)
+}
+
+/** getRuntimeInfo returns application and runtime details for the About page. */
+export function getRuntimeInfo(): Promise<RuntimeInfo> {
+  return AppService.RuntimeInfo()
+}
+
+/** checkForUpdate compares the current version against the latest release. */
+export function checkForUpdate(): Promise<UpdateStatus> {
+  return AppService.CheckForUpdate()
 }

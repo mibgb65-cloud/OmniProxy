@@ -30,6 +30,9 @@ type Config struct {
 	// It lets startup detect an interrupted migration (a crash between
 	// persisting the new location and moving the data) and revert.
 	PreviousDataDir string `json:"previousDataDir,omitempty"`
+	// UpdateRepo is the "owner/repo" checked for new releases on GitHub.
+	// Empty means update checks are not configured yet.
+	UpdateRepo string `json:"updateRepo,omitempty"`
 }
 
 // ConfigFilePath returns the fixed path of the persisted configuration for
