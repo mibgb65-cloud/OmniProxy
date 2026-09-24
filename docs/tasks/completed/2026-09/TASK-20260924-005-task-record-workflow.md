@@ -180,10 +180,10 @@ PASS
 ## Commit
 
 ```text
-docs: establish Task Record workflow
+5e90858 docs: establish Task Record workflow
 ```
 
-主提交与本任务文件一同提交，其 hash 由紧随其后的记录提交回填（提交内容无法包含自身 hash）。
+（本任务的 commit hash 由紧随其后的记录提交回填：提交内容无法包含自身 hash。）
 
 ---
 
