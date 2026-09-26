@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -118,7 +118,11 @@ None.
 
 ## Commit
 
-待提交并回填。
+```text
+9f56ad42ab78b9a31c9b38ad4082471f473e78c9 fix(frontend): restore collapsed sidebar controls and alignment
+```
+
+（本任务的 commit hash 由紧随其后的记录提交回填。）
 
 ---
 
@@ -130,4 +134,4 @@ None.
 
 # Completed
 
-待填写。
+2026-09-26 09:47
