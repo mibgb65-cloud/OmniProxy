@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260926-005 为侧栏文字增加逐字收展动画
 
 ## Recently Completed
 

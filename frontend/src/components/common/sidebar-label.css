@@ -1,0 +1,20 @@
+.sidebar-label-character {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 60ms ease-out var(--enter-delay),
+    visibility 0s linear 0s;
+}
+
+.sidebar-label[data-collapsed="true"] .sidebar-label-character {
+  opacity: 0;
+  visibility: hidden;
+  /* 保留离场所需的绘制时间；始终占位，避免收展过程中改变字距和行高。 */
+  transition-delay: var(--exit-delay), calc(var(--exit-delay) + 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-label .sidebar-label-character {
+    transition: none;
+  }
+}

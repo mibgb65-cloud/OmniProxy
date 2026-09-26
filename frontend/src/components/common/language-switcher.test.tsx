@@ -43,6 +43,8 @@ describe("LanguageSwitcher", () => {
     const user = userEvent.setup()
     renderSwitcher(true)
 
+    expect(screen.queryByRole("button", { name: "中文" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "English" })).not.toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "语言" }))
 
     expect(useUIStore.getState().language).toBe("en")

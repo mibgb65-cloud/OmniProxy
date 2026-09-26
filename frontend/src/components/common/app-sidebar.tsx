@@ -16,6 +16,7 @@ import {
 import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
 import { LanguageSwitcher } from "./language-switcher"
+import { SidebarLabel } from "./sidebar-label"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
 import type { NavItem } from "../../types/ui"
@@ -42,14 +43,16 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
+        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width] duration-250 ease-in-out motion-reduce:transition-none",
         collapsed ? "w-16" : "w-56",
       )}
     >
       {/* 图标固定在收起态的水平中心，避免宽度过渡时切换对齐方式产生跳动。 */}
       <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-5 whitespace-nowrap">
         <span className="bg-primary size-6 shrink-0 rounded-md" aria-hidden="true" />
-        {collapsed ? null : <span className="font-semibold">OmniProxy</span>}
+        <SidebarLabel collapsed={collapsed} className="font-semibold">
+          OmniProxy
+        </SidebarLabel>
       </div>
 
       <nav
@@ -76,7 +79,7 @@ export function AppSidebar() {
           aria-expanded={!collapsed}
         >
           <PanelLeftClose className={cn("size-4 shrink-0", collapsed && "rotate-180")} />
-          {collapsed ? null : <span>{t("common.collapse")}</span>}
+          <SidebarLabel collapsed={collapsed}>{t("common.collapse")}</SidebarLabel>
         </Button>
       </div>
     </aside>
@@ -103,7 +106,7 @@ function SidebarLink({
       activeProps={{ "data-active": "true" }}
     >
       <Icon className="size-4 shrink-0" />
-      {collapsed ? null : <span>{label}</span>}
+      <SidebarLabel collapsed={collapsed}>{label}</SidebarLabel>
     </Link>
   )
 }

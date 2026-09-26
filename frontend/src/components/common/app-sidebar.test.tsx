@@ -1,5 +1,5 @@
 import { createMemoryHistory, createRouter, RouterContextProvider } from "@tanstack/react-router"
-import { render, screen, waitFor } from "@testing-library/react"
+import { isInaccessible, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
@@ -55,13 +55,14 @@ describe("AppSidebar", () => {
     renderSidebar()
 
     await user.click(screen.getByRole("button", { name: "折叠" }))
-    expect(screen.queryByText("仪表盘")).not.toBeInTheDocument()
+    expect(isInaccessible(screen.getByText("仪表盘"))).toBe(true)
     expect(screen.getByRole("link", { name: "仪表盘" })).toHaveAttribute("href", "/")
     expect(screen.getAllByRole("link")).toHaveLength(11)
     expect(screen.getByRole("button", { name: "展开" })).toHaveAttribute("aria-expanded", "false")
 
     await user.click(screen.getByRole("button", { name: "展开" }))
     expect(screen.getByText("仪表盘")).toBeInTheDocument()
+    expect(isInaccessible(screen.getByText("仪表盘"))).toBe(false)
     expect(screen.getByRole("button", { name: "折叠" })).toHaveAttribute("aria-expanded", "true")
   })
 })
