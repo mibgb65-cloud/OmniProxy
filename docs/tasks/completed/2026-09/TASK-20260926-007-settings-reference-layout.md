@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -105,8 +105,16 @@ In Progress
 
 ## Commit
 
-待填写。
+```text
+2c04fcc feat(settings): 按参考稿优化存储设置页面
+```
+
+（归档记录本身另行提交，无法在同一提交中记录自身哈希。）
 
 # Result
 
 设置页已按参考稿建立清晰的存储概览、路径列表和迁移卡片，现有功能保持可用。
+
+# Completed
+
+2026-09-26 11:03
