@@ -55,6 +55,9 @@ describe("DataDirForm", () => {
     const user = userEvent.setup()
     renderForm()
 
+    expect(screen.getByText(/迁移时间取决于数据量和磁盘速度/)).toBeInTheDocument()
+    expect(screen.getByText(/退出应用时自动迁移现有数据/)).toBeInTheDocument()
+
     await user.click(screen.getByRole("button", { name: "保存" }))
 
     expect(await screen.findByText("请输入目录路径。")).toBeInTheDocument()
@@ -106,6 +109,16 @@ describe("DataDirForm", () => {
       expect(selectDirectory).toHaveBeenCalled()
     })
     expect(screen.getByLabelText<HTMLInputElement>("新数据目录").value).toBe("")
+  })
+
+  it("shows an error when the folder picker fails", async () => {
+    const user = userEvent.setup()
+    vi.mocked(selectDirectory).mockRejectedValue(new Error("picker unavailable"))
+    renderForm()
+
+    await user.click(screen.getByRole("button", { name: "浏览…" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("选择目录失败：picker unavailable")
   })
 
   it("surfaces backend validation errors", async () => {

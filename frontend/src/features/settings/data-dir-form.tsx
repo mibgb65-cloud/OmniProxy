@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { FolderOpen, Info } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
@@ -33,11 +34,14 @@ export function DataDirForm() {
     defaultValues: { path: info?.dataDir ?? "" },
   })
 
-  const browse = async () => {
-    const path = await selectDirectory.mutateAsync(t("settings.storage.selectTitle"))
-    if (path) {
-      setValue("path", path, { shouldValidate: true })
-    }
+  const browse = () => {
+    selectDirectory.mutate(t("settings.storage.selectTitle"), {
+      onSuccess: (path) => {
+        if (path) {
+          setValue("path", path, { shouldValidate: true })
+        }
+      },
+    })
   }
 
   const onSubmit = (values: FormValues) => {
@@ -47,23 +51,24 @@ export function DataDirForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("settings.storage.locationTitle")}</CardTitle>
+    <Card className="dark:bg-card/75 gap-0">
+      <CardHeader className="pb-5">
+        <CardTitle className="text-base">{t("settings.storage.locationTitle")}</CardTitle>
         <CardDescription>{t("settings.storage.locationDescription")}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <form
-          className="flex flex-wrap items-end gap-2"
+          className="flex flex-col gap-2 sm:flex-row sm:items-start"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
-          <div className="min-w-72 flex-1">
-            <label className="text-muted-foreground mb-1 block text-sm" htmlFor="data-dir">
+          <div className="min-w-0 flex-1">
+            <label className="sr-only" htmlFor="data-dir">
               {t("settings.storage.pathLabel")}
             </label>
             <Input
               id="data-dir"
+              className="font-mono text-xs"
               placeholder={t("settings.storage.pathPlaceholder")}
               aria-invalid={errors.path ? true : undefined}
               {...register("path")}
@@ -77,26 +82,44 @@ export function DataDirForm() {
             ) : null}
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={browse}
-            disabled={selectDirectory.isPending}
-          >
-            {t("settings.storage.browse")}
-          </Button>
-          <Button type="submit" disabled={setDataDir.isPending}>
-            {setDataDir.isPending ? t("settings.storage.saving") : t("settings.storage.save")}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={browse}
+              disabled={selectDirectory.isPending}
+            >
+              <FolderOpen aria-hidden="true" />
+              {t("settings.storage.browse")}
+            </Button>
+            <Button
+              type="submit"
+              className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+              disabled={setDataDir.isPending}
+            >
+              {setDataDir.isPending ? t("settings.storage.saving") : t("settings.storage.save")}
+            </Button>
+          </div>
         </form>
 
+        {selectDirectory.isError ? (
+          <p className="text-destructive text-xs" role="alert">
+            {t("settings.storage.browseFailed", { error: selectDirectory.error.message })}
+          </p>
+        ) : null}
+
         {setDataDir.isSuccess ? (
-          <p className="bg-muted text-muted-foreground mt-3 rounded-md px-3 py-2 text-sm">
+          <p className="bg-muted text-muted-foreground rounded-md px-3 py-2 text-sm" role="status">
             {t("settings.storage.saved", {
               size: formatBytes(setDataDir.data.existingDataSize),
             })}
           </p>
         ) : null}
+
+        <p className="flex gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2.5 text-xs text-blue-700 dark:border-blue-500/25 dark:bg-blue-500/5 dark:text-blue-300">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{t("settings.storage.migrationHint")}</span>
+        </p>
       </CardContent>
     </Card>
   )
