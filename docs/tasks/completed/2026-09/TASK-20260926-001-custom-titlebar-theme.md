@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -133,7 +133,11 @@ None.
 
 ## Commit
 
-待提交并回填。
+```text
+15587fadf30db0b9f4e5860fe54641ff93e2d1f0 feat(frontend): add custom titlebar and light-dark theme
+```
+
+（本任务的 commit hash 由紧随其后的记录提交回填。）
 
 ---
 
@@ -145,4 +149,4 @@ None.
 
 # Completed
 
-待填写。
+2026-09-26 09:11
