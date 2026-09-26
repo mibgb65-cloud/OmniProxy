@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260926-002 修复侧边栏展开时短暂出现滚动条
 
 ## Recently Completed
 

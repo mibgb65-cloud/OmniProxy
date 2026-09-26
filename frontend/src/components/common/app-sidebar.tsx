@@ -42,16 +42,19 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full flex-col border-r transition-[width]",
+        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width]",
         collapsed ? "w-16" : "w-56",
       )}
     >
-      <div className="border-sidebar-border flex h-14 items-center gap-2 border-b px-4">
+      <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-4 whitespace-nowrap">
         <span className="bg-primary size-6 shrink-0 rounded-md" aria-hidden="true" />
         {collapsed ? null : <span className="font-semibold">OmniProxy</span>}
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-2" aria-label="Primary">
+      <nav
+        className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-2"
+        aria-label="Primary"
+      >
         <ul className="space-y-1">
           {navItems.map((item) => (
             <li key={item.to}>
@@ -61,7 +64,7 @@ export function AppSidebar() {
         </ul>
       </nav>
 
-      <div className="border-sidebar-border space-y-2 border-t p-2">
+      <div className="border-sidebar-border shrink-0 space-y-2 overflow-hidden border-t p-2 whitespace-nowrap">
         <LanguageSwitcher collapsed={collapsed} />
         <Button
           variant="ghost"
@@ -92,7 +95,7 @@ function SidebarLink({
     <Link
       to={item.to}
       title={collapsed ? label : undefined}
-      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm data-[active=true]:font-medium"
+      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap data-[active=true]:font-medium"
       activeProps={{ "data-active": "true" }}
     >
       <Icon className="size-4 shrink-0" />
