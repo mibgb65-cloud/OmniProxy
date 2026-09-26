@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -119,7 +119,11 @@ None.
 
 ## Commit
 
-待提交并回填。
+```text
+2191e524730548b1c91a9ea62c2f7e117a3628c2 fix(frontend): prevent sidebar scrollbars during expansion
+```
+
+（本任务的 commit hash 由紧随其后的记录提交回填。）
 
 ---
 
@@ -131,4 +135,4 @@ None.
 
 # Completed
 
-待填写。
+2026-09-26 09:38

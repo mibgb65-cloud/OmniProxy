@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- TASK-20260926-002 修复侧边栏展开时短暂出现滚动条
+- (none)
 
 ## Recently Completed
 
+- TASK-20260926-002 修复侧边栏展开时短暂出现滚动条
 - TASK-20260926-001 自绘标题栏与亮暗模式
 - TASK-20260924-007 About page (version, runtime info, update check)
 - TASK-20260924-006 Settings page: data storage management
