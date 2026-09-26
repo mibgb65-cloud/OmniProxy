@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -82,8 +82,16 @@ None.
 
 # Git
 
-待提交。
+```text
+d8ec641e9c1f34ab59b28f1edc75ea2353c916f8 feat(frontend): 为侧栏文字增加逐字收展动画
+```
+
+提交 hash 由随后的任务归档提交回填。
 
 # Result
 
 侧栏文字逐字收展，快速切换可恢复到正确终态；图标、行高、底部操作和滚动行为保持稳定。
+
+# Completed
+
+2026-09-26
