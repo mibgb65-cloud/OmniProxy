@@ -21,7 +21,7 @@ export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-center"
+        className="w-full justify-start px-4 transition-colors has-[>svg]:px-4"
         aria-label={t("common.language")}
         title={t("common.language")}
         onClick={() => setLanguage(next)}
@@ -32,13 +32,13 @@ export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 px-2">
-      <span className="text-muted-foreground flex items-center gap-2 text-sm">
-        <Languages className="size-4" />
+    <div className="flex h-8 shrink-0 items-center justify-between gap-2 pl-4">
+      <span className="text-muted-foreground flex shrink-0 items-center gap-2 text-sm">
+        <Languages className="size-4 shrink-0" />
         {t("common.language")}
       </span>
       <div
-        className="border-border flex rounded-md border"
+        className="border-border flex shrink-0 rounded-md border"
         role="group"
         aria-label={t("common.language")}
       >

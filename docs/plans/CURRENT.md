@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260926-004 修复侧栏收展时图标位移与垂直跳动
 
 ## Recently Completed
 

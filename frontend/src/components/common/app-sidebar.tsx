@@ -42,16 +42,12 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width]",
+        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
         collapsed ? "w-16" : "w-56",
       )}
     >
-      <div
-        className={cn(
-          "border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b whitespace-nowrap",
-          collapsed ? "justify-center px-0" : "px-4",
-        )}
-      >
+      {/* 图标固定在收起态的水平中心，避免宽度过渡时切换对齐方式产生跳动。 */}
+      <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-5 whitespace-nowrap">
         <span className="bg-primary size-6 shrink-0 rounded-md" aria-hidden="true" />
         {collapsed ? null : <span className="font-semibold">OmniProxy</span>}
       </div>
@@ -74,9 +70,10 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="sm"
-          className={cn("w-full gap-2", collapsed ? "justify-center" : "justify-start")}
+          className="w-full justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
           onClick={toggleSidebar}
           aria-label={collapsed ? t("common.expand") : t("common.collapse")}
+          aria-expanded={!collapsed}
         >
           <PanelLeftClose className={cn("size-4 shrink-0", collapsed && "rotate-180")} />
           {collapsed ? null : <span>{t("common.collapse")}</span>}
@@ -100,10 +97,9 @@ function SidebarLink({
     <Link
       to={item.to}
       title={collapsed ? label : undefined}
-      className={cn(
-        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap data-[active=true]:font-medium",
-        collapsed && "justify-center px-0",
-      )}
+      aria-label={label}
+      // 固定行高，防止移除文字后由较矮的图标撑高而导致整列导航上移。
+      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 rounded-md px-4 text-sm whitespace-nowrap data-[active=true]:font-medium"
       activeProps={{ "data-active": "true" }}
     >
       <Icon className="size-4 shrink-0" />
