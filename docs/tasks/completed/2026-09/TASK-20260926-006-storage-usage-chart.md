@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -100,8 +100,16 @@ In Progress
 
 ## Commit
 
-待填写。
+```text
+9e74acd feat(settings): 增加数据存储占用图
+```
+
+（归档记录本身另行提交，无法在同一提交中记录自身哈希。）
 
 # Result
 
 设置页可直观看到真实数据目录的占用分布，含缓存、日志和数据库临时文件；账号数据的统计边界在界面中明确说明。
+
+# Completed
+
+2026-09-26 10:30

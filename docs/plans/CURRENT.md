@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- TASK-20260926-006 设置页数据存储占用图与完整目录统计
 - TASK-20260926-005 为侧栏文字增加逐字收展动画
 - TASK-20260926-004 修复侧栏收展时图标位移与垂直跳动
 - TASK-20260926-003 恢复收缩侧栏的展开按钮并居中图标
@@ -27,8 +28,8 @@
 
 ## Known Issues
 
-- The dashboard is the only page with live data; the other nine pages are
-  placeholders until their backends land.
+- Settings and About have live Wails data; account, provider, gateway and other
+  feature pages remain placeholders until their backends land.
 - No application feature services exist yet; `AppService` and `/healthz` are
   the only entry points.
 - UI log streaming (Wails events from the logger buffer) is not wired yet.
