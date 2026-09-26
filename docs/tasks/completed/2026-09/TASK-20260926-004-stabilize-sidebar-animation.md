@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -101,8 +101,16 @@ None.
 
 # Git
 
-待提交本次修复，提交后回填 hash 并归档记录。
+```text
+2562acfe8e8836f1e6051eefc825892291d379b0 fix(frontend): 修复侧栏收展时图标位移与垂直跳动
+```
+
+提交 hash 由随后的任务归档提交回填。
 
 # Result
 
 侧栏收展时图标保持原位，垂直间距一致，快速切换不产生位移或高度跳变；底部操作和低高度导航滚动能力保留。
+
+# Completed
+
+2026-09-26
