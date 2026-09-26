@@ -6,6 +6,15 @@
 export const zh = {
   "app.title": "OmniProxy - 本地 AI API 网关",
 
+  "window.title": "OmniProxy",
+  "window.switchToLight": "切换到亮色模式",
+  "window.switchToDark": "切换到暗色模式",
+  "window.minimise": "最小化",
+  "window.maximise": "最大化",
+  "window.restore": "还原窗口",
+  "window.close": "关闭窗口",
+  "window.actionFailed": "窗口操作失败",
+
   "common.language": "语言",
   "common.collapse": "折叠",
   "common.expand": "展开",

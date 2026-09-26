@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260926-001 自绘标题栏与亮暗模式
 
 ## Recently Completed
 

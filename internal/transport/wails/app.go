@@ -128,6 +128,7 @@ func Run(app *App) error {
 
 	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "OmniProxy",
+		Frameless:        true,
 		Width:            1200,
 		Height:           800,
 		MinWidth:         960,

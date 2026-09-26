@@ -7,6 +7,15 @@ import type { zh } from "./zh"
 export const en: Record<keyof typeof zh, string> = {
   "app.title": "OmniProxy - Local AI API Gateway",
 
+  "window.title": "OmniProxy",
+  "window.switchToLight": "Switch to light mode",
+  "window.switchToDark": "Switch to dark mode",
+  "window.minimise": "Minimise",
+  "window.maximise": "Maximise",
+  "window.restore": "Restore window",
+  "window.close": "Close window",
+  "window.actionFailed": "Window action failed",
+
   "common.language": "Language",
   "common.collapse": "Collapse",
   "common.expand": "Expand",

@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { defaultLanguage, isLanguage, type Language } from "../i18n/translation"
+import { defaultTheme, isTheme, type Theme } from "../lib/theme"
 
 interface UIState {
   sidebarCollapsed: boolean
@@ -8,12 +9,14 @@ interface UIState {
   /** Selected UI language; persisted to localStorage. */
   language: Language
   setLanguage: (language: Language) => void
+  /** Selected colour theme; persisted to localStorage. */
+  theme: Theme
+  toggleTheme: () => void
 }
 
 /**
- * Non-persistent UI state only (sidebar, theme, selections). Backend data
- * belongs in TanStack Query, never in this store. The language preference is
- * persisted so the choice survives restarts.
+ * UI state only (sidebar, language, theme). Backend data belongs in TanStack
+ * Query. Persist preferences so they survive restarts.
  */
 export const useUIStore = create<UIState>()(
   persist(
@@ -22,17 +25,23 @@ export const useUIStore = create<UIState>()(
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       language: defaultLanguage,
       setLanguage: (language) => set({ language }),
+      theme: defaultTheme,
+      toggleTheme: () => set((s) => ({ theme: s.theme === "dark" ? "light" : "dark" })),
     }),
     {
       name: "omniproxy-ui-state",
-      // Rehydrate defensively: a corrupted or foreign value falls back to the
-      // default language instead of breaking translations.
+      // Rehydrate defensively: a corrupted or foreign value cannot select an
+      // unsupported language or theme.
       merge: (persisted, current) => {
-        const stored = (persisted as Partial<UIState> | undefined)?.language
+        const stored = persisted as Partial<UIState> | undefined
         return {
           ...current,
-          ...(persisted as Partial<UIState>),
-          language: isLanguage(stored) ? stored : current.language,
+          sidebarCollapsed:
+            typeof stored?.sidebarCollapsed === "boolean"
+              ? stored.sidebarCollapsed
+              : current.sidebarCollapsed,
+          language: isLanguage(stored?.language) ? stored.language : current.language,
+          theme: isTheme(stored?.theme) ? stored.theme : current.theme,
         }
       },
     },
