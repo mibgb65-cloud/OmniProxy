@@ -46,7 +46,12 @@ export function AppSidebar() {
         collapsed ? "w-16" : "w-56",
       )}
     >
-      <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-4 whitespace-nowrap">
+      <div
+        className={cn(
+          "border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b whitespace-nowrap",
+          collapsed ? "justify-center px-0" : "px-4",
+        )}
+      >
         <span className="bg-primary size-6 shrink-0 rounded-md" aria-hidden="true" />
         {collapsed ? null : <span className="font-semibold">OmniProxy</span>}
       </div>
@@ -64,12 +69,12 @@ export function AppSidebar() {
         </ul>
       </nav>
 
-      <div className="border-sidebar-border shrink-0 space-y-2 overflow-hidden border-t p-2 whitespace-nowrap">
+      <div className="border-sidebar-border flex shrink-0 flex-col gap-2 overflow-hidden border-t p-2 whitespace-nowrap">
         <LanguageSwitcher collapsed={collapsed} />
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2"
+          className={cn("w-full gap-2", collapsed ? "justify-center" : "justify-start")}
           onClick={toggleSidebar}
           aria-label={collapsed ? t("common.expand") : t("common.collapse")}
         >
@@ -95,7 +100,10 @@ function SidebarLink({
     <Link
       to={item.to}
       title={collapsed ? label : undefined}
-      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap data-[active=true]:font-medium"
+      className={cn(
+        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex items-center gap-2 rounded-md px-3 py-2 text-sm whitespace-nowrap data-[active=true]:font-medium",
+        collapsed && "justify-center px-0",
+      )}
       activeProps={{ "data-active": "true" }}
     >
       <Icon className="size-4 shrink-0" />

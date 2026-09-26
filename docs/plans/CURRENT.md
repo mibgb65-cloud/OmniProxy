@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260926-003 恢复收缩侧栏的展开按钮
 
 ## Recently Completed
 
