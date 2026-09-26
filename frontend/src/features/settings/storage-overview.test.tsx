@@ -23,8 +23,10 @@ const storageInfo: StorageInfo = {
   items: [
     { name: "database", path: "…/omniproxy.db", bytes: 2048 },
     { name: "logs", path: "…/logs", bytes: 1024 },
+    { name: "cache", path: "…/cache", bytes: 512 },
+    { name: "other", path: "…", bytes: 512 },
   ],
-  totalBytes: 3072,
+  totalBytes: 4096,
 }
 
 function renderOverview() {
@@ -46,7 +48,7 @@ describe("StorageOverview", () => {
     vi.mocked(getStorageInfo).mockResolvedValue(storageInfo)
   })
 
-  it("renders storage locations and sizes", async () => {
+  it("renders storage locations and an accessible usage breakdown", async () => {
     renderOverview()
 
     await waitFor(() => {
@@ -54,10 +56,35 @@ describe("StorageOverview", () => {
         screen.getByText("C:\\Users\\test\\AppData\\Roaming\\OmniProxy-dev"),
       ).toBeInTheDocument()
     })
-    // The database row shows "size — path".
-    expect(screen.getByText(/^2\.0 KB — /)).toBeInTheDocument()
-    expect(screen.getByText("1.0 KB")).toBeInTheDocument() // logs item
-    expect(screen.getByText("3.0 KB")).toBeInTheDocument() // total
+    expect(screen.getByRole("img", { name: "数据存储占用比例" })).toBeInTheDocument()
+    expect(screen.getByText("数据库文件")).toBeInTheDocument()
+    expect(screen.getByText("2.0 KB")).toBeInTheDocument()
+    expect(screen.getByText("1.0 KB")).toBeInTheDocument()
+    expect(screen.getAllByText("512 B")).toHaveLength(2)
+    expect(screen.getByText("4.0 KB")).toBeInTheDocument()
+    expect(screen.getByText("50%")).toBeInTheDocument()
+    expect(
+      screen.getByText("账号元数据计入数据库，无法按文件大小单独拆分；系统凭据不在数据目录中。"),
+    ).toBeInTheDocument()
+  })
+
+  it("shows zero usage without dividing by zero", async () => {
+    vi.mocked(getStorageInfo).mockResolvedValue({ ...storageInfo, items: [], totalBytes: 0 })
+    renderOverview()
+
+    expect(await screen.findByText("占用分布")).toBeInTheDocument()
+    expect(screen.getAllByText("0 B")).toHaveLength(5)
+    expect(screen.getAllByText("0%")).toHaveLength(4)
+  })
+
+  it("refreshes the storage snapshot on request", async () => {
+    const user = userEvent.setup()
+    renderOverview()
+
+    await screen.findByText("占用分布")
+    await user.click(screen.getByRole("button", { name: "刷新" }))
+
+    await waitFor(() => expect(getStorageInfo).toHaveBeenCalledTimes(2))
   })
 
   it("cleans logs and reports freed space", async () => {

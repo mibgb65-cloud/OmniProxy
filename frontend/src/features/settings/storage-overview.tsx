@@ -1,22 +1,29 @@
+import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { formatBytes } from "../../lib/format"
-import type { StorageInfo } from "../../services/omniproxy"
+import { StorageUsageChart } from "./storage-usage-chart"
 import { useCleanStorage, useStorageInfo, type CleanTarget } from "./use-storage"
 
 export function StorageOverview() {
   const { t } = useTranslation()
-  const { data, isPending, isError, error } = useStorageInfo()
+  const { data, isPending, isFetching, isError, error, refetch } = useStorageInfo()
   const clean = useCleanStorage()
 
   const runClean = (target: CleanTarget) => clean.mutate(target)
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t("settings.storage.title")}</CardTitle>
-        <CardDescription>{t("settings.storage.description")}</CardDescription>
+      <CardHeader className="grid-cols-[1fr_auto]">
+        <div>
+          <CardTitle>{t("settings.storage.title")}</CardTitle>
+          <CardDescription className="mt-2">{t("settings.storage.description")}</CardDescription>
+        </div>
+        <Button size="sm" variant="outline" disabled={isFetching} onClick={() => void refetch()}>
+          <RefreshCw aria-hidden="true" className={isFetching ? "animate-spin" : ""} />
+          {t("settings.storage.refresh")}
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {isPending ? <p className="text-muted-foreground">{t("dashboard.loading")}</p> : null}
@@ -28,23 +35,12 @@ export function StorageOverview() {
 
         {data ? (
           <>
+            <StorageUsageChart data={data} />
+
             <dl className="grid gap-2">
               <Row label={t("settings.storage.dataDir")} value={data.dataDir} mono />
               <Row label={t("settings.storage.logDir")} value={data.logDir} mono />
-              <Row
-                label={t("settings.storage.database")}
-                value={`${formatBytes(itemBytes(data, "database"))} — ${data.databasePath}`}
-                mono
-              />
-              <Row
-                label={t("settings.storage.logs")}
-                value={formatBytes(itemBytes(data, "logs"))}
-              />
-              <Row
-                label={t("settings.storage.total")}
-                value={formatBytes(data.totalBytes)}
-                strong
-              />
+              <Row label={t("settings.storage.databasePath")} value={data.databasePath} mono />
             </dl>
 
             {data.pendingDataDir ? (
@@ -93,30 +89,11 @@ export function StorageOverview() {
   )
 }
 
-function itemBytes(data: StorageInfo, name: string): number {
-  return data.items?.find((item) => item.name === name)?.bytes ?? 0
-}
-
-function Row({
-  label,
-  value,
-  mono,
-  strong,
-}: {
-  label: string
-  value: string
-  mono?: boolean
-  strong?: boolean
-}) {
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-4">
+    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
       <dt className="text-muted-foreground shrink-0">{label}</dt>
-      <dd
-        className={`truncate text-right ${mono ? "font-mono text-xs" : ""} ${
-          strong ? "font-medium" : ""
-        }`}
-        title={value}
-      >
+      <dd className={`break-all sm:text-right ${mono ? "font-mono text-xs" : ""}`} title={value}>
         {value}
       </dd>
     </div>

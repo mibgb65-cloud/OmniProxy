@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -38,14 +39,9 @@ type StorageInfo struct {
 // StorageInfo returns the current data storage locations and their sizes.
 func (s *AppService) StorageInfo() StorageInfo {
 	dbPath := s.prof.DatabasePath()
-
-	dbSize, err := storage.FileSize(dbPath)
+	usage, err := storage.MeasureUsage(s.prof.DataDir, dbPath, s.prof.LogDir)
 	if err != nil {
-		s.log.Warn("failed to measure database size", "error", err)
-	}
-	logSize, err := storage.DirSize(s.prof.LogDir)
-	if err != nil {
-		s.log.Warn("failed to measure log directory size", "error", err)
+		s.log.Warn("failed to measure data storage usage", "error", err)
 	}
 
 	info := StorageInfo{
@@ -53,12 +49,12 @@ func (s *AppService) StorageInfo() StorageInfo {
 		LogDir:       s.prof.LogDir,
 		DatabasePath: dbPath,
 		Items: []StorageItem{
-			{Name: cleanTargetDatabase, Path: dbPath, Bytes: dbSize},
-			{Name: cleanTargetLogs, Path: s.prof.LogDir, Bytes: logSize},
+			{Name: cleanTargetDatabase, Path: dbPath, Bytes: usage.Database},
+			{Name: cleanTargetLogs, Path: s.prof.LogDir, Bytes: usage.Logs},
+			{Name: "cache", Path: filepath.Join(s.prof.DataDir, "cache"), Bytes: usage.Cache},
+			{Name: "other", Path: s.prof.DataDir, Bytes: usage.Other},
 		},
-	}
-	for _, item := range info.Items {
-		info.TotalBytes += item.Bytes
+		TotalBytes: usage.Total(),
 	}
 	if pending, err := profile.LoadConfig(s.prof.Kind); err == nil &&
 		pending.DataDir != "" && !samePath(pending.DataDir, s.prof.DataDir) {

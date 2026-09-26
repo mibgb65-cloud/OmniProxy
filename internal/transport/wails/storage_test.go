@@ -61,6 +61,8 @@ func writeFile(t *testing.T, path, content string) {
 func TestStorageInfoReportsLocationsAndSizes(t *testing.T) {
 	svc, prof := newTestService(t)
 	svc.log.Info("a log line that occupies space")
+	writeFile(t, filepath.Join(prof.DataDir, "cache", "response.bin"), "cached")
+	writeFile(t, filepath.Join(prof.DataDir, "notes.txt"), "other")
 
 	info := svc.StorageInfo()
 	if info.DataDir != prof.DataDir {
@@ -69,16 +71,21 @@ func TestStorageInfoReportsLocationsAndSizes(t *testing.T) {
 	if info.DatabasePath != prof.DatabasePath() {
 		t.Errorf("DatabasePath = %q, want %q", info.DatabasePath, prof.DatabasePath())
 	}
-	if len(info.Items) != 2 {
-		t.Fatalf("Items = %d, want 2", len(info.Items))
+	if len(info.Items) != 4 {
+		t.Fatalf("Items = %d, want 4", len(info.Items))
 	}
-	if info.Items[0].Name != "database" || info.Items[1].Name != "logs" {
-		t.Errorf("item names = %q, %q", info.Items[0].Name, info.Items[1].Name)
+	for i, name := range []string{"database", "logs", "cache", "other"} {
+		if info.Items[i].Name != name {
+			t.Errorf("item %d name = %q, want %q", i, info.Items[i].Name, name)
+		}
 	}
 	if info.Items[0].Bytes <= 0 {
 		t.Errorf("database size = %d, want > 0", info.Items[0].Bytes)
 	}
-	if info.TotalBytes != info.Items[0].Bytes+info.Items[1].Bytes {
+	if info.Items[2].Bytes != 6 || info.Items[3].Bytes != 5 {
+		t.Errorf("cache/other = %d/%d, want 6/5", info.Items[2].Bytes, info.Items[3].Bytes)
+	}
+	if info.TotalBytes != info.Items[0].Bytes+info.Items[1].Bytes+info.Items[2].Bytes+info.Items[3].Bytes {
 		t.Errorf("TotalBytes = %d, want sum of items", info.TotalBytes)
 	}
 	if info.PendingDataDir != "" {
