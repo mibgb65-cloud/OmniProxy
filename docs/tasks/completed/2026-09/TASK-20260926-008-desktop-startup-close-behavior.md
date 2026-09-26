@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -115,8 +115,16 @@ Wails 自带 Autostart 在 Windows 使用当前用户的登录启动项，启用
 
 ## Commit
 
-待填写。
+```text
+18c8f34 feat(settings): 增加开机启动与关闭到托盘设置
+```
+
+（归档记录本身另行提交，无法在同一提交中记录自身哈希。）
 
 # Result
 
 设置页具备可靠的 Windows 登录启动与关闭行为控制；托盘模式保留恢复和真正退出的完整路径。
+
+# Completed
+
+2026-09-26 15:19
