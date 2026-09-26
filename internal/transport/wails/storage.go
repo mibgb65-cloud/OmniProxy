@@ -78,7 +78,9 @@ func (s *AppService) SetDataDir(path string) (SetDataDirResult, error) {
 	if err != nil {
 		s.log.Warn("failed to measure existing data size", "error", err)
 	}
+	s.settingsMu.Lock()
 	cfg, err := profile.SetDataDir(s.prof.Kind, s.prof.DataDir, path)
+	s.settingsMu.Unlock()
 	if err != nil {
 		return SetDataDirResult{}, err
 	}

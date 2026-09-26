@@ -79,8 +79,8 @@ export const en: Record<keyof typeof zh, string> = {
   "dashboard.pingFailed": "Ping failed: {{error}}",
   "dashboard.pingReply": "Backend replied: {{result}}",
 
-  "settings.title": "Storage settings",
-  "settings.description": "Manage local runtime data, log cache, and persistent file paths.",
+  "settings.title": "Settings",
+  "settings.description": "Manage local data, storage locations, and desktop behavior.",
   "settings.storage.title": "Storage overview",
   "settings.storage.description": "Local directory usage and maintenance.",
   "settings.storage.dataDir": "Data directory",
@@ -109,7 +109,7 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.storage.locationDescription":
     "Existing data moves when the app exits; the new location is used on the next start.",
   "settings.storage.migrationHint":
-    "Migration time depends on the data size and disk speed. Do not force close the app during migration.",
+    "Migration time depends on the data size and disk speed. Do not force close the app during migration. If closing keeps the app in the tray, use the tray menu to quit before restarting.",
   "settings.storage.pathLabel": "New data directory",
   "settings.storage.pathPlaceholder": "Choose or enter a new absolute path…",
   "settings.storage.browse": "Browse…",
@@ -121,6 +121,26 @@ export const en: Record<keyof typeof zh, string> = {
     "Saved. Takes effect after restart; about {{size}} of existing data will be moved on exit.",
   "settings.storage.error.required": "Please enter a directory path.",
   "settings.storage.pending": "Pending new location: {{path}}",
+
+  "settings.desktop.title": "Desktop behavior",
+  "settings.desktop.description": "Choose login startup and what closing the main window does.",
+  "settings.desktop.autoStart": "Start at login",
+  "settings.desktop.autoStartDescription":
+    "Launch OmniProxy after you sign in to Windows; takes effect at the next login.",
+  "settings.desktop.autoStartUnavailable":
+    "Development builds do not register Windows startup entries; this setting is available in production.",
+  "settings.desktop.closeTitle": "When closing the window",
+  "settings.desktop.closeDescription": "Changes take effect immediately after saving.",
+  "settings.desktop.closeToTray": "Keep in system tray",
+  "settings.desktop.closeToTrayDescription":
+    "Hide the window and keep running; restore from the tray or quit from its menu.",
+  "settings.desktop.closeToExit": "Quit directly",
+  "settings.desktop.closeToExitDescription":
+    "Close the window, stop the app, and run normal shutdown.",
+  "settings.desktop.loadFailed": "Could not load desktop behavior: {{error}}",
+  "settings.desktop.autoStartFailed": "Could not change startup setting: {{error}}",
+  "settings.desktop.closeFailed": "Could not save close behavior: {{error}}",
+  "settings.desktop.saving": "Saving…",
 
   "pages.accounts.title": "Accounts",
   "pages.accounts.description":

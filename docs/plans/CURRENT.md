@@ -34,6 +34,8 @@
 - No application feature services exist yet; `AppService` and `/healthz` are
   the only entry points.
 - UI log streaming (Wails events from the logger buffer) is not wired yet.
+- Single-instance protection is not wired yet; a manual launch after autostart
+  can start a second process.
 - E2E (Playwright) is deferred until the first core user flow exists.
 
 ## Next Steps

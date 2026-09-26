@@ -41,6 +41,14 @@ export function CleanStorage(target: string): $CancellablePromise<$models.CleanR
 }
 
 /**
+ * DesktopSettings reads autostart from the OS and close behavior from the
+ * profile config, so external OS changes are reflected on refresh.
+ */
+export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> {
+    return $Call.ByID(721192358);
+}
+
+/**
  * Ping is a liveness probe for the UI binding layer.
  */
 export function Ping(): $CancellablePromise<string> {
@@ -61,6 +69,20 @@ export function RuntimeInfo(): $CancellablePromise<$models.RuntimeInfo> {
  */
 export function SelectDirectory(title: string): $CancellablePromise<string> {
     return $Call.ByID(73503672, title);
+}
+
+/**
+ * SetAutoStart changes the current user's OS login registration.
+ */
+export function SetAutoStart(enabled: boolean): $CancellablePromise<boolean> {
+    return $Call.ByID(501877452, enabled);
+}
+
+/**
+ * SetCloseBehavior persists the user's window-close preference.
+ */
+export function SetCloseBehavior(value: string): $CancellablePromise<string> {
+    return $Call.ByID(1368910203, value);
 }
 
 /**

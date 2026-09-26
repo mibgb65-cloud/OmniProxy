@@ -33,6 +33,9 @@ type Config struct {
 	// UpdateRepo is the "owner/repo" checked for new releases on GitHub.
 	// Empty means update checks are not configured yet.
 	UpdateRepo string `json:"updateRepo,omitempty"`
+	// CloseBehavior controls what closing the main window does. Empty keeps
+	// the historical default of exiting the application.
+	CloseBehavior string `json:"closeBehavior,omitempty"`
 }
 
 // ConfigFilePath returns the fixed path of the persisted configuration for

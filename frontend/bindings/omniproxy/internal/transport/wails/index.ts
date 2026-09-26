@@ -9,6 +9,7 @@ export {
 export type {
     AppInfo,
     CleanResult,
+    DesktopSettings,
     RuntimeInfo,
     SetDataDirResult,
     StorageInfo,

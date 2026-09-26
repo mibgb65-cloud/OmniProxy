@@ -41,6 +41,12 @@ Creates the Wails application and the main window, registers bound services
 (the `AppService`), and manages startup/shutdown. It contains no business
 logic. It is the only package allowed to import the Wails runtime.
 
+On Windows, the shell also owns the system tray and the window-close hook.
+Closing the main window exits by default; a persisted setting can hide it to
+the tray instead. The tray menu restores the window or quits through the normal
+shutdown path. Login autostart uses Wails' per-user Windows registration and
+is exposed only in the production profile.
+
 ### Control API (`internal/transport/httpapi`)
 
 A chi router bound to `127.0.0.1:<control port>`. External clients use it to

@@ -84,6 +84,12 @@ The active profile is selected by the build tag and can be overridden with
 data directory. Logs go to `<data dir>/logs/omniproxy.log` (rotating, 5 MiB ×
 3 backups).
 
+Windows login autostart is available only in the production profile. Development
+and production builds can use the same `bin/omniproxy.exe` output path, so the
+development profile must not register it as a startup command. The window-close
+choice is stored in the profile's `app.json`; when set to tray, use the tray
+menu's Quit action to run normal shutdown and any pending data relocation.
+
 ## Build artifacts
 
 | Artifact                          | Produced by    |

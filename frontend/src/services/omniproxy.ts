@@ -2,13 +2,22 @@ import {
   AppService,
   type AppInfo,
   type CleanResult,
+  type DesktopSettings,
   type RuntimeInfo,
   type SetDataDirResult,
   type StorageInfo,
   type UpdateStatus,
 } from "../../bindings/omniproxy/internal/transport/wails"
 
-export type { AppInfo, CleanResult, RuntimeInfo, SetDataDirResult, StorageInfo, UpdateStatus }
+export type {
+  AppInfo,
+  CleanResult,
+  DesktopSettings,
+  RuntimeInfo,
+  SetDataDirResult,
+  StorageInfo,
+  UpdateStatus,
+}
 
 /** getAppInfo returns the application runtime information from the Go backend. */
 export function getAppInfo(): Promise<AppInfo> {
@@ -41,6 +50,21 @@ export function selectDirectory(title: string): Promise<string> {
 /** cleanStorage runs a cleanup operation ("logs" | "database"). */
 export function cleanStorage(target: "logs" | "database"): Promise<CleanResult> {
   return AppService.CleanStorage(target)
+}
+
+/** getDesktopSettings reads the current OS autostart registration and close preference. */
+export function getDesktopSettings(): Promise<DesktopSettings> {
+  return AppService.DesktopSettings()
+}
+
+/** setAutoStart registers or removes this profile from the user's login startup. */
+export function setAutoStart(enabled: boolean): Promise<boolean> {
+  return AppService.SetAutoStart(enabled)
+}
+
+/** setCloseBehavior persists how closing the main window should behave. */
+export function setCloseBehavior(value: "exit" | "tray"): Promise<string> {
+  return AppService.SetCloseBehavior(value)
 }
 
 /** getRuntimeInfo returns application and runtime details for the About page. */

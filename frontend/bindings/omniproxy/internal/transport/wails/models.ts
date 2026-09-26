@@ -23,6 +23,15 @@ export interface CleanResult {
 }
 
 /**
+ * DesktopSettings describes the current OS autostart status and close behavior.
+ */
+export interface DesktopSettings {
+    "autoStart": boolean;
+    "autoStartAvailable": boolean;
+    "closeBehavior": string;
+}
+
+/**
  * RuntimeInfo is a snapshot of the application runtime for the About page.
  */
 export interface RuntimeInfo {

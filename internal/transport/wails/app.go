@@ -9,9 +9,11 @@ import (
 	"embed"
 	"log/slog"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
@@ -35,12 +37,14 @@ type App struct {
 // typed bindings. It carries no business logic of its own: feature services
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
-	prof      *profile.Profile
-	control   *httpapi.Server
-	db        *sql.DB
-	logFiles  *logger.Files
-	log       *slog.Logger
-	startedAt time.Time
+	prof       *profile.Profile
+	control    *httpapi.Server
+	db         *sql.DB
+	logFiles   *logger.Files
+	log        *slog.Logger
+	startedAt  time.Time
+	settingsMu sync.Mutex
+	autostart  autostartController
 }
 
 // NewAppService creates the bound application service.
@@ -126,7 +130,8 @@ func Run(app *App) error {
 		},
 	})
 
-	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
+	app.Service.autostart = wailsApp.Autostart
+	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "OmniProxy",
 		Frameless:        true,
 		Width:            1200,
@@ -135,6 +140,25 @@ func Run(app *App) error {
 		MinHeight:        600,
 		BackgroundColour: application.NewRGB(9, 9, 11),
 		URL:              "/",
+	})
+	tray := wailsApp.SystemTray.New()
+	tray.SetTooltip("OmniProxy")
+	menu := wailsApp.NewMenu()
+	menu.Add("显示 OmniProxy / Show").OnClick(func(_ *application.Context) {
+		window.Show().Focus()
+	})
+	menu.AddSeparator()
+	menu.Add("退出 OmniProxy / Quit").OnClick(func(_ *application.Context) {
+		wailsApp.Quit()
+	})
+	tray.SetMenu(menu)
+	tray.OnClick(func() { window.Show().Focus() })
+
+	window.RegisterHook(events.Common.WindowClosing, func(event *application.WindowEvent) {
+		if app.Service.shouldCloseToTray() {
+			window.Hide()
+			event.Cancel()
+		}
 	})
 
 	return wailsApp.Run()
