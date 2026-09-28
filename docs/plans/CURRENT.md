@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-006 测试结果悬浮提示
 
 ## Recently Completed
 

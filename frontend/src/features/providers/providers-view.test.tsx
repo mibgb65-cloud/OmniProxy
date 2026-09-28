@@ -137,7 +137,11 @@ describe("ProvidersView", () => {
     expect(screen.getByText("o3")).toBeInTheDocument()
     await user.click(screen.getAllByRole("button", { name: "测试" })[0])
     await waitFor(() => expect(probeProvider).toHaveBeenCalledWith("builtin_openai"))
-    expect(await screen.findByText("地址可达 · 42 ms · HTTP 401")).toBeInTheDocument()
+    const tip = await screen.findByText("地址可达 · 42 ms · HTTP 401")
+    expect(tip).toHaveAttribute("data-state", "open")
+    expect(screen.getAllByRole("button", { name: "测试" })[0].previousElementSibling).toBe(tip)
+    await waitFor(() => expect(tip).toHaveAttribute("data-state", "closed"), { timeout: 5_000 })
+    expect(tip).toHaveAttribute("aria-hidden", "true")
   })
 
   it("requires a URL and creates an enabled custom provider", async () => {

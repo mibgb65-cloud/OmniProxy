@@ -50,6 +50,7 @@ export function ProviderCatalog({
               endpoint={definition.defaultBaseUrl}
               probeResult={probeResults[item.id]?.result}
               probeError={probeResults[item.id]?.error}
+              probeVisible={probeResults[item.id]?.visible}
               probePending={probingId === item.id}
               onToggle={(enabled) => onToggle(item, enabled)}
               onProbe={() => onProbe(item)}

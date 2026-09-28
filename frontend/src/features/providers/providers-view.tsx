@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { ProviderConfiguration, UpdateProviderInput } from "../../services/omniproxy"
 import type { ProbeDisplay } from "./provider-card"
@@ -16,6 +16,7 @@ import {
 } from "./use-providers"
 
 type Editor = { initial?: ProviderConfiguration }
+const PROBE_TIP_DURATION_MS = 4_000
 
 export function ProvidersView() {
   const { t } = useTranslation()
@@ -30,6 +31,38 @@ export function ProvidersView() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [probeResults, setProbeResults] = useState<Record<string, ProbeDisplay>>({})
   const [probingId, setProbingId] = useState<string | null>(null)
+  const probeTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const mounted = useRef(false)
+
+  useEffect(() => {
+    mounted.current = true
+    const timers = probeTimers.current
+    return () => {
+      mounted.current = false
+      Object.values(timers).forEach(clearTimeout)
+    }
+  }, [])
+
+  const clearProbe = (id: string) => {
+    if (probeTimers.current[id] !== undefined) clearTimeout(probeTimers.current[id])
+    delete probeTimers.current[id]
+    setProbeResults((previous) => {
+      const next = { ...previous }
+      delete next[id]
+      return next
+    })
+  }
+
+  const showProbe = (id: string, display: ProbeDisplay) => {
+    setProbeResults((previous) => ({ ...previous, [id]: { ...display, visible: true } }))
+    probeTimers.current[id] = setTimeout(() => {
+      setProbeResults((previous) => {
+        if (!previous[id]) return previous
+        return { ...previous, [id]: { ...previous[id], visible: false } }
+      })
+      delete probeTimers.current[id]
+    }, PROBE_TIP_DURATION_MS)
+  }
 
   const builtins = providers.data?.filter((item) => item.source === "builtin") ?? []
   const custom = providers.data?.filter((item) => item.source === "custom") ?? []
@@ -38,12 +71,7 @@ export function ProvidersView() {
     if (!editor) return
     if (editor.initial) {
       await update.mutateAsync({ id: editor.initial.id, input })
-      const editedId = editor.initial.id
-      setProbeResults((previous) => {
-        const next = { ...previous }
-        delete next[editedId]
-        return next
-      })
+      clearProbe(editor.initial.id)
     } else {
       await create.mutateAsync(input)
     }
@@ -63,11 +91,7 @@ export function ProvidersView() {
     setActionError(null)
     try {
       await remove.mutateAsync(id)
-      setProbeResults((previous) => {
-        const next = { ...previous }
-        delete next[id]
-        return next
-      })
+      clearProbe(id)
       return true
     } catch (error) {
       const message = error instanceof Error ? error.message : ""
@@ -83,12 +107,18 @@ export function ProvidersView() {
   const testConnection = (item: ProviderConfiguration) => {
     if (probingId) return
     setProbingId(item.id)
-    setProbeResults((previous) => ({ ...previous, [item.id]: {} }))
+    clearProbe(item.id)
     void probe
       .mutateAsync(item.id)
-      .then((result) => setProbeResults((previous) => ({ ...previous, [item.id]: { result } })))
-      .catch(() => setProbeResults((previous) => ({ ...previous, [item.id]: { error: true } })))
-      .finally(() => setProbingId(null))
+      .then((result) => {
+        if (mounted.current) showProbe(item.id, { result })
+      })
+      .catch(() => {
+        if (mounted.current) showProbe(item.id, { error: true })
+      })
+      .finally(() => {
+        if (mounted.current) setProbingId(null)
+      })
   }
 
   return (

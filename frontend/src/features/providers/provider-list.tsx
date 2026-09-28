@@ -92,6 +92,7 @@ export function ProviderList({
                   endpoint={item.baseUrl}
                   probeResult={probeResults[item.id]?.result}
                   probeError={probeResults[item.id]?.error}
+                  probeVisible={probeResults[item.id]?.visible}
                   probePending={probingId === item.id}
                   onToggle={(enabled) => void toggle(item, enabled)}
                   onProbe={() => onProbe(item)}

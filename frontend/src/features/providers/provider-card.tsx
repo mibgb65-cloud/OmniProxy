@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import type { ProviderProbeResult } from "../../services/omniproxy"
 import { ProviderSwitch } from "./provider-switch"
+import "./provider-probe-tooltip.css"
 
 const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?: boolean }> = {
   openai: { file: "openai.svg", monochrome: true },
@@ -19,7 +20,7 @@ const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?
   stepfun: { file: "stepfun-color.svg" },
 }
 
-export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean }
+export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
 
 function ModelPreview({ models }: { models: string[] }) {
   const { t } = useTranslation()
@@ -71,6 +72,7 @@ export function ProviderCard({
   endpoint,
   probeResult,
   probeError,
+  probeVisible,
   probePending,
   onToggle,
   onProbe,
@@ -86,6 +88,7 @@ export function ProviderCard({
   endpoint?: string
   probeResult?: ProviderProbeResult
   probeError?: boolean
+  probeVisible?: boolean
   probePending: boolean
   onToggle: (enabled: boolean) => void
   onProbe: () => void
@@ -147,34 +150,38 @@ export function ProviderCard({
             {enabled ? t("providers.enabled") : t("providers.disabled")}
           </span>
           <div className="flex flex-wrap items-center gap-1">
+            <div className="relative">
+              {probeResult || probeError ? (
+                <span
+                  role="status"
+                  aria-hidden={!probeVisible}
+                  data-state={probeVisible ? "open" : "closed"}
+                  className={`provider-probe-tip bg-popover pointer-events-none absolute top-1/2 right-full z-20 mr-2 w-max max-w-[200px] rounded-md border px-2.5 py-1.5 text-xs leading-tight shadow-md ${probeResult?.reachable ? "border-emerald-500/30 text-emerald-700 dark:text-emerald-300" : "border-destructive/30 text-destructive"}`}
+                >
+                  {probeError
+                    ? t("providers.testError")
+                    : probeResult?.reachable
+                      ? t("providers.testReachable", {
+                          latency: probeResult.latencyMs,
+                          status: probeResult.statusCode,
+                        })
+                      : t("providers.testUnreachable", { latency: probeResult?.latencyMs ?? 0 })}
+                </span>
+              ) : null}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onProbe}
+                disabled={probePending || !endpoint}
+                className="cursor-pointer"
+              >
+                {probePending ? t("providers.testing") : t("providers.test")}
+              </Button>
+            </div>
             {actions}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onProbe}
-              disabled={probePending || !endpoint}
-              className="cursor-pointer"
-            >
-              {probePending ? t("providers.testing") : t("providers.test")}
-            </Button>
           </div>
         </div>
-        {probeResult || probeError ? (
-          <p
-            role="status"
-            className={`text-xs ${probeResult?.reachable ? "text-emerald-700 dark:text-emerald-300" : "text-destructive"}`}
-          >
-            {probeError
-              ? t("providers.testError")
-              : probeResult?.reachable
-                ? t("providers.testReachable", {
-                    latency: probeResult.latencyMs,
-                    status: probeResult.statusCode,
-                  })
-                : t("providers.testUnreachable", { latency: probeResult?.latencyMs ?? 0 })}
-          </p>
-        ) : null}
       </CardContent>
     </Card>
   )
