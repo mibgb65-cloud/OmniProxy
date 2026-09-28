@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- TASK-20260928-002 Windows 凭证存储基础设施
+- (none)
 
 ## Recently Completed
 
+- TASK-20260928-002 Windows 凭证存储基础设施
 - TASK-20260928-001 修复主界面滚动布局与滚动条交互
 - TASK-20260926-008 开机启动与关闭到托盘设置
 - TASK-20260926-007 按参考稿优化存储设置页面

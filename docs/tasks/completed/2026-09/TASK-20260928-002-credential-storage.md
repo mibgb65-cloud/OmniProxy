@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -76,6 +76,7 @@ In Progress
 - Windows 真实 DPAPI 测试已覆盖短密钥、超过 Credential Manager 单条上限的凭证、1 MiB 大小边界、数据目录迁移、篡改、路径格式与环境隔离。
 - 新增 ADR-002，澄清当前架构中的 DPAPI 保护与密文文件落盘方式。
 - `task verify` 全部通过。
+- 开发环境已恢复：Wails 连接 Vite，9245/3891 端口正常监听，首页 HTTP 返回 200。
 
 ---
 
@@ -120,7 +121,7 @@ In Progress
 
 ## Verification Result
 
-`task verify` PASS：Go 测试全通过；前端 13 个测试文件、52 个测试通过；Windows 生产构建成功。凭证包测试使用真实 Windows DPAPI 和临时目录，密文文件不含测试明文；没有写入真实凭证或用户数据库。
+`task verify` PASS：Go 测试全通过；前端 13 个测试文件、52 个测试通过；Windows 生产构建成功。文件拆分后，凭证包定向测试及 `go vet` 再次通过。凭证包测试使用真实 Windows DPAPI 和临时目录，密文文件不含测试明文；没有写入真实凭证或用户数据库。`git diff --check` PASS。
 
 ---
 
@@ -140,10 +141,16 @@ None.
 
 ## Commit
 
-待提交。
+`e5c9ee3759d52326b0f73ce670038251aa474b6c feat(credential): 增加 Windows DPAPI 凭证存储`
 
 ---
 
 # Result
 
 已具备面向三类账号所需的通用、本地加密凭证存储基础设施。后续账号服务负责凭证内容格式、认证/方案元数据及引用与数据库记录的一致性。
+
+---
+
+# Completed
+
+2026-09-28 11:00
