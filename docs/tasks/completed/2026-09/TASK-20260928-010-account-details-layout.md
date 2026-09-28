@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -92,10 +92,16 @@ None.
 
 ## Commit
 
-待完成。
+`f24c45574e06a9c544982d167c2e8d854a023e32` feat(account): 添加厂商详情页并优化宽屏布局
 
 ---
 
 # Result
 
 账号总览在多账号时保持紧凑，厂商详情页可查看完整账号元数据，所有页面共用有界左右边距。
+
+---
+
+# Completed
+
+2026-09-28 21:07
