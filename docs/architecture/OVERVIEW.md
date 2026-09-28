@@ -59,8 +59,10 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages provider
-> configurations in SQLite and is exposed through Wails bindings. The Control
+> Current state: `internal/application/provider` manages nine default-enabled
+> built-in providers and custom OpenAI-compatible endpoints in SQLite and is
+> exposed through Wails bindings. It also provides a bounded, unauthenticated
+> endpoint reachability check. The Control
 > API still exposes only `/healthz`; account management and gateway adapters
 > have not landed yet.
 
@@ -140,8 +142,9 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
   MiniMax, Xiaomi MiMo, StepFun, and OpenAI-compatible endpoints. Nine named
-  provider kinds are available for local configuration; request adapters are
-  still pending.
+  provider kinds are persisted and enabled by default, with user-controlled
+  switches. Custom OpenAI-compatible endpoints can be added separately;
+  request adapters are still pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

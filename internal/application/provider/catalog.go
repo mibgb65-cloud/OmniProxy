@@ -5,6 +5,8 @@ package provider
 type Definition struct {
 	Kind               string   `json:"kind"`
 	Name               string   `json:"name"`
+	DefaultBaseURL     string   `json:"defaultBaseUrl"`
+	Models             []string `json:"models"`
 	AuthMethods        []string `json:"authMethods"`
 	PlannedAuthMethods []string `json:"plannedAuthMethods"`
 }
@@ -12,18 +14,21 @@ type Definition struct {
 const (
 	AuthAPIKey            = "api_key"
 	AuthSubscriptionLogin = "subscription_login"
+	KindOpenAICompatible  = "openai-compatible"
+	SourceBuiltIn         = "builtin"
+	SourceCustom          = "custom"
 )
 
 var definitions = []Definition{
-	{Kind: "openai", Name: "OpenAI", AuthMethods: []string{AuthAPIKey}, PlannedAuthMethods: []string{AuthSubscriptionLogin}},
-	{Kind: "anthropic", Name: "Anthropic", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "google", Name: "Google", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "deepseek", Name: "DeepSeek", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "zhipu", Name: "Zhipu AI", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "kimi", Name: "Moonshot AI", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "minimax", Name: "MiniMax", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "mimo", Name: "Xiaomi MiMo", AuthMethods: []string{AuthAPIKey}},
-	{Kind: "stepfun", Name: "StepFun", AuthMethods: []string{AuthAPIKey}},
+	{Kind: "openai", Name: "OpenAI", DefaultBaseURL: "https://api.openai.com/v1", Models: []string{"GPT-5.4", "GPT-5.4 Mini", "GPT-4.1", "o3"}, AuthMethods: []string{AuthAPIKey}, PlannedAuthMethods: []string{AuthSubscriptionLogin}},
+	{Kind: "anthropic", Name: "Anthropic", DefaultBaseURL: "https://api.anthropic.com/v1", Models: []string{"Claude Opus 5.5", "Claude Sonnet 5", "Claude Haiku 4.5", "Claude Fable 5.1"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "google", Name: "Google", DefaultBaseURL: "https://generativelanguage.googleapis.com/v1beta", Models: []string{"Gemini 3.8 Flash", "Gemini 3.7 Flash", "Gemini 3.1 Pro", "Gemini Embedding"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "deepseek", Name: "DeepSeek", DefaultBaseURL: "https://api.deepseek.com", Models: []string{"DeepSeek V4.1 Flash", "DeepSeek V4 Pro"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "zhipu", Name: "Zhipu AI", DefaultBaseURL: "https://open.bigmodel.cn/api/paas/v4", Models: []string{"GLM-5.3", "GLM-5.3-Flash", "GLM-5.2", "GLM-4.7"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "kimi", Name: "Moonshot AI", DefaultBaseURL: "https://api.moonshot.ai/v1", Models: []string{"Kimi K3", "Kimi K2.6", "Kimi K2.5", "Moonshot V1"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "minimax", Name: "MiniMax", DefaultBaseURL: "https://api.minimax.io/v1", Models: []string{"MiniMax M3", "MiniMax M2.7", "MiniMax M2.5", "MiniMax Speech 2.8"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "mimo", Name: "Xiaomi MiMo", DefaultBaseURL: "https://api.xiaomimimo.com/v1", Models: []string{"MiMo V2.6 Pro", "MiMo V2.6 Flash", "MiMo V2.6 Pro UltraSpeed", "MiMo V2.5"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: "stepfun", Name: "StepFun", DefaultBaseURL: "https://api.stepfun.com/v1", Models: []string{"Step 5 Preview", "Step 3.7 Flash", "Step 3.5 Flash", "StepAudio 3"}, AuthMethods: []string{AuthAPIKey}},
 }
 
 // Catalog returns an independent snapshot of the nine built-in provider kinds.
@@ -31,10 +36,20 @@ func Catalog() []Definition {
 	result := make([]Definition, len(definitions))
 	for i, definition := range definitions {
 		result[i] = definition
+		result[i].Models = append([]string(nil), definition.Models...)
 		result[i].AuthMethods = append([]string(nil), definition.AuthMethods...)
 		result[i].PlannedAuthMethods = append([]string(nil), definition.PlannedAuthMethods...)
 	}
 	return result
+}
+
+func definitionForKind(kind string) (Definition, bool) {
+	for _, definition := range definitions {
+		if definition.Kind == kind {
+			return definition, true
+		}
+	}
+	return Definition{}, false
 }
 
 func knownKind(kind string) bool {

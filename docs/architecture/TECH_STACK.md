@@ -59,10 +59,13 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - Opaque credential bundles are stored as per-user DPAPI-protected files in
   profile-specific data directories (`internal/infrastructure/credential`,
   ADR-002). SQLite stores only `credential_ref` values.
-- Provider configurations use the existing `providers` table and
-  `internal/application/provider`; the nine built-in kinds and authentication
-  presets are code-defined. The UI uses generated Wails bindings and TanStack
-  Query to manage saved configurations.
+- Provider configurations use `providers` and `internal/application/provider`.
+  Migration `002_builtin_providers.sql` persists nine default-enabled built-in
+  rows and marks existing user-created rows as custom; custom endpoints use the
+  OpenAI-compatible kind. The UI uses generated Wails bindings and TanStack
+  Query to manage switches and custom configurations. Curated model names are
+  kept in the built-in catalog for display; a credential-free HTTP HEAD probe
+  measures endpoint reachability and response-header latency without redirects.
 
 ## Networking
 

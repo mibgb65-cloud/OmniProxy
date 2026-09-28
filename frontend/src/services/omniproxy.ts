@@ -12,6 +12,7 @@ import type {
   Configuration as ProviderConfiguration,
   CreateInput as CreateProviderInput,
   Definition as ProviderDefinition,
+  ProbeResult as ProviderProbeResult,
   UpdateInput as UpdateProviderInput,
 } from "../../bindings/omniproxy/internal/application/provider"
 
@@ -24,7 +25,13 @@ export type {
   StorageInfo,
   UpdateStatus,
 }
-export type { ProviderConfiguration, CreateProviderInput, ProviderDefinition, UpdateProviderInput }
+export type {
+  ProviderConfiguration,
+  CreateProviderInput,
+  ProviderDefinition,
+  ProviderProbeResult,
+  UpdateProviderInput,
+}
 
 /** getAppInfo returns the application runtime information from the Go backend. */
 export function getAppInfo(): Promise<AppInfo> {
@@ -105,6 +112,16 @@ export function updateProvider(
   input: UpdateProviderInput,
 ): Promise<ProviderConfiguration> {
   return AppService.UpdateProvider(id, input)
+}
+
+/** setProviderEnabled switches a built-in or custom provider on or off. */
+export function setProviderEnabled(id: string, enabled: boolean): Promise<ProviderConfiguration> {
+  return AppService.SetProviderEnabled(id, enabled)
+}
+
+/** probeProvider checks endpoint reachability and header latency without credentials. */
+export function probeProvider(id: string): Promise<ProviderProbeResult> {
+  return AppService.ProbeProvider(id)
 }
 
 /** deleteProvider removes an unreferenced configuration. */

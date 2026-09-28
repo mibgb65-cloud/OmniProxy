@@ -81,6 +81,13 @@ export function Ping(): $CancellablePromise<string> {
 }
 
 /**
+ * ProbeProvider measures endpoint reachability and response latency without credentials.
+ */
+export function ProbeProvider(id: string): $CancellablePromise<provider$0.ProbeResult> {
+    return $Call.ByID(2915076752, id);
+}
+
+/**
  * ProviderCatalog returns the built-in provider kinds and their auth options.
  */
 export function ProviderCatalog(): $CancellablePromise<provider$0.Definition[] | null> {
@@ -123,6 +130,13 @@ export function SetCloseBehavior(value: string): $CancellablePromise<string> {
  */
 export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDirResult> {
     return $Call.ByID(3348807762, path);
+}
+
+/**
+ * SetProviderEnabled changes the enabled state of a built-in or custom provider.
+ */
+export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePromise<provider$0.Configuration> {
+    return $Call.ByID(3123769335, id, enabled);
 }
 
 /**

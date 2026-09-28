@@ -53,6 +53,10 @@ accounts need one local place to:
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,
   StepFun, and OpenAI-compatible endpoints).
+- Nine named providers are enabled by default and can be switched off; users
+  can add enabled-by-default custom OpenAI-compatible endpoints.
+- Provider cards show a curated model preview and an unauthenticated endpoint
+  reachability/response-time check; actual model access depends on an account.
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,

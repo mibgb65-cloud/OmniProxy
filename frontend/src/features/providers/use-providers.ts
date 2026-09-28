@@ -4,6 +4,8 @@ import {
   deleteProvider,
   getProviderCatalog,
   listProviders,
+  probeProvider,
+  setProviderEnabled,
   updateProvider,
   type CreateProviderInput,
   type UpdateProviderInput,
@@ -46,4 +48,17 @@ export function useDeleteProvider() {
     mutationFn: (id: string) => deleteProvider(id),
     onSuccess: () => client.invalidateQueries({ queryKey: providerQueryKey }),
   })
+}
+
+export function useSetProviderEnabled() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
+      setProviderEnabled(id, enabled),
+    onSuccess: () => client.invalidateQueries({ queryKey: providerQueryKey }),
+  })
+}
+
+export function useProbeProvider() {
+  return useMutation({ mutationFn: (id: string) => probeProvider(id) })
 }

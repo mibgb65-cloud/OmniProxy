@@ -5,5 +5,6 @@ export type {
     Configuration,
     CreateInput,
     Definition,
+    ProbeResult,
     UpdateInput
 } from "./models.js";

@@ -7,6 +7,7 @@
 export interface Configuration {
     "id": string;
     "kind": string;
+    "source": string;
     "name": string;
     "baseUrl": string;
     "enabled": boolean;
@@ -18,10 +19,8 @@ export interface Configuration {
  * CreateInput contains user-supplied fields for a new configuration.
  */
 export interface CreateInput {
-    "kind": string;
     "name": string;
     "baseUrl": string;
-    "enabled": boolean;
 }
 
 /**
@@ -30,8 +29,20 @@ export interface CreateInput {
 export interface Definition {
     "kind": string;
     "name": string;
+    "defaultBaseUrl": string;
+    "models": string[] | null;
     "authMethods": string[] | null;
     "plannedAuthMethods": string[] | null;
+}
+
+/**
+ * ProbeResult reports endpoint reachability and time to HTTP response headers.
+ * It does not authenticate an account or make a model request.
+ */
+export interface ProbeResult {
+    "reachable": boolean;
+    "latencyMs": number;
+    "statusCode": number;
 }
 
 /**
@@ -40,5 +51,4 @@ export interface Definition {
 export interface UpdateInput {
     "name": string;
     "baseUrl": string;
-    "enabled": boolean;
 }

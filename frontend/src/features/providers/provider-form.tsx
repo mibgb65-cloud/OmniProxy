@@ -8,10 +8,15 @@ import type { ProviderConfiguration, UpdateProviderInput } from "../../services/
 type FieldError =
   | "providers.nameRequired"
   | "providers.nameTooLong"
+  | "providers.urlRequired"
   | "providers.urlInvalid"
   | "providers.urlSecure"
 
-function validate(name: string, baseUrl: string): { name?: FieldError; baseUrl?: FieldError } {
+function validate(
+  name: string,
+  baseUrl: string,
+  allowEmptyBaseUrl: boolean,
+): { name?: FieldError; baseUrl?: FieldError } {
   const errors: { name?: FieldError; baseUrl?: FieldError } = {}
   if (!name.trim()) errors.name = "providers.nameRequired"
   else if (
@@ -20,7 +25,9 @@ function validate(name: string, baseUrl: string): { name?: FieldError; baseUrl?:
   )
     errors.name = "providers.nameTooLong"
 
-  if (baseUrl.trim()) {
+  if (!baseUrl.trim() && !allowEmptyBaseUrl) {
+    errors.baseUrl = "providers.urlRequired"
+  } else if (baseUrl.trim()) {
     try {
       const url = new URL(baseUrl.trim())
       if (
@@ -49,36 +56,34 @@ function validate(name: string, baseUrl: string): { name?: FieldError; baseUrl?:
 }
 
 export function ProviderForm({
-  providerName,
   initial,
   onSubmit,
   onCancel,
 }: {
-  providerName: string
   initial?: ProviderConfiguration
   onSubmit: (input: UpdateProviderInput) => Promise<void>
   onCancel: () => void
 }) {
   const { t } = useTranslation()
   const nameRef = useRef<HTMLInputElement>(null)
-  const [name, setName] = useState(initial?.name ?? providerName)
+  const [name, setName] = useState(initial?.name ?? "")
   const [baseUrl, setBaseUrl] = useState(initial?.baseUrl ?? "")
-  const [enabled, setEnabled] = useState(initial?.enabled ?? true)
   const [errors, setErrors] = useState<ReturnType<typeof validate>>({})
   const [saveError, setSaveError] = useState(false)
   const [saving, setSaving] = useState(false)
+  const legacyConfig = Boolean(initial && initial.kind !== "openai-compatible")
 
   useEffect(() => nameRef.current?.focus(), [])
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const nextErrors = validate(name, baseUrl)
+    const nextErrors = validate(name, baseUrl, legacyConfig)
     setErrors(nextErrors)
     if (nextErrors.name || nextErrors.baseUrl) return
     setSaveError(false)
     setSaving(true)
     try {
-      await onSubmit({ name: name.trim(), baseUrl: baseUrl.trim(), enabled })
+      await onSubmit({ name: name.trim(), baseUrl: baseUrl.trim() })
     } catch {
       setSaveError(true)
     } finally {
@@ -90,7 +95,7 @@ export function ProviderForm({
     <Card className="dark:bg-card/75 gap-0" id="provider-editor">
       <CardHeader className="pb-4">
         <CardTitle className="text-base">
-          {initial ? t("providers.editTitle") : t("providers.newTitle", { name: providerName })}
+          {initial ? t("providers.editTitle") : t("providers.newTitle")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -112,7 +117,7 @@ export function ProviderForm({
           </div>
           <div className="space-y-1.5">
             <label htmlFor="provider-base-url" className="text-sm font-medium">
-              {t("providers.baseUrl")}
+              {legacyConfig ? t("providers.baseUrlOptional") : t("providers.baseUrl")}
             </label>
             <Input
               id="provider-base-url"
@@ -123,20 +128,13 @@ export function ProviderForm({
               maxLength={2048}
               aria-invalid={Boolean(errors.baseUrl)}
             />
-            <p className="text-muted-foreground text-xs">{t("providers.baseUrlHint")}</p>
+            <p className="text-muted-foreground text-xs">
+              {legacyConfig ? t("providers.legacyBaseUrlHint") : t("providers.baseUrlHint")}
+            </p>
             {errors.baseUrl ? (
               <p className="text-destructive text-xs">{t(errors.baseUrl)}</p>
             ) : null}
           </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={enabled}
-              onChange={(event) => setEnabled(event.target.checked)}
-              className="accent-blue-600"
-            />
-            {t("providers.enabled")}
-          </label>
           {saveError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("providers.saveFailed")}

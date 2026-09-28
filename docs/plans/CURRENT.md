@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-004 内置提供商默认启用与自定义提供商
 
 ## Recently Completed
 
@@ -35,8 +35,12 @@
 
 - Settings, About, and Providers have live Wails data; account, gateway and
   other feature pages remain placeholders until their backends land.
-- Provider configurations are persisted locally; provider request adapters,
+- Nine built-in providers are enabled by default and can be switched off;
+  custom OpenAI-compatible endpoints can be added. Provider request adapters,
   API Key accounts, and OpenAI subscription login are not connected yet.
+- Provider model names are curated examples rather than account-specific live
+  results. The Test action checks network reachability and latency without
+  authenticating or invoking a model.
 - UI log streaming (Wails events from the logger buffer) is not wired yet.
 - Single-instance protection is not wired yet; a manual launch after autostart
   can start a second process.

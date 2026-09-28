@@ -47,82 +47,103 @@ func TestCatalogContainsNineProviderKinds(t *testing.T) {
 	}
 }
 
-func TestProviderConfigurationLifecycle(t *testing.T) {
+func TestBuiltInProvidersStartEnabledAndCanOnlyToggle(t *testing.T) {
 	ctx := context.Background()
 	service := testService(t)
 	items, err := service.List(ctx)
-	if err != nil || items == nil || len(items) != 0 {
-		t.Fatalf("initial List = (%v, %v), want empty array", items, err)
+	if err != nil || len(items) != 9 {
+		t.Fatalf("List = (%v, %v), want nine built-ins", items, err)
 	}
-	first, err := service.Create(ctx, CreateInput{Kind: "mimo", Name: " MiMo 普通 API ", BaseURL: "https://api.example.test/v1", Enabled: true})
+	for _, item := range items {
+		if item.Source != SourceBuiltIn || !item.Enabled || item.ID != "builtin_"+item.Kind {
+			t.Errorf("invalid built-in = %+v", item)
+		}
+	}
+	updated, err := service.SetEnabled(ctx, "builtin_openai", false)
+	if err != nil || updated.Enabled {
+		t.Fatalf("SetEnabled = (%+v, %v), want disabled", updated, err)
+	}
+	if _, err := service.Update(ctx, "builtin_openai", UpdateInput{Name: "changed", BaseURL: "https://example.test"}); !errors.Is(err, ErrBuiltIn) {
+		t.Fatalf("Update built-in = %v, want ErrBuiltIn", err)
+	}
+	if err := service.Delete(ctx, "builtin_openai"); !errors.Is(err, ErrBuiltIn) {
+		t.Fatalf("Delete built-in = %v, want ErrBuiltIn", err)
+	}
+	stored, err := NewService(service.db).get(ctx, "builtin_openai")
+	if err != nil || stored.Enabled || stored.Name != "OpenAI" || stored.BaseURL != "" {
+		t.Fatalf("stored built-in = (%+v, %v)", stored, err)
+	}
+}
+
+func TestCustomProviderLifecycle(t *testing.T) {
+	ctx := context.Background()
+	service := testService(t)
+	item, err := service.Create(ctx, CreateInput{Name: " My endpoint ", BaseURL: "https://api.example.test/v1"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := service.Create(ctx, CreateInput{Kind: "mimo", Name: "MiMo Token Plan", BaseURL: "https://plan.example.test/v1", Enabled: true})
-	if err != nil {
+	if item.Kind != KindOpenAICompatible || item.Source != SourceCustom || !item.Enabled || item.Name != "My endpoint" {
+		t.Fatalf("Create = %+v", item)
+	}
+	items, err := NewService(service.db).List(ctx)
+	if err != nil || len(items) != 10 {
+		t.Fatalf("persisted List = (%v, %v), want ten", items, err)
+	}
+	updated, err := service.Update(ctx, item.ID, UpdateInput{Name: "Backup", BaseURL: "https://backup.example.test/v1"})
+	if err != nil || updated.Name != "Backup" || !updated.Enabled {
+		t.Fatalf("Update = (%+v, %v)", updated, err)
+	}
+	updated, err = service.SetEnabled(ctx, item.ID, false)
+	if err != nil || updated.Enabled {
+		t.Fatalf("SetEnabled custom = (%+v, %v)", updated, err)
+	}
+	if err := service.Delete(ctx, item.ID); err != nil {
 		t.Fatal(err)
 	}
-	if first.ID == second.ID || first.Name != "MiMo 普通 API" {
-		t.Fatalf("created configurations = %+v, %+v", first, second)
-	}
-	items, err = NewService(service.db).List(ctx)
-	if err != nil || len(items) != 2 {
-		t.Fatalf("persisted List = (%v, %v), want two", items, err)
-	}
-	updated, err := service.Update(ctx, first.ID, UpdateInput{Name: "普通 API", BaseURL: "", Enabled: false})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if updated.Kind != "mimo" || updated.Name != "普通 API" || updated.BaseURL != "" || updated.Enabled {
-		t.Fatalf("Update = %+v", updated)
-	}
-	if err := service.Delete(ctx, first.ID); err != nil {
-		t.Fatal(err)
-	}
-	if err := service.Delete(ctx, first.ID); !errors.Is(err, ErrNotFound) {
+	if err := service.Delete(ctx, item.ID); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("second Delete = %v, want ErrNotFound", err)
 	}
 	items, err = service.List(ctx)
-	if err != nil || len(items) != 1 || items[0].ID != second.ID {
+	if err != nil || len(items) != 9 {
 		t.Fatalf("List after Delete = (%v, %v)", items, err)
 	}
 }
 
-func TestProviderValidation(t *testing.T) {
+func TestCustomProviderValidation(t *testing.T) {
 	service := testService(t)
 	ctx := context.Background()
 	invalid := []CreateInput{
-		{Kind: "unknown", Name: "Provider", Enabled: true},
-		{Kind: "deepseek", Name: " ", Enabled: true},
-		{Kind: "deepseek", Name: "bad\nname", Enabled: true},
-		{Kind: "deepseek", Name: strings.Repeat("x", maxNameRunes+1), Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: "http://remote.example/v1", Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: "https://user:pass@example.com/v1", Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: "https://example.com/v1?key=secret", Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: "https://example.com/v1#fragment", Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: "https://example.com:65536/v1", Enabled: true},
-		{Kind: "deepseek", Name: "Provider", BaseURL: strings.Repeat("x", maxURLBytes+1), Enabled: true},
+		{Name: " ", BaseURL: "https://example.test"},
+		{Name: "bad\nname", BaseURL: "https://example.test"},
+		{Name: strings.Repeat("x", maxNameRunes+1), BaseURL: "https://example.test"},
+		{Name: "Provider", BaseURL: ""},
+		{Name: "Provider", BaseURL: "http://remote.example/v1"},
+		{Name: "Provider", BaseURL: "https://user:pass@example.com/v1"},
+		{Name: "Provider", BaseURL: "https://example.com/v1?key=secret"},
+		{Name: "Provider", BaseURL: "https://example.com/v1#fragment"},
+		{Name: "Provider", BaseURL: "https://example.com:65536/v1"},
+		{Name: "Provider", BaseURL: strings.Repeat("x", maxURLBytes+1)},
 	}
 	for i, input := range invalid {
 		if _, err := service.Create(ctx, input); !errors.Is(err, ErrInvalidInput) {
 			t.Errorf("invalid case %d = %v, want ErrInvalidInput", i, err)
 		}
 	}
-	if items, err := service.List(ctx); err != nil || len(items) != 0 {
+	if items, err := service.List(ctx); err != nil || len(items) != 9 {
 		t.Fatalf("invalid inputs wrote rows: %v, %v", items, err)
 	}
-	if _, err := service.Create(ctx, CreateInput{Kind: "deepseek", Name: "Local proxy", BaseURL: "http://127.0.0.1:8080/v1", Enabled: true}); err != nil {
+	if _, err := service.Create(ctx, CreateInput{Name: "Local proxy", BaseURL: "http://127.0.0.1:8080/v1"}); err != nil {
 		t.Fatalf("loopback HTTP should be accepted: %v", err)
 	}
-	if _, err := service.Update(ctx, "../bad", UpdateInput{Name: "x"}); !errors.Is(err, ErrInvalidID) {
-		t.Fatalf("Update invalid ID = %v", err)
+	if _, err := service.SetEnabled(ctx, "../bad", false); !errors.Is(err, ErrInvalidID) {
+		t.Fatalf("SetEnabled invalid ID = %v", err)
 	}
 }
 
 func TestDeletePreservesAccountsAndCredentialReferences(t *testing.T) {
 	service := testService(t)
 	ctx := context.Background()
-	item, err := service.Create(ctx, CreateInput{Kind: "openai", Name: "OpenAI", Enabled: true})
+	item, err := service.Create(ctx, CreateInput{Name: "Endpoint", BaseURL: "https://example.test"})
 	if err != nil {
 		t.Fatal(err)
 	}

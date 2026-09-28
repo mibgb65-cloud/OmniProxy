@@ -1,31 +1,43 @@
 import { useState } from "react"
+import { Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
-import type { ProviderConfiguration } from "../../services/omniproxy"
-import { isKnownProviderKind, providerNameKeys } from "./provider-labels"
+import type { ProviderConfiguration, ProviderDefinition } from "../../services/omniproxy"
+import { ProviderCard, type ProbeDisplay } from "./provider-card"
 
 export function ProviderList({
   items,
+  definitions,
+  onAdd,
   onEdit,
   onToggle,
   onDelete,
+  onProbe,
+  probeResults,
+  probingId,
   busy,
 }: {
   items: ProviderConfiguration[]
+  definitions: ProviderDefinition[]
+  onAdd: () => void
   onEdit: (item: ProviderConfiguration) => void
-  onToggle: (item: ProviderConfiguration) => Promise<void>
+  onToggle: (item: ProviderConfiguration, enabled: boolean) => Promise<void>
   onDelete: (id: string) => Promise<boolean>
+  onProbe: (item: ProviderConfiguration) => void
+  probeResults: Record<string, ProbeDisplay>
+  probingId: string | null
   busy: boolean
 }) {
   const { t } = useTranslation()
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const byKind = new Map(definitions.map((definition) => [definition.kind, definition]))
 
-  const toggle = async (item: ProviderConfiguration) => {
+  const toggle = async (item: ProviderConfiguration, enabled: boolean) => {
     setActionError(null)
     try {
-      await onToggle(item)
+      await onToggle(item, enabled)
     } catch {
       setActionError(t("providers.actionFailed"))
     }
@@ -38,11 +50,19 @@ export function ProviderList({
 
   return (
     <section aria-labelledby="configured-providers-title" className="space-y-4">
-      <div>
-        <h2 id="configured-providers-title" className="text-lg font-semibold">
-          {t("providers.configured")}
-        </h2>
-        <p className="text-muted-foreground mt-1 text-sm">{t("providers.configuredDescription")}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 id="configured-providers-title" className="text-lg font-semibold">
+            {t("providers.configured")}
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("providers.configuredDescription")}
+          </p>
+        </div>
+        <Button type="button" onClick={onAdd} disabled={busy} className="cursor-pointer">
+          <Plus aria-hidden="true" />
+          {t("providers.add")}
+        </Button>
       </div>
       {actionError ? (
         <p role="alert" className="text-destructive text-sm">
@@ -56,51 +76,36 @@ export function ProviderList({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => {
-            const kindName = isKnownProviderKind(item.kind)
-              ? t(providerNameKeys[item.kind])
-              : item.kind
+            const definition = byKind.get(item.kind)
             return (
-              <Card key={item.id} className="dark:bg-card/75 gap-0 py-0 shadow-sm">
-                <CardContent className="space-y-3 px-5 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium">{item.name}</h3>
-                        <span className="text-muted-foreground rounded-full border px-2 py-0.5 text-xs">
-                          {kindName}
-                        </span>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs ${item.enabled ? "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" : "bg-muted text-muted-foreground"}`}
-                        >
-                          {item.enabled ? t("providers.enabled") : t("providers.disabled")}
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground mt-1 text-xs break-all">
-                        {item.baseUrl || t("providers.defaultBaseUrl")}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+              <div key={item.id} className="space-y-2">
+                <ProviderCard
+                  kind={item.kind}
+                  name={item.name}
+                  enabled={item.enabled}
+                  disabled={busy}
+                  authMethods={definition?.authMethods ?? ["api_key"]}
+                  plannedAuthMethods={definition?.plannedAuthMethods ?? []}
+                  models={definition?.models ?? []}
+                  endpoint={item.baseUrl}
+                  probeResult={probeResults[item.id]?.result}
+                  probeError={probeResults[item.id]?.error}
+                  probePending={probingId === item.id}
+                  onToggle={(enabled) => void toggle(item, enabled)}
+                  onProbe={() => onProbe(item)}
+                  actions={
+                    <>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => onEdit(item)}
                         disabled={busy}
                         className="cursor-pointer"
                       >
                         {t("providers.edit")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => void toggle(item)}
-                        disabled={busy}
-                        className="cursor-pointer"
-                      >
-                        {item.enabled ? t("providers.disable") : t("providers.enable")}
                       </Button>
                       <Button
                         type="button"
@@ -112,37 +117,37 @@ export function ProviderList({
                       >
                         {t("providers.delete")}
                       </Button>
+                    </>
+                  }
+                />
+                {confirmId === item.id ? (
+                  <div className="bg-muted/40 space-y-2 rounded-md border p-3 text-sm">
+                    <p>{t("providers.deleteConfirm", { name: item.name })}</p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => void remove(item.id)}
+                        disabled={busy}
+                        className="cursor-pointer"
+                      >
+                        {t("providers.delete")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmId(null)}
+                        disabled={busy}
+                        className="cursor-pointer"
+                      >
+                        {t("providers.cancel")}
+                      </Button>
                     </div>
                   </div>
-                  {confirmId === item.id ? (
-                    <div className="bg-muted/40 flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
-                      <span>{t("providers.deleteConfirm", { name: item.name })}</span>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => void remove(item.id)}
-                          disabled={busy}
-                          className="cursor-pointer"
-                        >
-                          {t("providers.delete")}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setConfirmId(null)}
-                          disabled={busy}
-                          className="cursor-pointer"
-                        >
-                          {t("providers.cancel")}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
+                ) : null}
+              </div>
             )
           })}
         </div>

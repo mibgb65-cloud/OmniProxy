@@ -1,10 +1,7 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import type {
-  ProviderConfiguration,
-  ProviderDefinition,
-  UpdateProviderInput,
-} from "../../services/omniproxy"
+import type { ProviderConfiguration, UpdateProviderInput } from "../../services/omniproxy"
+import type { ProbeDisplay } from "./provider-card"
 import { ProviderCatalog } from "./provider-catalog"
 import { ProviderForm } from "./provider-form"
 import { ProviderList } from "./provider-list"
@@ -13,10 +10,12 @@ import {
   useDeleteProvider,
   useProviderCatalog,
   useProviders,
+  useProbeProvider,
+  useSetProviderEnabled,
   useUpdateProvider,
 } from "./use-providers"
 
-type Editor = { kind: string; providerName: string; initial?: ProviderConfiguration }
+type Editor = { initial?: ProviderConfiguration }
 
 export function ProvidersView() {
   const { t } = useTranslation()
@@ -25,40 +24,54 @@ export function ProvidersView() {
   const create = useCreateProvider()
   const update = useUpdateProvider()
   const remove = useDeleteProvider()
+  const setEnabled = useSetProviderEnabled()
+  const probe = useProbeProvider()
   const [editor, setEditor] = useState<Editor | null>(null)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [probeResults, setProbeResults] = useState<Record<string, ProbeDisplay>>({})
+  const [probingId, setProbingId] = useState<string | null>(null)
 
-  const items = providers.data ?? []
-  const counts = items.reduce<Record<string, number>>((result, item) => {
-    result[item.kind] = (result[item.kind] ?? 0) + 1
-    return result
-  }, {})
+  const builtins = providers.data?.filter((item) => item.source === "builtin") ?? []
+  const custom = providers.data?.filter((item) => item.source === "custom") ?? []
 
   const submit = async (input: UpdateProviderInput) => {
     if (!editor) return
     if (editor.initial) {
       await update.mutateAsync({ id: editor.initial.id, input })
+      const editedId = editor.initial.id
+      setProbeResults((previous) => {
+        const next = { ...previous }
+        delete next[editedId]
+        return next
+      })
     } else {
-      await create.mutateAsync({ kind: editor.kind, ...input })
+      await create.mutateAsync(input)
     }
     setEditor(null)
   }
 
-  const toggle = async (item: ProviderConfiguration) => {
-    await update.mutateAsync({
-      id: item.id,
-      input: { name: item.name, baseUrl: item.baseUrl, enabled: !item.enabled },
-    })
+  const toggle = async (item: ProviderConfiguration, enabled: boolean) => {
+    await setEnabled.mutateAsync({ id: item.id, enabled })
+  }
+
+  const toggleBuiltIn = (item: ProviderConfiguration, enabled: boolean) => {
+    setActionError(null)
+    void toggle(item, enabled).catch(() => setActionError(t("providers.actionFailed")))
   }
 
   const deleteItem = async (id: string) => {
-    setDeleteError(null)
+    setActionError(null)
     try {
       await remove.mutateAsync(id)
+      setProbeResults((previous) => {
+        const next = { ...previous }
+        delete next[id]
+        return next
+      })
       return true
     } catch (error) {
       const message = error instanceof Error ? error.message : ""
-      setDeleteError(
+      setActionError(
         message.includes("provider: has accounts")
           ? t("providers.deleteHasAccounts")
           : t("providers.actionFailed"),
@@ -67,13 +80,15 @@ export function ProvidersView() {
     }
   }
 
-  const openNew = (definition: ProviderDefinition, providerName: string) => {
-    setEditor({ kind: definition.kind, providerName })
-  }
-
-  const openEdit = (item: ProviderConfiguration) => {
-    const definition = catalog.data?.find((entry) => entry.kind === item.kind)
-    setEditor({ kind: item.kind, providerName: definition?.name ?? item.kind, initial: item })
+  const testConnection = (item: ProviderConfiguration) => {
+    if (probingId) return
+    setProbingId(item.id)
+    setProbeResults((previous) => ({ ...previous, [item.id]: {} }))
+    void probe
+      .mutateAsync(item.id)
+      .then((result) => setProbeResults((previous) => ({ ...previous, [item.id]: { result } })))
+      .catch(() => setProbeResults((previous) => ({ ...previous, [item.id]: { error: true } })))
+      .finally(() => setProbingId(null))
   }
 
   return (
@@ -85,6 +100,7 @@ export function ProvidersView() {
       <p className="border-border bg-muted/30 rounded-lg border px-4 py-3 text-sm">
         {t("providers.configOnly")}
       </p>
+      <p className="text-muted-foreground text-xs">{t("providers.previewHint")}</p>
       {catalog.isPending || providers.isPending ? (
         <p role="status" className="text-muted-foreground text-sm">
           {t("providers.loading")}
@@ -95,30 +111,42 @@ export function ProvidersView() {
           {t("providers.loadFailed")}
         </p>
       ) : null}
-      {catalog.data ? (
-        <ProviderCatalog definitions={catalog.data} counts={counts} onAdd={openNew} />
+      {catalog.data && providers.data ? (
+        <ProviderCatalog
+          definitions={catalog.data}
+          items={builtins}
+          busy={setEnabled.isPending}
+          probingId={probingId}
+          probeResults={probeResults}
+          onToggle={toggleBuiltIn}
+          onProbe={testConnection}
+        />
       ) : null}
       {editor ? (
         <ProviderForm
-          key={editor.initial?.id ?? editor.kind}
-          providerName={editor.providerName}
+          key={editor.initial?.id ?? "new-custom"}
           initial={editor.initial}
           onSubmit={submit}
           onCancel={() => setEditor(null)}
         />
       ) : null}
-      {deleteError ? (
+      {actionError ? (
         <p role="alert" className="text-destructive text-sm">
-          {deleteError}
+          {actionError}
         </p>
       ) : null}
       {providers.data ? (
         <ProviderList
-          items={items}
-          onEdit={openEdit}
+          items={custom}
+          definitions={catalog.data ?? []}
+          onAdd={() => setEditor({})}
+          onEdit={(item) => setEditor({ initial: item })}
           onToggle={toggle}
           onDelete={deleteItem}
-          busy={update.isPending || remove.isPending}
+          onProbe={testConnection}
+          probeResults={probeResults}
+          probingId={probingId}
+          busy={setEnabled.isPending || update.isPending || remove.isPending}
         />
       ) : null}
     </div>

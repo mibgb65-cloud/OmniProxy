@@ -30,14 +30,9 @@ var (
 	ErrNotFound = errors.New("provider: not found")
 	// ErrHasAccounts prevents deletion while accounts still reference a provider.
 	ErrHasAccounts = errors.New("provider: has accounts")
+	// ErrBuiltIn prevents changes to a built-in provider other than its enabled state.
+	ErrBuiltIn = errors.New("provider: built-in configuration")
 )
-
-func validateKind(kind string) error {
-	if !knownKind(kind) {
-		return fmt.Errorf("%w: unknown kind", ErrInvalidInput)
-	}
-	return nil
-}
 
 func validateName(value string) (string, error) {
 	name := strings.TrimSpace(value)
@@ -81,6 +76,9 @@ func validateBaseURL(value string) (string, error) {
 }
 
 func validateID(id string) error {
+	if strings.HasPrefix(id, "builtin_") && knownKind(strings.TrimPrefix(id, "builtin_")) {
+		return nil
+	}
 	if len(id) != len(idPrefix)+idBytes*2 || !strings.HasPrefix(id, idPrefix) {
 		return ErrInvalidID
 	}
