@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
+import { X } from "lucide-react"
+import { Dialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import type { CreateAccountInput, ProviderConfiguration } from "../../services/omniproxy"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
@@ -24,11 +25,9 @@ function validKey(value: string): boolean {
 export function AccountForm({
   provider,
   onSubmit,
-  onCancel,
 }: {
   provider: ProviderConfiguration
   onSubmit: (input: CreateAccountInput) => Promise<void>
-  onCancel: () => void
 }) {
   const { t } = useTranslation()
   const providerName =
@@ -43,8 +42,6 @@ export function AccountForm({
   const [saveError, setSaveError] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => nameRef.current?.focus(), [])
-
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nameError = !validName(name)
@@ -56,7 +53,6 @@ export function AccountForm({
     setSaveError(false)
     try {
       await onSubmit({ providerId: provider.id, name: name.trim(), apiKey: apiKey.trim() })
-      setAPIKey("")
     } catch {
       setSaveError(true)
     } finally {
@@ -65,11 +61,44 @@ export function AccountForm({
   }
 
   return (
-    <Card className="dark:bg-card/75 gap-0" id="account-editor">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base">{t("accounts.newFor", { name: providerName })}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Dialog.Portal>
+      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
+      <Dialog.Content
+        id="account-editor"
+        className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[min(480px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border p-6 shadow-xl outline-none"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          nameRef.current?.focus()
+        }}
+        onEscapeKeyDown={(event) => {
+          if (saving) event.preventDefault()
+        }}
+        onInteractOutside={(event) => {
+          if (saving) event.preventDefault()
+        }}
+      >
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="space-y-1.5">
+            <Dialog.Title className="text-base font-semibold">
+              {t("accounts.newFor", { name: providerName })}
+            </Dialog.Title>
+            <Dialog.Description className="text-muted-foreground text-sm">
+              {t("accounts.multipleHint")}
+            </Dialog.Description>
+          </div>
+          <Dialog.Close asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              disabled={saving}
+              aria-label={t("accounts.close")}
+              className="shrink-0 cursor-pointer"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </Button>
+          </Dialog.Close>
+        </div>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="account-name" className="text-sm font-medium">
@@ -125,18 +154,14 @@ export function AccountForm({
             <Button type="submit" disabled={saving} className="cursor-pointer">
               {saving ? t("accounts.saving") : t("accounts.save")}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={saving}
-              onClick={onCancel}
-              className="cursor-pointer"
-            >
-              {t("accounts.cancel")}
-            </Button>
+            <Dialog.Close asChild>
+              <Button type="button" variant="outline" disabled={saving} className="cursor-pointer">
+                {t("accounts.cancel")}
+              </Button>
+            </Dialog.Close>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </Dialog.Content>
+    </Dialog.Portal>
   )
 }

@@ -197,6 +197,8 @@ export const zh = {
   "accounts.count": "{{count}} 个账号",
   "accounts.add": "添加账号",
   "accounts.newFor": "添加 {{name}} 账号",
+  "accounts.multipleHint": "同一提供商可添加多个 API Key 账号。",
+  "accounts.close": "关闭添加账号窗口",
   "accounts.empty": "暂无账号",
   "accounts.providerDisabled": "此提供商已停用。",
   "accounts.subscriptionPlanned": "订阅登录待接入；目前可添加 API Key 账号。",

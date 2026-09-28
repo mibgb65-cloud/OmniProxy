@@ -67,6 +67,7 @@ const custom: ProviderConfiguration = {
   updatedAt: "2026-09-28T00:00:00Z",
 }
 let saved: AccountItem[] = []
+let nextId = 0
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -86,12 +87,13 @@ describe("AccountsView", () => {
     localStorage.clear()
     useUIStore.setState({ language: "zh" })
     saved = []
+    nextId = 0
     vi.mocked(getProviderCatalog).mockResolvedValue(catalog)
     vi.mocked(listProviders).mockResolvedValue([...providers, custom])
     vi.mocked(listAccounts).mockImplementation(async () => saved)
     vi.mocked(createAccount).mockImplementation(async (input) => {
       const item: AccountItem = {
-        id: "acct_0123456789abcdef0123456789abcdef",
+        id: `acct_${String(++nextId).padStart(32, "0")}`,
         providerId: input.providerId,
         name: input.name,
         enabled: true,
@@ -118,7 +120,7 @@ describe("AccountsView", () => {
     expect((await screen.findAllByRole("button", { name: "添加账号" })).length).toBe(10)
     expect(screen.getByRole("heading", { name: "Custom API" })).toBeInTheDocument()
     await user.click(screen.getAllByRole("button", { name: "添加账号" })[0])
-    expect(screen.getByText("添加 OpenAI 账号")).toBeInTheDocument()
+    expect(screen.getByRole("dialog", { name: "添加 OpenAI 账号" })).toBeInTheDocument()
     await user.type(screen.getByLabelText("账号名称"), "主账号")
     await user.type(screen.getByLabelText("API Key"), "test-secret-not-real")
     await user.click(screen.getByRole("button", { name: "保存账号" }))
@@ -130,6 +132,7 @@ describe("AccountsView", () => {
       }),
     )
     const account = await screen.findByText("主账号")
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
     expect(within(account.closest("li")!).getByText("API Key · 已启用")).toBeInTheDocument()
     expect(screen.queryByText("test-secret-not-real")).not.toBeInTheDocument()
     expect(screen.queryByDisplayValue("test-secret-not-real")).not.toBeInTheDocument()
@@ -149,5 +152,69 @@ describe("AccountsView", () => {
     await user.click(screen.getByRole("button", { name: "保存账号" }))
     expect(screen.getByText(/请输入有效的 API Key/)).toBeInTheDocument()
     expect(createAccount).not.toHaveBeenCalled()
+  })
+
+  it("adds two different API Keys to the same provider through separate dialogs", async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const addButtons = await screen.findAllByRole("button", { name: "添加账号" })
+    const addButton = addButtons[0]
+
+    for (const [name, key] of [
+      ["主账号", "first-test-key"],
+      ["备用账号", "second-test-key"],
+    ]) {
+      await user.click(addButton)
+      const dialog = screen.getByRole("dialog", { name: "添加 OpenAI 账号" })
+      expect(within(dialog).getByLabelText("账号名称")).toHaveFocus()
+      await user.type(within(dialog).getByLabelText("账号名称"), name)
+      await user.type(within(dialog).getByLabelText("API Key"), key)
+      await user.click(within(dialog).getByRole("button", { name: "保存账号" }))
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+    }
+
+    expect(createAccount).toHaveBeenCalledTimes(2)
+    expect(createAccount).toHaveBeenNthCalledWith(1, {
+      providerId: "builtin_openai",
+      name: "主账号",
+      apiKey: "first-test-key",
+    })
+    expect(createAccount).toHaveBeenNthCalledWith(2, {
+      providerId: "builtin_openai",
+      name: "备用账号",
+      apiKey: "second-test-key",
+    })
+    expect(screen.getByText("2 个账号")).toBeInTheDocument()
+    expect(screen.getByText("主账号")).toBeInTheDocument()
+    expect(screen.getByText("备用账号")).toBeInTheDocument()
+    expect(screen.queryByDisplayValue("first-test-key")).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue("second-test-key")).not.toBeInTheDocument()
+  })
+
+  it("closes the dialog with Escape and returns focus to its add button", async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const addButton = (await screen.findAllByRole("button", { name: "添加账号" }))[0]
+    await user.click(addButton)
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+    await user.keyboard("{Escape}")
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+    expect(addButton).toHaveFocus()
+    expect(createAccount).not.toHaveBeenCalled()
+  })
+
+  it("keeps the dialog open while an account is being saved", async () => {
+    const user = userEvent.setup()
+    vi.mocked(createAccount).mockImplementationOnce(() => new Promise(() => {}))
+    renderPage()
+    await user.click((await screen.findAllByRole("button", { name: "添加账号" }))[0])
+    const dialog = screen.getByRole("dialog", { name: "添加 OpenAI 账号" })
+    await user.type(within(dialog).getByLabelText("账号名称"), "主账号")
+    await user.type(within(dialog).getByLabelText("API Key"), "test-key")
+    await user.click(within(dialog).getByRole("button", { name: "保存账号" }))
+    expect(within(dialog).getByRole("button", { name: "正在保存…" })).toBeDisabled()
+    await user.keyboard("{Escape}")
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "取消" })).toBeDisabled()
   })
 })

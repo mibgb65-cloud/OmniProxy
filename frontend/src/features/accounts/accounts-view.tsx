@@ -1,12 +1,7 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import type {
-  AccountItem,
-  CreateAccountInput,
-  ProviderConfiguration,
-} from "../../services/omniproxy"
+import type { AccountItem, CreateAccountInput } from "../../services/omniproxy"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
-import { AccountForm } from "./account-form"
 import { AccountProviderCard } from "./account-provider-card"
 import {
   useAccounts,
@@ -23,12 +18,10 @@ export function AccountsView() {
   const create = useCreateAccount()
   const setEnabled = useSetAccountEnabled()
   const remove = useDeleteAccount()
-  const [selected, setSelected] = useState<ProviderConfiguration | null>(null)
   const [actionError, setActionError] = useState(false)
 
   const save = async (input: CreateAccountInput) => {
     await create.mutateAsync(input)
-    setSelected(null)
   }
 
   const toggle = (id: string, enabled: boolean) => {
@@ -66,14 +59,6 @@ export function AccountsView() {
           {t("accounts.loadFailed")}
         </p>
       ) : null}
-      {selected ? (
-        <AccountForm
-          key={selected.id}
-          provider={selected}
-          onSubmit={save}
-          onCancel={() => setSelected(null)}
-        />
-      ) : null}
       {actionError ? (
         <p role="alert" className="text-destructive text-sm">
           {t("accounts.actionFailed")}
@@ -87,10 +72,7 @@ export function AccountsView() {
               provider={provider}
               accounts={accounts.data.filter((account) => account.providerId === provider.id)}
               busy={setEnabled.isPending || remove.isPending}
-              onAdd={() => {
-                setActionError(false)
-                setSelected(provider)
-              }}
+              onCreate={save}
               onToggle={toggle}
               onDelete={deleteItem}
             />

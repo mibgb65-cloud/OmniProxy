@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-009 使用弹窗添加提供商账号
 
 ## Recently Completed
 

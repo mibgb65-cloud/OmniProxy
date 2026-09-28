@@ -209,6 +209,8 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.count": "{{count}} accounts",
   "accounts.add": "Add account",
   "accounts.newFor": "Add {{name}} account",
+  "accounts.multipleHint": "You can add multiple API Key accounts for this provider.",
+  "accounts.close": "Close add account dialog",
   "accounts.empty": "No accounts yet",
   "accounts.providerDisabled": "This provider is disabled.",
   "accounts.subscriptionPlanned":
