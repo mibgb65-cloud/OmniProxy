@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -89,10 +89,16 @@ None.
 
 ## Commit
 
-待完成。
+`292f7ffe06e9f1e54b0b23319f388f79c57cf7aa` feat(account): 使用弹窗添加多个账号
 
 ---
 
 # Result
 
 账号添加已改为弹窗；同一提供商可以连续添加多个独立 API Key 账号。
+
+---
+
+# Completed
+
+2026-09-28 18:59

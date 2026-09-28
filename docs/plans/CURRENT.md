@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- TASK-20260928-009 使用弹窗添加提供商账号
+- (none)
 
 ## Recently Completed
+
+- TASK-20260928-009 使用弹窗添加提供商账号
 
 - TASK-20260928-008 账号页面与 API Key 账号管理
 
