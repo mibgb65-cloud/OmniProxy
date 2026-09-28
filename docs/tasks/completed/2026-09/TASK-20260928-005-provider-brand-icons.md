@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -63,6 +63,7 @@ OpenAI、Anthropic、Google、DeepSeek、智谱、月之暗面、MiniMax、小�
 - 初次亮色窗口检查发现 Kimi 彩色标识的主体为白色，在白色底块上不可见；已为该图标使用深色底块，保留上游 SVG 原样。
 - 九家图标映射和自定义图标回退测试通过；实际 Wails 窗口的亮暗主题均已检查，随后恢复了原亮色主题。
 - `task verify` 全部通过，生产构建产物包含九个 SVG、来源说明及授权文本；开发环境已恢复。
+- Wails 与 Vite 分别在 3891、9245 端口正常监听；提交后工作区干净。
 
 ---
 
@@ -126,10 +127,16 @@ OpenAI、Anthropic、Google、DeepSeek、智谱、月之暗面、MiniMax、小�
 
 ## Commit
 
-待完成。
+`401c2c90258a89c33937d2ca4790de81cbf44ef6 feat(frontend): 为九家提供商使用真实品牌图标`
 
 ---
 
 # Result
 
 九家内置提供商显示可辨认的本地品牌标识；自定义项保留通用图标，亮暗主题均可用。
+
+---
+
+# Completed
+
+2026-09-28 15:55
