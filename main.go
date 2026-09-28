@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"io/fs"
 	"log/slog"
 	"os"
 
@@ -62,7 +63,12 @@ func main() {
 	}
 	defer func() { _ = db.Close() }()
 
-	if err := database.Migrate(context.Background(), db, migrations); err != nil {
+	migrationFiles, err := embeddedMigrations()
+	if err != nil {
+		log.Error("failed to open embedded migrations", "error", err)
+		os.Exit(1)
+	}
+	if err := database.Migrate(context.Background(), db, migrationFiles); err != nil {
 		log.Error("failed to apply database migrations", "error", err)
 		os.Exit(1)
 	}
@@ -81,4 +87,8 @@ func main() {
 		log.Error("application exited with error", "error", err)
 		os.Exit(1)
 	}
+}
+
+func embeddedMigrations() (fs.FS, error) {
+	return fs.Sub(migrations, "migrations")
 }

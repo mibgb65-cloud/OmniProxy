@@ -59,9 +59,10 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: no feature services exist yet. The Control API exposes only
-> `/healthz` and the Wails binding exposes app info and a ping. The first
-> feature service will be created together with its first real feature.
+> Current state: `internal/application/provider` manages provider
+> configurations in SQLite and is exposed through Wails bindings. The Control
+> API still exposes only `/healthz`; account management and gateway adapters
+> have not landed yet.
 
 ### Core (`internal/core/…`)
 
@@ -137,8 +138,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 
 ## External Dependencies
 
-- AI providers: OpenAI, Anthropic, Google, DeepSeek, Kimi, MiMo, and any
-  OpenAI-compatible endpoint.
+- AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
+  MiniMax, Xiaomi MiMo, StepFun, and OpenAI-compatible endpoints. Nine named
+  provider kinds are available for local configuration; request adapters are
+  still pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

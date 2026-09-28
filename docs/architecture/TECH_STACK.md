@@ -59,6 +59,10 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - Opaque credential bundles are stored as per-user DPAPI-protected files in
   profile-specific data directories (`internal/infrastructure/credential`,
   ADR-002). SQLite stores only `credential_ref` values.
+- Provider configurations use the existing `providers` table and
+  `internal/application/provider`; the nine built-in kinds and authentication
+  presets are code-defined. The UI uses generated Wails bindings and TanStack
+  Query to manage saved configurations.
 
 ## Networking
 
@@ -106,10 +110,9 @@ allowed (see CODING_RULES).
 ## Platform Requirements
 
 - Windows 10/11 x64 with the WebView2 runtime — the current target.
-- macOS and Linux: not targeted yet; the Go core and the runtime profile
-  design keep them possible (DPAPI credential storage is the main
-  platform-specific piece and will sit behind `internal/infrastructure/credential`,
-  to be created with the account feature).
+- macOS and Linux: not targeted yet; the Go core and runtime profile design
+  keep them possible. The current `internal/infrastructure/credential` DPAPI
+  implementation is Windows-specific.
 
 ## Signing & Distribution (planned)
 

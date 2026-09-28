@@ -8,6 +8,12 @@ import {
   type StorageInfo,
   type UpdateStatus,
 } from "../../bindings/omniproxy/internal/transport/wails"
+import type {
+  Configuration as ProviderConfiguration,
+  CreateInput as CreateProviderInput,
+  Definition as ProviderDefinition,
+  UpdateInput as UpdateProviderInput,
+} from "../../bindings/omniproxy/internal/application/provider"
 
 export type {
   AppInfo,
@@ -18,6 +24,7 @@ export type {
   StorageInfo,
   UpdateStatus,
 }
+export type { ProviderConfiguration, CreateProviderInput, ProviderDefinition, UpdateProviderInput }
 
 /** getAppInfo returns the application runtime information from the Go backend. */
 export function getAppInfo(): Promise<AppInfo> {
@@ -75,4 +82,32 @@ export function getRuntimeInfo(): Promise<RuntimeInfo> {
 /** checkForUpdate compares the current version against the latest release. */
 export function checkForUpdate(): Promise<UpdateStatus> {
   return AppService.CheckForUpdate()
+}
+
+/** getProviderCatalog returns the built-in provider kinds and auth options. */
+export async function getProviderCatalog(): Promise<ProviderDefinition[]> {
+  return (await AppService.ProviderCatalog()) ?? []
+}
+
+/** listProviders returns the user's saved provider configurations. */
+export async function listProviders(): Promise<ProviderConfiguration[]> {
+  return (await AppService.ListProviders()) ?? []
+}
+
+/** createProvider saves one provider configuration. */
+export function createProvider(input: CreateProviderInput): Promise<ProviderConfiguration> {
+  return AppService.CreateProvider(input)
+}
+
+/** updateProvider changes the editable fields of one configuration. */
+export function updateProvider(
+  id: string,
+  input: UpdateProviderInput,
+): Promise<ProviderConfiguration> {
+  return AppService.UpdateProvider(id, input)
+}
+
+/** deleteProvider removes an unreferenced configuration. */
+export function deleteProvider(id: string): Promise<void> {
+  return AppService.DeleteProvider(id)
 }

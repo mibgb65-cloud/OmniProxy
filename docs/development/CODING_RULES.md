@@ -20,10 +20,12 @@ internal/
   platform/profile/              Runtime profile (production/development/test)
   infrastructure/database/       SQLite open + migration runner
   infrastructure/logger/         slog setup, Redactor, rotating file, UI buffer
+  infrastructure/credential/     OS-protected credential file storage
+  application/provider/          Provider catalog and configuration service
   transport/wails/               Wails app service and shell adapter
   transport/httpapi/             Local Control API (chi)
   version/                       Application version constant
-cmd/, internal/application/, internal/core/, internal/provider/,
+cmd/, internal/core/, internal/provider/,
 internal/integration/, internal/platform/{windows,darwin,linux}/
                                  Created when the features that need them land
 ```

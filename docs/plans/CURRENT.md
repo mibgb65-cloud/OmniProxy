@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-003 九家提供商预设与配置管理
 
 ## Recently Completed
 
@@ -32,10 +32,10 @@
 
 ## Known Issues
 
-- Settings and About have live Wails data; account, provider, gateway and other
-  feature pages remain placeholders until their backends land.
-- No application feature services exist yet; `AppService` and `/healthz` are
-  the only entry points.
+- Settings, About, and Providers have live Wails data; account, gateway and
+  other feature pages remain placeholders until their backends land.
+- Provider configurations are persisted locally; provider request adapters,
+  API Key accounts, and OpenAI subscription login are not connected yet.
 - UI log streaming (Wails events from the logger buffer) is not wired yet.
 - Single-instance protection is not wired yet; a manual launch after autostart
   can start a second process.
@@ -43,8 +43,8 @@
 
 ## Next Steps
 
-1. First application service + core feature: provider configuration and
-   account management, with the account/provider pages wired to real bindings.
+1. Account management with API Key credentials, using the credential store and
+   provider configurations already in place; wire the Accounts page to bindings.
 2. Gateway proxy server with request parsing and the first provider adapter
    (OpenAI), followed by the model router.
 3. Account scheduler (eligibility, health, cooldown, retry) and automatic

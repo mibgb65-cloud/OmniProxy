@@ -14,6 +14,10 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as provider$0 from "../../application/provider/models.js";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as $models from "./models.js";
 
 /**
@@ -41,6 +45,20 @@ export function CleanStorage(target: string): $CancellablePromise<$models.CleanR
 }
 
 /**
+ * CreateProvider saves one provider configuration.
+ */
+export function CreateProvider(input: provider$0.CreateInput): $CancellablePromise<provider$0.Configuration> {
+    return $Call.ByID(2117709100, input);
+}
+
+/**
+ * DeleteProvider removes a provider configuration without accounts.
+ */
+export function DeleteProvider(id: string): $CancellablePromise<void> {
+    return $Call.ByID(3945501167, id);
+}
+
+/**
  * DesktopSettings reads autostart from the OS and close behavior from the
  * profile config, so external OS changes are reflected on refresh.
  */
@@ -49,10 +67,24 @@ export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> 
 }
 
 /**
+ * ListProviders returns saved provider configurations.
+ */
+export function ListProviders(): $CancellablePromise<provider$0.Configuration[] | null> {
+    return $Call.ByID(1567597833);
+}
+
+/**
  * Ping is a liveness probe for the UI binding layer.
  */
 export function Ping(): $CancellablePromise<string> {
     return $Call.ByID(77535937);
+}
+
+/**
+ * ProviderCatalog returns the built-in provider kinds and their auth options.
+ */
+export function ProviderCatalog(): $CancellablePromise<provider$0.Definition[] | null> {
+    return $Call.ByID(3706786763);
 }
 
 /**
@@ -98,4 +130,11 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
  */
 export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
     return $Call.ByID(3571019774);
+}
+
+/**
+ * UpdateProvider updates one provider configuration.
+ */
+export function UpdateProvider(id: string, input: provider$0.UpdateInput): $CancellablePromise<provider$0.Configuration> {
+    return $Call.ByID(1968740345, id, input);
 }

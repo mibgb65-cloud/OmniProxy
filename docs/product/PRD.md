@@ -51,7 +51,8 @@ accounts need one local place to:
 ## Core Features
 
 - Multi-provider access via a unified adapter architecture (OpenAI,
-  Anthropic, Google, DeepSeek, Kimi, MiMo, OpenAI-compatible).
+  Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,
+  StepFun, and OpenAI-compatible endpoints).
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
