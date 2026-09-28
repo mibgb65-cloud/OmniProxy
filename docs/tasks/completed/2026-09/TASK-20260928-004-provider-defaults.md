@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -69,6 +69,7 @@ In Progress
 - 参考图布局已实现：通用 AI 图标、右上滑块、接入方式、可展开模型与底部状态/测试操作，无“配置 Key”按钮。
 - 以官方文档核对九家 API 地址和代表性模型；连通测试使用无密钥 HEAD 请求，最多等待 6 秒，不跟随重定向，任何 HTTP 响应都归为地址可达并展示状态码。
 - `task verify` 全部通过。实际 Wails 窗口视觉检查通过；OpenAI 地址测试返回 HTTP 404，界面正确显示“地址可达”和约 930 ms 响应耗时。
+- 开发环境继续运行：Wails 已连接 Vite，9245/3891 端口监听正常，首页 HTTP 返回 200。
 
 ## Model Preview Sources
 
@@ -135,7 +136,7 @@ In Progress
 
 ## Verification Result
 
-`task verify` PASS：Go 测试通过；前端 14 个测试文件、59 个测试通过；Windows 生产构建成功。实际开发数据库 `builtin|9|9`，无自定义测试记录。Wails 窗口可见新卡片布局，OpenAI 无凭证地址测试返回 HTTP 404，界面显示地址可达、930 ms。`git diff --check` PASS。
+`task verify` PASS：Go 测试通过；前端 14 个测试文件、59 个测试通过；Windows 生产构建成功。最后的自定义地址编辑状态清理及文案调整后，前端定向测试和类型检查再次通过。实际开发数据库 `builtin|9|9`，无自定义测试记录。Wails 窗口可见新卡片布局，OpenAI 无凭证地址测试返回 HTTP 404，界面显示地址可达、930 ms。`git diff --check` PASS。
 
 ---
 
@@ -155,10 +156,16 @@ PRD、架构概览、技术栈和 CURRENT 看板已同步默认提供商、静�
 
 ## Commit
 
-待完成。
+`9a30af43e4b2dcbdc5efc60a3d81aa6ec4c923bb feat(provider): 默认启用内置提供商并完善卡片测试`
 
 ---
 
 # Result
 
 九家内置提供商默认启用并可直接切换；自定义 OpenAI 兼容提供商可新增且默认启用。新卡片展示 AI 图标、接入方式、可展开模型与无凭证连通/延迟测试。
+
+---
+
+# Completed
+
+2026-09-28 15:21
