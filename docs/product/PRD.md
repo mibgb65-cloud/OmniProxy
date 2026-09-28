@@ -52,7 +52,8 @@ accounts need one local place to:
 
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Kimi, MiMo, OpenAI-compatible).
-- Multi-account management with credential storage in the OS credential store.
+- Multi-account management with OS-protected local credential storage; account
+  metadata keeps only opaque references to secrets.
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
   concurrency and retry.
 - Model routing rules.

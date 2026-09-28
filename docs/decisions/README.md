@@ -49,3 +49,4 @@ rather than editing history.
 | ADR                                                              | Status  | Summary                                   |
 | ---------------------------------------------------------------- | ------- | ----------------------------------------- |
 | [ADR-001](ADR-001-wails3-go-react-stack.md)                      | Accepted| Wails 3 + Go core + React frontend stack  |
+| [ADR-002](ADR-002-dpapi-credential-files.md)                     | Accepted| Windows 用户范围 DPAPI 凭证文件           |

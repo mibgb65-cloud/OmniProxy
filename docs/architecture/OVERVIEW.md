@@ -77,8 +77,9 @@ types, no Wails types, no database types in its public API.
   records what has been applied.
 - `infrastructure/logger`: structured `log/slog` setup with a central
   Redactor; sinks are console, rotating file and an in-memory UI buffer.
-- Credential storage: OS credential store (DPAPI on Windows). The database
-  stores only a `credential_ref`, never a plaintext secret.
+- Credential storage: per-user DPAPI-protected files under each Windows
+  profile's data directory (ADR-002). The database stores only a
+  `credential_ref`, never a plaintext secret.
 
 ### Runtime profile (`internal/platform/profile`)
 
@@ -141,7 +142,8 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.
-- OS credential store (Windows DPAPI; Keychain / Secret Service later).
+- Windows DPAPI for local credential protection; Keychain / Secret Service
+  adapters may be added when those platforms are supported.
 
 ## Architecture Boundaries
 

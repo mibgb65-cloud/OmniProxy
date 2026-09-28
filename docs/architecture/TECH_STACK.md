@@ -56,6 +56,9 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - SQL migrations in `migrations/`, applied by
   `internal/infrastructure/database`; `schema_version` tracks applied
   migrations. Schema changes never happen outside migrations.
+- Opaque credential bundles are stored as per-user DPAPI-protected files in
+  profile-specific data directories (`internal/infrastructure/credential`,
+  ADR-002). SQLite stores only `credential_ref` values.
 
 ## Networking
 
@@ -84,6 +87,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 | `wailsapp/wails/v3`       | Desktop shell, bindings, events      | Chosen desktop framework (ADR-001)                     |
 | `go-chi/chi/v5`           | Control API router/middleware        | Small, composable; no heavyweight web framework        |
 | `modernc.org/sqlite`      | SQLite driver (pure Go)              | No CGO toolchain needed; matches Wails Windows builds  |
+| `golang.org/x/sys/windows`| Windows DPAPI calls                  | Existing module dependency; typed OS API wrappers      |
 | `react` / `react-dom`     | UI library                           | Project standard                                       |
 | `@tanstack/react-router`  | File-based routing                   | Type-safe routing, first-class TanStack integration    |
 | `@tanstack/react-query`   | Server state                         | Cache/loading/error/invalidate for backend data        |

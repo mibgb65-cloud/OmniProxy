@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-002 Windows 凭证存储基础设施
 
 ## Recently Completed
 
@@ -42,11 +42,10 @@
 
 ## Next Steps
 
-1. Credential store (Windows DPAPI) behind `internal/infrastructure/credential`.
-2. First application service + core feature: provider configuration and
+1. First application service + core feature: provider configuration and
    account management, with the account/provider pages wired to real bindings.
-3. Gateway proxy server with request parsing and the first provider adapter
+2. Gateway proxy server with request parsing and the first provider adapter
    (OpenAI), followed by the model router.
-4. Account scheduler (eligibility, health, cooldown, retry) and automatic
+3. Account scheduler (eligibility, health, cooldown, retry) and automatic
    failover.
-5. Wire the UI log stream through Wails events from the logger buffer.
+4. Wire the UI log stream through Wails events from the logger buffer.
