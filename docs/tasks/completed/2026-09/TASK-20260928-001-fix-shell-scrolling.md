@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -58,6 +58,7 @@ In Progress
 - 已实现独立滚动区域和固定占位滚动条，并增加指针拖拽及键盘滚动支持。
 - Headless Chrome 在 1200px 宽、500px 高的窗口中确认：文档宽度等于视口宽度；主内容滚动 100px 后标题栏位置为 0，侧栏滚动位置仍为 0；滚动时滑块透明度为 0，鼠标进入轨道后为 0.7，移出后回到 0。
 - `task verify` 全部通过。
+- 开发环境重新启动：Wails 已连接 Vite，9245 和 3891 端口监听正常，首页 HTTP 返回 200。
 
 ---
 
@@ -103,7 +104,7 @@ In Progress
 
 ## Verification Result
 
-`task verify` PASS：Go 测试通过；前端 13 个测试文件、52 个测试通过；Windows 生产构建成功。`git diff --check` PASS。浏览器预览未接入 Wails 服务，截图中设置数据加载报错属于预览环境限制，与滚动布局验证无关。
+`task verify` PASS：Go 测试通过；前端 13 个测试文件、52 个测试通过；Windows 生产构建成功。最后的指针捕获清理调整后，滚动组件测试 2/2 通过，Prettier 检查通过。`git diff --check` PASS。浏览器预览未接入 Wails 服务，截图中设置数据加载报错属于预览环境限制，与滚动布局验证无关。
 
 ---
 
@@ -123,10 +124,16 @@ None.
 
 ## Commit
 
-待提交。
+`9085688a863b70b106d293018021ae022467c79c fix(frontend): 修复主界面滚动布局与滚动条交互`
 
 ---
 
 # Result
 
 主界面标题栏与侧栏位置固定，主内容和侧栏独立滚动，文档无横向滚动条；两处滚动条仅在鼠标悬停轨道时渐显。
+
+---
+
+# Completed
+
+2026-09-28 10:20
