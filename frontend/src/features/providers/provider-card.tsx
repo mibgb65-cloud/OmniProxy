@@ -7,16 +7,16 @@ import { Card, CardContent } from "../../components/ui/card"
 import type { ProviderProbeResult } from "../../services/omniproxy"
 import { ProviderSwitch } from "./provider-switch"
 
-const iconColors: Record<string, string> = {
-  openai: "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-zinc-900",
-  anthropic: "bg-orange-700 text-white",
-  google: "bg-blue-600 text-white",
-  deepseek: "bg-indigo-600 text-white",
-  zhipu: "bg-violet-700 text-white",
-  kimi: "bg-purple-700 text-white",
-  minimax: "bg-rose-700 text-white",
-  mimo: "bg-cyan-700 text-white",
-  stepfun: "bg-emerald-700 text-white",
+const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?: boolean }> = {
+  openai: { file: "openai.svg", monochrome: true },
+  anthropic: { file: "anthropic.svg", monochrome: true },
+  google: { file: "google-color.svg" },
+  deepseek: { file: "deepseek-color.svg" },
+  zhipu: { file: "zhipu-color.svg" },
+  kimi: { file: "kimi-color.svg", darkTile: true },
+  minimax: { file: "minimax-color.svg" },
+  mimo: { file: "xiaomimimo.svg", monochrome: true },
+  stepfun: { file: "stepfun-color.svg" },
 }
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean }
@@ -92,16 +92,25 @@ export function ProviderCard({
   actions?: ReactNode
 }) {
   const { t } = useTranslation()
+  const brandIcon = brandIcons[kind]
   return (
     <Card className="dark:bg-card/75 gap-0 py-0 shadow-sm">
       <CardContent className="space-y-3 px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             <span
-              className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${iconColors[kind] ?? "bg-slate-700 text-white"}`}
+              className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${brandIcon?.monochrome || brandIcon?.darkTile ? "bg-zinc-950" : brandIcon ? "border-border border bg-white" : "bg-slate-700 text-white"}`}
               aria-hidden="true"
             >
-              <Bot className="size-5" />
+              {brandIcon ? (
+                <img
+                  src={`/provider-icons/${brandIcon.file}`}
+                  alt=""
+                  className={`size-6 ${brandIcon.monochrome ? "brightness-0 invert" : ""}`}
+                />
+              ) : (
+                <Bot className="size-5" />
+              )}
             </span>
             <div className="min-w-0 space-y-1">
               <h3 className="truncate text-sm font-semibold" title={name}>
