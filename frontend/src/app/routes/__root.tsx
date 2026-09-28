@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router"
 import { AppSidebar } from "../../components/common/app-sidebar"
 import { AppTitlebar } from "../../components/common/app-titlebar"
+import { ScrollRegion } from "../../components/common/scroll-region"
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -8,13 +9,13 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <div className="bg-background text-foreground flex h-screen w-screen flex-col overflow-hidden">
+    <div className="bg-background text-foreground flex h-full w-full flex-col overflow-hidden">
       <AppTitlebar />
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <AppSidebar />
-        <main className="min-w-0 flex-1 overflow-y-auto p-6">
+        <ScrollRegion as="main" className="min-w-0 flex-1" viewportClassName="p-6">
           <Outlet />
-        </main>
+        </ScrollRegion>
       </div>
     </div>
   )

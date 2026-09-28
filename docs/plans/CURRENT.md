@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-001 修复主界面滚动布局与滚动条交互
 
 ## Recently Completed
 

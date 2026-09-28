@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
 import { LanguageSwitcher } from "./language-switcher"
 import { SidebarLabel } from "./sidebar-label"
+import { ScrollRegion } from "./scroll-region"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
 import type { NavItem } from "../../types/ui"
@@ -55,9 +56,11 @@ export function AppSidebar() {
         </SidebarLabel>
       </div>
 
-      <nav
-        className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-2"
-        aria-label="Primary"
+      <ScrollRegion
+        as="nav"
+        className="min-h-0 min-w-0 flex-1"
+        viewportClassName="p-2"
+        ariaLabel="Primary"
       >
         <ul className="space-y-1">
           {navItems.map((item) => (
@@ -66,7 +69,7 @@ export function AppSidebar() {
             </li>
           ))}
         </ul>
-      </nav>
+      </ScrollRegion>
 
       <div className="border-sidebar-border flex shrink-0 flex-col gap-2 overflow-hidden border-t p-2 whitespace-nowrap">
         <LanguageSwitcher collapsed={collapsed} />

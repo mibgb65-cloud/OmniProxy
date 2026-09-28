@@ -1,0 +1,54 @@
+.scroll-region {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.scroll-region__viewport {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.scroll-region__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-region__viewport:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.scroll-region__rail {
+  position: relative;
+  width: 12px;
+  flex: none;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.scroll-region__thumb {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  left: 3px;
+  border-radius: 9999px;
+  background: var(--muted-foreground);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.scroll-region__rail[data-scrollable="true"]:hover .scroll-region__thumb,
+.scroll-region__rail[data-scrollable="true"][data-dragging="true"] .scroll-region__thumb {
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-region__thumb {
+    transition: none;
+  }
+}
