@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-007 精简提供商页面说明文案
 
 ## Recently Completed
 

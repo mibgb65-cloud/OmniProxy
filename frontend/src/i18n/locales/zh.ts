@@ -135,14 +135,8 @@ export const zh = {
   "settings.desktop.saving": "正在保存…",
 
   "providers.title": "提供商",
-  "providers.description": "九家内置提供商开箱即用，也可添加自己的 OpenAI 兼容接口。",
-  "providers.configOnly":
-    "内置提供商默认启用，可随时关闭。API Key 账号录入、订阅登录和网关调用将在后续接入。",
   "providers.catalog": "内置提供商",
-  "providers.catalogDescription": "九家提供商已预设并默认启用，使用滑块控制开关。",
   "providers.presetUnavailable": "未找到内置配置，请重启应用。",
-  "providers.previewHint":
-    "模型为官方预设示例，实际可用范围以账号权限为准；测试仅测地址连通和响应耗时，不验证密钥或模型调用。",
   "providers.customModels": "模型由自定义接口提供",
   "providers.showModels": "查看全部预设模型",
   "providers.hideModels": "收起预设模型",

@@ -29,7 +29,6 @@ export function ProviderCatalog({
         <h2 id="provider-catalog-title" className="text-lg font-semibold">
           {t("providers.catalog")}
         </h2>
-        <p className="text-muted-foreground mt-1 text-sm">{t("providers.catalogDescription")}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {definitions.map((definition) => {

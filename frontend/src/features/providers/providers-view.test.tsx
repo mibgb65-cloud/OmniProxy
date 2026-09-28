@@ -113,10 +113,16 @@ describe("ProvidersView", () => {
   it("shows nine enabled built-ins without an add action", async () => {
     renderPage()
     expect(await screen.findByRole("switch", { name: "切换OpenAI提供商的启用状态" })).toBeChecked()
+    expect(screen.getByRole("heading", { name: "提供商" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "内置提供商" })).toBeInTheDocument()
     expect(screen.getAllByRole("switch")).toHaveLength(9)
     expect(screen.getByText("订阅登录 · 待接入")).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "新增自定义提供商" })).toHaveLength(1)
     expect(screen.getByText("还没有自定义提供商。")).toBeInTheDocument()
+    expect(screen.queryByText(/九家内置提供商开箱即用/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/内置提供商默认启用/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/模型为官方预设示例/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/九家提供商已预设并默认启用/)).not.toBeInTheDocument()
   })
 
   it("persists a built-in switch without changing the preset", async () => {

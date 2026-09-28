@@ -143,16 +143,8 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.desktop.saving": "Saving…",
 
   "providers.title": "Providers",
-  "providers.description":
-    "Nine built-in providers are ready to configure. You can also add an OpenAI-compatible endpoint.",
-  "providers.configOnly":
-    "Built-in providers start enabled and can be switched off. API key accounts, subscription login, and gateway calls will be connected later.",
   "providers.catalog": "Built-in providers",
-  "providers.catalogDescription":
-    "All nine providers are preconfigured and enabled by default. Use the switches to control them.",
   "providers.presetUnavailable": "Built-in configuration missing. Restart the app.",
-  "providers.previewHint":
-    "Models are curated examples; availability depends on your account. The test checks endpoint reachability and response time without validating keys or model calls.",
   "providers.customModels": "Models are provided by the custom endpoint",
   "providers.showModels": "Show all preset models",
   "providers.hideModels": "Hide preset models",

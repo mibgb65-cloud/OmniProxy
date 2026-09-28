@@ -125,12 +125,7 @@ export function ProvidersView() {
     <div className="mx-auto max-w-[1120px] space-y-7 pb-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("providers.title")}</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{t("providers.description")}</p>
       </header>
-      <p className="border-border bg-muted/30 rounded-lg border px-4 py-3 text-sm">
-        {t("providers.configOnly")}
-      </p>
-      <p className="text-muted-foreground text-xs">{t("providers.previewHint")}</p>
       {catalog.isPending || providers.isPending ? (
         <p role="status" className="text-muted-foreground text-sm">
           {t("providers.loading")}
