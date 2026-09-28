@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -87,10 +87,16 @@ None.
 
 ## Commit
 
-待完成。
+`675533cc91f8c13f87bce342a045fa3967bbe37e` ui: 精简提供商页面说明文案
 
 ---
 
 # Result
 
 提供商页面已精简，预设卡片与原有功能保留。
+
+---
+
+# Completed
+
+2026-09-28 16:27
