@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -75,6 +75,7 @@ In Progress
 - 实际窗口发现提供商列表加载失败；根因是 `main.go` 把含有 `migrations/` 子目录的 embed FS 直接传给只读取根目录 SQL 的迁移器，导致真实数据库从未创建 `providers`/`accounts` 表。已将迁移输入改为嵌入的 SQL 子目录，并增加实际嵌入迁移测试。
 - 修复后在真实 Wails 窗口验证九家预设和已配置列表；通过页面创建一条不含凭证的开发测试配置，确认 SQLite 持久化，并清理该测试记录（当前开发数据库提供商记录数为 0）。
 - `task verify` 全部通过。
+- 开发环境已恢复：Wails 已连接 Vite，9245/3891 端口监听正常，首页 HTTP 返回 200。
 
 ---
 
@@ -124,7 +125,7 @@ In Progress
 
 ## Verification Result
 
-`task verify` PASS：Go 测试通过；前端 14 个测试文件、56 个测试通过；Windows 生产构建成功。实际开发窗口显示九家预设且无加载错误，新增配置写入 SQLite；测试记录已清理。`git diff --check` PASS。
+`task verify` PASS：Go 测试通过；前端 14 个测试文件、56 个测试通过；Windows 生产构建成功。最后的端口边界校验及翻译清理后，定向 Go 测试、前端类型检查、格式检查和页面测试再次通过。实际开发窗口显示九家预设且无加载错误，新增配置写入 SQLite；测试记录已清理。`git diff --check` PASS。
 
 ---
 
@@ -144,10 +145,16 @@ In Progress
 
 ## Commit
 
-待完成。
+`70d6840a08837d9351d6e0c232818e5bd500314b feat(provider): 添加九家提供商预设与配置管理`
 
 ---
 
 # Result
 
 九家提供商预设和可持久化配置已可在桌面应用中使用；OpenAI 订阅登录保持明确的待接入状态。
+
+---
+
+# Completed
+
+2026-09-28 11:53
