@@ -62,9 +62,9 @@ duplicates business logic.
 > Current state: `internal/application/provider` manages nine default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
-> endpoint reachability check. The Control
-> API still exposes only `/healthz`; account management and gateway adapters
-> have not landed yet.
+> endpoint reachability check. `internal/application/account` manages API Key
+> account metadata and protected credentials through Wails bindings. The Control
+> API still exposes only `/healthz`; gateway adapters have not landed yet.
 
 ### Core (`internal/core/…`)
 

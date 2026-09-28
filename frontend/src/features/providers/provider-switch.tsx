@@ -2,11 +2,13 @@ import { useTranslation } from "react-i18next"
 
 export function ProviderSwitch({
   name,
+  ariaLabel,
   checked,
   disabled,
   onChange,
 }: {
   name: string
+  ariaLabel?: string
   checked: boolean
   disabled: boolean
   onChange: (enabled: boolean) => void
@@ -17,7 +19,7 @@ export function ProviderSwitch({
       <input
         type="checkbox"
         role="switch"
-        aria-label={t("providers.toggleLabel", { name })}
+        aria-label={ariaLabel ?? t("providers.toggleLabel", { name })}
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange(event.currentTarget.checked)}

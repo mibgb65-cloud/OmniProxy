@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-008 账号页面与 API Key 账号管理
 
 ## Recently Completed
 
@@ -38,11 +38,13 @@
 
 ## Known Issues
 
-- Settings, About, and Providers have live Wails data; account, gateway and
+- Settings, About, Providers, and Accounts have live Wails data; gateway and
   other feature pages remain placeholders until their backends land.
 - Nine built-in providers are enabled by default and can be switched off;
-  custom OpenAI-compatible endpoints can be added. Provider request adapters,
-  API Key accounts, and OpenAI subscription login are not connected yet.
+  custom OpenAI-compatible endpoints can be added. API Key accounts are stored
+  locally; provider request adapters and OpenAI subscription login are pending.
+- Account API Keys are stored and managed but are not yet used by gateway calls.
+  Token Plan authentication and upstream key validation are not connected yet.
 - Provider model names are curated examples rather than account-specific live
   results. The Test action checks network reachability and latency without
   authenticating or invoking a model.
@@ -53,10 +55,8 @@
 
 ## Next Steps
 
-1. Account management with API Key credentials, using the credential store and
-   provider configurations already in place; wire the Accounts page to bindings.
-2. Gateway proxy server with request parsing and the first provider adapter
+1. Gateway proxy server with request parsing and the first provider adapter
    (OpenAI), followed by the model router.
-3. Account scheduler (eligibility, health, cooldown, retry) and automatic
+2. Account scheduler (eligibility, health, cooldown, retry) and automatic
    failover.
-4. Wire the UI log stream through Wails events from the logger buffer.
+3. Wire the UI log stream through Wails events from the logger buffer.

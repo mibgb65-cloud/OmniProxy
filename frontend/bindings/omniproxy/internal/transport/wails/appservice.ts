@@ -14,6 +14,9 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as account$0 from "../../application/account/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as provider$0 from "../../application/provider/models.js";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -45,10 +48,24 @@ export function CleanStorage(target: string): $CancellablePromise<$models.CleanR
 }
 
 /**
+ * CreateAccount saves a new API Key account.
+ */
+export function CreateAccount(input: account$0.CreateInput): $CancellablePromise<account$0.Item> {
+    return $Call.ByID(3711940652, input);
+}
+
+/**
  * CreateProvider saves one provider configuration.
  */
 export function CreateProvider(input: provider$0.CreateInput): $CancellablePromise<provider$0.Configuration> {
     return $Call.ByID(2117709100, input);
+}
+
+/**
+ * DeleteAccount removes account metadata and its protected API Key.
+ */
+export function DeleteAccount(id: string): $CancellablePromise<void> {
+    return $Call.ByID(2142238493, id);
 }
 
 /**
@@ -64,6 +81,13 @@ export function DeleteProvider(id: string): $CancellablePromise<void> {
  */
 export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> {
     return $Call.ByID(721192358);
+}
+
+/**
+ * ListAccounts returns metadata for all saved accounts.
+ */
+export function ListAccounts(): $CancellablePromise<account$0.Item[] | null> {
+    return $Call.ByID(3065549153);
 }
 
 /**
@@ -108,6 +132,13 @@ export function RuntimeInfo(): $CancellablePromise<$models.RuntimeInfo> {
  */
 export function SelectDirectory(title: string): $CancellablePromise<string> {
     return $Call.ByID(73503672, title);
+}
+
+/**
+ * SetAccountEnabled changes whether an account can later be scheduled.
+ */
+export function SetAccountEnabled(id: string, enabled: boolean): $CancellablePromise<account$0.Item> {
+    return $Call.ByID(1832825371, id, enabled);
 }
 
 /**

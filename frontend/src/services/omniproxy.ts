@@ -9,6 +9,10 @@ import {
   type UpdateStatus,
 } from "../../bindings/omniproxy/internal/transport/wails"
 import type {
+  CreateInput as CreateAccountInput,
+  Item as AccountItem,
+} from "../../bindings/omniproxy/internal/application/account"
+import type {
   Configuration as ProviderConfiguration,
   CreateInput as CreateProviderInput,
   Definition as ProviderDefinition,
@@ -25,6 +29,7 @@ export type {
   StorageInfo,
   UpdateStatus,
 }
+export type { AccountItem, CreateAccountInput }
 export type {
   ProviderConfiguration,
   CreateProviderInput,
@@ -127,4 +132,24 @@ export function probeProvider(id: string): Promise<ProviderProbeResult> {
 /** deleteProvider removes an unreferenced configuration. */
 export function deleteProvider(id: string): Promise<void> {
   return AppService.DeleteProvider(id)
+}
+
+/** listAccounts returns metadata only; API keys and credential references stay in Go. */
+export async function listAccounts(): Promise<AccountItem[]> {
+  return (await AppService.ListAccounts()) ?? []
+}
+
+/** createAccount stores an API Key in protected local storage. */
+export function createAccount(input: CreateAccountInput): Promise<AccountItem> {
+  return AppService.CreateAccount(input)
+}
+
+/** setAccountEnabled switches one account on or off. */
+export function setAccountEnabled(id: string, enabled: boolean): Promise<AccountItem> {
+  return AppService.SetAccountEnabled(id, enabled)
+}
+
+/** deleteAccount removes account metadata and the protected credential. */
+export function deleteAccount(id: string): Promise<void> {
+  return AppService.DeleteAccount(id)
 }
