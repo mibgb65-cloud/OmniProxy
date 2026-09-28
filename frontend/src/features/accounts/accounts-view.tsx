@@ -1,39 +1,15 @@
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import type { AccountItem, CreateAccountInput } from "../../services/omniproxy"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
 import { AccountProviderCard } from "./account-provider-card"
-import {
-  useAccounts,
-  useCreateAccount,
-  useDeleteAccount,
-  useSetAccountEnabled,
-} from "./use-accounts"
+import { useAccountActions } from "./use-account-actions"
+import { useAccounts } from "./use-accounts"
 
 export function AccountsView() {
   const { t } = useTranslation()
   const catalog = useProviderCatalog()
   const providers = useProviders()
   const accounts = useAccounts()
-  const create = useCreateAccount()
-  const setEnabled = useSetAccountEnabled()
-  const remove = useDeleteAccount()
-  const [actionError, setActionError] = useState(false)
-
-  const save = async (input: CreateAccountInput) => {
-    await create.mutateAsync(input)
-  }
-
-  const toggle = (id: string, enabled: boolean) => {
-    setActionError(false)
-    void setEnabled.mutateAsync({ id, enabled }).catch(() => setActionError(true))
-  }
-
-  const deleteItem = (account: AccountItem) => {
-    if (!window.confirm(t("accounts.deleteConfirm", { name: account.name }))) return
-    setActionError(false)
-    void remove.mutateAsync(account.id).catch(() => setActionError(true))
-  }
+  const actions = useAccountActions()
 
   const definitions = catalog.data ?? []
   const items = providers.data ?? []
@@ -45,7 +21,7 @@ export function AccountsView() {
   ]
 
   return (
-    <div className="mx-auto max-w-[1120px] space-y-7 pb-6">
+    <div className="w-full min-w-0 space-y-7 pb-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.accounts.title")}</h1>
       </header>
@@ -59,22 +35,22 @@ export function AccountsView() {
           {t("accounts.loadFailed")}
         </p>
       ) : null}
-      {actionError ? (
+      {actions.actionError ? (
         <p role="alert" className="text-destructive text-sm">
           {t("accounts.actionFailed")}
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid items-start gap-3 min-[3000px]:grid-cols-4 md:grid-cols-2 2xl:grid-cols-3">
           {orderedProviders.map((provider) => (
             <AccountProviderCard
               key={provider.id}
               provider={provider}
               accounts={accounts.data.filter((account) => account.providerId === provider.id)}
-              busy={setEnabled.isPending || remove.isPending}
-              onCreate={save}
-              onToggle={toggle}
-              onDelete={deleteItem}
+              busy={actions.busy}
+              onCreate={actions.save}
+              onToggle={actions.toggle}
+              onDelete={actions.deleteItem}
             />
           ))}
         </div>

@@ -122,7 +122,7 @@ export function ProvidersView() {
   }
 
   return (
-    <div className="mx-auto max-w-[1120px] space-y-7 pb-6">
+    <div className="w-full min-w-0 space-y-7 pb-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("providers.title")}</h1>
       </header>

@@ -1,0 +1,94 @@
+import { Link } from "@tanstack/react-router"
+import { ArrowLeft } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { ProviderBrandIcon } from "../providers/provider-brand-icon"
+import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
+import { useProviders } from "../providers/use-providers"
+import { AccountDetailsCard } from "./account-details-card"
+import { AddAccountDialog } from "./add-account-dialog"
+import { useAccountActions } from "./use-account-actions"
+import { useAccounts } from "./use-accounts"
+
+export function ProviderAccountsView({ providerId }: { providerId: string }) {
+  const { t } = useTranslation()
+  const providers = useProviders()
+  const accounts = useAccounts()
+  const actions = useAccountActions()
+  const provider = providers.data?.find((item) => item.id === providerId)
+  const name =
+    provider?.source === "builtin" && isKnownProviderKind(provider.kind)
+      ? t(providerNameKeys[provider.kind])
+      : (provider?.name ?? "")
+  const items = accounts.data?.filter((account) => account.providerId === providerId) ?? []
+
+  return (
+    <section className="w-full min-w-0 space-y-6 pb-6">
+      <Link
+        to="/accounts"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {t("accounts.detail.back")}
+      </Link>
+      {providers.isPending || accounts.isPending ? (
+        <p role="status" className="text-muted-foreground text-sm">
+          {t("accounts.loading")}
+        </p>
+      ) : null}
+      {providers.isError || accounts.isError ? (
+        <p role="alert" className="text-destructive text-sm">
+          {t("accounts.loadFailed")}
+        </p>
+      ) : null}
+      {providers.data && accounts.data && !provider ? (
+        <p role="alert" className="text-muted-foreground text-sm">
+          {t("accounts.detail.notFound")}
+        </p>
+      ) : null}
+      {provider && accounts.data ? (
+        <>
+          <header className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <ProviderBrandIcon kind={provider.kind} />
+              <div className="min-w-0">
+                <h1 className="truncate text-2xl font-semibold tracking-tight">
+                  {t("accounts.detail.title", { name })}
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  {t("accounts.count", { count: items.length })}
+                </p>
+              </div>
+            </div>
+            <AddAccountDialog provider={provider} onCreate={actions.save} />
+          </header>
+          {!provider.enabled ? (
+            <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
+          ) : null}
+          <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
+          {actions.actionError ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t("accounts.actionFailed")}
+            </p>
+          ) : null}
+          {items.length === 0 ? (
+            <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-sm">
+              {t("accounts.empty")}
+            </p>
+          ) : (
+            <div className="grid gap-3">
+              {items.map((account) => (
+                <AccountDetailsCard
+                  key={account.id}
+                  account={account}
+                  busy={actions.busy}
+                  onToggle={actions.toggle}
+                  onDelete={actions.deleteItem}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      ) : null}
+    </section>
+  )
+}

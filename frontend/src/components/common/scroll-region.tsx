@@ -6,7 +6,7 @@ import "./scroll-region.css"
 const MIN_THUMB_HEIGHT = 24
 
 type ScrollRegionProps = {
-  as: "main" | "nav"
+  as: "main" | "nav" | "section"
   children: ReactNode
   className?: string
   viewportClassName?: string

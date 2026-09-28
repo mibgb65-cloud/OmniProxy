@@ -1,8 +1,9 @@
-import { useState } from "react"
+import { Link } from "@tanstack/react-router"
+import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Dialog } from "radix-ui"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import type {
   AccountItem,
   CreateAccountInput,
@@ -11,7 +12,7 @@ import type {
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
 import { ProviderSwitch } from "../providers/provider-switch"
-import { AccountForm } from "./account-form"
+import { AddAccountDialog } from "./add-account-dialog"
 
 export function AccountProviderCard({
   provider,
@@ -29,51 +30,51 @@ export function AccountProviderCard({
   onDelete: (account: AccountItem) => void
 }) {
   const { t } = useTranslation()
-  const [adding, setAdding] = useState(false)
   const name =
     provider.source === "builtin" && isKnownProviderKind(provider.kind)
       ? t(providerNameKeys[provider.kind])
       : provider.name
 
-  const create = async (input: CreateAccountInput) => {
-    await onCreate(input)
-    setAdding(false)
-  }
-
   return (
-    <Dialog.Root open={adding} onOpenChange={setAdding}>
-      <Card className="dark:bg-card/75 gap-0 py-0 shadow-sm">
-        <CardContent className="space-y-4 px-4 py-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <ProviderBrandIcon kind={provider.kind} />
-              <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold" title={name}>
-                  {name}
-                </h2>
-                <p className="text-muted-foreground text-xs">
-                  {t("accounts.count", { count: accounts.length })}
-                </p>
-              </div>
+    <Card className="dark:bg-card/75 gap-0 py-0 shadow-sm">
+      <CardContent className="space-y-4 px-4 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            to="/accounts/$providerId"
+            params={{ providerId: provider.id }}
+            aria-label={t("accounts.openDetails", { name })}
+            className="group focus-visible:ring-ring/50 flex min-w-0 items-center gap-3 rounded-md focus-visible:ring-4"
+          >
+            <ProviderBrandIcon kind={provider.kind} />
+            <div className="min-w-0">
+              <h2 className="group-hover:text-primary truncate text-sm font-semibold" title={name}>
+                {name}
+              </h2>
+              <p className="text-muted-foreground text-xs">
+                {t("accounts.count", { count: accounts.length })}
+              </p>
             </div>
-            <Dialog.Trigger asChild>
-              <Button type="button" variant="outline" size="sm" className="shrink-0 cursor-pointer">
-                {t("accounts.add")}
-              </Button>
-            </Dialog.Trigger>
-          </div>
-          {!provider.enabled ? (
-            <p className="text-muted-foreground text-xs">{t("accounts.providerDisabled")}</p>
-          ) : null}
-          {provider.kind === "openai" && provider.source === "builtin" ? (
-            <p className="text-muted-foreground text-xs">{t("accounts.subscriptionPlanned")}</p>
-          ) : null}
-          {accounts.length === 0 ? (
-            <p className="text-muted-foreground border-border rounded-lg border border-dashed px-3 py-4 text-sm">
-              {t("accounts.empty")}
-            </p>
-          ) : (
-            <ul className="divide-border divide-y rounded-lg border">
+            <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+          </Link>
+          <AddAccountDialog provider={provider} onCreate={onCreate} />
+        </div>
+        {!provider.enabled ? (
+          <p className="text-muted-foreground text-xs">{t("accounts.providerDisabled")}</p>
+        ) : null}
+        {provider.kind === "openai" && provider.source === "builtin" ? (
+          <p className="text-muted-foreground text-xs">{t("accounts.subscriptionPlanned")}</p>
+        ) : null}
+        {accounts.length === 0 ? (
+          <p className="text-muted-foreground border-border rounded-lg border border-dashed px-3 py-4 text-sm">
+            {t("accounts.empty")}
+          </p>
+        ) : (
+          <ScrollRegion
+            as="section"
+            className="max-h-[240px] rounded-lg border"
+            ariaLabel={t("accounts.listFor", { name })}
+          >
+            <ul className="divide-border divide-y">
               {accounts.map((account) => (
                 <li
                   key={account.id}
@@ -111,10 +112,9 @@ export function AccountProviderCard({
                 </li>
               ))}
             </ul>
-          )}
-        </CardContent>
-      </Card>
-      {adding ? <AccountForm provider={provider} onSubmit={create} /> : null}
-    </Dialog.Root>
+          </ScrollRegion>
+        )}
+      </CardContent>
+    </Card>
   )
 }

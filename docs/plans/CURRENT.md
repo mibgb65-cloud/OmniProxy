@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20260928-010 账号卡片滚动、厂商详情页与全局内容宽度
 
 ## Recently Completed
 
@@ -48,7 +48,8 @@
   custom OpenAI-compatible endpoints can be added. API Key accounts are stored
   locally; provider request adapters and OpenAI subscription login are pending.
 - Account API Keys are stored and managed but are not yet used by gateway calls.
-  Token Plan authentication and upstream key validation are not connected yet.
+  Token Plan authentication, upstream key validation, and account balance queries
+  are not connected yet; provider account pages show this state explicitly.
 - Provider model names are curated examples rather than account-specific live
   results. The Test action checks network reachability and latency without
   authenticating or invoking a model.

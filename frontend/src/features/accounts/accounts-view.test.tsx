@@ -1,4 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterContextProvider,
+} from "@tanstack/react-router"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
@@ -71,14 +78,26 @@ let nextId = 0
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const rootRoute = createRootRoute()
+  const accountsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/accounts" })
+  const detailsRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/accounts/$providerId",
+  })
+  const router = createRouter({
+    routeTree: rootRoute.addChildren([accountsRoute, detailsRoute]),
+    history: createMemoryHistory({ initialEntries: ["/accounts"] }),
+  })
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <I18nProvider>
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        <QueryClientProvider client={client}>
+          <RouterContextProvider router={router}>{children}</RouterContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     )
   }
-  return render(<AccountsView />, { wrapper: Wrapper })
+  return { ...render(<AccountsView />, { wrapper: Wrapper }), router }
 }
 
 describe("AccountsView", () => {
@@ -216,5 +235,32 @@ describe("AccountsView", () => {
     await user.keyboard("{Escape}")
     expect(screen.getByRole("dialog")).toBeInTheDocument()
     expect(within(dialog).getByRole("button", { name: "取消" })).toBeDisabled()
+  })
+
+  it("links built-in and custom providers to their own account pages", async () => {
+    const user = userEvent.setup()
+    const { router } = renderPage()
+    const builtIn = await screen.findByRole("link", { name: "查看DeepSeek账号详情" })
+    const customLink = screen.getByRole("link", { name: "查看Custom API账号详情" })
+    expect(builtIn).toHaveAttribute("href", "/accounts/builtin_deepseek")
+    expect(customLink).toHaveAttribute("href", `/accounts/${custom.id}`)
+    await user.click(builtIn)
+    await waitFor(() => expect(router.state.location.pathname).toBe("/accounts/builtin_deepseek"))
+  })
+
+  it("caps the provider account list while retaining all account rows", async () => {
+    saved = Array.from({ length: 7 }, (_, index) => ({
+      id: `acct_${String(index).padStart(32, "0")}`,
+      providerId: "builtin_deepseek",
+      name: `DeepSeek ${index + 1}`,
+      enabled: true,
+      createdAt: "2026-09-28T00:00:00Z",
+      updatedAt: "2026-09-28T00:00:00Z",
+    }))
+    renderPage()
+    const list = await screen.findByRole("region", { name: "DeepSeek的账号列表" })
+    expect(list.parentElement).toHaveClass("max-h-[240px]")
+    expect(within(list).getAllByRole("listitem")).toHaveLength(7)
+    expect(screen.getByText("7 个账号")).toBeInTheDocument()
   })
 })
