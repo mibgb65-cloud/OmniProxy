@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -103,10 +103,16 @@ None. SQLite 与凭证文件无法组成同一事务；创建写库失败时清�
 
 ## Commit
 
-待完成。
+`59be07ec3a5341b23572b6c2b3cd6460c5488b49` feat(account): 添加 API Key 账号管理页面
 
 ---
 
 # Result
 
 账号页面已可管理当前提供商的 API Key 账号；订阅登录、Token Plan、上游校验和网关使用留待后续任务。
+
+---
+
+# Completed
+
+2026-09-28 16:49

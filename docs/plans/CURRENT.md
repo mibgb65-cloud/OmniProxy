@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- TASK-20260928-008 账号页面与 API Key 账号管理
+- (none)
 
 ## Recently Completed
+
+- TASK-20260928-008 账号页面与 API Key 账号管理
 
 - TASK-20260928-007 精简提供商页面说明文案
 
