@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -65,8 +65,16 @@ In Progress
 
 ## Git
 
-提交完成后回填功能提交哈希。
+```text
+a61dc52ee28d6ea7fad9223bb74c8a01f01fd214 fix(frontend): 支持标题栏双击最大化与还原
+```
+
+本记录由后续文档提交回填功能提交哈希并归档。上一任务的未提交启动记录未包含在本任务提交中。
 
 ## Result
 
 标题栏主题按钮左侧支持双击最大化／还原，既有拖动与窗口按钮保持正常；开发窗口已热更新生效。
+
+## Completed
+
+2026-10-06 20:50
