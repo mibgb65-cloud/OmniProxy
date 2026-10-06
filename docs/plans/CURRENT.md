@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20261006-003 账号卡片固定高度与删除图标
 
 ## Recently Completed
 

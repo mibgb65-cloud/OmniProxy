@@ -215,8 +215,6 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.close": "Close add account dialog",
   "accounts.empty": "No accounts yet",
   "accounts.providerDisabled": "This provider is disabled.",
-  "accounts.subscriptionPlanned":
-    "Subscription login is planned. API Key accounts are available now.",
   "accounts.name": "Account name",
   "accounts.namePlaceholder": "For example: My primary account",
   "accounts.nameInvalid": "Enter an account name of 80 characters or fewer.",

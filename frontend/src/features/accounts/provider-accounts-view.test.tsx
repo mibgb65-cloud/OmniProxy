@@ -89,6 +89,9 @@ describe("ProviderAccountsView", () => {
     expect(screen.getByText("更新时间")).toBeInTheDocument()
     expect(screen.getByRole("switch", { name: "切换账号“主账号”的启用状态" })).toBeChecked()
     expect(screen.getByRole("button", { name: "添加账号" })).toBeInTheDocument()
+    const deleteButton = screen.getByRole("button", { name: "删除账号“主账号”" })
+    expect(deleteButton.textContent).toBe("")
+    expect(deleteButton).toHaveAttribute("title", "删除")
     expect(screen.getByRole("link", { name: "返回账号" })).toHaveAttribute("href", "/accounts")
   })
 

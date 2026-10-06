@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
@@ -45,13 +46,14 @@ export function AccountDetailsCard({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               disabled={busy}
               onClick={() => onDelete(account)}
               aria-label={t("accounts.deleteLabel", { name: account.name })}
-              className="cursor-pointer"
+              title={t("accounts.delete")}
+              className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
             >
-              {t("accounts.delete")}
+              <Trash2 className="size-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

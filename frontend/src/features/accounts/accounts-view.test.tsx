@@ -138,6 +138,7 @@ describe("AccountsView", () => {
     renderPage()
     expect((await screen.findAllByRole("button", { name: "添加账号" })).length).toBe(10)
     expect(screen.getByRole("heading", { name: "Custom API" })).toBeInTheDocument()
+    expect(screen.queryByText("订阅登录待接入；目前可添加 API Key 账号。")).not.toBeInTheDocument()
     await user.click(screen.getAllByRole("button", { name: "添加账号" })[0])
     expect(screen.getByRole("dialog", { name: "添加 OpenAI 账号" })).toBeInTheDocument()
     await user.type(screen.getByLabelText("账号名称"), "主账号")
@@ -157,7 +158,10 @@ describe("AccountsView", () => {
     expect(screen.queryByDisplayValue("test-secret-not-real")).not.toBeInTheDocument()
     await user.click(screen.getByRole("switch", { name: "切换账号“主账号”的启用状态" }))
     await waitFor(() => expect(setAccountEnabled).toHaveBeenCalledWith(saved[0].id, false))
-    await user.click(screen.getByRole("button", { name: "删除账号“主账号”" }))
+    const deleteButton = screen.getByRole("button", { name: "删除账号“主账号”" })
+    expect(deleteButton.textContent).toBe("")
+    expect(deleteButton).toHaveAttribute("title", "删除")
+    await user.click(deleteButton)
     await waitFor(() => expect(deleteAccount).toHaveBeenCalled())
     await waitFor(() => expect(screen.queryByText("主账号")).not.toBeInTheDocument())
   })
@@ -248,7 +252,7 @@ describe("AccountsView", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/accounts/builtin_deepseek"))
   })
 
-  it("caps the provider account list while retaining all account rows", async () => {
+  it("keeps provider cards at a fixed height while retaining all account rows", async () => {
     saved = Array.from({ length: 7 }, (_, index) => ({
       id: `acct_${String(index).padStart(32, "0")}`,
       providerId: "builtin_deepseek",
@@ -259,7 +263,10 @@ describe("AccountsView", () => {
     }))
     renderPage()
     const list = await screen.findByRole("region", { name: "DeepSeek的账号列表" })
-    expect(list.parentElement).toHaveClass("max-h-[240px]")
+    expect(list.closest('[data-slot="card"]')).toHaveClass("h-[320px]")
+    expect(
+      screen.getByRole("heading", { name: "OpenAI" }).closest('[data-slot="card"]'),
+    ).toHaveClass("h-[320px]")
     expect(within(list).getAllByRole("listitem")).toHaveLength(7)
     expect(screen.getByText("7 个账号")).toBeInTheDocument()
   })

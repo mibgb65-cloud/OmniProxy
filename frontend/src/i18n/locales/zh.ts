@@ -203,7 +203,6 @@ export const zh = {
   "accounts.close": "关闭添加账号窗口",
   "accounts.empty": "暂无账号",
   "accounts.providerDisabled": "此提供商已停用。",
-  "accounts.subscriptionPlanned": "订阅登录待接入；目前可添加 API Key 账号。",
   "accounts.name": "账号名称",
   "accounts.namePlaceholder": "例如：我的主账号",
   "accounts.nameInvalid": "请输入不超过 80 个字符的账号名称。",

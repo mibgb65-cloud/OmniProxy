@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
@@ -36,9 +36,9 @@ export function AccountProviderCard({
       : provider.name
 
   return (
-    <Card className="dark:bg-card/75 gap-0 py-0 shadow-sm">
-      <CardContent className="space-y-4 px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
+    <Card className="dark:bg-card/75 h-[320px] min-w-0 gap-0 py-0 shadow-sm">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
+        <div className="flex shrink-0 items-center justify-between gap-3">
           <Link
             to="/accounts/$providerId"
             params={{ providerId: provider.id }}
@@ -59,19 +59,16 @@ export function AccountProviderCard({
           <AddAccountDialog provider={provider} onCreate={onCreate} />
         </div>
         {!provider.enabled ? (
-          <p className="text-muted-foreground text-xs">{t("accounts.providerDisabled")}</p>
-        ) : null}
-        {provider.kind === "openai" && provider.source === "builtin" ? (
-          <p className="text-muted-foreground text-xs">{t("accounts.subscriptionPlanned")}</p>
+          <p className="text-muted-foreground shrink-0 text-xs">{t("accounts.providerDisabled")}</p>
         ) : null}
         {accounts.length === 0 ? (
-          <p className="text-muted-foreground border-border rounded-lg border border-dashed px-3 py-4 text-sm">
+          <p className="text-muted-foreground border-border flex min-h-0 flex-1 items-center justify-center rounded-lg border border-dashed px-3 py-4 text-sm">
             {t("accounts.empty")}
           </p>
         ) : (
           <ScrollRegion
             as="section"
-            className="max-h-[240px] rounded-lg border"
+            className="min-h-0 flex-1 rounded-lg border"
             ariaLabel={t("accounts.listFor", { name })}
           >
             <ul className="divide-border divide-y">
@@ -100,13 +97,14 @@ export function AccountProviderCard({
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       disabled={busy}
                       onClick={() => onDelete(account)}
-                      className="cursor-pointer"
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                       aria-label={t("accounts.deleteLabel", { name: account.name })}
+                      title={t("accounts.delete")}
                     >
-                      {t("accounts.delete")}
+                      <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </li>
