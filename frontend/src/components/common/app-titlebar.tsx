@@ -38,11 +38,18 @@ export function AppTitlebar() {
     void action().catch(() => setActionFailed(true))
   }
 
+  const toggleMaximise = () => {
+    runWindowAction(async () => {
+      await Window.ToggleMaximise()
+      setIsMaximised(await Window.IsMaximised())
+    })
+  }
+
   const themeLabel = theme === "dark" ? t("window.switchToLight") : t("window.switchToDark")
 
   return (
     <header className="window-titlebar border-border bg-sidebar text-sidebar-foreground flex h-11 w-full shrink-0 items-center border-b pl-3">
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex h-full min-w-0 flex-1 items-center gap-2" onDoubleClick={toggleMaximise}>
         <img src="/favicon.svg" alt="" className="size-5 shrink-0 rounded" />
         <span className="truncate text-xs font-semibold tracking-wide">{t("window.title")}</span>
       </div>
@@ -78,12 +85,7 @@ export function AppTitlebar() {
           className={controlClass}
           aria-label={isMaximised ? t("window.restore") : t("window.maximise")}
           title={isMaximised ? t("window.restore") : t("window.maximise")}
-          onClick={() =>
-            runWindowAction(async () => {
-              await Window.ToggleMaximise()
-              setIsMaximised(await Window.IsMaximised())
-            })
-          }
+          onClick={toggleMaximise}
         >
           {isMaximised ? <Copy className="size-4" /> : <Square className="size-3.5" />}
         </button>

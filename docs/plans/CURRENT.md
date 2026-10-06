@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20261006-002 标题栏双击最大化与还原
 
 ## Recently Completed
 

@@ -99,4 +99,56 @@ describe("AppTitlebar", () => {
     await user.click(screen.getByRole("button", { name: "最小化" }))
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("窗口操作失败"))
   })
+
+  it("maximises and restores the window when double-clicking the titlebar area", async () => {
+    const user = userEvent.setup()
+    runtime.isMaximised
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
+    renderTitlebar()
+    const titlebarArea = screen.getByText("OmniProxy").parentElement!
+
+    await user.dblClick(titlebarArea)
+    expect(runtime.toggleMaximise).toHaveBeenCalledOnce()
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "还原窗口" })).toBeInTheDocument(),
+    )
+
+    await user.dblClick(titlebarArea)
+    expect(runtime.toggleMaximise).toHaveBeenCalledTimes(2)
+    await waitFor(() => expect(screen.getByRole("button", { name: "最大化" })).toBeInTheDocument())
+  })
+
+  it("does not maximise when double-clicking the theme or other window controls", async () => {
+    const user = userEvent.setup()
+    renderTitlebar()
+
+    await user.dblClick(screen.getByRole("button", { name: "切换到亮色模式" }))
+    expect(useUIStore.getState().theme).toBe(defaultTheme)
+
+    await user.dblClick(screen.getByRole("button", { name: "最小化" }))
+    expect(runtime.minimise).toHaveBeenCalledTimes(2)
+
+    await user.dblClick(screen.getByRole("button", { name: "关闭窗口" }))
+    expect(runtime.close).toHaveBeenCalledTimes(2)
+    expect(runtime.toggleMaximise).not.toHaveBeenCalled()
+  })
+
+  it("shows an error when double-click maximise fails and clears it after a successful retry", async () => {
+    const user = userEvent.setup()
+    runtime.toggleMaximise.mockRejectedValueOnce(new Error("failed"))
+    renderTitlebar()
+    const titlebarArea = screen.getByText("OmniProxy").parentElement!
+
+    await user.dblClick(titlebarArea)
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("窗口操作失败"))
+
+    runtime.isMaximised.mockResolvedValueOnce(true)
+    await user.dblClick(titlebarArea)
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "还原窗口" })).toBeInTheDocument(),
+    )
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+  })
 })
