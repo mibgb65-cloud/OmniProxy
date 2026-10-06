@@ -30,6 +30,7 @@ vi.mock("../../services/omniproxy", () => ({
   listProviders: vi.fn(),
   listAccounts: vi.fn(),
   createAccount: vi.fn(),
+  createAccounts: vi.fn(),
   setAccountEnabled: vi.fn(),
   deleteAccount: vi.fn(),
 }))
@@ -134,7 +135,6 @@ describe("AccountsView", () => {
 
   it("shows all existing providers and manages API Key accounts without displaying keys", async () => {
     const user = userEvent.setup()
-    vi.spyOn(window, "confirm").mockReturnValue(true)
     renderPage()
     expect((await screen.findAllByRole("button", { name: "添加账号" })).length).toBe(10)
     expect(screen.getByRole("heading", { name: "Custom API" })).toBeInTheDocument()
@@ -162,6 +162,9 @@ describe("AccountsView", () => {
     expect(deleteButton.textContent).toBe("")
     expect(deleteButton).toHaveAttribute("title", "删除")
     await user.click(deleteButton)
+    const confirmation = screen.getByRole("alertdialog", { name: "删除账号" })
+    expect(deleteAccount).not.toHaveBeenCalled()
+    await user.click(within(confirmation).getByRole("button", { name: "确认删除" }))
     await waitFor(() => expect(deleteAccount).toHaveBeenCalled())
     await waitFor(() => expect(screen.queryByText("主账号")).not.toBeInTheDocument())
   })

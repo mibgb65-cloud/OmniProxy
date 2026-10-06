@@ -7,6 +7,7 @@ import { ScrollRegion } from "../../components/common/scroll-region"
 import type {
   AccountItem,
   CreateAccountInput,
+  CreateAccountsInput,
   ProviderConfiguration,
 } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
@@ -19,6 +20,7 @@ export function AccountProviderCard({
   accounts,
   busy,
   onCreate,
+  onBatchCreate,
   onToggle,
   onDelete,
 }: {
@@ -26,6 +28,7 @@ export function AccountProviderCard({
   accounts: AccountItem[]
   busy: boolean
   onCreate: (input: CreateAccountInput) => Promise<void>
+  onBatchCreate: (input: CreateAccountsInput) => Promise<void>
   onToggle: (id: string, enabled: boolean) => void
   onDelete: (account: AccountItem) => void
 }) {
@@ -56,7 +59,7 @@ export function AccountProviderCard({
             </div>
             <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
           </Link>
-          <AddAccountDialog provider={provider} onCreate={onCreate} />
+          <AddAccountDialog provider={provider} onCreate={onCreate} onBatchCreate={onBatchCreate} />
         </div>
         {!provider.enabled ? (
           <p className="text-muted-foreground shrink-0 text-xs">{t("accounts.providerDisabled")}</p>

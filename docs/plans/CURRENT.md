@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20261006-004 账号自动命名、批量添加与删除确认弹窗
 
 ## Recently Completed
 

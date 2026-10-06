@@ -55,6 +55,13 @@ export function CreateAccount(input: account$0.CreateInput): $CancellablePromise
 }
 
 /**
+ * CreateAccounts 一次保存多个自动命名的 API Key 账号。
+ */
+export function CreateAccounts(input: account$0.BatchCreateInput): $CancellablePromise<account$0.Item[] | null> {
+    return $Call.ByID(2857319821, input);
+}
+
+/**
  * CreateProvider saves one provider configuration.
  */
 export function CreateProvider(input: provider$0.CreateInput): $CancellablePromise<provider$0.Configuration> {

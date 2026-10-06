@@ -87,7 +87,7 @@ func TestAccountValidationAndFailedInsertCleanup(t *testing.T) {
 	service, store := testService(t)
 	for _, input := range []CreateInput{
 		{ProviderID: "missing", Name: "one", APIKey: "key"},
-		{ProviderID: "builtin_openai", Name: "", APIKey: "key"},
+		{ProviderID: "builtin_openai", Name: "invalid\x00name", APIKey: "key"},
 		{ProviderID: "builtin_openai", Name: "one", APIKey: "\n"},
 		{ProviderID: "builtin_openai", Name: "one", APIKey: strings.Repeat("k", maxKeyBytes+1)},
 	} {

@@ -15,10 +15,12 @@ import (
 )
 
 const (
-	maxNameRunes = 80
-	maxNameBytes = 256
-	maxKeyBytes  = 8192
-	maxIDBytes   = 128
+	maxNameRunes     = 80
+	maxNameBytes     = 256
+	maxKeyBytes      = 8192
+	maxIDBytes       = 128
+	maxBatchKeys     = 100
+	defaultNameRunes = 8
 )
 
 var (
@@ -28,7 +30,7 @@ var (
 	ErrNotFound = errors.New("account: not found")
 )
 
-// Item contains only account metadata safe to send to the UI.
+// Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
 type Item struct {
 	ID         string `json:"id"`
 	ProviderID string `json:"providerId"`
@@ -43,6 +45,12 @@ type CreateInput struct {
 	ProviderID string `json:"providerId"`
 	Name       string `json:"name"`
 	APIKey     string `json:"apiKey"`
+}
+
+// BatchCreateInput 批量创建自动命名的账号，不接受自定义名称。
+type BatchCreateInput struct {
+	ProviderID string   `json:"providerId"`
+	APIKeys    []string `json:"apiKeys"`
 }
 
 // CredentialStore is the protected storage needed by account mutations.
@@ -123,6 +131,15 @@ func validateName(value string) (string, error) {
 		}
 	}
 	return name, nil
+}
+
+func resolveName(value string, key []byte) (string, error) {
+	if strings.TrimSpace(value) == "" {
+		// 名称按字符截取，避免 Unicode Key 被截断成无效 UTF-8。
+		runes := []rune(string(key))
+		value = string(runes[:min(defaultNameRunes, len(runes))])
+	}
+	return validateName(value)
 }
 
 func validateKey(value string) ([]byte, error) {

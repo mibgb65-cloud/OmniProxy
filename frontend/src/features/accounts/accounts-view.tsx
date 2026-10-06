@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
 import { AccountProviderCard } from "./account-provider-card"
+import { DeleteAccountDialog } from "./delete-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 
@@ -49,12 +50,14 @@ export function AccountsView() {
               accounts={accounts.data.filter((account) => account.providerId === provider.id)}
               busy={actions.busy}
               onCreate={actions.save}
+              onBatchCreate={actions.saveBatch}
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
             />
           ))}
         </div>
       ) : null}
+      <DeleteAccountDialog actions={actions} />
     </div>
   )
 }

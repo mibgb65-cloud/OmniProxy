@@ -6,6 +6,7 @@ import { isKnownProviderKind, providerNameKeys } from "../providers/provider-lab
 import { useProviders } from "../providers/use-providers"
 import { AccountDetailsCard } from "./account-details-card"
 import { AddAccountDialog } from "./add-account-dialog"
+import { DeleteAccountDialog } from "./delete-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 
@@ -59,7 +60,11 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                 </p>
               </div>
             </div>
-            <AddAccountDialog provider={provider} onCreate={actions.save} />
+            <AddAccountDialog
+              provider={provider}
+              onCreate={actions.save}
+              onBatchCreate={actions.saveBatch}
+            />
           </header>
           {!provider.enabled ? (
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
@@ -89,6 +94,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           )}
         </>
       ) : null}
+      <DeleteAccountDialog actions={actions} />
     </section>
   )
 }

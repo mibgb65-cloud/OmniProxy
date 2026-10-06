@@ -2,21 +2,32 @@ import { useState } from "react"
 import { Dialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
-import type { CreateAccountInput, ProviderConfiguration } from "../../services/omniproxy"
+import type {
+  CreateAccountInput,
+  CreateAccountsInput,
+  ProviderConfiguration,
+} from "../../services/omniproxy"
 import { AccountForm } from "./account-form"
 
 export function AddAccountDialog({
   provider,
   onCreate,
+  onBatchCreate,
 }: {
   provider: ProviderConfiguration
   onCreate: (input: CreateAccountInput) => Promise<void>
+  onBatchCreate: (input: CreateAccountsInput) => Promise<void>
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
   const create = async (input: CreateAccountInput) => {
     await onCreate(input)
+    setOpen(false)
+  }
+
+  const createBatch = async (input: CreateAccountsInput) => {
+    await onBatchCreate(input)
     setOpen(false)
   }
 
@@ -27,7 +38,9 @@ export function AddAccountDialog({
           {t("accounts.add")}
         </Button>
       </Dialog.Trigger>
-      {open ? <AccountForm provider={provider} onSubmit={create} /> : null}
+      {open ? (
+        <AccountForm provider={provider} onSubmit={create} onBatchSubmit={createBatch} />
+      ) : null}
     </Dialog.Root>
   )
 }

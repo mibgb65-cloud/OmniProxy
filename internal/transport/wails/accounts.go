@@ -34,6 +34,15 @@ func (s *AppService) CreateAccount(input account.CreateInput) (account.Item, err
 	return service.Create(context.Background(), input)
 }
 
+// CreateAccounts 一次保存多个自动命名的 API Key 账号。
+func (s *AppService) CreateAccounts(input account.BatchCreateInput) ([]account.Item, error) {
+	service, err := s.accountService()
+	if err != nil {
+		return nil, err
+	}
+	return service.CreateBatch(context.Background(), input)
+}
+
 // SetAccountEnabled changes whether an account can later be scheduled.
 func (s *AppService) SetAccountEnabled(id string, enabled bool) (account.Item, error) {
 	service, err := s.accountService()

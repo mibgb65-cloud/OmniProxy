@@ -66,6 +66,10 @@ duplicates business logic.
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`; gateway adapters have not landed yet.
 
+账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
+
+前端新增账号弹窗提供单个／批量方式，批量每行一个 Key、不提供名称输入；总览和详情共享 Radix AlertDialog 删除确认，只有确认后才调用删除服务。
+
 ### Core (`internal/core/…`)
 
 Pure Go business logic: the proxy server, request parsing, model routing,

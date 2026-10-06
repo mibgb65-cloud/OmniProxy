@@ -54,4 +54,25 @@ func TestAccountBindingsUseProtectedStore(t *testing.T) {
 	if _, err := store.Get(ref); !errors.Is(err, credential.ErrNotFound) {
 		t.Fatalf("deleted credential still exists: %v", err)
 	}
+	keys := []string{"batch-one-test-key", "batch-two-test-key"}
+	batch, err := svc.CreateAccounts(account.BatchCreateInput{ProviderID: "builtin_google", APIKeys: keys})
+	if err != nil || len(batch) != 2 {
+		t.Fatalf("CreateAccounts count = %d, error = %v", len(batch), err)
+	}
+	for i, item := range batch {
+		if item.Name != keys[i][:8] {
+			t.Fatal("batch binding did not automatically name the account")
+		}
+		if err := db.QueryRow(`SELECT credential_ref FROM accounts WHERE id = ?`, item.ID).Scan(&ref); err != nil {
+			t.Fatal(err)
+		}
+		stored, err := store.Get(ref)
+		if err != nil || string(stored) != keys[i] {
+			t.Fatal("batch credential did not survive protected storage")
+		}
+		clear(stored)
+		if err := svc.DeleteAccount(item.ID); err != nil {
+			t.Fatal(err)
+		}
+	}
 }

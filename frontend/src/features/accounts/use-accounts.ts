@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createAccount,
+  createAccounts,
   deleteAccount,
   listAccounts,
   setAccountEnabled,
   type CreateAccountInput,
+  type CreateAccountsInput,
 } from "../../services/omniproxy"
 
 const accountQueryKey = ["accounts"] as const
@@ -17,6 +19,14 @@ export function useCreateAccount() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (input: CreateAccountInput) => createAccount(input),
+    onSuccess: () => client.invalidateQueries({ queryKey: accountQueryKey }),
+  })
+}
+
+export function useCreateAccounts() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: CreateAccountsInput) => createAccounts(input),
     onSuccess: () => client.invalidateQueries({ queryKey: accountQueryKey }),
   })
 }

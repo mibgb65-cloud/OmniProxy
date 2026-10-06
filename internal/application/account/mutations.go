@@ -12,21 +12,17 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err := validateID(input.ProviderID); err != nil {
 		return Item{}, err
 	}
-	name, err := validateName(input.Name)
-	if err != nil {
-		return Item{}, err
-	}
 	key, err := validateKey(input.APIKey)
 	if err != nil {
 		return Item{}, err
 	}
 	defer clear(key)
-	var exists int
-	if err := s.db.QueryRowContext(ctx, `SELECT 1 FROM providers WHERE id = ?`, input.ProviderID).Scan(&exists); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return Item{}, ErrNotFound
-		}
-		return Item{}, fmt.Errorf("account: check provider: %w", err)
+	name, err := resolveName(input.Name, key)
+	if err != nil {
+		return Item{}, err
+	}
+	if err := s.checkProvider(ctx, input.ProviderID); err != nil {
+		return Item{}, err
 	}
 	id, err := newID()
 	if err != nil {
@@ -47,6 +43,17 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		return Item{}, errors.Join(fmt.Errorf("account: create: %w", err), cleanupErr)
 	}
 	return item, nil
+}
+
+func (s *Service) checkProvider(ctx context.Context, id string) error {
+	var exists int
+	if err := s.db.QueryRowContext(ctx, `SELECT 1 FROM providers WHERE id = ?`, id).Scan(&exists); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return fmt.Errorf("account: check provider: %w", err)
+	}
+	return nil
 }
 
 // SetEnabled changes the account's enabled state without exposing its credential.

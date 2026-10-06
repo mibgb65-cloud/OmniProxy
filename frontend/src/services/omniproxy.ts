@@ -9,6 +9,7 @@ import {
   type UpdateStatus,
 } from "../../bindings/omniproxy/internal/transport/wails"
 import type {
+  BatchCreateInput as CreateAccountsInput,
   CreateInput as CreateAccountInput,
   Item as AccountItem,
 } from "../../bindings/omniproxy/internal/application/account"
@@ -29,7 +30,7 @@ export type {
   StorageInfo,
   UpdateStatus,
 }
-export type { AccountItem, CreateAccountInput }
+export type { AccountItem, CreateAccountInput, CreateAccountsInput }
 export type {
   ProviderConfiguration,
   CreateProviderInput,
@@ -134,7 +135,7 @@ export function deleteProvider(id: string): Promise<void> {
   return AppService.DeleteProvider(id)
 }
 
-/** listAccounts returns metadata only; API keys and credential references stay in Go. */
+/** 返回账号元数据；自动名称可能含 Key 前缀，密钥字段与凭证引用不返回。 */
 export async function listAccounts(): Promise<AccountItem[]> {
   return (await AppService.ListAccounts()) ?? []
 }
@@ -142,6 +143,11 @@ export async function listAccounts(): Promise<AccountItem[]> {
 /** createAccount stores an API Key in protected local storage. */
 export function createAccount(input: CreateAccountInput): Promise<AccountItem> {
   return AppService.CreateAccount(input)
+}
+
+/** 一次保存多个自动命名的账号，完整密钥留在受保护存储中。 */
+export async function createAccounts(input: CreateAccountsInput): Promise<AccountItem[]> {
+  return (await AppService.CreateAccounts(input)) ?? []
 }
 
 /** setAccountEnabled switches one account on or off. */

@@ -6,12 +6,14 @@ import {
   createRouter,
   RouterContextProvider,
 } from "@tanstack/react-router"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import {
   listAccounts,
+  deleteAccount,
   listProviders,
   type AccountItem,
   type ProviderConfiguration,
@@ -23,6 +25,7 @@ vi.mock("../../services/omniproxy", () => ({
   listProviders: vi.fn(),
   listAccounts: vi.fn(),
   createAccount: vi.fn(),
+  createAccounts: vi.fn(),
   setAccountEnabled: vi.fn(),
   deleteAccount: vi.fn(),
 }))
@@ -77,6 +80,7 @@ describe("ProviderAccountsView", () => {
     useUIStore.setState({ language: "zh" })
     vi.mocked(listProviders).mockResolvedValue([provider])
     vi.mocked(listAccounts).mockResolvedValue([account])
+    vi.mocked(deleteAccount).mockResolvedValue(undefined)
   })
 
   it("shows account metadata and labels unavailable balance honestly", async () => {
@@ -99,5 +103,59 @@ describe("ProviderAccountsView", () => {
     renderPage("missing-provider")
     expect(await screen.findByRole("alert")).toHaveTextContent("未找到该提供商")
     expect(screen.queryByText("主账号")).not.toBeInTheDocument()
+  })
+
+  it("opens a themed confirmation and cancels without deleting, restoring focus", async () => {
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    const removeButton = await screen.findByRole("button", { name: "删除账号“主账号”" })
+    await user.click(removeButton)
+    const dialog = screen.getByRole("alertdialog", { name: "删除账号" })
+    expect(dialog).toHaveTextContent("确定删除“主账号”及其已保存的密钥吗？")
+    const cancel = within(dialog).getByRole("button", { name: "取消" })
+    expect(cancel).toHaveFocus()
+    await user.click(cancel)
+    expect(deleteAccount).not.toHaveBeenCalled()
+    await waitFor(() => expect(removeButton).toHaveFocus())
+    await user.click(removeButton)
+    await user.keyboard("{Escape}")
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(deleteAccount).not.toHaveBeenCalled()
+  })
+
+  it("keeps deletion pending until the backend completes and blocks cancellation", async () => {
+    let complete!: () => void
+    vi.mocked(deleteAccount).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          complete = resolve
+        }),
+    )
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    await user.click(await screen.findByRole("button", { name: "删除账号“主账号”" }))
+    await user.click(screen.getByRole("button", { name: "确认删除" }))
+    expect(screen.getByRole("button", { name: "正在删除…" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "取消" })).toBeDisabled()
+    await user.keyboard("{Escape}")
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+    vi.mocked(listAccounts).mockResolvedValue([])
+    complete()
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(deleteAccount).toHaveBeenCalledExactlyOnceWith(account.id)
+  })
+
+  it("keeps the confirmation open with an error and allows a retry", async () => {
+    vi.mocked(deleteAccount).mockRejectedValueOnce(new Error("storage unavailable"))
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    await user.click(await screen.findByRole("button", { name: "删除账号“主账号”" }))
+    await user.click(screen.getByRole("button", { name: "确认删除" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent("删除失败")
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+    vi.mocked(listAccounts).mockResolvedValue([])
+    await user.click(screen.getByRole("button", { name: "确认删除" }))
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(deleteAccount).toHaveBeenCalledTimes(2)
   })
 })

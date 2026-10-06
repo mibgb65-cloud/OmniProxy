@@ -59,6 +59,8 @@ accounts need one local place to:
   reachability/response-time check; actual model access depends on an account.
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
+- API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。
+- 自动名称有意展示 Key 前缀，短于 8 个字符时使用实际长度；名称不写入日志。删除账号必须经过应用内、随主题切换的确认弹窗。
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
   concurrency and retry.
 - Model routing rules.
@@ -88,7 +90,7 @@ Explicitly out of scope for the current stage:
 
 - Local-first: the gateway binds to loopback; no data leaves the machine except
   to the AI providers the user configured.
-- Credentials must never be stored in plaintext in the database or logs.
+- 密钥字段保存在受保护凭证存储中，数据库使用不透明引用；用户要求的自动账号名称允许保存前最多 8 个字符。日志不得包含密钥或这些名称。
 - Development and production environments must not share data directories.
 - The Go core must remain independent of Wails and React so it stays testable
   and reusable (e.g. behind a future CLI).

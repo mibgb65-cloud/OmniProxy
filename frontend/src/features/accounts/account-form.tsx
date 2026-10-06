@@ -1,33 +1,25 @@
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { X } from "lucide-react"
-import { Dialog } from "radix-ui"
+import { Dialog, Tabs } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import type { CreateAccountInput, ProviderConfiguration } from "../../services/omniproxy"
+import type {
+  CreateAccountInput,
+  CreateAccountsInput,
+  ProviderConfiguration,
+} from "../../services/omniproxy"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
-
-function validName(value: string): boolean {
-  const name = value.trim()
-  return (
-    name.length > 0 &&
-    Array.from(name).length <= 80 &&
-    new TextEncoder().encode(name).length <= 256 &&
-    !/[\p{Cc}]/u.test(name)
-  )
-}
-
-function validKey(value: string): boolean {
-  const key = value.trim()
-  return key.length > 0 && new TextEncoder().encode(key).length <= 8192 && !/[\p{Cc}]/u.test(key)
-}
+import { AccountCredentialsFields } from "./account-credentials-fields"
+import { useAccountForm } from "./use-account-form"
 
 export function AccountForm({
   provider,
   onSubmit,
+  onBatchSubmit,
 }: {
   provider: ProviderConfiguration
   onSubmit: (input: CreateAccountInput) => Promise<void>
+  onBatchSubmit: (input: CreateAccountsInput) => Promise<void>
 }) {
   const { t } = useTranslation()
   const providerName =
@@ -35,31 +27,7 @@ export function AccountForm({
       ? t(providerNameKeys[provider.kind])
       : provider.name
   const nameRef = useRef<HTMLInputElement>(null)
-  const [name, setName] = useState("")
-  const [apiKey, setAPIKey] = useState("")
-  const [invalidName, setInvalidName] = useState(false)
-  const [invalidKey, setInvalidKey] = useState(false)
-  const [saveError, setSaveError] = useState(false)
-  const [saving, setSaving] = useState(false)
-
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const nameError = !validName(name)
-    const keyError = !validKey(apiKey)
-    setInvalidName(nameError)
-    setInvalidKey(keyError)
-    if (nameError || keyError) return
-    setSaving(true)
-    setSaveError(false)
-    try {
-      await onSubmit({ providerId: provider.id, name: name.trim(), apiKey: apiKey.trim() })
-    } catch {
-      setSaveError(true)
-    } finally {
-      setSaving(false)
-    }
-  }
-
+  const form = useAccountForm({ providerId: provider.id, onSubmit, onBatchSubmit })
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
@@ -71,10 +39,10 @@ export function AccountForm({
           nameRef.current?.focus()
         }}
         onEscapeKeyDown={(event) => {
-          if (saving) event.preventDefault()
+          if (form.saving) event.preventDefault()
         }}
         onInteractOutside={(event) => {
-          if (saving) event.preventDefault()
+          if (form.saving) event.preventDefault()
         }}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
@@ -91,7 +59,7 @@ export function AccountForm({
               type="button"
               variant="ghost"
               size="icon"
-              disabled={saving}
+              disabled={form.saving}
               aria-label={t("accounts.close")}
               className="shrink-0 cursor-pointer"
             >
@@ -99,68 +67,56 @@ export function AccountForm({
             </Button>
           </Dialog.Close>
         </div>
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="account-name" className="text-sm font-medium">
-              {t("accounts.name")}
-            </label>
-            <Input
-              ref={nameRef}
-              id="account-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={256}
-              placeholder={t("accounts.namePlaceholder")}
-              aria-invalid={invalidName}
-              aria-describedby={invalidName ? "account-name-error" : undefined}
-            />
-            {invalidName ? (
-              <p id="account-name-error" className="text-destructive text-xs">
-                {t("accounts.nameInvalid")}
+        <Tabs.Root value={form.mode} onValueChange={form.changeMode}>
+          <Tabs.List
+            aria-label={t("accounts.addMode")}
+            className="bg-muted mb-4 grid grid-cols-2 gap-1 rounded-lg p-1"
+          >
+            {(["single", "batch"] as const).map((mode) => (
+              <Tabs.Trigger key={mode} value={mode} asChild disabled={form.saving}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="data-[state=active]:bg-background cursor-pointer data-[state=active]:shadow-sm"
+                >
+                  {mode === "single" ? t("accounts.singleMode") : t("accounts.batchMode")}
+                </Button>
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
+          <form onSubmit={form.submit} className="space-y-4">
+            {(["single", "batch"] as const).map((mode) => (
+              <Tabs.Content key={mode} value={mode} className="space-y-4 outline-none">
+                <AccountCredentialsFields form={form} nameRef={nameRef} />
+              </Tabs.Content>
+            ))}
+            {form.saveError ? (
+              <p role="alert" className="text-destructive text-sm">
+                {t("accounts.saveFailed")}
               </p>
             ) : null}
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="account-api-key" className="text-sm font-medium">
-              {t("accounts.apiKey")}
-            </label>
-            <Input
-              id="account-api-key"
-              type="password"
-              value={apiKey}
-              onChange={(event) => setAPIKey(event.target.value)}
-              maxLength={8192}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              aria-invalid={invalidKey}
-              aria-describedby={invalidKey ? "account-key-error" : "account-key-hint"}
-            />
-            <p id="account-key-hint" className="text-muted-foreground text-xs">
-              {t("accounts.keyHint")}
-            </p>
-            {invalidKey ? (
-              <p id="account-key-error" className="text-destructive text-xs">
-                {t("accounts.keyInvalid")}
-              </p>
-            ) : null}
-          </div>
-          {saveError ? (
-            <p role="alert" className="text-destructive text-sm">
-              {t("accounts.saveFailed")}
-            </p>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={saving} className="cursor-pointer">
-              {saving ? t("accounts.saving") : t("accounts.save")}
-            </Button>
-            <Dialog.Close asChild>
-              <Button type="button" variant="outline" disabled={saving} className="cursor-pointer">
-                {t("accounts.cancel")}
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={form.saving} className="cursor-pointer">
+                {form.saving
+                  ? t("accounts.saving")
+                  : form.mode === "batch"
+                    ? t("accounts.saveBatch")
+                    : t("accounts.save")}
               </Button>
-            </Dialog.Close>
-          </div>
-        </form>
+              <Dialog.Close asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={form.saving}
+                  className="cursor-pointer"
+                >
+                  {t("accounts.cancel")}
+                </Button>
+              </Dialog.Close>
+            </div>
+          </form>
+        </Tabs.Root>
       </Dialog.Content>
     </Dialog.Portal>
   )
