@@ -11,6 +11,7 @@ export function AccountDetailsList({
   busy,
   onToggle,
   onDelete,
+  onEdit,
 }: {
   accounts: AccountItem[]
 } & Omit<AccountItemActionsProps, "account">) {
@@ -94,6 +95,7 @@ export function AccountDetailsList({
                     busy={busy}
                     onToggle={onToggle}
                     onDelete={onDelete}
+                    onEdit={onEdit}
                   />
                 </div>
               </td>

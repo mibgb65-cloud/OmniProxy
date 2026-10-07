@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react"
+import { SquarePen, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import type { AccountItem } from "../../services/omniproxy"
@@ -9,9 +9,16 @@ export type AccountItemActionsProps = {
   busy: boolean
   onToggle: (id: string, enabled: boolean) => void
   onDelete: (account: AccountItem) => void
+  onEdit: (account: AccountItem) => void
 }
 
-export function AccountItemActions({ account, busy, onToggle, onDelete }: AccountItemActionsProps) {
+export function AccountItemActions({
+  account,
+  busy,
+  onToggle,
+  onDelete,
+  onEdit,
+}: AccountItemActionsProps) {
   const { t } = useTranslation()
   return (
     <div className="flex shrink-0 items-center gap-2">
@@ -22,6 +29,18 @@ export function AccountItemActions({ account, busy, onToggle, onDelete }: Accoun
         disabled={busy}
         onChange={(enabled) => onToggle(account.id, enabled)}
       />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        disabled={busy}
+        onClick={() => onEdit(account)}
+        aria-label={t("accounts.edit.label", { name: account.name })}
+        title={t("accounts.edit.action")}
+        className="text-muted-foreground hover:text-foreground cursor-pointer"
+      >
+        <SquarePen className="size-4" aria-hidden="true" />
+      </Button>
       <Button
         type="button"
         variant="ghost"

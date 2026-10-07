@@ -10,6 +10,7 @@ import { AccountDetailsList } from "./account-details-list"
 import { AccountViewToggle } from "./account-view-toggle"
 import { AddAccountDialog } from "./add-account-dialog"
 import { DeleteAccountDialog } from "./delete-account-dialog"
+import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 
@@ -82,6 +83,11 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               {t("accounts.actionFailed")}
             </p>
           ) : null}
+          {actions.updateWarning ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t("accounts.edit.cleanupWarning")}
+            </p>
+          ) : null}
           {items.length === 0 ? (
             <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-sm">
               {t("accounts.empty")}
@@ -92,6 +98,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               busy={actions.busy}
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
+              onEdit={actions.editItem}
             />
           ) : (
             <div className="grid gap-3 min-[1800px]:grid-cols-3 md:grid-cols-2">
@@ -102,6 +109,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                   busy={actions.busy}
                   onToggle={actions.toggle}
                   onDelete={actions.deleteItem}
+                  onEdit={actions.editItem}
                 />
               ))}
             </div>
@@ -109,6 +117,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
         </>
       ) : null}
       <DeleteAccountDialog actions={actions} />
+      <EditAccountDialog actions={actions} />
     </section>
   )
 }

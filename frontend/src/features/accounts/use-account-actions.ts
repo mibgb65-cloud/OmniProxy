@@ -1,10 +1,16 @@
 import { useRef, useState } from "react"
-import type { AccountItem, CreateAccountInput, CreateAccountsInput } from "../../services/omniproxy"
+import type {
+  AccountItem,
+  CreateAccountInput,
+  CreateAccountsInput,
+  UpdateAccountInput,
+} from "../../services/omniproxy"
 import {
   useCreateAccount,
   useCreateAccounts,
   useDeleteAccount,
   useSetAccountEnabled,
+  useUpdateAccount,
 } from "./use-accounts"
 
 export function useAccountActions() {
@@ -12,12 +18,16 @@ export function useAccountActions() {
   const createBatch = useCreateAccounts()
   const setEnabled = useSetAccountEnabled()
   const remove = useDeleteAccount()
+  const update = useUpdateAccount()
   const [actionError, setActionError] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<AccountItem | null>(null)
   const [deleteError, setDeleteError] = useState(false)
   const deletingRef = useRef(false)
   const deleteFocusRef = useRef<HTMLElement | null>(null)
   const fallbackFocusRef = useRef<HTMLElement | null>(null)
+  const [editTarget, setEditTarget] = useState<AccountItem | null>(null)
+  const [updateWarning, setUpdateWarning] = useState(false)
+  const updatingRef = useRef(false)
 
   const save = async (input: CreateAccountInput) => {
     await create.mutateAsync(input)
@@ -32,16 +42,45 @@ export function useAccountActions() {
     void setEnabled.mutateAsync({ id, enabled }).catch(() => setActionError(true))
   }
 
-  const deleteItem = (account: AccountItem) => {
-    if (deletingRef.current) return
+  const rememberModalFocus = () => {
     const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null
     deleteFocusRef.current = focused
     fallbackFocusRef.current =
       focused?.closest('[data-slot="card"]')?.querySelector('button[data-variant="outline"]') ??
       focused?.closest("section")?.querySelector('button[data-variant="outline"]') ??
       null
+  }
+
+  const deleteItem = (account: AccountItem) => {
+    if (deletingRef.current || editTarget) return
+    rememberModalFocus()
     setDeleteError(false)
     setDeleteTarget(account)
+  }
+
+  const editItem = (account: AccountItem) => {
+    if (updatingRef.current || deleteTarget) return
+    rememberModalFocus()
+    setEditTarget(account)
+  }
+
+  const cancelEdit = () => {
+    if (!updatingRef.current) setEditTarget(null)
+  }
+
+  const saveEdit = async (input: UpdateAccountInput) => {
+    if (updatingRef.current) return
+    updatingRef.current = true
+    setUpdateWarning(false)
+    try {
+      const result = await update.mutateAsync(input)
+      setUpdateWarning(result.cleanupWarning)
+      setEditTarget(null)
+    } finally {
+      updatingRef.current = false
+      // 提交结束清除 mutation 中的新密钥输入；失败时只在编辑表单保留以便重试。
+      update.reset()
+    }
   }
 
   const cancelDelete = () => {
@@ -82,7 +121,13 @@ export function useAccountActions() {
     cancelDelete,
     restoreDeleteFocus,
     deleting: remove.isPending,
+    editItem,
+    editTarget,
+    cancelEdit,
+    saveEdit,
+    restoreEditFocus: restoreDeleteFocus,
+    updateWarning,
     actionError,
-    busy: setEnabled.isPending || remove.isPending,
+    busy: setEnabled.isPending || remove.isPending || update.isPending,
   }
 }

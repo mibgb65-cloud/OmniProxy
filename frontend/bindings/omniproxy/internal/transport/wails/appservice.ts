@@ -199,6 +199,13 @@ export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
 }
 
 /**
+ * UpdateAccount 更新名称及可选的新密钥，不返回完整密钥。
+ */
+export function UpdateAccount(input: account$0.UpdateInput): $CancellablePromise<account$0.UpdateResult> {
+    return $Call.ByID(564975715, input);
+}
+
+/**
  * UpdateProvider updates one provider configuration.
  */
 export function UpdateProvider(id: string, input: provider$0.UpdateInput): $CancellablePromise<provider$0.Configuration> {

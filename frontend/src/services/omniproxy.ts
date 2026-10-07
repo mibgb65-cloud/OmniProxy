@@ -12,6 +12,8 @@ import type {
   BatchCreateInput as CreateAccountsInput,
   CreateInput as CreateAccountInput,
   Item as AccountItem,
+  UpdateInput as UpdateAccountInput,
+  UpdateResult as UpdateAccountResult,
 } from "../../bindings/omniproxy/internal/application/account"
 import type {
   Configuration as ProviderConfiguration,
@@ -30,7 +32,13 @@ export type {
   StorageInfo,
   UpdateStatus,
 }
-export type { AccountItem, CreateAccountInput, CreateAccountsInput }
+export type {
+  AccountItem,
+  CreateAccountInput,
+  CreateAccountsInput,
+  UpdateAccountInput,
+  UpdateAccountResult,
+}
 export type {
   ProviderConfiguration,
   CreateProviderInput,
@@ -148,6 +156,11 @@ export function createAccount(input: CreateAccountInput): Promise<AccountItem> {
 /** 一次保存多个自动命名的账号，完整密钥留在受保护存储中。 */
 export async function createAccounts(input: CreateAccountsInput): Promise<AccountItem[]> {
   return (await AppService.CreateAccounts(input)) ?? []
+}
+
+/** 修改名称及可选的新密钥；空密钥字段保持原凭证。 */
+export function updateAccount(input: UpdateAccountInput): Promise<UpdateAccountResult> {
+  return AppService.UpdateAccount(input)
 }
 
 /** setAccountEnabled switches one account on or off. */

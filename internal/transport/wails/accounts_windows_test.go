@@ -71,6 +71,15 @@ func TestAccountBindingsUseProtectedStore(t *testing.T) {
 			t.Fatal("batch credential did not survive protected storage")
 		}
 		clear(stored)
+		oldRef := ref
+		updated, err := svc.UpdateAccount(account.UpdateInput{ID: item.ID, Name: "updated", APIKey: "replacement-test-protected-key"})
+		if err != nil || updated.CleanupWarning || updated.Account.Name != "updated" {
+			t.Fatal("account update binding failed")
+		}
+		keys[i] = "replacement-test-protected-key"
+		if _, err := store.Get(oldRef); !errors.Is(err, credential.ErrNotFound) {
+			t.Fatal("old protected key survived successful replacement")
+		}
 		preview, err := svc.AccountKeyPreview(item.ID)
 		if err != nil || preview == keys[i] {
 			t.Fatal("preview binding leaked or failed to read the protected key")

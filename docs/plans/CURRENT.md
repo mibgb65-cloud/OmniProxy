@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20261007-003 编辑账号名称与 API Key
 
 ## Recently Completed
 

@@ -4,5 +4,7 @@
 export type {
     BatchCreateInput,
     CreateInput,
-    Item
+    Item,
+    UpdateInput,
+    UpdateResult
 } from "./models.js";

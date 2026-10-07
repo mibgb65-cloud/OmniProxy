@@ -43,6 +43,15 @@ func (s *AppService) CreateAccounts(input account.BatchCreateInput) ([]account.I
 	return service.CreateBatch(context.Background(), input)
 }
 
+// UpdateAccount 更新名称及可选的新密钥，不返回完整密钥。
+func (s *AppService) UpdateAccount(input account.UpdateInput) (account.UpdateResult, error) {
+	service, err := s.accountService()
+	if err != nil {
+		return account.UpdateResult{}, err
+	}
+	return service.Update(context.Background(), input)
+}
+
 // SetAccountEnabled changes whether an account can later be scheduled.
 func (s *AppService) SetAccountEnabled(id string, enabled bool) (account.Item, error) {
 	service, err := s.accountService()

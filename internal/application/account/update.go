@@ -1,0 +1,118 @@
+package account
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
+
+	"omniproxy/internal/infrastructure/credential"
+)
+
+// ErrConflict 表示账号在凭证准备期间被其他操作修改，更新未提交。
+var ErrConflict = errors.New("account: concurrent update")
+
+// UpdateInput 更新指定账号；APIKey 留空保留原凭证，Name 留空自动命名。
+type UpdateInput struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	APIKey string `json:"apiKey"`
+}
+
+// UpdateResult 区分账号更新成功与提交后的旧凭证清理警告。
+type UpdateResult struct {
+	Account        Item `json:"account"`
+	CleanupWarning bool `json:"cleanupWarning"`
+}
+
+// Update 安全更新账号；只有数据库引用切换成功后才清理原凭证。
+func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateResult, err error) {
+	if err := validateID(input.ID); err != nil {
+		return result, err
+	}
+	if len(input.Name) > maxNameBytes || len(input.APIKey) > maxKeyBytes {
+		return result, fmt.Errorf("%w: update field length", ErrInvalidInput)
+	}
+	item, oldRef, err := s.get(ctx, input.ID)
+	if err != nil {
+		return result, err
+	}
+	keyChanged := strings.TrimSpace(input.APIKey) != ""
+	var key []byte
+	if keyChanged {
+		key, err = validateKey(input.APIKey)
+		if err != nil {
+			return result, err
+		}
+		defer clear(key)
+	}
+	var name string
+	if strings.TrimSpace(input.Name) != "" {
+		name, err = validateName(input.Name)
+	} else if keyChanged {
+		name, err = resolveName("", key)
+	} else {
+		err = s.UseAPIKey(ctx, input.ID, func(currentKey []byte) error {
+			name, err = resolveName("", currentKey)
+			return err
+		})
+	}
+	if err != nil {
+		return result, err
+	}
+	newRef := oldRef
+	if keyChanged {
+		newRef, err = s.store.Put(key)
+		if err != nil {
+			return result, fmt.Errorf("account: protect replacement key: %w", err)
+		}
+	}
+	var tx *sql.Tx
+	committed := false
+	defer func() {
+		if committed {
+			return
+		}
+		if tx != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+				err = errors.Join(err, fmt.Errorf("account: rollback update: %w", rollbackErr))
+			}
+		}
+		if newRef != oldRef {
+			if cleanupErr := s.store.Delete(newRef); cleanupErr != nil {
+				err = errors.Join(err, fmt.Errorf("account: clean replacement key: %w", cleanupErr))
+			}
+		}
+	}()
+	tx, err = s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return result, fmt.Errorf("account: begin update: %w", err)
+	}
+	timestamp := now()
+	// 引用和时间戳共同检查，避免并发更新时覆盖其他修改或删除正在使用的密钥。
+	updated, err := tx.ExecContext(ctx, `UPDATE accounts SET name = ?, credential_ref = ?, updated_at = ?
+		WHERE id = ? AND credential_ref = ? AND updated_at = ?`, name, newRef, timestamp, item.ID, oldRef, item.UpdatedAt)
+	if err != nil {
+		return result, fmt.Errorf("account: update: %w", err)
+	}
+	changed, err := updated.RowsAffected()
+	if err != nil {
+		return result, fmt.Errorf("account: update result: %w", err)
+	}
+	if changed != 1 {
+		return result, ErrConflict
+	}
+	if err := tx.Commit(); err != nil {
+		return result, fmt.Errorf("account: commit update: %w", err)
+	}
+	committed = true
+	item.Name, item.UpdatedAt = name, timestamp
+	result.Account = item
+	if keyChanged && oldRef != "" {
+		// 已提交后不能把清理失败误报为未保存，否则重试可能再次替换凭证。
+		cleanupErr := s.store.Delete(oldRef)
+		result.CleanupWarning = cleanupErr != nil && !errors.Is(cleanupErr, credential.ErrNotFound)
+	}
+	return result, nil
+}

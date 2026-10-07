@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
 import { AccountProviderCard } from "./account-provider-card"
 import { DeleteAccountDialog } from "./delete-account-dialog"
+import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 
@@ -41,6 +42,11 @@ export function AccountsView() {
           {t("accounts.actionFailed")}
         </p>
       ) : null}
+      {actions.updateWarning ? (
+        <p role="alert" className="text-destructive text-sm">
+          {t("accounts.edit.cleanupWarning")}
+        </p>
+      ) : null}
       {catalog.data && providers.data && accounts.data ? (
         <div className="grid items-start gap-3 min-[3000px]:grid-cols-4 md:grid-cols-2 2xl:grid-cols-3">
           {orderedProviders.map((provider) => (
@@ -53,11 +59,13 @@ export function AccountsView() {
               onBatchCreate={actions.saveBatch}
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
+              onEdit={actions.editItem}
             />
           ))}
         </div>
       ) : null}
       <DeleteAccountDialog actions={actions} />
+      <EditAccountDialog actions={actions} />
     </div>
   )
 }

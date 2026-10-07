@@ -29,3 +29,20 @@ export interface Item {
     "createdAt": string;
     "updatedAt": string;
 }
+
+/**
+ * UpdateInput 更新指定账号；APIKey 留空保留原凭证，Name 留空自动命名。
+ */
+export interface UpdateInput {
+    "id": string;
+    "name": string;
+    "apiKey": string;
+}
+
+/**
+ * UpdateResult 区分账号更新成功与提交后的旧凭证清理警告。
+ */
+export interface UpdateResult {
+    "account": Item;
+    "cleanupWarning": boolean;
+}

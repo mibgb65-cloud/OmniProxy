@@ -5,7 +5,13 @@ import { AccountItemActions, type AccountItemActionsProps } from "./account-item
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
 
-export function AccountDetailsCard({ account, busy, onToggle, onDelete }: AccountItemActionsProps) {
+export function AccountDetailsCard({
+  account,
+  busy,
+  onToggle,
+  onDelete,
+  onEdit,
+}: AccountItemActionsProps) {
   const { t, i18n } = useTranslation()
   const locale = i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US"
 
@@ -24,6 +30,7 @@ export function AccountDetailsCard({ account, busy, onToggle, onDelete }: Accoun
             busy={busy}
             onToggle={onToggle}
             onDelete={onDelete}
+            onEdit={onEdit}
           />
         </div>
         <AccountKeyPreview account={account} />

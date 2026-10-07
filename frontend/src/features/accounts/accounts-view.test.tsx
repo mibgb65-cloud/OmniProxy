@@ -31,6 +31,9 @@ vi.mock("../../services/omniproxy", () => ({
   listAccounts: vi.fn(),
   createAccount: vi.fn(),
   createAccounts: vi.fn(),
+  updateAccount: vi.fn(),
+  getAccountKeyPreview: vi.fn(async () => "••••••••"),
+  copyAccountKey: vi.fn(),
   setAccountEnabled: vi.fn(),
   deleteAccount: vi.fn(),
 }))

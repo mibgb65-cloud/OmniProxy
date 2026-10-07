@@ -272,6 +272,19 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.key.copy": "Copy API Key for {{name}}",
   "accounts.key.copied": "Copied",
   "accounts.key.copyFailed": "Could not copy. Please try again.",
+  "accounts.edit.action": "Edit",
+  "accounts.edit.label": "Edit {{name}} account",
+  "accounts.edit.title": "Edit account",
+  "accounts.edit.description":
+    "Change the account name or enter a new API Key to replace the current key.",
+  "accounts.edit.close": "Close account editor",
+  "accounts.edit.currentKey": "Current key",
+  "accounts.edit.keyPlaceholder": "Leave blank to keep the current API Key",
+  "accounts.edit.keyHint":
+    "Leave blank to keep the current key. A new key is submitted only when saving.",
+  "accounts.edit.save": "Save changes",
+  "accounts.edit.cleanupWarning":
+    "Account updated, but the old credential could not be cleaned up.",
   "pages.gateway.title": "Gateway",
   "pages.gateway.description":
     "Proxy server status and control. The gateway backend lands in a later milestone.",

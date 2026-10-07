@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, Trash2 } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import { ScrollRegion } from "../../components/common/scroll-region"
 import type {
@@ -12,7 +11,7 @@ import type {
 } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
-import { ProviderSwitch } from "../providers/provider-switch"
+import { AccountItemActions } from "./account-item-actions"
 import { AddAccountDialog } from "./add-account-dialog"
 
 export function AccountProviderCard({
@@ -23,6 +22,7 @@ export function AccountProviderCard({
   onBatchCreate,
   onToggle,
   onDelete,
+  onEdit,
 }: {
   provider: ProviderConfiguration
   accounts: AccountItem[]
@@ -31,6 +31,7 @@ export function AccountProviderCard({
   onBatchCreate: (input: CreateAccountsInput) => Promise<void>
   onToggle: (id: string, enabled: boolean) => void
   onDelete: (account: AccountItem) => void
+  onEdit: (account: AccountItem) => void
 }) {
   const { t } = useTranslation()
   const name =
@@ -89,27 +90,13 @@ export function AccountProviderCard({
                       {account.enabled ? t("accounts.enabled") : t("accounts.disabled")}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <ProviderSwitch
-                      name={account.name}
-                      ariaLabel={t("accounts.toggleLabel", { name: account.name })}
-                      checked={account.enabled}
-                      disabled={busy}
-                      onChange={(enabled) => onToggle(account.id, enabled)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      disabled={busy}
-                      onClick={() => onDelete(account)}
-                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
-                      aria-label={t("accounts.deleteLabel", { name: account.name })}
-                      title={t("accounts.delete")}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </Button>
-                  </div>
+                  <AccountItemActions
+                    account={account}
+                    busy={busy}
+                    onToggle={onToggle}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
+                  />
                 </li>
               ))}
             </ul>
