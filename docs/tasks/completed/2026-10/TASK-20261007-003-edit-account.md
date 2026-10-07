@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -74,8 +74,16 @@ In Progress
 
 ## Git
 
-功能提交完成后回填哈希。
+```text
+8cd7f411a43f50db21db4a0a4c866c93f387af70 feat(account): 支持编辑名称及安全替换 API Key
+```
+
+共享文案和 CURRENT 通过仅含本任务改动的补丁暂存，网关任务未提交内容保持原样。本记录由后续文档提交回填功能哈希并归档。
 
 ## Result
 
 账号编辑、原 Key 保留与安全替换已完成，完整质量门禁和真实弹窗检查通过，开发环境保持运行。
+
+## Completed
+
+2026-10-07 10:15

@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- TASK-20261007-003 编辑账号名称与 API Key
+- (none)
 
 ## Recently Completed
+
+- TASK-20261007-003 编辑账号名称与 API Key
 
 - TASK-20261007-001 账号详情卡片与列表切换
 
