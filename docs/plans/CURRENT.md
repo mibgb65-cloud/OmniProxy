@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- (none)
+- TASK-20261007-001 账号详情卡片与列表切换
 
 ## Recently Completed
 

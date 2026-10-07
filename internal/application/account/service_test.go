@@ -22,6 +22,13 @@ func (s *fakeStore) Put(secret []byte) (string, error) {
 	return "cred-v1-test", nil
 }
 
+func (s *fakeStore) Get(string) ([]byte, error) {
+	if s.deleted || s.secret == nil {
+		return nil, ErrNotFound
+	}
+	return append([]byte(nil), s.secret...), nil
+}
+
 func (s *fakeStore) Delete(string) error {
 	s.deleted = true
 	if s.failDel {

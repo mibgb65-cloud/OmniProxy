@@ -159,3 +159,13 @@ export function setAccountEnabled(id: string, enabled: boolean): Promise<Account
 export function deleteAccount(id: string): Promise<void> {
   return AppService.DeleteAccount(id)
 }
+
+/** 只返回后端生成的密钥脱敏片段。 */
+export function getAccountKeyPreview(id: string): Promise<string> {
+  return AppService.AccountKeyPreview(id)
+}
+
+/** 桌面端直接复制；完整密钥不返回浏览器。 */
+export function copyAccountKey(id: string): Promise<void> {
+  return AppService.CopyAccountKey(id)
+}

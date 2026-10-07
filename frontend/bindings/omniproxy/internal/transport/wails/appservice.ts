@@ -24,6 +24,13 @@ import * as provider$0 from "../../application/provider/models.js";
 import * as $models from "./models.js";
 
 /**
+ * AccountKeyPreview 返回密钥脱敏文本，不返回完整密钥或凭证引用。
+ */
+export function AccountKeyPreview(id: string): $CancellablePromise<string> {
+    return $Call.ByID(2889239957, id);
+}
+
+/**
  * AppInfo returns the current application runtime information.
  */
 export function AppInfo(): $CancellablePromise<$models.AppInfo> {
@@ -45,6 +52,13 @@ export function CheckForUpdate(): $CancellablePromise<$models.UpdateStatus> {
  */
 export function CleanStorage(target: string): $CancellablePromise<$models.CleanResult> {
     return $Call.ByID(1327547443, target);
+}
+
+/**
+ * CopyAccountKey 由桌面端直接写入剪贴板，完整密钥不经过前端或查询缓存。
+ */
+export function CopyAccountKey(id: string): $CancellablePromise<void> {
+    return $Call.ByID(2612798186, id);
 }
 
 /**

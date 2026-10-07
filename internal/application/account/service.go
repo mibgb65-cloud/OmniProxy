@@ -56,6 +56,7 @@ type BatchCreateInput struct {
 // CredentialStore is the protected storage needed by account mutations.
 type CredentialStore interface {
 	Put([]byte) (string, error)
+	Get(string) ([]byte, error)
 	Delete(string) error
 }
 

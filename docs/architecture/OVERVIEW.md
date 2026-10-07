@@ -70,6 +70,8 @@ duplicates business logic.
 
 前端新增账号弹窗提供单个／批量方式，批量每行一个 Key、不提供名称输入；总览和详情共享 Radix AlertDialog 删除确认，只有确认后才调用删除服务。
 
+账号详情的卡片与列表复用时间显示、启停、删除和密钥预览组件，展示偏好保存在 Zustand。查询缓存仅存新的密钥接口返回的脱敏字符串。复制由 Wails 适配层在受控凭证回调内直接写入系统剪贴板，复制方法不返回密钥内容；解密字节在回调结束后清理。较短密钥的预览全部遮掩，凭证读取失败时提供重试，余额未接入时继续显示待接入。
+
 ### Core (`internal/core/…`)
 
 Pure Go business logic: the proxy server, request parsing, model routing,

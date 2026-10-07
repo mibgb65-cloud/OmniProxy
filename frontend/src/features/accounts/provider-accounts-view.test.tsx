@@ -15,6 +15,9 @@ import {
   listAccounts,
   deleteAccount,
   listProviders,
+  getAccountKeyPreview,
+  copyAccountKey,
+  setAccountEnabled,
   type AccountItem,
   type ProviderConfiguration,
 } from "../../services/omniproxy"
@@ -28,6 +31,8 @@ vi.mock("../../services/omniproxy", () => ({
   createAccounts: vi.fn(),
   setAccountEnabled: vi.fn(),
   deleteAccount: vi.fn(),
+  getAccountKeyPreview: vi.fn(),
+  copyAccountKey: vi.fn(),
 }))
 
 const provider: ProviderConfiguration = {
@@ -70,17 +75,22 @@ function renderPage(providerId: string) {
       </I18nProvider>
     )
   }
-  return render(<ProviderAccountsView providerId={providerId} />, { wrapper: Wrapper })
+  return {
+    ...render(<ProviderAccountsView providerId={providerId} />, { wrapper: Wrapper }),
+    client,
+  }
 }
 
 describe("ProviderAccountsView", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    useUIStore.setState({ language: "zh" })
+    useUIStore.setState({ language: "zh", accountView: "cards" })
     vi.mocked(listProviders).mockResolvedValue([provider])
     vi.mocked(listAccounts).mockResolvedValue([account])
     vi.mocked(deleteAccount).mockResolvedValue(undefined)
+    vi.mocked(getAccountKeyPreview).mockResolvedValue("sk-t••••••••1234")
+    vi.mocked(copyAccountKey).mockResolvedValue(undefined)
   })
 
   it("shows account metadata and labels unavailable balance honestly", async () => {
@@ -157,5 +167,62 @@ describe("ProviderAccountsView", () => {
     await user.click(screen.getByRole("button", { name: "确认删除" }))
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
     expect(deleteAccount).toHaveBeenCalledTimes(2)
+  })
+
+  it("switches views without changing accounts and remembers the selected mode", async () => {
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    await screen.findByRole("heading", { name: "主账号" })
+    expect(screen.getByRole("radio", { name: "卡片展示" })).toBeChecked()
+    await user.click(screen.getByRole("radio", { name: "列表展示" }))
+    const table = screen.getByRole("table", { name: "账号信息列表" })
+    expect(within(table).getByRole("rowheader", { name: /主账号/ })).toBeInTheDocument()
+    expect(within(table).getByRole("columnheader", { name: "API Key 密钥" })).toBeInTheDocument()
+    expect(await within(table).findByText("sk-t••••••••1234")).toBeInTheDocument()
+    expect(useUIStore.getState().accountView).toBe("list")
+    expect(JSON.parse(localStorage.getItem("omniproxy-ui-state")!).state.accountView).toBe("list")
+    await user.click(screen.getByRole("radio", { name: "卡片展示" }))
+    expect(screen.queryByRole("table")).not.toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "主账号" })).toBeInTheDocument()
+    expect(deleteAccount).not.toHaveBeenCalled()
+    expect(setAccountEnabled).not.toHaveBeenCalled()
+  })
+
+  it("keeps account controls and deletion confirmation working in list mode", async () => {
+    useUIStore.setState({ accountView: "list" })
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    await screen.findByRole("table")
+    vi.mocked(setAccountEnabled).mockResolvedValue({ ...account, enabled: false })
+    vi.mocked(listAccounts).mockResolvedValue([{ ...account, enabled: false }])
+    await user.click(screen.getByRole("switch", { name: "切换账号“主账号”的启用状态" }))
+    await waitFor(() => expect(setAccountEnabled).toHaveBeenCalledWith(account.id, false))
+    await waitFor(() => expect(screen.getByRole("switch")).not.toBeChecked())
+    await user.click(screen.getByRole("button", { name: "删除账号“主账号”" }))
+    const dialog = screen.getByRole("alertdialog", { name: "删除账号" })
+    await user.click(within(dialog).getByRole("button", { name: "取消" }))
+    expect(deleteAccount).not.toHaveBeenCalled()
+  })
+
+  it("copies through the desktop binding without receiving a full key", async () => {
+    const user = userEvent.setup()
+    const { client } = renderPage(provider.id)
+    await screen.findByText("sk-t••••••••1234")
+    await user.click(screen.getByRole("button", { name: "复制账号“主账号”的 API Key" }))
+    await waitFor(() => expect(copyAccountKey).toHaveBeenCalledExactlyOnceWith(account.id))
+    expect(await screen.findByRole("button", { name: "已复制" })).toBeInTheDocument()
+    expect(client.getQueryData(["account-key-preview", account.id])).toBe("sk-t••••••••1234")
+  })
+
+  it("shows key-read and clipboard failures without exposing key contents", async () => {
+    vi.mocked(getAccountKeyPreview).mockRejectedValueOnce(new Error("unavailable"))
+    const user = userEvent.setup()
+    renderPage(provider.id)
+    expect(await screen.findByText("读取失败")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "重新读取密钥信息" }))
+    await screen.findByText("sk-t••••••••1234")
+    vi.mocked(copyAccountKey).mockRejectedValueOnce(new Error("clipboard unavailable"))
+    await user.click(screen.getByRole("button", { name: "复制账号“主账号”的 API Key" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent("复制失败")
   })
 })

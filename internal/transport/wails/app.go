@@ -37,14 +37,16 @@ type App struct {
 // typed bindings. It carries no business logic of its own: feature services
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
-	prof       *profile.Profile
-	control    *httpapi.Server
-	db         *sql.DB
-	logFiles   *logger.Files
-	log        *slog.Logger
-	startedAt  time.Time
-	settingsMu sync.Mutex
-	autostart  autostartController
+	prof        *profile.Profile
+	control     *httpapi.Server
+	db          *sql.DB
+	logFiles    *logger.Files
+	log         *slog.Logger
+	startedAt   time.Time
+	settingsMu  sync.Mutex
+	autostart   autostartController
+	clipboardMu sync.Mutex
+	copyText    func(string) bool
 }
 
 // NewAppService creates the bound application service.
@@ -131,6 +133,7 @@ func Run(app *App) error {
 	})
 
 	app.Service.autostart = wailsApp.Autostart
+	app.Service.copyText = wailsApp.Clipboard.SetText
 	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "OmniProxy",
 		Frameless:        true,

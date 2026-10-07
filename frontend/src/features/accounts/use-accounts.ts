@@ -45,6 +45,9 @@ export function useDeleteAccount() {
   return useMutation({
     mutationFn: (id: string) => deleteAccount(id),
     // 清理密文失败时数据库记录也可能已删除，仍需刷新列表。
-    onSettled: () => client.invalidateQueries({ queryKey: accountQueryKey }),
+    onSettled: async (_data, _error, id) => {
+      await client.invalidateQueries({ queryKey: accountQueryKey })
+      client.removeQueries({ queryKey: ["account-key-preview", id] })
+    },
   })
 }

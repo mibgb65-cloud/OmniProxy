@@ -27,6 +27,14 @@ func (s *batchStore) Put(key []byte) (string, error) {
 	return ref, nil
 }
 
+func (s *batchStore) Get(ref string) ([]byte, error) {
+	key, found := s.values[ref]
+	if !found {
+		return nil, ErrNotFound
+	}
+	return append([]byte(nil), key...), nil
+}
+
 func (s *batchStore) Delete(ref string) error {
 	s.deleted = append(s.deleted, ref)
 	if s.failDelete {

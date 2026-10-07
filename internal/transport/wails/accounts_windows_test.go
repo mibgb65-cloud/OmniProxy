@@ -71,6 +71,19 @@ func TestAccountBindingsUseProtectedStore(t *testing.T) {
 			t.Fatal("batch credential did not survive protected storage")
 		}
 		clear(stored)
+		preview, err := svc.AccountKeyPreview(item.ID)
+		if err != nil || preview == keys[i] {
+			t.Fatal("preview binding leaked or failed to read the protected key")
+		}
+		copied := ""
+		svc.copyText = func(value string) bool { copied = value; return true }
+		if err := svc.CopyAccountKey(item.ID); err != nil || copied != keys[i] {
+			t.Fatal("copy binding did not use the protected key")
+		}
+		svc.copyText = func(string) bool { return false }
+		if err := svc.CopyAccountKey(item.ID); err == nil {
+			t.Fatal("clipboard failure was ignored")
+		}
 		if err := svc.DeleteAccount(item.ID); err != nil {
 			t.Fatal(err)
 		}

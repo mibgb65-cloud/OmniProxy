@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useUIStore } from "../../stores/ui-store"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
 import { useProviders } from "../providers/use-providers"
 import { AccountDetailsCard } from "./account-details-card"
+import { AccountDetailsList } from "./account-details-list"
+import { AccountViewToggle } from "./account-view-toggle"
 import { AddAccountDialog } from "./add-account-dialog"
 import { DeleteAccountDialog } from "./delete-account-dialog"
 import { useAccountActions } from "./use-account-actions"
@@ -15,6 +18,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
   const providers = useProviders()
   const accounts = useAccounts()
   const actions = useAccountActions()
+  const view = useUIStore((state) => state.accountView)
   const provider = providers.data?.find((item) => item.id === providerId)
   const name =
     provider?.source === "builtin" && isKnownProviderKind(provider.kind)
@@ -60,11 +64,14 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                 </p>
               </div>
             </div>
-            <AddAccountDialog
-              provider={provider}
-              onCreate={actions.save}
-              onBatchCreate={actions.saveBatch}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <AccountViewToggle />
+              <AddAccountDialog
+                provider={provider}
+                onCreate={actions.save}
+                onBatchCreate={actions.saveBatch}
+              />
+            </div>
           </header>
           {!provider.enabled ? (
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
@@ -79,8 +86,15 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-sm">
               {t("accounts.empty")}
             </p>
+          ) : view === "list" ? (
+            <AccountDetailsList
+              accounts={items}
+              busy={actions.busy}
+              onToggle={actions.toggle}
+              onDelete={actions.deleteItem}
+            />
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-3 min-[1800px]:grid-cols-3 md:grid-cols-2">
               {items.map((account) => (
                 <AccountDetailsCard
                   key={account.id}

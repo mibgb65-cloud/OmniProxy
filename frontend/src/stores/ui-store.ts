@@ -3,6 +3,12 @@ import { persist } from "zustand/middleware"
 import { defaultLanguage, isLanguage, type Language } from "../i18n/translation"
 import { defaultTheme, isTheme, type Theme } from "../lib/theme"
 
+export type AccountView = "cards" | "list"
+
+export function isAccountView(value: unknown): value is AccountView {
+  return value === "cards" || value === "list"
+}
+
 interface UIState {
   sidebarCollapsed: boolean
   toggleSidebar: () => void
@@ -12,10 +18,13 @@ interface UIState {
   /** Selected colour theme; persisted to localStorage. */
   theme: Theme
   toggleTheme: () => void
+  /** 账号详情的展示方式；持久化保存，不包含账号数据。 */
+  accountView: AccountView
+  setAccountView: (view: AccountView) => void
 }
 
 /**
- * UI state only (sidebar, language, theme). Backend data belongs in TanStack
+ * UI state only (sidebar, language, theme, account view). Backend data belongs in TanStack
  * Query. Persist preferences so they survive restarts.
  */
 export const useUIStore = create<UIState>()(
@@ -27,6 +36,8 @@ export const useUIStore = create<UIState>()(
       setLanguage: (language) => set({ language }),
       theme: defaultTheme,
       toggleTheme: () => set((s) => ({ theme: s.theme === "dark" ? "light" : "dark" })),
+      accountView: "cards",
+      setAccountView: (accountView) => set({ accountView }),
     }),
     {
       name: "omniproxy-ui-state",
@@ -42,6 +53,9 @@ export const useUIStore = create<UIState>()(
               : current.sidebarCollapsed,
           language: isLanguage(stored?.language) ? stored.language : current.language,
           theme: isTheme(stored?.theme) ? stored.theme : current.theme,
+          accountView: isAccountView(stored?.accountView)
+            ? stored.accountView
+            : current.accountView,
         }
       },
     },
