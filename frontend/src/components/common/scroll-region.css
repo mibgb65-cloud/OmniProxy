@@ -31,6 +31,15 @@
   touch-action: none;
 }
 
+/* 主内容轨道避开窗口右侧缩放区域，底部额外让出范围更大的右下角缩放区域。 */
+.scroll-region--window-edge {
+  padding-right: 8px;
+}
+
+.scroll-region--window-edge > .scroll-region__rail {
+  margin-bottom: 20px;
+}
+
 .scroll-region__thumb {
   position: absolute;
   top: 0;

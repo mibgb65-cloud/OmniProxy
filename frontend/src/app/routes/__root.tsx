@@ -13,7 +13,7 @@ function RootLayout() {
       <AppTitlebar />
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <AppSidebar />
-        <ScrollRegion as="main" className="min-w-0 flex-1">
+        <ScrollRegion as="main" className="scroll-region--window-edge min-w-0 flex-1">
           {/* 统一限制页面左右留白，超宽窗口也不会让内容缩在中央。 */}
           <div className="w-full min-w-0 px-[clamp(16px,2.5vw,96px)] py-6">
             <Outlet />
