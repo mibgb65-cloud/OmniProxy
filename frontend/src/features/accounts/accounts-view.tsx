@@ -48,7 +48,7 @@ export function AccountsView() {
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div className="grid items-start gap-3 min-[3000px]:grid-cols-4 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {orderedProviders.map((provider) => (
             <AccountProviderCard
               key={provider.id}

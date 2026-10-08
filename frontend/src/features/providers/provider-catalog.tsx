@@ -30,7 +30,7 @@ export function ProviderCatalog({
           {t("providers.catalog")}
         </h2>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {definitions.map((definition) => {
           const name = isKnownProviderKind(definition.kind)
             ? t(providerNameKeys[definition.kind])

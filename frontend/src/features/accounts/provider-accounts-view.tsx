@@ -101,7 +101,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               onEdit={actions.editItem}
             />
           ) : (
-            <div className="grid gap-3 min-[1800px]:grid-cols-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {items.map((account) => (
                 <AccountDetailsCard
                   key={account.id}
