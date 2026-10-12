@@ -17,17 +17,123 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 import * as account$0 from "../../application/account/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as activity$0 from "../../application/activity/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as agentconfig$0 from "../../application/agentconfig/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as agentinstall$0 from "../../application/agentinstall/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as balance$0 from "../../application/balance/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as gateway$0 from "../../application/gateway/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as modelcatalog$0 from "../../application/modelcatalog/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as provider$0 from "../../application/provider/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as routing$0 from "../../application/routing/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as subscription$0 from "../../application/subscription/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as routing$1 from "../../core/routing/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as logger$0 from "../../infrastructure/logger/models.js";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
 import * as $models from "./models.js";
 
 /**
+ * AccountBalance 仅返回公开余额，凭据在后端回调内使用和清理。
+ */
+export function AccountBalance(id: string): $CancellablePromise<balance$0.Info> {
+    return $Call.ByID(2986880376, id);
+}
+
+/**
  * AccountKeyPreview 返回密钥脱敏文本，不返回完整密钥或凭证引用。
  */
 export function AccountKeyPreview(id: string): $CancellablePromise<string> {
     return $Call.ByID(2889239957, id);
+}
+
+export function AgentApply(input: agentconfig$0.Input): $CancellablePromise<agentconfig$0.Item[] | null> {
+    return $Call.ByID(1413500582, input);
+}
+
+export function AgentClients(): $CancellablePromise<agentconfig$0.Item[] | null> {
+    return $Call.ByID(1622463050);
+}
+
+/**
+ * AgentCopyKey 在桌面端复制本地接入 Key，不通过绑定返回完整凭据。
+ */
+export function AgentCopyKey(client: string): $CancellablePromise<void> {
+    return $Call.ByID(311812714, client);
+}
+
+/**
+ * AgentInstall 只接受固定客户端 ID，返回后台任务状态。
+ */
+export function AgentInstall(id: string): $CancellablePromise<agentinstall$0.Snapshot> {
+    return $Call.ByID(3055535909, id);
+}
+
+/**
+ * AgentInstallationOpenOfficial 只打开固定客户端的官方说明，不接受任意 URL。
+ */
+export function AgentInstallationOpenOfficial(id: string): $CancellablePromise<void> {
+    return $Call.ByID(3577453551, id);
+}
+
+/**
+ * AgentInstallations 返回本机安装元数据和后台任务快照，不执行安装。
+ */
+export function AgentInstallations(): $CancellablePromise<agentinstall$0.Snapshot> {
+    return $Call.ByID(344085223);
+}
+
+/**
+ * AgentInstallationsRefresh 明确刷新检测结果，不读取客户端登录和会话。
+ */
+export function AgentInstallationsRefresh(): $CancellablePromise<agentinstall$0.Snapshot> {
+    return $Call.ByID(85719882);
+}
+
+/**
+ * AgentOpenClaudeCode 打开官方 Code 编程入口，不附带任务、项目路径或凭据。
+ */
+export function AgentOpenClaudeCode(): $CancellablePromise<void> {
+    return $Call.ByID(2742116713);
+}
+
+export function AgentPreview(input: agentconfig$0.Input): $CancellablePromise<string> {
+    return $Call.ByID(3256128818, input);
+}
+
+/**
+ * AgentPreviewPlan 返回受校验目录快照，供一键配置预览和应用使用。
+ */
+export function AgentPreviewPlan(input: agentconfig$0.Input): $CancellablePromise<agentconfig$0.Plan> {
+    return $Call.ByID(1554851897, input);
+}
+
+export function AgentRestore(client: string): $CancellablePromise<agentconfig$0.Item[] | null> {
+    return $Call.ByID(3092409068, client);
+}
+
+export function AgentSetEnabled(client: string, enabled: boolean): $CancellablePromise<void> {
+    return $Call.ByID(891263155, client, enabled);
 }
 
 /**
@@ -83,6 +189,20 @@ export function CreateProvider(input: provider$0.CreateInput): $CancellablePromi
 }
 
 /**
+ * CreateRoute 保存模型精确映射。
+ */
+export function CreateRoute(input: routing$0.Input): $CancellablePromise<routing$1.Rule> {
+    return $Call.ByID(3489523214, input);
+}
+
+/**
+ * DashboardRead 读取本地运行统计，不查询官方配额或调用模型。
+ */
+export function DashboardRead(query: activity$0.DashboardQuery): $CancellablePromise<activity$0.DashboardInfo> {
+    return $Call.ByID(4084307607, query);
+}
+
+/**
  * DeleteAccount removes account metadata and its protected API Key.
  */
 export function DeleteAccount(id: string): $CancellablePromise<void> {
@@ -97,11 +217,39 @@ export function DeleteProvider(id: string): $CancellablePromise<void> {
 }
 
 /**
+ * DeleteRoute 只删除映射，不修改账号或提供商。
+ */
+export function DeleteRoute(id: string): $CancellablePromise<void> {
+    return $Call.ByID(819395059, id);
+}
+
+/**
  * DesktopSettings reads autostart from the OS and close behavior from the
  * profile config, so external OS changes are reflected on refresh.
  */
 export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> {
     return $Call.ByID(721192358);
+}
+
+/**
+ * GatewayInfo 返回真实运行状态和本版支持的协议，不读取密钥或调用模型。
+ */
+export function GatewayInfo(): $CancellablePromise<gateway$0.Info> {
+    return $Call.ByID(4242772873);
+}
+
+/**
+ * GatewayStart 仅启动 loopback 监听器。
+ */
+export function GatewayStart(): $CancellablePromise<gateway$0.Info> {
+    return $Call.ByID(2379269251);
+}
+
+/**
+ * GatewayStop 取消当前请求并在有限时间内停止代理。
+ */
+export function GatewayStop(): $CancellablePromise<gateway$0.Info> {
+    return $Call.ByID(980571153);
 }
 
 /**
@@ -112,6 +260,13 @@ export function ListAccounts(): $CancellablePromise<account$0.Item[] | null> {
 }
 
 /**
+ * ListDefaultRoutes 返回目录派生的同名映射、服务商候选和当前实际选择。
+ */
+export function ListDefaultRoutes(): $CancellablePromise<routing$0.DefaultRoute[] | null> {
+    return $Call.ByID(3308824168);
+}
+
+/**
  * ListProviders returns saved provider configurations.
  */
 export function ListProviders(): $CancellablePromise<provider$0.Configuration[] | null> {
@@ -119,10 +274,60 @@ export function ListProviders(): $CancellablePromise<provider$0.Configuration[] 
 }
 
 /**
+ * ListRoutes 返回规则和配置诊断。
+ */
+export function ListRoutes(): $CancellablePromise<routing$0.Item[] | null> {
+    return $Call.ByID(757017339);
+}
+
+/**
+ * LogsExport 只接受记录 ID，正文从后端已脱敏缓存获取，文件路径由原生对话框提供。
+ */
+export function LogsExport(ids: number[] | null, language: string): $CancellablePromise<$models.LogExportResult> {
+    return $Call.ByID(2280813732, ids, language);
+}
+
+/**
+ * LogsHead 返回清空显示所需的当前位置，不删除内存或文件日志。
+ */
+export function LogsHead(): $CancellablePromise<number> {
+    return $Call.ByID(3091868248);
+}
+
+/**
+ * LogsOpenDirectory 仅打开当前环境的固定日志目录，不接受外部路径。
+ */
+export function LogsOpenDirectory(): $CancellablePromise<void> {
+    return $Call.ByID(3868379141);
+}
+
+/**
+ * LogsRead 返回有界的已脱敏结构化记录。
+ */
+export function LogsRead(query: logger$0.Query): $CancellablePromise<logger$0.Snapshot> {
+    return $Call.ByID(2906447574, query);
+}
+
+export function ModelCatalog(): $CancellablePromise<modelcatalog$0.Item[] | null> {
+    return $Call.ByID(3199922049);
+}
+
+export function ModelSync(id: string): $CancellablePromise<modelcatalog$0.Item[] | null> {
+    return $Call.ByID(3291025769, id);
+}
+
+/**
  * Ping is a liveness probe for the UI binding layer.
  */
 export function Ping(): $CancellablePromise<string> {
     return $Call.ByID(77535937);
+}
+
+/**
+ * PreviewRoute 解析配置，不调用模型或读取凭证。
+ */
+export function PreviewRoute(model: string): $CancellablePromise<routing$0.Preview> {
+    return $Call.ByID(2874593876, model);
 }
 
 /**
@@ -137,6 +342,22 @@ export function ProbeProvider(id: string): $CancellablePromise<provider$0.ProbeR
  */
 export function ProviderCatalog(): $CancellablePromise<provider$0.Definition[] | null> {
     return $Call.ByID(3706786763);
+}
+
+export function RequestRead(id: string): $CancellablePromise<activity$0.RequestItem> {
+    return $Call.ByID(3283823074, id);
+}
+
+export function RequestRetention(): $CancellablePromise<activity$0.Retention> {
+    return $Call.ByID(654949120);
+}
+
+export function RequestRetentionSet(limit: number): $CancellablePromise<activity$0.Retention> {
+    return $Call.ByID(46001136, limit);
+}
+
+export function RequestsRead(query: activity$0.RequestQuery): $CancellablePromise<activity$0.RequestPage> {
+    return $Call.ByID(1523608767, query);
 }
 
 /**
@@ -185,6 +406,13 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
 }
 
 /**
+ * SetModelPreferredProvider 保存模型服务商偏好，空值恢复自动选择。
+ */
+export function SetModelPreferredProvider(model: string, providerID: string): $CancellablePromise<void> {
+    return $Call.ByID(875548932, model, providerID);
+}
+
+/**
  * SetProviderEnabled changes the enabled state of a built-in or custom provider.
  */
 export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePromise<provider$0.Configuration> {
@@ -192,10 +420,87 @@ export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePr
 }
 
 /**
+ * SetRouteEnabled 修改规则开关。
+ */
+export function SetRouteEnabled(id: string, enabled: boolean): $CancellablePromise<routing$1.Rule> {
+    return $Call.ByID(3920308617, id, enabled);
+}
+
+/**
  * StorageInfo returns the current data storage locations and their sizes.
  */
 export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
     return $Call.ByID(3571019774);
+}
+
+/**
+ * SubscriptionBegin 通过官方本机 Codex 组件启动隔离授权。
+ */
+export function SubscriptionBegin(input: subscription$0.Input): $CancellablePromise<subscription$0.State> {
+    return $Call.ByID(544809649, input);
+}
+
+/**
+ * SubscriptionCancel 取消隔离授权并清理临时系统凭证。
+ */
+export function SubscriptionCancel(id: string): $CancellablePromise<subscription$0.State> {
+    return $Call.ByID(2979415694, id);
+}
+
+/**
+ * SubscriptionConsumeReset 通过稳定幂等键执行用户确认的单次手动兑换。
+ */
+export function SubscriptionConsumeReset(input: subscription$0.ResetInput): $CancellablePromise<subscription$0.ResetResult> {
+    return $Call.ByID(368141733, input);
+}
+
+/**
+ * SubscriptionCurrent 恢复仍在运行的后台授权，不启动或刷新登录。
+ */
+export function SubscriptionCurrent(providerID: string, accountID: string): $CancellablePromise<subscription$0.State> {
+    return $Call.ByID(1396366921, providerID, accountID);
+}
+
+/**
+ * SubscriptionLogout 清除该账号系统凭证并保留账号元数据。
+ */
+export function SubscriptionLogout(id: string): $CancellablePromise<account$0.Item> {
+    return $Call.ByID(1307528146, id);
+}
+
+/**
+ * SubscriptionOpen 只打开由官方组件返回且仍在等待中的授权位置。
+ */
+export function SubscriptionOpen(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1857869804, id);
+}
+
+/**
+ * SubscriptionQuota 查询订阅额度，返回公开百分比与重置时间，不返回官方身份或凭据。
+ */
+export function SubscriptionQuota(id: string): $CancellablePromise<subscription$0.Quota> {
+    return $Call.ByID(118241716, id);
+}
+
+/**
+ * SubscriptionRead 读取当前会话，不返回任何令牌。
+ */
+export function SubscriptionRead(id: string): $CancellablePromise<subscription$0.State> {
+    return $Call.ByID(4163247136, id);
+}
+
+/**
+ * SubscriptionRefresh 请求官方组件刷新授权并更新账号状态。
+ */
+export function SubscriptionRefresh(id: string): $CancellablePromise<account$0.Item> {
+    return $Call.ByID(1730020983, id);
+}
+
+/**
+ * SubscriptionResetStatus 返回最近操作回执，不触发官方兑换。
+ */
+export function SubscriptionResetStatus(id: string): $CancellablePromise<subscription$0.ResetOperation> {
+    return $Call.ByID(1027449805, id);
 }
 
 /**
@@ -210,4 +515,15 @@ export function UpdateAccount(input: account$0.UpdateInput): $CancellablePromise
  */
 export function UpdateProvider(id: string, input: provider$0.UpdateInput): $CancellablePromise<provider$0.Configuration> {
     return $Call.ByID(1968740345, id, input);
+}
+
+/**
+ * UpdateRoute 修改模型映射。
+ */
+export function UpdateRoute(id: string, input: routing$0.Input): $CancellablePromise<routing$1.Rule> {
+    return $Call.ByID(3627115793, id, input);
+}
+
+export function UsageRead(): $CancellablePromise<activity$0.UsageInfo> {
+    return $Call.ByID(2721413860);
 }

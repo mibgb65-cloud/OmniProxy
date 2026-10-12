@@ -40,7 +40,13 @@ export function DeleteAccountDialog({
               <AlertDialog.Description className="text-muted-foreground text-sm break-words">
                 {t("accounts.deleteConfirm", { name: actions.deleteTarget?.name ?? "" })}
               </AlertDialog.Description>
-              <p className="text-muted-foreground text-xs">{t("accounts.deleteNotice")}</p>
+              <p className="text-muted-foreground text-xs">
+                {t(
+                  actions.deleteTarget?.authMethod === "subscription_login"
+                    ? "subscription.deleteNotice"
+                    : "accounts.deleteNotice",
+                )}
+              </p>
             </div>
           </div>
           {actions.deleteError ? (

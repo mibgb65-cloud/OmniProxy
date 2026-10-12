@@ -19,9 +19,12 @@ func (s *Service) UseAPIKey(ctx context.Context, id string, consume func([]byte)
 	if consume == nil {
 		return fmt.Errorf("%w: key consumer", ErrInvalidInput)
 	}
-	_, ref, err := s.get(ctx, id)
+	item, ref, err := s.get(ctx, id)
 	if err != nil {
 		return err
+	}
+	if item.AuthMethod != AuthAPIKey {
+		return fmt.Errorf("%w: credential type", ErrInvalidInput)
 	}
 	if ref == "" {
 		return ErrNotFound

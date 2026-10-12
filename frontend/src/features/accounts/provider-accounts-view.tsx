@@ -13,6 +13,7 @@ import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
+import { OpenAIAccountSettings } from "./openai-account-settings"
 
 export function ProviderAccountsView({ providerId }: { providerId: string }) {
   const { t } = useTranslation()
@@ -66,6 +67,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {provider.kind === "openai" ? <OpenAIAccountSettings /> : null}
               <AccountViewToggle />
               <AddAccountDialog
                 provider={provider}
@@ -77,7 +79,11 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           {!provider.enabled ? (
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
           ) : null}
-          <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
+          {provider.kind !== "deepseek" &&
+            (provider.kind !== "openai" ||
+            items.some((account) => account.authMethod !== "subscription_login") ? (
+              <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
+            ) : null)}
           {actions.actionError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("accounts.actionFailed")}
@@ -99,6 +105,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
               onEdit={actions.editItem}
+              balanceSupported={provider.kind === "deepseek"}
             />
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -110,6 +117,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                   onToggle={actions.toggle}
                   onDelete={actions.deleteItem}
                   onEdit={actions.editItem}
+                  balanceSupported={provider.kind === "deepseek"}
                 />
               ))}
             </div>

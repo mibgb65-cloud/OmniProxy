@@ -112,10 +112,12 @@ describe("ProvidersView", () => {
 
   it("shows nine enabled built-ins without an add action", async () => {
     renderPage()
-    expect(await screen.findByRole("switch", { name: "切换OpenAI提供商的启用状态" })).toBeChecked()
+    expect(
+      await screen.findByRole("button", { name: "切换OpenAI提供商的启用状态" }),
+    ).toHaveAttribute("aria-pressed", "true")
     expect(screen.getByRole("heading", { name: "提供商" })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "内置提供商" })).toBeInTheDocument()
-    expect(screen.getAllByRole("switch")).toHaveLength(9)
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(9)
     expect(screen.getByText("订阅登录 · 待接入")).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "新增自定义提供商" })).toHaveLength(1)
     expect(screen.getByText("还没有自定义提供商。")).toBeInTheDocument()
@@ -125,13 +127,24 @@ describe("ProvidersView", () => {
     expect(screen.queryByText(/九家提供商已预设并默认启用/)).not.toBeInTheDocument()
   })
 
-  it("persists a built-in switch without changing the preset", async () => {
+  it("persists a built-in power toggle without changing the preset", async () => {
     const user = userEvent.setup()
     renderPage()
-    await user.click(await screen.findByRole("switch", { name: "切换OpenAI提供商的启用状态" }))
+    await user.click(await screen.findByRole("button", { name: "切换OpenAI提供商的启用状态" }))
     await waitFor(() => expect(setProviderEnabled).toHaveBeenCalledWith("builtin_openai", false))
     await waitFor(() =>
-      expect(screen.getByRole("switch", { name: "切换OpenAI提供商的启用状态" })).not.toBeChecked(),
+      expect(screen.getByRole("button", { name: "切换OpenAI提供商的启用状态" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      ),
+    )
+    await user.click(screen.getByRole("button", { name: "切换OpenAI提供商的启用状态" }))
+    await waitFor(() => expect(setProviderEnabled).toHaveBeenLastCalledWith("builtin_openai", true))
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "切换OpenAI提供商的启用状态" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      ),
     )
     expect(createProvider).not.toHaveBeenCalled()
   })
@@ -148,6 +161,24 @@ describe("ProvidersView", () => {
     expect(screen.getAllByRole("button", { name: "测试" })[0].previousElementSibling).toBe(tip)
     await waitFor(() => expect(tip).toHaveAttribute("data-state", "closed"), { timeout: 5_000 })
     expect(tip).toHaveAttribute("aria-hidden", "true")
+  })
+
+  it("blocks repeated power toggles while a provider update is pending", async () => {
+    const user = userEvent.setup()
+    let finishUpdate!: (item: ProviderConfiguration) => void
+    vi.mocked(setProviderEnabled).mockImplementation(
+      () => new Promise((resolve) => (finishUpdate = resolve)),
+    )
+    renderPage()
+    const button = await screen.findByRole("button", { name: "切换OpenAI提供商的启用状态" })
+    await user.click(button)
+    await waitFor(() => expect(button).toBeDisabled())
+    await user.click(button)
+    expect(setProviderEnabled).toHaveBeenCalledTimes(1)
+    saved = saved.map((item) => (item.id === "builtin_openai" ? { ...item, enabled: false } : item))
+    finishUpdate(saved.find((item) => item.id === "builtin_openai")!)
+    await waitFor(() => expect(button).toBeEnabled())
+    expect(button).toHaveAttribute("aria-pressed", "false")
   })
 
   it("requires a URL and creates an enabled custom provider", async () => {
@@ -169,9 +200,9 @@ describe("ProvidersView", () => {
       }),
     )
     expect(
-      await screen.findByRole("switch", { name: "切换My endpoint提供商的启用状态" }),
-    ).toBeChecked()
-    expect(screen.getAllByRole("switch")).toHaveLength(10)
+      await screen.findByRole("button", { name: "切换My endpoint提供商的启用状态" }),
+    ).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(10)
   })
 
   it("edits, disables and deletes only the custom provider", async () => {
@@ -183,12 +214,12 @@ describe("ProvidersView", () => {
     await user.type(screen.getByRole("textbox", { name: "配置名称" }), "Backup")
     await user.click(screen.getByRole("button", { name: "保存配置" }))
     expect(await screen.findByText("Backup")).toBeInTheDocument()
-    await user.click(screen.getByRole("switch", { name: "切换Backup提供商的启用状态" }))
+    await user.click(screen.getByRole("button", { name: "切换Backup提供商的启用状态" }))
     await waitFor(() => expect(setProviderEnabled).toHaveBeenCalledWith(custom.id, false))
     await user.click(screen.getByRole("button", { name: "删除" }))
     await user.click(screen.getAllByRole("button", { name: "删除" })[1])
     expect(await screen.findByText("还没有自定义提供商。")).toBeInTheDocument()
-    expect(screen.getAllByRole("switch")).toHaveLength(9)
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(9)
   })
 
   it("keeps an existing provider configuration with an empty URL editable", async () => {

@@ -29,6 +29,8 @@ secrets*
 # --- Logs & local data ---
 *.log
 logs/
+!frontend/src/features/logs/
+!frontend/src/features/logs/**
 coverage/
 omniproxy.db
 omniproxy.db-wal

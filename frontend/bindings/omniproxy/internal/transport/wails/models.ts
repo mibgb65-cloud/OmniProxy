@@ -32,6 +32,22 @@ export interface DesktopSettings {
 }
 
 /**
+ * LogExportResult 报告导出条数及缓存中已过期的选择，取消不是导出成功。
+ */
+export interface LogExportResult {
+    "cancelled": boolean;
+    "count": number;
+    "missing": number;
+}
+
+/**
+ * LogNotice 只通知最新序号，日志正文通过有界绑定接口读取。
+ */
+export interface LogNotice {
+    "latestId": number;
+}
+
+/**
  * RuntimeInfo is a snapshot of the application runtime for the About page.
  */
 export interface RuntimeInfo {
@@ -80,6 +96,13 @@ export interface StorageItem {
     "name": string;
     "path": string;
     "bytes": number;
+}
+
+/**
+ * SubscriptionNotice 只发送状态信号，不携带个人身份或授权 URL。
+ */
+export interface SubscriptionNotice {
+    "changed": boolean;
 }
 
 /**

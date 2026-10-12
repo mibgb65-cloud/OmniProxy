@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { Events } from "@wailsio/runtime"
 import {
   createAccount,
   createAccounts,
@@ -14,6 +16,14 @@ import {
 const accountQueryKey = ["accounts"] as const
 
 export function useAccounts() {
+  const client = useQueryClient()
+  useEffect(
+    () =>
+      Events.On("subscription:updated", () => {
+        void client.invalidateQueries({ queryKey: accountQueryKey })
+      }),
+    [client],
+  )
   return useQuery({ queryKey: accountQueryKey, queryFn: listAccounts })
 }
 

@@ -1,0 +1,93 @@
+.sidebar-gateway {
+  --gateway-transition: var(--sidebar-duration, 250ms) var(--sidebar-easing, ease-in-out);
+}
+
+.sidebar-gateway-card {
+  position: relative;
+}
+
+/* 固定保留按钮与状态点的高度，只折叠额外详情，避免 min-height 截断过渡。 */
+.sidebar-gateway-heading {
+  position: relative;
+  height: 3.875rem;
+  padding: calc(0.75rem + 1px);
+  transition: opacity var(--gateway-transition);
+}
+
+.sidebar-gateway-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--gateway-transition);
+}
+
+.sidebar-gateway-surface {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity var(--gateway-transition);
+}
+
+.sidebar-gateway-viewport {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  transition: opacity var(--gateway-transition);
+}
+
+.sidebar-gateway-heading,
+.sidebar-gateway-details {
+  /* 内容始终按展开宽度排版，避免侧栏变窄时文字换行、反复撑高导航。 */
+  width: calc(var(--sidebar-expanded-width, 14rem) - 1rem - 1px);
+}
+
+.sidebar-gateway-details {
+  padding: calc(0.125rem + 1px) calc(0.75rem + 1px) calc(0.75rem + 1px);
+}
+
+.sidebar-gateway-power {
+  position: absolute;
+  top: calc(1rem + 1px);
+  right: calc(0.75rem + 1px);
+  transition:
+    top var(--gateway-transition),
+    right var(--gateway-transition);
+}
+
+.sidebar-gateway-dot {
+  position: absolute;
+  top: 3rem;
+  left: calc(2rem - 0.5rem - 0.5px - 0.1875rem);
+  opacity: 0;
+  transition: opacity var(--gateway-transition);
+}
+
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-body {
+  grid-template-rows: 0fr;
+}
+
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-surface,
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-heading,
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-viewport {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-power {
+  top: 0.5rem;
+  right: calc(0.5rem - 0.5px);
+}
+
+.sidebar-gateway[data-collapsed="true"] .sidebar-gateway-dot {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-gateway-body,
+  .sidebar-gateway-heading,
+  .sidebar-gateway-surface,
+  .sidebar-gateway-viewport,
+  .sidebar-gateway-power,
+  .sidebar-gateway-dot {
+    transition: none;
+  }
+}

@@ -74,7 +74,11 @@ export function AccountEditForm({
               {t("accounts.edit.title")}
             </Dialog.Title>
             <Dialog.Description className="text-muted-foreground text-sm">
-              {t("accounts.edit.description")}
+              {t(
+                account.authMethod === "subscription_login"
+                  ? "subscription.editDescription"
+                  : "accounts.edit.description",
+              )}
             </Dialog.Description>
           </div>
           <Dialog.Close asChild>
@@ -114,37 +118,41 @@ export function AccountEditForm({
               </p>
             ) : null}
           </div>
-          <div className="space-y-1.5">
-            <p className="text-sm font-medium">{t("accounts.edit.currentKey")}</p>
-            <AccountKeyPreview account={account} />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="edit-account-key" className="text-sm font-medium">
-              {t("accounts.apiKey")}
-            </label>
-            <Input
-              id="edit-account-key"
-              type="password"
-              value={apiKey}
-              disabled={saving}
-              maxLength={MAX_KEY_BYTES}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              onChange={(event) => setAPIKey(event.target.value)}
-              placeholder={t("accounts.edit.keyPlaceholder")}
-              aria-invalid={invalidKey}
-              aria-describedby={invalidKey ? "edit-key-hint edit-key-error" : "edit-key-hint"}
-            />
-            <p id="edit-key-hint" className="text-muted-foreground text-xs">
-              {t("accounts.edit.keyHint")}
-            </p>
-            {invalidKey ? (
-              <p id="edit-key-error" className="text-destructive text-xs">
-                {t("accounts.keyInvalid")}
-              </p>
-            ) : null}
-          </div>
+          {account.authMethod !== "subscription_login" ? (
+            <>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium">{t("accounts.edit.currentKey")}</p>
+                <AccountKeyPreview account={account} />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="edit-account-key" className="text-sm font-medium">
+                  {t("accounts.apiKey")}
+                </label>
+                <Input
+                  id="edit-account-key"
+                  type="password"
+                  value={apiKey}
+                  disabled={saving}
+                  maxLength={MAX_KEY_BYTES}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  onChange={(event) => setAPIKey(event.target.value)}
+                  placeholder={t("accounts.edit.keyPlaceholder")}
+                  aria-invalid={invalidKey}
+                  aria-describedby={invalidKey ? "edit-key-hint edit-key-error" : "edit-key-hint"}
+                />
+                <p id="edit-key-hint" className="text-muted-foreground text-xs">
+                  {t("accounts.edit.keyHint")}
+                </p>
+                {invalidKey ? (
+                  <p id="edit-key-error" className="text-destructive text-xs">
+                    {t("accounts.keyInvalid")}
+                  </p>
+                ) : null}
+              </div>
+            </>
+          ) : null}
           {saveError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("accounts.saveFailed")}

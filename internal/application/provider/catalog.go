@@ -20,7 +20,7 @@ const (
 )
 
 var definitions = []Definition{
-	{Kind: "openai", Name: "OpenAI", DefaultBaseURL: "https://api.openai.com/v1", Models: []string{"GPT-5.4", "GPT-5.4 Mini", "GPT-4.1", "o3"}, AuthMethods: []string{AuthAPIKey}, PlannedAuthMethods: []string{AuthSubscriptionLogin}},
+	{Kind: "openai", Name: "OpenAI", DefaultBaseURL: "https://api.openai.com/v1", Models: []string{"GPT-5.4", "GPT-5.4 Mini", "GPT-4.1", "o3"}, AuthMethods: []string{AuthAPIKey, AuthSubscriptionLogin}},
 	{Kind: "anthropic", Name: "Anthropic", DefaultBaseURL: "https://api.anthropic.com/v1", Models: []string{"Claude Opus 5.5", "Claude Sonnet 5", "Claude Haiku 4.5", "Claude Fable 5.1"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "google", Name: "Google", DefaultBaseURL: "https://generativelanguage.googleapis.com/v1beta", Models: []string{"Gemini 3.8 Flash", "Gemini 3.7 Flash", "Gemini 3.1 Pro", "Gemini Embedding"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "deepseek", Name: "DeepSeek", DefaultBaseURL: "https://api.deepseek.com", Models: []string{"DeepSeek V4.1 Flash", "DeepSeek V4 Pro"}, AuthMethods: []string{AuthAPIKey}},

@@ -33,7 +33,7 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		return Item{}, fmt.Errorf("account: protect API Key: %w", err)
 	}
 	timestamp := now()
-	item := Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp}
+	item := Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp, AuthMethod: AuthAPIKey}
 	_, err = s.db.ExecContext(ctx, `
 		INSERT INTO accounts (id, provider_id, name, credential_ref, enabled, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`, item.ID, item.ProviderID, item.Name, ref, item.Enabled, item.CreatedAt, item.UpdatedAt)
@@ -78,12 +78,24 @@ func (s *Service) SetEnabled(ctx context.Context, id string, enabled bool) (Item
 
 // Delete removes account metadata, then its protected credential.
 func (s *Service) Delete(ctx context.Context, id string) error {
+	return s.deleteAccount(ctx, id, false)
+}
+
+// DeleteManaged 由订阅生命周期服务完成系统凭证注销后调用。
+func (s *Service) DeleteManaged(ctx context.Context, id string) error {
+	return s.deleteAccount(ctx, id, true)
+}
+
+func (s *Service) deleteAccount(ctx context.Context, id string, managed bool) error {
 	if err := validateID(id); err != nil {
 		return err
 	}
-	_, ref, err := s.get(ctx, id)
+	item, ref, err := s.get(ctx, id)
 	if err != nil {
 		return err
+	}
+	if item.AuthMethod == AuthSubscription && !managed {
+		return fmt.Errorf("%w: managed deletion required", ErrInvalidInput)
 	}
 	result, err := s.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = ?`, id)
 	if err != nil {

@@ -14,6 +14,24 @@ type Files struct {
 	dir    string
 	path   string
 	active *rotatingFile
+	buffer *UIBuffer
+	level  string
+}
+
+// Buffer 供桌面适配层读取脱敏记录；无文件日志配置时返回 nil。
+func (f *Files) Buffer() *UIBuffer {
+	if f == nil {
+		return nil
+	}
+	return f.buffer
+}
+
+// RecordedLevel 表示实际采集级别，界面筛选不会改变它。
+func (f *Files) RecordedLevel() string {
+	if f == nil {
+		return ""
+	}
+	return f.level
 }
 
 // Close closes the active log file. It is safe to call more than once.

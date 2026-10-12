@@ -28,6 +28,11 @@ export interface Item {
     "enabled": boolean;
     "createdAt": string;
     "updatedAt": string;
+    "authMethod"?: string;
+    "authEmail"?: string;
+    "authPlan"?: string;
+    "authState"?: string;
+    "authAccountId"?: string;
 }
 
 /**

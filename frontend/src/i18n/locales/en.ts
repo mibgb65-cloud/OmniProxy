@@ -1,10 +1,35 @@
+import { subscriptionEn } from "./subscription-en"
 import type { zh } from "./zh"
+import { gatewayEn } from "./gateway-en"
+import { routingEn } from "./routing-en"
+import { logsEn } from "./logs-en"
+import { balanceEn } from "./balance-en"
+import { agentsEn } from "./agents-en"
+import { activityEn } from "./activity-en"
+import { quotaEn } from "./quota-en"
+import { dashboardEn } from "./dashboard-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...gatewayEn,
+  ...routingEn,
+  ...logsEn,
+  ...subscriptionEn,
+  ...balanceEn,
+  ...agentsEn,
+  ...activityEn,
+  ...quotaEn,
+  ...dashboardEn,
+  "settings.appearance.title": "Appearance",
+  "settings.appearance.description":
+    "Adjust text size across the app. Changes apply immediately and are saved automatically.",
+  "settings.appearance.fontSize": "Global text size",
+  "settings.appearance.reset": "Restore default",
+  "settings.appearance.preview": "This is a text size preview.",
+  "settings.appearance.previewDetail": "Descriptions and timestamps scale together",
   "app.title": "OmniProxy - Local AI API Gateway",
 
   "window.title": "OmniProxy",
@@ -165,6 +190,8 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.enabled": "Enabled",
   "providers.disabled": "Disabled",
   "providers.toggleLabel": "Toggle {{name}} provider",
+  "providers.power.enable": "Enable provider",
+  "providers.power.disable": "Disable provider",
   "providers.apiKey": "API key",
   "providers.subscriptionPlanned": "Subscription login · Planned",
   "providers.name": "Configuration name",
@@ -239,6 +266,8 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.enabled": "Enabled",
   "accounts.disabled": "Disabled",
   "accounts.toggleLabel": "Toggle {{name}} account",
+  "accounts.power.enable": "Enable account",
+  "accounts.power.disable": "Disable account",
   "accounts.delete": "Delete",
   "accounts.deleteLabel": "Delete {{name}} account",
   "accounts.deleteConfirm": "Delete “{{name}}” and its saved key?",

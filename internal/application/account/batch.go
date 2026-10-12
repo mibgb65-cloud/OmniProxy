@@ -40,7 +40,7 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 		if idErr != nil {
 			return nil, fmt.Errorf("account: generate batch ID: %w", idErr)
 		}
-		items[i] = Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp}
+		items[i] = Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp, AuthMethod: AuthAPIKey}
 	}
 	if err := s.checkProvider(ctx, input.ProviderID); err != nil {
 		return nil, err

@@ -1,3 +1,4 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { Clipboard } from "@wailsio/runtime"
 import { Check, Copy } from "lucide-react"
 import { useState } from "react"
@@ -37,25 +38,26 @@ export function StoragePathList({ data }: { data: StorageInfo }) {
           >
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
               <dt className="text-muted-foreground shrink-0 text-xs sm:w-20">{label}</dt>
-              <dd className="min-w-0 flex-1 truncate font-mono text-xs" title={path}>
-                {path}
-              </dd>
+              <Tooltip content={path}>
+                <dd className="min-w-0 flex-1 truncate font-mono text-xs">{path}</dd>
+              </Tooltip>
             </div>
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="outline"
-              className="text-muted-foreground hover:text-foreground size-9"
-              aria-label={t("settings.storage.copyPath", { label })}
-              title={t("settings.storage.copyPath", { label })}
-              onClick={() => void copyPath(path, label)}
-            >
-              {feedback?.path === path && !feedback.error ? (
-                <Check aria-hidden="true" />
-              ) : (
-                <Copy aria-hidden="true" />
-              )}
-            </Button>
+            <Tooltip content={t("settings.storage.copyPath", { label })}>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                className="text-muted-foreground hover:text-foreground size-9"
+                aria-label={t("settings.storage.copyPath", { label })}
+                onClick={() => void copyPath(path, label)}
+              >
+                {feedback?.path === path && !feedback.error ? (
+                  <Check aria-hidden="true" />
+                ) : (
+                  <Copy aria-hidden="true" />
+                )}
+              </Button>
+            </Tooltip>
           </div>
         ))}
       </dl>

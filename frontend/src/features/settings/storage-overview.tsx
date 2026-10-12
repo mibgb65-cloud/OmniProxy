@@ -1,3 +1,4 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -21,18 +22,22 @@ export function StorageOverview() {
           <CardTitle className="text-base">{t("settings.storage.title")}</CardTitle>
           <CardDescription className="mt-1">{t("settings.storage.description")}</CardDescription>
         </div>
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          className="text-muted-foreground hover:bg-muted/50 hover:text-foreground dark:hover:bg-muted/50 size-9 appearance-none border bg-transparent dark:bg-transparent"
-          aria-label={t("settings.storage.refresh")}
-          title={t("settings.storage.refresh")}
-          disabled={isFetching}
-          onClick={() => void refetch()}
-        >
-          <RefreshCw aria-hidden="true" className={isFetching ? "motion-safe:animate-spin" : ""} />
-        </Button>
+        <Tooltip content={t("settings.storage.refresh")}>
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            className="text-muted-foreground hover:bg-muted/50 hover:text-foreground dark:hover:bg-muted/50 size-9 appearance-none border bg-transparent dark:bg-transparent"
+            aria-label={t("settings.storage.refresh")}
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={isFetching ? "motion-safe:animate-spin" : ""}
+            />
+          </Button>
+        </Tooltip>
       </CardHeader>
       <CardContent className="text-sm">
         {isPending ? <p className="text-muted-foreground">{t("dashboard.loading")}</p> : null}

@@ -1,12 +1,16 @@
 import { createMemoryHistory, createRouter, RouterContextProvider } from "@tanstack/react-router"
-import { isInaccessible, render, screen, waitFor } from "@testing-library/react"
+import { act, isInaccessible, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { routeTree } from "../../app/routeTree.gen"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
 import { AppSidebar } from "./app-sidebar"
+
+vi.mock("../../features/gateway/sidebar-gateway-status", () => ({
+  SidebarGatewayStatus: () => <section aria-label="网关" />,
+}))
 
 function renderSidebar() {
   const router = createRouter({
@@ -35,13 +39,13 @@ describe("AppSidebar", () => {
     expect(screen.getByText("仪表盘")).toBeInTheDocument()
     expect(screen.getByText("账号")).toBeInTheDocument()
     expect(screen.getByText("设置")).toBeInTheDocument()
+    expect(screen.queryByRole("group", { name: "语言" })).not.toBeInTheDocument()
   })
 
   it("switches the whole navigation to English", async () => {
-    const user = userEvent.setup()
     renderSidebar()
 
-    await user.click(screen.getByRole("button", { name: "English" }))
+    act(() => useUIStore.getState().setLanguage("en"))
 
     await waitFor(() => {
       expect(screen.getByText("Dashboard")).toBeInTheDocument()

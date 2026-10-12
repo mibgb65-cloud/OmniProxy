@@ -1,3 +1,4 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
@@ -69,9 +70,9 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
   return (
     <div className="flex items-baseline justify-between gap-4">
       <dt className="text-muted-foreground shrink-0">{label}</dt>
-      <dd className={`truncate text-right ${mono ? "font-mono text-xs" : ""}`} title={value}>
-        {value}
-      </dd>
+      <Tooltip content={value}>
+        <dd className={`truncate text-right ${mono ? "font-mono text-xs" : ""}`}>{value}</dd>
+      </Tooltip>
     </div>
   )
 }

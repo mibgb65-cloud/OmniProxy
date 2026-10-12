@@ -16,6 +16,14 @@ class ResizeObserverStub {
 
 globalThis.ResizeObserver = ResizeObserverStub
 
+// Radix Select 的焦点／指针逻辑使用真实浏览器 API，jsdom 本身没有这些能力。
+HTMLElement.prototype.scrollIntoView = function () {}
+HTMLElement.prototype.hasPointerCapture = function () {
+  return false
+}
+HTMLElement.prototype.setPointerCapture = function () {}
+HTMLElement.prototype.releasePointerCapture = function () {}
+
 afterEach(() => {
   cleanup()
 })

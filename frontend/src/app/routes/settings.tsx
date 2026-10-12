@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next"
 import { DataDirForm } from "../../features/settings/data-dir-form"
 import { DesktopBehavior } from "../../features/settings/desktop-behavior"
 import { StorageOverview } from "../../features/settings/storage-overview"
+import { AppearanceSettings } from "../../features/settings/appearance-settings"
+import { RequestRetentionSettings } from "../../features/settings/request-retention"
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -16,6 +18,8 @@ function SettingsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
         <p className="text-muted-foreground mt-1 text-sm">{t("settings.description")}</p>
       </header>
+      <AppearanceSettings />
+      <RequestRetentionSettings />
       <StorageOverview />
       <DataDirForm />
       <DesktopBehavior />

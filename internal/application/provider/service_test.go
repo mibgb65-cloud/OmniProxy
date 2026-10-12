@@ -31,10 +31,10 @@ func TestCatalogContainsNineProviderKinds(t *testing.T) {
 		t.Fatalf("Catalog length = %d, want %d", len(definitions), len(want))
 	}
 	for i, definition := range definitions {
-		if definition.Kind != want[i] || len(definition.AuthMethods) != 1 || definition.AuthMethods[0] != AuthAPIKey {
+		if definition.Kind != want[i] || len(definition.AuthMethods) != map[bool]int{true: 2, false: 1}[i == 0] || definition.AuthMethods[0] != AuthAPIKey {
 			t.Errorf("definition %d = %+v", i, definition)
 		}
-		if i == 0 && (len(definition.PlannedAuthMethods) != 1 || definition.PlannedAuthMethods[0] != AuthSubscriptionLogin) {
+		if i == 0 && (len(definition.PlannedAuthMethods) != 0 || definition.AuthMethods[1] != AuthSubscriptionLogin) {
 			t.Errorf("OpenAI subscription option = %+v", definition)
 		}
 		if i > 0 && len(definition.PlannedAuthMethods) != 0 {

@@ -1,0 +1,86 @@
+package routing
+
+import (
+	"context"
+	"encoding/json"
+	"omniproxy/internal/application/account"
+	catalog "omniproxy/internal/core/modelcatalog"
+	core "omniproxy/internal/core/routing"
+)
+
+type discoveredModel struct {
+	accountID, providerID, model, name string
+	metadata                           catalog.Metadata
+}
+
+func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id AND (a.credential_ref || ':' || a.auth_account_id)=m.account_version ORDER BY a.provider_id,m.model,a.id LIMIT 10001`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	result := []discoveredModel{}
+	for rows.Next() {
+		var m discoveredModel
+		var metadata string
+		if err := rows.Scan(&m.accountID, &m.providerID, &m.model, &m.name, &metadata); err != nil {
+			return nil, err
+		}
+		if len(metadata) > 16384 || json.Unmarshal([]byte(metadata), &m.metadata) != nil || catalog.ValidateMetadata(m.metadata) != nil || len(result) >= 10000 {
+			return nil, catalog.ErrInvalid
+		}
+		result = append(result, m)
+	}
+	return result, rows.Err()
+}
+func targetSupports(data snapshot, providerID, accountID, model string) bool {
+	for _, m := range data.models {
+		if m.providerID == providerID && m.model == model && (accountID == "" || m.accountID == accountID) {
+			return true
+		}
+	}
+	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == "deepseek" {
+			return supportedModel(model)
+		}
+	}
+	return false
+}
+func eligible(data snapshot, a account.Item, model string) bool {
+	for _, p := range data.providers {
+		if p.ID != a.ProviderID || !p.Enabled {
+			continue
+		}
+		if p.Kind == "deepseek" && a.AuthMethod != account.AuthSubscription {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == "openai" && a.AuthMethod == account.AuthSubscription && a.AuthState == "authenticated" {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
+	}
+	return false
+}
+
+// Models 只公布至少存在可用账号的模型，供网关和本地 Agent 选择。
+func (s *Service) Models(ctx context.Context) ([]string, error) {
+	data, err := s.snapshot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := []string{}
+	seen := map[string]bool{}
+	for _, m := range data.models {
+		for _, a := range data.accounts {
+			if a.ID == m.accountID && a.Enabled && eligible(data, a, m.model) && !seen[m.model] {
+				ids = append(ids, m.model)
+				seen[m.model] = true
+			}
+		}
+	}
+	for _, m := range []string{"deepseek-flash", "deepseek-v4-pro"} {
+		if !seen[m] && evaluate(m, core.Rule{}, false, data).Routable {
+			ids = append(ids, m)
+		}
+	}
+	return ids, nil
+}

@@ -31,7 +31,11 @@ func (s *AppService) CreateAccount(input account.CreateInput) (account.Item, err
 	if err != nil {
 		return account.Item{}, err
 	}
-	return service.Create(context.Background(), input)
+	item, err := service.Create(context.Background(), input)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return item, err
 }
 
 // CreateAccounts 一次保存多个自动命名的 API Key 账号。
@@ -40,7 +44,11 @@ func (s *AppService) CreateAccounts(input account.BatchCreateInput) ([]account.I
 	if err != nil {
 		return nil, err
 	}
-	return service.CreateBatch(context.Background(), input)
+	items, err := service.CreateBatch(context.Background(), input)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return items, err
 }
 
 // UpdateAccount 更新名称及可选的新密钥，不返回完整密钥。
@@ -49,7 +57,11 @@ func (s *AppService) UpdateAccount(input account.UpdateInput) (account.UpdateRes
 	if err != nil {
 		return account.UpdateResult{}, err
 	}
-	return service.Update(context.Background(), input)
+	result, err := service.Update(context.Background(), input)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return result, err
 }
 
 // SetAccountEnabled changes whether an account can later be scheduled.
@@ -58,7 +70,11 @@ func (s *AppService) SetAccountEnabled(id string, enabled bool) (account.Item, e
 	if err != nil {
 		return account.Item{}, err
 	}
-	return service.SetEnabled(context.Background(), id, enabled)
+	item, err := service.SetEnabled(context.Background(), id, enabled)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return item, err
 }
 
 // DeleteAccount removes account metadata and its protected API Key.
@@ -67,5 +83,26 @@ func (s *AppService) DeleteAccount(id string) error {
 	if err != nil {
 		return err
 	}
-	return service.Delete(context.Background(), id)
+	item, err := service.Metadata(context.Background(), id)
+	if err != nil {
+		return err
+	}
+	if item.AuthMethod == account.AuthSubscription {
+		manager, err := s.subscriptionService()
+		if err != nil {
+			return err
+		}
+		ctx, cancel := subscriptionContext()
+		defer cancel()
+		err = manager.Delete(ctx, id)
+		if err == nil {
+			s.refreshAgentCatalog()
+		}
+		return err
+	}
+	err = service.Delete(context.Background(), id)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return err
 }

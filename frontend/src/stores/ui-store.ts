@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { defaultLanguage, isLanguage, type Language } from "../i18n/translation"
 import { defaultTheme, isTheme, type Theme } from "../lib/theme"
+import { defaultFontScale, isFontScale } from "../lib/typography"
 
 export type AccountView = "cards" | "list"
 
@@ -21,6 +22,9 @@ interface UIState {
   /** 账号详情的展示方式；持久化保存，不包含账号数据。 */
   accountView: AccountView
   setAccountView: (view: AccountView) => void
+  /** 全局文字缩放百分比，本地持久化且立即生效。 */
+  fontScale: number
+  setFontScale: (scale: number) => void
 }
 
 /**
@@ -38,6 +42,10 @@ export const useUIStore = create<UIState>()(
       toggleTheme: () => set((s) => ({ theme: s.theme === "dark" ? "light" : "dark" })),
       accountView: "cards",
       setAccountView: (accountView) => set({ accountView }),
+      fontScale: defaultFontScale,
+      setFontScale: (fontScale) => {
+        if (isFontScale(fontScale)) set({ fontScale })
+      },
     }),
     {
       name: "omniproxy-ui-state",
@@ -56,6 +64,7 @@ export const useUIStore = create<UIState>()(
           accountView: isAccountView(stored?.accountView)
             ? stored.accountView
             : current.accountView,
+          fontScale: isFontScale(stored?.fontScale) ? stored.fontScale : defaultFontScale,
         }
       },
     },

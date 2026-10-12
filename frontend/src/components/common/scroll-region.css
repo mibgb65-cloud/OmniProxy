@@ -31,6 +31,18 @@
   touch-action: none;
 }
 
+/* 窄侧栏的轨道覆盖右侧留白，避免常驻轨道挤窄选中背景；图标位置不随收展改变。 */
+.scroll-region--overlay {
+  position: relative;
+}
+
+.scroll-region--overlay > .scroll-region__rail {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 8px;
+}
+
 /* 主内容轨道避开窗口右侧缩放区域，底部额外让出范围更大的右下角缩放区域。 */
 .scroll-region--window-edge {
   padding-right: 8px;

@@ -23,17 +23,29 @@ func (s *AppService) CreateProvider(input provider.CreateInput) (provider.Config
 
 // UpdateProvider updates one provider configuration.
 func (s *AppService) UpdateProvider(id string, input provider.UpdateInput) (provider.Configuration, error) {
-	return provider.NewService(s.db).Update(context.Background(), id, input)
+	item, err := provider.NewService(s.db).Update(context.Background(), id, input)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return item, err
 }
 
 // SetProviderEnabled changes the enabled state of a built-in or custom provider.
 func (s *AppService) SetProviderEnabled(id string, enabled bool) (provider.Configuration, error) {
-	return provider.NewService(s.db).SetEnabled(context.Background(), id, enabled)
+	item, err := provider.NewService(s.db).SetEnabled(context.Background(), id, enabled)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return item, err
 }
 
 // DeleteProvider removes a provider configuration without accounts.
 func (s *AppService) DeleteProvider(id string) error {
-	return provider.NewService(s.db).Delete(context.Background(), id)
+	err := provider.NewService(s.db).Delete(context.Background(), id)
+	if err == nil {
+		s.refreshAgentCatalog()
+	}
+	return err
 }
 
 // ProbeProvider measures endpoint reachability and response latency without credentials.

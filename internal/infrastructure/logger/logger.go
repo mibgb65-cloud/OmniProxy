@@ -43,7 +43,7 @@ func Setup(opts Options) (*slog.Logger, *Files, error) {
 
 	capacity := opts.UIBufferCapacity
 	if capacity <= 0 {
-		capacity = 512
+		capacity = MaxUIEntries
 	}
 	uiBuffer := NewUIBuffer(capacity)
 	redactor := NewRedactor()
@@ -60,9 +60,9 @@ func Setup(opts Options) (*slog.Logger, *Files, error) {
 		}
 		sinks = append(sinks,
 			newRedactingHandler(slog.NewJSONHandler(rot, &slog.HandlerOptions{Level: level}), redactor),
-			newRedactingHandler(slog.NewTextHandler(&lineWriter{buf: uiBuffer}, &slog.HandlerOptions{Level: level}), redactor),
+			newRedactingHandler(uiHandler{buffer: uiBuffer, level: level}, redactor),
 		)
-		files = &Files{dir: opts.LogDir, path: rot.Path(), active: rot}
+		files = &Files{dir: opts.LogDir, path: rot.Path(), active: rot, buffer: uiBuffer, level: level.String()}
 	}
 
 	log := slog.New(fanoutHandler{handlers: sinks})

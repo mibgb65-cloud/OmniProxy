@@ -8,6 +8,7 @@ import type {
   ProviderConfiguration,
 } from "../../services/omniproxy"
 import { AccountForm } from "./account-form"
+import { SubscriptionLoginDialog } from "./subscription-login-dialog"
 
 export function AddAccountDialog({
   provider,
@@ -32,15 +33,18 @@ export function AddAccountDialog({
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <Button type="button" variant="outline" size="sm" className="shrink-0 cursor-pointer">
-          {t("accounts.add")}
-        </Button>
-      </Dialog.Trigger>
-      {open ? (
-        <AccountForm provider={provider} onSubmit={create} onBatchSubmit={createBatch} />
-      ) : null}
-    </Dialog.Root>
+    <div className="flex flex-wrap gap-2">
+      {provider.kind === "openai" ? <SubscriptionLoginDialog providerId={provider.id} /> : null}
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Trigger asChild>
+          <Button type="button" variant="outline" size="sm" className="shrink-0 cursor-pointer">
+            {t("accounts.add")}
+          </Button>
+        </Dialog.Trigger>
+        {open ? (
+          <AccountForm provider={provider} onSubmit={create} onBatchSubmit={createBatch} />
+        ) : null}
+      </Dialog.Root>
+    </div>
   )
 }

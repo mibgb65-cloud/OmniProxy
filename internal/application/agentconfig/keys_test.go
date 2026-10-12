@@ -1,0 +1,38 @@
+package agentconfig
+
+import (
+	"context"
+	"strings"
+	"testing"
+)
+
+func TestOnlySupportedClientKeysAuthorize(t *testing.T) {
+	s := fixture(t)
+	ctx := context.Background()
+	legacyKey := []byte("opk_" + strings.Repeat("d", 64))
+	ref, err := s.store.Put(legacyKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.db.Exec(`INSERT INTO agent_connections VALUES('diagnostic',?,1,'2026-10-12T00:00:00Z')`, ref); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Key(ctx, "diagnostic"); err == nil {
+		t.Fatal("removed diagnostic client accepted")
+	}
+	if s.Authorize(ctx, string(legacyKey)) {
+		t.Fatal("legacy diagnostic key still authorizes")
+	}
+	clear(legacyKey)
+	for _, client := range []string{"codex", "claude", "claude-desktop"} {
+		key, err := s.Key(ctx, client)
+		if err != nil {
+			t.Fatal(err)
+		}
+		valid := s.Authorize(ctx, string(key))
+		clear(key)
+		if !valid {
+			t.Fatalf("supported client %s no longer authorizes", client)
+		}
+	}
+}

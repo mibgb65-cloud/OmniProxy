@@ -51,7 +51,7 @@ func NewRedactor() *Redactor {
 	return &Redactor{
 		keyValue: regexp.MustCompile(keyPattern),
 		bearer:   regexp.MustCompile(`(?i)\b(bearer|basic)\s+([A-Za-z0-9\-._~+/]{6,}={0,2})`),
-		apiKey:   regexp.MustCompile(`\bsk-[A-Za-z0-9\-_]{12,}`),
+		apiKey:   regexp.MustCompile(`\b(?:sk-[A-Za-z0-9\-_]{12,}|opk_[a-f0-9]{64})`),
 		jwt:      regexp.MustCompile(`\beyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}`),
 	}
 }
@@ -73,8 +73,17 @@ func (r *Redactor) Redact(s string) string {
 // itself also applies it to every attribute.
 func (r *Redactor) SensitiveKey(key string) bool {
 	k := strings.ToLower(strings.ReplaceAll(key, "-", "_"))
+	compact := strings.ReplaceAll(k, "_", "")
+	if strings.HasSuffix(compact, "token") || compact == "auth" || compact == "jwt" || compact == "sessionid" {
+		return true
+	}
+	// 账号名称可能包含 Key 前缀，内容字段可能包含提示词或回复，不能进入任何日志出口。
+	switch compact {
+	case "name", "accountname", "prompt", "prompts", "content", "messages", "body", "requestbody", "response", "responsebody", "completion", "input", "output", "toolarguments", "toolresult":
+		return true
+	}
 	for _, s := range sensitiveKeySubstrings {
-		if strings.Contains(k, s) {
+		if strings.Contains(k, s) || strings.Contains(compact, strings.ReplaceAll(s, "_", "")) {
 			return true
 		}
 	}

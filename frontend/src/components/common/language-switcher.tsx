@@ -1,75 +1,56 @@
-import { Languages } from "lucide-react"
+import { Check, Languages } from "lucide-react"
+import { DropdownMenu } from "radix-ui"
 import { useTranslation } from "react-i18next"
-import { Button } from "../ui/button"
-import { languageOptions } from "../../i18n/translation"
-import { cn } from "../../lib/utils"
+import { isLanguage, languageOptions } from "../../i18n/translation"
 import { useUIStore } from "../../stores/ui-store"
-import { SidebarLabel } from "./sidebar-label"
 
-interface LanguageSwitcherProps {
-  /** Collapsed sidebar shows a single toggle button instead of the segmented control. */
-  collapsed: boolean
-}
-
-export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
+export function LanguageSwitcher() {
   const { t } = useTranslation()
   const language = useUIStore((s) => s.language)
   const setLanguage = useUIStore((s) => s.setLanguage)
 
-  const next = language === "zh" ? "en" : "zh"
-
   return (
-    <div className="relative flex h-8 shrink-0 items-center">
-      {collapsed && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute inset-0 w-full transition-colors"
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          type="button"
           aria-label={t("common.language")}
-          title={t("common.language")}
-          onClick={() => setLanguage(next)}
-        />
-      )}
-      <Languages
-        className="text-muted-foreground pointer-events-none absolute left-4 size-4"
-        aria-hidden="true"
-      />
-      {/* 固定展开内容的宽度，裁切与逐字过渡不会把语言选项挤回图标上。 */}
-      <div
-        className="flex w-52 shrink-0 items-center justify-between gap-2 pl-10"
-        inert={collapsed}
-      >
-        <SidebarLabel collapsed={collapsed} className="text-muted-foreground text-sm">
-          {t("common.language")}
-        </SidebarLabel>
-        <div
-          className={cn(
-            "border-border flex shrink-0 rounded-md border transition-opacity duration-150 motion-reduce:transition-none",
-            collapsed && "pointer-events-none opacity-0",
-          )}
-          role="group"
-          aria-label={t("common.language")}
-          aria-hidden={collapsed}
+          className="hover:bg-sidebar-accent focus-visible:ring-ring data-[state=open]:bg-sidebar-accent flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-inset"
         >
-          {languageOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={cn(
-                "px-2 py-1 text-xs first:rounded-l-[5px] last:rounded-r-[5px]",
-                language === option.value
-                  ? "bg-accent text-accent-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-pressed={language === option.value}
-              aria-label={option.label}
-              onClick={() => setLanguage(option.value)}
-            >
-              <SidebarLabel collapsed={collapsed}>{option.label}</SidebarLabel>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+          <Languages className="size-4 shrink-0" aria-hidden="true" />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          side="bottom"
+          align="end"
+          sideOffset={6}
+          collisionPadding={12}
+          loop
+          aria-label={t("common.language")}
+          className="bg-popover/95 text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 z-80 min-w-36 rounded-xl border p-1.5 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.28)] backdrop-blur-xl motion-safe:duration-150"
+        >
+          <DropdownMenu.RadioGroup
+            value={language}
+            onValueChange={(value) => {
+              if (isLanguage(value)) setLanguage(value)
+            }}
+          >
+            {languageOptions.map((option) => (
+              <DropdownMenu.RadioItem
+                key={option.value}
+                value={option.value}
+                className="data-[highlighted]:bg-accent/80 relative flex min-h-9 cursor-pointer items-center rounded-lg py-2 pr-9 pl-3 text-sm outline-none select-none data-[state=checked]:bg-blue-500/8 data-[state=checked]:text-blue-700 dark:data-[state=checked]:text-blue-300"
+              >
+                {option.label}
+                <DropdownMenu.ItemIndicator className="absolute right-3 flex size-4 items-center justify-center">
+                  <Check className="size-3.5" aria-hidden="true" />
+                </DropdownMenu.ItemIndicator>
+              </DropdownMenu.RadioItem>
+            ))}
+          </DropdownMenu.RadioGroup>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   )
 }

@@ -56,6 +56,28 @@ describe("AppTitlebar", () => {
     useUIStore.setState({ language: defaultLanguage, theme: defaultTheme })
   })
 
+  it("places language options before the theme control and remembers the selection", async () => {
+    const user = userEvent.setup()
+    renderTitlebar()
+    const languages = screen.getByRole("button", { name: "语言" })
+    const theme = screen.getByRole("button", { name: "切换到亮色模式" })
+    expect(languages.compareDocumentPosition(theme) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    await user.click(languages)
+    await user.click(screen.getByRole("menuitemradio", { name: "English" }))
+    expect(useUIStore.getState().language).toBe("en")
+    expect(JSON.parse(localStorage.getItem("omniproxy-ui-state")!).state.language).toBe("en")
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Language" })).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Switch to light mode" })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole("button", { name: "Language" }))
+    await user.click(screen.getByRole("menuitemradio", { name: "中文" }))
+    expect(useUIStore.getState().language).toBe("zh")
+    expect(runtime.toggleMaximise).not.toHaveBeenCalled()
+  })
+
   it("switches the full document theme and remembers the choice", async () => {
     const user = userEvent.setup()
     renderTitlebar()
@@ -123,6 +145,9 @@ describe("AppTitlebar", () => {
   it("does not maximise when double-clicking the theme or other window controls", async () => {
     const user = userEvent.setup()
     renderTitlebar()
+
+    await user.dblClick(screen.getByRole("button", { name: "语言" }))
+    await user.keyboard("{Escape}")
 
     await user.dblClick(screen.getByRole("button", { name: "切换到亮色模式" }))
     expect(useUIStore.getState().theme).toBe(defaultTheme)

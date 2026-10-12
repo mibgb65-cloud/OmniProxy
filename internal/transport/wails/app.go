@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"log/slog"
 	"path/filepath"
 	"sync"
@@ -15,6 +16,10 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
+	"omniproxy/internal/application/activity"
+	"omniproxy/internal/application/agentconfig"
+	"omniproxy/internal/application/agentinstall"
+	"omniproxy/internal/application/gateway"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/transport/httpapi"
@@ -37,16 +42,27 @@ type App struct {
 // typed bindings. It carries no business logic of its own: feature services
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
-	prof        *profile.Profile
-	control     *httpapi.Server
-	db          *sql.DB
-	logFiles    *logger.Files
-	log         *slog.Logger
-	startedAt   time.Time
-	settingsMu  sync.Mutex
-	autostart   autostartController
-	clipboardMu sync.Mutex
-	copyText    func(string) bool
+	gateway          *gateway.Service
+	agents           *agentconfig.Service
+	installations    *agentinstall.Service
+	activity         *activity.Service
+	prof             *profile.Profile
+	control          *httpapi.Server
+	db               *sql.DB
+	logFiles         *logger.Files
+	log              *slog.Logger
+	startedAt        time.Time
+	settingsMu       sync.Mutex
+	autostart        autostartController
+	clipboardMu      sync.Mutex
+	copyText         func(string) bool
+	logActions       sync.Mutex
+	selectLogExport  func(string) (string, error)
+	openLogDirectory func(string) error
+	openAgentURL     func(string) error
+	stopLogs         func()
+	stopActivity     func()
+	subscription     subscriptionState
 }
 
 // NewAppService creates the bound application service.
@@ -57,7 +73,7 @@ func NewAppService(
 	logFiles *logger.Files,
 	log *slog.Logger,
 ) *AppService {
-	return &AppService{
+	service := &AppService{
 		prof:      prof,
 		control:   control,
 		db:        db,
@@ -65,6 +81,9 @@ func NewAppService(
 		log:       log,
 		startedAt: time.Now(),
 	}
+	service.initGateway()
+	service.initAgentInstaller()
+	return service
 }
 
 // AppInfo is a snapshot of application runtime information for the UI.
@@ -110,13 +129,23 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 // ServiceShutdown stops the local Control API and relocates the data
 // directory when the user changed it.
 func (s *AppService) ServiceShutdown() error {
+	if s.stopActivity != nil {
+		s.stopActivity()
+	}
+	s.shutdownSubscription()
+	s.shutdownLogs()
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
+	var installationErr error
+	if s.installations != nil {
+		installationErr = s.installations.Close(ctx)
+	}
+	gatewayErr := s.shutdownGateway(ctx)
 	if err := s.control.Shutdown(ctx); err != nil {
 		s.log.Error("control API shutdown failed", "error", err)
 	}
 	s.relocateIfPending()
-	return nil
+	return errors.Join(gatewayErr, installationErr)
 }
 
 // Run creates the Wails application, opens the main window and blocks until
@@ -132,8 +161,11 @@ func Run(app *App) error {
 		},
 	})
 
+	app.Service.bindGatewayEvents(wailsApp)
+	app.Service.bindActivityEvents(wailsApp)
 	app.Service.autostart = wailsApp.Autostart
 	app.Service.copyText = wailsApp.Clipboard.SetText
+	app.Service.openAgentURL = wailsApp.Browser.OpenURL
 	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "OmniProxy",
 		Frameless:        true,
@@ -144,6 +176,8 @@ func Run(app *App) error {
 		BackgroundColour: application.NewRGB(9, 9, 11),
 		URL:              "/",
 	})
+	app.Service.bindLogEvents(wailsApp, window)
+	app.Service.bindSubscriptionEvents(wailsApp)
 	tray := wailsApp.SystemTray.New()
 	tray.SetTooltip("OmniProxy")
 	menu := wailsApp.NewMenu()

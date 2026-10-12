@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { PagePlaceholder } from "../../components/common/page-placeholder"
+import { QuotaView } from "../../features/quota/quota-view"
 
 export const Route = createFileRoute("/quota")({
-  component: QuotaPage,
+  component: QuotaView,
 })
-
-function QuotaPage() {
-  return <PagePlaceholder titleKey="pages.quota.title" descriptionKey="pages.quota.description" />
-}

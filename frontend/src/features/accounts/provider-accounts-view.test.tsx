@@ -24,6 +24,15 @@ import {
 import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
 
+vi.mock("../../services/balance", () => ({
+  readAccountBalance: vi.fn(async () => ({
+    available: true,
+    entries: [{ currency: "CNY", total: "110.00", granted: "10.00", toppedUp: "100.00" }],
+    fetchedAt: "2026-10-09T00:00:00Z",
+  })),
+  balanceError: () => "query_failed",
+}))
+
 vi.mock("../../services/omniproxy", () => ({
   listProviders: vi.fn(),
   listAccounts: vi.fn(),
@@ -94,19 +103,22 @@ describe("ProviderAccountsView", () => {
     vi.mocked(copyAccountKey).mockResolvedValue(undefined)
   })
 
-  it("shows account metadata and labels unavailable balance honestly", async () => {
+  it("shows account metadata and live DeepSeek balance", async () => {
     renderPage(provider.id)
     expect(await screen.findByRole("heading", { name: "DeepSeek 账号" })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "主账号" })).toBeInTheDocument()
-    expect(screen.getByText("余额")).toBeInTheDocument()
-    expect(screen.getByText("待接入")).toBeInTheDocument()
-    expect(screen.getByText("创建时间")).toBeInTheDocument()
-    expect(screen.getByText("更新时间")).toBeInTheDocument()
-    expect(screen.getByRole("switch", { name: "切换账号“主账号”的启用状态" })).toBeChecked()
+    expect(await screen.findByText("¥110.00")).toBeInTheDocument()
+    expect(screen.getByText("赠送余额")).toBeInTheDocument()
+    expect(screen.getByText("充值余额")).toBeInTheDocument()
+    expect(screen.queryByText("待接入")).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "切换账号“主账号”的启用状态" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
     expect(screen.getByRole("button", { name: "添加账号" })).toBeInTheDocument()
     const deleteButton = screen.getByRole("button", { name: "删除账号“主账号”" })
     expect(deleteButton.textContent).toBe("")
-    expect(deleteButton).toHaveAttribute("title", "删除")
+    expect(deleteButton).not.toHaveAttribute("title")
     expect(screen.getByRole("link", { name: "返回账号" })).toHaveAttribute("href", "/accounts")
   })
 
@@ -178,7 +190,7 @@ describe("ProviderAccountsView", () => {
     await user.click(screen.getByRole("radio", { name: "列表展示" }))
     const table = screen.getByRole("table", { name: "账号信息列表" })
     expect(within(table).getByRole("rowheader", { name: /主账号/ })).toBeInTheDocument()
-    expect(within(table).getByRole("columnheader", { name: "API Key 密钥" })).toBeInTheDocument()
+    expect(within(table).getByRole("columnheader", { name: "认证信息" })).toBeInTheDocument()
     expect(await within(table).findByText("sk-t••••••••1234")).toBeInTheDocument()
     expect(useUIStore.getState().accountView).toBe("list")
     expect(JSON.parse(localStorage.getItem("omniproxy-ui-state")!).state.accountView).toBe("list")
@@ -196,9 +208,14 @@ describe("ProviderAccountsView", () => {
     await screen.findByRole("table")
     vi.mocked(setAccountEnabled).mockResolvedValue({ ...account, enabled: false })
     vi.mocked(listAccounts).mockResolvedValue([{ ...account, enabled: false }])
-    await user.click(screen.getByRole("switch", { name: "切换账号“主账号”的启用状态" }))
+    await user.click(screen.getByRole("button", { name: "切换账号“主账号”的启用状态" }))
     await waitFor(() => expect(setAccountEnabled).toHaveBeenCalledWith(account.id, false))
-    await waitFor(() => expect(screen.getByRole("switch")).not.toBeChecked())
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "切换账号“主账号”的启用状态" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      ),
+    )
     await user.click(screen.getByRole("button", { name: "删除账号“主账号”" }))
     const dialog = screen.getByRole("alertdialog", { name: "删除账号" })
     await user.click(within(dialog).getByRole("button", { name: "取消" }))

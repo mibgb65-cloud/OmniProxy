@@ -1,0 +1,12 @@
+.app-sidebar {
+  --sidebar-expanded-width: 14rem;
+  --sidebar-duration: 250ms;
+  --sidebar-easing: ease-in-out;
+  transition: width var(--sidebar-duration) var(--sidebar-easing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar {
+    transition: none;
+  }
+}

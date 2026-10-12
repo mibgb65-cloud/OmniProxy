@@ -1,0 +1,63 @@
+import { AppService } from "../../bindings/omniproxy/internal/transport/wails"
+import type { Input, Item } from "../../bindings/omniproxy/internal/application/agentconfig"
+
+export type AgentClient = Item
+export type AgentInput = Input
+export const listAgentClients = () => AppService.AgentClients()
+export async function rereadAgentConfig(client: string): Promise<AgentClient> {
+  if (client !== "codex" && client !== "claude" && client !== "claude-desktop")
+    throw new Error("agent: invalid_client")
+  const items = await listAgentClients()
+  const item = items?.find((item) => item.client === client)
+  if (!item) throw new Error("agent: unavailable")
+  return item
+}
+export const previewAgentConfig = (input: Input) => AppService.AgentPreview(input)
+export const previewAgentPlan = (input: Input) => AppService.AgentPreviewPlan(input)
+export type AgentPlan = Awaited<ReturnType<typeof previewAgentPlan>>
+export const applyAgentConfig = (input: Input) => AppService.AgentApply(input)
+export const restoreAgentConfig = (client: string) => AppService.AgentRestore(client)
+export const copyAgentKey = (client: string) => AppService.AgentCopyKey(client)
+export const setAgentEnabled = (client: string, enabled: boolean) =>
+  AppService.AgentSetEnabled(client, enabled)
+
+export function agentError(error: unknown) {
+  const code = String(error instanceof Error ? error.message : error)
+    .split("\n", 1)[0]
+    ?.replace("agent: ", "")
+  switch (code) {
+    case "config_changed":
+    case "invalid_config":
+    case "auth_conflict":
+    case "profile_conflict":
+    case "key_disabled":
+    case "desktop_profile_active":
+    case "no_models":
+    case "models_unavailable":
+    case "catalog_changed":
+    case "catalog_conflict":
+    case "catalog_too_large":
+    case "write_failed":
+    case "read_failed":
+    case "unsafe_config":
+    case "config_locked":
+    case "backup_failed":
+    case "backup_unavailable":
+    case "rollback_failed":
+      return code
+    default:
+      return "failed"
+  }
+}
+export function agentTitle(client: string) {
+  switch (client) {
+    case "codex":
+      return "agents.codex"
+    case "claude":
+      return "agents.claude"
+    case "claude-desktop":
+      return "agents.claude-desktop"
+    default:
+      return "agents.title"
+  }
+}

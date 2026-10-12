@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from "react"
-import type { PointerEvent, ReactNode } from "react"
+import type { PointerEvent, ReactNode, RefObject, UIEventHandler } from "react"
 import { cn } from "../../lib/utils"
+import { useScrollRestoration } from "./use-scroll-restoration"
 import "./scroll-region.css"
 
 const MIN_THUMB_HEIGHT = 24
@@ -11,6 +12,9 @@ type ScrollRegionProps = {
   className?: string
   viewportClassName?: string
   ariaLabel?: string
+  viewportRef?: RefObject<HTMLElement | null>
+  onScroll?: UIEventHandler<HTMLElement>
+  pageKey?: string
 }
 
 export function ScrollRegion({
@@ -19,6 +23,9 @@ export function ScrollRegion({
   className,
   viewportClassName,
   ariaLabel,
+  viewportRef: externalViewportRef,
+  onScroll,
+  pageKey,
 }: ScrollRegionProps) {
   const viewportRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -46,6 +53,13 @@ export function ScrollRegion({
     thumb.style.height = `${thumbHeight}px`
     thumb.style.transform = `translateY(${thumbTop}px)`
   }, [])
+
+  const { recordScroll, cancelRestoration } = useScrollRestoration(
+    viewportRef,
+    contentRef,
+    pageKey,
+    syncThumb,
+  )
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
@@ -108,13 +122,29 @@ export function ScrollRegion({
   }
 
   return (
-    <div className={cn("scroll-region", className)}>
+    <div
+      className={cn("scroll-region", className)}
+      onWheelCapture={cancelRestoration}
+      onTouchStartCapture={cancelRestoration}
+      onPointerDownCapture={cancelRestoration}
+      onKeyDownCapture={(event) => {
+        if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key))
+          cancelRestoration()
+      }}
+    >
       <Element
-        ref={viewportRef}
+        ref={(node) => {
+          viewportRef.current = node
+          if (externalViewportRef) externalViewportRef.current = node
+        }}
         className={cn("scroll-region__viewport", viewportClassName)}
         aria-label={ariaLabel}
         tabIndex={0}
-        onScroll={syncThumb}
+        onScroll={(event) => {
+          syncThumb()
+          recordScroll()
+          onScroll?.(event)
+        }}
       >
         <div ref={contentRef} className="scroll-region__content">
           {children}

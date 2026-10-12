@@ -136,3 +136,16 @@
 .window-titlebar button {
   --wails-draggable: no-drag;
 }
+
+/* 小字也采用根字号比例，避免全局调节后金额说明、时间和数量角标仍固定为 px。 */
+@layer utilities {
+  .text-\[9px\] {
+    font-size: 0.5625rem;
+  }
+  .text-\[10px\] {
+    font-size: 0.625rem;
+  }
+  .text-\[11px\] {
+    font-size: 0.6875rem;
+  }
+}

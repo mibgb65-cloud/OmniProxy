@@ -1,8 +1,10 @@
+import { Tooltip } from "../ui/tooltip"
 import { useEffect, useState } from "react"
 import { Events, Window } from "@wailsio/runtime"
 import { Copy, Minus, Moon, Square, Sun, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useUIStore } from "../../stores/ui-store"
+import { LanguageSwitcher } from "./language-switcher"
 
 const controlClass =
   "hover:bg-sidebar-accent focus-visible:ring-ring flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-inset"
@@ -61,43 +63,48 @@ export function AppTitlebar() {
       ) : null}
 
       <div className="flex h-full shrink-0 items-center">
-        <button
-          type="button"
-          className={controlClass}
-          aria-label={themeLabel}
-          title={themeLabel}
-          onClick={toggleTheme}
-        >
-          {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-        </button>
+        <LanguageSwitcher />
+        <Tooltip content={themeLabel}>
+          <button
+            type="button"
+            className={controlClass}
+            aria-label={themeLabel}
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
+        </Tooltip>
         <span className="bg-border mx-1 h-4 w-px" aria-hidden="true" />
-        <button
-          type="button"
-          className={controlClass}
-          aria-label={t("window.minimise")}
-          title={t("window.minimise")}
-          onClick={() => runWindowAction(() => Window.Minimise())}
-        >
-          <Minus className="size-4" />
-        </button>
-        <button
-          type="button"
-          className={controlClass}
-          aria-label={isMaximised ? t("window.restore") : t("window.maximise")}
-          title={isMaximised ? t("window.restore") : t("window.maximise")}
-          onClick={toggleMaximise}
-        >
-          {isMaximised ? <Copy className="size-4" /> : <Square className="size-3.5" />}
-        </button>
-        <button
-          type="button"
-          className={`${controlClass} hover:bg-destructive hover:text-white`}
-          aria-label={t("window.close")}
-          title={t("window.close")}
-          onClick={() => runWindowAction(() => Window.Close())}
-        >
-          <X className="size-4" />
-        </button>
+        <Tooltip content={t("window.minimise")}>
+          <button
+            type="button"
+            className={controlClass}
+            aria-label={t("window.minimise")}
+            onClick={() => runWindowAction(() => Window.Minimise())}
+          >
+            <Minus className="size-4" />
+          </button>
+        </Tooltip>
+        <Tooltip content={isMaximised ? t("window.restore") : t("window.maximise")}>
+          <button
+            type="button"
+            className={controlClass}
+            aria-label={isMaximised ? t("window.restore") : t("window.maximise")}
+            onClick={toggleMaximise}
+          >
+            {isMaximised ? <Copy className="size-4" /> : <Square className="size-3.5" />}
+          </button>
+        </Tooltip>
+        <Tooltip content={t("window.close")}>
+          <button
+            type="button"
+            className={`${controlClass} hover:bg-destructive hover:text-white`}
+            aria-label={t("window.close")}
+            onClick={() => runWindowAction(() => Window.Close())}
+          >
+            <X className="size-4" />
+          </button>
+        </Tooltip>
       </div>
     </header>
   )

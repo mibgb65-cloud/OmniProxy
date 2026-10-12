@@ -48,8 +48,9 @@ func (h fanoutHandler) WithGroup(name string) slog.Handler {
 // before delegating to the inner handler. Every sink in OmniProxy is wrapped
 // by this handler, so no module can accidentally leak a credential.
 type redactingHandler struct {
-	inner    slog.Handler
-	redactor *Redactor
+	inner          slog.Handler
+	redactor       *Redactor
+	sensitiveGroup bool
 }
 
 func newRedactingHandler(inner slog.Handler, redactor *Redactor) slog.Handler {
@@ -74,19 +75,21 @@ func (h redactingHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	for i, a := range attrs {
 		copied[i] = h.redactAttr(a)
 	}
-	return redactingHandler{inner: h.inner.WithAttrs(copied), redactor: h.redactor}
+	return redactingHandler{inner: h.inner.WithAttrs(copied), redactor: h.redactor, sensitiveGroup: h.sensitiveGroup}
 }
 
 func (h redactingHandler) WithGroup(name string) slog.Handler {
-	return redactingHandler{inner: h.inner.WithGroup(name), redactor: h.redactor}
+	return redactingHandler{inner: h.inner.WithGroup(h.redactor.Redact(name)), redactor: h.redactor, sensitiveGroup: h.sensitiveGroup || h.redactor.SensitiveKey(name)}
 }
 
 func (h redactingHandler) redactAttr(a slog.Attr) slog.Attr {
-	if h.redactor.SensitiveKey(a.Key) {
+	return h.redactAttrDepth(a, 0)
+}
+
+func (h redactingHandler) redactAttrDepth(a slog.Attr, depth int) slog.Attr {
+	if depth > 16 || h.sensitiveGroup || h.redactor.SensitiveKey(a.Key) {
 		return slog.String(a.Key, masked)
 	}
-	if a.Value.Kind() == slog.KindString {
-		return slog.String(a.Key, h.redactor.Redact(a.Value.String()))
-	}
+	a.Value = h.redactValue(a.Value, depth)
 	return a
 }

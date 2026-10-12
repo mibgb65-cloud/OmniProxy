@@ -1,3 +1,4 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { Link } from "@tanstack/react-router"
 import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -13,6 +14,7 @@ import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
 import { AccountItemActions } from "./account-item-actions"
 import { AddAccountDialog } from "./add-account-dialog"
+import { accountDisplayName } from "./account-display"
 
 export function AccountProviderCard({
   provider,
@@ -42,7 +44,7 @@ export function AccountProviderCard({
   return (
     <Card className="dark:bg-card/75 h-[320px] min-w-0 gap-0 py-0 shadow-sm">
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
-        <div className="flex shrink-0 items-center justify-between gap-3">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
           <Link
             to="/accounts/$providerId"
             params={{ providerId: provider.id }}
@@ -51,9 +53,9 @@ export function AccountProviderCard({
           >
             <ProviderBrandIcon kind={provider.kind} />
             <div className="min-w-0">
-              <h2 className="group-hover:text-primary truncate text-sm font-semibold" title={name}>
-                {name}
-              </h2>
+              <Tooltip content={name}>
+                <h2 className="group-hover:text-primary truncate text-sm font-semibold">{name}</h2>
+              </Tooltip>
               <p className="text-muted-foreground text-xs">
                 {t("accounts.count", { count: accounts.length })}
               </p>
@@ -82,12 +84,16 @@ export function AccountProviderCard({
                   className="flex min-w-0 items-center justify-between gap-3 px-3 py-2.5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium" title={account.name}>
-                      {account.name}
-                    </p>
+                    <Tooltip content={accountDisplayName(account)}>
+                      <p className="truncate text-sm font-medium">{accountDisplayName(account)}</p>
+                    </Tooltip>
                     <p className="text-muted-foreground text-xs">
-                      {t("accounts.apiKey")} ·{" "}
-                      {account.enabled ? t("accounts.enabled") : t("accounts.disabled")}
+                      {t(
+                        account.authMethod === "subscription_login"
+                          ? "subscription.type"
+                          : "accounts.apiKey",
+                      )}{" "}
+                      · {account.enabled ? t("accounts.enabled") : t("accounts.disabled")}
                     </p>
                   </div>
                   <AccountItemActions

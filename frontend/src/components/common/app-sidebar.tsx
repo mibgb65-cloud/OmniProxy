@@ -1,3 +1,4 @@
+import { Tooltip } from "../ui/tooltip"
 import { Link } from "@tanstack/react-router"
 import {
   BarChart3,
@@ -15,12 +16,13 @@ import {
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
-import { LanguageSwitcher } from "./language-switcher"
 import { SidebarLabel } from "./sidebar-label"
+import { SidebarGatewayStatus } from "../../features/gateway/sidebar-gateway-status"
 import { ScrollRegion } from "./scroll-region"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
 import type { NavItem } from "../../types/ui"
+import "./app-sidebar.css"
 
 const navItems: NavItem[] = [
   { to: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
@@ -44,7 +46,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r transition-[width] duration-250 ease-in-out motion-reduce:transition-none",
+        "app-sidebar border-sidebar-border bg-sidebar text-sidebar-foreground flex h-full shrink-0 flex-col overflow-hidden border-r",
         collapsed ? "w-16" : "w-56",
       )}
     >
@@ -56,9 +58,11 @@ export function AppSidebar() {
         </SidebarLabel>
       </div>
 
+      <SidebarGatewayStatus collapsed={collapsed} />
+
       <ScrollRegion
         as="nav"
-        className="min-h-0 min-w-0 flex-1"
+        className="scroll-region--overlay min-h-0 min-w-0 flex-1"
         viewportClassName="p-2"
         ariaLabel="Primary"
       >
@@ -72,7 +76,6 @@ export function AppSidebar() {
       </ScrollRegion>
 
       <div className="border-sidebar-border flex shrink-0 flex-col gap-2 overflow-hidden border-t p-2 whitespace-nowrap">
-        <LanguageSwitcher collapsed={collapsed} />
         <Button
           variant="ghost"
           size="sm"
@@ -100,16 +103,17 @@ function SidebarLink({
 }) {
   const Icon = item.icon
   return (
-    <Link
-      to={item.to}
-      title={collapsed ? label : undefined}
-      aria-label={label}
-      // 固定行高，防止移除文字后由较矮的图标撑高而导致整列导航上移。
-      className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 rounded-md px-4 text-sm whitespace-nowrap data-[active=true]:font-medium"
-      activeProps={{ "data-active": "true" }}
-    >
-      <Icon className="size-4 shrink-0" />
-      <SidebarLabel collapsed={collapsed}>{label}</SidebarLabel>
-    </Link>
+    <Tooltip content={collapsed ? label : undefined} side="right">
+      <Link
+        to={item.to}
+        aria-label={label}
+        // 固定行高，防止移除文字后由较矮的图标撑高而导致整列导航上移。
+        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 overflow-hidden rounded-md px-4 text-sm whitespace-nowrap data-[active=true]:font-medium"
+        activeProps={{ "data-active": "true" }}
+      >
+        <Icon className="size-4 shrink-0" />
+        <SidebarLabel collapsed={collapsed}>{label}</SidebarLabel>
+      </Link>
+    </Tooltip>
   )
 }

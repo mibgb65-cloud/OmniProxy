@@ -1,0 +1,19 @@
+.agent-installation-progress__indeterminate {
+  animation: agent-installation-progress 1.4s ease-in-out infinite;
+}
+
+@keyframes agent-installation-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(410%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-installation-progress__indeterminate {
+    animation: none;
+    transform: translateX(100%);
+  }
+}

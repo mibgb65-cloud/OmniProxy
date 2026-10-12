@@ -38,6 +38,9 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, err
 	}
+	if item.AuthMethod == AuthSubscription {
+		return s.updateSubscriptionName(ctx, item, input)
+	}
 	keyChanged := strings.TrimSpace(input.APIKey) != ""
 	var key []byte
 	if keyChanged {

@@ -1,10 +1,13 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { CircleHelp } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { AccountItem } from "../../services/omniproxy"
-import { formatAccountTime } from "./account-display"
+import { accountDisplayName, formatAccountTime } from "./account-display"
 import { AccountItemActions, type AccountItemActionsProps } from "./account-item-actions"
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
+import { SubscriptionQuota } from "./subscription-quota"
+import { AccountBalance } from "./account-balance"
 
 export function AccountDetailsList({
   accounts,
@@ -12,11 +15,13 @@ export function AccountDetailsList({
   onToggle,
   onDelete,
   onEdit,
+  balanceSupported = false,
 }: {
   accounts: AccountItem[]
+  balanceSupported?: boolean
 } & Omit<AccountItemActionsProps, "account">) {
-  const { t, i18n } = useTranslation()
-  const locale = i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US"
+  const { t } = useTranslation()
+  const hasSubscriptions = accounts.some((account) => account.authMethod === "subscription_login")
   return (
     <div
       role="region"
@@ -32,13 +37,13 @@ export function AccountDetailsList({
               {t("accounts.list.identity")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
-              {t("accounts.list.apiKey")}
+              {t("subscription.authentication")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
               {t("accounts.detail.status")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
-              {t("accounts.detail.balance")}
+              {t(hasSubscriptions ? "subscription.quota.title" : "accounts.detail.balance")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
               {t("accounts.detail.created")}
@@ -65,9 +70,9 @@ export function AccountDetailsList({
                   <span className="bg-muted text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-md text-xs tabular-nums">
                     {accounts.length - index}
                   </span>
-                  <span className="truncate" title={account.name}>
-                    {account.name}
-                  </span>
+                  <Tooltip content={accountDisplayName(account)}>
+                    <span className="truncate">{accountDisplayName(account)}</span>
+                  </Tooltip>
                 </div>
               </th>
               <td className="px-4 py-3">
@@ -77,16 +82,26 @@ export function AccountDetailsList({
                 <AccountStatusBadge enabled={account.enabled} />
               </td>
               <td className="px-4 py-3">
-                <span className="bg-muted/60 text-muted-foreground inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs whitespace-nowrap">
-                  <CircleHelp className="size-3" aria-hidden="true" />
-                  {t("accounts.detail.balancePending")}
-                </span>
+                {account.authMethod === "subscription_login" ? (
+                  <div className="min-w-72">
+                    <SubscriptionQuota account={account} />
+                  </div>
+                ) : balanceSupported ? (
+                  <div className="min-w-64">
+                    <AccountBalance account={account} />
+                  </div>
+                ) : (
+                  <span className="bg-muted/60 text-muted-foreground inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs whitespace-nowrap">
+                    <CircleHelp className="size-3" aria-hidden="true" />
+                    {t("accounts.detail.balancePending")}
+                  </span>
+                )}
               </td>
               <td className="text-muted-foreground px-4 py-3 text-xs whitespace-nowrap">
-                {formatAccountTime(account.createdAt, locale)}
+                {formatAccountTime(account.createdAt)}
               </td>
               <td className="text-muted-foreground px-4 py-3 text-xs whitespace-nowrap">
-                {formatAccountTime(account.updatedAt, locale)}
+                {formatAccountTime(account.updatedAt)}
               </td>
               <td className="bg-card sticky right-0 z-10 px-4 py-3">
                 <div className="flex justify-end">

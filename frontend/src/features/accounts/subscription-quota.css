@@ -1,0 +1,22 @@
+/* 只在信息变化时淡入，进度条保留原节点以便从旧宽度过渡到新宽度。 */
+.quota-information-update {
+  display: inline-block;
+  animation: quota-information-update 300ms ease-out;
+}
+
+@keyframes quota-information-update {
+  from {
+    opacity: 0.45;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quota-information-update {
+    animation: none;
+  }
+}

@@ -10,9 +10,12 @@ export type {
     AppInfo,
     CleanResult,
     DesktopSettings,
+    LogExportResult,
+    LogNotice,
     RuntimeInfo,
     SetDataDirResult,
     StorageInfo,
     StorageItem,
+    SubscriptionNotice,
     UpdateStatus
 } from "./models.js";

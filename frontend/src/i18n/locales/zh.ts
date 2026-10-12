@@ -1,9 +1,34 @@
+import { subscriptionZh } from "./subscription-zh"
+import { gatewayZh } from "./gateway-zh"
+import { routingZh } from "./routing-zh"
+import { logsZh } from "./logs-zh"
+import { balanceZh } from "./balance-zh"
+import { agentsZh } from "./agents-zh"
+import { activityZh } from "./activity-zh"
+import { quotaZh } from "./quota-zh"
+import { dashboardZh } from "./dashboard-zh"
+
 /**
  * Chinese translations — the single source of truth for translation keys.
  * `en.ts` is type-checked against this dictionary, so a key added here must
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...gatewayZh,
+  ...routingZh,
+  ...logsZh,
+  ...subscriptionZh,
+  ...balanceZh,
+  ...agentsZh,
+  ...activityZh,
+  ...quotaZh,
+  ...dashboardZh,
+  "settings.appearance.title": "外观",
+  "settings.appearance.description": "调整全局文字大小，立即生效并自动保存。",
+  "settings.appearance.fontSize": "全局文字大小",
+  "settings.appearance.reset": "恢复默认",
+  "settings.appearance.preview": "这是文字大小预览。",
+  "settings.appearance.previewDetail": "界面说明和时间也会同步调整",
   "app.title": "OmniProxy - 本地 AI API 网关",
 
   "window.title": "OmniProxy",
@@ -156,6 +181,8 @@ export const zh = {
   "providers.enabled": "已启用",
   "providers.disabled": "已停用",
   "providers.toggleLabel": "切换{{name}}提供商的启用状态",
+  "providers.power.enable": "启用提供商",
+  "providers.power.disable": "停用提供商",
   "providers.apiKey": "API Key",
   "providers.subscriptionPlanned": "订阅登录 · 待接入",
   "providers.name": "配置名称",
@@ -226,6 +253,8 @@ export const zh = {
   "accounts.enabled": "已启用",
   "accounts.disabled": "已停用",
   "accounts.toggleLabel": "切换账号“{{name}}”的启用状态",
+  "accounts.power.enable": "启用账号",
+  "accounts.power.disable": "停用账号",
   "accounts.delete": "删除",
   "accounts.deleteLabel": "删除账号“{{name}}”",
   "accounts.deleteConfirm": "确定删除“{{name}}”及其已保存的密钥吗？",

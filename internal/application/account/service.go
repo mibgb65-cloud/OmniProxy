@@ -32,12 +32,17 @@ var (
 
 // Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
 type Item struct {
-	ID         string `json:"id"`
-	ProviderID string `json:"providerId"`
-	Name       string `json:"name"`
-	Enabled    bool   `json:"enabled"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
+	ID            string `json:"id"`
+	ProviderID    string `json:"providerId"`
+	Name          string `json:"name"`
+	Enabled       bool   `json:"enabled"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
+	AuthMethod    string `json:"authMethod,omitempty"`
+	AuthEmail     string `json:"authEmail,omitempty"`
+	AuthPlan      string `json:"authPlan,omitempty"`
+	AuthState     string `json:"authState,omitempty"`
+	AuthAccountID string `json:"authAccountId,omitempty"`
 }
 
 // CreateInput contains fields for a new API Key account. APIKey is never persisted in SQLite.
@@ -74,7 +79,7 @@ func NewService(db *sql.DB, store CredentialStore) *Service {
 // List returns account metadata without credential references or secrets.
 func (s *Service) List(ctx context.Context) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT id, provider_id, name, enabled, created_at, updated_at
+		SELECT id, provider_id, name, enabled, created_at, updated_at, auth_method, auth_email, auth_plan, auth_state, auth_account_id
 		FROM accounts ORDER BY created_at DESC, id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("account: list: %w", err)
@@ -98,9 +103,9 @@ func (s *Service) get(ctx context.Context, id string) (Item, string, error) {
 	var item Item
 	var ref string
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, provider_id, name, enabled, created_at, updated_at, credential_ref
+		SELECT id, provider_id, name, enabled, created_at, updated_at, credential_ref, auth_method, auth_email, auth_plan, auth_state, auth_account_id
 		FROM accounts WHERE id = ?`, id).Scan(
-		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref,
+		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Item{}, "", ErrNotFound
@@ -115,7 +120,7 @@ type scanner interface{ Scan(dest ...any) error }
 
 func scanItem(row scanner) (Item, error) {
 	var item Item
-	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt); err != nil {
+	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID); err != nil {
 		return Item{}, fmt.Errorf("account: scan: %w", err)
 	}
 	return item, nil

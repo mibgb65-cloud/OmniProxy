@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { PagePlaceholder } from "../../components/common/page-placeholder"
+import { RoutingView } from "../../features/routing/routing-view"
+import { validateRoutingSearch } from "../../features/routing/routing-tabs"
 
 export const Route = createFileRoute("/routing")({
   component: RoutingPage,
+  validateSearch: validateRoutingSearch,
 })
 
 function RoutingPage() {
+  const { tab } = Route.useSearch()
+  const navigate = Route.useNavigate()
   return (
-    <PagePlaceholder titleKey="pages.routing.title" descriptionKey="pages.routing.description" />
+    <RoutingView
+      tab={tab ?? "defaults"}
+      onTabChange={(next) => void navigate({ search: { tab: next }, resetScroll: false })}
+    />
   )
 }

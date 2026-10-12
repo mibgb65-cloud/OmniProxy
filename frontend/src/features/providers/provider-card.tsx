@@ -1,3 +1,4 @@
+import { Tooltip } from "../../components/ui/tooltip"
 import { useId, useState } from "react"
 import type { ReactNode } from "react"
 import { ChevronDown } from "lucide-react"
@@ -6,7 +7,7 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import type { ProviderProbeResult } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "./provider-brand-icon"
-import { ProviderSwitch } from "./provider-switch"
+import { ProviderPowerButton } from "./provider-power-button"
 import "./provider-probe-tooltip.css"
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
@@ -91,18 +92,23 @@ export function ProviderCard({
           <div className="flex min-w-0 items-start gap-3">
             <ProviderBrandIcon kind={kind} />
             <div className="min-w-0 space-y-1">
-              <h3 className="truncate text-sm font-semibold" title={name}>
-                {name}
-              </h3>
+              <Tooltip content={name}>
+                <h3 className="truncate text-sm font-semibold">{name}</h3>
+              </Tooltip>
               <ModelPreview models={models} />
               {endpoint ? (
-                <p className="text-muted-foreground truncate text-xs" title={endpoint}>
-                  {endpoint}
-                </p>
+                <Tooltip content={endpoint}>
+                  <p className="text-muted-foreground truncate text-xs">{endpoint}</p>
+                </Tooltip>
               ) : null}
             </div>
           </div>
-          <ProviderSwitch name={name} checked={enabled} disabled={disabled} onChange={onToggle} />
+          <ProviderPowerButton
+            name={name}
+            enabled={enabled}
+            disabled={disabled}
+            onChange={onToggle}
+          />
         </div>
         <div className="flex flex-wrap gap-1.5">
           {authMethods?.includes("api_key") ? (
@@ -113,6 +119,11 @@ export function ProviderCard({
           {plannedAuthMethods?.includes("subscription_login") ? (
             <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
               {t("providers.subscriptionPlanned")}
+            </span>
+          ) : null}
+          {authMethods?.includes("subscription_login") ? (
+            <span className="border-border bg-muted/50 rounded-md border px-2 py-0.5 text-xs">
+              {t("subscription.type")}
             </span>
           ) : null}
         </div>

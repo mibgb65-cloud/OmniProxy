@@ -6,7 +6,12 @@ import { useUIStore } from "./ui-store"
 describe("UI theme preference", () => {
   beforeEach(() => {
     localStorage.clear()
-    useUIStore.setState({ language: defaultLanguage, theme: defaultTheme, accountView: "cards" })
+    useUIStore.setState({
+      language: defaultLanguage,
+      theme: defaultTheme,
+      accountView: "cards",
+      fontScale: 100,
+    })
   })
 
   it("restores a saved light theme", async () => {
@@ -63,5 +68,32 @@ describe("UI theme preference", () => {
     await useUIStore.persist.rehydrate()
     expect(useUIStore.getState().accountView).toBe("cards")
     expect(useUIStore.getState().setAccountView).toBeTypeOf("function")
+  })
+
+  it("persists font size and restores it without replacing the setter", async () => {
+    useUIStore.getState().setFontScale(125)
+    expect(JSON.parse(localStorage.getItem("omniproxy-ui-state")!).state.fontScale).toBe(125)
+    useUIStore.setState({ fontScale: 100 })
+    localStorage.setItem(
+      "omniproxy-ui-state",
+      JSON.stringify({ state: { fontScale: 125, setFontScale: "invalid" }, version: 0 }),
+    )
+    await useUIStore.persist.rehydrate()
+    expect(useUIStore.getState().fontScale).toBe(125)
+    expect(useUIStore.getState().setFontScale).toBeTypeOf("function")
+  })
+
+  it("rejects invalid font sizes in stored preferences and setters", async () => {
+    for (const value of ["120", 0, 79, 141, 113, null]) {
+      localStorage.setItem(
+        "omniproxy-ui-state",
+        JSON.stringify({ state: { fontScale: value }, version: 0 }),
+      )
+      await useUIStore.persist.rehydrate()
+      expect(useUIStore.getState().fontScale).toBe(100)
+    }
+    useUIStore.getState().setFontScale(120)
+    for (const value of [NaN, Infinity, 200, 85.5]) useUIStore.getState().setFontScale(value)
+    expect(useUIStore.getState().fontScale).toBe(120)
   })
 })
