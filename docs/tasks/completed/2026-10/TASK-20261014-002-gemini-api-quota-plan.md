@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -150,8 +150,12 @@ In Progress
 
 # Git
 
-待填写。
+`efb4972` docs(plan): 规划 Gemini API 与项目额度接入。
 
 # Result
 
 规划已完成。推荐先交付 P1／P2，再根据只读 Cloud 授权能力完成 P3；完整 Agent 桥接与费用扩展为 P4。所有未知数据与权限边界已明确，接入代码尚未实施。
+
+# Completed
+
+2026-10-14（Asia/Singapore）；完成状态仅指本轮规划。
