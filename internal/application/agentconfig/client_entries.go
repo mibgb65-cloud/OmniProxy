@@ -16,5 +16,9 @@ func (s *Service) clientEntries(ctx context.Context, client string) ([]catalog.E
 	if client == "codex" {
 		protocol = "responses"
 	}
-	return catalog.ForProtocol(entries, protocol), nil
+	entries = catalog.ForProtocol(entries, protocol)
+	if protocol == "messages" {
+		return catalog.ClaudeEntries(entries)
+	}
+	return entries, nil
 }

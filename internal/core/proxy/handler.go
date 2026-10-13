@@ -103,7 +103,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("request_read_failed", 400))
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, MaxRequestBytes)
+	r.Body = http.MaxBytesReader(w, r.Body, int64(requestBodyLimit(path)))
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		var tooLarge *http.MaxBytesError
@@ -136,7 +136,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeFailure(w, safeFailure(ctx, err))
 			return
 		}
-		if len(request.Body) > MaxRequestBytes {
+		if len(request.Body) > requestBodyLimit(path) {
 			writeFailure(w, Failure("request_too_large", 413))
 			return
 		}

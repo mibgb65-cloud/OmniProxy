@@ -6,8 +6,6 @@ import (
 	"sort"
 	"strings"
 	"unicode"
-
-	"omniproxy/internal/core/routing"
 )
 
 const MaxModels = 1000
@@ -85,7 +83,7 @@ func Normalize(entries []Entry) ([]Entry, error) {
 	result := make([]Entry, 0, len(entries))
 	seen := map[string]bool{}
 	for _, entry := range entries {
-		if !routing.ValidModel(entry.ID) || !textValid(entry.Name, 200) || ValidateMetadata(entry.Metadata) != nil {
+		if !ValidClaudeModel(entry.ID) || !textValid(entry.Name, 200) || ValidateMetadata(entry.Metadata) != nil {
 			return nil, ErrInvalid
 		}
 		if seen[entry.ID] {

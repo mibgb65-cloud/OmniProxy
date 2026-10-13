@@ -33,6 +33,15 @@ func ToChat(body []byte, protocol string) ([]byte, map[string]string, error) {
 		for _, v := range array(source["messages"]) {
 			m := object(v)
 			role := text(m["role"])
+			if role == "system" {
+				// Claude Code 2.1.295 会附加系统提醒消息，保留其位置和文本，不接受系统工具块。
+				s, e := content(m["content"])
+				if e != nil {
+					return nil, nil, e
+				}
+				messages = append(messages, Object{"role": role, "content": s})
+				continue
+			}
 			if role != "assistant" && role != "user" {
 				return nil, nil, ErrUnsupported
 			}

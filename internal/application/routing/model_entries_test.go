@@ -3,6 +3,8 @@ package routing
 import (
 	"context"
 	"testing"
+
+	catalog "omniproxy/internal/core/modelcatalog"
 )
 
 func TestDirectoryAliasInheritsTheSelectedAccountMetadata(t *testing.T) {
@@ -46,5 +48,25 @@ func TestDirectoryAliasInheritsTheSelectedAccountMetadata(t *testing.T) {
 		if entry.ID == "coding-route" {
 			t.Fatal("unavailable fixed account remained in directory")
 		}
+	}
+}
+
+func TestDeepSeekExistingCatalogGetsConfirmedContext(t *testing.T) {
+	s, _ := fixture(t)
+	if _, err := s.Create(context.Background(), input("coding-route")); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := s.Catalog(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if entry.ProviderKind == "deepseek" && (entry.Metadata.ContextWindow == nil || *entry.Metadata.ContextWindow != catalog.ClaudeLongContextWindow) {
+			t.Fatal("known target missing confirmed context", entry.ID)
+		}
+	}
+	variants, err := catalog.ClaudeEntries(entries)
+	if err != nil || len(entries) == 0 || len(variants) != 2*len(entries) {
+		t.Fatal("known target and route missing context variants", err)
 	}
 }

@@ -12,12 +12,12 @@ import (
 	"omniproxy/internal/core/routing"
 )
 
-// 只允许目录自身使用的参数；推理请求仍拒绝未知查询字符串。
+// 只允许协议已知参数；Claude Code 的 beta Messages 请求带 beta=true。
 func validModelQuery(path, raw string) bool {
 	if raw == "" {
 		return true
 	}
-	if len(raw) > 512 || path != "/v1/models" && path != "/v1/codex-models" {
+	if len(raw) > 512 {
 		return false
 	}
 	values, err := url.ParseQuery(raw)
@@ -30,6 +30,7 @@ func validModelQuery(path, raw string) bool {
 		}
 		value := values[0]
 		switch {
+		case path == "/v1/messages" && key == "beta" && value == "true":
 		case path == "/v1/codex-models" && key == "client_version":
 			if len(value) > 64 || strings.ContainsFunc(value, func(r rune) bool {
 				return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || strings.ContainsRune("._+-", r))

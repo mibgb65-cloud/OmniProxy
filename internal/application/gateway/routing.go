@@ -22,12 +22,12 @@ func (s *Service) SetRouter(router Router) { s.router = router }
 
 // RouteRequest 解析规则后改写模型，路由异常不回退到其他提供商或账号。
 func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (proxy.Request, error) {
-	if request.Protocol == "messages" && strings.HasPrefix(request.Model, catalog.DesktopAliasPrefix) {
+	if request.Protocol == "messages" && (strings.HasPrefix(request.Model, catalog.DesktopAliasPrefix) || strings.HasSuffix(request.Model, catalog.ClaudeLongContextSuffix)) {
 		entries, err := s.Catalog(ctx)
 		if err != nil {
 			return request, proxy.Failure("model_catalog_unavailable", 503)
 		}
-		model, found := catalog.ResolveDesktopAlias(entries, request.Model)
+		model, found := catalog.ResolveClaudeModel(entries, request.Model)
 		if !found {
 			return request, proxy.Failure("unsupported_model", 400)
 		}

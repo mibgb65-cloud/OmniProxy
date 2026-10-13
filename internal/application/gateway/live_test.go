@@ -17,8 +17,9 @@ import (
 	"omniproxy/internal/platform/profile"
 )
 
-// TestLiveDeepSeek 仅显式启用时读取现有数据库和凭证，不创建账号或写用户数据库。
-func TestLiveDeepSeek(t *testing.T) {
+// liveDeepSeekService 仅显式启用时读取现有数据库和凭证，不创建账号或写用户数据库。
+func liveDeepSeekService(t *testing.T) *Service {
+	t.Helper()
 	if os.Getenv("OMNIPROXY_LIVE_DEEPSEEK") != "1" {
 		t.Skip("真实提供商验证需显式启用")
 	}
@@ -56,7 +57,12 @@ func TestLiveDeepSeek(t *testing.T) {
 	if err != nil {
 		t.Fatal("cannot open existing read-only database")
 	}
-	defer db.Close()
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Error("cannot close read-only database")
+		}
+	})
+	db.SetMaxOpenConns(1)
 	if err := db.Ping(); err != nil {
 		t.Fatalf("cannot access read-only database: %v", err)
 	}
@@ -65,16 +71,24 @@ func TestLiveDeepSeek(t *testing.T) {
 		t.Fatal("cannot initialize protected credential access")
 	}
 	service := New(proxy.Options{}, provider.NewService(db), account.NewService(db, store), nil)
+	if _, err := service.selectTarget(context.Background()); err != nil {
+		t.Fatalf("cannot select live target: %v", err)
+	}
 	if _, err := service.Start(); err != nil {
 		t.Fatal("cannot start isolated test listener")
 	}
-	defer func() {
+	t.Cleanup(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		if _, err := service.Stop(ctx); err != nil {
 			t.Error("cannot stop isolated test listener")
 		}
-	}()
+	})
+	return service
+}
+
+func TestLiveDeepSeek(t *testing.T) {
+	service := liveDeepSeekService(t)
 	for _, stream := range []bool{false, true} {
 		started := time.Now()
 		status, body := localGatewayRequest(t, service, "deepseek-flash", stream)

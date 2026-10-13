@@ -5,6 +5,7 @@ import (
 
 	catalog "omniproxy/internal/core/modelcatalog"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/deepseek"
 )
 
 // Catalog 使用实际路由决策的账号元数据，不把其他同名模型的能力混入目标。
@@ -56,6 +57,10 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		}
 		if matched {
 			entry.Metadata.IsDefault = false
+		}
+		if entry.ProviderKind == "deepseek" && entry.Metadata.ContextWindow == nil {
+			// 兼容已同步但尚未保存上下文元数据的旧快照，按实际路由目标补齐。
+			entry.Metadata.ContextWindow = deepseek.ModelMetadata(entry.TargetModel).ContextWindow
 		}
 		entries = append(entries, entry)
 	}

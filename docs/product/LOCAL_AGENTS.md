@@ -53,6 +53,8 @@ Claude Code Desktop 是官方 Claude 桌面应用中的 Code 功能，与 Chat �
 
 Claude Code Desktop 的配置使用稳定兼容路由名，标签显示实际模型／用户路由名称。Messages 请求先用当前可用目录解析兼容名，再进入现有精确路由和账号选择；目录或路由移除后，旧配置不能继续调用。兼容名不写入用户路由表，其他客户端目录继续使用原模型 ID。
 
+Claude CLI / Desktop 目录为已确认支持 1M 的目标同时提供普通与 `[1m]` 选项，例如 `deepseek-flash` / `deepseek-flash[1m]`、`deepseek-v4-pro` / `deepseek-v4-pro[1m]`。普通选项使用 Claude Code 默认上下文（本机 2.1.295 实测为 200K），`[1m]` 选项启用 1M；两者使用同一个真实上游模型。Desktop 兼容 ID 保留可见后缀，客户端发送前去掉后缀仍可解析；直接携带后缀的 Messages 请求也支持。已有默认保持优先，未知上下文不生成长上下文选项。DeepSeek Flash / Pro 的官方上下文元数据在同步和旧快照读取时补齐，路由继承实际目标能力。Messages 正文上限单独设为 16 MiB，以容纳长文本与 JSON 编码；继续在读取前鉴权并占用有界并发名额，其余协议仍使用 2 MiB 上限。[DeepSeek 官方接入说明](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code/)、[官方模型能力](https://api-docs.deepseek.com/quick_start/pricing/)、[Claude Code 上下文说明](https://code.claude.com/docs/en/model-config)。
+
 模型目录按账号和授权版本隔离，保存官方已确认的描述、推理档位和可选能力。路由别名继承实际目标账号的元数据；未知上下文／工具能力保持待确认，不借用其他模型的数值。客户端目录排除已确认不支持所需协议、文本或工具的模型。
 
 - Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
@@ -81,10 +83,10 @@ Claude CLI 只合并接入 env，不退出原登录。Desktop 应用时添加并
 
 - Windows 本地客户端配置；ChatGPT / Codex 官方 model/list 和 DeepSeek 官方 GET /models。
 - GET /v1/models 动态合并可用原始模型与路由；所有请求校验本地接入 Key。
-- GET /v1/codex-models 提供 Codex 专用元数据；只接受有界 `client_version` 参数。普通模型列表支持有界 `limit`、`after_id`、`before_id`，其他参数及推理请求的查询字符串仍拒绝。
+- GET /v1/codex-models 提供 Codex 专用元数据；只接受有界 `client_version` 参数。普通模型列表支持有界 `limit`、`after_id`、`before_id`；Messages 支持 Claude Code 实际发送的单个 `beta=true` 查询参数，重复、异常或未知参数仍拒绝，其他推理协议不接受查询参数。
 - POST /v1/chat/completions、POST /v1/responses、POST /v1/messages。
 - Codex Responses WebSocket，连接内上下文续接、会话和请求并发上限、空闲超时、重置 Key 状态检查。
-- ChatGPT Responses 保留原生文本、工具及流式事件；跨协议支持文本和工具调用，包括 Codex namespace／custom 工具及 Claude tool_use／tool_result。
+- ChatGPT Responses 保留原生文本、工具及流式事件；跨协议支持文本和工具调用，包括 Codex namespace／custom 工具及 Claude tool_use／tool_result。Claude Code 在 messages 中附加的 system 文本提醒保留角色、位置和正文，系统消息中的工具及其他不支持内容仍拒绝。
 - 跨协议返回完成后的 JSON 或 SSE；当前不会逐 token 翻译。DeepSeek 跨协议思考关闭，多模态及不支持的托管工具明确返回 unsupported_content。
 - HTTP Responses 为无持久化请求，调用方需提供完整上下文；没有调度、静默重试或故障切换。
 

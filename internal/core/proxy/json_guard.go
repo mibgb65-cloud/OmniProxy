@@ -9,7 +9,11 @@ import (
 
 // validateJSON 拒绝重复字段和过深嵌套，避免代理与上游对同一正文产生不同解释。
 func validateJSON(body []byte) error {
-	if len(body) == 0 || len(body) > MaxRequestBytes || !utf8.Valid(body) {
+	return validateJSONSize(body, MaxRequestBytes)
+}
+
+func validateJSONSize(body []byte, limit int) error {
+	if len(body) == 0 || len(body) > limit || !utf8.Valid(body) {
 		return Failure("invalid_request", 400)
 	}
 	decoder := json.NewDecoder(bytes.NewReader(body))

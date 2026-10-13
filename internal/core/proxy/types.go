@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	MaxRequestBytes  = 2 << 20
-	maxResponseBytes = 8 << 20
-	maxStreamBytes   = 32 << 20
+	MaxRequestBytes = 2 << 20
+	// 百万上下文的文本及 JSON 编码可能超过 2 MiB，Messages 使用独立的有界容量。
+	MaxMessagesRequestBytes = 16 << 20
+	maxResponseBytes        = 8 << 20
+	maxStreamBytes          = 32 << 20
 )
 
 // Request 保留协议正文；只解析代理需要的模型和流式标志。
