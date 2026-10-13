@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261013-009](../tasks/active/TASK-20261013-009-codex-quota-auto-activation.md) 自动激活 Codex 额度窗口：明确保存授权、后台检测、原账号最小消息、复查与持久去重已实现，完整质量门与原生验收通过，待提交归档。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261013-009](../tasks/completed/2026-10/TASK-20261013-009-codex-quota-auto-activation.md) 自动激活 Codex 额度窗口：默认关闭、明确保存授权、原账号最小消息、复查与周期持久去重；完整质量门与原生验收通过，真实设置保持关闭。实现提交 `3084778`。
 - [TASK-20261013-008](../tasks/completed/2026-10/TASK-20261013-008-codex-websocket-settings.md) OpenAI 账号设置新增网关级 Codex WebSocket 开关，默认开启、持久保存、动态生效，保留客户端身份；完整质量门与原生验收通过。实现提交 `50b309c`。
 - [TASK-20261013-007](../tasks/completed/2026-10/TASK-20261013-007-model-provider-priorities.md) 同名模型服务商优先级排序、旧偏好兼容迁移及配置弹窗；完整质量门、三服务商原生真实保存与开发窗口验收通过。实现提交 `baa1621`。
 - [TASK-20261013-006](../tasks/completed/2026-10/TASK-20261013-006-routing-model-provider-views.md) 路由默认映射与模型目录增加模型／服务商双向视图，移除指定目录说明；完整质量门、深浅主题与最小窗口原生验收通过，开发窗口已更新。实现提交 `dda694d`。
