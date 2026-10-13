@@ -117,7 +117,11 @@ PASS：最终 `VITEST_MAX_WORKERS=4 task verify BIN_DIR=E:/go/new/wails3-v/OmniP
 
 # Git
 
-Branch: `codex/deepseek-claude-context`。最终质量门已通过，提交本任务文件后补记实现提交号；不推送远端。
+Branch: `codex/deepseek-claude-context`。
+
+实现提交：`06a33786b405a1ca0e30f875fd5a887267f07dc5 fix(gateway): 修复 Claude Code DeepSeek 上下文与请求兼容`。
+
+仅提交本任务代码、测试与文档，不推送远端；提交后补记哈希。
 
 # Result
 
