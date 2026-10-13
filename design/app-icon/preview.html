@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniProxy · 图标设计</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#171a20;font:16px/1.65 "Segoe UI","Microsoft YaHei UI",sans-serif}
+  main{max-width:1340px;margin:auto;padding:42px 28px}h1{margin:0;font-size:42px;letter-spacing:-1.5px}p{color:#65707c}
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:22px 0}button{border:1px solid #d7dce2;background:#fff;padding:9px 16px;border-radius:8px;font:inherit;cursor:pointer}
+  button:focus-visible{outline:3px solid #047c62;outline-offset:3px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  article{background:#fff;border:1px solid #e0e4e9;border-radius:16px;padding:24px}h2{font-size:24px;margin:0 0 8px}article p{font-size:14px;margin:0}
+  .hero{height:310px;display:grid;place-items:center}.hero img{width:270px;height:270px;object-fit:contain}.bar{display:flex;align-items:center;gap:24px;height:98px;padding:16px;margin-top:16px;border-radius:8px}
+  .light{background:#f5f6f8}.dark{background:#171a20;color:#d7dce4}.bar>span{font-size:12px;min-width:62px}.sample{text-align:center;font-size:11px}.slot{height:42px;display:grid;place-items:center}
+  .sample img{display:block}.sizes{margin-top:20px;display:flex;gap:14px;font-size:13px}.sizes a,a{color:#036e58}.foot{margin-top:28px;font-size:14px}
+  body.night{background:#111419;color:#e7ebf1}body.night article{background:#22272f;border-color:#363d48}body.night article p,body.night>main>p{color:#b2bbc6}body.night .hero{background:#171a20;border-radius:10px}body.night .light{color:#171a20}body.night a{color:#33b895}
+  @media(max-width:950px){.grid{grid-template-columns:1fr}.hero{height:280px}}
+</style>
+<main>
+  <h1>OmniProxy</h1>
+  <p>桌面与任务栏图标 · 三个原创方向 · 设计提案</p>
+  <div class="controls"><button id="theme" type="button" aria-pressed="false">切换深色展示</button><span>小图按 16／24／32 实际 CSS 像素展示，浏览器缩放保持 100%。</span></div>
+  <section class="grid" id="icons" aria-label="图标方案比较"></section>
+  <p class="foot">参考：<a href="https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-design">微软 Windows 图标规范</a> · <a href="https://blog.google/products-and-platforms/products/chrome/how-we-redesigned-the-chrome-icon/">Google Chrome 设计过程</a> · <a href="https://spectrum.adobe.com/foundations/visual-language/brand">Adobe 品牌规范</a></p>
+  <p class="foot">PNG 与 ICO 为本轮设计交付，尚未替换应用资源。桌面与任务栏沿用同一标识，ICO 包含多个尺寸。</p>
+</main>
+<script>
+  const directions=[
+    {id:'a-jade-link',name:'A · 翡翠连接环',description:'两段几何通路相扣，形成统一入口。青绿双色，透明外底。'},
+    {id:'b-graphite-portal',name:'B · 曜石入口',description:'石墨黑底与白色入口，一处青绿切面，偏专业工具风格。'},
+    {id:'c-cobalt-hub',name:'C · 钴蓝汇聚',description:'三路宽通路汇为一体，以紧凑枢纽表达多服务汇聚。'}
+  ];
+  const root=document.getElementById('icons');
+  for(const direction of directions){
+    const card=document.createElement('article');
+    const title=document.createElement('h2');title.textContent=direction.name;card.append(title);
+    const description=document.createElement('p');description.textContent=direction.description;card.append(description);
+    const hero=document.createElement('div');hero.className='hero';
+    const image=document.createElement('img');image.src=direction.id+'.png';image.alt=direction.name;hero.append(image);card.append(hero);
+    for(const theme of ['light','dark']){
+      const bar=document.createElement('div');bar.className='bar '+theme;
+      const label=document.createElement('span');label.textContent=theme==='light'?'浅色任务栏':'深色任务栏';bar.append(label);
+      for(const size of [32,24,16]){
+        const sample=document.createElement('div');sample.className='sample';
+        const slot=document.createElement('div');slot.className='slot';
+        const small=document.createElement('img');small.src='sizes/'+direction.id+'-'+size+'.png';small.width=size;small.height=size;small.alt=direction.name+' '+size+'像素';slot.append(small);
+        const caption=document.createElement('span');caption.textContent=size+' px';sample.append(slot,caption);bar.append(sample);
+      }
+      card.append(bar);
+    }
+    const links=document.createElement('div');links.className='sizes';
+    for(const extension of ['png','ico']){const link=document.createElement('a');link.href=direction.id+'.'+extension;link.download=direction.id+'.'+extension;link.textContent='下载 '+extension.toUpperCase();links.append(link)}
+    card.append(links);root.append(card);
+  }
+  document.getElementById('theme').addEventListener('click',event=>{
+    const dark=document.body.classList.toggle('night');event.currentTarget.setAttribute('aria-pressed',String(dark));event.currentTarget.textContent=dark?'切换浅色展示':'切换深色展示';
+  });
+</script>
+</html>

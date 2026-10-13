@@ -1,0 +1,74 @@
+[
+  {
+    "id": "a-jade-link",
+    "width": 1254,
+    "height": 1254,
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "exported_sizes": [
+      16,
+      20,
+      24,
+      32,
+      40,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "status": "尺寸和透明外底检查通过"
+  },
+  {
+    "id": "b-graphite-portal",
+    "width": 1254,
+    "height": 1254,
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "exported_sizes": [
+      16,
+      20,
+      24,
+      32,
+      40,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "status": "尺寸和透明外底检查通过"
+  },
+  {
+    "id": "c-cobalt-hub",
+    "width": 1254,
+    "height": 1254,
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "exported_sizes": [
+      16,
+      20,
+      24,
+      32,
+      40,
+      48,
+      64,
+      96,
+      128,
+      256
+    ],
+    "status": "尺寸和透明外底检查通过"
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "product": "OmniProxy",
+  "date": "2026-10-13",
+  "status": "设计提案，尚未替换应用图标",
+  "request": "桌面图标和任务栏图标，高级简洁，先参考大厂图标。",
+  "positioning": "本地 AI API 网关、多提供商统一接入与账号管理。",
+  "generation_mode": "内置 imagegen",
+  "references": [
+    {
+      "brand": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/windows/apps/design/iconography/app-icon-design",
+      "takeaway": "简单隐喻、清晰轮廓、少量层次与渐变，同时考虑深浅背景和小尺寸辨识度。"
+    },
+    {
+      "brand": "Google Chrome",
+      "url": "https://blog.google/products-and-platforms/products/chrome/how-we-redesigned-the-chrome-icon/",
+      "takeaway": "简化阴影、调整比例，以稳定轮廓保持辨识度；针对平台和尺寸进行适配。"
+    },
+    {
+      "brand": "Adobe",
+      "url": "https://spectrum.adobe.com/foundations/visual-language/brand",
+      "takeaway": "集中使用品牌色，用统一而清晰的视觉主体建立产品识别。"
+    }
+  ],
+  "directions": [
+    {
+      "id": "a-jade-link",
+      "name": "翡翠连接环",
+      "description": "两段相扣的圆角几何连接环，形成 O 与双向通路；青绿双色、透明外底。",
+      "recommended": false,
+      "prompt": "Use case: logo-brand. Asset type: original Windows desktop and taskbar app icon for OmniProxy, a local AI API gateway that unifies multiple providers. Create ONE meticulously designed premium minimalist app symbol, isolated on a truly transparent canvas. The symbol is a substantial near-square geometric O formed by exactly two complementary thick C-shaped channel segments, interlocked visually but separated by two generous precision diagonal negative-space cuts at the upper-right and lower-left. The outer contour is a soft chamfered square with generously rounded corners, not a circular browser swirl. The inner aperture is one large clean rounded square, at least 42 percent of the total symbol width. The bands have equal substantial thickness. Dark jade teal for the lower-left segment, bright emerald mint for the upper-right segment, with extremely restrained tonal transitions. The construction subtly communicates two-way routing and one unified gateway. Straight-on orthographic view, absolutely crisp vector-like edges, balanced centered proportions, symbol occupies 76 percent of the square canvas. Confident highly recognizable silhouette that holds up at 24 and 32 pixels. Refined like a major technology company product mark but fully original. No background tile, no letters, no text, no tagline, no extra dots, no arrows, no orbiting particles, no circuit lines, no knots, no multiple tiny layers, no dramatic lighting, no 3D extrusion, no cast shadow, no existing brand logos, no watermark. Deliver the single finished icon only, never a contact sheet, mockup, board, or size comparison."
+    },
+    {
+      "id": "b-graphite-portal",
+      "name": "曜石入口",
+      "description": "石墨黑圆角底板、白色统一入口和一处青绿切面；偏专业工具风格。",
+      "recommended": true,
+      "prompt": "Use case: logo-brand. Asset type: original Windows desktop and taskbar app icon for OmniProxy, a professional local AI API gateway. Create ONE premium exceptionally simple app icon on a truly transparent surrounding canvas. A front-facing graphite-black rounded-square tile with beautifully precise corners. Inside it, a single thick ivory-white geometric portal ring: an upright rounded-square O with a large clean central aperture, not a literal text letter. The ring has two short broad openings offset near the upper-right and lower-left corner so that two bold complementary channels communicate incoming and outgoing connections. One channel end at the upper-right is a short restrained vivid jade-green segment, built into the same ring rather than an extra dot or badge. Icon tile covers 84 percent of the square image and the white ring covers 62 percent of the tile. Massive clean negative space. Flat Swiss precision, matte colors, no heavy lighting, just a very subtle graphite tonal change across the tile. Sharp vector-like execution and exceptional 24px readability. Original major-company-quality developer tool identity. Exactly one tile and one central geometric mark. No wordmark, no text, no tiny detail, no outline border, no secondary floating symbols, no external shadow, no glass shine, no photorealistic material, no circuits, no sparkle, no existing logos, no watermark. Deliver the single finished icon only, no presentation board, no mockup, no variants. Preserve real transparency outside the tile."
+    },
+    {
+      "id": "c-cobalt-hub",
+      "name": "钴蓝汇聚",
+      "description": "三条宽通路汇成紧凑枢纽，单一蓝色体系；强调多服务汇聚。",
+      "recommended": false,
+      "prompt": "Use case: logo-brand. Asset type: original Windows desktop and taskbar app icon for OmniProxy, a local gateway connecting many AI providers. Create ONE highly sophisticated minimalist original technology product mark on a genuinely transparent square canvas. The symbol is an unmistakable compact three-way junction constructed from three substantial identical bent rounded geometric channel segments arranged with 120-degree rotational balance. Each segment enters from an outer corner and bends smoothly into a shared small central rounded triangular negative-space aperture, giving a clean unified hub silhouette. Three broad paths, one center, no visible small connector nodes. Strong geometric construction, generous open negative spaces between the three arms, elegantly rounded exterior corners. Use a tightly controlled cobalt-to-indigo blue family with barely perceptible light-to-dark variation; no rainbow. Straight-on flat vector-style rendering with impeccable clean edges. Center the symbol at 76 percent of the canvas width. It must be bold and instantly legible at 24 and 32 px and elegant as a 256px desktop icon. Major technology company refinement, fully original visual identity. Avoid similarity to Google Drive, Microsoft Edge, OpenAI knots, recycling symbols, spinning loading indicators, or shields. No background tile, no letters, no wordmark, no text, no spheres, no arrows, no chips, no network lines, no extra nodes, no extruded 3D, no shadow, no glossy chrome, no watermark. Deliver one finished icon only, never a mockup or comparison sheet."
+    }
+  ],
+  "export": {
+    "ico_sizes_px": [16, 20, 24, 32, 40, 48, 64, 96, 128, 256],
+    "ico_tool": "项目已安装的 wails3 generate icons",
+    "ico_command_template": "wails3 generate icons -input design/app-icon/ID.png -windowsfilename design/app-icon/ID.ico -macfilename tmp/app-icon-design/ID.icns -sizes 256,128,96,64,48,40,32,24,20,16",
+    "preview_command": "./design/app-icon/prepare-preview.ps1",
+    "note": "ID 为三个方向中对应的 id；PNG 原稿保留生成的透明通道，macfilename 仅为工具所需的临时输出。"
+  },
+  "validation_targets": {
+    "desktop_px": [48, 64, 128, 256],
+    "taskbar_px": [24, 32, 48],
+    "tray_px": [16, 20],
+    "backgrounds": ["#F5F6F8", "#171A20"],
+    "note": "同一视觉标识用于桌面与任务栏。小尺寸预览只用于设计验收；实际系统接入需要 ICO 尺寸集合及原生验收。"
+  }
+}
