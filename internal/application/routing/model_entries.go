@@ -5,6 +5,7 @@ import (
 
 	catalog "omniproxy/internal/core/modelcatalog"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
 )
 
@@ -18,10 +19,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids := []string{"deepseek-flash", "deepseek-v4-pro"}
-	for _, model := range data.models {
-		ids = append(ids, model.model)
-	}
+	ids := originalModels(data)
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)
@@ -61,6 +59,9 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		if entry.ProviderKind == "deepseek" && entry.Metadata.ContextWindow == nil {
 			// 兼容已同步但尚未保存上下文元数据的旧快照，按实际路由目标补齐。
 			entry.Metadata.ContextWindow = deepseek.ModelMetadata(entry.TargetModel).ContextWindow
+		}
+		if entry.ProviderKind == atria.Kind {
+			entry.Metadata = atria.ModelMetadata(entry.TargetModel)
 		}
 		entries = append(entries, entry)
 	}

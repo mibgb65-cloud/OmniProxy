@@ -1,6 +1,8 @@
 // Package provider manages provider configurations independently of the desktop shell.
 package provider
 
+import "omniproxy/internal/provider/atria"
+
 // Definition describes a built-in provider kind and its authentication options.
 type Definition struct {
 	Kind               string   `json:"kind"`
@@ -29,9 +31,10 @@ var definitions = []Definition{
 	{Kind: "minimax", Name: "MiniMax", DefaultBaseURL: "https://api.minimax.io/v1", Models: []string{"MiniMax M3", "MiniMax M2.7", "MiniMax M2.5", "MiniMax Speech 2.8"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "mimo", Name: "Xiaomi MiMo", DefaultBaseURL: "https://api.xiaomimimo.com/v1", Models: []string{"MiMo V2.6 Pro", "MiMo V2.6 Flash", "MiMo V2.6 Pro UltraSpeed", "MiMo V2.5"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "stepfun", Name: "StepFun", DefaultBaseURL: "https://api.stepfun.com/v1", Models: []string{"Step 5 Preview", "Step 3.7 Flash", "Step 3.5 Flash", "StepAudio 3"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},
 }
 
-// Catalog returns an independent snapshot of the nine built-in provider kinds.
+// Catalog returns an independent snapshot of the built-in provider kinds.
 func Catalog() []Definition {
 	result := make([]Definition, len(definitions))
 	for i, definition := range definitions {

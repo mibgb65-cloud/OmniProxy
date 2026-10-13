@@ -15,6 +15,9 @@ export function ModelCatalogRow({
       <p className="text-muted-foreground min-w-0 wrap-anywhere">
         {account?.authEmail || account?.name || model.accountId}
       </p>
+      {model.source === "preset" ? (
+        <p className="text-muted-foreground">{t("models.presetSource")}</p>
+      ) : null}
       <p className="text-muted-foreground wrap-anywhere">
         {model.metadata?.contextWindow
           ? t("models.contextWindow", { count: model.metadata.contextWindow })

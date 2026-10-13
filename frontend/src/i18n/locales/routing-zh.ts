@@ -61,7 +61,7 @@ export const routingZh = {
   "routing.editTitle": "编辑模型映射",
   "routing.newTitle": "新增模型映射",
   "routing.formDescription":
-    "精确匹配 model，保存后立即生效。支持已接入的 DeepSeek 和 ChatGPT / Codex。",
+    "精确匹配 model，保存后立即生效。支持已接入的 DeepSeek、Atria 和 ChatGPT / Codex。",
   "routing.aliasHint": "区分大小写，最多 128 个字符；支持字母、数字及 - _ . : /。",
   "routing.aliasInvalid": "请输入 1–128 个允许字符的模型名，不含空格。",
   "routing.aliasDuplicate": "此模型名已有规则，请使用其他名称。",

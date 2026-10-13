@@ -21,10 +21,14 @@ export function useGatewayPreparation() {
     ? getConfiguredProxyAddress(gateway.info.data?.runtime.port)
     : null
   const address = (activeAddress ?? proxyAddress) ? `${activeAddress ?? proxyAddress}/v1` : null
-  const supportedProviders = providers.data?.filter((item) => item.kind === "deepseek") ?? []
+  const supportedProviders =
+    providers.data?.filter((item) => item.kind === "deepseek" || item.kind === "atria") ?? []
   const resources =
     providers.isSuccess && accounts.isSuccess
-      ? getConfiguredResources(supportedProviders, accounts.data)
+      ? getConfiguredResources(
+          supportedProviders,
+          accounts.data.filter((item) => item.authMethod !== "subscription_login"),
+        )
       : null
   const providerCount = providers.isSuccess
     ? supportedProviders.filter((item) => item.enabled).length

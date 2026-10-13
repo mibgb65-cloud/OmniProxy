@@ -2,7 +2,7 @@
 
 ## 使用
 
-1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek API Key。
+1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／Atria API Key。
 2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。
 3. 可以直接使用已同步模型，也可以新建精确路由并固定账号。
 4. 在网关页「客户端接入」选项卡的「本地 Agent 接入」点击 Codex、Claude Code CLI 或 Claude Desktop Code 品牌卡片，进入对应的配置页面；无需先启动网关。卡片只展示客户端名称、简介与接入状态。
@@ -86,6 +86,7 @@ Claude CLI 只合并接入 env，不退出原登录。Desktop 应用时添加并
 ## 第一版能力
 
 - Windows 本地客户端配置；ChatGPT / Codex 官方 model/list 和 DeepSeek 官方 GET /models。
+- Atria 账号自动提供 `Atria-Dawn-Preview` 官方预设和 256000／仅文本元数据，目录注明预设来源，不查询尚未确认的 `/v1/models`。Codex 使用本地 Responses，Claude CLI／Desktop 使用本地 Messages；Atria 原生 SSE 保留增量与工具关联。真实 Key 和客户端专有扩展仍需实机验证，不为 Atria 生成 1M 变体。
 - GET /v1/models 动态合并可用原始模型与路由；所有请求校验本地接入 Key。
 - GET /v1/codex-models 提供 Codex 专用元数据；只接受有界 `client_version` 参数。普通模型列表支持有界 `limit`、`after_id`、`before_id`；Messages 支持 Claude Code 实际发送的单个 `beta=true` 查询参数，重复、异常或未知参数仍拒绝，其他推理协议不接受查询参数。
 - POST /v1/chat/completions、POST /v1/responses、POST /v1/messages。

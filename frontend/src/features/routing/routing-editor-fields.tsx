@@ -47,6 +47,7 @@ export function RoutingEditorFields({
     ...providers.map((p) => {
       const unsupported =
         p.kind !== "deepseek" &&
+        p.kind !== "atria" &&
         !(p.kind === "openai" && catalog.some((m) => m.providerId === p.id))
       return {
         value: p.id,

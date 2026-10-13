@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## Atria 原生提供商（2026-10-13）
+
+迁移 019 追加默认启用的 Atria，018 预留给并行 GPT 长上下文任务。`provider/atria` 通过既有 `proxy.Upstream` 协议转发三种原生 HTTP／SSE，并在受保护 API Key 回调内管理资源和认证。路由与客户端目录共享精确模型 ID 和 256000／文本元数据；`application/modelcatalog` 派生账号预设，来源为 preset、不伪造发现时间。统计仍观察原上游 usage；未确认的发现／余额接口不调用。
+
 ## 代理统计（2026-10-09）
 
 迁移 009 增加独立 provider_id＋model 累计，与原用量差值事务同步。用量查询新增可选 providerModels 字段，按具体提供商配置展示模型表，保留原全局模型汇总。资源删除和请求淘汰不影响该累计；历史回填不能确定归属时保留历史名称分组。
@@ -95,13 +99,13 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages nine default-enabled
+> Current state: `internal/application/provider` manages ten default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
-> API still exposes only `/healthz`. The first gateway adapter supports DeepSeek
-> Chat Completions through the local proxy; other provider request adapters are pending.
+> API still exposes only `/healthz`. The gateway forwards DeepSeek,
+> ChatGPT / Codex subscription, and Atria requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -200,10 +204,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, and OpenAI-compatible endpoints. Nine named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, and OpenAI-compatible endpoints. Ten named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters are still pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, and Atria are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

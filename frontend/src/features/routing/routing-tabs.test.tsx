@@ -160,7 +160,7 @@ describe("路由选项卡导航与状态保留", () => {
     expect(screen.getByRole("combobox", { name: "同步账号" })).toHaveTextContent(
       "My account · DeepSeek",
     )
-    expect(await screen.findByText("已同步 1 个账号模型")).toBeInTheDocument()
+    expect(await screen.findByText("共 1 个账号模型")).toBeInTheDocument()
     expect(syncAccountModels).toHaveBeenCalledTimes(1)
   })
 

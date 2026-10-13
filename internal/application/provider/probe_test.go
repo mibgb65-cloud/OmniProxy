@@ -13,8 +13,8 @@ func TestBuiltInProbeEndpointsAreValid(t *testing.T) {
 		if _, err := validateBaseURL(definition.DefaultBaseURL); err != nil {
 			t.Errorf("%s has an invalid endpoint: %v", definition.Kind, err)
 		}
-		if len(definition.Models) < 2 {
-			t.Errorf("%s has no expandable model preview", definition.Kind)
+		if len(definition.Models) == 0 {
+			t.Errorf("%s has no model preview", definition.Kind)
 		}
 	}
 }

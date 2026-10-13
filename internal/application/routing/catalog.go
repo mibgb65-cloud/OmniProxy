@@ -6,6 +6,7 @@ import (
 	"omniproxy/internal/application/account"
 	catalog "omniproxy/internal/core/modelcatalog"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/atria"
 )
 
 type discoveredModel struct {
@@ -43,6 +44,9 @@ func targetSupports(data snapshot, providerID, accountID, model string) bool {
 		if p.ID == providerID && p.Kind == "deepseek" {
 			return supportedModel(model)
 		}
+		if p.ID == providerID && p.Kind == atria.Kind {
+			return model == atria.ModelID
+		}
 	}
 	return false
 }
@@ -52,6 +56,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 			continue
 		}
 		if p.Kind == "deepseek" && a.AuthMethod != account.AuthSubscription {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == atria.Kind && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "openai" && a.AuthMethod == account.AuthSubscription && a.AuthState == "authenticated" {
@@ -77,7 +84,7 @@ func (s *Service) Models(ctx context.Context) ([]string, error) {
 			}
 		}
 	}
-	for _, m := range []string{"deepseek-flash", "deepseek-v4-pro"} {
+	for _, m := range originalModels(data) {
 		if !seen[m] && evaluate(m, core.Rule{}, false, data).Routable {
 			ids = append(ids, m)
 		}

@@ -24,6 +24,7 @@ type Item struct {
 	Name       string        `json:"name"`
 	FetchedAt  string        `json:"fetchedAt"`
 	Metadata   core.Metadata `json:"metadata,omitempty"`
+	Source     string        `json:"source,omitempty"`
 }
 type Service struct {
 	db           *sql.DB
@@ -57,7 +58,11 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 	if rows.Err() != nil || len(items) > 10000 {
 		return nil, ErrUnavailable
 	}
-	return items, nil
+	presets, err := s.presetItems(ctx)
+	if err != nil || len(items)+len(presets) > 10000 {
+		return nil, ErrUnavailable
+	}
+	return append(items, presets...), nil
 }
 
 // Sync 失败时保留上次成功目录，账号凭据版本改变后旧目录不参与路由。

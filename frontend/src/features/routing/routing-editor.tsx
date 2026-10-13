@@ -61,7 +61,13 @@ export function RoutingEditor({
   const submit = handleSubmit(async (input) => {
     setSaveError(null)
     if (
-      !providers.some((item) => item.id === input.providerId && item.kind === "deepseek") ||
+      !providers.some(
+        (item) =>
+          item.id === input.providerId &&
+          (item.kind === "deepseek" ||
+            item.kind === "atria" ||
+            (item.kind === "openai" && catalog.some((model) => model.providerId === item.id))),
+      ) ||
       !models.includes(input.model)
     ) {
       setError("providerId", { type: "validate" })

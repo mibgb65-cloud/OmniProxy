@@ -98,7 +98,7 @@ export function ModelCatalog({
         {models.length ? (
           <div className="min-w-0 space-y-3">
             <p className="text-muted-foreground text-xs">
-              {t("models.synced", { count: models.length })}
+              {t("models.catalogCount", { count: models.length })}
             </p>
             <ModelCatalogGroups
               models={models}

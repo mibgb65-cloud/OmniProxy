@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-017](../tasks/active/TASK-20261013-017-atria-builtin-provider.md)：Atria 内置提供商与原生三协议接入，在独立分支 `codex/atria-provider` 验证；原 GPT 长上下文任务工作区保持独立。
 
 ## Recently Completed
 

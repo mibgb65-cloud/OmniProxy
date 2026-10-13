@@ -66,6 +66,9 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
   Query to manage switches and custom configurations. Curated model names are
   kept in the built-in catalog for display; a credential-free HTTP HEAD probe
   measures endpoint reachability and response-header latency without redirects.
+  Migration `019_builtin_atria.sql` adds Atria as the tenth preset without
+  resetting existing state. Its native HTTP adapter uses the existing standard
+  library transport and proxy interfaces; no new SDK dependency is added.
 - API Key accounts use the existing `accounts` table and
   `internal/application/account`. The account list exposes metadata only;
   `credential_ref` stays in SQLite while the API Key is saved in the profile's

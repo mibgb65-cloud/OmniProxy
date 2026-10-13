@@ -14,7 +14,13 @@ import {
   type RouteItem,
 } from "../../services/routing"
 import { useUIStore } from "../../stores/ui-store"
-import { providers, accounts, ruleItem, renderRouting } from "./routing-test-helpers"
+import {
+  providers,
+  accounts,
+  ruleItem,
+  renderRouting,
+  listModelCatalogMock,
+} from "./routing-test-helpers"
 
 vi.mock("../../services/gateway", () => ({ getGatewayInfo: vi.fn() }))
 vi.mock("../../services/omniproxy", () => ({ listProviders: vi.fn(), listAccounts: vi.fn() }))
@@ -37,6 +43,7 @@ describe("路由页面", () => {
     localStorage.clear()
     useUIStore.setState({ language: "zh" })
     saved = []
+    listModelCatalogMock.mockResolvedValue([])
     vi.mocked(getGatewayInfo).mockResolvedValue({
       runtime: { state: "stopped", address: "", port: 3001, startedAt: "", errorCode: "" },
       models: ["deepseek-flash", "deepseek-v4-pro"],
@@ -76,6 +83,55 @@ describe("路由页面", () => {
       routable: true,
       errorCode: "",
     })
+  })
+
+  it("Atria 官方预设可用于新增并保存显式路由", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      ...providers,
+      { ...providers[0], id: "builtin_atria", kind: "atria", name: "Atria" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      ...accounts,
+      {
+        ...accounts[0],
+        id: "atria-account",
+        providerId: "builtin_atria",
+        name: "Atria account",
+        authMethod: "api_key",
+      },
+    ])
+    listModelCatalogMock.mockResolvedValue([
+      {
+        accountId: "atria-account",
+        providerId: "builtin_atria",
+        model: "Atria-Dawn-Preview",
+        name: "Atria-Dawn-Preview",
+        fetchedAt: "",
+        source: "preset",
+      },
+    ])
+    const user = userEvent.setup()
+    renderRouting("rules")
+    await user.click((await screen.findAllByRole("button", { name: "新增规则" }))[0])
+    const dialog = within(screen.getByRole("dialog"))
+    await user.type(dialog.getByRole("textbox", { name: "客户端模型名" }), "research")
+    await selectOption(user, dialog.getByRole("combobox", { name: "提供商配置" }), "Atria")
+    await selectOption(
+      user,
+      dialog.getByRole("combobox", { name: "实际模型 ID" }),
+      "Atria-Dawn-Preview",
+    )
+    await selectOption(user, dialog.getByRole("combobox", { name: "账号范围" }), "Atria account")
+    await user.click(dialog.getByRole("button", { name: "保存规则" }))
+    await waitFor(() =>
+      expect(createRoute).toHaveBeenCalledWith({
+        alias: "research",
+        providerId: "builtin_atria",
+        model: "Atria-Dawn-Preview",
+        accountId: "atria-account",
+        enabled: true,
+      }),
+    )
   })
 
   it("空状态不创建示例数据，新增规则后刷新列表并恢复焦点", async () => {
