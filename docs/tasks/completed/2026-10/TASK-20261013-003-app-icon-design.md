@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -87,8 +87,12 @@ In Progress
 
 # Git
 
-实现提交后记录提交哈希。
+`119d24d chore(design): 添加 OmniProxy 桌面与任务栏图标方案`
 
 # Result
 
 已完成三款桌面／任务栏图标设计提案、Windows 多尺寸图标和预览，推荐 B「曜石入口」。
+
+# Completed
+
+2026-10-13 09:58（Asia/Singapore）

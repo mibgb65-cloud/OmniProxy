@@ -88,6 +88,6 @@ try {
     }
     Draw-Text '大图观察造型，小图检查辨识度。任务栏样本按实际像素绘制；设计提案尚未接入应用。' 51 943 19 '#626A76'
     $canvas.Save((Join-Path $designRoot 'comparison.png'), [System.Drawing.Imaging.ImageFormat]::Png)
-    $json = $validation | ConvertTo-Json -Depth 5
+    $json = ($validation | ConvertTo-Json -Depth 5) -replace "`r`n", "`n"
     [System.IO.File]::WriteAllText((Join-Path $designRoot 'validation.json'), $json + "`n", [System.Text.UTF8Encoding]::new($false))
 } finally { $graphics.Dispose(); $canvas.Dispose() }
