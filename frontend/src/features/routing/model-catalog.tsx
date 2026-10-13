@@ -7,7 +7,8 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 import { listModelCatalog, syncAccountModels } from "../../services/models"
-import { ModelCatalogRow } from "./model-catalog-row"
+import { ModelCatalogGroups } from "./model-catalog-groups"
+import { ModelProviderViewToggle, type ModelProviderView } from "./model-provider-view-toggle"
 
 export function ModelCatalog({
   accounts,
@@ -19,6 +20,7 @@ export function ModelCatalog({
   const { t } = useTranslation()
   const client = useQueryClient()
   const [accountId, setAccountId] = useState("")
+  const [view, setView] = useState<ModelProviderView>("model")
   const catalog = useQuery({ queryKey: ["model-catalog"], queryFn: listModelCatalog })
   const sync = useMutation({
     mutationFn: (id: string) => syncAccountModels(id),
@@ -50,9 +52,9 @@ export function ModelCatalog({
           <Download className="size-4" aria-hidden="true" />
           {t("models.title")}
         </h2>
-        <p className="text-muted-foreground text-sm">{t("models.description")}</p>
       </CardHeader>
       <CardContent className="space-y-4">
+        <ModelProviderViewToggle value={view} onChange={setView} />
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1 space-y-2">
             <label htmlFor="model-sync-account" className="text-xs font-medium">
@@ -94,20 +96,17 @@ export function ModelCatalog({
           </p>
         ) : null}
         {models.length ? (
-          <details className="rounded-lg border">
-            <summary className="cursor-pointer px-3 py-2 text-sm">
+          <div className="min-w-0 space-y-3">
+            <p className="text-muted-foreground text-xs">
               {t("models.synced", { count: models.length })}
-            </summary>
-            <ul className="max-h-64 overflow-auto border-t p-3">
-              {models.map((m) => (
-                <ModelCatalogRow
-                  key={`${m.accountId}:${m.model}`}
-                  model={m}
-                  account={accounts.find((a) => a.id === m.accountId)}
-                />
-              ))}
-            </ul>
-          </details>
+            </p>
+            <ModelCatalogGroups
+              models={models}
+              accounts={accounts}
+              providers={providers}
+              view={view}
+            />
+          </div>
         ) : (
           <p className="text-muted-foreground text-xs">{t("models.empty")}</p>
         )}

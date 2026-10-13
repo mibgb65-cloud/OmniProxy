@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-006](../tasks/active/TASK-20261013-006-routing-model-provider-views.md) 路由默认映射与模型目录增加模型／服务商双向视图，移除目录说明；质量门和原生界面验证通过，待提交归档。
 
 ## Recently Completed
 

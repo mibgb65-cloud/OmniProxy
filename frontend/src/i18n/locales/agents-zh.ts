@@ -130,8 +130,6 @@ export const agentsZh = {
   "agents.cliModelHint":
     "Claude Code CLI 可使用 /model <模型ID> 切换；模型菜单展示取决于客户端版本。",
   "models.title": "官方模型目录",
-  "models.description":
-    "按账号同步 ChatGPT / Codex 与 DeepSeek 的官方模型，供路由与本地 Agent 选择。",
   "models.account": "同步账号",
   "models.choose": "选择账号",
   "models.sync": "同步官方模型",

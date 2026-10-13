@@ -2,6 +2,12 @@ import { routingDefaultsZh } from "./routing-defaults-zh"
 
 export const routingZh = {
   ...routingDefaultsZh,
+  "routing.grouping.label": "模型与服务商视图",
+  "routing.grouping.byModel": "按模型",
+  "routing.grouping.byProvider": "按服务商",
+  "routing.grouping.providersFor": "{{model}} 的可用服务商",
+  "routing.grouping.preferLabel": "{{provider}} · {{model}} 的优先服务商",
+  "routing.grouping.unavailable": "暂无可用服务商",
   "routing.tabs.title": "路由功能",
   "routing.tabs.defaults": "默认映射",
   "routing.tabs.rules": "自定义规则",

@@ -3,6 +3,12 @@ import { routingDefaultsEn } from "./routing-defaults-en"
 
 export const routingEn: Record<keyof typeof routingZh, string> = {
   ...routingDefaultsEn,
+  "routing.grouping.label": "Model and provider view",
+  "routing.grouping.byModel": "By model",
+  "routing.grouping.byProvider": "By provider",
+  "routing.grouping.providersFor": "Available providers for {{model}}",
+  "routing.grouping.preferLabel": "Preferred provider for {{model}} in {{provider}}",
+  "routing.grouping.unavailable": "No available providers",
   "routing.tabs.title": "Routing sections",
   "routing.tabs.defaults": "Default mappings",
   "routing.tabs.rules": "Custom rules",

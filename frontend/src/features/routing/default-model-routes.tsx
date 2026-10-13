@@ -3,11 +3,14 @@ import { useTranslation } from "react-i18next"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { DefaultModelRouteRow } from "./default-model-route-row"
+import { DefaultProviderRoutes } from "./default-provider-routes"
+import { ModelProviderViewToggle, type ModelProviderView } from "./model-provider-view-toggle"
 import type { RoutingData } from "./use-routing"
 
 export function DefaultModelRoutes({ data }: { data: RoutingData }) {
   const { t } = useTranslation()
   const [search, setSearch] = useState("")
+  const [view, setView] = useState<ModelProviderView>("model")
   const items = data.defaults.data ?? []
   const visible = items.filter((item) =>
     [
@@ -36,6 +39,7 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
         <p className="text-muted-foreground text-sm">{t("routing.defaults.description")}</p>
       </CardHeader>
       <CardContent className="min-w-0 space-y-4">
+        <ModelProviderViewToggle value={view} onChange={setView} />
         {data.defaults.isPending && !data.catalog.isError ? (
           <p role="status" className="text-muted-foreground text-sm">
             {t("routing.defaults.loading")}
@@ -67,22 +71,31 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
-            <ul
-              className="divide-border min-w-0 divide-y rounded-lg border"
-              aria-label={t("routing.defaults.title")}
-            >
-              {visible.map((item) => (
-                <DefaultModelRouteRow
-                  key={item.model}
-                  item={item}
-                  disabled={busy}
-                  onSelect={(providerId) =>
-                    data.preference.mutate({ model: item.model, providerId })
-                  }
-                />
-              ))}
-            </ul>
-            {!visible.length ? (
+            {view === "provider" ? (
+              <DefaultProviderRoutes
+                items={items}
+                search={search}
+                disabled={busy}
+                onSelect={(model, providerId) => data.preference.mutate({ model, providerId })}
+              />
+            ) : (
+              <ul
+                className="divide-border min-w-0 divide-y rounded-lg border"
+                aria-label={t("routing.defaults.title")}
+              >
+                {visible.map((item) => (
+                  <DefaultModelRouteRow
+                    key={item.model}
+                    item={item}
+                    disabled={busy}
+                    onSelect={(providerId) =>
+                      data.preference.mutate({ model: item.model, providerId })
+                    }
+                  />
+                ))}
+              </ul>
+            )}
+            {view === "model" && !visible.length ? (
               <p className="text-muted-foreground text-sm">{t("routing.defaults.noMatches")}</p>
             ) : null}
           </>

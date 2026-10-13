@@ -148,8 +148,6 @@ export const agentsEn = {
   "agents.cliModelHint":
     "Use /model <model-id> in Claude Code CLI to switch models. Picker entries depend on the client version.",
   "models.title": "Official model catalog",
-  "models.description":
-    "Sync ChatGPT / Codex and DeepSeek models per account for routing and local agents.",
   "models.account": "Account to sync",
   "models.choose": "Choose an account",
   "models.sync": "Sync official models",

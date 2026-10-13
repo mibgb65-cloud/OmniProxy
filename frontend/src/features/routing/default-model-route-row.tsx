@@ -7,10 +7,12 @@ export function DefaultModelRouteRow({
   item,
   disabled,
   onSelect,
+  groupProviderName,
 }: {
   item: DefaultModelRoute
   disabled: boolean
   onSelect: (providerId: string) => void
+  groupProviderName?: string
 }) {
   const { t } = useTranslation()
   const providers = item.providers ?? []
@@ -29,6 +31,18 @@ export function DefaultModelRouteRow({
         {item.name !== item.model ? (
           <p className="text-muted-foreground text-xs wrap-anywhere">{item.name}</p>
         ) : null}
+        {!groupProviderName && providers.length ? (
+          <ul
+            className="flex flex-wrap gap-1.5"
+            aria-label={t("routing.grouping.providersFor", { model: item.model })}
+          >
+            {providers.map((provider) => (
+              <li key={provider.id} className="bg-muted rounded-md px-2 py-1 text-xs wrap-anywhere">
+                {provider.name}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {result.routable ? (
           <p className="text-muted-foreground text-xs wrap-anywhere">
             {t("routing.defaults.target", { provider: result.providerName, model: result.model })}
@@ -46,7 +60,10 @@ export function DefaultModelRouteRow({
       </div>
       <div className="min-w-0 space-y-1.5">
         <SelectField
-          aria-label={t("routing.defaults.preferLabel", { model: item.model })}
+          aria-label={t(
+            groupProviderName ? "routing.grouping.preferLabel" : "routing.defaults.preferLabel",
+            { model: item.model, provider: groupProviderName },
+          )}
           value={item.preferredProviderId}
           disabled={disabled || result.matched || (!providers.length && !item.preferredProviderId)}
           onValueChange={onSelect}
