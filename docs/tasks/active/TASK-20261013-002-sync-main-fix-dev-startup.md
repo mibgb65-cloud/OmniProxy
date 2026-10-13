@@ -49,15 +49,42 @@ In Progress
 
 ## Implementation Result
 
-待完成后填写。
+- 已提交 71 个 Markdown 文件（含本任务记录），规范化一份既有任务记录的 BOM／换行；现有文档通过敏感模式及相对链接检查。
+- 本地 `main` 从 `c9fc9a8` 快进到 `fdfd29e`，包含昨日 `44fdbc4` 实现快照及现有文档；未改写历史，其他分支和 worktree 保留。
+- 新增 Go 桌面适配层的开发服务等待逻辑，在创建 Wails 应用前轮询 Vite 首页，最长 120 秒，单次请求上限 2 秒，重试间隔 500 毫秒，仅 HTTP 200 表示就绪。
+- 开发地址限制为无凭据、路径、查询参数和片段的本机 HTTP/HTTPS 地址；不使用系统代理或跟随重定向。地址无效或等待超时会返回明确错误。
+- 使用 `production` 构建标签区分实现，生产版直接使用内嵌前端。原有 Taskfile、Wails 配置、源码 watcher 和 Vite 热更新流程保持现有入口。
+- 普通 `task dev` 已在 `main` 启动：任务 PID 17520，桌面应用 PID 37392，Vite PID 37376。窗口路径为当前仓库的 `bin/omniproxy.exe`，可见且正常响应。
+- 本次运行日志、元数据和验证快照位于 `C:/Users/mimanchi/AppData/Local/Temp/omniproxy-fixed-dev-20261013-85dfca28/`。
+
+## Root Cause
+
+原有开发流程在构建完成后并发启动前端和原生应用，未等待前端返回可用页面；Wails 框架的短重试窗口不能覆盖整个前端启动链路，应用失败后 watcher 按 primary 的 shutdown 策略退出并终止前端。
+
+## Regression Prevention
+
+Go 回归测试覆盖超过 5 秒的前端就绪等待、持续 HTTP 503、连接失败、重定向拒绝、请求取消和开发地址边界；独立的 production 标签测试验证生产版忽略开发服务环境变量。
 
 ## Verification
 
-文档提交前检查：71 项 Markdown（含本任务记录）未发现敏感凭据模式，相对文件链接均有效；发现一份既有记录的 BOM／换行问题，提交前规范化为 UTF-8 无 BOM、LF。后续代码验证待完成后填写。
+- 文档提交前检查：71 项 Markdown 未发现敏感凭据模式，相对文件链接均有效；既有编码问题已规范化为 UTF-8 无 BOM、LF。
+- `go test ./internal/transport/wails -run 'Test(ParseDevServerURL|WaitFor)' -count=1`：PASS，慢启动回归实际等待超过 5 秒。
+- `go test -tags production ./internal/transport/wails -run '^TestProductionIgnoresDevServer$' -count=1`：PASS。
+- `task verify`：PASS（退出码 0），格式检查、Go vet／staticcheck／ESLint、TypeScript、全部 Go 测试、64 个前端测试文件／340 项测试及生产构建通过。
+- 普通 `task dev`：开发构建与运行成功，使用仓库原有 `build/config.yml`，无临时等待配置。
+- `http://127.0.0.1:9245/` 和 `/@vite/client` 均返回 HTTP 200。
+- `http://127.0.0.1:3891/healthz` 返回 `status=ok`、`profile=development`、`controlPort=3891`。
+- 日志包含中文的等待／就绪信息及 Wails `Connected to frontend dev server!`，无 FATAL。
+- 当前仓库原生窗口标题为 OmniProxy，句柄 1248868，`IsWindowVisible=true`，`Responding=true`；9245 和 3891 均为回环监听，未主动启动网关。
+- 构建未产生额外的已跟踪源码／绑定差异；新文件均为 UTF-8 无 BOM、LF，文件长度符合现有规范。
+
+## Remaining Risks
+
+本地没有远端配置，因此 Git 同步仅涉及本地分支。Wails 工具链缺少 uname／tail、jsdom scrollTo 和客户端模型目录刷新警告仍存在，但未影响本次完整质量门和开发窗口启动；这些独立问题未纳入本任务。
 
 ## Documentation
 
-计划更新 `docs/development/BUILD.md`、`docs/plans/CURRENT.md` 和本任务记录。
+已更新 `docs/development/BUILD.md` 的等待时限、输入边界和故障排查说明；任务看板及本记录在归档时同步。
 
 ## Deviations
 
@@ -65,8 +92,10 @@ None.
 
 ## Git
 
-待提交后填写。
+- 文档提交：`fdfd29ec1a935f1d106dacd4c3c550bc3d6e2f29`，`docs: 同步网关客户端实现文档与任务记录`，71 个 Markdown 文件。
+- 已切换到本地 `main`，通过 `git merge --ff-only codex/account-details-layout` 同步到文档提交；旧分支及其他 worktree 保留。
+- 开发启动修复提交待验证后填写。
 
 ## Result
 
-待完成后填写。
+代码和文档已同步到本地 `main`，永久启动修复通过完整质量门与普通 `task dev` 原生验收；开发环境保持运行。修复提交与归档待完成。

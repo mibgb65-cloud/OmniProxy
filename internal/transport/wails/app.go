@@ -151,6 +151,10 @@ func (s *AppService) ServiceShutdown() error {
 // Run creates the Wails application, opens the main window and blocks until
 // the application exits.
 func Run(app *App) error {
+	if err := waitForFrontend(context.Background(), app.Service.log); err != nil {
+		return err
+	}
+
 	wailsApp := application.New(application.Options{
 		Name:        "OmniProxy",
 		Description: "Local AI API gateway and multi-account management tool",

@@ -26,7 +26,12 @@ What happens:
 1. `wails3 build DEV=true` builds the frontend (Vite) and the Go binary in
    development mode.
 2. The Vite dev server runs in the background (HMR on port 9245 by default).
-3. The app binary runs and loads the UI from the dev server.
+3. 开发版应用在创建窗口前等待 Vite 首页返回 HTTP 200，最长 120 秒；
+   单次请求最多 2 秒，每 500 毫秒重试。就绪后进入 Wails 原有启动流程并加载 UI。
+
+等待使用 Wails 提供的 `FRONTEND_DEVSERVER_URL`，只接受本机 HTTP/HTTPS 地址，
+不跟随重定向或使用系统代理。超时会返回明确错误并退出，检查同一终端的 Vite
+错误输出后再启动。未配置开发地址时使用内嵌前端；生产版不执行此等待。
 
 Frontend-only work can also use `cd frontend && pnpm dev`, but the app itself
 needs `task dev`.
