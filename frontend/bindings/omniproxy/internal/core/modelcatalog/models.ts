@@ -29,6 +29,11 @@ export interface Entry {
 export interface Metadata {
     "description"?: string;
     "contextWindow"?: number | null;
+
+    /**
+     * ContextVerified 表示当前授权版本的订阅线路已完成长输入验证，不是客户端的默认值。
+     */
+    "contextVerified"?: boolean;
     "reasoningEfforts"?: Effort[] | null;
     "defaultEffort"?: string;
     "inputModalities"?: string[] | null;

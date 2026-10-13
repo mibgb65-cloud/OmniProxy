@@ -122,11 +122,31 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 	if tx.QueryRowContext(ctx, `SELECT credential_ref || ':' || auth_account_id FROM accounts WHERE id=?`, id).Scan(&version) != nil || version != initialVersion {
 		return nil, ErrUnavailable
 	}
+	confirmed, err := confirmedModels(ctx, tx, id, version)
+	if err != nil {
+		return nil, ErrUnavailable
+	}
+	// 旧官方核心未列出已实际调用成功的 6.1；仅保留同授权版本的这项补充，其他消失模型正常移除。
+	if extra, found := confirmed["gpt-6.1-sol"]; found {
+		present := false
+		for _, model := range models {
+			present = present || model.ID == extra.ID
+		}
+		if !present {
+			models = append(models, extra)
+		}
+	}
+	if len(models) > core.MaxModels {
+		return nil, ErrUnavailable
+	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM account_models WHERE account_id=?`, id); err != nil {
 		return nil, ErrUnavailable
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	for _, m := range models {
+		if prior, found := confirmed[m.ID]; found {
+			m.Metadata.ContextWindow, m.Metadata.ContextVerified = prior.Metadata.ContextWindow, true
+		}
 		if _, err = core.Normalize([]core.Entry{{ID: m.ID, Name: m.Name, Metadata: m.Metadata}}); err != nil {
 			return nil, ErrUnavailable
 		}

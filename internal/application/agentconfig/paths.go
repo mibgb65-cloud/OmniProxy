@@ -37,7 +37,10 @@ func DefaultPaths() (Paths, error) {
 
 func desktopClientPaths(cache string) (profile, normal, thirdParty string, err error) {
 	normalRoot, thirdPartyRoot := filepath.Join(cache, "Claude"), filepath.Join(cache, "Claude-3p")
-	// 启动模式与 3P 配置库使用客户端约定的共享目录。MSIX 包缓存中的
-	// Roaming 配置属于另一份用户数据，不能替代旧项目已验证的启动模式入口。
+	thirdPartyRoot, err = desktopThirdPartyRoot(cache, thirdPartyRoot)
+	if err != nil {
+		return "", "", "", err
+	}
+	// 商店版的 Local 虚拟配置库可能遮蔽共享目录；Roaming 官方聊天设置仍不作为 3P 配置入口。
 	return filepath.Join(thirdPartyRoot, "configLibrary", DesktopProfileID+".json"), filepath.Join(normalRoot, "claude_desktop_config.json"), filepath.Join(thirdPartyRoot, "claude_desktop_config.json"), nil
 }

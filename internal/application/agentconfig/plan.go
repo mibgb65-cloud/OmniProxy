@@ -57,24 +57,6 @@ func (s *Service) catalogPath() string {
 	return filepath.Join(filepath.Dir(s.paths.Codex), "omniproxy-models.json")
 }
 
-func existingModel(client string, body []byte) string {
-	var config map[string]any
-	if client == "codex" {
-		if toml.Unmarshal(body, &config) == nil {
-			model, _ := config["model"].(string)
-			return model
-		}
-	} else if client == "claude" {
-		if json.Unmarshal(body, &config) == nil {
-			if env, ok := config["env"].(map[string]any); ok {
-				model, _ := env["ANTHROPIC_MODEL"].(string)
-				return model
-			}
-		}
-	}
-	return ""
-}
-
 func (s *Service) prepare(ctx context.Context, input Input) (preparation, error) {
 	if len(input.Revision) != 64 {
 		return preparation{}, failure("config_changed")

@@ -47,6 +47,21 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 		return result, provider, err
 	}
 	if client != "claude-desktop" {
+		if client == "claude" {
+			defer clear(patched)
+			var config map[string]any
+			if json.Unmarshal(patched, &config) != nil {
+				return nil, provider, failure("invalid_config")
+			}
+			if err := subscriptionCompactSettings(config, plan.Models); err != nil {
+				return nil, provider, err
+			}
+			result, err := json.MarshalIndent(config, "", "  ")
+			if err != nil {
+				return nil, provider, failure("invalid_config")
+			}
+			return append(result, '\n'), provider, nil
+		}
 		return patched, provider, nil
 	}
 	defer clear(patched)

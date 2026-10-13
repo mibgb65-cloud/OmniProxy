@@ -54,7 +54,8 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	if json.Unmarshal(before.body, &config) != nil {
 		return failure("invalid_config")
 	}
-	config["inferenceModels"] = catalog.DesktopModels(entries, "")
+	selected := upgradeClaudeDefault(entries, existingModel(client, before.body))
+	config["inferenceModels"] = catalog.DesktopModels(entries, selected)
 	body, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return failure("invalid_config")

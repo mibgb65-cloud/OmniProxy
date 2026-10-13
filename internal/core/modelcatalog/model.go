@@ -20,8 +20,10 @@ type Effort struct {
 
 // Metadata 的空值表示尚未确认，不能当作模型不支持或猜测具体额度。
 type Metadata struct {
-	Description      string   `json:"description,omitempty"`
-	ContextWindow    *int64   `json:"contextWindow,omitempty"`
+	Description   string `json:"description,omitempty"`
+	ContextWindow *int64 `json:"contextWindow,omitempty"`
+	// ContextVerified 表示当前授权版本的订阅线路已完成长输入验证，不是客户端的默认值。
+	ContextVerified  bool     `json:"contextVerified,omitempty"`
 	ReasoningEfforts []Effort `json:"reasoningEfforts,omitempty"`
 	DefaultEffort    string   `json:"defaultEffort,omitempty"`
 	InputModalities  []string `json:"inputModalities,omitempty"`
@@ -49,6 +51,9 @@ func textValid(value string, limit int) bool {
 
 // ValidateMetadata 校验持久快照和客户端目录的共同边界。
 func ValidateMetadata(value Metadata) error {
+	if value.ContextVerified && (value.ContextWindow == nil || *value.ContextWindow != ClaudeLongContextWindow) {
+		return ErrInvalid
+	}
 	if !textValid(value.Description, 2000) || len(value.ReasoningEfforts) > 16 || len(value.InputModalities) > 3 {
 		return ErrInvalid
 	}

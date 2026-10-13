@@ -21,7 +21,7 @@ func supportsLongContext(entry Entry) bool {
 	return entry.Metadata.ContextWindow != nil && *entry.Metadata.ContextWindow >= ClaudeLongContextWindow
 }
 
-// ClaudeEntries 的 DeepSeek 目标只提供已确认的 1M，其他目标保持原默认和可用变体。
+// ClaudeEntries 对 DeepSeek 和通过真实验证的订阅目标只提供 1M，其他目标保持原默认和可用变体。
 func ClaudeEntries(entries []Entry) ([]Entry, error) {
 	result := make([]Entry, 0, len(entries))
 	seen := make(map[string]bool, len(entries))
@@ -31,7 +31,7 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 	for _, entry := range entries {
 		id := entry.ID + ClaudeLongContextSuffix
 		available := supportsLongContext(entry) && !strings.HasSuffix(entry.ID, ClaudeLongContextSuffix) && ValidClaudeModel(id)
-		onlyLong := available && entry.ProviderKind == "deepseek"
+		onlyLong := available && (entry.ProviderKind == "deepseek" || entry.Metadata.ContextVerified)
 		if !onlyLong {
 			result = append(result, entry)
 		}
