@@ -31,11 +31,11 @@ export function ResetCreditList({
             ? card.status
             : "unknown"
         return (
-          <li key={card.id} className="bg-muted/20 space-y-2 rounded-xl border p-4">
+          <li key={card.id} className="bg-muted/20 space-y-2 rounded-xl border p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2">
                 <TicketCheck className="text-primary size-4 shrink-0" aria-hidden="true" />
-                <span className="font-medium">
+                <span className="min-w-0 text-sm font-medium break-words">
                   {card.title || t("subscription.reset.cardTitle")}
                 </span>
               </div>

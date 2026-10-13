@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Dialog } from "radix-ui"
+import { useId, useState } from "react"
+import { Popover } from "radix-ui"
 import { Tickets, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -9,7 +9,7 @@ import { useSubscriptionQuota } from "./use-subscription-quota"
 import { accountDisplayName } from "./account-display"
 import { ResetCreditsContent } from "./reset-credits-content"
 
-export function ResetCreditsDialog({
+export function ResetCreditsPopover({
   account,
   disabled,
 }: {
@@ -19,17 +19,20 @@ export function ResetCreditsDialog({
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  const titleId = useId()
+  const descriptionId = useId()
   const quota = useSubscriptionQuota(account)
   const count = quota.data?.resetCredits?.availableCount
   return (
-    <Dialog.Root
+    <Popover.Root
+      modal={false}
       open={open}
       onOpenChange={(value) => {
         if (!busy) setOpen(value)
       }}
     >
       <Tooltip content={t("subscription.reset.title")}>
-        <Dialog.Trigger asChild>
+        <Popover.Trigger asChild>
           <Button
             type="button"
             variant="ghost"
@@ -49,14 +52,19 @@ export function ResetCreditsDialog({
               </span>
             ) : null}
           </Button>
-        </Dialog.Trigger>
+        </Popover.Trigger>
       </Tooltip>
       {open ? (
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
-          <Dialog.Content
-            aria-modal={true}
-            className="bg-popover text-popover-foreground fixed top-1/2 left-1/2 z-50 flex h-[min(620px,calc(100dvh-3rem))] w-[min(720px,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-xl border p-6 shadow-2xl outline-none"
+        <Popover.Portal>
+          <Popover.Content
+            side="bottom"
+            align="start"
+            sideOffset={8}
+            collisionPadding={12}
+            sticky="always"
+            aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+            className="bg-popover text-popover-foreground z-50 flex h-[440px] max-h-[var(--radix-popover-content-available-height)] w-[min(360px,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-xl outline-none"
             onEscapeKeyDown={(event) => {
               if (busy) event.preventDefault()
             }}
@@ -65,15 +73,15 @@ export function ResetCreditsDialog({
             }}
           >
             <div className="flex items-start justify-between gap-3 border-b pb-3">
-              <div>
-                <Dialog.Title className="font-semibold">
+              <div className="min-w-0">
+                <h3 id={titleId} className="font-semibold">
                   {t("subscription.reset.title")}
-                </Dialog.Title>
-                <Dialog.Description className="text-muted-foreground mt-1 text-xs break-all">
+                </h3>
+                <p id={descriptionId} className="text-muted-foreground mt-1 text-xs break-all">
                   {accountDisplayName(account)}
-                </Dialog.Description>
+                </p>
               </div>
-              <Dialog.Close asChild>
+              <Popover.Close asChild>
                 <Button
                   type="button"
                   variant="ghost"
@@ -83,12 +91,12 @@ export function ResetCreditsDialog({
                 >
                   <X className="size-4" aria-hidden="true" />
                 </Button>
-              </Dialog.Close>
+              </Popover.Close>
             </div>
             <ResetCreditsContent account={account} onBusyChange={setBusy} />
-          </Dialog.Content>
-        </Dialog.Portal>
+          </Popover.Content>
+        </Popover.Portal>
       ) : null}
-    </Dialog.Root>
+    </Popover.Root>
   )
 }

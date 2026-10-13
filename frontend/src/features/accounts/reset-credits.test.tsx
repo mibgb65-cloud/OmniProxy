@@ -12,7 +12,7 @@ import {
   type SubscriptionQuota,
   type SubscriptionResetOperation,
 } from "../../services/subscription"
-import { ResetCreditsDialog } from "./reset-credits-dialog"
+import { ResetCreditsPopover } from "./reset-credits-popover"
 
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
@@ -38,7 +38,7 @@ function setup() {
   render(
     <I18nProvider>
       <QueryClientProvider client={client}>
-        <ResetCreditsDialog account={account} disabled={false} />
+        <ResetCreditsPopover account={account} disabled={false} />
       </QueryClientProvider>
     </I18nProvider>,
   )

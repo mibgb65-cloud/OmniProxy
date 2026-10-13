@@ -24,8 +24,8 @@ export function ResetCreditsContent({
   const locked = busy || !!wallet.pending || wallet.status.isPending || wallet.status.isError
   const selected = cards.find((card) => card.id === wallet.selection)
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="bg-muted/30 flex items-center justify-between rounded-xl border p-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="bg-muted/30 flex shrink-0 items-center justify-between rounded-xl border p-3">
         <div>
           <p className="text-muted-foreground text-xs">{t("subscription.reset.count")}</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums">
@@ -107,7 +107,7 @@ export function ResetCreditsContent({
         ) : null}
       </div>
       {wallet.selection !== null ? (
-        <div className="bg-muted/30 space-y-3 rounded-xl border p-4">
+        <div className="bg-muted/30 shrink-0 space-y-3 rounded-xl border p-3">
           <p className="text-sm font-medium">
             {t("subscription.reset.confirm", {
               title: selected?.title || t("subscription.reset.next"),
@@ -137,6 +137,7 @@ export function ResetCreditsContent({
         <Button
           type="button"
           variant="outline"
+          className="shrink-0"
           disabled={locked || !summary || summary.availableCount <= 0}
           onClick={() => wallet.setSelection("")}
         >

@@ -12,7 +12,7 @@ import {
 import { SubscriptionLoginDialog } from "./subscription-login-dialog"
 import { SubscriptionPlanBadge } from "./subscription-plan-badge"
 import { SubscriptionAccountID } from "./subscription-account-id"
-import { ResetCreditsDialog } from "./reset-credits-dialog"
+import { ResetCreditsPopover } from "./reset-credits-popover"
 
 export function SubscriptionAccountStatus({ account }: { account: AccountItem }) {
   const { t } = useTranslation()
@@ -30,7 +30,7 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
           <SubscriptionAccountID id={account.authAccountId} />
         </div>
         <div className="text-muted-foreground flex shrink-0 items-center gap-1">
-          <ResetCreditsDialog account={account} disabled={mutation.isPending} />
+          <ResetCreditsPopover account={account} disabled={mutation.isPending} />
           <Tooltip content={t("subscription.refresh")}>
             <Button
               type="button"
