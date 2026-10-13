@@ -47,6 +47,21 @@ export const subscriptionZh = {
   "subscription.settings.saveFailed": "保存失败，原有开关状态已保留，请重试。",
   "subscription.settings.saving": "正在保存…",
   "subscription.settings.saved": "设置已保存并生效。",
+  "subscription.activation.title": "自动激活 Codex 额度窗口",
+  "subscription.activation.description":
+    "开启并保存后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。",
+  "subscription.activation.cost":
+    "仅检测启用且已授权的 OpenAI 订阅账号。发送会消耗少量额度；同一窗口的发送结果不确定时只复查，不自动重发。",
+  "subscription.activation.saveHint": "保存后立即检测，应用运行期间每 5 分钟检查。",
+  "subscription.activation.save": "保存自动激活设置",
+  "subscription.activation.saved": "自动激活设置已保存。",
+  "subscription.activation.saveFailed": "自动激活设置未保存，原设置仍生效，请重试。",
+  "subscription.activation.checking": "正在检测并复查额度窗口…",
+  "subscription.activation.summary":
+    "最近检查 {{checked}} 个账号，发送 {{sent}} 条消息，确认激活 {{activated}} 个账号。",
+  "subscription.activation.pending": "部分窗口尚待官方确认，后续只复查，不重复发送。",
+  "subscription.activation.failed": "部分账号检测或激活未完成，请检查账号授权与网络。",
+  "subscription.activation.statusFailed": "暂时无法读取自动激活状态。",
   "subscription.quota.title": "额度 / 余额",
   "subscription.quota.fiveHour": "5h 额度",
   "subscription.quota.weekly": "一周额度",

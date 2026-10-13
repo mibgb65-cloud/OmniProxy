@@ -1,4 +1,5 @@
-import { queryOptions, useQuery } from "@tanstack/react-query"
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Events } from "@wailsio/runtime"
 import { useEffect, useRef } from "react"
 import type { AccountItem } from "../../services/omniproxy"
 import { readSubscriptionQuota } from "../../services/subscription"
@@ -31,11 +32,22 @@ export function subscriptionQuotaOptions(account: AccountItem) {
 }
 
 export function useSubscriptionQuota(account: AccountItem) {
+  const client = useQueryClient()
   const options = subscriptionQuotaOptions(account)
   const scope = JSON.stringify(options.queryKey)
   const previous = useRef({ scope, version: account.updatedAt })
   const query = useQuery(options)
   const refetch = query.refetch
+  useEffect(
+    () =>
+      Events.On("subscription:quota-updated", () => {
+        void client.invalidateQueries(
+          { predicate: (query) => JSON.stringify(query.queryKey) === scope },
+          { cancelRefetch: false },
+        )
+      }),
+    [client, scope],
+  )
   useEffect(() => {
     const changed =
       previous.current.scope === scope && previous.current.version !== account.updatedAt

@@ -15,11 +15,12 @@ import (
 )
 
 type subscriptionState struct {
-	mu      sync.Mutex
-	service *subscription.Service
-	openURL func(string) error
-	emit    func()
-	closed  bool
+	mu        sync.Mutex
+	service   *subscription.Service
+	openURL   func(string) error
+	emit      func()
+	emitQuota func()
+	closed    bool
 }
 
 // SubscriptionNotice 只发送状态信号，不携带个人身份或授权 URL。
@@ -150,6 +151,7 @@ func (s *AppService) SubscriptionLogout(id string) (account.Item, error) {
 func (s *AppService) bindSubscriptionEvents(app *application.App) {
 	s.subscription.openURL = app.Browser.OpenURL
 	s.subscription.emit = func() { app.Event.Emit("subscription:updated", SubscriptionNotice{Changed: true}) }
+	s.subscription.emitQuota = func() { app.Event.Emit("subscription:quota-updated", SubscriptionNotice{Changed: true}) }
 }
 
 func (s *AppService) shutdownSubscription() {

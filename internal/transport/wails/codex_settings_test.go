@@ -27,6 +27,12 @@ func TestCodexSettingsBindingsPersistWithoutClientAccess(t *testing.T) {
 		t.Fatal("disable failed", err)
 	}
 	service = &AppService{db: db}
+	if _, err := service.SetCodexQuotaAutoActivation(true); err == nil {
+		t.Fatal("uninitialized activation worker accepted authorization")
+	}
+	if settings, err := service.SetCodexQuotaAutoActivation(false); err != nil || settings.AutoQuotaActivation {
+		t.Fatal("cannot disable unavailable worker", err)
+	}
 	if settings, err := service.GetCodexSettings(); err != nil || settings.WebSocketEnabled {
 		t.Fatal("state not persisted", err)
 	}

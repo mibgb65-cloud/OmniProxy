@@ -10,6 +10,8 @@ import { getCodexSettings, setCodexWebSocketEnabled } from "../../services/codex
 vi.mock("../../services/codex-settings", () => ({
   getCodexSettings: vi.fn(),
   setCodexWebSocketEnabled: vi.fn(),
+  setCodexQuotaAutoActivation: vi.fn(),
+  getCodexQuotaActivationStatus: vi.fn(),
 }))
 
 function renderSettings() {
@@ -27,8 +29,14 @@ describe("OpenAI account settings", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useUIStore.setState({ language: "zh" })
-    vi.mocked(getCodexSettings).mockResolvedValue({ webSocketEnabled: true })
-    vi.mocked(setCodexWebSocketEnabled).mockResolvedValue({ webSocketEnabled: false })
+    vi.mocked(getCodexSettings).mockResolvedValue({
+      webSocketEnabled: true,
+      autoQuotaActivation: false,
+    })
+    vi.mocked(setCodexWebSocketEnabled).mockResolvedValue({
+      webSocketEnabled: false,
+      autoQuotaActivation: false,
+    })
   })
   it("opens global gateway settings on demand and restores focus when closed", async () => {
     const user = userEvent.setup()
@@ -61,7 +69,10 @@ describe("OpenAI account settings", () => {
     await waitFor(() => expect(toggle).not.toBeChecked())
     expect(await screen.findByRole("status")).toHaveTextContent("设置已保存并生效")
     await user.keyboard("{Escape}")
-    vi.mocked(getCodexSettings).mockResolvedValue({ webSocketEnabled: false })
+    vi.mocked(getCodexSettings).mockResolvedValue({
+      webSocketEnabled: false,
+      autoQuotaActivation: false,
+    })
     await user.click(screen.getByRole("button", { name: "OpenAI 账号设置" }))
     expect(await screen.findByRole("switch", { name: "Codex WebSocket" })).not.toBeChecked()
   })

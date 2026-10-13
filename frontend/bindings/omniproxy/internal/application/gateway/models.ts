@@ -10,6 +10,7 @@ import * as proxy$0 from "../../core/proxy/models.js";
  */
 export interface CodexSettings {
     "webSocketEnabled": boolean;
+    "autoQuotaActivation": boolean;
 }
 
 /**

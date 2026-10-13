@@ -20,6 +20,7 @@ import (
 	"omniproxy/internal/application/agentconfig"
 	"omniproxy/internal/application/agentinstall"
 	"omniproxy/internal/application/gateway"
+	"omniproxy/internal/application/quotaactivation"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/transport/httpapi"
@@ -43,6 +44,7 @@ type App struct {
 // live in internal/application/<feature> and are shared with the Control API.
 type AppService struct {
 	gateway          *gateway.Service
+	quotaActivation  *quotaactivation.Service
 	agents           *agentconfig.Service
 	installations    *agentinstall.Service
 	activity         *activity.Service
@@ -119,6 +121,9 @@ func (s *AppService) Ping() string { return "pong" }
 // the user can resolve the conflict. Returning an error here would make Wails
 // terminate the whole application.
 func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOptions) error {
+	if s.quotaActivation != nil {
+		s.quotaActivation.Start(context.Background())
+	}
 	if err := s.control.Start(); err != nil {
 		s.log.Error("control API failed to start; external clients cannot connect",
 			"error", err, "control_port", s.prof.ControlPort)
@@ -129,23 +134,30 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 // ServiceShutdown stops the local Control API and relocates the data
 // directory when the user changed it.
 func (s *AppService) ServiceShutdown() error {
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	if s.quotaActivation != nil {
+		s.quotaActivation.Stop()
+	}
 	if s.stopActivity != nil {
 		s.stopActivity()
 	}
 	s.shutdownSubscription()
 	s.shutdownLogs()
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cancel()
 	var installationErr error
 	if s.installations != nil {
 		installationErr = s.installations.Close(ctx)
 	}
 	gatewayErr := s.shutdownGateway(ctx)
+	var activationErr error
+	if s.quotaActivation != nil {
+		activationErr = s.quotaActivation.Close(ctx)
+	}
 	if err := s.control.Shutdown(ctx); err != nil {
 		s.log.Error("control API shutdown failed", "error", err)
 	}
 	s.relocateIfPending()
-	return errors.Join(gatewayErr, installationErr)
+	return errors.Join(gatewayErr, installationErr, activationErr)
 }
 
 // Run creates the Wails application, opens the main window and blocks until

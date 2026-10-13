@@ -55,6 +55,25 @@ export const subscriptionEn = {
     "Could not save. The previous switch state is kept. Try again.",
   "subscription.settings.saving": "Saving…",
   "subscription.settings.saved": "Settings saved and applied.",
+  "subscription.activation.title": "Automatically activate Codex quota windows",
+  "subscription.activation.description":
+    "After enabling and saving, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped.",
+  "subscription.activation.cost":
+    "Only enabled, authorized OpenAI subscription accounts are checked. Messages consume a small amount of quota. Uncertain requests are rechecked without being resent in the same window.",
+  "subscription.activation.saveHint":
+    "Checks immediately after saving and every 5 minutes while the app runs.",
+  "subscription.activation.save": "Save automatic activation",
+  "subscription.activation.saved": "Automatic activation settings saved.",
+  "subscription.activation.saveFailed":
+    "Automatic activation settings were not saved. Your previous settings remain active. Try again.",
+  "subscription.activation.checking": "Checking and rechecking quota windows…",
+  "subscription.activation.summary":
+    "Last check: {{checked}} accounts, {{sent}} messages sent, {{activated}} accounts confirmed active.",
+  "subscription.activation.pending":
+    "Some windows await official confirmation. They will be rechecked without resending.",
+  "subscription.activation.failed":
+    "Some checks or activations could not finish. Check account authorization and network.",
+  "subscription.activation.statusFailed": "Automatic activation status is temporarily unavailable.",
   "subscription.quota.title": "Quota / balance",
   "subscription.quota.fiveHour": "5h quota",
   "subscription.quota.weekly": "Weekly quota",

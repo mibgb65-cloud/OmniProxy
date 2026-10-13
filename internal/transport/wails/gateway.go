@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/application/agentconfig"
 	"omniproxy/internal/application/gateway"
 	"omniproxy/internal/application/provider"
+	"omniproxy/internal/application/quotaactivation"
 	routes "omniproxy/internal/application/routing"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/infrastructure/codex"
@@ -45,6 +46,17 @@ func (s *AppService) initGateway() {
 	subscription, err := s.subscriptionService()
 	if err == nil {
 		s.gateway.SetSubscription(subscription)
+		accounts := account.NewService(s.db, store)
+		providers := provider.NewService(s.db)
+		s.quotaActivation = quotaactivation.New(s.db, accounts, providers, subscription, quotaactivation.NewMessageSender(accounts, providers, subscription, nil))
+		s.quotaActivation.OnChange(func() {
+			s.subscription.mu.Lock()
+			emit := s.subscription.emitQuota
+			s.subscription.mu.Unlock()
+			if emit != nil {
+				emit()
+			}
+		})
 	}
 }
 

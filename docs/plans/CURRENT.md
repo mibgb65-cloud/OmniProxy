@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-009](../tasks/active/TASK-20261013-009-codex-quota-auto-activation.md) 自动激活 Codex 额度窗口：明确保存授权、后台检测、原账号最小消息、复查与持久去重已实现，完整质量门与原生验收通过，待提交归档。
 
 ## Recently Completed
 

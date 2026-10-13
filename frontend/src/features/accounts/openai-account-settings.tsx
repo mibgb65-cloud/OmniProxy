@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
 import { CodexWebSocketSettings } from "./codex-websocket-settings"
+import { CodexQuotaActivationSettings } from "./codex-quota-activation-settings"
 
 export function OpenAIAccountSettings() {
   const { t } = useTranslation()
@@ -47,6 +48,7 @@ export function OpenAIAccountSettings() {
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <CodexWebSocketSettings />
+            <CodexQuotaActivationSettings />
           </div>
         </Dialog.Content>
       </Dialog.Portal>

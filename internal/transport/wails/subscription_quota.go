@@ -1,6 +1,9 @@
 package wails
 
-import "omniproxy/internal/application/subscription"
+import (
+	"omniproxy/internal/application/quotaactivation"
+	"omniproxy/internal/application/subscription"
+)
 
 // SubscriptionQuota 查询订阅额度，返回公开百分比与重置时间，不返回官方身份或凭据。
 func (s *AppService) SubscriptionQuota(id string) (subscription.Quota, error) {
@@ -10,5 +13,9 @@ func (s *AppService) SubscriptionQuota(id string) (subscription.Quota, error) {
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return service.ReadQuota(ctx, id)
+	quota, err := service.ReadQuota(ctx, id)
+	if err == nil && s.quotaActivation != nil && quotaactivation.NeedsActivation(quota) {
+		s.quotaActivation.Wake(false)
+	}
+	return quota, err
 }

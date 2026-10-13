@@ -38,6 +38,9 @@ import * as modelcatalog$0 from "../../application/modelcatalog/models.js";
 import * as provider$0 from "../../application/provider/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as quotaactivation$0 from "../../application/quotaactivation/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as routing$0 from "../../application/routing/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -253,6 +256,13 @@ export function GatewayStop(): $CancellablePromise<gateway$0.Info> {
 }
 
 /**
+ * GetCodexQuotaActivationStatus 只返回计数与安全状态，不暴露账号身份或消息内容。
+ */
+export function GetCodexQuotaActivationStatus(): $CancellablePromise<quotaactivation$0.Status> {
+    return $Call.ByID(2479197700);
+}
+
+/**
  * GetCodexSettings 读取当前 OmniProxy 网关的 Codex WebSocket 开关。
  */
 export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings> {
@@ -402,6 +412,13 @@ export function SetAutoStart(enabled: boolean): $CancellablePromise<boolean> {
  */
 export function SetCloseBehavior(value: string): $CancellablePromise<string> {
     return $Call.ByID(1368910203, value);
+}
+
+/**
+ * SetCodexQuotaAutoActivation 保存明确授权的自动激活开关，开启后唤醒后台检测。
+ */
+export function SetCodexQuotaAutoActivation(enabled: boolean): $CancellablePromise<gateway$0.CodexSettings> {
+    return $Call.ByID(2763938297, enabled);
 }
 
 /**
