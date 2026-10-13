@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -71,8 +71,14 @@ OpenAI 账号设置、网关 WebSocket 接入开关、必要的后端接口与�
 
 ## Git
 
-本次实现、迁移、生成绑定与文档差异已审查，待写入实现提交哈希。
+`50b309c feat(gateway): 添加 Codex WebSocket 接入开关`
+
+本次实现、迁移、生成绑定与文档差异已审查，只提交本任务相关文件。
 
 ## Result
 
-用户选择的网关级 Codex WebSocket 开关已实现，默认开启、持久保存、动态生效，HTTP/SSE 保持可用，客户端身份和会话保留。质量门与原生验收完成，待提交归档。
+用户选择的网关级 Codex WebSocket 开关已实现，默认开启、持久保存、动态生效，HTTP/SSE 保持可用，客户端身份和会话保留。质量门与原生验收通过，开发窗口显示新设置，实现已提交。
+
+## Completed
+
+2026-10-13（Asia/Singapore）
