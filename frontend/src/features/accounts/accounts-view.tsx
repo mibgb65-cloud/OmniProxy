@@ -5,6 +5,7 @@ import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
+import "./account-card-grid.css"
 
 export function AccountsView() {
   const { t } = useTranslation()
@@ -48,7 +49,7 @@ export function AccountsView() {
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="account-card-grid items-start">
           {orderedProviders.map((provider) => (
             <AccountProviderCard
               key={provider.id}

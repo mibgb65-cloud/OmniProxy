@@ -14,6 +14,7 @@ import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 import { OpenAIAccountSettings } from "./openai-account-settings"
+import "./account-card-grid.css"
 
 export function ProviderAccountsView({ providerId }: { providerId: string }) {
   const { t } = useTranslation()
@@ -108,7 +109,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               balanceSupported={provider.kind === "deepseek"}
             />
           ) : (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="account-card-grid">
               {items.map((account) => (
                 <AccountDetailsCard
                   key={account.id}

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-013](../tasks/active/TASK-20261013-013-continuous-account-card-width.md) 修复账号卡片在窗口拉宽、响应式列数切换时突然缩小的问题，正在实现与验证。
 
 ## Recently Completed
 
