@@ -86,7 +86,9 @@ LOCAL_AGENTS 与 CURRENT 已同步，TASK-20261013-014 追加澄清 Desktop 验�
 
 # Git
 
-分支 `codex/deepseek-claude-context`。最终 diff、UTF-8 无 BOM / LF、文件长度与质量门审查通过，提交本任务代码及文档后补记实现提交号。
+分支 `codex/deepseek-claude-context`。最终 diff、UTF-8 无 BOM / LF、文件长度与质量门审查通过。
+
+实现提交：`7b025409407acd70e84423be8ea8a961c78abf2b fix(agentconfig): DeepSeek 默认仅使用 1M 上下文`。仅提交本任务代码、测试与文档，不推送远端。
 
 # Result
 
