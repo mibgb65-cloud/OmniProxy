@@ -1,7 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Button } from "../../components/ui/button"
 import {
   getCodexSettings,
   getCodexQuotaActivationStatus,
@@ -12,13 +10,15 @@ import { ProviderSwitch } from "../providers/provider-switch"
 export function CodexQuotaActivationSettings() {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const [draft, setDraft] = useState<boolean | null>(null)
+  // 两个开关返回完整设置，保存期间共享锁，避免响应乱序覆盖另一开关。
+  const saving = useIsMutating({ mutationKey: ["codex-settings"] }) > 0
   const settings = useQuery({ queryKey: ["codex-settings"], queryFn: getCodexSettings })
   const save = useMutation({
+    mutationKey: ["codex-settings"],
     mutationFn: setCodexQuotaAutoActivation,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await client.cancelQueries({ queryKey: ["codex-settings"] })
       client.setQueryData(["codex-settings"], data)
-      setDraft(null)
       void client.invalidateQueries({ queryKey: ["codex-quota-activation"] })
     },
   })
@@ -29,53 +29,41 @@ export function CodexQuotaActivationSettings() {
     retry: false,
     refetchInterval: settings.data?.autoQuotaActivation ? 2000 : false,
   })
-  const checked = draft ?? settings.data?.autoQuotaActivation ?? false
-  const disabled = !settings.isSuccess || settings.isFetching || save.isPending
+  const checked = settings.data?.autoQuotaActivation ?? false
+  const disabled = !settings.isSuccess || settings.isFetching || saving
   return (
-    <section className="mt-5 space-y-3">
-      <div className="rounded-lg border p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 space-y-2">
-            <h2 className="text-sm font-semibold">{t("subscription.activation.title")}</h2>
-            <p className="text-muted-foreground text-sm leading-6">
-              {t("subscription.activation.description")}
-            </p>
-            <p className="text-muted-foreground text-xs leading-5">
-              {t("subscription.activation.cost")}
-            </p>
-          </div>
+    <section className="mt-4 space-y-3">
+      <div className="space-y-2 rounded-lg border p-3">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold">{t("subscription.activation.title")}</h3>
           <div className="flex min-h-11 shrink-0 items-center">
             <ProviderSwitch
               name="Codex"
               ariaLabel={t("subscription.activation.title")}
               checked={checked}
               disabled={disabled}
-              onChange={(enabled) => {
-                setDraft(enabled)
-                save.reset()
-              }}
+              onChange={(enabled) => save.mutate(enabled)}
             />
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-muted-foreground text-xs">{t("subscription.activation.saveHint")}</p>
-          <Button
-            variant="outline"
-            disabled={disabled || draft === null || checked === settings.data?.autoQuotaActivation}
-            onClick={() => save.mutate(checked)}
-          >
-            {t(save.isPending ? "subscription.settings.saving" : "subscription.activation.save")}
-          </Button>
-        </div>
+        <p className="text-muted-foreground text-sm leading-6">
+          {t("subscription.activation.description")}
+        </p>
+        <p className="text-muted-foreground text-xs leading-5">
+          {t("subscription.activation.cost")}
+        </p>
+        <p className="text-muted-foreground text-xs leading-5">
+          {t("subscription.activation.saveHint")}
+        </p>
       </div>
       {save.isError ? (
         <p role="alert" className="text-destructive text-sm">
           {t("subscription.activation.saveFailed")}
         </p>
       ) : null}
-      {save.isSuccess ? (
+      {save.isPending || save.isSuccess ? (
         <p role="status" className="text-muted-foreground text-sm">
-          {t("subscription.activation.saved")}
+          {t(save.isPending ? "subscription.settings.saving" : "subscription.activation.saved")}
         </p>
       ) : null}
       {settings.data?.autoQuotaActivation && status.data ? (

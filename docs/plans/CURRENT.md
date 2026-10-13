@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261013-011](../tasks/completed/2026-10/TASK-20261013-011-openai-settings-popover.md) OpenAI 设置改为局部面板，自动激活开关直接持久保存生效，移除二次确认；完整质量门、隔离原生保存及深浅主题／最小窗口开发验收通过。
 - [TASK-20261013-010](../tasks/completed/2026-10/TASK-20261013-010-reset-credits-popover.md) 重置卡改为入口下方局部面板、取消整页遮罩、保留确认／核对及关闭保护；完整质量门与深浅主题／最小窗口原生验收通过。实现提交 `91fbea0`。
 - [TASK-20261013-009](../tasks/completed/2026-10/TASK-20261013-009-codex-quota-auto-activation.md) 自动激活 Codex 额度窗口：默认关闭、明确保存授权、原账号最小消息、复查与周期持久去重；完整质量门与原生验收通过，真实设置保持关闭。实现提交 `3084778`。
 - [TASK-20261013-008](../tasks/completed/2026-10/TASK-20261013-008-codex-websocket-settings.md) OpenAI 账号设置新增网关级 Codex WebSocket 开关，默认开启、持久保存、动态生效，保留客户端身份；完整质量门与原生验收通过。实现提交 `50b309c`。

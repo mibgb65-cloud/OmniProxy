@@ -57,12 +57,11 @@ export const subscriptionEn = {
   "subscription.settings.saved": "Settings saved and applied.",
   "subscription.activation.title": "Automatically activate Codex quota windows",
   "subscription.activation.description":
-    "After enabling and saving, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped.",
+    "When enabled, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped.",
   "subscription.activation.cost":
     "Only enabled, authorized OpenAI subscription accounts are checked. Messages consume a small amount of quota. Uncertain requests are rechecked without being resent in the same window.",
   "subscription.activation.saveHint":
-    "Checks immediately after saving and every 5 minutes while the app runs.",
-  "subscription.activation.save": "Save automatic activation",
+    "Changes are saved and applied automatically. Checks immediately when enabled and every 5 minutes while the app runs.",
   "subscription.activation.saved": "Automatic activation settings saved.",
   "subscription.activation.saveFailed":
     "Automatic activation settings were not saved. Your previous settings remain active. Try again.",

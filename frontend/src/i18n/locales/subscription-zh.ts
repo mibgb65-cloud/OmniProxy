@@ -49,11 +49,11 @@ export const subscriptionZh = {
   "subscription.settings.saved": "设置已保存并生效。",
   "subscription.activation.title": "自动激活 Codex 额度窗口",
   "subscription.activation.description":
-    "开启并保存后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。",
+    "开启后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。",
   "subscription.activation.cost":
     "仅检测启用且已授权的 OpenAI 订阅账号。发送会消耗少量额度；同一窗口的发送结果不确定时只复查，不自动重发。",
-  "subscription.activation.saveHint": "保存后立即检测，应用运行期间每 5 分钟检查。",
-  "subscription.activation.save": "保存自动激活设置",
+  "subscription.activation.saveHint":
+    "切换开关自动保存并生效；开启后立即检测，应用运行期间每 5 分钟检查。",
   "subscription.activation.saved": "自动激活设置已保存。",
   "subscription.activation.saveFailed": "自动激活设置未保存，原设置仍生效，请重试。",
   "subscription.activation.checking": "正在检测并复查额度窗口…",

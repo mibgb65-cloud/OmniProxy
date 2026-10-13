@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { CancellablePromise } from "@wailsio/runtime"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
@@ -52,42 +53,41 @@ function renderSettings() {
   }
 }
 
-it("默认关闭，选中草稿不会触发自动请求，只有保存后才显示检测状态", async () => {
+it("默认关闭，切换开关直接保存并显示检测状态，无需二次确认", async () => {
   const user = userEvent.setup()
   renderSettings()
   const toggle = await screen.findByRole("switch", { name: "自动激活 Codex 额度窗口" })
   await waitFor(() => expect(toggle).toBeEnabled())
   expect(toggle).not.toBeChecked()
-  expect(screen.getByRole("button", { name: "保存自动激活设置" })).toBeDisabled()
+  expect(getCodexQuotaActivationStatus).not.toHaveBeenCalled()
+  expect(screen.queryByRole("button")).not.toBeInTheDocument()
   toggle.focus()
   await user.keyboard(" ")
-  expect(toggle).toBeChecked()
-  expect(setCodexQuotaAutoActivation).not.toHaveBeenCalled()
-  expect(getCodexQuotaActivationStatus).not.toHaveBeenCalled()
-  await user.click(screen.getByRole("button", { name: "保存自动激活设置" }))
   await waitFor(() => expect(vi.mocked(setCodexQuotaAutoActivation).mock.calls[0]?.[0]).toBe(true))
+  expect(setCodexQuotaAutoActivation).toHaveBeenCalledTimes(1)
   expect(
     await screen.findByText("最近检查 2 个账号，发送 1 条消息，确认激活 1 个账号。"),
   ).toBeInTheDocument()
-  expect(screen.getByRole("button", { name: "保存自动激活设置" })).toBeDisabled()
+  expect(toggle).toBeChecked()
+  expect(screen.queryByRole("button")).not.toBeInTheDocument()
 })
 
-it("保存失败不会授权自动激活，保留草稿供重试且隐藏原始错误", async () => {
+it("保存失败保留原开关状态，点击可重试且隐藏原始错误", async () => {
   vi.mocked(setCodexQuotaAutoActivation).mockRejectedValueOnce(new Error("private token error"))
   const user = userEvent.setup()
   const { client } = renderSettings()
   const toggle = await screen.findByRole("switch", { name: "自动激活 Codex 额度窗口" })
   await waitFor(() => expect(toggle).toBeEnabled())
   await user.click(toggle)
-  await user.click(screen.getByRole("button", { name: "保存自动激活设置" }))
   expect(await screen.findByRole("alert")).toHaveTextContent("未保存，原设置仍生效")
   expect(client.getQueryData(["codex-settings"])).toEqual({
     webSocketEnabled: true,
     autoQuotaActivation: false,
   })
   expect(getCodexQuotaActivationStatus).not.toHaveBeenCalled()
+  expect(toggle).not.toBeChecked()
   expect(screen.queryByText("private token error")).not.toBeInTheDocument()
-  await user.click(screen.getByRole("button", { name: "保存自动激活设置" }))
+  await user.click(toggle)
   expect(await screen.findByText("自动激活设置已保存。")).toBeInTheDocument()
 })
 
@@ -117,7 +117,7 @@ it("读取已保存授权，明确显示待复查与失败，不宣称未知窗�
   ).toBeInTheDocument()
 })
 
-it("关闭草稿在保存前继续沿用旧授权，保存关闭后取消状态轮询", async () => {
+it("关闭开关直接保存关闭并停止状态查询", async () => {
   vi.mocked(getCodexSettings).mockResolvedValue({
     webSocketEnabled: true,
     autoQuotaActivation: true,
@@ -131,16 +131,35 @@ it("关闭草稿在保存前继续沿用旧授权，保存关闭后取消状态�
   const toggle = await screen.findByRole("switch", { name: "自动激活 Codex 额度窗口" })
   await waitFor(() => expect(toggle).toBeEnabled())
   await user.click(toggle)
-  expect(client.getQueryData(["codex-settings"])).toEqual({
-    webSocketEnabled: true,
-    autoQuotaActivation: true,
-  })
-  expect(setCodexQuotaAutoActivation).not.toHaveBeenCalled()
-  await user.click(screen.getByRole("button", { name: "保存自动激活设置" }))
   await waitFor(() =>
     expect(client.getQueryData(["codex-settings"])).toEqual({
       webSocketEnabled: true,
       autoQuotaActivation: false,
     }),
   )
+  expect(setCodexQuotaAutoActivation).toHaveBeenCalledWith(false, expect.anything())
+  expect(toggle).not.toBeChecked()
+})
+
+it("保存期间显示进度，拒绝重复切换且保留已确认值", async () => {
+  let finish!: () => void
+  vi.mocked(setCodexQuotaAutoActivation).mockImplementationOnce(
+    () =>
+      new CancellablePromise((resolve) => {
+        finish = () => resolve({ webSocketEnabled: true, autoQuotaActivation: true })
+      }),
+  )
+  const user = userEvent.setup()
+  renderSettings()
+  const toggle = await screen.findByRole("switch", { name: "自动激活 Codex 额度窗口" })
+  await waitFor(() => expect(toggle).toBeEnabled())
+  await user.click(toggle)
+  expect(toggle).toBeDisabled()
+  expect(toggle).not.toBeChecked()
+  expect(await screen.findByText("正在保存…")).toBeInTheDocument()
+  await user.click(toggle)
+  expect(setCodexQuotaAutoActivation).toHaveBeenCalledTimes(1)
+  finish()
+  await waitFor(() => expect(toggle).toBeChecked())
+  await waitFor(() => expect(toggle).toBeEnabled())
 })

@@ -1,4 +1,5 @@
-import { Dialog } from "radix-ui"
+import { useId } from "react"
+import { Popover } from "radix-ui"
 import { Settings2, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -8,10 +9,11 @@ import { CodexQuotaActivationSettings } from "./codex-quota-activation-settings"
 
 export function OpenAIAccountSettings() {
   const { t } = useTranslation()
+  const titleId = useId()
   return (
-    <Dialog.Root>
+    <Popover.Root modal={false}>
       <Tooltip content={t("subscription.settings.title")}>
-        <Dialog.Trigger asChild>
+        <Popover.Trigger asChild>
           <Button
             type="button"
             variant="outline"
@@ -21,20 +23,24 @@ export function OpenAIAccountSettings() {
           >
             <Settings2 className="size-4" aria-hidden="true" />
           </Button>
-        </Dialog.Trigger>
+        </Popover.Trigger>
       </Tooltip>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
-        <Dialog.Content
-          aria-modal={true}
+      <Popover.Portal>
+        <Popover.Content
+          side="bottom"
+          align="start"
+          sideOffset={8}
+          collisionPadding={12}
+          sticky="always"
+          aria-labelledby={titleId}
           aria-describedby={undefined}
-          className="bg-popover text-popover-foreground fixed top-1/2 left-1/2 z-50 flex h-[min(560px,calc(100dvh-3rem))] w-[min(800px,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl border p-6 shadow-2xl outline-none"
+          className="bg-popover text-popover-foreground z-50 flex max-h-[min(560px,var(--radix-popover-content-available-height))] w-[min(420px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border p-4 shadow-xl outline-none"
         >
-          <div className="flex items-center justify-between gap-3 border-b pb-3">
-            <Dialog.Title className="text-base font-semibold">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b pb-3">
+            <h2 id={titleId} className="text-base font-semibold">
               {t("subscription.settings.title")}
-            </Dialog.Title>
-            <Dialog.Close asChild>
+            </h2>
+            <Popover.Close asChild>
               <Button
                 type="button"
                 variant="ghost"
@@ -44,14 +50,14 @@ export function OpenAIAccountSettings() {
               >
                 <X className="size-3.5" aria-hidden="true" />
               </Button>
-            </Dialog.Close>
+            </Popover.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
             <CodexWebSocketSettings />
             <CodexQuotaActivationSettings />
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }

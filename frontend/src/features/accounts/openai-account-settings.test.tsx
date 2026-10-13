@@ -1,11 +1,17 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { CancellablePromise } from "@wailsio/runtime"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
 import { OpenAIAccountSettings } from "./openai-account-settings"
-import { getCodexSettings, setCodexWebSocketEnabled } from "../../services/codex-settings"
+import {
+  getCodexSettings,
+  getCodexQuotaActivationStatus,
+  setCodexQuotaAutoActivation,
+  setCodexWebSocketEnabled,
+} from "../../services/codex-settings"
 
 vi.mock("../../services/codex-settings", () => ({
   getCodexSettings: vi.fn(),
@@ -20,6 +26,7 @@ function renderSettings() {
     <I18nProvider>
       <QueryClientProvider client={client}>
         <OpenAIAccountSettings />
+        <button>面板外操作</button>
       </QueryClientProvider>
     </I18nProvider>,
   )
@@ -37,20 +44,38 @@ describe("OpenAI account settings", () => {
       webSocketEnabled: false,
       autoQuotaActivation: false,
     })
+    vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
+      running: false,
+      checked: 0,
+      sent: 0,
+      activated: 0,
+      failed: 0,
+      pending: 0,
+      updatedAt: "",
+      errorCode: "",
+    })
   })
-  it("opens global gateway settings on demand and restores focus when closed", async () => {
+  it("opens local gateway settings on demand and restores focus when closed", async () => {
     const user = userEvent.setup()
     renderSettings()
     expect(getCodexSettings).not.toHaveBeenCalled()
     const trigger = screen.getByRole("button", { name: "OpenAI 账号设置" })
     await user.click(trigger)
     const panel = screen.getByRole("dialog", { name: "OpenAI 账号设置" })
-    expect(panel).toHaveAttribute("aria-modal", "true")
+    expect(panel).not.toHaveAttribute("aria-modal", "true")
     expect(await screen.findByRole("switch", { name: "Codex WebSocket" })).toBeChecked()
     expect(panel).toHaveTextContent("OpenAI 账号设置")
     await user.keyboard("{Escape}")
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
     expect(trigger).toHaveFocus()
+    await user.click(trigger)
+    await user.click(trigger)
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    await user.click(trigger)
+    const outside = screen.getByRole("button", { name: "面板外操作" })
+    await user.click(outside)
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(outside).toHaveFocus()
     await user.click(trigger)
     await user.click(screen.getByRole("button", { name: "关闭账号设置" }))
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
@@ -102,4 +127,52 @@ describe("OpenAI account settings", () => {
     )
     expect(setCodexWebSocketEnabled).not.toHaveBeenCalled()
   })
+  it.each(["websocket", "activation"])(
+    "locks both switches during %s save across reopen and ignores an old read",
+    async (setting) => {
+      const activation = setting === "activation"
+      const next = { webSocketEnabled: activation, autoQuotaActivation: activation }
+      let finishSave!: () => void
+      let finishRead!: () => void
+      const setter = activation ? setCodexQuotaAutoActivation : setCodexWebSocketEnabled
+      vi.mocked(setter).mockImplementationOnce(
+        () =>
+          new CancellablePromise((resolve) => {
+            finishSave = () => resolve(next)
+          }),
+      )
+      const user = userEvent.setup()
+      renderSettings()
+      const trigger = screen.getByRole("button", { name: "OpenAI 账号设置" })
+      await user.click(trigger)
+      const name = activation ? "自动激活 Codex 额度窗口" : "Codex WebSocket"
+      const toggle = await screen.findByRole("switch", { name })
+      await waitFor(() => expect(toggle).toBeEnabled())
+      await user.click(toggle)
+      expect(screen.getAllByRole("switch")).toHaveLength(2)
+      screen.getAllByRole("switch").forEach((item) => expect(item).toBeDisabled())
+      await user.click(screen.getByRole("button", { name: "关闭账号设置" }))
+      vi.mocked(getCodexSettings).mockImplementationOnce(
+        () =>
+          new CancellablePromise((resolve) => {
+            finishRead = () => resolve({ webSocketEnabled: true, autoQuotaActivation: false })
+          }),
+      )
+      await user.click(trigger)
+      screen.getAllByRole("switch").forEach((item) => expect(item).toBeDisabled())
+      await user.click(screen.getByRole("switch", { name }))
+      expect(setter).toHaveBeenCalledTimes(1)
+      finishSave()
+      await waitFor(() =>
+        screen.getAllByRole("switch").forEach((item) => expect(item).toBeEnabled()),
+      )
+      await act(async () => finishRead())
+      const websocket = screen.getByRole("switch", { name: "Codex WebSocket" })
+      if (activation) expect(websocket).toBeChecked()
+      else expect(websocket).not.toBeChecked()
+      if (activation)
+        expect(screen.getByRole("switch", { name: "自动激活 Codex 额度窗口" })).toBeChecked()
+      else expect(screen.getByRole("switch", { name: "自动激活 Codex 额度窗口" })).not.toBeChecked()
+    },
+  )
 })
