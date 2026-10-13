@@ -72,6 +72,10 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
   DPAPI-protected credential store. The desktop UI manages accounts through
   generated Wails bindings and TanStack Query.
 
+- ChatGPT / Codex 订阅授权复用本机官方 Codex CLI 的 stdio app-server，
+  不新增 SDK 依赖；授权令牌由官方组件的强制 keyring 管理，DPAPI 仅保存
+  隔离配置定位。SQLite 仍只保存元数据和 credential_ref（ADR-003）。
+
 ## Networking
 
 - Wails typed bindings — desktop UI ↔ Go (generated into `frontend/bindings`).
@@ -100,6 +104,9 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 | `go-chi/chi/v5`           | Control API router/middleware        | Small, composable; no heavyweight web framework        |
 | `modernc.org/sqlite`      | SQLite driver (pure Go)              | No CGO toolchain needed; matches Wails Windows builds  |
 | `golang.org/x/sys/windows`| Windows DPAPI calls                  | Existing module dependency; typed OS API wrappers      |
+| `github.com/pelletier/go-toml/v2` | 保留字段的客户端 TOML 合并 | 解析官方语法位置，避免误改提供商身份和无关配置 |
+| `github.com/coder/websocket` | Codex Responses WebSocket | 已有 Wails 传递依赖，供代理协议使用 |
+| `filippo.io/age` | 官方 CodexAuth 加密存储读取 | 标准 age 库兼容官方密文，避免自行实现密码算法；仅后端短期解密 |
 | `react` / `react-dom`     | UI library                           | Project standard                                       |
 | `@tanstack/react-router`  | File-based routing                   | Type-safe routing, first-class TanStack integration    |
 | `@tanstack/react-query`   | Server state                         | Cache/loading/error/invalidate for backend data        |

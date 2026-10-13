@@ -1,6 +1,30 @@
 # Architecture Overview
 
+## 代理统计（2026-10-09）
+
+迁移 009 增加独立 provider_id＋model 累计，与原用量差值事务同步。用量查询新增可选 providerModels 字段，按具体提供商配置展示模型表，保留原全局模型汇总。资源删除和请求淘汰不影响该累计；历史回填不能确定归属时保留历史名称分组。
+
+`core/proxy.Trace` 统一 HTTP／WebSocket 请求 ID 与生命周期，原上游 usageReader 采集官方快照，避免跨协议默认零值污染统计。`application/activity` 实现 RequestObserver，迁移 008 事务更新请求明细及独立累计／每日汇总，记录身份快照，无资源删除外键。Wails 提供薄查询／保留设置绑定，用量与请求页通过 TanStack Query 读取；日志按 request_id 双向关联。见 ADR-006 与 `docs/product/ACTIVITY.md`。
+
+## 本地 Agent 与模型目录（2026-10-09）
+
+2026-10-12：`application/agentinstall` 管理只读检测缓存、单个后台安装任务与结果核对；`infrastructure/agentinstall` 只允许固定的 Windows WinGet 包，检测 CLI／注册表／当前用户 MSIX。Wails 提供快照、重新检测、安装和固定官方说明入口，前端仅在任务运行时轮询。安装不读取客户端认证或会话，不自动升级既有版本，不新增数据库迁移。Codex 安装成功后同步本机版本到配置目录适配逻辑。详见 `docs/product/LOCAL_AGENTS.md`。
+
+安装进度通过后台 ConPTY 的 WinGet 输出读取，转换成有界的阶段／百分比／字节数，原文不进入 UI 或日志。安装快照带起止时间，支持无数值时的动态进度反馈。配置重装恢复通过显式重新读取、文件版本校验和迁移 013 的旧备份引用归档完成；新恢复基准与应用版本同事务提交，失败回滚当前文件。
+
+2026-10-10：`core/modelcatalog` 增加中立目录、边界校验与 Codex 格式适配。迁移 011 保存官方元数据和受管目录备份引用；路由按实际选中账号关联目标能力。配置服务自动生成完整目录、保留可用原默认，预览修订绑定目录方式／默认／端口；本地目录与配置双文件版本提交失败时回滚。Codex 内置身份采用本地兼容目录，适用自定义 Provider 可用远程目录；Claude Desktop 使用完整显式列表。见 ADR 008。
+
+`application/agentconfig` 管理固定客户端配置位置、字段合并、版本冲突、DPAPI 备份及独立接入 Key；`application/modelcatalog` 将账号官方目录存入迁移 007 的 `account_models`，路由按凭据／工作区和启用状态校验。Wails 只提供薄绑定。
+
+2026-10-10：`application/routing` 从目录派生默认同名映射，迁移 012 独立保存模型服务商偏好，读取默认列表不创建手工规则。精确规则保持强制目标语义；未命中时由独立核心账号选择函数将优先服务商排在原创建时间／ID 顺序之前。无可用优先候选时回落到其他同名模型候选，网关、预览和客户端目录共享此决策，不引入请求失败重试。
+
+`core/agentprotocol` 负责文本和工具的协议转换；`core/proxy` 负责鉴权、HTTP/SSE 与 WebSocket 生命周期，不读取凭据。`application/gateway` 协调 DeepSeek API Key 和隔离 ChatGPT 订阅回调。`infrastructure/codex` 在内存兼容官方 keyring／age 授权；`provider/chatgpt` 只转发到固定官方端点。原始 Responses 保留流式能力，跨协议有界收集完整结果后输出目标格式。
+
+客户端会话身份保护及官方加密存储兼容见 ADR 005，第一版能力边界见 `docs/product/LOCAL_AGENTS.md`。
+
 ## System Overview
+
+仪表盘统计由 `application/activity` 的迁移 010 时间桶承担。开始、用量差值、结果及恢复同事务更新，读取根据客户端本地日历的 UTC 边界聚合。桌面适配层合并只含变更信号的 `activity:updated` 事件；首页资源只订阅现有缓存，主动操作才请求官方接口。决策见 ADR-007，页面边界见 `docs/product/DASHBOARD.md`。
 
 OmniProxy is a local desktop application built as three layers:
 
@@ -35,6 +59,12 @@ Core would still compile and run behind the local HTTP Control API.
 
 ## Component Responsibilities
 
+DeepSeek 余额查询通过 Wails `AccountBalance` → `internal/application/balance` → `internal/provider/deepseek` 实现。应用层核对账号归属，在 account.UseAPIKey 回调内请求固定官方地址；返回金额文本与币种，不暴露凭据。无需启动网关，无余额历史落库，前端按账号版本单独缓存。见 `docs/product/BALANCE.md`。
+
+订阅额度查询通过 Wails `SubscriptionQuota` → `internal/application/subscription` → `internal/infrastructure/codex` 的官方 stdio 协议读取，仅返回窗口剩余百分比与重置时间。账号元数据列表不触发网络查询；前端单独按需缓存额度，既有操作互斥限制子进程数量，失败不改变授权。具体边界见 `docs/product/SUBSCRIPTION.md`。
+
+手动重置卡使用通过同一官方组件完成，账号应用服务维护迁移 006 的操作记录。调用前持久化幂等键和身份归属，兑换结果不确定时保留 pending，核对复用同一键；完成回执和刷新失败独立处理，不由前端推算额度恢复。见 ADR-004。
+
 ### Desktop shell (`internal/transport/wails`)
 
 Creates the Wails application and the main window, registers bound services
@@ -64,7 +94,8 @@ duplicates business logic.
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
-> API still exposes only `/healthz`; gateway adapters have not landed yet.
+> API still exposes only `/healthz`. The first gateway adapter supports DeepSeek
+> Chat Completions through the local proxy; other provider request adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -74,11 +105,21 @@ duplicates business logic.
 
 账号编辑复用统一弹窗，只提交名称和可选的新 Key。替换时先写新凭证，再通过事务与原引用／更新时间条件切换数据库引用；提交失败清理新凭证，原凭证不受影响。提交成功后清理旧凭证，清理失败由 UpdateResult 的警告标志报告，避免将已更新误报为未保存。前端提交结束清理 mutation 输入状态，并刷新元数据和脱敏预览。
 
+`internal/application/subscription` 管理 OpenAI 的 ChatGPT 订阅授权生命周期；`internal/infrastructure/codex` 通过本机官方 app-server 的 stdio 协议实现浏览器／设备码登录、取消、刷新和退出。每个账号使用固定缓存根目录下的随机 CODEX_HOME，强制 keyring，实际令牌由官方组件管理；DPAPI 引用只保存隔离配置定位。迁移 004 保留 API Key 默认值并增加安全身份元数据。重新授权先暂存新配置，成功切换后清理旧配置，失败清理保留引用／标记以便重试。Wails 事件只携带变更信号，前端订阅后补读会话状态；不会读取用户默认 Codex 登录。详见 `docs/product/SUBSCRIPTION.md` 和 ADR-003。
+
 ### Core (`internal/core/…`)
 
 Pure Go business logic: the proxy server, request parsing, model routing,
 account scheduling, quota tracking and usage collection. No HTTP framework
 types, no Wails types, no database types in its public API.
+
+当前 `internal/core/proxy` 使用标准库 `net/http` 实现 loopback 监听、启停串行化、请求校验、资源边界和普通／SSE 响应。`Upstream` 只使用 context、字节和 io.Reader 等 Go 类型，不携带凭证。`internal/application/gateway` 每次重新检查提供商与账号启用状态，在已有 UseAPIKey 回调内调用 `internal/provider/deepseek`。精确路由已接入，健康／负载调度仍未实现。
+
+`internal/core/routing` 提供模型名校验、精确规则匹配、顶层 model 改写和纯元数据账号选择；`internal/application/routing` 通过迁移 003 的 model_routes 表保存规则，校验具体提供商与固定账号归属，并生成同源的列表诊断和只读匹配预览。网关使用可选 RequestRouter／ModelCatalog 接口解析后检查实际模型，并在 /v1/models 动态公布可解析别名。规则保存后即时生效，异常规则不静默回退。目标标识有意保留而不设置删除外键，资源删除后显示异常，保持既有删除 API 行为。详见 `docs/product/ROUTING.md`。
+
+DeepSeek 适配器在回调结束前关闭响应，禁止上游重定向，仅接受 HTTPS 或明确配置的本机 HTTP 端点。客户端 Header 不透传；上游错误只向客户端返回稳定代码。代理日志只记录模型、流式标记、分类和耗时，不保存提示词、回复或密钥。
+
+桌面绑定提供 GatewayInfo／GatewayStart／GatewayStop／GatewayTest。状态变化通过类型化 `gateway:status` 事件通知前端重新读取快照，避免事件乱序覆盖真实状态；无轮询。关闭网关和退出应用都会取消在途请求。HTTP Control API 仍只提供健康检查，与代理端口、桌面绑定分离。
 
 ### Infrastructure
 
@@ -88,6 +129,10 @@ types, no Wails types, no database types in its public API.
   records what has been applied.
 - `infrastructure/logger`: structured `log/slog` setup with a central
   Redactor; sinks are console, rotating file and an in-memory UI buffer.
+  The UI buffer exposes bounded structured snapshots with sequence cursors.
+  The Wails adapter coalesces `logs:updated` notifications; the logs page reads
+  deltas through bindings and handles pause, filtering and cache eviction.
+  See `docs/product/LOGS.md` for export and redaction boundaries.
 - Credential storage: per-user DPAPI-protected files under each Windows
   profile's data directory (ADR-002). The database stores only a
   `credential_ref`, never a plaintext secret.

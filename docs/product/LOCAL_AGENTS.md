@@ -1,0 +1,83 @@
+# 本地 Agent 接入与模型同步
+
+## 使用
+
+1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek API Key。
+2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。
+3. 可以直接使用已同步模型，也可以新建精确路由并固定账号。
+4. 在网关页「客户端接入」选项卡的「本地 Agent 接入」点击 Codex、Claude Code CLI 或 Claude Desktop Code 品牌卡片，进入对应的配置页面；无需先启动网关。卡片只展示客户端名称、简介与接入状态。
+5. 在配置页点击「一键配置」，随后点击配置预览，检查自动选择的默认模型、目录方式和完整可用列表，再应用。无需手动选择单个模型。配置页同时提供路径、文件状态、接入 Key 复制与启停、原配置恢复。重新启动对应客户端后，在客户端中选择模型；实际调用前需启动网关。
+
+配置页面使用 `/gateway?tab=clients&client=codex|claude|claude-desktop` 定位，支持刷新与前进／后退；非法客户端参数回到卡片目录。返回目录恢复原卡片焦点，选项卡往返保留正在进行的配置操作。点击卡片只导航，不写入客户端配置或发起模型请求。
+
+配置预览、保存与网关运行状态独立。没有适用的模型／路由时，应先同步账号模型或配置可用路由。目录在预览后变化时，需要重新预览；首次接入使用稳定默认，仍可用的原模型优先保留。
+
+## 客户端安装
+
+卡片显示真实的软件安装状态，与网关接入 Key 状态分别展示。详情页的「软件安装」支持只读检测、重新检测、安装和官方说明。Codex CLI 与桌面应用分别检测；Claude Code CLI 和 Claude Desktop 也各自检测。
+
+Windows 使用固定 WinGet 包与安装源：
+
+| 软件 | 软件包 ID | 安装源 |
+| --- | --- | --- |
+| Codex CLI | `OpenAI.Codex` | `winget` |
+| Codex Desktop | `9PLM9XGG6VKS` | `msstore` |
+| Claude Code CLI | `Anthropic.ClaudeCode` | `winget` |
+| Claude Code Desktop（Claude 应用的 Code 入口） | `9P6K58THS811` | `msstore` |
+
+只有点击「安装」才启动任务；点击安装表示接受软件及安装源协议，必要的系统授权由 Windows 处理。安装一次只执行一个任务，保留既有版本、不自动升级，使用 WinGet 默认完整性校验。界面显示准备／下载／安装／核对阶段、进度条及已用时间。WinGet 报告数值时显示阶段百分比和当前下载量；未报告时显示动态进度，不推算全流程百分比。下载 100% 不等于安装完成，最终结果仍以实际检测为准。失败后可以重新检测或重试；检测异常不会被当作未安装。没有 WinGet 时提供官方说明入口。
+
+CLI 检测 PATH 和固定用户安装目录；桌面应用检测卸载注册表和当前用户 MSIX 包。Claude Desktop 兼容商店新版 `AnthropicPBC.Claude` 和旧版 `Claude` 的精确包名，新旧包共存时优先识别健康版本。只检测安装元数据，不读取登录、凭据和会话。安装器输出不进入 UI 或日志。退出应用中断任务后不会宣称安装已回滚，下一次启动重新检测结果。Windows 原生安装与 WSL 内的软件分别管理，本版不安装 WSL 客户端。
+
+进度通过后台 Windows ConPTY 读取，兼容 WinGet 的终端进度指令和有界文本帧；只向界面传递阶段、百分比和字节数。无法建立终端且尚未启动安装进程时才降级为普通输出读取，避免重复安装。未提供进度的安装器仍显示阶段和时间。
+
+安装和接入配置相互独立，仍允许先准备配置。安装完成后自动刷新状态；Codex 核心版本同步到模型目录兼容逻辑。
+
+Claude Code Desktop 是官方 Claude 桌面应用中的 Code 功能，与 Chat 共用安装包。该卡片的「打开 Claude Code」通过固定的 `claude://code/new` 进入编程页面，不附带任务、项目路径或凭据；官方说明链接指向 Code 桌面文档。一键配置会启用第三方网关模式并选中「OmniProxy · 本地网关」，完全退出并重启 Claude 后进入 Code。原有官方设置、配置条目和会话文件保留，恢复配置可还原原模式与选择。尚未激活本地网关时，打开按钮提示先应用一键配置，避免进入官方登录页。[官方桌面说明](https://code.claude.com/docs/en/desktop)、[第三方配置说明](https://claude.com/docs/third-party/claude-desktop/in-app-configuration)、[Code 入口链接](https://support.claude.com/en/articles/14729294-open-claude-desktop-with-a-link)。
+
+配置错误分别提示读取、写入、文件占用与备份失败，不将文件写入问题误报为网关异常。Windows 加密配置目录拒绝同目录重命名时，使用独占文件句柄再次校验版本并写入，保留文件加密与 ACL；失败恢复原字节，恢复也失败时明确报错。此兼容分支提供进程内失败回退，无法保证断电或强制结束进程时的原子性，应用前仍保存加密备份。
+
+安装渠道依据：[Codex CLI 官方说明](https://learn.chatgpt.com/docs/codex/cli)、[Codex Windows 官方说明](https://learn.chatgpt.com/docs/windows/windows-app)、[Claude Code 官方说明](https://code.claude.com/docs/en/setup)、[Claude Desktop 官方下载](https://claude.com/download)、[WinGet 安装命令](https://learn.microsoft.com/en-us/windows/package-manager/winget/install)。
+
+网关允许 CLI 和 Electron 不携带 Origin 的原生请求，包括 `Sec-Fetch-Site: none`；仍校验 loopback Host、端口及独立接入 Key，拒绝浏览器跨来源、跨站和同站请求。安装客户端并不放宽接入认证。
+
+## 模型目录
+
+Claude Code Desktop 的配置使用稳定兼容路由名，标签显示实际模型／用户路由名称。Messages 请求先用当前可用目录解析兼容名，再进入现有精确路由和账号选择；目录或路由移除后，旧配置不能继续调用。兼容名不写入用户路由表，其他客户端目录继续使用原模型 ID。
+
+模型目录按账号和授权版本隔离，保存官方已确认的描述、推理档位和可选能力。路由别名继承实际目标账号的元数据；未知上下文／工具能力保持待确认，不借用其他模型的数值。客户端目录排除已确认不支持所需协议、文本或工具的模型。
+
+- Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
+- Claude Desktop 写入完整的 `inferenceModels`，支持从其模型选择器切换网关模型和别名，不依赖只识别 Claude ID 的自动发现。
+- Claude Code CLI 自动配置默认模型；可用 ID 可通过 `/model <模型ID>` 切换，菜单展示受客户端版本影响。
+
+模型同步和路由／资源变更会更新未被外部修改的受管目录，客户端重启后生效；不会结束正在进行的会话。本地目录使用加密备份和文件版本保护，与原客户端配置一同恢复。目录位置已有未受管文件时拒绝接管。目录刷新失败记录安全错误，原有配置的外部修改不会被覆盖。
+
+每个客户端独立接入 Key，可以停用、重新启用。后台使用本应用管理的上游账号凭据；客户端不会取得这些凭据。
+
+## 会话保留
+
+Codex 不改 model_provider，官方登录和会话根目录不变。内置 openai 通过专用本地接入路径；自定义提供商保留表名。认证助手／活跃配置 profile 冲突时拒绝自动修改。
+
+Claude CLI 只合并接入 env，不退出原登录。Desktop 应用时添加并选中「OmniProxy · 本地网关」第三方推理配置条目，合并两份启动配置的 `deploymentMode=3p`。原模式和选择保存为可恢复的非敏感状态；官方登录和原会话文件不改写。组织托管策略仍优先。[官方 Desktop 接入说明](https://code.claude.com/docs/en/llm-gateway-connect#desktop-app)。
+
+「恢复原配置」按加密备份恢复原文件，原本没有文件时删除本次创建的文件。外部修改会阻止覆盖；Desktop 同时恢复原启动模式和配置选择，保留接入后新增的非受管设置。主配置版本和激活状态同事务提交，多文件写入或提交失败会回退；外部改变受管模式或当前配置时拒绝恢复。恢复同时停用 Key，重新应用可启用。旧版没有模式快照的配置仍保留先切回原配置再移除的保护。
+
+## 重新读取配置
+
+详情页「接入配置」标题右侧和一键配置弹窗底部均提供「重新读取配置」。重装或外部编辑后，重新读取当前版本、清除旧预览，然后再次预览／应用。只有明确重新读取后才允许接入已变化的文件；应用仍核对读取的文件版本，后续外部改动会再次被阻止。
+
+重新接入会保留当前文件中的非网关设置，为当前内容创建新的加密恢复基准。迁移 013 的 `agent_backup_history` 保留旧备份引用；切换恢复基准与应用版本同事务提交，失败回滚当前文件并保留旧备份。该入口只读取配置元数据，完整内容和凭据不返回前端。
+
+## 第一版能力
+
+- Windows 本地客户端配置；ChatGPT / Codex 官方 model/list 和 DeepSeek 官方 GET /models。
+- GET /v1/models 动态合并可用原始模型与路由；所有请求校验本地接入 Key。
+- GET /v1/codex-models 提供 Codex 专用元数据；只接受有界 `client_version` 参数。普通模型列表支持有界 `limit`、`after_id`、`before_id`，其他参数及推理请求的查询字符串仍拒绝。
+- POST /v1/chat/completions、POST /v1/responses、POST /v1/messages。
+- Codex Responses WebSocket，连接内上下文续接、会话和请求并发上限、空闲超时、重置 Key 状态检查。
+- ChatGPT Responses 保留原生文本、工具及流式事件；跨协议支持文本和工具调用，包括 Codex namespace／custom 工具及 Claude tool_use／tool_result。
+- 跨协议返回完成后的 JSON 或 SSE；当前不会逐 token 翻译。DeepSeek 跨协议思考关闭，多模态及不支持的托管工具明确返回 unsupported_content。
+- HTTP Responses 为无持久化请求，调用方需提供完整上下文；没有调度、静默重试或故障切换。
+
+其他提供商模型目录、跨平台配置及高级协议能力留到后续任务。

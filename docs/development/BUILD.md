@@ -31,6 +31,8 @@ What happens:
 Frontend-only work can also use `cd frontend && pnpm dev`, but the app itself
 needs `task dev`.
 
+恢复开发窗口时使用 `task dev`，并确认启动日志包含连接前端开发服务的信息。`task run`／`wails3 task run` 仅运行现有二进制；Wails 开发代理还需要 `FRONTEND_DEVSERVER_URL`，单独启动 Vite 不会保证窗口加载最新源码。临时目录中的质量验证构建也不会替换正在运行的应用。完成界面修改后，必须在项目路径对应的原生窗口核对实际内容；存在多个同名窗口时按进程路径识别，避免只验证浏览器预览或选错应用。
+
 ## Production build
 
 ```bash
@@ -103,6 +105,12 @@ menu's Quit action to run normal shutdown and any pending data relocation.
 `tsc`, ESLint and Vitest work on a fresh clone without running the Wails
 toolchain. It is regenerated automatically by `task build` / `task dev`; commit
 the regenerated output when it changes.
+
+## 原生客户端接入验收
+
+在同一 Windows 用户的正常终端运行 `task dev`，再用实际桌面客户端核对地址、配置选择、模型列表和连接状态。部分工具执行环境对用户配置使用独立视图；出现工具写入成功、客户端仍读旧配置时，应先比较两个运行上下文中的受管字段，再继续排查。
+
+切换验收构建前退出已有开发版，释放 3001／3891；窗口设置为关闭到托盘时，使用托盘的退出菜单。开发版与生产版的数据目录及端口继续隔离。客户端实机结果、实际代理响应和 `task verify` 结果均写入 Task Record。
 
 ## Platform differences
 

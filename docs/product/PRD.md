@@ -55,19 +55,30 @@ accounts need one local place to:
   StepFun, and OpenAI-compatible endpoints).
 - Nine named providers are enabled by default and can be switched off; users
   can add enabled-by-default custom OpenAI-compatible endpoints.
+- 提供商卡片使用与账号一致的电源图标按钮控制启停：绿色表示启用，灰色表示停用，悬浮提示说明下一步操作。
 - Provider cards show a curated model preview and an unauthenticated endpoint
   reachability/response-time check; actual model access depends on an account.
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。
+- OpenAI 支持通过本机官方 Codex 组件登录 ChatGPT 订阅账号，提供浏览器／设备码授权、多账号隔离、身份与套餐、刷新、退出和重新登录。系统凭证库与官方加密命名空间保存授权，已支持订阅 Responses 转发；详见 `docs/product/SUBSCRIPTION.md`、`docs/product/LOCAL_AGENTS.md`。
 - 自动名称有意展示 Key 前缀，短于 8 个字符时使用实际长度；名称不写入日志。删除账号必须经过应用内、随主题切换的确认弹窗。
 - 提供商账号详情支持卡片／列表切换并保存展示偏好；展示真实密钥的脱敏片段，用户可主动复制密钥。新的密钥读取接口只返回脱敏文本，复制在桌面端直接写入系统剪贴板。
 - 账号支持编辑名称与替换 API Key；编辑弹窗不回填当前完整密钥，Key 留空时保留原凭证，名称清空继续自动命名。
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
   concurrency and retry.
 - Model routing rules.
+- 模型路由首版支持精确别名映射、具体提供商配置与可选固定账号；规则持久化并动态生效，提供不读取密钥的匹配预览，模型发现接口同步可解析别名。
+- 路由页依据已有模型目录自动展示同名初步映射，无需逐条新增规则；每个模型可保存优先服务商。精确规则优先，默认映射优先使用所选服务商，其配置不可用时选择其他支持同名模型的可用服务商，预览／网关／客户端目录保持一致。本次覆盖现有 DeepSeek 和 ChatGPT/Codex 适配器。
+- 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE，其他提供商及自动调度仍待接入。
+- 网关页支持 Codex CLI／Desktop、Claude Code CLI 和 Claude Desktop Code 配置，独立接入 Key、预览、加密备份和恢复；保留原提供商标识与官方会话，Desktop 添加独立配置条目。路由页可同步 ChatGPT／DeepSeek 官方模型目录并按账号选择；详见 `docs/product/LOCAL_AGENTS.md`。
+- 一键接入自动提供适用的模型／路由目录，无需手选单个模型；优先保留仍可用的原默认。目录记录官方已确认元数据并保留未知能力，Codex 按身份／核心版本适配本地或远程目录，Claude Desktop 提供完整显式列表。受管目录支持安全更新和恢复。
 - Quota monitoring and usage statistics.
+- DeepSeek API Key 账号支持官方余额查询，展示币种、总余额、赠送／充值余额与充足状态，提供手动刷新，其他提供商余额仍待接入；详见 `docs/product/BALANCE.md`。
+- Codex 订阅账号详情可查询真实额度窗口、剩余百分比及重置时间；Plus／Team 普通套餐展示 5h 与周额度，其他套餐仅周额度。配额页集中展示跨账号订阅额度及 DeepSeek 余额、异常概况、搜索／筛选和受控刷新，与账号详情共享缓存；额度历史和推理权限验证仍待后续实现。详见 `docs/product/QUOTA.md`。
 - Request history with success/failure classification.
+- 仪表盘提供本地今日／7 天／30 天运行总览、请求／Token／成功率／完整耗时、结果趋势、待处理问题、最近请求及资源／客户端配置概况；资源默认读缓存，官方查询由用户主动触发。独立时间桶保留明细清理后的聚合，历史缺口明确标示。详见 `docs/product/DASHBOARD.md`。
+- 已实现持久请求明细、输入／输出 Token 累计及每日／成员／模型汇总；删除账号与明细淘汰不减少累计。请求默认保存 10000、设置可调整，日志缓存最多 5000，request_id 双向关联。Team 同时按邮箱和 account_id 识别。详见 `docs/product/ACTIVITY.md`。
 - Provider health detection.
 - Client integration management for external AI tools.
 - Local HTTP Control API for CLI/agent/script/MCP access.
