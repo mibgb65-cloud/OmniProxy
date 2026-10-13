@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-004](../tasks/active/TASK-20261013-004-integrate-app-icons.md) 接入已选定的 C「钴蓝汇聚」桌面、任务栏、托盘与应用内图标，进行构建及原生验证。
 
 ## Recently Completed
 

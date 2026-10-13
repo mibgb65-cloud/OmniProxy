@@ -52,7 +52,7 @@ export function AppTitlebar() {
   return (
     <header className="window-titlebar border-border bg-sidebar text-sidebar-foreground flex h-11 w-full shrink-0 items-center border-b pl-3">
       <div className="flex h-full min-w-0 flex-1 items-center gap-2" onDoubleClick={toggleMaximise}>
-        <img src="/favicon.svg" alt="" className="size-5 shrink-0 rounded" />
+        <img src="/app-icon.png" alt="" className="size-5 shrink-0" />
         <span className="truncate text-xs font-semibold tracking-wide">{t("window.title")}</span>
       </div>
 

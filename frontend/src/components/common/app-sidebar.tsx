@@ -52,7 +52,7 @@ export function AppSidebar() {
     >
       {/* 图标固定在收起态的水平中心，避免宽度过渡时切换对齐方式产生跳动。 */}
       <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-5 whitespace-nowrap">
-        <span className="bg-primary size-6 shrink-0 rounded-md" aria-hidden="true" />
+        <img src="/app-icon.png" alt="" className="size-6 shrink-0" />
         <SidebarLabel collapsed={collapsed} className="font-semibold">
           OmniProxy
         </SidebarLabel>

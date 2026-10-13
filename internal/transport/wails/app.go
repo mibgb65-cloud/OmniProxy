@@ -158,6 +158,7 @@ func Run(app *App) error {
 	wailsApp := application.New(application.Options{
 		Name:        "OmniProxy",
 		Description: "Local AI API gateway and multi-account management tool",
+		Icon:        appIcon,
 		Services:    []application.Service{application.NewService(app.Service)},
 		Assets:      application.AssetOptions{Handler: application.AssetFileServerFS(app.Assets)},
 		Mac: application.MacOptions{
@@ -183,6 +184,7 @@ func Run(app *App) error {
 	app.Service.bindLogEvents(wailsApp, window)
 	app.Service.bindSubscriptionEvents(wailsApp)
 	tray := wailsApp.SystemTray.New()
+	tray.SetIcon(appIcon)
 	tray.SetTooltip("OmniProxy")
 	menu := wailsApp.NewMenu()
 	menu.Add("显示 OmniProxy / Show").OnClick(func(_ *application.Context) {

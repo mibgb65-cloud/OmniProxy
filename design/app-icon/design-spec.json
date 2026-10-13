@@ -1,8 +1,16 @@
 {
   "product": "OmniProxy",
   "date": "2026-10-13",
-  "status": "用户选定 C「钴蓝汇聚」，尚未替换应用图标",
+  "status": "C「钴蓝汇聚」已接入应用构建、托盘与前端品牌图标",
   "selected_direction": "c-cobalt-hub",
+  "integration": {
+    "task": "TASK-20261013-004",
+    "build_source": "build/appicon.png",
+    "windows_icon": "build/windows/icon.ico",
+    "runtime_icon": "internal/transport/wails/assets/app-icon.png",
+    "frontend_icon": "frontend/public/app-icon.png",
+    "verification": "task verify 与 Windows 原生窗口、快捷方式、托盘验收通过"
+  },
   "request": "桌面图标和任务栏图标，高级简洁，先参考大厂图标。",
   "positioning": "本地 AI API 网关、多提供商统一接入与账号管理。",
   "generation_mode": "内置 imagegen",

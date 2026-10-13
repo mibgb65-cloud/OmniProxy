@@ -51,6 +51,16 @@ task build
 - Generates Windows resource data (icon, manifest, version info) from
   `build/windows/`.
 
+## 应用图标
+
+当前采用 C「钴蓝汇聚」，源设计位于 `design/app-icon/c-cobalt-hub.png`。
+`build/appicon.png` 是构建源图，`task common:generate:icons` 生成 Windows ICO，
+保留 16／20／24／32／40／48／64／96／128／256 像素资源；Windows 窗口和任务栏从可执行文件读取该图标。
+
+`internal/transport/wails/assets/app-icon.png` 与 `frontend/public/app-icon.png`
+使用相同的 256 像素透明 PNG，分别供内嵌托盘／窗口回退和标题栏／侧栏／favicon 使用。
+更新设计时同步上述资源，再重新构建与启动；运行中的进程仍使用旧的内嵌资源。
+
 ## Packaging
 
 ```bash
