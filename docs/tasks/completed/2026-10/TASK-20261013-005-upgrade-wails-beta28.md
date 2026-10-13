@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -77,8 +77,12 @@ beta.28 仍是预发布版本；本任务验证了正常构建与桌面运行，
 
 # Git
 
-实现提交后填写提交哈希。
+`d4848c3 build(wails): 升级框架运行时与 CLI 至 beta.28`
 
 # Result
 
 Wails Go 模块、前端运行时、本机 CLI 和 CI 安装目标统一为 beta.28，完整质量门与原生验收通过，新开发版保持运行。
+
+# Completed
+
+2026-10-13（Asia/Singapore）

@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261013-005](../tasks/active/TASK-20261013-005-upgrade-wails-beta28.md) 升级 Wails Go 依赖、前端运行时与 CLI 至 beta.28，核对兼容性及原生开发启动。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261013-005](../tasks/completed/2026-10/TASK-20261013-005-upgrade-wails-beta28.md) Wails Go／JS／CLI 统一升级 beta.28，CI 固定同版；完整质量门通过，原生“关于”页显示 beta.28，开发版保持运行。实现提交 `d4848c3`。
 - [TASK-20261013-004](../tasks/completed/2026-10/TASK-20261013-004-integrate-app-icons.md) C「钴蓝汇聚」已接入桌面／任务栏、托盘及标题栏／侧栏／favicon；10 个 ICO 尺寸、完整质量门和原生验收通过，开发版保持运行。实现提交 `a001b14`。
 - [TASK-20261013-003](../tasks/completed/2026-10/TASK-20261013-003-app-icon-design.md) 参考微软／Google／Adobe，完成三款图标提案、多尺寸 ICO 与深浅预览；用户选定 C「钴蓝汇聚」，接入见 TASK-20261013-004。设计提交 `119d24d`。
 - [TASK-20261013-002](../tasks/completed/2026-10/TASK-20261013-002-sync-main-fix-dev-startup.md) 文档提交 `fdfd29e`、本地 main 快进同步及开发启动等待修复 `1ecb6bb`；完整质量门与普通 task dev 原生验收通过。
