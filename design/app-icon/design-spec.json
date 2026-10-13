@@ -1,7 +1,8 @@
 {
   "product": "OmniProxy",
   "date": "2026-10-13",
-  "status": "设计提案，尚未替换应用图标",
+  "status": "用户选定 C「钴蓝汇聚」，尚未替换应用图标",
+  "selected_direction": "c-cobalt-hub",
   "request": "桌面图标和任务栏图标，高级简洁，先参考大厂图标。",
   "positioning": "本地 AI API 网关、多提供商统一接入与账号管理。",
   "generation_mode": "内置 imagegen",
@@ -34,14 +35,14 @@
       "id": "b-graphite-portal",
       "name": "曜石入口",
       "description": "石墨黑圆角底板、白色统一入口和一处青绿切面；偏专业工具风格。",
-      "recommended": true,
+      "recommended": false,
       "prompt": "Use case: logo-brand. Asset type: original Windows desktop and taskbar app icon for OmniProxy, a professional local AI API gateway. Create ONE premium exceptionally simple app icon on a truly transparent surrounding canvas. A front-facing graphite-black rounded-square tile with beautifully precise corners. Inside it, a single thick ivory-white geometric portal ring: an upright rounded-square O with a large clean central aperture, not a literal text letter. The ring has two short broad openings offset near the upper-right and lower-left corner so that two bold complementary channels communicate incoming and outgoing connections. One channel end at the upper-right is a short restrained vivid jade-green segment, built into the same ring rather than an extra dot or badge. Icon tile covers 84 percent of the square image and the white ring covers 62 percent of the tile. Massive clean negative space. Flat Swiss precision, matte colors, no heavy lighting, just a very subtle graphite tonal change across the tile. Sharp vector-like execution and exceptional 24px readability. Original major-company-quality developer tool identity. Exactly one tile and one central geometric mark. No wordmark, no text, no tiny detail, no outline border, no secondary floating symbols, no external shadow, no glass shine, no photorealistic material, no circuits, no sparkle, no existing logos, no watermark. Deliver the single finished icon only, no presentation board, no mockup, no variants. Preserve real transparency outside the tile."
     },
     {
       "id": "c-cobalt-hub",
       "name": "钴蓝汇聚",
       "description": "三条宽通路汇成紧凑枢纽，单一蓝色体系；强调多服务汇聚。",
-      "recommended": false,
+      "recommended": true,
       "prompt": "Use case: logo-brand. Asset type: original Windows desktop and taskbar app icon for OmniProxy, a local gateway connecting many AI providers. Create ONE highly sophisticated minimalist original technology product mark on a genuinely transparent square canvas. The symbol is an unmistakable compact three-way junction constructed from three substantial identical bent rounded geometric channel segments arranged with 120-degree rotational balance. Each segment enters from an outer corner and bends smoothly into a shared small central rounded triangular negative-space aperture, giving a clean unified hub silhouette. Three broad paths, one center, no visible small connector nodes. Strong geometric construction, generous open negative spaces between the three arms, elegantly rounded exterior corners. Use a tightly controlled cobalt-to-indigo blue family with barely perceptible light-to-dark variation; no rainbow. Straight-on flat vector-style rendering with impeccable clean edges. Center the symbol at 76 percent of the canvas width. It must be bold and instantly legible at 24 and 32 px and elegant as a 256px desktop icon. Major technology company refinement, fully original visual identity. Avoid similarity to Google Drive, Microsoft Edge, OpenAI knots, recycling symbols, spinning loading indicators, or shields. No background tile, no letters, no wordmark, no text, no spheres, no arrows, no chips, no network lines, no extra nodes, no extruded 3D, no shadow, no glossy chrome, no watermark. Deliver one finished icon only, never a mockup or comparison sheet."
     }
   ],
