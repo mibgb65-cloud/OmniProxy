@@ -54,16 +54,7 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 	if json.Unmarshal(patched, &config) != nil {
 		return nil, provider, failure("invalid_config")
 	}
-	models := make([]map[string]string, 0, len(plan.Models))
-	for _, model := range plan.Models {
-		item := map[string]string{"name": catalog.DesktopAlias(model.ID), "labelOverride": model.Name}
-		if model.ID == plan.DefaultModel {
-			models = append([]map[string]string{item}, models...)
-		} else {
-			models = append(models, item)
-		}
-	}
-	config["inferenceModels"] = models
+	config["inferenceModels"] = catalog.DesktopModels(plan.Models, plan.DefaultModel)
 	config["modelDiscoveryEnabled"] = false
 	result, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {

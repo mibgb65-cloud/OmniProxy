@@ -22,3 +22,13 @@ func (s *Service) clientEntries(ctx context.Context, client string) ([]catalog.E
 	}
 	return entries, nil
 }
+
+func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
+	// 升级旧 DeepSeek 默认，不因普通 ID 消失而切到其他模型；Codex 目录不生成该变体。
+	for _, entry := range entries {
+		if entry.ProviderKind == "deepseek" && entry.ID == selected+catalog.ClaudeLongContextSuffix {
+			return entry.ID
+		}
+	}
+	return selected
+}

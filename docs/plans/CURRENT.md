@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261013-015](../tasks/completed/2026-10/TASK-20261013-015-claude-desktop-context-picker.md) DeepSeek 默认仅 1M、旧默认升级与原生长上下文字段；菜单仅两个 DeepSeek 1M 选项，原生实际回复显示 49.4K / 1M，CLI 默认及完整质量门通过。
 - [TASK-20261013-014](../tasks/completed/2026-10/TASK-20261013-014-deepseek-claude-context-and-requests.md) DeepSeek Claude Code 普通／1M 选项、beta Messages 与 system 提醒兼容，正文容量适配；真实四组合、默认工具、开发网关和完整质量门通过，Desktop 目录已更新。实现提交 `06a3378`。
 - [TASK-20261013-013](../tasks/completed/2026-10/TASK-20261013-013-continuous-account-card-width.md) 账号详情与总览采用连续列宽，消除窗口拉宽跨断点时卡片突然缩小；37,914 次浏览器尺寸检查、原生窗口验收与完整质量门通过。实现提交 `6a5726d`。
 - [TASK-20261013-012](../tasks/completed/2026-10/TASK-20261013-012-popover-scrollbars.md) 重置卡和 OpenAI 设置使用细圆角悬停滚动条，保留占位、默认隐藏、淡入淡出；完整质量门与深浅主题显隐／布局／拖拽原生验收通过。实现提交 `cfe1a8b`。

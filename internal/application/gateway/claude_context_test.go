@@ -55,7 +55,7 @@ func TestClaudeBetaContextVariantsReachDeepSeek(t *testing.T) {
 		}
 	}
 	for _, id := range []string{"deepseek-flash", "deepseek-v4-pro"} {
-		for _, model := range []string{id, id + "[1m]", catalog.DesktopAlias(id), catalog.DesktopAlias(id + "[1m]")} {
+		for _, model := range []string{id, id + "[1m]", catalog.DesktopAlias(id), catalog.DesktopAlias(id + "[1m]"), strings.TrimSuffix(catalog.DesktopAlias(id+"[1m]"), "[1m]"), catalog.DesktopAlias(id) + "[1m]"} {
 			request(model, 200)
 		}
 	}
@@ -65,7 +65,7 @@ func TestClaudeBetaContextVariantsReachDeepSeek(t *testing.T) {
 		t.Fatal(err)
 	}
 	request("deepseek-flash[1m]", 503)
-	if seen != 8 {
+	if seen != 12 {
 		t.Fatal("unavailable models reached upstream")
 	}
 }
@@ -74,7 +74,7 @@ func TestClaudeLongContextPreservesSelectedUserRoute(t *testing.T) {
 	window := catalog.ClaudeLongContextWindow
 	router := &desktopAliasRouter{entries: []catalog.Entry{{ID: "coding-route", Alias: true, TargetModel: "deepseek-flash", Metadata: catalog.Metadata{ContextWindow: &window}}}}
 	service := &Service{router: router}
-	for _, model := range []string{"coding-route[1m]", catalog.DesktopAlias("coding-route[1m]")} {
+	for _, model := range []string{"coding-route[1m]", catalog.DesktopAlias("coding-route[1m]"), strings.TrimSuffix(catalog.DesktopAlias("coding-route[1m]"), "[1m]")} {
 		body, _ := json.Marshal(map[string]string{"model": model})
 		request, err := service.RouteRequest(context.Background(), proxy.Request{Protocol: "messages", Model: model, Body: body})
 		if err != nil || router.input != "coding-route" || request.Model != "deepseek-flash" || request.AccountID != "acct_first" {

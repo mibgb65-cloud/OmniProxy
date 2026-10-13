@@ -20,7 +20,11 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 	}
 	entries := make([]catalog.Entry, 0, len(ids))
 	for _, id := range ids {
-		entries = append(entries, catalog.Entry{ID: id, Name: id, Metadata: deepseek.ModelMetadata(id)})
+		entry := catalog.Entry{ID: id, Name: id, Metadata: deepseek.ModelMetadata(id)}
+		if entry.Metadata.ContextWindow != nil {
+			entry.ProviderKind = "deepseek"
+		}
+		entries = append(entries, entry)
 	}
 	return catalog.Normalize(entries)
 }

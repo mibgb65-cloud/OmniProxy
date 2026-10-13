@@ -2,6 +2,7 @@ package routing
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	catalog "omniproxy/internal/core/modelcatalog"
@@ -66,7 +67,12 @@ func TestDeepSeekExistingCatalogGetsConfirmedContext(t *testing.T) {
 		}
 	}
 	variants, err := catalog.ClaudeEntries(entries)
-	if err != nil || len(entries) == 0 || len(variants) != 2*len(entries) {
+	if err != nil || len(entries) == 0 || len(variants) != len(entries) {
 		t.Fatal("known target and route missing context variants", err)
+	}
+	for _, entry := range variants {
+		if !strings.HasSuffix(entry.ID, catalog.ClaudeLongContextSuffix) {
+			t.Fatal("DeepSeek still offers an ordinary context option")
+		}
 	}
 }

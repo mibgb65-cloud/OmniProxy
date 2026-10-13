@@ -21,16 +21,21 @@ func supportsLongContext(entry Entry) bool {
 	return entry.Metadata.ContextWindow != nil && *entry.Metadata.ContextWindow >= ClaudeLongContextWindow
 }
 
-// ClaudeEntries 为已确认支持 1M 的目标增加客户端选项，普通模型保持原默认。
+// ClaudeEntries 的 DeepSeek 目标只提供已确认的 1M，其他目标保持原默认和可用变体。
 func ClaudeEntries(entries []Entry) ([]Entry, error) {
-	result := append([]Entry(nil), entries...)
+	result := make([]Entry, 0, len(entries))
 	seen := make(map[string]bool, len(entries))
 	for _, entry := range entries {
 		seen[entry.ID] = true
 	}
 	for _, entry := range entries {
 		id := entry.ID + ClaudeLongContextSuffix
-		if !supportsLongContext(entry) || strings.HasSuffix(entry.ID, ClaudeLongContextSuffix) || seen[id] || !ValidClaudeModel(id) {
+		available := supportsLongContext(entry) && !strings.HasSuffix(entry.ID, ClaudeLongContextSuffix) && ValidClaudeModel(id)
+		onlyLong := available && entry.ProviderKind == "deepseek"
+		if !onlyLong {
+			result = append(result, entry)
+		}
+		if !available || seen[id] {
 			continue
 		}
 		if entry.Name == "" {
@@ -41,7 +46,9 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 		if !textValid(entry.Name, 200) {
 			entry.Name = id
 		}
-		entry.Metadata.IsDefault = false
+		if !onlyLong {
+			entry.Metadata.IsDefault = false
+		}
 		result = append(result, entry)
 	}
 	return Normalize(result)
@@ -66,6 +73,16 @@ func ResolveClaudeModel(entries []Entry, model string) (string, bool) {
 			return "", false
 		}
 		return entry.ID, true
+	}
+	for _, entry := range entries {
+		if !supportsLongContext(entry) {
+			continue
+		}
+		// Desktop 的 prefer1m 选择和 CLI 的去后缀请求都使用独立的长上下文基础 ID。
+		alias := DesktopAlias(entry.ID + ClaudeLongContextSuffix)
+		if model == alias || model == strings.TrimSuffix(alias, ClaudeLongContextSuffix) {
+			return entry.ID, true
+		}
 	}
 	return "", false
 }

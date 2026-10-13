@@ -54,11 +54,7 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	if json.Unmarshal(before.body, &config) != nil {
 		return failure("invalid_config")
 	}
-	models := make([]map[string]string, 0, len(entries))
-	for _, model := range entries {
-		models = append(models, map[string]string{"name": catalog.DesktopAlias(model.ID), "labelOverride": model.Name})
-	}
-	config["inferenceModels"] = models
+	config["inferenceModels"] = catalog.DesktopModels(entries, "")
 	body, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return failure("invalid_config")

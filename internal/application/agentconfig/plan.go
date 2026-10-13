@@ -111,6 +111,7 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	if selected == "" {
 		selected = existingModel(input.Client, body)
 	}
+	selected = upgradeClaudeDefault(entries, selected)
 	valid := false
 	for _, entry := range entries {
 		if entry.ID == selected {

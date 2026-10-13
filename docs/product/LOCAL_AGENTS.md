@@ -53,7 +53,11 @@ Claude Code Desktop 是官方 Claude 桌面应用中的 Code 功能，与 Chat �
 
 Claude Code Desktop 的配置使用稳定兼容路由名，标签显示实际模型／用户路由名称。Messages 请求先用当前可用目录解析兼容名，再进入现有精确路由和账号选择；目录或路由移除后，旧配置不能继续调用。兼容名不写入用户路由表，其他客户端目录继续使用原模型 ID。
 
-Claude CLI / Desktop 目录为已确认支持 1M 的目标同时提供普通与 `[1m]` 选项，例如 `deepseek-flash` / `deepseek-flash[1m]`、`deepseek-v4-pro` / `deepseek-v4-pro[1m]`。普通选项使用 Claude Code 默认上下文（本机 2.1.295 实测为 200K），`[1m]` 选项启用 1M；两者使用同一个真实上游模型。Desktop 兼容 ID 保留可见后缀，客户端发送前去掉后缀仍可解析；直接携带后缀的 Messages 请求也支持。已有默认保持优先，未知上下文不生成长上下文选项。DeepSeek Flash / Pro 的官方上下文元数据在同步和旧快照读取时补齐，路由继承实际目标能力。Messages 正文上限单独设为 16 MiB，以容纳长文本与 JSON 编码；继续在读取前鉴权并占用有界并发名额，其余协议仍使用 2 MiB 上限。[DeepSeek 官方接入说明](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code/)、[官方模型能力](https://api-docs.deepseek.com/quick_start/pricing/)、[Claude Code 上下文说明](https://code.claude.com/docs/en/model-config)。
+Claude CLI / Desktop 对已确认支持 1M 的 DeepSeek 模型及其路由只提供长上下文选项，例如 `deepseek-flash[1m]`、`deepseek-v4-pro[1m]`，不再展示普通 200K 选项；旧 DeepSeek 默认自动升级到对应 1M。未知上下文不生成变体，其他提供商沿用已有默认。DeepSeek Flash / Pro 的官方上下文元数据在同步和旧快照读取时补齐，路由继承实际目标能力。[DeepSeek 官方接入说明](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code/)、[官方模型能力](https://api-docs.deepseek.com/quick_start/pricing/)、[Claude Code 上下文说明](https://code.claude.com/docs/en/model-config)。
+
+Desktop 使用独立的长上下文基础兼容 ID，以及原生 `supports1m=true` / `prefer1m=true`，避免配置归一化合并选项或选中标签后仍按 200K 调用。客户端去掉后缀后网关仍可识别；上一版普通和共享基础 ID 的请求保留解析兼容，不改上游真实模型。应用与目录刷新复用同一格式。实际桌面菜单和上下文显示必须验收，写入条目数量或 CLI 参数验证不能替代原生结果。
+
+Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在读取前鉴权并占用有界并发名额，其余协议仍使用 2 MiB 上限。
 
 模型目录按账号和授权版本隔离，保存官方已确认的描述、推理档位和可选能力。路由别名继承实际目标账号的元数据；未知上下文／工具能力保持待确认，不借用其他模型的数值。客户端目录排除已确认不支持所需协议、文本或工具的模型。
 

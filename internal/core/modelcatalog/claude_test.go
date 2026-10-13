@@ -24,16 +24,18 @@ func TestClaudeVariantsAndDesktopSuffixShareBaseRoute(t *testing.T) {
 	}
 	for _, id := range []string{"deepseek-flash", "coding-route"} {
 		alias := DesktopAlias(id)
-		if DesktopAlias(id+ClaudeLongContextSuffix) != alias+ClaudeLongContextSuffix {
-			t.Fatal("client stripping suffix would break routing")
+		longAlias := DesktopAlias(id + ClaudeLongContextSuffix)
+		longBase := strings.TrimSuffix(longAlias, ClaudeLongContextSuffix)
+		if longBase == alias {
+			t.Fatal("desktop normalization would collapse the two context choices")
 		}
-		for _, model := range []string{id + ClaudeLongContextSuffix, alias, alias + ClaudeLongContextSuffix} {
+		for _, model := range []string{id + ClaudeLongContextSuffix, alias, alias + ClaudeLongContextSuffix, longAlias, longBase} {
 			actual, found := ResolveClaudeModel(entries, model)
 			if !found || actual != id {
 				t.Fatal("variant did not resolve through original route", model)
 			}
 		}
-		if actual, found := ResolveDesktopAlias(entries, alias+ClaudeLongContextSuffix); !found || actual != id {
+		if actual, found := ResolveDesktopAlias(entries, longAlias); !found || actual != id {
 			t.Fatal("long context desktop alias not resolved")
 		}
 	}

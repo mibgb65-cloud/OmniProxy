@@ -134,3 +134,7 @@ Branch: `codex/deepseek-claude-context`。
 ## Completed
 
 2026-10-13 20:48（Asia/Singapore）
+
+## 后续澄清
+
+用户后续确认完全退出重开后，Desktop 菜单仍只有 8 项。上述“10 项”验证仅证明受管文件写入，CLI 的 1M 验证不能代表 Desktop 菜单和调用生效；最初交付时这一边界说明不充分。Desktop 会对共享基础 ID 的上下文变体归一化，后续另核对了原生编辑器实际配置与工具侧文件的差异。完整修复、用户调整为 DeepSeek 仅 1M 的最终要求，以及真实菜单／上下文验收见 TASK-20261013-015。
