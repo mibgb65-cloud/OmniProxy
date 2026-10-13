@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -79,12 +79,16 @@ API 规格与客户端默认窗口不是同一事实。现有订阅适配器直�
 
 # Documentation
 
-已同步 LOCAL_AGENTS；完成后同步 CURRENT。
+已同步 LOCAL_AGENTS 与 CURRENT。
 
 # Git
 
-待提交。
+`cbd7176` feat(models): 验证订阅长上下文并补充 GPT-6.1 Sol。
 
 # Result
 
 六款 GPT 的已验证长上下文确认和 GPT-6.1 Sol 目录已生效。Terra 仍需在上游恢复且额度重置后验证；本次未强行开启。客户端现有缓存需要原生保存重启，保留该限制，不夸大一键配置的运行时效果。
+
+# Completed
+
+2026-10-14 00:53（Asia/Singapore）
