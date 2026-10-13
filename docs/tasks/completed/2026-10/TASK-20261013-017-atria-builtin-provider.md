@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -183,8 +183,14 @@ In Progress
 
 # Git
 
-实现与验证完成，待写入实际提交哈希。
+`015cd6ab8baed81ff890809cbc23a5c78d4808f9 feat(provider): 接入 Atria 内置提供商与原生三协议`
+
+分支：`codex/atria-provider`。原工作区正在执行 TASK-016，未切换其分支或合入本提交。归档和提交哈希记录由后续文档提交保存。
 
 # Result
 
 Atria 内置接入代码与本地验证完成。独立分支可供后续安全合入；另一任务的工作区、真实账号、开发应用和客户端配置保持独立。
+
+# Completed
+
+2026-10-14 00:16（Asia/Singapore）

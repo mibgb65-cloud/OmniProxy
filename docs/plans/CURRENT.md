@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261013-017](../tasks/active/TASK-20261013-017-atria-builtin-provider.md)：Atria 内置提供商与原生三协议接入，在独立分支 `codex/atria-provider` 验证；原 GPT 长上下文任务工作区保持独立。
+暂无当前任务。本看板对应独立分支 `codex/atria-provider`；原工作区正在执行 GPT 长上下文任务，未合入本分支。
 
 ## Recently Completed
+
+- [TASK-20261013-017](../tasks/completed/2026-10/TASK-20261013-017-atria-builtin-provider.md)：Atria 第十家内置提供商、原生三协议 HTTP／SSE、预设目录／路由与用量统计；完整质量门、369 项前端测试及隔离原生验收通过。实现提交 `015cd6a`，保留独立分支，真实 Atria Key 调用尚未验证。
 
 - [TASK-20261013-015](../tasks/completed/2026-10/TASK-20261013-015-claude-desktop-context-picker.md) DeepSeek 默认仅 1M、旧默认升级与原生长上下文字段；菜单仅两个 DeepSeek 1M 选项，原生实际回复显示 49.4K / 1M，CLI 默认及完整质量门通过。实现提交 `7b02540`。
 - [TASK-20261013-014](../tasks/completed/2026-10/TASK-20261013-014-deepseek-claude-context-and-requests.md) DeepSeek Claude Code 普通／1M 选项、beta Messages 与 system 提醒兼容，正文容量适配；真实四组合、默认工具、开发网关和完整质量门通过，Desktop 目录已更新。实现提交 `06a3378`。
