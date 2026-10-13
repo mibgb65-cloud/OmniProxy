@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -74,8 +74,12 @@ In Progress
 
 # Git
 
-实现提交后补充提交哈希。
+`a001b14 feat(wails): 接入钴蓝汇聚桌面任务栏与托盘图标`
 
 # Result
 
 C「钴蓝汇聚」已接入桌面／任务栏、托盘、标题栏／侧栏和 favicon，完整质量门与原生验收通过，更新后的开发版保持运行。
+
+# Completed
+
+2026-10-13（Asia/Singapore）
