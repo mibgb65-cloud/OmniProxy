@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -74,7 +74,9 @@ None.
 
 ## Git
 
-待提交。
+`6a5726d fix(account): 修复窗口拉宽时卡片列宽跳变`
+
+仅提交本任务代码与文档，未推送远端。
 
 ## Result
 
@@ -83,3 +85,7 @@ None.
 ## Remaining Risks
 
 同一行卡片数量由实际容器和连续列宽决定，可能与旧版预设列数不同；这是避免拉宽时压窄已有卡片的必要取舍。正常字号下宽度达到 448px 后保持稳定。
+
+## Completed
+
+2026-10-13 20:10（Asia/Singapore）
