@@ -76,6 +76,7 @@ API 规格与客户端默认窗口不是同一事实。现有订阅适配器直�
 - 最终 `task verify`（`tmp/gpt-long-context/verify-delivery.log`）PASS：格式、Go vet／staticcheck、ESLint、TypeScript、全部 Go 测试、69 个前端测试文件／366 项测试、生产构建。原有 jsdom scrollTo／前端块大小提示不影响通过。
 - 原生菜单已确认 9 项，GPT-6.1 Sol 可选；曾在原验收会话确认 49.4K / 850K 压缩边界，旧 OK 消息属于原 DeepSeek 验收，不能归为本次 GPT 回复。额度耗尽后未追加 Native GPT 消息。
 - 改为逐模型压缩策略、重新应用 CLI 并重启客户端后，DeepSeek 实际恢复 49.4K / 1M；新会话默认已恢复 DeepSeek Flash。完整菜单复核为 9 项，当前开发网关已启动。
+- 最终选择 GPT-6.1 Sol 后原生用量环也显示 49.4K / 1M；850K 为逐模型配置中的提前压缩边界，不能再把初版全局变量产生的 850K 显示当作最终窗口。验收后已恢复 DeepSeek Flash，未发送新增 GPT 消息。
 
 # Documentation
 
