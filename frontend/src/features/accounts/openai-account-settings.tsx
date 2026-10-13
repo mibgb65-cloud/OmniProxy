@@ -4,6 +4,7 @@ import { Settings2, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import { CodexWebSocketSettings } from "./codex-websocket-settings"
 import { CodexQuotaActivationSettings } from "./codex-quota-activation-settings"
 
@@ -52,10 +53,15 @@ export function OpenAIAccountSettings() {
               </Button>
             </Popover.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <ScrollRegion
+            as="section"
+            ariaLabel={t("subscription.settings.title")}
+            className="min-h-0 flex-1"
+            viewportClassName="pr-1"
+          >
             <CodexWebSocketSettings />
             <CodexQuotaActivationSettings />
-          </div>
+          </ScrollRegion>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

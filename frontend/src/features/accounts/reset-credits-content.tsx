@@ -3,6 +3,7 @@ import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import type { AccountItem } from "../../services/omniproxy"
 import { subscriptionError } from "../../services/subscription"
 import { useResetCredits } from "./use-reset-credits"
@@ -47,65 +48,72 @@ export function ResetCreditsContent({
           </Button>
         </Tooltip>
       </div>
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-        {wallet.quota.isPending ? (
-          <p role="status">{t("subscription.quota.loading")}</p>
-        ) : wallet.quota.isError ? (
-          <p role="alert" className="text-destructive text-sm">
-            {t(`subscription.error.${subscriptionError(wallet.quota.error)}`)}
-          </p>
-        ) : !summary ? (
-          <p className="text-muted-foreground text-sm">{t("subscription.reset.unavailable")}</p>
-        ) : summary.availableCount === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("subscription.reset.empty")}</p>
-        ) : (
-          <>
-            {!summary.detailsKnown || summary.availableCount > cards.length ? (
-              <p className="text-muted-foreground text-xs">{t("subscription.reset.partial")}</p>
-            ) : null}
-            <ResetCreditList cards={cards} busy={locked} onSelect={wallet.setSelection} />
-          </>
-        )}
-        {wallet.status.isError ? (
-          <p role="alert" className="text-destructive text-sm">
-            {t("subscription.error.reset_record_failed")}
-          </p>
-        ) : null}
-        {wallet.pending ? (
-          <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            <p>{t("subscription.reset.pending")}</p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={busy}
-              onClick={() => void wallet.submit(true)}
-            >
-              {t("subscription.reset.verify")}
-            </Button>
-          </div>
-        ) : null}
-        {wallet.receipt && wallet.selection === null ? (
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-xs">{t("subscription.reset.receipt")}</p>
-            <p role="status" className="text-sm">
-              {t(`subscription.reset.outcome.${wallet.receipt.outcome}`, {
-                defaultValue: t("subscription.reset.pending"),
-              })}
+      <ScrollRegion
+        as="section"
+        ariaLabel={t("subscription.reset.title")}
+        className="min-h-0 flex-1"
+        viewportClassName="pr-1"
+      >
+        <div className="space-y-3">
+          {wallet.quota.isPending ? (
+            <p role="status">{t("subscription.quota.loading")}</p>
+          ) : wallet.quota.isError ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t(`subscription.error.${subscriptionError(wallet.quota.error)}`)}
             </p>
-          </div>
-        ) : null}
-        {wallet.mutation.data?.refreshFailed ? (
-          <p role="alert" className="text-muted-foreground text-xs">
-            {t("subscription.reset.refreshFailed")}
-          </p>
-        ) : null}
-        {wallet.mutation.isError ? (
-          <p role="alert" className="text-destructive text-sm">
-            {t(`subscription.error.${subscriptionError(wallet.mutation.error)}`)}
-          </p>
-        ) : null}
-      </div>
+          ) : !summary ? (
+            <p className="text-muted-foreground text-sm">{t("subscription.reset.unavailable")}</p>
+          ) : summary.availableCount === 0 ? (
+            <p className="text-muted-foreground text-sm">{t("subscription.reset.empty")}</p>
+          ) : (
+            <>
+              {!summary.detailsKnown || summary.availableCount > cards.length ? (
+                <p className="text-muted-foreground text-xs">{t("subscription.reset.partial")}</p>
+              ) : null}
+              <ResetCreditList cards={cards} busy={locked} onSelect={wallet.setSelection} />
+            </>
+          )}
+          {wallet.status.isError ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t("subscription.error.reset_record_failed")}
+            </p>
+          ) : null}
+          {wallet.pending ? (
+            <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+              <p>{t("subscription.reset.pending")}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={busy}
+                onClick={() => void wallet.submit(true)}
+              >
+                {t("subscription.reset.verify")}
+              </Button>
+            </div>
+          ) : null}
+          {wallet.receipt && wallet.selection === null ? (
+            <div className="space-y-1">
+              <p className="text-muted-foreground text-xs">{t("subscription.reset.receipt")}</p>
+              <p role="status" className="text-sm">
+                {t(`subscription.reset.outcome.${wallet.receipt.outcome}`, {
+                  defaultValue: t("subscription.reset.pending"),
+                })}
+              </p>
+            </div>
+          ) : null}
+          {wallet.mutation.data?.refreshFailed ? (
+            <p role="alert" className="text-muted-foreground text-xs">
+              {t("subscription.reset.refreshFailed")}
+            </p>
+          ) : null}
+          {wallet.mutation.isError ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t(`subscription.error.${subscriptionError(wallet.mutation.error)}`)}
+            </p>
+          ) : null}
+        </div>
+      </ScrollRegion>
       {wallet.selection !== null ? (
         <div className="bg-muted/30 shrink-0 space-y-3 rounded-xl border p-3">
           <p className="text-sm font-medium">
