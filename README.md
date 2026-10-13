@@ -17,7 +17,7 @@ local HTTP Control API.
 - Node.js 22 (pinned via `.nvmrc` and `frontend/package.json` engines)
 - pnpm 10+ (the only supported package manager)
 - [Task](https://taskfile.dev) (`go install github.com/go-task/task/v3/cmd/task@latest`)
-- Wails 3 CLI (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
+- Wails 3 CLI (`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.28`)
 - Windows 10/11 with the WebView2 runtime (other platforms are future work)
 
 ## Development

@@ -68,7 +68,7 @@ func parseDevServerURL(rawURL string) (*url.URL, error) {
 }
 
 func waitForDevServer(ctx context.Context, serverURL *url.URL) error {
-	// Wails 自身的短重试窗口不足以覆盖 Vite 冷启动；在创建应用前等待，保留原有 watcher 的启停与重编译流程。
+	// 应用层等待保留地址校验、取消与时限控制；不依赖 CLI 的探测配置，并与生产构建隔离。
 	ctx, cancel := context.WithTimeout(ctx, devServerWaitTimeout)
 	defer cancel()
 	transport := &http.Transport{

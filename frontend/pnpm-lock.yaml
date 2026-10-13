@@ -21,8 +21,8 @@ importers:
         specifier: ^1.168.40
         version: 1.168.40(@tanstack/react-router@1.170.39(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(rolldown@1.2.9)(vite@8.3.0(jiti@2.7.0))
       '@wailsio/runtime':
-        specifier: 3.0.0-beta.25
-        version: 3.0.0-beta.25
+        specifier: 3.0.0-beta.28
+        version: 3.0.0-beta.28
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1544,8 +1544,8 @@ packages:
   '@vitest/spy@5.0.1':
     resolution: {integrity: sha512-rbto/mF/SGERxEgYOek7Xm6B9b+y+mVoo+f4b2LymYO8zM1b7uB5nHuhVMTP2hxdzgxvGiZYGxGIaMvL5y180Q==}
 
-  '@wailsio/runtime@3.0.0-beta.25':
-    resolution: {integrity: sha512-VjymRlaTJWQULr94R4XivNypJUrWWxsNA+vi8aBhREri2JWg4UUJdMhBM9vzPC0cFWH3tioHNJgxpne36OynyA==}
+  '@wailsio/runtime@3.0.0-beta.28':
+    resolution: {integrity: sha512-IPl7WIsu0uQni9qgYAGm47G1WKNV/YFQannb/1r8orA81+wswJmCt/TS6GNb/U/coIRYyQ3ruO1FNMVwUVDvQQ==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -4079,7 +4079,7 @@ snapshots:
 
   '@vitest/spy@5.0.1': {}
 
-  '@wailsio/runtime@3.0.0-beta.25': {}
+  '@wailsio/runtime@3.0.0-beta.28': {}
 
   acorn-jsx@5.3.2(acorn@8.18.0):
     dependencies:

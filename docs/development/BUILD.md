@@ -6,6 +6,10 @@
 - Windows: the WebView2 runtime (preinstalled on Windows 11 and up-to-date
   Windows 10).
 
+当前 Wails Go 模块与 CLI 使用 `v3.0.0-beta.28`，前端运行时使用 `3.0.0-beta.28`。
+本机安装 CLI：`go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.28`。
+升级时同步 Go 依赖、前端运行时和 CLI，避免生成绑定或构建使用不同版本。
+
 ## One-time setup
 
 ```bash

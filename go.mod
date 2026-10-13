@@ -7,7 +7,7 @@ require (
 	github.com/coder/websocket v1.8.14
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/pelletier/go-toml/v2 v2.4.3
-	github.com/wailsapp/wails/v3 v3.0.0-beta.25
+	github.com/wailsapp/wails/v3 v3.0.0-beta.28
 	golang.org/x/sys v0.47.0
 	modernc.org/sqlite v1.59.0
 )

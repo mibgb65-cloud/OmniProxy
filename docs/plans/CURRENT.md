@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-005](../tasks/active/TASK-20261013-005-upgrade-wails-beta28.md) 升级 Wails Go 依赖、前端运行时与 CLI 至 beta.28，核对兼容性及原生开发启动。
 
 ## Recently Completed
 
