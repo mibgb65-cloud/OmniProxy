@@ -44,6 +44,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if path == "/v1/responses" && r.Method == http.MethodGet && strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+		if err := s.webSocketPolicy(r.Context()); err != nil {
+			writeFailure(w, err)
+			return
+		}
 		s.serveResponsesSocket(w, r, key)
 		return
 	}

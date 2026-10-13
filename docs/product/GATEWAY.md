@@ -26,6 +26,7 @@
 - Codex 保留 model_provider、官方认证文件与会话目录。内置 openai 使用专用本地接入路径，不重定义内置提供商表。
 - Claude Desktop 添加独立 3P 条目，保留官方当前配置。首次使用需在桌面配置选择器选择该条目；不会自动切换官方工作空间。
 - Chat Completions、Responses、Messages 和 Codex Responses WebSocket。
+- OpenAI 账号设置提供全局 Codex WebSocket 开关，默认开启且持久保存；每次握手及连接内创建响应检查当前开关。关闭时拒绝 WebSocket，HTTP/SSE 保持可用，修改无需重启网关。
 - ChatGPT / Codex 与 DeepSeek 模型目录在路由页按账号同步，网关模型选择同步更新。
 
 实际协议及配置范围见 [本地 Agent 接入](LOCAL_AGENTS.md)，会话保护设计见 [ADR 005](../decisions/ADR-005-preserve-agent-session-identity.md)。

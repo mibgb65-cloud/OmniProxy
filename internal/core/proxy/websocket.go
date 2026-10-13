@@ -38,6 +38,11 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			socketError(r.Context(), socket, "unauthorized")
 			return
 		}
+		// 已建立连接也必须检查当前策略，关闭开关后不能继续通过旧连接创建响应。
+		if err := s.webSocketPolicy(r.Context()); err != nil {
+			socketError(r.Context(), socket, err.Code)
+			return
+		}
 		var fields map[string]json.RawMessage
 		if json.Unmarshal(body, &fields) != nil || string(fields["type"]) != `"response.create"` {
 			socketError(r.Context(), socket, "invalid_request")

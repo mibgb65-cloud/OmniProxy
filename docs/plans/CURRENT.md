@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-008](../tasks/active/TASK-20261013-008-codex-websocket-settings.md) 按用户选择新增网关级 Codex WebSocket 开关，保留客户端身份；完整质量门与原生验收通过，待提交归档。
 
 ## Recently Completed
 

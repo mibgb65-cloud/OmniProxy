@@ -12,6 +12,14 @@
 
 配置预览、保存与网关运行状态独立。没有适用的模型／路由时，应先同步账号模型或配置可用路由。目录在预览后变化时，需要重新预览；首次接入使用稳定默认，仍可用的原模型优先保留。
 
+## Codex WebSocket 接入开关
+
+账号 → OpenAI →「OpenAI 账号设置」提供应用级「Codex WebSocket」开关，默认开启。只控制当前 OmniProxy 网关是否允许 Responses WebSocket，所有 OpenAI 账号共用；设置保存在本机 SQLite（迁移 016），无需启动或重启网关即可保存。关闭后新握手返回 `403 websocket_disabled`；已连接会话在下一次创建响应时被拒绝，进行中的请求可以正常结束。普通 HTTP/SSE 保持可用，客户端是否自动回退取决于自身版本。
+
+该开关不修改 Codex CLI／Desktop 的配置、提供商身份、登录、会话或环境变量。Codex 0.155.1 已将旧 responses_websockets／v2 标记为 removed，内置 openai 禁止覆盖；不能将旧标志的 false 当作真实关闭客户端传输。用户选择控制网关以保持 ADR-005 的身份保护。参考：[官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)、[开发者设置](https://learn.chatgpt.com/docs/developer-settings)。
+
+只影响当前运行的新版网关；旧应用进程和其他端口不联动。客户端若仍指向旧版 `/codex/v1` 地址，应使用新版网关页的一键接入，不能宣称只打开本开关已修复其他进程的 403。
+
 ## 客户端安装
 
 卡片显示真实的软件安装状态，与网关接入 Key 状态分别展示。详情页的「软件安装」支持只读检测、重新检测、安装和官方说明。Codex CLI 与桌面应用分别检测；Claude Code CLI 和 Claude Desktop 也各自检测。

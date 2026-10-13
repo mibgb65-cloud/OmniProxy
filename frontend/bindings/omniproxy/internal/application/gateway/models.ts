@@ -6,6 +6,13 @@
 import * as proxy$0 from "../../core/proxy/models.js";
 
 /**
+ * CodexSettings 是当前 OmniProxy 网关的应用级 Codex 接入设置。
+ */
+export interface CodexSettings {
+    "webSocketEnabled": boolean;
+}
+
+/**
  * Info 包含运行快照和本版实际支持的协议。
  */
 export interface Info {

@@ -60,14 +60,15 @@ type Status struct {
 
 // Options 配置代理的资源边界；Port 为 0 时由系统分配，供隔离测试使用。
 type Options struct {
-	Observer       RequestObserver
-	Authorize      func(context.Context, string) bool
-	Port           int
-	RequestTimeout time.Duration
-	MaxConcurrent  int
-	Upstream       Upstream
-	Models         []string
-	Logger         *slog.Logger
+	WebSocketAllowed func(context.Context) (bool, error)
+	Observer         RequestObserver
+	Authorize        func(context.Context, string) bool
+	Port             int
+	RequestTimeout   time.Duration
+	MaxConcurrent    int
+	Upstream         Upstream
+	Models           []string
+	Logger           *slog.Logger
 }
 
 // Error 的 Code 可用于 UI 和协议错误；禁止放入原始上游正文、凭证或请求内容。

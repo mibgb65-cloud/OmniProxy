@@ -3,6 +3,7 @@ import { Settings2, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
+import { CodexWebSocketSettings } from "./codex-websocket-settings"
 
 export function OpenAIAccountSettings() {
   const { t } = useTranslation()
@@ -44,7 +45,9 @@ export function OpenAIAccountSettings() {
               </Button>
             </Dialog.Close>
           </div>
-          <div className="min-h-0 flex-1" />
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <CodexWebSocketSettings />
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

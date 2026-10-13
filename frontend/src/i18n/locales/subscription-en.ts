@@ -43,6 +43,18 @@ export const subscriptionEn = {
     "This credit cannot be used right now. Refresh to check its status.",
   "subscription.settings.title": "OpenAI account settings",
   "subscription.settings.close": "Close account settings",
+  "subscription.settings.websocket": "Codex WebSocket",
+  "subscription.settings.websocketDescription":
+    "Allow Codex CLI and the desktop app to use WebSocket through this OmniProxy gateway. Disabling rejects WebSocket requests; HTTP/SSE remains available.",
+  "subscription.settings.websocketScope":
+    "Shared by all OpenAI accounts and applies to this gateway only. Codex authentication and sessions are preserved. Changes need no gateway restart and are checked on the next request of existing connections.",
+  "subscription.settings.loading": "Loading connection settings…",
+  "subscription.settings.loadFailed": "Could not load connection settings. Try again.",
+  "subscription.settings.retry": "Reload settings",
+  "subscription.settings.saveFailed":
+    "Could not save. The previous switch state is kept. Try again.",
+  "subscription.settings.saving": "Saving…",
+  "subscription.settings.saved": "Settings saved and applied.",
   "subscription.quota.title": "Quota / balance",
   "subscription.quota.fiveHour": "5h quota",
   "subscription.quota.weekly": "Weekly quota",

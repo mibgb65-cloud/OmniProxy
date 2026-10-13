@@ -253,6 +253,13 @@ export function GatewayStop(): $CancellablePromise<gateway$0.Info> {
 }
 
 /**
+ * GetCodexSettings 读取当前 OmniProxy 网关的 Codex WebSocket 开关。
+ */
+export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings> {
+    return $Call.ByID(831035687);
+}
+
+/**
  * ListAccounts returns metadata for all saved accounts.
  */
 export function ListAccounts(): $CancellablePromise<account$0.Item[] | null> {
@@ -395,6 +402,13 @@ export function SetAutoStart(enabled: boolean): $CancellablePromise<boolean> {
  */
 export function SetCloseBehavior(value: string): $CancellablePromise<string> {
     return $Call.ByID(1368910203, value);
+}
+
+/**
+ * SetCodexWebSocketEnabled 保存全局开关，不改变 Codex 提供商身份或客户端文件。
+ */
+export function SetCodexWebSocketEnabled(enabled: boolean): $CancellablePromise<gateway$0.CodexSettings> {
+    return $Call.ByID(3870917706, enabled);
 }
 
 /**

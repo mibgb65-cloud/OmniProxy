@@ -36,6 +36,17 @@ export const subscriptionZh = {
   "subscription.error.reset_not_usable": "这张卡当前不可使用，请刷新后查看状态。",
   "subscription.settings.title": "OpenAI 账号设置",
   "subscription.settings.close": "关闭账号设置",
+  "subscription.settings.websocket": "Codex WebSocket",
+  "subscription.settings.websocketDescription":
+    "允许 Codex CLI 和桌面端通过当前 OmniProxy 网关使用 WebSocket。关闭后拒绝 WebSocket 请求，普通 HTTP/SSE 仍可使用。",
+  "subscription.settings.websocketScope":
+    "此设置对所有 OpenAI 账号共用，只控制当前网关；不修改 Codex 认证或会话。修改后无需重启网关，已连接会话的下一次请求也会检查开关。",
+  "subscription.settings.loading": "正在读取接入设置…",
+  "subscription.settings.loadFailed": "无法读取接入设置，请重试。",
+  "subscription.settings.retry": "重新读取",
+  "subscription.settings.saveFailed": "保存失败，原有开关状态已保留，请重试。",
+  "subscription.settings.saving": "正在保存…",
+  "subscription.settings.saved": "设置已保存并生效。",
   "subscription.quota.title": "额度 / 余额",
   "subscription.quota.fiveHour": "5h 额度",
   "subscription.quota.weekly": "一周额度",

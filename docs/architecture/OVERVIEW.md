@@ -26,6 +26,8 @@
 
 ## System Overview
 
+2026-10-13：迁移 016 保存应用级 Codex WebSocket 开关，默认开启。`application/gateway` 设置服务通过 Core 的只读策略回调，在鉴权后控制新握手及连接内后续创建响应；读取失败拒绝访问并返回稳定错误码。Wails 提供薄读写接口，OpenAI 账号设置共用 Query 缓存，不改写客户端身份／认证或配置。
+
 仪表盘统计由 `application/activity` 的迁移 010 时间桶承担。开始、用量差值、结果及恢复同事务更新，读取根据客户端本地日历的 UTC 边界聚合。桌面适配层合并只含变更信号的 `activity:updated` 事件；首页资源只订阅现有缓存，主动操作才请求官方接口。决策见 ADR-007，页面边界见 `docs/product/DASHBOARD.md`。
 
 OmniProxy is a local desktop application built as three layers:
