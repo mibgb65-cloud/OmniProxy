@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261013-007](../tasks/active/TASK-20261013-007-model-provider-priorities.md) 同名模型服务商顺序、兼容迁移及配置弹窗已实现，完整质量门及隔离／开发窗口原生验收通过，待提交归档。
 
 ## Recently Completed
 

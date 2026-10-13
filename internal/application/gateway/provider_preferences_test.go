@@ -31,7 +31,9 @@ func TestGatewayUsesModelProviderPreferenceWithoutRestart(t *testing.T) {
 	service, db, store := setupService(t, handler("primary"))
 	backup := httptest.NewServer(handler("preferred"))
 	defer backup.Close()
-	for _, name := range []string{"003_model_routes.sql", "012_model_provider_preferences.sql"} {
+	second := httptest.NewServer(handler("second"))
+	defer second.Close()
+	for _, name := range []string{"003_model_routes.sql", "012_model_provider_preferences.sql", "015_model_provider_order.sql"} {
 		sql, err := os.ReadFile("../../../migrations/" + name)
 		if err != nil {
 			t.Fatal(err)
@@ -45,6 +47,10 @@ INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updat
 		t.Fatal(err)
 	}
 	if _, err := db.Exec(`INSERT INTO providers VALUES('backup','deepseek','custom','Backup',?,1,'2026-02-01T00:00:00Z','now')`, backup.URL); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`INSERT INTO providers VALUES('second','deepseek','custom','Second',?,1,'2026-03-01T00:00:00Z','now');
+INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('acct_second','second','Second','test-ref',1,'2026-03-01T00:00:00Z','now');`, second.URL); err != nil {
 		t.Fatal(err)
 	}
 	router := routes.New(db, provider.NewService(db), account.NewService(db, store))
@@ -73,6 +79,21 @@ INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updat
 	}
 	request("preferred")
 	if _, err := db.Exec(`UPDATE providers SET enabled=0 WHERE id='backup'`); err != nil {
+		t.Fatal(err)
+	}
+	request("primary")
+	if _, err := db.Exec(`UPDATE providers SET enabled=1 WHERE id='backup'`); err != nil {
+		t.Fatal(err)
+	}
+	request("preferred")
+	if err := router.SetProviderOrder(context.Background(), "deepseek-flash", []string{"backup", "second", "builtin_deepseek"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(`UPDATE providers SET enabled=0 WHERE id='backup'`); err != nil {
+		t.Fatal(err)
+	}
+	request("second")
+	if _, err := db.Exec(`UPDATE accounts SET enabled=0 WHERE id='acct_second'`); err != nil {
 		t.Fatal(err)
 	}
 	request("primary")

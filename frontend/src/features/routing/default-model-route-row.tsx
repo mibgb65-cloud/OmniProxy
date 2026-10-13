@@ -1,24 +1,30 @@
 import { useTranslation } from "react-i18next"
 import { SelectField } from "../../components/ui/select-field"
+import { Button } from "../../components/ui/button"
+import { ListOrdered } from "lucide-react"
 import type { DefaultModelRoute } from "../../services/routing"
 import { routingErrorKey } from "./routing-errors"
+import { savedProviderOrder, providerPriorityChoices } from "./provider-priority"
 
 export function DefaultModelRouteRow({
   item,
   disabled,
   onSelect,
   groupProviderName,
+  onConfigurePriority,
 }: {
   item: DefaultModelRoute
   disabled: boolean
   onSelect: (providerId: string) => void
   groupProviderName?: string
+  onConfigurePriority: () => void
 }) {
   const { t } = useTranslation()
   const providers = item.providers ?? []
   const missingPreference =
     !!item.preferredProviderId && !providers.some((p) => p.id === item.preferredProviderId)
   const result = item.preview
+  const order = savedProviderOrder(item)
   return (
     <li className="grid min-w-0 gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)]">
       <div className="min-w-0 space-y-1.5">
@@ -83,6 +89,34 @@ export function DefaultModelRouteRow({
               : []),
           ]}
         />
+        {providerPriorityChoices(item).length > 1 || order.length ? (
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={disabled || result.matched}
+            onClick={onConfigurePriority}
+            aria-label={t("routing.priority.configureLabel", {
+              model: item.model,
+              provider: groupProviderName || "",
+            })}
+          >
+            <ListOrdered aria-hidden="true" />
+            {t("routing.priority.configure")}
+          </Button>
+        ) : null}
+        {order.length ? (
+          <ol
+            className="space-y-1 text-xs"
+            aria-label={t("routing.priority.savedOrder", { model: item.model })}
+          >
+            {order.map((entry, index) => (
+              <li key={entry.id} className="text-muted-foreground wrap-anywhere">
+                {index + 1}. {entry.name}
+                {!entry.available ? ` · ${t("routing.priority.unavailable")}` : ""}
+              </li>
+            ))}
+          </ol>
+        ) : null}
         <p className="text-muted-foreground text-xs">
           {t(result.matched ? "routing.defaults.ruleHint" : "routing.defaults.providerCount", {
             count: providers.length,

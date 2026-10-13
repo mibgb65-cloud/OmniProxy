@@ -55,11 +55,14 @@ export function RoutingPreview({ data }: { data: RoutingData }) {
               {t(
                 result.matched
                   ? "routing.preview.matched"
-                  : result.preferenceApplied
-                    ? "routing.defaults.preferredMatch"
-                    : result.routable
-                      ? "routing.preview.direct"
-                      : "routing.preview.noMatch",
+                  : result.providerPriority
+                    ? "routing.priority.applied"
+                    : result.preferenceApplied
+                      ? "routing.defaults.preferredMatch"
+                      : result.routable
+                        ? "routing.preview.direct"
+                        : "routing.preview.noMatch",
+                { priority: result.providerPriority },
               )}
             </p>
             {result.preferredProviderId &&

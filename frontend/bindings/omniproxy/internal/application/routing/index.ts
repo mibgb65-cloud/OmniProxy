@@ -6,5 +6,6 @@ export type {
     Input,
     Item,
     Preview,
-    ProviderOption
+    ProviderOption,
+    ProviderPriority
 } from "./models.js";

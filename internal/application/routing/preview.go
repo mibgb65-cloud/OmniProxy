@@ -13,7 +13,7 @@ type snapshot struct {
 	providers   []provider.Configuration
 	accounts    []account.Item
 	models      []discoveredModel
-	preferences map[string]string
+	preferences map[string][]string
 }
 
 func (s *Service) snapshot(ctx context.Context) (snapshot, error) {
@@ -98,6 +98,7 @@ func (s *Service) Aliases(ctx context.Context) ([]string, error) {
 
 func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview {
 	result := Preview{InputModel: model, Model: model, Matched: matched}
+	var providerOrder []string
 	allowed := make(map[string]bool)
 	if matched {
 		result.RuleID, result.Model, result.ProviderID = rule.ID, rule.Model, rule.ProviderID
@@ -128,7 +129,10 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 			return result
 		}
 	} else {
-		result.PreferredProviderID = data.preferences[model]
+		providerOrder = data.preferences[model]
+		if len(providerOrder) > 0 {
+			result.PreferredProviderID = providerOrder[0]
+		}
 		for _, provider := range data.providers {
 			if provider.Enabled && targetSupports(data, provider.ID, "", model) {
 				allowed[provider.ID] = true
@@ -146,13 +150,19 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 	for _, account := range data.accounts {
 		accounts = append(accounts, core.Account{ID: account.ID, ProviderID: account.ProviderID, CreatedAt: account.CreatedAt, Enabled: account.Enabled && eligible(data, account, result.Model)})
 	}
-	selected, count, code := core.SelectPreferredAccount(accounts, allowed, rule.AccountID, result.PreferredProviderID)
+	selected, count, code := core.SelectPrioritizedAccount(accounts, allowed, rule.AccountID, providerOrder)
 	result.CandidateCount, result.ErrorCode = count, code
 	if code != "" {
 		return result
 	}
 	result.AccountID, result.ProviderID, result.Routable = selected.ID, selected.ProviderID, true
 	result.PreferenceApplied = result.PreferredProviderID != "" && result.PreferredProviderID == selected.ProviderID
+	for index, id := range providerOrder {
+		if id == selected.ProviderID {
+			result.ProviderPriority = index + 1
+			break
+		}
+	}
 	for _, provider := range data.providers {
 		if provider.ID == selected.ProviderID {
 			result.ProviderName = provider.Name

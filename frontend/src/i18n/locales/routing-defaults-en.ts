@@ -3,7 +3,7 @@ import type { routingDefaultsZh } from "./routing-defaults-zh"
 export const routingDefaultsEn: Record<keyof typeof routingDefaultsZh, string> = {
   "routing.defaults.title": "Default model mappings",
   "routing.defaults.description":
-    "Discovered models map automatically by model ID. Choose a preferred provider for each model; changes save automatically.",
+    "Discovered models map automatically by model ID. Configure provider priorities for shared models; choosing a preferred provider saves automatically.",
   "routing.defaults.count": "{{count}} models",
   "routing.defaults.loading": "Loading default model mappings…",
   "routing.defaults.loadFailed": "Could not load default mappings. Refresh and retry.",
@@ -27,6 +27,6 @@ export const routingDefaultsEn: Record<keyof typeof routingDefaultsZh, string> =
   "routing.defaults.empty":
     "No model catalog yet. Add an available account or sync official models to generate mappings.",
   "routing.defaults.policy":
-    "Custom rules take precedence. Default mappings prefer your chosen provider, then other available providers supporting the same model ID. Accounts within a provider follow creation order.",
+    "Custom rules take precedence. Default mappings follow provider priorities, skipping unavailable entries. Unranked providers use automatic selection. Accounts within a provider follow creation order.",
   "routing.defaults.preferredMatch": "Preferred provider selected",
 }

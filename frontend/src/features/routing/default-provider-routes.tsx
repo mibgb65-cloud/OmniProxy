@@ -8,11 +8,13 @@ export function DefaultProviderRoutes({
   search,
   disabled,
   onSelect,
+  onConfigurePriority,
 }: {
   items: DefaultModelRoute[]
   search: string
   disabled: boolean
   onSelect: (model: string, providerId: string) => void
+  onConfigurePriority: (item: DefaultModelRoute) => void
 }) {
   const { t } = useTranslation()
   const groups = groupDefaultRoutesByProvider(items, search)
@@ -36,6 +38,7 @@ export function DefaultProviderRoutes({
                   disabled={disabled}
                   groupProviderName={name}
                   onSelect={(providerId) => onSelect(item.model, providerId)}
+                  onConfigurePriority={() => onConfigurePriority(item)}
                 />
               ))}
             </ul>

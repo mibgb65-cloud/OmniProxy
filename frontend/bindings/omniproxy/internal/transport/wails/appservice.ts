@@ -406,10 +406,17 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
 }
 
 /**
- * SetModelPreferredProvider 保存模型服务商偏好，空值恢复自动选择。
+ * SetModelPreferredProvider 将服务商移到首位并保留后续优先级，空值恢复自动选择。
  */
 export function SetModelPreferredProvider(model: string, providerID: string): $CancellablePromise<void> {
     return $Call.ByID(875548932, model, providerID);
+}
+
+/**
+ * SetModelProviderOrder 保存同名模型的服务商优先级；空列表恢复自动选择。
+ */
+export function SetModelProviderOrder(model: string, providerIDs: string[] | null): $CancellablePromise<void> {
+    return $Call.ByID(3860525591, model, providerIDs);
 }
 
 /**

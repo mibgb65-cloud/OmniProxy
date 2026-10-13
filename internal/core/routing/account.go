@@ -19,6 +19,16 @@ func SelectAccount(accounts []Account, providers map[string]bool, fixedID string
 // SelectPreferredAccount 优先选择指定服务商的可用账号；偏好无候选时保留原有稳定顺序。
 // fixedID 仍是强制账号范围，不受服务商偏好影响。
 func SelectPreferredAccount(accounts []Account, providers map[string]bool, fixedID, preferredProviderID string) (Account, int, string) {
+	order := []string{}
+	if preferredProviderID != "" {
+		order = append(order, preferredProviderID)
+	}
+	return SelectPrioritizedAccount(accounts, providers, fixedID, order)
+}
+
+// SelectPrioritizedAccount 按服务商优先级选择可用账号，未排序服务商沿用账号创建时间顺序。
+// 固定账号仍是强制范围；配置不可用时跳过该服务商，不执行请求失败重试。
+func SelectPrioritizedAccount(accounts []Account, providers map[string]bool, fixedID string, providerOrder []string) (Account, int, string) {
 	candidates := make([]Account, 0)
 	times := make(map[string]time.Time, len(accounts))
 	for _, item := range accounts {
@@ -49,11 +59,22 @@ func SelectPreferredAccount(accounts []Account, providers map[string]bool, fixed
 	if len(candidates) == 0 {
 		return Account{}, 0, "no_enabled_account"
 	}
+	ranks := make(map[string]int, len(providerOrder))
+	for index, id := range providerOrder {
+		if _, exists := ranks[id]; !exists {
+			ranks[id] = index
+		}
+	}
+	rank := func(id string) int {
+		if value, exists := ranks[id]; exists {
+			return value
+		}
+		return len(providerOrder)
+	}
 	sort.Slice(candidates, func(i, j int) bool {
-		leftPreferred := candidates[i].ProviderID == preferredProviderID
-		rightPreferred := candidates[j].ProviderID == preferredProviderID
-		if leftPreferred != rightPreferred {
-			return leftPreferred
+		leftRank, rightRank := rank(candidates[i].ProviderID), rank(candidates[j].ProviderID)
+		if leftRank != rightRank {
+			return leftRank < rightRank
 		}
 		left, right := times[candidates[i].ID], times[candidates[j].ID]
 		if !left.Equal(right) {

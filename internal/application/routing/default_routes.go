@@ -44,7 +44,11 @@ func (s *Service) DefaultRoutes(ctx context.Context) ([]DefaultRoute, error) {
 	items := []DefaultRoute{}
 	for _, id := range originalModels(data) {
 		rule, matched := core.Match(id, rules)
-		item := DefaultRoute{Model: id, Name: id, PreferredProviderID: data.preferences[id], Providers: []ProviderOption{}, Preview: evaluate(id, rule, matched, data)}
+		order := data.preferences[id]
+		item := DefaultRoute{Model: id, Name: id, Providers: []ProviderOption{}, ProviderOrder: []ProviderPriority{}, Preview: evaluate(id, rule, matched, data)}
+		if len(order) > 0 {
+			item.PreferredProviderID = order[0]
+		}
 		for _, model := range data.models {
 			if model.model == id && model.name != "" {
 				item.Name = model.name
@@ -61,6 +65,22 @@ func (s *Service) DefaultRoutes(ctx context.Context) ([]DefaultRoute, error) {
 			}
 		}
 		sort.Slice(item.Providers, func(i, j int) bool { return item.Providers[i].ID < item.Providers[j].ID })
+		for _, providerID := range order {
+			priority := ProviderPriority{ID: providerID, Name: providerID}
+			for _, provider := range data.providers {
+				if provider.ID == providerID {
+					priority.Name = provider.Name
+					break
+				}
+			}
+			for _, provider := range item.Providers {
+				if provider.ID == providerID {
+					priority.Available = true
+					break
+				}
+			}
+			item.ProviderOrder = append(item.ProviderOrder, priority)
+		}
 		items = append(items, item)
 	}
 	return items, nil

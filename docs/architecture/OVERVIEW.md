@@ -20,6 +20,8 @@
 
 `core/agentprotocol` 负责文本和工具的协议转换；`core/proxy` 负责鉴权、HTTP/SSE 与 WebSocket 生命周期，不读取凭据。`application/gateway` 协调 DeepSeek API Key 和隔离 ChatGPT 订阅回调。`infrastructure/codex` 在内存兼容官方 keyring／age 授权；`provider/chatgpt` 只转发到固定官方端点。原始 Responses 保留流式能力，跨协议有界收集完整结果后输出目标格式。
 
+2026-10-13：迁移 015 在既有模型偏好记录增加有界服务商顺序，将旧首选迁移为单项列表，保留旧字段和首选接口。核心账号选择先按服务商顺序，再按创建时间／ID；不可用的服务商跳过，未排序候选沿用自动选择。Wails 增加顺序保存接口，默认映射返回可用性与完整顺序，预览返回实际优先级；网关与客户端目录继续复用同一解析，无请求失败重试。
+
 客户端会话身份保护及官方加密存储兼容见 ADR 005，第一版能力边界见 `docs/product/LOCAL_AGENTS.md`。
 
 ## System Overview

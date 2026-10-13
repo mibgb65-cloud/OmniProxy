@@ -15,7 +15,7 @@ func (s *AppService) ListDefaultRoutes() ([]routes.DefaultRoute, error) {
 	return service.DefaultRoutes(context.Background())
 }
 
-// SetModelPreferredProvider 保存模型服务商偏好，空值恢复自动选择。
+// SetModelPreferredProvider 将服务商移到首位并保留后续优先级，空值恢复自动选择。
 func (s *AppService) SetModelPreferredProvider(model, providerID string) error {
 	service, err := s.routingService()
 	if err != nil {
@@ -26,4 +26,17 @@ func (s *AppService) SetModelPreferredProvider(model, providerID string) error {
 		s.refreshAgentCatalog()
 	}
 	return err
+}
+
+// SetModelProviderOrder 保存同名模型的服务商优先级；空列表恢复自动选择。
+func (s *AppService) SetModelProviderOrder(model string, providerIDs []string) error {
+	service, err := s.routingService()
+	if err != nil {
+		return err
+	}
+	if err := service.SetProviderOrder(context.Background(), model, providerIDs); err != nil {
+		return err
+	}
+	s.refreshAgentCatalog()
+	return nil
 }

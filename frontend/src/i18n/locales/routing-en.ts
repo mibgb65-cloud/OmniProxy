@@ -3,6 +3,25 @@ import { routingDefaultsEn } from "./routing-defaults-en"
 
 export const routingEn: Record<keyof typeof routingZh, string> = {
   ...routingDefaultsEn,
+  "routing.priority.title": "Provider priority for {{model}}",
+  "routing.priority.configure": "Configure priority",
+  "routing.priority.configureLabel": "Configure provider priority for {{model}} {{provider}}",
+  "routing.priority.description":
+    "Select available providers from top to bottom. Unavailable providers are skipped. New unranked providers use the automatic selection order.",
+  "routing.priority.order": "Provider selection order",
+  "routing.priority.savedOrder": "Saved provider order for {{model}}",
+  "routing.priority.up": "Increase priority of {{provider}}",
+  "routing.priority.down": "Decrease priority of {{provider}}",
+  "routing.priority.remove": "Remove unavailable provider {{provider}}",
+  "routing.priority.unavailable": "Currently unavailable",
+  "routing.priority.save": "Save priority",
+  "routing.priority.saveFailed":
+    "Could not save priorities. Existing settings are unchanged. Try again.",
+  "routing.priority.saved": "Saved provider priorities for {{model}}.",
+  "routing.priority.automatic": "Restore automatic selection",
+  "routing.priority.close": "Close priority settings",
+  "routing.priority.limit": "A model can have up to 100 ranked providers.",
+  "routing.priority.applied": "Using provider priority {{priority}}",
   "routing.grouping.label": "Model and provider view",
   "routing.grouping.byModel": "By model",
   "routing.grouping.byProvider": "By provider",

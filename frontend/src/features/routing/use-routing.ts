@@ -8,6 +8,7 @@ import {
   listRoutes,
   listDefaultRoutes,
   setModelPreferredProvider,
+  setModelProviderOrder,
   previewRoute,
   setRouteEnabled,
   updateRoute,
@@ -60,6 +61,12 @@ export function useRouting() {
     onMutate: () => preview.reset(),
     onSuccess: invalidate,
   })
+  const priority = useMutation({
+    mutationFn: ({ model, providerIds }: { model: string; providerIds: string[] }) =>
+      setModelProviderOrder(model, providerIds),
+    onMutate: () => preview.reset(),
+    onSuccess: invalidate,
+  })
   async function refresh() {
     preview.reset()
     await Promise.all([
@@ -79,6 +86,7 @@ export function useRouting() {
     catalog,
     defaults,
     preference,
+    priority,
     create,
     update,
     toggle,

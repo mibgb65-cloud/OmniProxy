@@ -20,6 +20,9 @@ export async function listDefaultRoutes(): Promise<DefaultRoute[]> {
 export function setModelPreferredProvider(model: string, providerId: string): Promise<void> {
   return AppService.SetModelPreferredProvider(model, providerId)
 }
+export function setModelProviderOrder(model: string, providerIds: string[]): Promise<void> {
+  return AppService.SetModelProviderOrder(model, providerIds)
+}
 export async function listRoutes(): Promise<Item[]> {
   return (await AppService.ListRoutes()) ?? []
 }

@@ -36,6 +36,16 @@ func TestRoutingBindingsWithoutCredentialAccess(t *testing.T) {
 	if err := s.SetModelPreferredProvider("deepseek-flash", "builtin_deepseek"); err != nil {
 		t.Fatal(err)
 	}
+	if err := s.SetModelProviderOrder("deepseek-flash", []string{"builtin_deepseek"}); err != nil {
+		t.Fatal(err)
+	}
+	defaults, err = s.ListDefaultRoutes()
+	if err != nil || len(defaults[0].ProviderOrder) != 1 || defaults[0].ProviderOrder[0].ID != "builtin_deepseek" {
+		t.Fatal("priority binding not saved", err)
+	}
+	if err := s.SetModelProviderOrder("deepseek-flash", []string{"builtin_deepseek", "builtin_deepseek"}); err == nil {
+		t.Fatal("binding accepted duplicate priority")
+	}
 	if err := s.SetModelPreferredProvider("deepseek-flash", ""); err != nil {
 		t.Fatal(err)
 	}

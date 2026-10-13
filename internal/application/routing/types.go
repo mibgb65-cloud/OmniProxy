@@ -56,6 +56,7 @@ type Preview struct {
 	ErrorCode           string `json:"errorCode"`
 	PreferredProviderID string `json:"preferredProviderId,omitempty"`
 	PreferenceApplied   bool   `json:"preferenceApplied,omitempty"`
+	ProviderPriority    int    `json:"providerPriority,omitempty"`
 }
 
 // ProviderReader 和 AccountReader 只允许读取元数据，不暴露密钥读取能力。

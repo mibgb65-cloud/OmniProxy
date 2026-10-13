@@ -49,6 +49,13 @@ func TestLocalGatewayAliasRewriteAndDynamicModels(t *testing.T) {
 	if _, err := db.Exec(string(preferences)); err != nil {
 		t.Fatal(err)
 	}
+	order, err := os.ReadFile("../../../migrations/015_model_provider_order.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.Exec(string(order)); err != nil {
+		t.Fatal(err)
+	}
 	router := routes.New(db, provider.NewService(db), account.NewService(db, store))
 	if _, err := service.Stop(context.Background()); err != nil {
 		t.Fatal(err)

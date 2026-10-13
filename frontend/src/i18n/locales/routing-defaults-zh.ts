@@ -1,7 +1,7 @@
 export const routingDefaultsZh = {
   "routing.defaults.title": "默认模型映射",
   "routing.defaults.description":
-    "已读取的模型自动按原模型名映射，无需逐条新增规则。可为每个模型选择优先服务商，选择后自动保存。",
+    "已读取的模型自动按原模型名映射，无需逐条新增规则。同名模型可配置服务商优先级，首选服务商选择后自动保存。",
   "routing.defaults.count": "{{count}} 个模型",
   "routing.defaults.loading": "正在读取默认模型映射…",
   "routing.defaults.loadFailed": "无法读取默认映射，请刷新后重试。",
@@ -22,6 +22,6 @@ export const routingDefaultsZh = {
   "routing.defaults.noMatches": "没有符合搜索条件的默认模型。",
   "routing.defaults.empty": "暂无模型目录。添加可用账号或同步官方模型后，会自动生成初步映射。",
   "routing.defaults.policy":
-    "自定义规则优先；默认映射优先使用所选服务商，不可用时使用其他支持同名模型的服务商。同一服务商内按账号创建时间选择。",
+    "自定义规则优先；默认映射按服务商优先级选择，跳过不可用项，未排序的服务商沿用自动选择。同一服务商内按账号创建时间选择。",
   "routing.defaults.preferredMatch": "使用优先服务商",
 } as const

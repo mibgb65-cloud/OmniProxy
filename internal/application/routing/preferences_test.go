@@ -25,7 +25,7 @@ func TestPreferenceCountLimitAndRecovery(t *testing.T) {
 	s, db := preferenceFixture(t)
 	_, err := db.Exec(`WITH RECURSIVE numbers(value) AS (SELECT 1 UNION ALL SELECT value+1 FROM numbers WHERE value<999)
 INSERT INTO model_provider_preferences(model,provider_id,updated_at) SELECT 'saved_'||value,'builtin_deepseek','now' FROM numbers;
-INSERT INTO model_provider_preferences VALUES('deepseek-flash','builtin_deepseek','now');`)
+INSERT INTO model_provider_preferences(model,provider_id,updated_at) VALUES('deepseek-flash','builtin_deepseek','now');`)
 	if err != nil {
 		t.Fatal(err)
 	}

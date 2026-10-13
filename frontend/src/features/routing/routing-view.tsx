@@ -65,7 +65,8 @@ export function RoutingView({
     data.update.isPending ||
     data.remove.isPending ||
     data.toggle.isPending ||
-    data.preference.isPending
+    data.preference.isPending ||
+    data.priority.isPending
   const models = [
     ...new Set([
       ...(data.catalog.data ?? []).map((m) => m.model),

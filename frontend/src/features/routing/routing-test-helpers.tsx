@@ -80,6 +80,7 @@ export const defaultMapping: DefaultModelRoute = {
   ],
   preferredProviderId: "",
   preferredProviderName: "",
+  providerOrder: [],
   preview: {
     inputModel: "deepseek-flash",
     matched: false,

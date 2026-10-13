@@ -14,6 +14,7 @@ export interface DefaultRoute {
     "providers": ProviderOption[] | null;
     "preferredProviderId": string;
     "preferredProviderName": string;
+    "providerOrder": ProviderPriority[] | null;
     "preview": Preview;
 }
 
@@ -55,6 +56,7 @@ export interface Preview {
     "errorCode": string;
     "preferredProviderId"?: string;
     "preferenceApplied"?: boolean;
+    "providerPriority"?: number;
 }
 
 /**
@@ -64,4 +66,13 @@ export interface ProviderOption {
     "id": string;
     "name": string;
     "candidateCount": number;
+}
+
+/**
+ * ProviderPriority 保留模型的已保存服务商顺序及当前可用性，资源删除后仍可诊断。
+ */
+export interface ProviderPriority {
+    "id": string;
+    "name": string;
+    "available": boolean;
 }
