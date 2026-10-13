@@ -12,4 +12,5 @@ export interface Item {
     "name": string;
     "fetchedAt": string;
     "metadata"?: modelcatalog$0.Metadata;
+    "source"?: string;
 }

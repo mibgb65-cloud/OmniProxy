@@ -45,6 +45,16 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	if target.kind == "openai" {
 		return proxy.Failure("adapter_unavailable", 503)
 	}
+	if target.kind == "atria" {
+		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+			return s.atria.Forward(ctx, target.baseURL, key, request, func(response proxy.Response) error {
+				return consume(proxy.ObserveResponse(ctx, request.Trace, response, request.Protocol))
+			})
+		})
+	}
+	if target.kind != "" && target.kind != "deepseek" {
+		return proxy.Failure("adapter_unavailable", 503)
+	}
 	if request.Protocol == "" || request.Protocol == "chat" {
 		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error { return s.forwardDeepseek(ctx, target, key, request, consume) })
 	}

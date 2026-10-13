@@ -41,7 +41,7 @@ func validateInput(input Input, data snapshot) error {
 	found := false
 	for _, provider := range data.providers {
 		if provider.ID == input.ProviderID {
-			found = provider.Kind == "deepseek" || provider.Kind == "openai"
+			found = supportedProvider(provider.Kind)
 			break
 		}
 	}

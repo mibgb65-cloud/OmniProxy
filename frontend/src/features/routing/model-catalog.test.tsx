@@ -52,6 +52,29 @@ function renderCatalog(props = catalogProps) {
   )
 }
 
+it("Atria 静态目录显示来源和文本能力，不提供未经确认的账号同步", async () => {
+  vi.mocked(listModelCatalog).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "Atria-Dawn-Preview",
+      name: "Atria-Dawn-Preview",
+      fetchedAt: "",
+      source: "preset",
+      metadata: { contextWindow: 256000, inputModalities: ["text"] },
+    },
+  ])
+  renderCatalog({
+    providers: [{ ...catalogProps.providers[0], kind: "atria", name: "Atria" }],
+    accounts: [{ ...catalogProps.accounts[0], authMethod: "api_key" }],
+  })
+  expect(await screen.findByText("Atria-Dawn-Preview")).toBeInTheDocument()
+  expect(screen.getByText("官方预设 · 账号访问权限待验证")).toBeInTheDocument()
+  expect(screen.getByText("上下文 256000 Token")).toBeInTheDocument()
+  expect(screen.getByRole("button", { name: "同步官方模型" })).toBeDisabled()
+  expect(syncAccountModels).not.toHaveBeenCalled()
+})
+
 it("按账号同步并在失败时保留原模型目录", async () => {
   vi.mocked(listModelCatalog).mockResolvedValue([
     { accountId: "a", providerId: "p", model: "gpt-test", name: "GPT Test", fetchedAt: "now" },

@@ -63,7 +63,7 @@ export const routingEn: Record<keyof typeof routingZh, string> = {
   "routing.editTitle": "Edit model mapping",
   "routing.newTitle": "Add model mapping",
   "routing.formDescription":
-    "Matches model exactly and takes effect on save. Supports connected DeepSeek and ChatGPT / Codex adapters.",
+    "Matches model exactly and takes effect on save. Supports connected DeepSeek, Atria, and ChatGPT / Codex adapters.",
   "routing.aliasHint":
     "Case-sensitive, up to 128 characters. Letters, numbers and - _ . : / are allowed.",
   "routing.aliasInvalid": "Enter 1–128 allowed characters without spaces.",

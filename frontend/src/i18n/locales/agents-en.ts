@@ -154,8 +154,11 @@ export const agentsEn = {
   "models.syncing": "Syncing…",
   "models.failed":
     "Sync failed. The last successful catalog is preserved. Check authentication and network.",
-  "models.empty": "No synced models yet. Select a signed-in ChatGPT or DeepSeek API key account.",
+  "models.empty":
+    "No models yet. Sync a signed-in ChatGPT or DeepSeek API key account; Atria presets appear when an API key account is added.",
   "models.synced": "Synced {{count}} account models",
+  "models.catalogCount": "{{count}} account models",
+  "models.presetSource": "Official preset · Account access unverified",
   "models.metadataUnknown": "Context capability unconfirmed",
   "models.contextWindow": "Context: {{count}} tokens",
   "models.reasoningEfforts": "Reasoning effort: {{values}}",

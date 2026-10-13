@@ -135,8 +135,11 @@ export const agentsZh = {
   "models.sync": "同步官方模型",
   "models.syncing": "正在同步…",
   "models.failed": "同步失败，保留上次成功的目录。请检查账号授权与网络。",
-  "models.empty": "还没有同步模型。请选择一个已登录的 ChatGPT 账号或 DeepSeek API Key 账号。",
+  "models.empty":
+    "暂无模型。可同步已登录的 ChatGPT 或 DeepSeek API Key 账号；添加 Atria API Key 账号后自动显示官方预设。",
   "models.synced": "已同步 {{count}} 个账号模型",
+  "models.catalogCount": "共 {{count}} 个账号模型",
+  "models.presetSource": "官方预设 · 账号访问权限待验证",
   "models.metadataUnknown": "上下文能力待确认",
   "models.contextWindow": "上下文 {{count}} Token",
   "models.reasoningEfforts": "推理档位：{{values}}",

@@ -8,6 +8,7 @@ export const providerNameKeys = {
   minimax: "providers.kind.minimax",
   mimo: "providers.kind.mimo",
   stepfun: "providers.kind.stepfun",
+  atria: "providers.kind.atria",
 } as const
 
 export function isKnownProviderKind(kind: string): kind is keyof typeof providerNameKeys {

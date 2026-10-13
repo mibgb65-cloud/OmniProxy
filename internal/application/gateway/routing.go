@@ -116,11 +116,14 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		return target{}, proxy.Failure("configuration_unavailable", 503)
 	}
 	for _, provider := range providers {
-		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai") || !provider.Enabled {
+		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria") || !provider.Enabled {
 			continue
 		}
 		for _, account := range accounts {
 			if account.ID == request.AccountID && account.ProviderID == provider.ID && account.Enabled {
+				if provider.Kind == "atria" && account.AuthMethod != "api_key" {
+					return target{}, proxy.Failure("route_account_unavailable", 503)
+				}
 				if provider.Kind == "openai" && (account.AuthMethod != "subscription_login" || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}

@@ -8,10 +8,11 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-001](../tasks/active/TASK-20261014-001-merge-atria-and-gpt-context.md)：将 Atria 与 GPT 长上下文分支合入 main，执行合并后的回归和完整质量门。
 
 ## Recently Completed
 
+- [TASK-20261013-017](../tasks/completed/2026-10/TASK-20261013-017-atria-builtin-provider.md)：Atria 第十家内置提供商、原生三协议 HTTP／SSE、预设目录／路由与用量统计；分支质量门、369 项前端测试及隔离原生验收通过。实现提交 `015cd6a`，真实 Atria Key 调用尚未验证。
 - [TASK-20261013-016](../tasks/completed/2026-10/TASK-20261013-016-gpt-subscription-long-context.md) 六款 GPT 900019 输入 token 实测通过、按授权版本保存 1M、补充 GPT-6.1 Sol；原生九项菜单已保存生效，DeepSeek 实际 1M、GPT 独立 850K 压缩阈值与完整质量门通过。Terra 过载／429 未确认，原生旧缓存的自动刷新仍有限制。实现提交 `cbd7176`。
 - [TASK-20261013-015](../tasks/completed/2026-10/TASK-20261013-015-claude-desktop-context-picker.md) DeepSeek 默认仅 1M、旧默认升级与原生长上下文字段；菜单仅两个 DeepSeek 1M 选项，原生实际回复显示 49.4K / 1M，CLI 默认及完整质量门通过。实现提交 `7b02540`。
 - [TASK-20261013-014](../tasks/completed/2026-10/TASK-20261013-014-deepseek-claude-context-and-requests.md) DeepSeek Claude Code 普通／1M 选项、beta Messages 与 system 提醒兼容，正文容量适配；真实四组合、默认工具、开发网关和完整质量门通过，Desktop 目录已更新。实现提交 `06a3378`。

@@ -11,6 +11,7 @@ import (
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/chatgpt"
 	"omniproxy/internal/provider/deepseek"
 )
@@ -45,6 +46,7 @@ type Service struct {
 	router       Router
 	subscription SubscriptionAccess
 	chatgpt      *chatgpt.Client
+	atria        *atria.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -56,6 +58,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 		opts.RequestTimeout = 120 * time.Second
 	}
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
+	s.atria = atria.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	s.server = proxy.New(opts)
 	return s

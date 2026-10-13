@@ -216,6 +216,7 @@ export const zh = {
   "providers.kind.minimax": "MiniMax",
   "providers.kind.mimo": "小米 MiMo",
   "providers.kind.stepfun": "阶跃星辰",
+  "providers.kind.atria": "Atria",
 
   "pages.accounts.title": "账号",
   "accounts.loading": "正在加载账号…",

@@ -109,7 +109,7 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 			}
 			found = true
 			result.ProviderName = provider.Name
-			if provider.Kind != "deepseek" && provider.Kind != "openai" {
+			if !supportedProvider(provider.Kind) {
 				result.ErrorCode = "adapter_unavailable"
 				return result
 			}

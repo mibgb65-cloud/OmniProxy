@@ -5,16 +5,16 @@ import (
 	"sort"
 
 	core "omniproxy/internal/core/routing"
-	"omniproxy/internal/provider/deepseek"
 )
 
 func originalModels(data snapshot) []string {
 	seen := make(map[string]bool)
 	for _, provider := range data.providers {
-		if provider.Kind == "deepseek" {
-			for _, id := range deepseek.Models() {
-				seen[id] = true
-			}
+		if provider.Kind == "atria" && !hasPresetAccount(data, provider.ID) {
+			continue
+		}
+		for _, id := range presetModels(provider.Kind) {
+			seen[id] = true
 		}
 	}
 	for _, model := range data.models {

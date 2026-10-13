@@ -228,6 +228,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.minimax": "MiniMax",
   "providers.kind.mimo": "Xiaomi MiMo",
   "providers.kind.stepfun": "StepFun",
+  "providers.kind.atria": "Atria",
 
   "pages.accounts.title": "Accounts",
   "accounts.loading": "Loading accounts…",
