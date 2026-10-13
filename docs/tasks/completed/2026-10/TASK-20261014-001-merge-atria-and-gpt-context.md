@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -55,8 +55,14 @@ GPT 分支改动目录授权版本、CLI 逐模型压缩、Desktop 路径和默�
 
 # Git
 
-待填写。
+`7dce1b0` chore(merge): 合入 Atria 接入并保留 GPT 长上下文。
+
+两个父提交为 `153e37a`（GPT／DeepSeek 分支）和 `ef4eb36`（Atria 分支）。main 快进保留所有原提交后创建真实合并提交，未重写历史或推送远端。
 
 # Result
 
-两个授权分支的实现已整合并通过质量门，等待本地合并提交。main 生产二进制已生成，真实 Atria 调用限制保持如实记录。
+两个授权分支已合入 main 并通过质量门，main 工作区干净、生产二进制已生成。Atria 代码接入完成；真实上游需有效 Key 后验收，未把契约测试当作真实调用成功。
+
+# Completed
+
+2026-10-14（Asia/Singapore）
