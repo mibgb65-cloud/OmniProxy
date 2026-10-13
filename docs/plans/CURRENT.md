@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261013-002](../tasks/active/TASK-20261013-002-sync-main-fix-dev-startup.md) 提交现有文档、快进同步本地 main，并修复 task dev 前端就绪等待。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261013-002](../tasks/completed/2026-10/TASK-20261013-002-sync-main-fix-dev-startup.md) 文档提交 `fdfd29e`、本地 main 快进同步及开发启动等待修复 `1ecb6bb`；完整质量门与普通 task dev 原生验收通过。
 - [TASK-20261012-007](../tasks/completed/2026-10/TASK-20261012-007-commit-current-implementation.md) 按用户要求只提交当前代码快照：`44fdbc4`；537 个代码文件，文档保留工作区，实际对话 400 尚未修改。
 - [TASK-20261012-006](../tasks/completed/2026-10/TASK-20261012-006-claude-desktop-gateway-activation.md) Claude Code Desktop 一键启用 3001 网关、原生请求兼容、稳定模型映射与实际 Code 免登录／无配置提醒验收；完整检查通过，未混合提交既有工作区改动。
 - [TASK-20261012-005](../tasks/completed/2026-10/TASK-20261012-005-claude-desktop-detection-and-write.md) Claude 新旧包名检测、加密目录写入兼容与 Code 入口（补录）

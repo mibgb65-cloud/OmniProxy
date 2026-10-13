@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -84,7 +84,7 @@ Go 回归测试覆盖超过 5 秒的前端就绪等待、持续 HTTP 503、连�
 
 ## Documentation
 
-已更新 `docs/development/BUILD.md` 的等待时限、输入边界和故障排查说明；任务看板及本记录在归档时同步。
+已更新 `docs/development/BUILD.md` 的等待时限、输入边界和故障排查说明；本记录已归档，`docs/plans/CURRENT.md` 已同步完成状态。
 
 ## Deviations
 
@@ -94,8 +94,12 @@ None.
 
 - 文档提交：`fdfd29ec1a935f1d106dacd4c3c550bc3d6e2f29`，`docs: 同步网关客户端实现文档与任务记录`，71 个 Markdown 文件。
 - 已切换到本地 `main`，通过 `git merge --ff-only codex/account-details-layout` 同步到文档提交；旧分支及其他 worktree 保留。
-- 开发启动修复提交待验证后填写。
+- 修复提交：`1ecb6bba28952faeab13e58d8be5ed71a2f22fc5`，`fix(wails): 等待前端就绪后启动开发窗口`，提交于 `main`。
 
 ## Result
 
-代码和文档已同步到本地 `main`，永久启动修复通过完整质量门与普通 `task dev` 原生验收；开发环境保持运行。修复提交与归档待完成。
+代码和文档已同步到本地 `main`，永久启动修复通过完整质量门与普通 `task dev` 原生验收并完成提交；开发环境保持运行，任务记录已归档。
+
+## Completed
+
+2026-10-13（Asia/Singapore）
