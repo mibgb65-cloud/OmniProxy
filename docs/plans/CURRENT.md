@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-008](../tasks/active/TASK-20261014-008-claude-desktop-shared-config.md) 修复 Claude Desktop 错误选择商店包缓存的问题，恢复共享配置入口；路径与配置服务测试通过，正在执行完整质量门及运行版验收。
 
 ## Recently Completed
 

@@ -45,6 +45,8 @@ CLI 检测 PATH 和固定用户安装目录；桌面应用检测卸载注册表�
 
 Claude Code Desktop 是官方 Claude 桌面应用中的 Code 功能，与 Chat 共用安装包。该卡片的「打开 Claude Code」通过固定的 `claude://code/new` 进入编程页面，不附带任务、项目路径或凭据；官方说明链接指向 Code 桌面文档。一键配置会启用第三方网关模式并选中「OmniProxy · 本地网关」，完全退出并重启 Claude 后进入 Code。原有官方设置、配置条目和会话文件保留，恢复配置可还原原模式与选择。尚未激活本地网关时，打开按钮提示先应用一键配置，避免进入官方登录页。[官方桌面说明](https://code.claude.com/docs/en/desktop)、[第三方配置说明](https://claude.com/docs/third-party/claude-desktop/in-app-configuration)、[Code 入口链接](https://support.claude.com/en/articles/14729294-open-claude-desktop-with-a-link)。
 
+Windows 的第三方配置入口为 `%LOCALAPPDATA%\Claude-3p\configLibrary`，启动模式写入共享的 `Claude` 与 `Claude-3p` 目录。Claude 商店安装包明确将 `Claude-3p` 排除出文件系统虚拟化，因此 `Packages\...\LocalCache\Local\Claude-3p`（可能映射到 `D:\WpSystem`）中的残留配置不能作为路径选择依据。开发版也使用同一客户端入口，无需先安装 OmniProxy；默认网关端口为 3001。若旧版本曾写入错误位置，重启修复后的 OmniProxy，使用「重新读取配置」重新预览并应用，原加密备份按现有归档流程保留。
+
 配置错误分别提示读取、写入、文件占用与备份失败，不将文件写入问题误报为网关异常。Windows 加密配置目录拒绝同目录重命名时，使用独占文件句柄再次校验版本并写入，保留文件加密与 ACL；失败恢复原字节，恢复也失败时明确报错。此兼容分支提供进程内失败回退，无法保证断电或强制结束进程时的原子性，应用前仍保存加密备份。
 
 安装渠道依据：[Codex CLI 官方说明](https://learn.chatgpt.com/docs/codex/cli)、[Codex Windows 官方说明](https://learn.chatgpt.com/docs/windows/windows-app)、[Claude Code 官方说明](https://code.claude.com/docs/en/setup)、[Claude Desktop 官方下载](https://claude.com/download)、[WinGet 安装命令](https://learn.microsoft.com/en-us/windows/package-manager/winget/install)。

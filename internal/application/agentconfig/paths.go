@@ -37,10 +37,7 @@ func DefaultPaths() (Paths, error) {
 
 func desktopClientPaths(cache string) (profile, normal, thirdParty string, err error) {
 	normalRoot, thirdPartyRoot := filepath.Join(cache, "Claude"), filepath.Join(cache, "Claude-3p")
-	thirdPartyRoot, err = desktopThirdPartyRoot(cache, thirdPartyRoot)
-	if err != nil {
-		return "", "", "", err
-	}
-	// 商店版的 Local 虚拟配置库可能遮蔽共享目录；Roaming 官方聊天设置仍不作为 3P 配置入口。
+	// Claude 的 MSIX 清单将 Claude-3p 排除出文件系统虚拟化，与普通安装共用此入口。
+	// 包缓存即使残留配置库也不能作为生效依据，否则一键配置会写入客户端不读取的位置。
 	return filepath.Join(thirdPartyRoot, "configLibrary", DesktopProfileID+".json"), filepath.Join(normalRoot, "claude_desktop_config.json"), filepath.Join(thirdPartyRoot, "claude_desktop_config.json"), nil
 }
