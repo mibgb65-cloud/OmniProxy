@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -145,7 +145,7 @@ In Progress
 # Verification
 
 - 官方链接已打开或读取其同路径公开 Markdown，人工核对四类地址、Messages 根路径差异、Step Plan Responses、模型发现和账户字段；未发送真实推理。
-- 任务文档 163 行，UTF-8 无 BOM；人工复查方案、已知／未知边界和实施条件。
+- 任务文档 UTF-8 无 BOM；人工复查方案、已知／未知边界和实施条件。
 - `git diff --check` PASS；提交前再次检查暂存区，仅包含本轮两份文档。
 - 本轮仅文档改动，无可执行代码／配置示例，不运行 `task verify`；实际接入后按上方验证清单运行质量门。
 
@@ -159,8 +159,12 @@ In Progress
 
 # Git
 
-待提交。
+`3f3212d` docs(plan): 规划阶跃星辰双平台 API 与 Step Plan 接入。
 
 # Result
 
 规划完成，推荐一个阶跃星辰入口、四类账号独立配置，按 P1–P4 完成接入与验收。接入代码尚未实施；Step Plan 官方剩余查询保持待确认，不阻碍调用能力的后续实现。
+
+# Completed
+
+2026-10-14（Asia/Singapore）；完成状态仅指本轮接入规划。
