@@ -13,7 +13,7 @@ const (
 
 // Models 返回官方对话模型预设，不包含独立 ASR／TTS 模型。
 func Models() []string {
-	return []string{"mimo-v2.6-pro", "mimo-v2.6-flash", "mimo-v2.6-pro-ultraspeed", "mimo-v2.5-pro", "mimo-v2.5"}
+	return []string{"mimo-v2.6-pro", "mimo-v2.6-flash", "mimo-v2.6-pro-ultraspeed"}
 }
 
 // SupportsModel 限定已核对原生对话协议的模型，不能把语音模型误用于客户端路由。

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-013](../tasks/active/TASK-20261014-013-provider-model-popover.md) 提供商模型列表改为浮层，保持卡片高度；移除小米两个 V2.5 旧模型，验证 main 原生窗口及完整质量门。
 
 ## Recently Completed
 

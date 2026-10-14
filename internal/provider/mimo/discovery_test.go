@@ -16,7 +16,7 @@ func TestModelDiscoveryFiltersSpeechAndUnverifiedModels(t *testing.T) {
 		if r.Method != http.MethodGet || r.URL.Path != "/v1/models" || r.Header.Get("Api-Key") != "test-key" {
 			t.Error("invalid discovery contract")
 		}
-		fmt.Fprint(w, `{"object":"list","data":[{"id":"mimo-v2.6-pro"},{"id":"mimo-v2.6-flash"},{"id":"mimo-v2.6-pro"},{"id":"mimo-v2.5-asr"},{"id":"mimo-v2.5-tts"},{"id":"mimo-future"}]}`)
+		fmt.Fprint(w, `{"object":"list","data":[{"id":"mimo-v2.6-pro"},{"id":"mimo-v2.6-flash"},{"id":"mimo-v2.6-pro"},{"id":"mimo-v2.5-pro"},{"id":"mimo-v2.5"},{"id":"mimo-v2.5-asr"},{"id":"mimo-v2.5-tts"},{"id":"mimo-future"}]}`)
 	}))
 	defer upstream.Close()
 	models, err := New(nil).DiscoverModels(context.Background(), upstream.URL+"/v1", []byte("test-key"))

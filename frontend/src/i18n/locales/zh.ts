@@ -165,6 +165,7 @@ export const zh = {
   "providers.catalog": "内置提供商",
   "providers.presetUnavailable": "未找到内置配置，请重启应用。",
   "providers.customModels": "模型由自定义接口提供",
+  "providers.modelsTitle": "预设模型",
   "providers.showModels": "查看全部预设模型",
   "providers.hideModels": "收起预设模型",
   "providers.test": "测试",

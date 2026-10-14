@@ -1,55 +1,15 @@
 import { Tooltip } from "../../components/ui/tooltip"
-import { useId, useState } from "react"
 import type { ReactNode } from "react"
-import { ChevronDown } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import type { ProviderProbeResult } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "./provider-brand-icon"
 import { ProviderPowerButton } from "./provider-power-button"
+import { ModelPreview } from "./model-preview"
 import "./provider-probe-tooltip.css"
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
-
-function ModelPreview({ models }: { models: string[] }) {
-  const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
-  const listId = useId()
-  if (models.length === 0) {
-    return <p className="text-muted-foreground text-xs">{t("providers.customModels")}</p>
-  }
-  return (
-    <div className="min-w-0">
-      <button
-        type="button"
-        aria-expanded={expanded}
-        aria-controls={listId}
-        onClick={() => setExpanded((value) => !value)}
-        className="text-muted-foreground hover:text-foreground flex max-w-full cursor-pointer items-center gap-1 text-left text-xs transition-colors"
-      >
-        <span className="truncate">{models.slice(0, 2).join(" · ")}</span>
-        {models.length > 2 ? <span className="shrink-0">+{models.length - 2}</span> : null}
-        <ChevronDown
-          className={`size-3.5 shrink-0 motion-safe:transition-transform ${expanded ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        />
-        <span className="sr-only">
-          {expanded ? t("providers.hideModels") : t("providers.showModels")}
-        </span>
-      </button>
-      {expanded ? (
-        <ul id={listId} className="mt-2 flex flex-wrap gap-1.5">
-          {models.map((model) => (
-            <li key={model} className="bg-muted/60 rounded-md px-2 py-1 text-xs">
-              {model}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  )
-}
 
 export function ProviderCard({
   kind,
@@ -95,7 +55,7 @@ export function ProviderCard({
               <Tooltip content={name}>
                 <h3 className="truncate text-sm font-semibold">{name}</h3>
               </Tooltip>
-              <ModelPreview models={models} />
+              <ModelPreview name={name} models={models} />
               {endpoint ? (
                 <Tooltip content={endpoint}>
                   <p className="text-muted-foreground truncate text-xs">{endpoint}</p>

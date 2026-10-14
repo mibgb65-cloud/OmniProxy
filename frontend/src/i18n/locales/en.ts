@@ -173,6 +173,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.catalog": "Built-in providers",
   "providers.presetUnavailable": "Built-in configuration missing. Restart the app.",
   "providers.customModels": "Models are provided by the custom endpoint",
+  "providers.modelsTitle": "Preset models",
   "providers.showModels": "Show all preset models",
   "providers.hideModels": "Hide preset models",
   "providers.test": "Test",

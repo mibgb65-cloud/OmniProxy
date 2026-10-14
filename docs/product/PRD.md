@@ -58,6 +58,7 @@ accounts need one local place to:
 - 提供商卡片使用与账号一致的电源图标按钮控制启停：绿色表示启用，灰色表示停用，悬浮提示说明下一步操作。
 - Provider cards show a curated model preview and an unauthenticated endpoint
   reachability/response-time check; actual model access depends on an account.
+- 点击模型预览后在浮层中查看完整预设列表，卡片和同一行相邻卡片高度保持稳定；浮层支持键盘打开、Esc／外部点击关闭和窗口边缘避让。
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。
@@ -74,7 +75,7 @@ accounts need one local place to:
 - 路由页依据已有模型目录自动展示同名初步映射，无需逐条新增规则；同名模型可保存多个服务商的优先级顺序。精确规则优先，默认映射按顺序选择可用服务商，跳过不可用配置，其余候选沿用自动选择；预览／网关／客户端目录保持一致。本次覆盖现有 DeepSeek 和 ChatGPT/Codex 适配器。
 - 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE，其他提供商及自动调度仍待接入。
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
-- 小米 MiMo 普通 API Key 支持五个已核对的 V2.6／V2.5 对话模型、官方账号模型同步、精确路由和客户端目录；三种原生协议保留文本、思考、函数调用及 JSON／SSE，用量由既有观察器记录。预设与账号发现区分，Token Plan、余额、多模态及语音接口未接入。详见 `docs/product/MIMO.md`。
+- 小米 MiMo 普通 API Key 支持三个已核对的 V2.6 对话模型、官方账号模型同步、精确路由和客户端目录；三种原生协议保留文本、思考、函数调用及 JSON／SSE，用量由既有观察器记录。预设与账号发现区分，Token Plan、余额、多模态及语音接口未接入。详见 `docs/product/MIMO.md`。
 - 网关页支持 Codex CLI／Desktop、Claude Code CLI 和 Claude Desktop Code 配置，独立接入 Key、预览、加密备份和恢复；保留原提供商标识与官方会话，Desktop 添加独立配置条目。路由页可同步 ChatGPT／DeepSeek 官方模型目录并按账号选择；详见 `docs/product/LOCAL_AGENTS.md`。
 - 一键接入自动提供适用的模型／路由目录，无需手选单个模型；优先保留仍可用的原默认。目录记录官方已确认元数据并保留未知能力，Codex 按身份／核心版本适配本地或远程目录，Claude Desktop 提供完整显式列表。受管目录支持安全更新和恢复。
 - Quota monitoring and usage statistics.
