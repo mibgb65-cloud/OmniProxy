@@ -26,6 +26,12 @@ export function ModelCatalogRow({
           ? ` · ${t("models.reasoningEfforts", { values: model.metadata.reasoningEfforts.map((effort) => effort.value).join(" / ") })}`
           : ""}
       </p>
+      {model.metadata?.inputTokenLimit ? (
+        <p>{t("models.inputLimit", { count: model.metadata.inputTokenLimit })}</p>
+      ) : null}
+      {model.metadata?.outputTokenLimit ? (
+        <p>{t("models.outputLimit", { count: model.metadata.outputTokenLimit })}</p>
+      ) : null}
     </li>
   )
 }

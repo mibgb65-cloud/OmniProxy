@@ -14,6 +14,7 @@ import (
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/chatgpt"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/google"
 )
 
 // ProviderReader 只读取已保存的提供商，不修改其他功能的配置。
@@ -37,16 +38,18 @@ type Info struct {
 
 // Service 复用账号与提供商服务，不持有或缓存明文密钥。
 type Service struct {
-	server       *proxy.Server
-	providers    ProviderReader
-	accounts     AccountAccess
-	client       *deepseek.Client
-	log          *slog.Logger
-	timeout      time.Duration
-	router       Router
-	subscription SubscriptionAccess
-	chatgpt      *chatgpt.Client
-	atria        *atria.Client
+	server          *proxy.Server
+	providers       ProviderReader
+	accounts        AccountAccess
+	client          *deepseek.Client
+	log             *slog.Logger
+	timeout         time.Duration
+	router          Router
+	subscription    SubscriptionAccess
+	chatgpt         *chatgpt.Client
+	atria           *atria.Client
+	google          *google.Client
+	googleResources GoogleResourceObserver
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -59,6 +62,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	}
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
 	s.atria = atria.New(nil)
+	s.google = google.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	s.server = proxy.New(opts)
 	return s
@@ -115,6 +119,7 @@ func (s *Service) Forward(ctx context.Context, request proxy.Request, consume fu
 }
 
 type target struct {
+	updatedAt string
 	snapshot  proxy.TargetSnapshot
 	accountID string
 	baseURL   string

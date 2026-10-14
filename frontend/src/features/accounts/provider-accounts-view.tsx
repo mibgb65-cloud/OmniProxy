@@ -14,6 +14,7 @@ import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 import { OpenAIAccountSettings } from "./openai-account-settings"
+import { GoogleResources } from "../google/google-resources"
 import "./account-card-grid.css"
 
 export function ProviderAccountsView({ providerId }: { providerId: string }) {
@@ -81,10 +82,19 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
           ) : null}
           {provider.kind !== "deepseek" &&
+            provider.kind !== "google" &&
             (provider.kind !== "openai" ||
             items.some((account) => account.authMethod !== "subscription_login") ? (
               <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
             ) : null)}
+          {provider.kind === "google" ? (
+            <>
+              <p className="text-muted-foreground text-sm">{t("google.chatOnly")}</p>
+              <GoogleResources
+                accounts={items.filter((account) => account.authMethod === "api_key")}
+              />
+            </>
+          ) : null}
           {actions.actionError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("accounts.actionFailed")}
@@ -119,6 +129,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                   onDelete={actions.deleteItem}
                   onEdit={actions.editItem}
                   balanceSupported={provider.kind === "deepseek"}
+                  googleSupported={provider.kind === "google"}
                 />
               ))}
             </div>

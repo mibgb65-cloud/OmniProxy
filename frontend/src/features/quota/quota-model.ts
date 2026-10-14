@@ -17,7 +17,7 @@ export type QuotaStatus = (typeof quotaStatuses)[number]
 export type QuotaAccount = {
   account: AccountItem
   provider?: ProviderConfiguration
-  kind: "subscription" | "balance" | "unsupported"
+  kind: "subscription" | "balance" | "google" | "unsupported"
   canQuery: boolean
 }
 export type QuotaSnapshot = {
@@ -42,9 +42,12 @@ export function describeQuotaAccounts(
         ? "subscription"
         : provider?.kind === "deepseek" && (!account.authMethod || account.authMethod === "api_key")
           ? "balance"
-          : "unsupported"
+          : provider?.kind === "google" && account.authMethod === "api_key"
+            ? "google"
+            : "unsupported"
     const canQuery =
       kind !== "unsupported" &&
+      kind !== "google" &&
       !(
         kind === "subscription" &&
         ["logged_out", "reauth_required"].includes(account.authState ?? "")
@@ -75,6 +78,7 @@ export function quotaEntryStatus(
   now: number,
 ): QuotaStatus {
   if (item.kind === "unsupported") return "unsupported"
+  if (item.kind === "google") return "unknown"
   if (!item.canQuery) return "unauthenticated"
   if (snapshot.error) return "error"
   if (!snapshot.quota && !snapshot.balance) return snapshot.pending ? "pending" : "unknown"

@@ -7,6 +7,7 @@ import { agentsZh } from "./agents-zh"
 import { activityZh } from "./activity-zh"
 import { quotaZh } from "./quota-zh"
 import { dashboardZh } from "./dashboard-zh"
+import { googleZh } from "./google-zh"
 
 /**
  * Chinese translations — the single source of truth for translation keys.
@@ -14,6 +15,7 @@ import { dashboardZh } from "./dashboard-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...googleZh,
   ...gatewayZh,
   ...routingZh,
   ...logsZh,

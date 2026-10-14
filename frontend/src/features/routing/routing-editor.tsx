@@ -66,7 +66,8 @@ export function RoutingEditor({
           item.id === input.providerId &&
           (item.kind === "deepseek" ||
             item.kind === "atria" ||
-            (item.kind === "openai" && catalog.some((model) => model.providerId === item.id))),
+            (["openai", "google"].includes(item.kind) &&
+              catalog.some((model) => model.providerId === item.id))),
       ) ||
       !models.includes(input.model)
     ) {

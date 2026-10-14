@@ -11,6 +11,7 @@ import (
 	core "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/google"
 	"time"
 )
 
@@ -111,6 +112,20 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 				models = append(models, codex.Model{ID: m, Name: m, Metadata: deepseek.ModelMetadata(m)})
 			}
 			return e
+		})
+	} else if kind == "google" && current.AuthMethod == account.AuthAPIKey {
+		base := ""
+		for _, item := range providers {
+			if item.ID == current.ProviderID {
+				base = item.BaseURL
+			}
+		}
+		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
+			discovered, discoveryError := google.New(nil).Models(ctx, base, key)
+			for _, item := range discovered {
+				models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: item.Metadata})
+			}
+			return discoveryError
 		})
 	} else {
 		return nil, ErrUnavailable

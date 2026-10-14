@@ -8,6 +8,7 @@ import (
 	"omniproxy/internal/application/activity"
 	"omniproxy/internal/application/agentconfig"
 	"omniproxy/internal/application/gateway"
+	"omniproxy/internal/application/googlequota"
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/application/quotaactivation"
 	routes "omniproxy/internal/application/routing"
@@ -43,6 +44,7 @@ func (s *AppService) initGateway() {
 		s.log.Warn("client catalog version unavailable", "module", "agentconfig", "code", "codex_unavailable")
 	}
 	s.gateway.SetRouter(routes.New(s.db, provider.NewService(s.db), account.NewService(s.db, store)))
+	s.gateway.SetGoogleResources(googlequota.New(s.db))
 	subscription, err := s.subscriptionService()
 	if err == nil {
 		s.gateway.SetSubscription(subscription)

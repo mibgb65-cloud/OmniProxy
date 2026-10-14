@@ -18,7 +18,7 @@ func presetModels(kind string) []string {
 }
 
 func supportedProvider(kind string) bool {
-	return kind == "deepseek" || kind == "openai" || kind == atria.Kind
+	return kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google"
 }
 
 func hasPresetAccount(data snapshot, providerID string) bool {

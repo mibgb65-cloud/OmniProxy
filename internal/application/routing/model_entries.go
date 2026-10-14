@@ -63,6 +63,10 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		if entry.ProviderKind == atria.Kind {
 			entry.Metadata = atria.ModelMetadata(entry.TargetModel)
 		}
+		if entry.ProviderKind == "google" {
+			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。
+			entry.Protocols = []string{"chat_completions"}
+		}
 		entries = append(entries, entry)
 	}
 	return catalog.Normalize(entries)

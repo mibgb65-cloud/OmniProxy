@@ -61,6 +61,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == atria.Kind && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
+		if p.Kind == "google" && a.AuthMethod == account.AuthAPIKey {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
 		if p.Kind == "openai" && a.AuthMethod == account.AuthSubscription && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}

@@ -52,6 +52,9 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 			})
 		})
 	}
+	if target.kind == "google" {
+		return s.forwardGoogle(ctx, target, request, consume)
+	}
 	if target.kind != "" && target.kind != "deepseek" {
 		return proxy.Failure("adapter_unavailable", 503)
 	}

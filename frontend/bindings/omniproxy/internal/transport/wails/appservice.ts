@@ -32,6 +32,9 @@ import * as balance$0 from "../../application/balance/models.js";
 import * as gateway$0 from "../../application/gateway/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as googlequota$0 from "../../application/googlequota/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as modelcatalog$0 from "../../application/modelcatalog/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -270,6 +273,13 @@ export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings>
 }
 
 /**
+ * GoogleResources 仅读取项目绑定与本机观察，不调用推理或冒充官方剩余查询。
+ */
+export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
+    return $Call.ByID(3772564351);
+}
+
+/**
  * ListAccounts returns metadata for all saved accounts.
  */
 export function ListAccounts(): $CancellablePromise<account$0.Item[] | null> {
@@ -331,6 +341,13 @@ export function ModelCatalog(): $CancellablePromise<modelcatalog$0.Item[] | null
 
 export function ModelSync(id: string): $CancellablePromise<modelcatalog$0.Item[] | null> {
     return $Call.ByID(3291025769, id);
+}
+
+/**
+ * OpenGoogleConsole 仅打开固定官方页面，不接受任意 URL。
+ */
+export function OpenGoogleConsole(page: string): $CancellablePromise<void> {
+    return $Call.ByID(4008506523, page);
 }
 
 /**
@@ -434,6 +451,13 @@ export function SetCodexWebSocketEnabled(enabled: boolean): $CancellablePromise<
  */
 export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDirResult> {
     return $Call.ByID(3348807762, path);
+}
+
+/**
+ * SetGoogleProject 保存用户声明的项目，不修改 Google Cloud 项目或 Key。
+ */
+export function SetGoogleProject(input: googlequota$0.BindingInput): $CancellablePromise<void> {
+    return $Call.ByID(2698725425, input);
 }
 
 /**

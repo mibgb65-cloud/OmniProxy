@@ -1,0 +1,68 @@
+package gateway
+
+import (
+	"context"
+	"encoding/json"
+	catalog "omniproxy/internal/core/modelcatalog"
+	"omniproxy/internal/core/proxy"
+	"omniproxy/internal/provider/google"
+)
+
+type GoogleResourceObserver interface {
+	Record(context.Context, string, string, string, google.Failure) error
+}
+
+func (s *Service) SetGoogleResources(observer GoogleResourceObserver) { s.googleResources = observer }
+
+func (s *Service) forwardGoogle(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
+	if request.Protocol != "chat" {
+		return proxy.Failure("unsupported_protocol", 400)
+	}
+	if err := s.googleOutputLimit(ctx, target, request); err != nil {
+		return err
+	}
+	return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+		return s.google.Forward(ctx, target.baseURL, key, request, func(failure google.Failure) error {
+			if s.googleResources == nil {
+				return nil
+			}
+			if err := s.googleResources.Record(ctx, target.accountID, target.updatedAt, request.Model, failure); err != nil {
+				if s.log == nil {
+					return proxy.Failure("resource_observation_unavailable", 503)
+				}
+				s.log.Warn("Google resource observation unavailable", "module", "googlequota", "code", "observation_failed")
+			}
+			return nil
+		}, func(response proxy.Response) error {
+			return consume(proxy.ObserveResponse(ctx, request.Trace, response, "chat"))
+		})
+	})
+}
+
+func (s *Service) googleOutputLimit(ctx context.Context, target target, request proxy.Request) error {
+	source, ok := s.router.(interface {
+		TargetMetadata(context.Context, string, string, string) (catalog.Metadata, error)
+	})
+	if !ok {
+		return nil
+	}
+	metadata, err := source.TargetMetadata(ctx, request.ProviderID, target.accountID, request.Model)
+	if err != nil {
+		return proxy.Failure("model_catalog_unavailable", 503)
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(request.Body, &fields) != nil {
+		return proxy.Failure("invalid_request", 400)
+	}
+	if metadata.OutputTokenLimit != nil {
+		for _, name := range []string{"max_tokens", "max_completion_tokens"} {
+			if raw, exists := fields[name]; exists {
+				var limit int64
+				if json.Unmarshal(raw, &limit) != nil || limit < 1 || limit > *metadata.OutputTokenLimit {
+					return proxy.Failure("invalid_request", 400)
+				}
+			}
+		}
+	}
+	return nil
+}

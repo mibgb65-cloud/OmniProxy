@@ -29,6 +29,8 @@ export interface Entry {
 export interface Metadata {
     "description"?: string;
     "contextWindow"?: number | null;
+    "inputTokenLimit"?: number | null;
+    "outputTokenLimit"?: number | null;
 
     /**
      * ContextVerified 表示当前授权版本的订阅线路已完成长输入验证，不是客户端的默认值。

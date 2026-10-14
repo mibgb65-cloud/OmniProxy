@@ -93,6 +93,8 @@ Claude CLI 只合并接入 env，不退出原登录。Desktop 应用时添加并
 
 ## 第一版能力
 
+Gemini 当前只提供 Chat API，虽可在路由页同步官方模型和限制，但不参与 Codex／Claude 的一键配置模型列表。Messages／Responses 转换与完整工具签名桥接尚未实施，不能以输入上限直接宣称原生客户端已启用 1M。
+
 - Windows 本地客户端配置；ChatGPT / Codex 官方 model/list 和 DeepSeek 官方 GET /models。
 - Atria 账号自动提供 `Atria-Dawn-Preview` 官方预设和 256000／仅文本元数据，目录注明预设来源，不查询尚未确认的 `/v1/models`。Codex 使用本地 Responses，Claude CLI／Desktop 使用本地 Messages；Atria 原生 SSE 保留增量与工具关联。真实 Key 和客户端专有扩展仍需实机验证，不为 Atria 生成 1M 变体。
 - GET /v1/models 动态合并可用原始模型与路由；所有请求校验本地接入 Key。

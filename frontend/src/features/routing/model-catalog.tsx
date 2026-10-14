@@ -38,7 +38,7 @@ export function ModelCatalog({
     providers.some(
       (p) =>
         p.id === a.providerId &&
-        ((p.kind === "deepseek" && a.authMethod === "api_key") ||
+        (((p.kind === "deepseek" || p.kind === "google") && a.authMethod === "api_key") ||
           (p.kind === "openai" &&
             a.authMethod === "subscription_login" &&
             a.authState === "authenticated")),

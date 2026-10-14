@@ -8,6 +8,7 @@ import { QuotaAccountCard } from "./quota-account-card"
 import { QuotaFilters } from "./quota-filters"
 import { QuotaSummary } from "./quota-summary"
 import { useQuotaOverview } from "./use-quota-overview"
+import { GoogleResources } from "../google/google-resources"
 
 export function QuotaView() {
   const { t } = useTranslation()
@@ -85,30 +86,39 @@ export function QuotaView() {
           {t("quota.noMatches")}
         </p>
       ) : null}
-      {data.groups.map((group) => (
-        <section
-          key={group.id}
-          className="space-y-3"
-          aria-label={group.provider?.name ?? t("quota.unknownProvider")}
-        >
-          <header className="flex items-center gap-3">
-            <ProviderBrandIcon kind={group.provider?.kind ?? ""} />
-            <div className="min-w-0">
-              <h2 className="text-base font-semibold break-words">
-                {group.provider?.name ?? t("quota.unknownProvider")}
-              </h2>
-              <p className="text-muted-foreground text-xs">
-                {t("quota.count", { count: group.entries.length })}
-              </p>
+      <GoogleResources
+        accounts={data.groups.flatMap((group) =>
+          group.entries.filter((entry) => entry.kind === "google").map((entry) => entry.account),
+        )}
+      />
+      {data.groups
+        .filter((group) => group.entries.some((entry) => entry.kind !== "google"))
+        .map((group) => (
+          <section
+            key={group.id}
+            className="space-y-3"
+            aria-label={group.provider?.name ?? t("quota.unknownProvider")}
+          >
+            <header className="flex items-center gap-3">
+              <ProviderBrandIcon kind={group.provider?.kind ?? ""} />
+              <div className="min-w-0">
+                <h2 className="text-base font-semibold break-words">
+                  {group.provider?.name ?? t("quota.unknownProvider")}
+                </h2>
+                <p className="text-muted-foreground text-xs">
+                  {t("quota.count", { count: group.entries.length })}
+                </p>
+              </div>
+            </header>
+            <div className="grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {group.entries
+                .filter((entry) => entry.kind !== "google")
+                .map((entry) => (
+                  <QuotaAccountCard key={entry.account.id} entry={entry} now={data.now} />
+                ))}
             </div>
-          </header>
-          <div className="grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            {group.entries.map((entry) => (
-              <QuotaAccountCard key={entry.account.id} entry={entry} now={data.now} />
-            ))}
-          </div>
-        </section>
-      ))}
+          </section>
+        ))}
       <p className="text-muted-foreground text-xs leading-5">{t("quota.readOnlyNote")}</p>
     </section>
   )

@@ -8,12 +8,14 @@ import { agentsEn } from "./agents-en"
 import { activityEn } from "./activity-en"
 import { quotaEn } from "./quota-en"
 import { dashboardEn } from "./dashboard-en"
+import { googleEn } from "./google-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...googleEn,
   ...gatewayEn,
   ...routingEn,
   ...logsEn,

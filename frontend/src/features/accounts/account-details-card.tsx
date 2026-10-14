@@ -16,7 +16,8 @@ export function AccountDetailsCard({
   onDelete,
   onEdit,
   balanceSupported = false,
-}: AccountItemActionsProps & { balanceSupported?: boolean }) {
+  googleSupported = false,
+}: AccountItemActionsProps & { balanceSupported?: boolean; googleSupported?: boolean }) {
   const { t } = useTranslation()
   const subscription = account.authMethod === "subscription_login"
 
@@ -70,7 +71,7 @@ export function AccountDetailsCard({
           <dl className="border-border grid grid-cols-2 gap-4 border-t pt-4 text-sm">
             <div className="col-span-2">
               <dt className="text-muted-foreground text-xs">{t("accounts.detail.balance")}</dt>
-              <dd>{t("accounts.detail.balancePending")}</dd>
+              <dd>{t(googleSupported ? "google.unknown" : "accounts.detail.balancePending")}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground text-xs">{t("accounts.detail.created")}</dt>

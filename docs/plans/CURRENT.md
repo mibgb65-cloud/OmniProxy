@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-003](../tasks/active/TASK-20261014-003-gemini-api-quota-implementation.md)：Gemini P1/P2 实现及真实 Key 小请求验收完成，完整质量门通过；正在整理结果与提交归档。
 
 ## Recently Completed
 
