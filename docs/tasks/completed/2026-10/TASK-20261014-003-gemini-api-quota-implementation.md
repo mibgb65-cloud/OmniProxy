@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -61,7 +61,7 @@ In Progress
 
 # Git
 
-基线 main `75ed46e`，实现位于 `codex/gemini-api-quota`。实现提交待记录；不自动推送或合入 main。
+基线 main `75ed46e`，实现位于 `codex/gemini-api-quota`。实现提交 `bf050a2`；完成记录与看板另作归档提交。不自动推送或合入 main。
 
 # Result
 

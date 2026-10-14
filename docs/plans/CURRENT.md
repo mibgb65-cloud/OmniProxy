@@ -8,11 +8,13 @@
 
 ## In Progress
 
-- [TASK-20261014-003](../tasks/active/TASK-20261014-003-gemini-api-quota-implementation.md)：Gemini P1/P2 实现及真实 Key 小请求验收完成，完整质量门通过；正在整理结果与提交归档。
+暂无当前任务。
 
 ## Recently Completed
 
-- [TASK-20261014-002](../tasks/completed/2026-10/TASK-20261014-002-gemini-api-quota-plan.md)：Gemini API、用量、项目共享限流与官方额度的四阶段规划；明确只读 Cloud 授权、预付余额入口与 Agent 签名桥接边界，尚未实施代码。规划提交 `efb4972`。
+- [TASK-20261014-003](../tasks/completed/2026-10/TASK-20261014-003-gemini-api-quota-implementation.md)：先重建最新开发环境，完成 Gemini Chat JSON/SSE、官方模型限制、用量和项目资源观察；真实 Flash-Lite 小请求、原生窗口及完整质量门／371 项前端测试通过。官方剩余资源与 Agent 桥接保留后续。实现提交 `bf050a2`。
+
+- [TASK-20261014-002](../tasks/completed/2026-10/TASK-20261014-002-gemini-api-quota-plan.md)：Gemini API、用量、项目共享限流与官方额度的四阶段规划；明确只读 Cloud 授权、预付余额入口与 Agent 签名桥接边界；P1/P2 落地见 TASK-20261014-003。规划提交 `efb4972`。
 - [TASK-20261014-001](../tasks/completed/2026-10/TASK-20261014-001-merge-atria-and-gpt-context.md)：Atria 与 GPT 长上下文两分支合入 main；保留预设目录与账号确认能力，冲突已解决，合并后完整质量门／369 项前端测试／生产构建通过。合并提交 `7dce1b0`，真实 Atria Key 调用仍待验收。
 - [TASK-20261013-017](../tasks/completed/2026-10/TASK-20261013-017-atria-builtin-provider.md)：Atria 第十家内置提供商、原生三协议 HTTP／SSE、预设目录／路由与用量统计；分支质量门、369 项前端测试及隔离原生验收通过。实现提交 `015cd6a`，真实 Atria Key 调用尚未验证。
 - [TASK-20261013-016](../tasks/completed/2026-10/TASK-20261013-016-gpt-subscription-long-context.md) 六款 GPT 900019 输入 token 实测通过、按授权版本保存 1M、补充 GPT-6.1 Sol；原生九项菜单已保存生效，DeepSeek 实际 1M、GPT 独立 850K 压缩阈值与完整质量门通过。Terra 过载／429 未确认，原生旧缓存的自动刷新仍有限制。实现提交 `cbd7176`。
