@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -71,8 +71,14 @@ In Progress
 
 # Git
 
-待提交。
+`77b11d5` — `feat(stepfun): 接入双平台按量 API 与 Step Plan`。
+
+已有三份无关未跟踪任务记录未修改、未提交；没有推送远程。
 
 # Result
 
 四类账号的配置、目录、隔离路由、文本三协议调用及普通余额功能已实现，国内金额显示人民币，原生界面与最终完整质量门通过。真实 Key／套餐及长窗口验收和未确认的 Step Plan 剩余查询保留上述边界。
+
+# Completed
+
+2026-10-14（Asia/Singapore）。

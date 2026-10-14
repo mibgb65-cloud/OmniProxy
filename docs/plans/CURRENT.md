@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-016](../tasks/active/TASK-20261014-016-stepfun-api-implementation.md) 实施阶跃星辰国内／海外 × 按量 API／Step Plan；账号选项、计费隔离、三协议与余额已实现，针对验证通过，完整质量门及原生窗口验收中。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261014-016](../tasks/completed/2026-10/TASK-20261014-016-stepfun-api-implementation.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合、账号选项、隔离路由、原生三协议及普通余额；国内人民币／海外币种待确认，完整质量门／397 项前端测试及原生深浅主题通过。实现提交 `77b11d5`，真实 Key／长窗口和 Step Plan 剩余查询待验证。
 - [TASK-20261014-015](../tasks/completed/2026-10/TASK-20261014-015-stepfun-api-plan.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合规划，明确账号级选项、计费池隔离、原生三协议及余额／Credit 边界；官方资料和文档检查通过。规划提交 `3f3212d`，接入代码尚未实施。
 - [TASK-20261014-014](../tasks/completed/2026-10/TASK-20261014-014-consolidate-worktrees.md) 最新 main 统一到原 OmniProxy 目录，清理六个附加工作树，保留 Git 历史／18 个分支／独有资料及 OmniMail-win；正常桌面开发版从唯一目录启动，构建、原生界面、热更新和健康接口验收通过。整理记录提交 `7e80c35`。
 - [TASK-20261014-013](../tasks/completed/2026-10/TASK-20261014-013-provider-model-popover.md) 提供商模型列表改为浮层，保持当前与相邻卡片高度；移除小米两个 V2.5 旧模型，main 原生深浅主题／960 与 1717 px 及完整质量门／392 项前端测试通过。实现提交 `ac9d340`。
