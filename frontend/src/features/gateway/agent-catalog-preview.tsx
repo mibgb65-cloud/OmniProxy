@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import type { AgentPlan } from "../../services/agents"
 
 const modeLabels = {
@@ -30,21 +31,28 @@ export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
         <summary className="cursor-pointer font-medium">
           {t("agents.catalogCount", { count: models.length })}
         </summary>
-        <ul className="mt-2 max-h-48 space-y-2 overflow-auto border-t pt-3">
-          {models.map((model) => (
-            <li key={model.id} className="space-y-1 text-xs">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-medium wrap-anywhere">{model.name}</span>
-                <code className="text-muted-foreground min-w-0 wrap-anywhere">{model.id}</code>
-              </div>
-              <p className="text-muted-foreground">
-                {model.metadata.contextWindow
-                  ? t("models.contextWindow", { count: model.metadata.contextWindow })
-                  : t("models.metadataUnknown")}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <ScrollRegion
+          as="section"
+          ariaLabel={t("agents.catalogCount", { count: models.length })}
+          className="mt-2 max-h-48 border-t"
+          viewportClassName="pt-3"
+        >
+          <ul className="space-y-2">
+            {models.map((model) => (
+              <li key={model.id} className="space-y-1 text-xs">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="font-medium wrap-anywhere">{model.name}</span>
+                  <code className="text-muted-foreground min-w-0 wrap-anywhere">{model.id}</code>
+                </div>
+                <p className="text-muted-foreground">
+                  {model.metadata.contextWindow
+                    ? t("models.contextWindow", { count: model.metadata.contextWindow })
+                    : t("models.metadataUnknown")}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </ScrollRegion>
       </details>
       <p className="text-muted-foreground text-xs leading-5">{t("agents.catalogRefreshHint")}</p>
     </section>

@@ -1,6 +1,7 @@
 import { Dialog } from "radix-ui"
 import { Check, RefreshCw, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import { Button } from "../../components/ui/button"
 import { agentTitle, type AgentClient } from "../../services/agents"
 import { useAgentConfigForm } from "./use-agent-config-form"
@@ -72,52 +73,59 @@ function ConfigForm({
             <X />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1">
-          <Dialog.Description
-            id="agent-config-description"
-            className="text-muted-foreground text-sm"
-          >
-            {t("agents.description")}
-          </Dialog.Description>
-          <p className="text-muted-foreground text-sm">{t("agents.automaticModels")}</p>
-          {item.client === "claude" ? (
-            <p className="text-muted-foreground text-xs">{t("agents.cliModelHint")}</p>
-          ) : null}
-          {preview ? <AgentCatalogPreview plan={preview} /> : null}
-          {reloaded ? (
-            <p
-              role="status"
-              className="text-muted-foreground rounded-lg border p-3 text-sm leading-6"
+        <ScrollRegion
+          as="section"
+          ariaLabel={t("agents.configure")}
+          className="min-h-0 flex-1"
+          viewportClassName="pr-1"
+        >
+          <div className="space-y-5">
+            <Dialog.Description
+              id="agent-config-description"
+              className="text-muted-foreground text-sm"
             >
-              {t(acceptCurrent ? "agents.rereadChangesNotice" : "agents.rereadSuccess")}
-            </p>
-          ) : null}
-          {!reloaded && current.errorCode === "config_changed" ? (
-            <p role="alert" className="text-destructive text-sm">
-              {t("agents.error.config_changed")}
-            </p>
-          ) : null}
-          {item.client === "claude-desktop" ? (
-            <p className="text-muted-foreground rounded-lg border p-3 text-sm leading-6">
-              {t("agents.desktopHint")}
-            </p>
-          ) : null}
-          <p className="text-muted-foreground text-xs">{t("agents.restart")}</p>
-          {error ? (
-            <p role="alert" className="text-destructive text-sm">
-              {t(`agents.error.${error}`)}
-            </p>
-          ) : null}
-          {success ? (
-            <p
-              role="status"
-              className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400"
-            >
-              <Check className="size-4" />
-              {t("agents.success")}
-            </p>
-          ) : null}
-        </div>
+              {t("agents.description")}
+            </Dialog.Description>
+            <p className="text-muted-foreground text-sm">{t("agents.automaticModels")}</p>
+            {item.client === "claude" ? (
+              <p className="text-muted-foreground text-xs">{t("agents.cliModelHint")}</p>
+            ) : null}
+            {preview ? <AgentCatalogPreview plan={preview} /> : null}
+            {reloaded ? (
+              <p
+                role="status"
+                className="text-muted-foreground rounded-lg border p-3 text-sm leading-6"
+              >
+                {t(acceptCurrent ? "agents.rereadChangesNotice" : "agents.rereadSuccess")}
+              </p>
+            ) : null}
+            {!reloaded && current.errorCode === "config_changed" ? (
+              <p role="alert" className="text-destructive text-sm">
+                {t("agents.error.config_changed")}
+              </p>
+            ) : null}
+            {item.client === "claude-desktop" ? (
+              <p className="text-muted-foreground rounded-lg border p-3 text-sm leading-6">
+                {t("agents.desktopHint")}
+              </p>
+            ) : null}
+            <p className="text-muted-foreground text-xs">{t("agents.restart")}</p>
+            {error ? (
+              <p role="alert" className="text-destructive text-sm">
+                {t(`agents.error.${error}`)}
+              </p>
+            ) : null}
+            {success ? (
+              <p
+                role="status"
+                className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400"
+              >
+                <Check className="size-4" />
+                {t("agents.success")}
+              </p>
+            ) : null}
+          </div>
+        </ScrollRegion>
         <div className="flex shrink-0 justify-end gap-3 border-t pt-4">
           {!success ? (
             <Button variant="outline" disabled={busy} onClick={() => void reload()}>
