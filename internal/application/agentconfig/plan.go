@@ -126,7 +126,7 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		}
 	} else if input.Client == "claude-desktop" {
 		mode = "desktop-model-list"
-		desktop, err := s.prepareDesktopChange(ctx, true)
+		desktop, err := s.prepareDesktopChange(ctx, true, false)
 		if err != nil {
 			return failed(err)
 		}

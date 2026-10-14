@@ -91,7 +91,7 @@ func readDesktopField(file desktopFileChange, key string, mode bool) (desktopFie
 	return field, nil
 }
 
-func (s *Service) prepareDesktopChange(ctx context.Context, activate bool) (*desktopChange, error) {
+func (s *Service) prepareDesktopChange(ctx context.Context, activate, rebase bool) (*desktopChange, error) {
 	change, err := s.desktopFiles()
 	if err != nil {
 		return nil, err
@@ -110,12 +110,12 @@ func (s *Service) prepareDesktopChange(ctx context.Context, activate bool) (*des
 			change.clear()
 			return nil, failure("backup_unavailable")
 		}
-		if change.original.Scope != change.current.Scope {
+		if change.original.Scope != change.current.Scope || activate && rebase {
 			if !activate {
 				change.clear()
 				return nil, failure("config_changed")
 			}
-			// 安装渠道或实际数据根目录变化后，以新位置的现状为模式恢复基准。
+			// 重新读取主配置后，启动模式与选择也必须采用当前基准；不同文件视图可能使用相同逻辑路径。
 			change.original = change.current
 		}
 		if !activate && desktopStateHash(change.current) != applied {

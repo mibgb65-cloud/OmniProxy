@@ -43,7 +43,7 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 	}
 	var desktop *desktopChange
 	if input.Client == "claude-desktop" {
-		desktop, err = s.prepareDesktopChange(ctx, true)
+		desktop, err = s.prepareDesktopChange(ctx, true, staged.newRef != "")
 		if err != nil {
 			return nil, err
 		}

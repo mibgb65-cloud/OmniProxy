@@ -61,3 +61,38 @@ func TestDesktopPathCorrectionPreservesCacheAndRestoresSharedBaseline(t *testing
 		t.Fatal("path correction modified the unused package configuration", err)
 	}
 }
+
+func TestDesktopRereadRebasesActivationAtSameLogicalPath(t *testing.T) {
+	s := fixture(t)
+	ctx := context.Background()
+	change, err := s.desktopFiles()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer change.clear()
+	normal, thirdParty, meta := change.files[0].path, change.files[1].path, change.files[2].path
+	writeDesktopFixture(t, normal, `{"deploymentMode":"1p"}`)
+	writeDesktopFixture(t, thirdParty, `{"deploymentMode":"1p"}`)
+	writeDesktopFixture(t, meta, `{"appliedId":"first","entries":[{"id":"first","name":"First"}]}`)
+	if _, err := s.Apply(ctx, Input{Client: "claude-desktop", Revision: digest(nil, false)}); err != nil {
+		t.Fatal(err)
+	}
+	// 文件视图改变或重装后，逻辑路径可能相同；重新读取必须同步更新配置与激活状态的恢复基准。
+	fresh := `{"custom":"current"}`
+	writeDesktopFixture(t, s.paths.ClaudeDesktop, fresh)
+	writeDesktopFixture(t, normal, `{"deploymentMode":"3p"}`)
+	writeDesktopFixture(t, thirdParty, `{"deploymentMode":"3p","custom":"current"}`)
+	writeDesktopFixture(t, meta, `{"appliedId":"old-project","entries":[{"id":"old-project","name":"Old project"}]}`)
+	if _, err := s.Apply(ctx, Input{Client: "claude-desktop", Revision: digest([]byte(fresh), true), AcceptCurrentConfig: true}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Restore(ctx, "claude-desktop"); err != nil {
+		t.Fatal(err)
+	}
+	if restored, err := os.ReadFile(s.paths.ClaudeDesktop); err != nil || string(restored) != fresh {
+		t.Fatal("reread profile baseline not restored", err)
+	}
+	if readDesktopFixture(t, normal)["deploymentMode"] != "3p" || readDesktopFixture(t, thirdParty)["deploymentMode"] != "3p" || readDesktopFixture(t, meta)["appliedId"] != "old-project" {
+		t.Fatal("reread retained the old activation baseline at the same logical path")
+	}
+}

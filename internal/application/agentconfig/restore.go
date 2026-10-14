@@ -44,7 +44,7 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 	defer clear(original.Body)
 	var desktop *desktopChange
 	if client == "claude-desktop" {
-		desktop, err = s.prepareDesktopChange(ctx, false)
+		desktop, err = s.prepareDesktopChange(ctx, false, false)
 		if err != nil {
 			return nil, err
 		}

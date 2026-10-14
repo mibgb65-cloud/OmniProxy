@@ -115,7 +115,7 @@ func TestDesktopRestoreRejectsExternallySelectedProfile(t *testing.T) {
 
 func TestDesktopActivationFileConflictRollsBackEarlierFiles(t *testing.T) {
 	s := fixture(t)
-	change, err := s.prepareDesktopChange(context.Background(), true)
+	change, err := s.prepareDesktopChange(context.Background(), true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
