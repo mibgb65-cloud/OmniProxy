@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-014](../tasks/active/TASK-20261014-014-consolidate-worktrees.md) 最新 main 已统一到原 `OmniProxy` 目录，六个附加工作树已清理；正在恢复正常桌面开发环境并核对资料保存与分支完整性。
 
 ## Recently Completed
 

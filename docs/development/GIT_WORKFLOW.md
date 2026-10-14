@@ -2,6 +2,10 @@
 
 ## Branches
 
+本机日常开发与启动统一使用 `E:/go/new/wails3-v/OmniProxy`，当前开发分支为 `main`。需要切换分支时在同一目录使用 `git switch`；不要把多个长期工作树当作项目备份。
+
+Git worktree 是同一仓库的额外工作目录，共享提交历史和分支。临时工作树使用结束后，通过 `git worktree remove` 清理；清理前保留未提交的独有内容，移除目录不删除分支或提交。
+
 - `main` is the primary branch and stays releasable.
 - Short-lived `feature/*`, `fix/*`, `refactor/*` branches for larger work.
 - No `develop`, `release/*`, `hotfix/*` or `staging` branches unless a real
