@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-011](../tasks/active/TASK-20261014-011-xiaomi-mimo-api.md) 接入小米 MiMo 普通 API Key、官方模型目录、原生三协议及路由；实施与验证中。
 
 ## Recently Completed
 

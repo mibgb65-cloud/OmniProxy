@@ -15,6 +15,7 @@ import (
 	"omniproxy/internal/provider/chatgpt"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
+	"omniproxy/internal/provider/mimo"
 )
 
 // ProviderReader 只读取已保存的提供商，不修改其他功能的配置。
@@ -49,6 +50,7 @@ type Service struct {
 	chatgpt         *chatgpt.Client
 	atria           *atria.Client
 	google          *google.Client
+	mimo            *mimo.Client
 	googleResources GoogleResourceObserver
 }
 
@@ -63,6 +65,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
 	s.atria = atria.New(nil)
 	s.google = google.New(nil)
+	s.mimo = mimo.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	s.server = proxy.New(opts)
 	return s

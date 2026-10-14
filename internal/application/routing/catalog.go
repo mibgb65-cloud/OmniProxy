@@ -7,6 +7,7 @@ import (
 	catalog "omniproxy/internal/core/modelcatalog"
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
+	"omniproxy/internal/provider/mimo"
 )
 
 type discoveredModel struct {
@@ -35,6 +36,11 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 	return result, rows.Err()
 }
 func targetSupports(data snapshot, providerID, accountID, model string) bool {
+	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == mimo.Kind {
+			return mimoTargetSupports(data, providerID, accountID, model)
+		}
+	}
 	for _, m := range data.models {
 		if m.providerID == providerID && m.model == model && (accountID == "" || m.accountID == accountID) {
 			return true
@@ -58,7 +64,7 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == "deepseek" && a.AuthMethod != account.AuthSubscription {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
-		if p.Kind == atria.Kind && a.AuthMethod == account.AuthAPIKey {
+		if (p.Kind == atria.Kind || p.Kind == mimo.Kind) && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "google" && a.AuthMethod == account.AuthAPIKey {

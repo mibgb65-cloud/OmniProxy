@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## 小米 MiMo 原生提供商（2026-10-14）
+
+`provider/mimo` 使用普通按量 HTTPS 域名和 `api-key`，在已有 `UseAPIKey` 回调内转发 Chat、Responses 与独立 `/anthropic/v1/messages`，不引入 SDK。原生 SSE 与思考／工具上下文保持，复用 `proxy.ObserveResponse`。模型发现有界并筛选已核对对话模型；未同步账号提供标记为 preset 的目录，成功快照优先，凭据版本变化后失效。路由、客户端菜单和网关接入检查同步扩展，不新增数据库迁移。首版只公布文本能力与官方 1M 上下文；Token Plan 和多模态尚未接入，见 `product/MIMO.md`。
+
 ## Atria 原生提供商（2026-10-13）
 
 迁移 019 追加默认启用的 Atria，018 预留给并行 GPT 长上下文任务。`provider/atria` 通过既有 `proxy.Upstream` 协议转发三种原生 HTTP／SSE，并在受保护 API Key 回调内管理资源和认证。路由与客户端目录共享精确模型 ID 和 256000／文本元数据；`application/modelcatalog` 派生账号预设，来源为 preset、不伪造发现时间。统计仍观察原上游 usage；未确认的发现／余额接口不调用。
@@ -105,7 +109,7 @@ duplicates business logic.
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`. The gateway forwards DeepSeek,
-> ChatGPT / Codex subscription, and Atria requests; other provider adapters are pending.
+> ChatGPT / Codex subscription, Atria, MiMo, and Google Chat requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -207,7 +211,7 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
   MiniMax, Xiaomi MiMo, StepFun, Atria, and OpenAI-compatible endpoints. Ten named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, and Atria are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, Atria, MiMo, and Google Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

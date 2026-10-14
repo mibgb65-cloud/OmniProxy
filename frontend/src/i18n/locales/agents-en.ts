@@ -155,7 +155,7 @@ export const agentsEn = {
   "models.failed":
     "Sync failed. The last successful catalog is preserved. Check authentication and network.",
   "models.empty":
-    "No models yet. Sync a signed-in ChatGPT or DeepSeek API key account; Atria presets appear when an API key account is added.",
+    "No models yet. Sync a signed-in ChatGPT or a DeepSeek, Gemini, or MiMo API key account; Atria and MiMo presets appear when an API key account is added.",
   "models.synced": "Synced {{count}} account models",
   "models.catalogCount": "{{count}} account models",
   "models.presetSource": "Official preset · Account access unverified",

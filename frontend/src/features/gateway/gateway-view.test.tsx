@@ -38,23 +38,26 @@ describe("网关页面", () => {
     vi.mocked(listAccounts).mockResolvedValue(accounts)
   })
 
-  it("仅有 Atria API Key 账号时接入检查显示已配置，排除订阅账号", async () => {
-    vi.mocked(listProviders).mockResolvedValue([
-      { ...providers[0], id: "builtin_atria", kind: "atria", name: "Atria" },
-    ])
-    vi.mocked(listAccounts).mockResolvedValue([
-      { ...accounts[0], providerId: "builtin_atria", authMethod: "api_key" },
-      {
-        ...accounts[0],
-        id: "subscription",
-        providerId: "builtin_atria",
-        authMethod: "subscription_login",
-      },
-    ])
-    renderGateway("diagnostics")
-    await waitFor(() => expect(screen.getAllByText("已配置 · 1 个")).toHaveLength(2))
-    expect(screen.queryByText("待配置")).not.toBeInTheDocument()
-  })
+  it.each(["atria", "mimo"])(
+    "仅有 %s API Key 账号时接入检查显示已配置，排除订阅账号",
+    async (kind) => {
+      vi.mocked(listProviders).mockResolvedValue([
+        { ...providers[0], id: `builtin_${kind}`, kind, name: kind },
+      ])
+      vi.mocked(listAccounts).mockResolvedValue([
+        { ...accounts[0], providerId: `builtin_${kind}`, authMethod: "api_key" },
+        {
+          ...accounts[0],
+          id: "subscription",
+          providerId: `builtin_${kind}`,
+          authMethod: "subscription_login",
+        },
+      ])
+      renderGateway("diagnostics")
+      await waitFor(() => expect(screen.getAllByText("已配置 · 1 个")).toHaveLength(2))
+      expect(screen.queryByText("待配置")).not.toBeInTheDocument()
+    },
+  )
 
   it("按选项卡展示实际配置，保留运行控制和元数据检查边界", async () => {
     const user = userEvent.setup()

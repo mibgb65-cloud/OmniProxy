@@ -59,7 +59,7 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 	if rows.Err() != nil || len(items) > 10000 {
 		return nil, ErrUnavailable
 	}
-	presets, err := s.presetItems(ctx)
+	presets, err := s.presetItems(ctx, items)
 	if err != nil || len(items)+len(presets) > 10000 {
 		return nil, ErrUnavailable
 	}
@@ -89,10 +89,10 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 	if err != nil {
 		return nil, ErrUnavailable
 	}
-	kind := ""
+	kind, base := "", ""
 	for _, p := range providers {
 		if p.ID == current.ProviderID {
-			kind = p.Kind
+			kind, base = p.Kind, p.BaseURL
 		}
 	}
 	models := []codex.Model{}
@@ -127,6 +127,8 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			}
 			return discoveryError
 		})
+	} else if kind == "mimo" && current.AuthMethod == account.AuthAPIKey {
+		models, err = s.syncMiMo(ctx, id, base)
 	} else {
 		return nil, ErrUnavailable
 	}

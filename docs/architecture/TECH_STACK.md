@@ -85,6 +85,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - Wails events — real-time state push to the UI.
 - Local HTTP Control API (chi, loopback only) — external clients.
 - net/http transport for upstream AI provider calls.
+- MiMo 沿用标准库原生 Chat／Responses／Messages HTTP／SSE 和 `api-key`，不新增 SDK、依赖或数据库迁移；模型发现复用现有账号快照表。
 
 ## Build Tools
 

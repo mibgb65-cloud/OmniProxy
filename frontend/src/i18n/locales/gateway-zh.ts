@@ -7,7 +7,7 @@ export const gatewayZh = {
   "gateway.tabs.overviewHint": "查看本地网关的资源概况与运行参数。",
   "gateway.tabs.manualHint": "复制接口地址与配置摘要，接入自行管理的客户端。",
   "gateway.tabs.diagnosticsHint":
-    "检查 DeepSeek / Atria API Key 接入配置；实际调用结果可在请求记录与运行日志中查看。",
+    "检查 DeepSeek / Atria / Gemini / MiMo API Key 接入配置；实际调用结果可在请求记录与运行日志中查看。",
   "gateway.summary.title": "接入概况",
   "gateway.links.title": "相关页面",
   "gateway.sidebar.title": "网关",
@@ -69,7 +69,7 @@ export const gatewayZh = {
   "gateway.summary.accounts": "已配置 API Key 账号",
   "gateway.summary.protocol": "API 协议",
   "gateway.summary.accountsHint":
-    "此处统计已启用的 DeepSeek / Atria API Key 接入资源；ChatGPT / Codex 通过订阅账号接入。当前暂无自动切换。",
+    "此处统计已启用的 DeepSeek / Atria / Gemini / MiMo API Key 接入资源；ChatGPT / Codex 通过订阅账号接入。当前暂无自动切换。",
   "gateway.loading": "读取中…",
   "gateway.unavailable": "读取失败",
   "gateway.connection.title": "通用接口地址",
@@ -103,10 +103,10 @@ export const gatewayZh = {
   "gateway.check.runtime": "本地配置",
   "gateway.check.runtimeHint": "读取当前代理端口和运行环境。",
   "gateway.check.providers": "提供商",
-  "gateway.check.providersHint": "启用 DeepSeek 或 Atria 提供商。",
+  "gateway.check.providersHint": "启用 DeepSeek、Atria、Gemini 或 MiMo 提供商。",
   "gateway.check.accounts": "账号",
   "gateway.check.accountsHint":
-    "为已启用的 DeepSeek 或 Atria 提供商配置至少一个已启用 API Key 账号。",
+    "为已启用的 DeepSeek、Atria、Gemini 或 MiMo 提供商配置至少一个已启用 API Key 账号。",
   "gateway.check.configured": "已配置",
   "gateway.check.read": "已读取",
   "gateway.check.missing": "待配置",

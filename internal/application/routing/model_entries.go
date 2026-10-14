@@ -7,6 +7,7 @@ import (
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/mimo"
 )
 
 // Catalog 使用实际路由决策的账号元数据，不把其他同名模型的能力混入目标。
@@ -62,6 +63,9 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		}
 		if entry.ProviderKind == atria.Kind {
 			entry.Metadata = atria.ModelMetadata(entry.TargetModel)
+		}
+		if entry.ProviderKind == mimo.Kind {
+			entry.Metadata = mimo.ModelMetadata(entry.TargetModel)
 		}
 		if entry.ProviderKind == "google" {
 			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。

@@ -10,10 +10,13 @@ import (
 func originalModels(data snapshot) []string {
 	seen := make(map[string]bool)
 	for _, provider := range data.providers {
-		if provider.Kind == "atria" && !hasPresetAccount(data, provider.ID) {
+		if (provider.Kind == "atria" || provider.Kind == "mimo") && !hasPresetAccount(data, provider.ID) {
 			continue
 		}
 		for _, id := range presetModels(provider.Kind) {
+			if provider.Kind == "mimo" && !mimoTargetSupports(data, provider.ID, "", id) {
+				continue
+			}
 			seen[id] = true
 		}
 	}

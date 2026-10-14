@@ -1,7 +1,10 @@
 // Package provider manages provider configurations independently of the desktop shell.
 package provider
 
-import "omniproxy/internal/provider/atria"
+import (
+	"omniproxy/internal/provider/atria"
+	"omniproxy/internal/provider/mimo"
+)
 
 // Definition describes a built-in provider kind and its authentication options.
 type Definition struct {
@@ -29,7 +32,7 @@ var definitions = []Definition{
 	{Kind: "zhipu", Name: "Zhipu AI", DefaultBaseURL: "https://open.bigmodel.cn/api/paas/v4", Models: []string{"GLM-5.3", "GLM-5.3-Flash", "GLM-5.2", "GLM-4.7"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "kimi", Name: "Moonshot AI", DefaultBaseURL: "https://api.moonshot.ai/v1", Models: []string{"Kimi K3", "Kimi K2.6", "Kimi K2.5", "Moonshot V1"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "minimax", Name: "MiniMax", DefaultBaseURL: "https://api.minimax.io/v1", Models: []string{"MiniMax M3", "MiniMax M2.7", "MiniMax M2.5", "MiniMax Speech 2.8"}, AuthMethods: []string{AuthAPIKey}},
-	{Kind: "mimo", Name: "Xiaomi MiMo", DefaultBaseURL: "https://api.xiaomimimo.com/v1", Models: []string{"MiMo V2.6 Pro", "MiMo V2.6 Flash", "MiMo V2.6 Pro UltraSpeed", "MiMo V2.5"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: mimo.Kind, Name: "Xiaomi MiMo", DefaultBaseURL: mimo.DefaultBaseURL, Models: mimo.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: "stepfun", Name: "StepFun", DefaultBaseURL: "https://api.stepfun.com/v1", Models: []string{"Step 5 Preview", "Step 3.7 Flash", "Step 3.5 Flash", "StepAudio 3"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},
 }

@@ -91,6 +91,39 @@ it("按账号同步并在失败时保留原模型目录", async () => {
   expect(screen.queryByText("secret token")).not.toBeInTheDocument()
 })
 
+it("MiMo 普通 API Key 可同步官方模型，发现结果替换预设", async () => {
+  vi.mocked(listModelCatalog).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "mimo-v2.6-pro",
+      name: "mimo-v2.6-pro",
+      fetchedAt: "",
+      source: "preset",
+    },
+  ])
+  vi.mocked(syncAccountModels).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "mimo-v2.6-flash",
+      name: "mimo-v2.6-flash",
+      fetchedAt: "now",
+    },
+  ])
+  renderCatalog({
+    providers: [{ ...catalogProps.providers[0], kind: "mimo", name: "Xiaomi MiMo" }],
+    accounts: [{ ...catalogProps.accounts[0], authMethod: "api_key" }],
+  })
+  const user = userEvent.setup()
+  expect(await screen.findByText("mimo-v2.6-pro")).toBeInTheDocument()
+  await selectOption(user, screen.getByRole("combobox"), "Account · Xiaomi MiMo")
+  await user.click(screen.getByRole("button", { name: "同步官方模型" }))
+  expect(await screen.findByText("mimo-v2.6-flash")).toBeInTheDocument()
+  expect(syncAccountModels).toHaveBeenCalledWith("a")
+  expect(screen.queryByText("mimo-v2.6-pro")).not.toBeInTheDocument()
+})
+
 it("模型与服务商双向分组，同一服务商的账号共用模型标题并保留各自能力", async () => {
   vi.mocked(listModelCatalog).mockResolvedValue([
     {
