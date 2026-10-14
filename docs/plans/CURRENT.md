@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-012](../tasks/active/TASK-20261014-012-accounts-overview-full-width.md) 账号总览改用弹性等宽网格，修复宽屏右侧留白；在 main 实施并验证。
 
 ## Recently Completed
 

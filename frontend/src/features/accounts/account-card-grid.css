@@ -9,3 +9,8 @@
     min(100%, clamp(20rem, calc((100% - var(--account-card-gap)) / 2), 28rem))
   );
 }
+
+.account-card-grid-overview {
+  /* 总览按容器分配全部宽度；末行继续对齐前面的列，不单独拉伸卡片。 */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+}
