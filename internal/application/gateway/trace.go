@@ -14,6 +14,9 @@ func snapshotTarget(p provider.Configuration, a account.Item) proxy.TargetSnapsh
 		target.ProviderRegion = a.StepFun.Region
 		target.BillingMode = a.StepFun.BillingMode
 	}
+	if a.Kimi != nil {
+		target.ProviderRegion = a.Kimi.Region
+	}
 	return target
 }
 func (s *Service) forwardDeepseek(ctx context.Context, target target, key []byte, request proxy.Request, consume func(proxy.Response) error) error {

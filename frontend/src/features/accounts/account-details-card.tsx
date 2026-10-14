@@ -1,3 +1,4 @@
+import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { StepFunPlanResource } from "./stepfun-resource"
 import { Tooltip } from "../../components/ui/tooltip"
@@ -32,6 +33,7 @@ export function AccountDetailsCard({
               <h3 className="truncate font-semibold">{accountDisplayName(account)}</h3>
             </Tooltip>
             <StepFunBadge account={account} />
+            <KimiPlatformBadge account={account} />
             <p className="text-muted-foreground text-xs">
               {t(
                 account.authMethod === "subscription_login"

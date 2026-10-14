@@ -1,3 +1,4 @@
+import type { KimiOptions } from "../../services/kimi"
 import type { StepFunOptions as Options } from "../../services/stepfun"
 import { useMemo, useRef, useState } from "react"
 import type { FormEvent } from "react"
@@ -13,14 +14,17 @@ import {
 export function useAccountForm({
   providerId,
   stepEnabled = false,
+  kimiEnabled = false,
   onSubmit,
   onBatchSubmit,
 }: {
   providerId: string
   stepEnabled?: boolean
+  kimiEnabled?: boolean
   onSubmit: (input: CreateAccountInput) => Promise<void>
   onBatchSubmit: (input: CreateAccountsInput) => Promise<void>
 }) {
+  const [kimi, setKimi] = useState<KimiOptions>({ region: "cn", version: 0 })
   const [stepfun, setStepFun] = useState<Options>({ region: "cn", billingMode: "payg", version: 0 })
   const [mode, setMode] = useState<"single" | "batch">("single")
   const [name, setName] = useState("")
@@ -58,8 +62,17 @@ export function useAccountForm({
     setSaveError(false)
     try {
       const stepOptions = stepEnabled ? { stepfun } : {}
-      if (mode === "batch") await onBatchSubmit({ providerId, apiKeys: batchKeys, ...stepOptions })
-      else await onSubmit({ providerId, name: name.trim(), apiKey: apiKey.trim(), ...stepOptions })
+      const kimiOptions = kimiEnabled ? { kimi } : {}
+      if (mode === "batch")
+        await onBatchSubmit({ providerId, apiKeys: batchKeys, ...stepOptions, ...kimiOptions })
+      else
+        await onSubmit({
+          providerId,
+          name: name.trim(),
+          apiKey: apiKey.trim(),
+          ...stepOptions,
+          ...kimiOptions,
+        })
     } catch {
       setSaveError(true)
     } finally {
@@ -68,6 +81,8 @@ export function useAccountForm({
     }
   }
   return {
+    kimi,
+    setKimi,
     stepfun,
     setStepFun,
     mode,

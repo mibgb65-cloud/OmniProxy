@@ -6,6 +6,7 @@ import (
 	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -21,7 +22,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		return nil, err
 	}
 	ids := originalModels(data)
-	rules = append(rules, stepAliases(data)...)
+	rules = append(append(rules, stepAliases(data)...), kimiAliases(data)...)
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)
@@ -71,6 +72,18 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		if entry.ProviderKind == "google" {
 			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。
 			entry.Protocols = []string{"chat_completions"}
+		}
+		if entry.ProviderKind == kimi.Kind {
+			if entry.Metadata.ContextWindow == nil {
+				entry.Metadata = kimi.ModelMetadata(entry.TargetModel)
+			}
+			entry.Protocols = []string{"chat_completions"}
+			if kimi.Supports(entry.TargetModel, "messages") {
+				entry.Protocols = append(entry.Protocols, "messages")
+			}
+			if kimi.Supports(entry.TargetModel, "responses") {
+				entry.Protocols = append(entry.Protocols, "responses")
+			}
 		}
 		if entry.ProviderKind == stepfun.Kind {
 			entry.Metadata = stepfun.ModelMetadata(entry.TargetModel)

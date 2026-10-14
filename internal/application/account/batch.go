@@ -19,6 +19,10 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 	if err != nil {
 		return nil, err
 	}
+	kimiOptions, err := s.prepareKimi(ctx, input.ProviderID, input.Kimi, nil)
+	if err != nil {
+		return nil, err
+	}
 	keys := make([][]byte, len(input.APIKeys))
 	defer func() {
 		for _, key := range keys {
@@ -36,6 +40,9 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 			return nil, fmt.Errorf("account: batch key %d: %w", i+1, keyErr)
 		}
 		keys[i] = key
+		if err := validateKimiKey(kimiOptions, key); err != nil {
+			return nil, err
+		}
 		if err := validateStepKey(options, key); err != nil {
 			return nil, err
 		}
@@ -92,6 +99,13 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 				return nil, optionErr
 			}
 			items[i].StepFun = &copy
+		}
+		if kimiOptions != nil {
+			copy := *kimiOptions
+			if err := saveKimi(ctx, tx, item.ID, &copy); err != nil {
+				return nil, err
+			}
+			items[i].Kimi = &copy
 		}
 	}
 	if err := tx.Commit(); err != nil {

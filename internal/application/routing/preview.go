@@ -154,6 +154,10 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 		result.ErrorCode = "ambiguous_stepfun_pool"
 		return result
 	}
+	if kimiAmbiguous(data, allowed, result.Model, rule.AccountID) {
+		result.ErrorCode = "ambiguous_kimi_platform"
+		return result
+	}
 	selected, count, code := core.SelectPrioritizedAccount(accounts, allowed, rule.AccountID, providerOrder)
 	result.CandidateCount, result.ErrorCode = count, code
 	if code != "" {

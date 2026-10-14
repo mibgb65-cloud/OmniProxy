@@ -1,3 +1,4 @@
+import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { Tooltip } from "../../components/ui/tooltip"
 import { Link } from "@tanstack/react-router"
@@ -89,6 +90,7 @@ export function AccountProviderCard({
                       <p className="truncate text-sm font-medium">{accountDisplayName(account)}</p>
                     </Tooltip>
                     <StepFunBadge account={account} />
+                    <KimiPlatformBadge account={account} />
                     <p className="text-muted-foreground text-xs">
                       {t(
                         account.authMethod === "subscription_login"

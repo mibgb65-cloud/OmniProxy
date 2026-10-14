@@ -11,6 +11,9 @@ import (
 // 同 Team 工作区不同邮箱是不同成员；账号删除重建同一身份可继续合并历史。
 func subject(target proxy.TargetSnapshot) (string, error) {
 	parts := []string{target.ProviderKind, "account", target.AccountID}
+	if target.ProviderKind == "kimi" {
+		parts = append(parts, target.ProviderRegion)
+	}
 	if target.ProviderKind == "stepfun" {
 		parts = append(parts, target.ProviderRegion, target.BillingMode)
 	}

@@ -1,3 +1,4 @@
+import { KimiPlatformFields } from "./kimi-platform"
 import { useRef } from "react"
 import { X } from "lucide-react"
 import { Dialog, Tabs } from "radix-ui"
@@ -31,6 +32,7 @@ export function AccountForm({
   const form = useAccountForm({
     providerId: provider.id,
     stepEnabled: provider.kind === "stepfun",
+    kimiEnabled: provider.kind === "kimi",
     onSubmit,
     onBatchSubmit,
   })
@@ -92,6 +94,13 @@ export function AccountForm({
             ))}
           </Tabs.List>
           <form onSubmit={form.submit} className="space-y-4">
+            {provider.kind === "kimi" ? (
+              <KimiPlatformFields
+                value={form.kimi}
+                onChange={form.setKimi}
+                disabled={form.saving}
+              />
+            ) : null}
             {provider.kind === "stepfun" ? (
               <StepFunOptionsFields
                 value={form.stepfun}

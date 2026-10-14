@@ -117,13 +117,16 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		return target{}, proxy.Failure("configuration_unavailable", 503)
 	}
 	for _, provider := range providers {
-		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun") || !provider.Enabled {
+		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi") || !provider.Enabled {
 			continue
 		}
 		for _, account := range accounts {
 			if account.ID == request.AccountID && account.ProviderID == provider.ID && account.Enabled {
-				if provider.Kind == "stepfun" && request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
+				if (provider.Kind == "stepfun" || provider.Kind == "kimi") && request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
 					return target{}, proxy.Failure("route_configuration_changed", 503)
+				}
+				if provider.Kind == "kimi" && (account.AuthMethod != "api_key" || account.Kimi == nil || !account.Kimi.Valid()) {
+					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				if provider.Kind == "stepfun" && (account.AuthMethod != "api_key" || account.StepFun == nil || !account.StepFun.Valid()) {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
@@ -137,7 +140,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if provider.Kind == "openai" && (account.AuthMethod != "subscription_login" || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				return target{accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun}, nil
+				return target{accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi}, nil
 			}
 		}
 		return target{}, proxy.Failure("route_account_unavailable", 503)

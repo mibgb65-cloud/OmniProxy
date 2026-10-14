@@ -1,3 +1,4 @@
+import { KimiPlatformBadge } from "../accounts/kimi-platform"
 import { Link } from "@tanstack/react-router"
 import { StepFunBadge } from "../accounts/stepfun-options"
 import { ArrowUpRight, RefreshCw } from "lucide-react"
@@ -59,6 +60,7 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
                 </span>
               )}
               <StepFunBadge account={entry.account} />
+              <KimiPlatformBadge account={entry.account} />
               {!entry.account.enabled ? <AccountStatusBadge enabled={false} /> : null}
             </div>
             <span

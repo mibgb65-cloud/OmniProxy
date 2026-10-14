@@ -1,3 +1,4 @@
+import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { StepFunPlanResource } from "./stepfun-resource"
 import { Tooltip } from "../../components/ui/tooltip"
@@ -77,6 +78,7 @@ export function AccountDetailsList({
                   </Tooltip>
                 </div>
                 <StepFunBadge account={account} />
+                <KimiPlatformBadge account={account} />
               </th>
               <td className="px-4 py-3">
                 <AccountKeyPreview account={account} />

@@ -1,15 +1,13 @@
-import { useRef, useState } from "react"
-import type { FormEvent } from "react"
+import { useAccountEditForm } from "./use-account-edit-form"
+import { KimiPlatformFields } from "./kimi-platform"
 import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import type { AccountItem, UpdateAccountInput } from "../../services/omniproxy"
-import { MAX_KEY_BYTES, validAccountName, validAPIKey } from "./account-input"
-import type { StepFunOptions as Options } from "../../services/stepfun"
+import { MAX_KEY_BYTES } from "./account-input"
 import { StepFunOptionsFields } from "./stepfun-options"
-import { validStepOptions } from "./stepfun-input"
 import { AccountKeyPreview } from "./account-key-preview"
 
 export function AccountEditForm({
@@ -22,46 +20,26 @@ export function AccountEditForm({
   onRestoreFocus: () => void
 }) {
   const { t } = useTranslation()
-  const stepEnabled = Boolean(account.stepfun || account.providerId === "builtin_stepfun")
-  const [stepfun, setStepFun] = useState<Options>(
-    account.stepfun ?? { region: "", billingMode: "", version: 0 },
-  )
-  const [invalidStep, setInvalidStep] = useState(false)
-  const [name, setName] = useState(account.name)
-  const [apiKey, setAPIKey] = useState("")
-  const [invalidName, setInvalidName] = useState(false)
-  const [invalidKey, setInvalidKey] = useState(false)
-  const [saveError, setSaveError] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const savingRef = useRef(false)
-  const nameRef = useRef<HTMLInputElement>(null)
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (savingRef.current) return
-    const nameError = !validAccountName(name)
-    const keyError = apiKey.trim() !== "" && !validAPIKey(apiKey)
-    setInvalidName(nameError)
-    setInvalidKey(keyError)
-    const stepError = stepEnabled && !validStepOptions(stepfun)
-    setInvalidStep(stepError)
-    if (nameError || keyError || stepError) return
-    savingRef.current = true
-    setSaving(true)
-    setSaveError(false)
-    try {
-      await onSubmit({
-        id: account.id,
-        name: name.trim(),
-        apiKey: apiKey.trim(),
-        ...(stepEnabled ? { stepfun } : {}),
-      })
-    } catch {
-      setSaveError(true)
-    } finally {
-      savingRef.current = false
-      setSaving(false)
-    }
-  }
+  const {
+    name,
+    setName,
+    apiKey,
+    setAPIKey,
+    invalidName,
+    invalidKey,
+    saveError,
+    saving,
+    nameRef,
+    submit,
+    kimiEnabled,
+    kimi,
+    setKimi,
+    invalidKimi,
+    stepEnabled,
+    stepfun,
+    setStepFun,
+    invalidStep,
+  } = useAccountEditForm(account, onSubmit)
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
@@ -110,6 +88,14 @@ export function AccountEditForm({
           </Dialog.Close>
         </div>
         <form onSubmit={submit} className="space-y-4">
+          {kimiEnabled ? (
+            <KimiPlatformFields
+              value={kimi}
+              onChange={setKimi}
+              disabled={saving}
+              invalid={invalidKimi}
+            />
+          ) : null}
           {stepEnabled ? (
             <StepFunOptionsFields
               value={stepfun}

@@ -36,10 +36,17 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	return s.withStepPresets(ctx, result)
+	result, err = s.withStepPresets(ctx, result)
+	if err != nil {
+		return nil, err
+	}
+	return s.withKimiPresets(ctx, result)
 }
 func targetSupports(data snapshot, providerID, accountID, model string) bool {
 	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == "kimi" {
+			return kimiTargetSupports(data, providerID, accountID, model)
+		}
 		if p.ID == providerID && p.Kind == "stepfun" {
 			return stepTargetSupports(data, providerID, accountID, model)
 		}
@@ -72,6 +79,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		}
 		if (p.Kind == atria.Kind || p.Kind == mimo.Kind) && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == "kimi" && a.AuthMethod == account.AuthAPIKey {
+			return a.Kimi != nil && a.Kimi.Valid() && targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "stepfun" && a.AuthMethod == account.AuthAPIKey {
 			return a.StepFun != nil && a.StepFun.Valid() && targetSupports(data, p.ID, a.ID, model)

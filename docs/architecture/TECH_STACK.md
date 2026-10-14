@@ -89,6 +89,8 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 
 - 阶跃星辰四类账号通道复用标准库与 DPAPI，迁移 021／022 维护配置版本及请求归属；无新增 SDK 或依赖。
 
+- Kimi 普通 API 同样使用标准库与 DPAPI，迁移 023 管理账号地区与目录失效；原生协议按官方模型能力开放，不新增 SDK 或依赖。
+
 ## Build Tools
 
 - Vite 8 (frontend dev server, HMR, production build).

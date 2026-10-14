@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-017](../tasks/active/TASK-20261014-017-kimi-api-implementation.md) Kimi 四款模型、普通 API Key 国内／海外平台、原生调用、目录与地区路由已实现；针对验证通过，完整质量门及原生界面检查中。
 
 ## Recently Completed
 

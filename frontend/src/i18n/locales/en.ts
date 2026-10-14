@@ -227,6 +227,17 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.google": "Google",
   "providers.kind.deepseek": "DeepSeek",
   "providers.kind.zhipu": "Zhipu AI",
+  "kimi.platform": "Kimi platform",
+  "kimi.cn": "China",
+  "kimi.global": "Global",
+  "kimi.choose": "Choose the platform that issued this API key",
+  "kimi.keyHint":
+    "Keys issued by China and global platforms are separate. New accounts default to China; a batch shares its platform choice.",
+  "kimi.needsConfiguration": "Platform needs confirmation",
+  "kimi.routingHint":
+    "K3, K2.7 Code and high-speed variant, and K2.6 are supported. Use regional model names for China/global. Native Responses is available for K3; other models are excluded from Codex targets.",
+  "routing.error.ambiguous_kimi_platform":
+    "Multiple Kimi platforms are available. Choose a fixed account or a regional model name.",
   "providers.kind.kimi": "Moonshot AI (Kimi)",
   "providers.kind.minimax": "MiniMax",
   "providers.kind.mimo": "Xiaomi MiMo",

@@ -41,7 +41,10 @@ export function ModelCatalog({
         ((p.kind === "stepfun" &&
           a.stepfun?.billingMode === "payg" &&
           a.authMethod === "api_key") ||
-          ((p.kind === "deepseek" || p.kind === "google" || p.kind === "mimo") &&
+          ((p.kind === "deepseek" ||
+            p.kind === "google" ||
+            p.kind === "mimo" ||
+            (p.kind === "kimi" && a.kimi != null)) &&
             a.authMethod === "api_key") ||
           (p.kind === "openai" &&
             a.authMethod === "subscription_login" &&

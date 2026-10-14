@@ -91,6 +91,9 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           {provider.kind === "stepfun" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("stepfun.routingHint")}</p>
           ) : null}
+          {provider.kind === "kimi" ? (
+            <p className="text-muted-foreground text-sm leading-6">{t("kimi.routingHint")}</p>
+          ) : null}
           {provider.kind === "google" ? (
             <>
               <p className="text-muted-foreground text-sm">{t("google.chatOnly")}</p>

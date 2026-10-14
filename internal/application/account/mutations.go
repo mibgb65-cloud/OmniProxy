@@ -31,6 +31,13 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err := validateStepKey(options, key); err != nil {
 		return Item{}, err
 	}
+	kimiOptions, err := s.prepareKimi(ctx, input.ProviderID, input.Kimi, nil)
+	if err != nil {
+		return Item{}, err
+	}
+	if err := validateKimiKey(kimiOptions, key); err != nil {
+		return Item{}, err
+	}
 	id, err := newID()
 	if err != nil {
 		return Item{}, fmt.Errorf("account: generate ID: %w", err)
@@ -53,6 +60,9 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		err = saveStep(ctx, tx, item.ID, options)
 	}
 	if err == nil {
+		err = saveKimi(ctx, tx, item.ID, kimiOptions)
+	}
+	if err == nil {
 		err = tx.Commit()
 	}
 	if err != nil {
@@ -61,6 +71,7 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		return Item{}, errors.Join(fmt.Errorf("account: create: %w", err), cleanupErr)
 	}
 	item.StepFun = options
+	item.Kimi = kimiOptions
 	return item, nil
 }
 

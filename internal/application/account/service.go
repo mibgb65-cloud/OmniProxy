@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/stepfun"
 	"strings"
 	"time"
@@ -33,6 +34,7 @@ var (
 
 // Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
 type Item struct {
+	Kimi          *kimi.Options    `json:"kimi,omitempty"`
 	StepFun       *stepfun.Options `json:"stepfun,omitempty"`
 	ID            string           `json:"id"`
 	ProviderID    string           `json:"providerId"`
@@ -49,6 +51,7 @@ type Item struct {
 
 // CreateInput contains fields for a new API Key account. APIKey is never persisted in SQLite.
 type CreateInput struct {
+	Kimi       *kimi.Options    `json:"kimi,omitempty"`
 	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
 	ProviderID string           `json:"providerId"`
 	Name       string           `json:"name"`
@@ -57,6 +60,7 @@ type CreateInput struct {
 
 // BatchCreateInput 批量创建自动命名的账号，不接受自定义名称。
 type BatchCreateInput struct {
+	Kimi       *kimi.Options    `json:"kimi,omitempty"`
 	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
 	ProviderID string           `json:"providerId"`
 	APIKeys    []string         `json:"apiKeys"`
@@ -84,8 +88,8 @@ func NewService(db *sql.DB, store CredentialStore) *Service {
 func (s *Service) List(ctx context.Context) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
-		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0)
-		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0)
+		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("account: list: %w", err)
 	}
@@ -102,42 +106,6 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 		return nil, fmt.Errorf("account: iterate: %w", err)
 	}
 	return items, nil
-}
-
-func (s *Service) get(ctx context.Context, id string) (Item, string, error) {
-	var item Item
-	var ref string
-	var options stepfun.Options
-	err := s.db.QueryRowContext(ctx, `
-		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.credential_ref, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
-		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0)
-		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id WHERE a.id = ?`, id).Scan(
-		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version,
-	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return Item{}, "", ErrNotFound
-	}
-	if err != nil {
-		return Item{}, "", fmt.Errorf("account: read: %w", err)
-	}
-	if options.Region != "" {
-		item.StepFun = &options
-	}
-	return item, ref, nil
-}
-
-type scanner interface{ Scan(dest ...any) error }
-
-func scanItem(row scanner) (Item, error) {
-	var item Item
-	var options stepfun.Options
-	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version); err != nil {
-		return Item{}, fmt.Errorf("account: scan: %w", err)
-	}
-	if options.Region != "" {
-		item.StepFun = &options
-	}
-	return item, nil
 }
 
 func validateName(value string) (string, error) {
