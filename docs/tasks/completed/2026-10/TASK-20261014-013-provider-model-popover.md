@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -72,8 +72,14 @@ In Progress
 
 ## Git
 
-待本次实现提交后写入提交哈希并归档；main 原有未跟踪的 TASK-20261014-010 运行记录不纳入本任务提交。
+`ac9d340` — `fix(provider): 模型列表改为浮层并移除小米旧模型`。
+
+main 原有未跟踪的 TASK-20261014-010 运行记录不纳入本任务提交。
 
 ## Result
 
 小米预设仅保留三个 V2.6 模型；完整模型列表在局部浮层展示，原生窗口确认当前及相邻卡片高度稳定，完整质量门通过。
+
+## Completed
+
+2026-10-14（Asia/Singapore）
