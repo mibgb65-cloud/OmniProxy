@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-012](../tasks/active/TASK-20261014-012-accounts-overview-full-width.md) 账号总览改用弹性等宽网格，修复宽屏右侧留白；在 main 实施并验证。
+暂无当前任务。
 
 ## Recently Completed
+
+- [TASK-20261014-012](../tasks/completed/2026-10/TASK-20261014-012-accounts-overview-full-width.md) 账号总览弹性等宽网格，宽屏五列两行并填满可用宽度；窄窗口／字号缩放／末行对齐／原生窗口及完整质量门通过，详情连续列宽保持原样。实现提交 `6070f83`。
 
 - [TASK-20261014-011](../tasks/completed/2026-10/TASK-20261014-011-xiaomi-mimo-api.md) 小米 MiMo 普通 API Key、五个对话模型、账号目录同步及原生三协议／SSE／思考／函数调用；完整质量门／386 项前端测试通过，合入 main 并正常桌面启动核对。实现提交 `184af39`；真实 Key 调用待验证。
 
