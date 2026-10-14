@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -50,8 +50,18 @@ In Progress
 
 ## Git
 
-待提交。
+合并提交：`b47dfa698d24450b32869c47b438db16382f580b chore(merge): 将滚动条优化合入 main`。
+
+父提交为原 main `6548ca3` 和源分支 `dfc55c5`。`git merge-base --is-ancestor codex/deepseek-claude-context main` 通过，源分支两个提交已完整纳入主分支。
 
 ## Result
 
-待完成。
+滚动条优化和验收记录已合入本地 main，双方实现与任务历史保留，任务编号冲突已解决，合并后完整质量门通过。没有远端配置，本次为本地合并。
+
+## Remaining Risks
+
+无新增实现或业务风险。原实现的减少动态效果行为沿用共享组件；本次合并没有增加真实客户端配置或模型请求操作。
+
+## Completed
+
+2026-10-14（Asia/Singapore）

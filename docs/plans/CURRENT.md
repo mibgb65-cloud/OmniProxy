@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-007](../tasks/active/TASK-20261014-007-merge-agent-scrollbars-main.md) 合入一键配置滚动条优化，正在进行合并后质量门与文档编号核对。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261014-007](../tasks/completed/2026-10/TASK-20261014-007-merge-agent-scrollbars-main.md) 滚动条优化合入本地 main，保留既有 Atria／Gemini 实现并统一任务编号；合并后完整质量门／384 项前端测试通过。合并提交 `b47dfa6`。
 - [TASK-20261014-006](../tasks/completed/2026-10/TASK-20261014-006-agent-config-scrollbars.md) 一键配置弹窗正文与模型目录统一细圆角悬停滚动条，去掉系统箭头、固定占位；完整质量门和深浅主题原生显隐／独立滚动／拖动验收通过。实现提交 `b078db0`。
 - [TASK-20261014-005](../tasks/completed/2026-10/TASK-20261014-005-merge-main-and-restart-dev.md) Gemini 与 Atria 图标合入本地 main，保留双方配额界面并消除任务编号冲突；完整质量门／384 项前端测试通过，已重新运行正常 task dev，原生图标和 Gemini 资源模块验收通过，3001 网关恢复运行。合并提交 `1311430`。
 - [TASK-20261014-004](../tasks/completed/2026-10/TASK-20261014-004-atria-provider-icon.md) 补充 Atria 官方本地图标，识别已有官方 API 地址的自定义配置，统一提供商／账号／配额页面；完整质量门与深浅主题原生验收通过，Atria 额度查询维持未接入。实现提交 `b76af6a`。
