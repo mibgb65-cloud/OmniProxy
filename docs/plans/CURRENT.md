@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-015](../tasks/active/TASK-20261014-015-stepfun-api-plan.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 接入规划；已核对四类端点、原生三协议和余额／Credit 边界，正在检查并归档方案。
 
 ## Recently Completed
 
