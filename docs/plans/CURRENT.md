@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-014](../tasks/active/TASK-20261014-014-consolidate-worktrees.md) 最新 main 已统一到原 `OmniProxy` 目录，六个附加工作树已清理；正在恢复正常桌面开发环境并核对资料保存与分支完整性。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261014-014](../tasks/completed/2026-10/TASK-20261014-014-consolidate-worktrees.md) 最新 main 统一到原 OmniProxy 目录，清理六个附加工作树，保留 Git 历史／18 个分支／独有资料及 OmniMail-win；正常桌面开发版从唯一目录启动，构建、原生界面、热更新和健康接口验收通过。整理记录提交 `7e80c35`。
 - [TASK-20261014-013](../tasks/completed/2026-10/TASK-20261014-013-provider-model-popover.md) 提供商模型列表改为浮层，保持当前与相邻卡片高度；移除小米两个 V2.5 旧模型，main 原生深浅主题／960 与 1717 px 及完整质量门／392 项前端测试通过。实现提交 `ac9d340`。
 - [TASK-20261014-012](../tasks/completed/2026-10/TASK-20261014-012-accounts-overview-full-width.md) 账号总览弹性等宽网格，宽屏五列两行并填满可用宽度；窄窗口／字号缩放／末行对齐／原生窗口及完整质量门通过，详情连续列宽保持原样。实现提交 `6070f83`。
 

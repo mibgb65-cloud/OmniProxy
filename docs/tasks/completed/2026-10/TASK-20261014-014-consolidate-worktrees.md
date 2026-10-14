@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -64,8 +64,14 @@ Git 工作流增加统一开发目录和临时工作树清理说明，CURRENT �
 
 ## Git
 
-待提交本任务文档；原有三份未跟踪记录及本地资料不纳入提交。
+`7e80c35` — `docs(workspace): 将 OmniProxy 统一到原目录并记录清理验收`。
+
+原有三份未跟踪记录及本地资料不纳入提交。分支引用一致性检查在本任务文档提交之前完成；本任务仅为 main 增加整理与归档文档提交，其余分支引用不变。
 
 ## Result
 
 最新 main 已统一到原 OmniProxy 目录，六个附加工作树已清理，Git 历史、分支和独有资料保留；OmniMail-win 保留，统一目录的正常桌面开发版已运行并验收。
+
+## Completed
+
+2026-10-14（Asia/Singapore）
