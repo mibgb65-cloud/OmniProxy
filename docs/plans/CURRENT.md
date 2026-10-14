@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-011](../tasks/active/TASK-20261014-011-xiaomi-mimo-api.md) 接入小米 MiMo 普通 API Key、官方模型目录、原生三协议及路由；实施与验证中。
+暂无当前任务。
 
 ## Recently Completed
+
+- [TASK-20261014-011](../tasks/completed/2026-10/TASK-20261014-011-xiaomi-mimo-api.md) 小米 MiMo 普通 API Key、五个对话模型、账号目录同步及原生三协议／SSE／思考／函数调用；完整质量门／386 项前端测试通过，合入 main 并正常桌面启动核对。实现提交 `184af39`；真实 Key 调用待验证。
 
 - [TASK-20261014-008](../tasks/completed/2026-10/TASK-20261014-008-claude-desktop-shared-config.md) 修复共享目录选择与重新读取恢复基准；正常桌面启动开发版避开 Codex 文件重定向，真实文件更新为 3001／10 模型，Claude 重启后 Code／连接 healthy 已验收，最终 main 完整质量门通过。main 修复提交 `fa69dc6`。
 - [TASK-20261014-007](../tasks/completed/2026-10/TASK-20261014-007-merge-agent-scrollbars-main.md) 滚动条优化合入本地 main，保留既有 Atria／Gemini 实现并统一任务编号；合并后完整质量门／384 项前端测试通过。合并提交 `b47dfa6`。

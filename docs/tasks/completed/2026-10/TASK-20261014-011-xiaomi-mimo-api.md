@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -51,7 +51,9 @@ Token Plan、余额／配额、ASR／TTS 独立接口不在本次范围。未确
 - 官方模型同步有界、去重和对话筛选；未同步时提供明确标注的预设，成功快照优先，失败保留，更换 Key 后旧快照失效。
 - 接入默认映射、别名／固定账号、启停保护、客户端统一目录、前端同步账号选择和网关接入检查；现有 MiMo 图标和账号存储复用，无新增依赖或迁移。
 - 新增认证／地址／取消／正文／模型发现契约测试，以及三协议 JSON／SSE 首包、用量、凭证清理、目录和路由集成测试。相关前端同步及接入检查回归通过。
-- 实现位于基于 main 的 `codex/xiaomi-mimo-api`，待同步主分支并核对实际正常桌面开发窗口。
+- 实现已提交为 `184af39`，本地 main 从 `3038bfa` 快进至同一实现提交，未经额外修改。旧 main 开发版通过精确托盘 Quit 正常退出，生产版保持运行。
+- 已由资源管理器从正常桌面环境启动 main 普通 `task dev`，共享文件句柄指向真实 Claude-3p 目录，没有 Codex 重定向。main 开发应用 PID 为 38200，Vite PID 为 25428，后台 task PID 为 2460；程序路径为 `E:/go/new/wails3-v/OmniProxy-main/bin/omniproxy.exe`。
+- 原生提供商页已加载「小米 MiMo」和 `mimo-v2.6-pro · mimo-v2.6-flash +3` 新预设入口，开发源码包含 MiMo 同步账号条件。启动与验证资料位于 main 忽略目录 `tmp/mimo-api-normal-main/`。
 
 ## Verification
 
@@ -63,6 +65,13 @@ Token Plan、余额／配额、ASR／TTS 独立接口不在本次范围。未确
 - 静态检查指出测试中的 HTTP 重定向数字常量，已替换为标准库常量后重跑。
 - PASS：`VITEST_MAX_WORKERS=4 task verify BIN_DIR=E:/go/new/wails3-v/OmniProxy-mimo-api/tmp/mimo-api/quality-bin`，退出码 0；格式、Go vet／staticcheck、ESLint、TypeScript、全部 Go 测试、70 个前端文件／386 项测试和 Windows 生产构建通过。日志位于忽略文件 `tmp-mimo-verify.log`。
 - PASS：`git diff --check`；Wails 绑定、Go 模块和前端锁文件没有额外差异。
+- PASS：main 实际开发构建、绑定生成与前端开发构建；原生窗口句柄 19337060，可见且响应正常，路径对应 main。
+- PASS：9245 首页与 HMR 客户端均为 HTTP 200，3891 `/healthz` 为 development／ok；日志包含前端服务连接成功，更新后的 MiMo 模块及原生预设入口已经核对。
+- PASS：main 合入的是已通过完整质量门的同一提交，源码没有额外差异；先前未跟踪的 TASK-20261014-010 与原工作区既有任务记录保留。
+
+## Remaining Risks
+
+测试使用本机假上游与模拟凭证，尚未用真实 MiMo Key 验证官方鉴权、余额、真实多轮工具调用或 1M 输入。原生目录入口已核对；此 WebView 展开按钮不支持 UI Automation Invoke，因此未宣称通过自动化展开五项列表。Token Plan、多模态、ASR／TTS、余额和托管／自由格式工具仍不在本次范围。
 
 ## Documentation
 
@@ -74,8 +83,14 @@ Token Plan、余额／配额、ASR／TTS 独立接口不在本次范围。未确
 
 ## Git
 
-待提交。
+- 实现提交：`184af39c1616668b35b2707b9d29efca844acc9e feat(provider): 接入小米 MiMo 普通 API Key 和原生三协议`。
+- `codex/xiaomi-mimo-api` 基于 main 实施；本地 main 使用 `git merge --ff-only codex/xiaomi-mimo-api` 同步同一提交。
+- 本记录和 CURRENT 在原生开发验收后单独归档；未推送远端，未提交其他任务记录或用户运行数据。
 
 ## Result
 
-待完成。
+MiMo 普通 API Key 的模型目录、路由与原生三协议调用已接入并合入本地 main，完整质量门及正常桌面开发启动核对通过。可在原生账号页添加 Key、同步官方模型并按现有预览／应用流程接入客户端；真实账号调用仍待实际 Key 验证。
+
+## Completed
+
+2026-10-14 18:34（Asia/Singapore）
