@@ -83,6 +83,18 @@ export function RequestDialog({
                     ["activity.protocol", `${item.protocol} / ${item.transport}`],
                     ["activity.model", item.model || item.inputModel || "—"],
                     ["activity.provider", item.providerName || "—"],
+                    ...(item.providerRegion
+                      ? ([
+                          [
+                            "stepfun.region",
+                            t(item.providerRegion === "cn" ? "stepfun.cn" : "stepfun.global"),
+                          ],
+                          [
+                            "stepfun.billing",
+                            t(item.billingMode === "step_plan" ? "stepfun.plan" : "stepfun.payg"),
+                          ],
+                        ] as const)
+                      : []),
                     ["activity.account", item.email || item.accountName || "—"],
                     ["activity.workspace", item.workspaceId || "—"],
                     ["activity.httpStatus", item.statusCode || "—"],

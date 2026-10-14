@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { StepFunBadge } from "../accounts/stepfun-options"
 import { ArrowUpRight, RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -57,6 +58,7 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
                   )}
                 </span>
               )}
+              <StepFunBadge account={entry.account} />
               {!entry.account.enabled ? <AccountStatusBadge enabled={false} /> : null}
             </div>
             <span

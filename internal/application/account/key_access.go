@@ -13,6 +13,11 @@ const (
 
 // UseAPIKey 只在受控回调内使用密钥，完成后清理读取的字节，不返回完整密钥。
 func (s *Service) UseAPIKey(ctx context.Context, id string, consume func([]byte) error) error {
+	return s.UseAPIKeyAt(ctx, id, "", consume)
+}
+
+// UseAPIKeyAt 将已选账号快照与实际读取凭证绑定，配置改变后拒绝发送到旧通道。
+func (s *Service) UseAPIKeyAt(ctx context.Context, id, expectedAt string, consume func([]byte) error) error {
 	if err := validateID(id); err != nil {
 		return err
 	}
@@ -22,6 +27,9 @@ func (s *Service) UseAPIKey(ctx context.Context, id string, consume func([]byte)
 	item, ref, err := s.get(ctx, id)
 	if err != nil {
 		return err
+	}
+	if expectedAt != "" && item.UpdatedAt != expectedAt {
+		return ErrConflict
 	}
 	if item.AuthMethod != AuthAPIKey {
 		return fmt.Errorf("%w: credential type", ErrInvalidInput)

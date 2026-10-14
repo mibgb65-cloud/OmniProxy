@@ -38,8 +38,11 @@ export function ModelCatalog({
     providers.some(
       (p) =>
         p.id === a.providerId &&
-        (((p.kind === "deepseek" || p.kind === "google" || p.kind === "mimo") &&
+        ((p.kind === "stepfun" &&
+          a.stepfun?.billingMode === "payg" &&
           a.authMethod === "api_key") ||
+          ((p.kind === "deepseek" || p.kind === "google" || p.kind === "mimo") &&
+            a.authMethod === "api_key") ||
           (p.kind === "openai" &&
             a.authMethod === "subscription_login" &&
             a.authState === "authenticated")),

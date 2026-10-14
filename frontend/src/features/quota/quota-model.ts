@@ -17,7 +17,7 @@ export type QuotaStatus = (typeof quotaStatuses)[number]
 export type QuotaAccount = {
   account: AccountItem
   provider?: ProviderConfiguration
-  kind: "subscription" | "balance" | "google" | "unsupported"
+  kind: "subscription" | "balance" | "google" | "step_plan" | "unsupported"
   canQuery: boolean
 }
 export type QuotaSnapshot = {
@@ -38,16 +38,22 @@ export function describeQuotaAccounts(
   return accounts.map((account) => {
     const provider = byId.get(account.providerId)
     const kind =
-      provider?.kind === "openai" && account.authMethod === "subscription_login"
-        ? "subscription"
-        : provider?.kind === "deepseek" && (!account.authMethod || account.authMethod === "api_key")
+      provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
+        ? "step_plan"
+        : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
           ? "balance"
-          : provider?.kind === "google" && account.authMethod === "api_key"
-            ? "google"
-            : "unsupported"
+          : provider?.kind === "openai" && account.authMethod === "subscription_login"
+            ? "subscription"
+            : provider?.kind === "deepseek" &&
+                (!account.authMethod || account.authMethod === "api_key")
+              ? "balance"
+              : provider?.kind === "google" && account.authMethod === "api_key"
+                ? "google"
+                : "unsupported"
     const canQuery =
       kind !== "unsupported" &&
       kind !== "google" &&
+      kind !== "step_plan" &&
       !(
         kind === "subscription" &&
         ["logged_out", "reauth_required"].includes(account.authState ?? "")
@@ -78,11 +84,12 @@ export function quotaEntryStatus(
   now: number,
 ): QuotaStatus {
   if (item.kind === "unsupported") return "unsupported"
-  if (item.kind === "google") return "unknown"
+  if (item.kind === "google" || item.kind === "step_plan") return "unknown"
   if (!item.canQuery) return "unauthenticated"
   if (snapshot.error) return "error"
   if (!snapshot.quota && !snapshot.balance) return snapshot.pending ? "pending" : "unknown"
   if (item.kind === "balance") {
+    if (snapshot.balance?.stepfun) return "unknown"
     if (!snapshot.balance?.entries?.length) return "unknown"
     return snapshot.balance.available ? "normal" : "exhausted"
   }

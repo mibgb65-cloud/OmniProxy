@@ -15,6 +15,10 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 	if len(input.APIKeys) == 0 || len(input.APIKeys) > maxBatchKeys {
 		return nil, fmt.Errorf("%w: batch count", ErrInvalidInput)
 	}
+	options, err := s.prepareStep(ctx, input.ProviderID, input.StepFun, nil)
+	if err != nil {
+		return nil, err
+	}
 	keys := make([][]byte, len(input.APIKeys))
 	defer func() {
 		for _, key := range keys {
@@ -32,6 +36,9 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 			return nil, fmt.Errorf("account: batch key %d: %w", i+1, keyErr)
 		}
 		keys[i] = key
+		if err := validateStepKey(options, key); err != nil {
+			return nil, err
+		}
 		name, nameErr := resolveName("", key)
 		if nameErr != nil {
 			return nil, fmt.Errorf("account: batch name %d: %w", i+1, nameErr)
@@ -78,6 +85,13 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 			INSERT INTO accounts (id, provider_id, name, credential_ref, enabled, created_at, updated_at)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`, item.ID, item.ProviderID, item.Name, ref, item.Enabled, item.CreatedAt, item.UpdatedAt); insertErr != nil {
 			return nil, fmt.Errorf("account: insert batch account %d: %w", i+1, insertErr)
+		}
+		if options != nil {
+			copy := *options
+			if optionErr := saveStep(ctx, tx, item.ID, &copy); optionErr != nil {
+				return nil, optionErr
+			}
+			items[i].StepFun = &copy
 		}
 	}
 	if err := tx.Commit(); err != nil {

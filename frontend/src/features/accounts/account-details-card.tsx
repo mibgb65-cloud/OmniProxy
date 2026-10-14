@@ -1,3 +1,5 @@
+import { StepFunBadge } from "./stepfun-options"
+import { StepFunPlanResource } from "./stepfun-resource"
 import { Tooltip } from "../../components/ui/tooltip"
 import { useTranslation } from "react-i18next"
 import { Card, CardContent } from "../../components/ui/card"
@@ -29,6 +31,7 @@ export function AccountDetailsCard({
             <Tooltip content={accountDisplayName(account)}>
               <h3 className="truncate font-semibold">{accountDisplayName(account)}</h3>
             </Tooltip>
+            <StepFunBadge account={account} />
             <p className="text-muted-foreground text-xs">
               {t(
                 account.authMethod === "subscription_login"
@@ -60,6 +63,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.stepfun?.billingMode === "step_plan" ? (
+          <>
+            <StepFunPlanResource account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : balanceSupported ? (

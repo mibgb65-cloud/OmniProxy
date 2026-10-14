@@ -1,6 +1,6 @@
 # API Key 账号余额查询
 
-目前仅 DeepSeek API Key 账号支持真实余额，其他提供商保留未接入提示。
+DeepSeek 和阶跃星辰普通按量 API Key 账号支持官方余额查询。阶跃支持账号级国内／海外，账户类型与累计金额单独建模，国内已确认人民币 CNY、海外币种待确认，不套用 DeepSeek 的剩余分项及充足标志；Step Plan 剩余 Credit 未接入。阶跃详细边界见 `STEPFUN.md`，下文为 DeepSeek 协议与展示规则。
 
 ## 使用
 

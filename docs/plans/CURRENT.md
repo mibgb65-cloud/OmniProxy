@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261014-016](../tasks/active/TASK-20261014-016-stepfun-api-implementation.md) 实施阶跃星辰国内／海外 × 按量 API／Step Plan；账号选项、计费隔离、三协议与余额已实现，针对验证通过，完整质量门及原生窗口验收中。
 
 ## Recently Completed
 

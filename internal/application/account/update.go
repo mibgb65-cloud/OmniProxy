@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"omniproxy/internal/infrastructure/credential"
+	"omniproxy/internal/provider/stepfun"
 )
 
 // ErrConflict 表示账号在凭证准备期间被其他操作修改，更新未提交。
@@ -15,9 +16,10 @@ var ErrConflict = errors.New("account: concurrent update")
 
 // UpdateInput 更新指定账号；APIKey 留空保留原凭证，Name 留空自动命名。
 type UpdateInput struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	APIKey string `json:"apiKey"`
+	StepFun *stepfun.Options `json:"stepfun,omitempty"`
+	ID      string           `json:"id"`
+	Name    string           `json:"name"`
+	APIKey  string           `json:"apiKey"`
 }
 
 // UpdateResult 区分账号更新成功与提交后的旧凭证清理警告。
@@ -38,6 +40,10 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, err
 	}
+	options, err := s.prepareStep(ctx, item.ProviderID, input.StepFun, &item)
+	if err != nil {
+		return result, err
+	}
 	if item.AuthMethod == AuthSubscription {
 		return s.updateSubscriptionName(ctx, item, input)
 	}
@@ -49,6 +55,9 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 			return result, err
 		}
 		defer clear(key)
+		if err := validateStepKey(options, key); err != nil {
+			return result, err
+		}
 	}
 	var name string
 	if strings.TrimSpace(input.Name) != "" {
@@ -106,11 +115,20 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if changed != 1 {
 		return result, ErrConflict
 	}
+	if input.StepFun != nil && (item.StepFun == nil || !item.StepFun.SamePool(*options)) {
+		if err = saveStep(ctx, tx, item.ID, options); err != nil {
+			return result, err
+		}
+		if _, err = tx.ExecContext(ctx, `DELETE FROM account_models WHERE account_id=?`, item.ID); err != nil {
+			return result, err
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return result, fmt.Errorf("account: commit update: %w", err)
 	}
 	committed = true
 	item.Name, item.UpdatedAt = name, timestamp
+	item.StepFun = options
 	result.Account = item
 	if keyChanged && oldRef != "" {
 		// 已提交后不能把清理失败误报为未保存，否则重试可能再次替换凭证。

@@ -1,3 +1,4 @@
+import { StepFunBalanceValues } from "./stepfun-resource"
 import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -22,7 +23,7 @@ export function AccountBalance({ account }: { account: AccountItem }) {
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium">{t("balance.title")}</span>
         <div className="flex items-center gap-2">
-          {data ? (
+          {data && !data.stepfun ? (
             <span
               className={`rounded-md px-2 py-0.5 text-[10px] ${data.available ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" : "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200"}`}
             >
@@ -50,7 +51,9 @@ export function AccountBalance({ account }: { account: AccountItem }) {
         </div>
       </div>
       {data ? (
-        entries.length > 0 ? (
+        data.stepfun ? (
+          <StepFunBalanceValues value={data.stepfun} />
+        ) : entries.length > 0 ? (
           <div className="space-y-3">
             {entries.map((entry) => (
               <div key={entry.currency} className="min-w-0 space-y-2">

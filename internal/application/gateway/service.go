@@ -16,6 +16,7 @@ import (
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/stepfun"
 )
 
 // ProviderReader 只读取已保存的提供商，不修改其他功能的配置。
@@ -51,6 +52,7 @@ type Service struct {
 	atria           *atria.Client
 	google          *google.Client
 	mimo            *mimo.Client
+	stepfun         *stepfun.Client
 	googleResources GoogleResourceObserver
 }
 
@@ -66,6 +68,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.atria = atria.New(nil)
 	s.google = google.New(nil)
 	s.mimo = mimo.New(nil)
+	s.stepfun = stepfun.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	s.server = proxy.New(opts)
 	return s
@@ -122,6 +125,7 @@ func (s *Service) Forward(ctx context.Context, request proxy.Request, consume fu
 }
 
 type target struct {
+	stepfun   *stepfun.Options
 	updatedAt string
 	snapshot  proxy.TargetSnapshot
 	accountID string

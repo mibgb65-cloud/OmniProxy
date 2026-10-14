@@ -48,6 +48,13 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 			t.Fatal(err)
 		}
 		service.Stop(context.Background())
+		stepHistory, err := os.ReadFile("../../../migrations/022_stepfun_request_scope.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(stepHistory)); err != nil {
+			t.Fatal(err)
+		}
 		observer := activity.New(db)
 		server := proxy.New(proxy.Options{Port: 0, Upstream: service, Models: []string{"deepseek-flash"}, Observer: observer})
 		if _, err = server.Start(); err != nil {

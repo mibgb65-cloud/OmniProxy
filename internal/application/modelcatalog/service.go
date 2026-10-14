@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
+	"omniproxy/internal/provider/stepfun"
 	"time"
 )
 
@@ -33,16 +34,17 @@ type Service struct {
 	providers    *provider.Service
 	subscription Subscription
 	client       *deepseek.Client
+	stepfun      *stepfun.Client
 }
 
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil)}
+	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil)}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")
 
 func (s *Service) List(ctx context.Context) ([]Item, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.fetched_at,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id AND (a.credential_ref || ':' || a.auth_account_id)=m.account_version ORDER BY a.provider_id,m.model LIMIT 10001`)
+	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.fetched_at,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model LIMIT 10001`)
 	if err != nil {
 		return nil, ErrUnavailable
 	}
@@ -63,7 +65,11 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 	if err != nil || len(items)+len(presets) > 10000 {
 		return nil, ErrUnavailable
 	}
-	return append(items, presets...), nil
+	step, err := s.stepPresets(ctx, items)
+	if err != nil || len(items)+len(presets)+len(step) > 10000 {
+		return nil, ErrUnavailable
+	}
+	return append(append(items, presets...), step...), nil
 }
 
 // Sync 失败时保留上次成功目录，账号凭据版本改变后旧目录不参与路由。
@@ -97,7 +103,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 	}
 	models := []codex.Model{}
 	var initialVersion string
-	if s.db.QueryRowContext(ctx, `SELECT credential_ref || ':' || auth_account_id FROM accounts WHERE id=?`, id).Scan(&initialVersion) != nil {
+	if s.db.QueryRowContext(ctx, `SELECT version FROM account_catalog_versions WHERE id=?`, id).Scan(&initialVersion) != nil {
 		return nil, ErrUnavailable
 	}
 	if kind == "openai" && current.AuthMethod == account.AuthSubscription {
@@ -127,6 +133,8 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			}
 			return discoveryError
 		})
+	} else if kind == stepfun.Kind && current.AuthMethod == account.AuthAPIKey {
+		models, err = s.syncStep(ctx, current)
 	} else if kind == "mimo" && current.AuthMethod == account.AuthAPIKey {
 		models, err = s.syncMiMo(ctx, id, base)
 	} else {
@@ -141,7 +149,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 	}
 	defer tx.Rollback()
 	var version string
-	if tx.QueryRowContext(ctx, `SELECT credential_ref || ':' || auth_account_id FROM accounts WHERE id=?`, id).Scan(&version) != nil || version != initialVersion {
+	if tx.QueryRowContext(ctx, `SELECT version FROM account_catalog_versions WHERE id=?`, id).Scan(&version) != nil || version != initialVersion {
 		return nil, ErrUnavailable
 	}
 	confirmed, err := confirmedModels(ctx, tx, id, version)

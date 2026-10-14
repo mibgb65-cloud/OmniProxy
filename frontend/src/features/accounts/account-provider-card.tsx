@@ -1,3 +1,4 @@
+import { StepFunBadge } from "./stepfun-options"
 import { Tooltip } from "../../components/ui/tooltip"
 import { Link } from "@tanstack/react-router"
 import { ChevronRight } from "lucide-react"
@@ -87,6 +88,7 @@ export function AccountProviderCard({
                     <Tooltip content={accountDisplayName(account)}>
                       <p className="truncate text-sm font-medium">{accountDisplayName(account)}</p>
                     </Tooltip>
+                    <StepFunBadge account={account} />
                     <p className="text-muted-foreground text-xs">
                       {t(
                         account.authMethod === "subscription_login"

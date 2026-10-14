@@ -1,3 +1,4 @@
+import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-resource"
 import { useTranslation } from "react-i18next"
 import { balanceError } from "../../services/balance"
 import { subscriptionError } from "../../services/subscription"
@@ -6,6 +7,7 @@ import { quotaWindows, type QuotaEntry } from "./quota-model"
 
 export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }) {
   const { t } = useTranslation()
+  if (entry.kind === "step_plan") return <StepFunPlanResource account={entry.account} />
   if (entry.kind === "unsupported" || !entry.canQuery) {
     return (
       <p className="text-muted-foreground text-xs leading-5">
@@ -28,6 +30,8 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
             />
           ))}
         </div>
+      ) : entry.balance?.stepfun ? (
+        <StepFunBalanceValues value={entry.balance.stepfun} />
       ) : entry.balance ? (
         <div className="space-y-3">
           {(entry.balance.entries ?? []).map((item) => (

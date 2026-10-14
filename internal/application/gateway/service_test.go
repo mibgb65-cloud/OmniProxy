@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -55,6 +56,13 @@ func setupService(t *testing.T, handler http.Handler) (*Service, *sql.DB, *testS
 		t.Fatal(err)
 	}
 	store := &testStore{}
+	stepSchema, err := os.ReadFile("../../../migrations/021_stepfun_account_options.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(string(stepSchema)); err != nil {
+		t.Fatal(err)
+	}
 	service := New(proxy.Options{}, provider.NewService(db), account.NewService(db, store), nil)
 	if _, err := service.Start(); err != nil {
 		t.Fatal(err)

@@ -76,6 +76,7 @@ accounts need one local place to:
 - 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE，其他提供商及自动调度仍待接入。
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
 - 小米 MiMo 普通 API Key 支持三个已核对的 V2.6 对话模型、官方账号模型同步、精确路由和客户端目录；三种原生协议保留文本、思考、函数调用及 JSON／SSE，用量由既有观察器记录。预设与账号发现区分，Token Plan、余额、多模态及语音接口未接入。详见 `docs/product/MIMO.md`。
+- 阶跃星辰支持账号级国内／海外和按量 API／Step Plan 四组合，原生文本协议按模型开放，通道模型名隔离路由与计费；支持普通模型同步、官方普通余额和本机用量，Step Plan 官方剩余保持未知。详见 `docs/product/STEPFUN.md`；真实 Key 与长窗口验收待完成。
 - 网关页支持 Codex CLI／Desktop、Claude Code CLI 和 Claude Desktop Code 配置，独立接入 Key、预览、加密备份和恢复；保留原提供商标识与官方会话，Desktop 添加独立配置条目。路由页可同步 ChatGPT／DeepSeek 官方模型目录并按账号选择；详见 `docs/product/LOCAL_AGENTS.md`。
 - 一键接入自动提供适用的模型／路由目录，无需手选单个模型；优先保留仍可用的原默认。目录记录官方已确认元数据并保留未知能力，Codex 按身份／核心版本适配本地或远程目录，Claude Desktop 提供完整显式列表。受管目录支持安全更新和恢复。
 - Quota monitoring and usage statistics.

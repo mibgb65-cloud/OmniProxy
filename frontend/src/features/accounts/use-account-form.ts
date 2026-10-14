@@ -1,3 +1,4 @@
+import type { StepFunOptions as Options } from "../../services/stepfun"
 import { useMemo, useRef, useState } from "react"
 import type { FormEvent } from "react"
 import type { CreateAccountInput, CreateAccountsInput } from "../../services/omniproxy"
@@ -11,13 +12,16 @@ import {
 
 export function useAccountForm({
   providerId,
+  stepEnabled = false,
   onSubmit,
   onBatchSubmit,
 }: {
   providerId: string
+  stepEnabled?: boolean
   onSubmit: (input: CreateAccountInput) => Promise<void>
   onBatchSubmit: (input: CreateAccountsInput) => Promise<void>
 }) {
+  const [stepfun, setStepFun] = useState<Options>({ region: "cn", billingMode: "payg", version: 0 })
   const [mode, setMode] = useState<"single" | "batch">("single")
   const [name, setName] = useState("")
   const [apiKey, setAPIKey] = useState("")
@@ -53,8 +57,9 @@ export function useAccountForm({
     setSaving(true)
     setSaveError(false)
     try {
-      if (mode === "batch") await onBatchSubmit({ providerId, apiKeys: batchKeys })
-      else await onSubmit({ providerId, name: name.trim(), apiKey: apiKey.trim() })
+      const stepOptions = stepEnabled ? { stepfun } : {}
+      if (mode === "batch") await onBatchSubmit({ providerId, apiKeys: batchKeys, ...stepOptions })
+      else await onSubmit({ providerId, name: name.trim(), apiKey: apiKey.trim(), ...stepOptions })
     } catch {
       setSaveError(true)
     } finally {
@@ -63,6 +68,8 @@ export function useAccountForm({
     }
   }
   return {
+    stepfun,
+    setStepFun,
     mode,
     changeMode,
     name,

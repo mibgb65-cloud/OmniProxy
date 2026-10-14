@@ -23,6 +23,8 @@ type Service struct {
 func New(db *sql.DB) *Service { return &Service{db: db, updates: make(chan struct{}, 1)} }
 
 type RequestItem struct {
+	ProviderRegion string `json:"providerRegion,omitempty"`
+	BillingMode    string `json:"billingMode,omitempty"`
 	ID             string `json:"id"`
 	StartedAt      string `json:"startedAt"`
 	FinishedAt     string `json:"finishedAt"`

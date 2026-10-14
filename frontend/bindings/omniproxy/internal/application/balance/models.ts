@@ -4,8 +4,12 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
 import * as deepseek$0 from "../../provider/deepseek/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as stepfun$0 from "../../provider/stepfun/models.js";
 
 export interface Info {
+    "stepfun"?: stepfun$0.Balance | null;
     "available": boolean;
     "entries": deepseek$0.BalanceInfo[] | null;
     "fetchedAt": string;

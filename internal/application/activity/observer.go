@@ -99,7 +99,7 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	if err != nil {
 		return ErrUnavailable
 	}
-	_, err = tx.ExecContext(ctx, `UPDATE request_records SET input_model=?,model=?,stream=?,provider_id=?,provider_name=?,account_id=?,account_name=?,email=?,workspace_id=?,subject=?,input_tokens=?,output_tokens=?,input_known=MAX(input_known,?),output_known=MAX(output_known,?),usage_complete=? WHERE id=?`, event.InputModel, event.Model, event.Stream, event.Target.ProviderID, event.Target.ProviderName, event.Target.AccountID, event.Target.AccountName, event.Target.Email, event.Target.WorkspaceID, key, input, output, usage.InputKnown, usage.OutputKnown, complete, event.ID)
+	_, err = tx.ExecContext(ctx, `UPDATE request_records SET provider_region=?,billing_mode=?,input_model=?,model=?,stream=?,provider_id=?,provider_name=?,account_id=?,account_name=?,email=?,workspace_id=?,subject=?,input_tokens=?,output_tokens=?,input_known=MAX(input_known,?),output_known=MAX(output_known,?),usage_complete=? WHERE id=?`, event.Target.ProviderRegion, event.Target.BillingMode, event.InputModel, event.Model, event.Stream, event.Target.ProviderID, event.Target.ProviderName, event.Target.AccountID, event.Target.AccountName, event.Target.Email, event.Target.WorkspaceID, key, input, output, usage.InputKnown, usage.OutputKnown, complete, event.ID)
 	if err != nil {
 		return ErrUnavailable
 	}

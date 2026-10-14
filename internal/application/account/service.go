@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"omniproxy/internal/provider/stepfun"
 	"strings"
 	"time"
 	"unicode"
@@ -32,30 +33,33 @@ var (
 
 // Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
 type Item struct {
-	ID            string `json:"id"`
-	ProviderID    string `json:"providerId"`
-	Name          string `json:"name"`
-	Enabled       bool   `json:"enabled"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
-	AuthMethod    string `json:"authMethod,omitempty"`
-	AuthEmail     string `json:"authEmail,omitempty"`
-	AuthPlan      string `json:"authPlan,omitempty"`
-	AuthState     string `json:"authState,omitempty"`
-	AuthAccountID string `json:"authAccountId,omitempty"`
+	StepFun       *stepfun.Options `json:"stepfun,omitempty"`
+	ID            string           `json:"id"`
+	ProviderID    string           `json:"providerId"`
+	Name          string           `json:"name"`
+	Enabled       bool             `json:"enabled"`
+	CreatedAt     string           `json:"createdAt"`
+	UpdatedAt     string           `json:"updatedAt"`
+	AuthMethod    string           `json:"authMethod,omitempty"`
+	AuthEmail     string           `json:"authEmail,omitempty"`
+	AuthPlan      string           `json:"authPlan,omitempty"`
+	AuthState     string           `json:"authState,omitempty"`
+	AuthAccountID string           `json:"authAccountId,omitempty"`
 }
 
 // CreateInput contains fields for a new API Key account. APIKey is never persisted in SQLite.
 type CreateInput struct {
-	ProviderID string `json:"providerId"`
-	Name       string `json:"name"`
-	APIKey     string `json:"apiKey"`
+	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
+	ProviderID string           `json:"providerId"`
+	Name       string           `json:"name"`
+	APIKey     string           `json:"apiKey"`
 }
 
 // BatchCreateInput 批量创建自动命名的账号，不接受自定义名称。
 type BatchCreateInput struct {
-	ProviderID string   `json:"providerId"`
-	APIKeys    []string `json:"apiKeys"`
+	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
+	ProviderID string           `json:"providerId"`
+	APIKeys    []string         `json:"apiKeys"`
 }
 
 // CredentialStore is the protected storage needed by account mutations.
@@ -79,8 +83,9 @@ func NewService(db *sql.DB, store CredentialStore) *Service {
 // List returns account metadata without credential references or secrets.
 func (s *Service) List(ctx context.Context) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT id, provider_id, name, enabled, created_at, updated_at, auth_method, auth_email, auth_plan, auth_state, auth_account_id
-		FROM accounts ORDER BY created_at DESC, id DESC`)
+		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0)
+		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("account: list: %w", err)
 	}
@@ -102,16 +107,21 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 func (s *Service) get(ctx context.Context, id string) (Item, string, error) {
 	var item Item
 	var ref string
+	var options stepfun.Options
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, provider_id, name, enabled, created_at, updated_at, credential_ref, auth_method, auth_email, auth_plan, auth_state, auth_account_id
-		FROM accounts WHERE id = ?`, id).Scan(
-		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID,
+		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.credential_ref, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0)
+		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id WHERE a.id = ?`, id).Scan(
+		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Item{}, "", ErrNotFound
 	}
 	if err != nil {
 		return Item{}, "", fmt.Errorf("account: read: %w", err)
+	}
+	if options.Region != "" {
+		item.StepFun = &options
 	}
 	return item, ref, nil
 }
@@ -120,8 +130,12 @@ type scanner interface{ Scan(dest ...any) error }
 
 func scanItem(row scanner) (Item, error) {
 	var item Item
-	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID); err != nil {
+	var options stepfun.Options
+	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version); err != nil {
 		return Item{}, fmt.Errorf("account: scan: %w", err)
+	}
+	if options.Region != "" {
+		item.StepFun = &options
 	}
 	return item, nil
 }

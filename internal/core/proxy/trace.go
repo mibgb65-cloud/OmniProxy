@@ -9,7 +9,7 @@ import (
 )
 
 // TargetSnapshot 仅含公开账号身份；不包含凭据、引用、请求内容或原始头部。
-type TargetSnapshot struct{ ProviderID, ProviderName, ProviderKind, AccountID, AccountName, AuthMethod, Email, WorkspaceID string }
+type TargetSnapshot struct{ ProviderID, ProviderName, ProviderKind, AccountID, AccountName, AuthMethod, Email, WorkspaceID, ProviderRegion, BillingMode string }
 type UsageSnapshot struct {
 	Input, Output                     int64
 	InputKnown, OutputKnown, Complete bool

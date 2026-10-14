@@ -43,6 +43,7 @@ export interface Item {
  * Preview 包含配置解析结果，不读取密钥、调用模型或返回凭证引用。
  */
 export interface Preview {
+    "accountUpdatedAt"?: string;
     "inputModel": string;
     "matched": boolean;
     "ruleId": string;

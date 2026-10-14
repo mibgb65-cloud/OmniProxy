@@ -65,6 +65,8 @@ export interface ProviderModel {
 }
 
 export interface RequestItem {
+    "providerRegion"?: string;
+    "billingMode"?: string;
     "id": string;
     "startedAt": string;
     "finishedAt": string;

@@ -77,7 +77,7 @@ func (s *Service) Resolve(ctx context.Context, model string) (Preview, error) {
 	if err != nil {
 		return Preview{}, err
 	}
-	rule, matched := core.Match(model, rules)
+	rule, matched := matchRoute(model, rules, data)
 	return evaluate(model, rule, matched, data), nil
 }
 
@@ -150,6 +150,10 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 	for _, account := range data.accounts {
 		accounts = append(accounts, core.Account{ID: account.ID, ProviderID: account.ProviderID, CreatedAt: account.CreatedAt, Enabled: account.Enabled && eligible(data, account, result.Model)})
 	}
+	if stepAmbiguous(data, allowed, result.Model, rule.AccountID) {
+		result.ErrorCode = "ambiguous_stepfun_pool"
+		return result
+	}
 	selected, count, code := core.SelectPrioritizedAccount(accounts, allowed, rule.AccountID, providerOrder)
 	result.CandidateCount, result.ErrorCode = count, code
 	if code != "" {
@@ -172,6 +176,7 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 	for _, account := range data.accounts {
 		if account.ID == selected.ID {
 			result.AccountName = account.Name
+			result.AccountUpdatedAt = account.UpdatedAt
 			break
 		}
 	}

@@ -31,7 +31,12 @@ export function useCreateAccount() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (input: CreateAccountInput) => createAccount(input),
-    onSuccess: () => client.invalidateQueries({ queryKey: accountQueryKey }),
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: accountQueryKey }),
+        client.invalidateQueries({ queryKey: ["model-catalog"] }),
+        client.invalidateQueries({ queryKey: ["default-routes"] }),
+      ]),
   })
 }
 
@@ -39,7 +44,12 @@ export function useCreateAccounts() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (input: CreateAccountsInput) => createAccounts(input),
-    onSuccess: () => client.invalidateQueries({ queryKey: accountQueryKey }),
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: accountQueryKey }),
+        client.invalidateQueries({ queryKey: ["model-catalog"] }),
+        client.invalidateQueries({ queryKey: ["default-routes"] }),
+      ]),
   })
 }
 
@@ -52,6 +62,8 @@ export function useUpdateAccount() {
       await Promise.all([
         client.invalidateQueries({ queryKey: accountQueryKey }),
         client.invalidateQueries({ queryKey: ["account-key-preview", input.id] }),
+        client.invalidateQueries({ queryKey: ["model-catalog"] }),
+        client.invalidateQueries({ queryKey: ["default-routes"] }),
       ])
     },
   })
@@ -62,7 +74,12 @@ export function useSetAccountEnabled() {
   return useMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       setAccountEnabled(id, enabled),
-    onSuccess: () => client.invalidateQueries({ queryKey: accountQueryKey }),
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: accountQueryKey }),
+        client.invalidateQueries({ queryKey: ["model-catalog"] }),
+        client.invalidateQueries({ queryKey: ["default-routes"] }),
+      ]),
   })
 }
 

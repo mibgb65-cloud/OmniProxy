@@ -43,6 +43,7 @@ type Item struct {
 
 // Preview 包含配置解析结果，不读取密钥、调用模型或返回凭证引用。
 type Preview struct {
+	AccountUpdatedAt    string `json:"accountUpdatedAt,omitempty"`
 	InputModel          string `json:"inputModel"`
 	Matched             bool   `json:"matched"`
 	RuleID              string `json:"ruleId"`

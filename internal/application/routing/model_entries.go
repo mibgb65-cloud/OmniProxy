@@ -4,10 +4,10 @@ import (
 	"context"
 
 	catalog "omniproxy/internal/core/modelcatalog"
-	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/stepfun"
 )
 
 // Catalog 使用实际路由决策的账号元数据，不把其他同名模型的能力混入目标。
@@ -21,6 +21,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		return nil, err
 	}
 	ids := originalModels(data)
+	rules = append(rules, stepAliases(data)...)
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)
@@ -33,7 +34,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 			continue
 		}
 		seen[id] = true
-		rule, matched := core.Match(id, rules)
+		rule, matched := matchRoute(id, rules, data)
 		decision := evaluate(id, rule, matched, data)
 		if !decision.Routable {
 			continue
@@ -70,6 +71,15 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		if entry.ProviderKind == "google" {
 			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。
 			entry.Protocols = []string{"chat_completions"}
+		}
+		if entry.ProviderKind == stepfun.Kind {
+			entry.Metadata = stepfun.ModelMetadata(entry.TargetModel)
+			entry.Protocols = []string{"chat_completions", "messages"}
+			for _, a := range data.accounts {
+				if a.ID == decision.AccountID && a.StepFun != nil && stepfun.Supports(*a.StepFun, entry.TargetModel, "responses") {
+					entry.Protocols = append(entry.Protocols, "responses")
+				}
+			}
 		}
 		entries = append(entries, entry)
 	}

@@ -9,7 +9,12 @@ import (
 )
 
 func snapshotTarget(p provider.Configuration, a account.Item) proxy.TargetSnapshot {
-	return proxy.TargetSnapshot{ProviderID: p.ID, ProviderName: p.Name, ProviderKind: p.Kind, AccountID: a.ID, AccountName: a.Name, AuthMethod: a.AuthMethod, Email: a.AuthEmail, WorkspaceID: a.AuthAccountID}
+	target := proxy.TargetSnapshot{ProviderID: p.ID, ProviderName: p.Name, ProviderKind: p.Kind, AccountID: a.ID, AccountName: a.Name, AuthMethod: a.AuthMethod, Email: a.AuthEmail, WorkspaceID: a.AuthAccountID}
+	if a.StepFun != nil {
+		target.ProviderRegion = a.StepFun.Region
+		target.BillingMode = a.StepFun.BillingMode
+	}
+	return target
 }
 func (s *Service) forwardDeepseek(ctx context.Context, target target, key []byte, request proxy.Request, consume func(proxy.Response) error) error {
 	if request.Stream {

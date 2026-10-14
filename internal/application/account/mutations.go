@@ -24,6 +24,13 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err := s.checkProvider(ctx, input.ProviderID); err != nil {
 		return Item{}, err
 	}
+	options, err := s.prepareStep(ctx, input.ProviderID, input.StepFun, nil)
+	if err != nil {
+		return Item{}, err
+	}
+	if err := validateStepKey(options, key); err != nil {
+		return Item{}, err
+	}
 	id, err := newID()
 	if err != nil {
 		return Item{}, fmt.Errorf("account: generate ID: %w", err)
@@ -34,14 +41,26 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	}
 	timestamp := now()
 	item := Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp, AuthMethod: AuthAPIKey}
-	_, err = s.db.ExecContext(ctx, `
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return Item{}, errors.Join(err, s.store.Delete(ref))
+	}
+	defer tx.Rollback()
+	_, err = tx.ExecContext(ctx, `
 		INSERT INTO accounts (id, provider_id, name, credential_ref, enabled, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`, item.ID, item.ProviderID, item.Name, ref, item.Enabled, item.CreatedAt, item.UpdatedAt)
+	if err == nil {
+		err = saveStep(ctx, tx, item.ID, options)
+	}
+	if err == nil {
+		err = tx.Commit()
+	}
 	if err != nil {
 		// 文件存储与 SQLite 没有共同事务，插入失败必须清理刚写入的密文。
 		cleanupErr := s.store.Delete(ref)
 		return Item{}, errors.Join(fmt.Errorf("account: create: %w", err), cleanupErr)
 	}
+	item.StepFun = options
 	return item, nil
 }
 

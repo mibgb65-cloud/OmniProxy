@@ -16,7 +16,7 @@ type discoveredModel struct {
 }
 
 func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id AND (a.credential_ref || ':' || a.auth_account_id)=m.account_version ORDER BY a.provider_id,m.model,a.id LIMIT 10001`)
+	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model,a.id LIMIT 10001`)
 	if err != nil {
 		return nil, err
 	}
@@ -33,10 +33,16 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 		}
 		result = append(result, m)
 	}
-	return result, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return s.withStepPresets(ctx, result)
 }
 func targetSupports(data snapshot, providerID, accountID, model string) bool {
 	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == "stepfun" {
+			return stepTargetSupports(data, providerID, accountID, model)
+		}
 		if p.ID == providerID && p.Kind == mimo.Kind {
 			return mimoTargetSupports(data, providerID, accountID, model)
 		}
@@ -66,6 +72,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		}
 		if (p.Kind == atria.Kind || p.Kind == mimo.Kind) && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == "stepfun" && a.AuthMethod == account.AuthAPIKey {
+			return a.StepFun != nil && a.StepFun.Valid() && targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "google" && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)

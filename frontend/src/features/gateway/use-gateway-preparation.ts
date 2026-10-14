@@ -22,8 +22,9 @@ export function useGatewayPreparation() {
     : null
   const address = (activeAddress ?? proxyAddress) ? `${activeAddress ?? proxyAddress}/v1` : null
   const supportedProviders =
-    providers.data?.filter((item) => ["deepseek", "atria", "google", "mimo"].includes(item.kind)) ??
-    []
+    providers.data?.filter((item) =>
+      ["deepseek", "atria", "google", "mimo", "stepfun"].includes(item.kind),
+    ) ?? []
   const resources =
     providers.isSuccess && accounts.isSuccess
       ? getConfiguredResources(

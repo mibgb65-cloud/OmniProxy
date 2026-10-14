@@ -10,6 +10,7 @@ import type {
 } from "../../services/omniproxy"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
 import { AccountCredentialsFields } from "./account-credentials-fields"
+import { StepFunOptionsFields } from "./stepfun-options"
 import { useAccountForm } from "./use-account-form"
 
 export function AccountForm({
@@ -27,7 +28,12 @@ export function AccountForm({
       ? t(providerNameKeys[provider.kind])
       : provider.name
   const nameRef = useRef<HTMLInputElement>(null)
-  const form = useAccountForm({ providerId: provider.id, onSubmit, onBatchSubmit })
+  const form = useAccountForm({
+    providerId: provider.id,
+    stepEnabled: provider.kind === "stepfun",
+    onSubmit,
+    onBatchSubmit,
+  })
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
@@ -86,6 +92,13 @@ export function AccountForm({
             ))}
           </Tabs.List>
           <form onSubmit={form.submit} className="space-y-4">
+            {provider.kind === "stepfun" ? (
+              <StepFunOptionsFields
+                value={form.stepfun}
+                onChange={form.setStepFun}
+                disabled={form.saving}
+              />
+            ) : null}
             {(["single", "batch"] as const).map((mode) => (
               <Tabs.Content key={mode} value={mode} className="space-y-4 outline-none">
                 <AccountCredentialsFields form={form} nameRef={nameRef} />

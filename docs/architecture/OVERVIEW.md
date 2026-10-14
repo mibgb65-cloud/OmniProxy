@@ -32,6 +32,12 @@
 
 客户端会话身份保护及官方加密存储兼容见 ADR 005，第一版能力边界见 `docs/product/LOCAL_AGENTS.md`。
 
+## 阶跃星辰账号级通道（2026-10-14）
+
+迁移 021 保存 Step 专用区域／计费方式和配置版本，`account_catalog_versions` 将凭据与配置共同绑定模型快照。`provider/stepfun` 只解析四类固定官方 HTTPS 入口，复用受保护 Key 回调与原生三协议 HTTP／SSE。路由从账号选项生成通道别名，混合池的裸模型拒绝歧义，已解析请求和取 Key 时均检查账号快照；不跨平台或计费模式重试。迁移 022 保存当次地区／计费方式，账号用量身份按通道分离。
+
+普通余额采用独立 DTO 保留 prepaid／postpaid、十进制金额及累计分项，不伪造币种或订阅 Credit。Step Plan 目录为官方预设，剩余资源未知；详情和总览共用缓存及固定官方入口。见 `docs/product/STEPFUN.md`。
+
 ## System Overview
 
 2026-10-13：迁移 017 和 `application/quotaactivation` 管理默认关闭的自动额度激活授权、周期登记和单后台检测循环。复用订阅身份校验／隔离令牌和固定 ChatGPT Responses 适配器，绕过模型路由固定原账号。发送前事务登记，未知结果只复查，独立额度信号更新前端共享缓存。生命周期由 Wails 启动／取消／有界关闭；决策见 ADR-009。
@@ -109,7 +115,7 @@ duplicates business logic.
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`. The gateway forwards DeepSeek,
-> ChatGPT / Codex subscription, Atria, MiMo, and Google Chat requests; other provider adapters are pending.
+> ChatGPT / Codex subscription, Atria, MiMo, StepFun, and Google Chat requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -211,7 +217,7 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
   MiniMax, Xiaomi MiMo, StepFun, Atria, and OpenAI-compatible endpoints. Ten named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, Atria, MiMo, and Google Chat are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, Atria, MiMo, StepFun, and Google Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

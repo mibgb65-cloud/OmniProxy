@@ -87,6 +87,8 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - net/http transport for upstream AI provider calls.
 - MiMo 沿用标准库原生 Chat／Responses／Messages HTTP／SSE 和 `api-key`，不新增 SDK、依赖或数据库迁移；模型发现复用现有账号快照表。
 
+- 阶跃星辰四类账号通道复用标准库与 DPAPI，迁移 021／022 维护配置版本及请求归属；无新增 SDK 或依赖。
+
 ## Build Tools
 
 - Vite 8 (frontend dev server, HMR, production build).

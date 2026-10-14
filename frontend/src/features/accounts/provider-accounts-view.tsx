@@ -81,12 +81,16 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           {!provider.enabled ? (
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
           ) : null}
-          {provider.kind !== "deepseek" &&
+          {provider.kind !== "stepfun" &&
+            provider.kind !== "deepseek" &&
             provider.kind !== "google" &&
             (provider.kind !== "openai" ||
             items.some((account) => account.authMethod !== "subscription_login") ? (
               <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
             ) : null)}
+          {provider.kind === "stepfun" ? (
+            <p className="text-muted-foreground text-sm leading-6">{t("stepfun.routingHint")}</p>
+          ) : null}
           {provider.kind === "google" ? (
             <>
               <p className="text-muted-foreground text-sm">{t("google.chatOnly")}</p>
@@ -116,7 +120,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
               onEdit={actions.editItem}
-              balanceSupported={provider.kind === "deepseek"}
+              balanceSupported={provider.kind === "deepseek" || provider.kind === "stepfun"}
             />
           ) : (
             <div className="account-card-grid">
@@ -128,7 +132,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                   onToggle={actions.toggle}
                   onDelete={actions.deleteItem}
                   onEdit={actions.editItem}
-                  balanceSupported={provider.kind === "deepseek"}
+                  balanceSupported={provider.kind === "deepseek" || provider.kind === "stepfun"}
                   googleSupported={provider.kind === "google"}
                 />
               ))}

@@ -351,6 +351,13 @@ export function OpenGoogleConsole(page: string): $CancellablePromise<void> {
 }
 
 /**
+ * OpenStepConsole 从账号公开区域解析固定官方页面，不接受用户 URL 或密钥。
+ */
+export function OpenStepConsole(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1355824464, id);
+}
+
+/**
  * Ping is a liveness probe for the UI binding layer.
  */
 export function Ping(): $CancellablePromise<string> {

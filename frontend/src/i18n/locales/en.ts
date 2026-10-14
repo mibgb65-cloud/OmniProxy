@@ -230,6 +230,32 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.kimi": "Moonshot AI (Kimi)",
   "providers.kind.minimax": "MiniMax",
   "providers.kind.mimo": "Xiaomi MiMo",
+  "stepfun.connection": "StepFun connection",
+  "stepfun.region": "Platform",
+  "stepfun.billing": "Billing mode",
+  "stepfun.cn": "China",
+  "stepfun.global": "Global",
+  "stepfun.payg": "Pay as you go",
+  "stepfun.plan": "Step Plan",
+  "stepfun.choose": "Choose a platform and billing mode",
+  "stepfun.keyHint":
+    "Use a key issued by the selected platform. Step Plan uses subscription credits; pay-as-you-go uses account resources. A batch shares these choices.",
+  "stepfun.needsConfiguration": "Connection needs confirmation",
+  "stepfun.prepaid": "Prepaid",
+  "stepfun.postpaid": "Postpaid",
+  "stepfun.currencyUnknown": "Currency unconfirmed",
+  "stepfun.cny": "Chinese yuan (CNY)",
+  "stepfun.totalCash": "Total deposited amount",
+  "stepfun.totalVoucher": "Total promotional amount",
+  "stepfun.credits": "Step Plan credits",
+  "stepfun.planUnknown":
+    "Remaining credits are unknown. Check the platform. Plan credits are separate from pay-as-you-go balance.",
+  "stepfun.openPlatform": "Open official platform",
+  "stepfun.openFailed": "Could not open the platform. Try again.",
+  "stepfun.routingHint":
+    "Platforms and billing modes route separately. Use a channel model name; with multiple channels, a plain model name needs a fixed account.",
+  "routing.error.ambiguous_stepfun_pool":
+    "Multiple StepFun platforms or billing channels are available. Choose a fixed account or a channel model name.",
   "providers.kind.stepfun": "StepFun",
   "providers.kind.atria": "Atria",
 

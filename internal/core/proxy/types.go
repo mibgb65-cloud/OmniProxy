@@ -18,11 +18,12 @@ const (
 
 // Request 保留协议正文；只解析代理需要的模型和流式标志。
 type Request struct {
-	Trace    *Trace
-	Protocol string
-	Body     []byte
-	Model    string
-	Stream   bool
+	AccountUpdatedAt string
+	Trace            *Trace
+	Protocol         string
+	Body             []byte
+	Model            string
+	Stream           bool
 	// 路由目标由受信解析器填入，HTTP 正文不能指定这些字段。
 	ProviderID string
 	AccountID  string

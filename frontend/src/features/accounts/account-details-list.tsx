@@ -1,3 +1,5 @@
+import { StepFunBadge } from "./stepfun-options"
+import { StepFunPlanResource } from "./stepfun-resource"
 import { Tooltip } from "../../components/ui/tooltip"
 import { CircleHelp } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -74,6 +76,7 @@ export function AccountDetailsList({
                     <span className="truncate">{accountDisplayName(account)}</span>
                   </Tooltip>
                 </div>
+                <StepFunBadge account={account} />
               </th>
               <td className="px-4 py-3">
                 <AccountKeyPreview account={account} />
@@ -86,6 +89,8 @@ export function AccountDetailsList({
                   <div className="min-w-72">
                     <SubscriptionQuota account={account} />
                   </div>
+                ) : account.stepfun?.billingMode === "step_plan" ? (
+                  <StepFunPlanResource account={account} />
                 ) : balanceSupported ? (
                   <div className="min-w-64">
                     <AccountBalance account={account} />

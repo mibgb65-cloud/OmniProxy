@@ -7,6 +7,9 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import type { AccountItem, UpdateAccountInput } from "../../services/omniproxy"
 import { MAX_KEY_BYTES, validAccountName, validAPIKey } from "./account-input"
+import type { StepFunOptions as Options } from "../../services/stepfun"
+import { StepFunOptionsFields } from "./stepfun-options"
+import { validStepOptions } from "./stepfun-input"
 import { AccountKeyPreview } from "./account-key-preview"
 
 export function AccountEditForm({
@@ -19,6 +22,11 @@ export function AccountEditForm({
   onRestoreFocus: () => void
 }) {
   const { t } = useTranslation()
+  const stepEnabled = Boolean(account.stepfun || account.providerId === "builtin_stepfun")
+  const [stepfun, setStepFun] = useState<Options>(
+    account.stepfun ?? { region: "", billingMode: "", version: 0 },
+  )
+  const [invalidStep, setInvalidStep] = useState(false)
   const [name, setName] = useState(account.name)
   const [apiKey, setAPIKey] = useState("")
   const [invalidName, setInvalidName] = useState(false)
@@ -34,12 +42,19 @@ export function AccountEditForm({
     const keyError = apiKey.trim() !== "" && !validAPIKey(apiKey)
     setInvalidName(nameError)
     setInvalidKey(keyError)
-    if (nameError || keyError) return
+    const stepError = stepEnabled && !validStepOptions(stepfun)
+    setInvalidStep(stepError)
+    if (nameError || keyError || stepError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
     try {
-      await onSubmit({ id: account.id, name: name.trim(), apiKey: apiKey.trim() })
+      await onSubmit({
+        id: account.id,
+        name: name.trim(),
+        apiKey: apiKey.trim(),
+        ...(stepEnabled ? { stepfun } : {}),
+      })
     } catch {
       setSaveError(true)
     } finally {
@@ -95,6 +110,14 @@ export function AccountEditForm({
           </Dialog.Close>
         </div>
         <form onSubmit={submit} className="space-y-4">
+          {stepEnabled ? (
+            <StepFunOptionsFields
+              value={stepfun}
+              onChange={setStepFun}
+              disabled={saving}
+              invalid={invalidStep}
+            />
+          ) : null}
           <div className="space-y-1.5">
             <label htmlFor="edit-account-name" className="text-sm font-medium">
               {t("accounts.name")}
