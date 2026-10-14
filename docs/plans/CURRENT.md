@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261014-004](../tasks/completed/2026-10/TASK-20261014-004-atria-provider-icon.md) 补充 Atria 官方本地图标，识别已有官方 API 地址的自定义配置，统一提供商／账号／配额页面；完整质量门与深浅主题原生验收通过，Atria 额度查询维持未接入。实现提交 `b76af6a`。
 - [TASK-20261014-003](../tasks/completed/2026-10/TASK-20261014-003-gemini-api-quota-implementation.md)：先重建最新开发环境，完成 Gemini Chat JSON/SSE、官方模型限制、用量和项目资源观察；真实 Flash-Lite 小请求、原生窗口及完整质量门／371 项前端测试通过。官方剩余资源与 Agent 桥接保留后续。实现提交 `bf050a2`。
 
 - [TASK-20261014-002](../tasks/completed/2026-10/TASK-20261014-002-gemini-api-quota-plan.md)：Gemini API、用量、项目共享限流与官方额度的四阶段规划；明确只读 Cloud 授权、预付余额入口与 Agent 签名桥接边界；P1/P2 落地见 TASK-20261014-003。规划提交 `efb4972`。

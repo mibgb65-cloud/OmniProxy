@@ -13,9 +13,10 @@ const brandIcons = {
   minimax: "minimax-color.svg",
   mimo: "xiaomimimo.svg",
   stepfun: "stepfun-color.svg",
+  atria: "atria.png",
 } as const
 
-function renderCard(kind: string) {
+function renderCard(kind: string, endpoint = "https://example.test/v1") {
   return render(
     <I18nProvider>
       <ProviderCard
@@ -26,7 +27,7 @@ function renderCard(kind: string) {
         authMethods={["api_key"]}
         plannedAuthMethods={[]}
         models={[]}
-        endpoint="https://example.test/v1"
+        endpoint={endpoint}
         probePending={false}
         onToggle={vi.fn()}
         onProbe={vi.fn()}
@@ -46,5 +47,36 @@ describe("ProviderCard icons", () => {
     const { container } = renderCard("openai-compatible")
     expect(container.querySelector("img")).toBeNull()
     expect(container.querySelector("svg")).toBeInTheDocument()
+  })
+
+  it.each(["https://api.atria-asi.ai/v1", "https://API.ATRIA-ASI.AI:443/v1/"])(
+    "recognizes an existing custom Atria provider at %s",
+    (endpoint) => {
+      const { container } = renderCard("openai-compatible", endpoint)
+      expect(container.querySelector("img")).toHaveAttribute("src", "/provider-icons/atria.png")
+    },
+  )
+
+  it.each([
+    "https://api.atria-asi.ai.example.test/v1",
+    "https://example.test/api.atria-asi.ai/v1",
+    "https://api.atria-asi.ai@example.test/v1",
+    "https://user@api.atria-asi.ai/v1",
+    "https://api.atria-asi.ai:8443/v1",
+    "http://api.atria-asi.ai/v1",
+    "invalid-url",
+    "",
+    `https://api.atria-asi.ai/${"a".repeat(2048)}`,
+  ])("keeps the generic icon for an unrecognized endpoint %s", (endpoint) => {
+    const { container } = renderCard("openai-compatible", endpoint)
+    expect(container.querySelector("img")).toBeNull()
+  })
+
+  it("keeps a known provider's brand when its endpoint changes", () => {
+    const { container } = renderCard("deepseek", "https://api.atria-asi.ai/v1")
+    expect(container.querySelector("img")).toHaveAttribute(
+      "src",
+      "/provider-icons/deepseek-color.svg",
+    )
   })
 })

@@ -90,7 +90,7 @@ export function ProviderCard({
       <CardContent className="space-y-3 px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <ProviderBrandIcon kind={kind} />
+            <ProviderBrandIcon kind={kind} endpoint={endpoint} />
             <div className="min-w-0 space-y-1">
               <Tooltip content={name}>
                 <h3 className="truncate text-sm font-semibold">{name}</h3>
