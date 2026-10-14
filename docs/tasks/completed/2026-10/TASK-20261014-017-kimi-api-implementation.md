@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -72,8 +72,14 @@ main 基线 `9451f11`。已读产品、架构、技术栈、编码及已有开�
 
 # Git
 
-待提交。
+`a20b0ab` — `feat(kimi): 接入两平台模型与原生 API`。
+
+三份原有无关未跟踪任务记录保持原样，未纳入提交；没有推送远程。
 
 # Result
 
 Kimi 普通 API Key 模型接入完成，当前四款模型与两平台配置可用，原生调用按已确认协议开放；最终质量门与原生界面验证通过，真实 Key／长窗口保持待验收。
+
+# Completed
+
+2026-10-14（Asia/Singapore）。

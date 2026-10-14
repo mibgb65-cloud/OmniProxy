@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261014-017](../tasks/active/TASK-20261014-017-kimi-api-implementation.md) Kimi 四款模型、普通 API Key 国内／海外平台、原生调用、目录与地区路由已实现；针对验证通过，完整质量门及原生界面检查中。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261014-017](../tasks/completed/2026-10/TASK-20261014-017-kimi-api-implementation.md) Kimi 四款现役模型、国内／海外账号配置、模型同步与地区路由、原生思考／工具／SSE／用量；K3 三协议、K2.7 Code／K2.6 Chat／Messages、高速版 Chat。完整质量门／401 项前端测试及原生深浅主题通过。实现提交 `a20b0ab`，真实 Key／长窗口待验证。
 - [TASK-20261014-016](../tasks/completed/2026-10/TASK-20261014-016-stepfun-api-implementation.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合、账号选项、隔离路由、原生三协议及普通余额；国内人民币／海外币种待确认，完整质量门／397 项前端测试及原生深浅主题通过。实现提交 `77b11d5`，真实 Key／长窗口和 Step Plan 剩余查询待验证。
 - [TASK-20261014-015](../tasks/completed/2026-10/TASK-20261014-015-stepfun-api-plan.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合规划，明确账号级选项、计费池隔离、原生三协议及余额／Credit 边界；官方资料和文档检查通过。规划提交 `3f3212d`，接入代码尚未实施。
 - [TASK-20261014-014](../tasks/completed/2026-10/TASK-20261014-014-consolidate-worktrees.md) 最新 main 统一到原 OmniProxy 目录，清理六个附加工作树，保留 Git 历史／18 个分支／独有资料及 OmniMail-win；正常桌面开发版从唯一目录启动，构建、原生界面、热更新和健康接口验收通过。整理记录提交 `7e80c35`。
