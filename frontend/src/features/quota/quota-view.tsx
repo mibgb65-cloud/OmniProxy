@@ -92,7 +92,10 @@ export function QuotaView() {
           aria-label={group.provider?.name ?? t("quota.unknownProvider")}
         >
           <header className="flex items-center gap-3">
-            <ProviderBrandIcon kind={group.provider?.kind ?? ""} />
+            <ProviderBrandIcon
+              kind={group.provider?.kind ?? ""}
+              endpoint={group.provider?.baseUrl}
+            />
             <div className="min-w-0">
               <h2 className="text-base font-semibold break-words">
                 {group.provider?.name ?? t("quota.unknownProvider")}

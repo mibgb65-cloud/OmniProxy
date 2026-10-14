@@ -57,7 +57,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
         <>
           <header className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <ProviderBrandIcon kind={provider.kind} />
+              <ProviderBrandIcon kind={provider.kind} endpoint={provider.baseUrl} />
               <div className="min-w-0">
                 <h1 className="truncate text-2xl font-semibold tracking-tight">
                   {t("accounts.detail.title", { name })}

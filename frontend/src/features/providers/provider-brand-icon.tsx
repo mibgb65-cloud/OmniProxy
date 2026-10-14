@@ -10,10 +10,34 @@ const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?
   minimax: { file: "minimax-color.svg" },
   mimo: { file: "xiaomimimo.svg", monochrome: true },
   stepfun: { file: "stepfun-color.svg" },
+  atria: { file: "atria.png" },
 }
 
-export function ProviderBrandIcon({ kind }: { kind: string }) {
-  const brandIcon = brandIcons[kind]
+function resolveBrandIcon(kind: string, endpoint?: string) {
+  if (Object.hasOwn(brandIcons, kind)) return brandIcons[kind]
+  if (kind !== "openai-compatible" || !endpoint || endpoint.length > 2048) return undefined
+
+  // 既有 Atria 账号属于自定义服务商，仅按官方主机名识别品牌，避免相似域名误匹配。
+  try {
+    const url = new URL(endpoint)
+    if (
+      url.protocol === "https:" &&
+      url.hostname === "api.atria-asi.ai" &&
+      !url.port &&
+      !url.username &&
+      !url.password
+    ) {
+      return brandIcons.atria
+    }
+  } catch {
+    // 无效地址只影响装饰图标，继续使用通用图标，配置校验仍由后端负责。
+    return undefined
+  }
+  return undefined
+}
+
+export function ProviderBrandIcon({ kind, endpoint }: { kind: string; endpoint?: string }) {
+  const brandIcon = resolveBrandIcon(kind, endpoint)
   return (
     <span
       className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${brandIcon?.monochrome || brandIcon?.darkTile ? "bg-zinc-950" : brandIcon ? "border-border border bg-white" : "bg-slate-700 text-white"}`}
@@ -23,7 +47,7 @@ export function ProviderBrandIcon({ kind }: { kind: string }) {
         <img
           src={`/provider-icons/${brandIcon.file}`}
           alt=""
-          className={`size-6 ${brandIcon.monochrome ? "brightness-0 invert" : ""}`}
+          className={`size-6 object-contain ${brandIcon.monochrome ? "brightness-0 invert" : ""}`}
         />
       ) : (
         <Bot className="size-5" />

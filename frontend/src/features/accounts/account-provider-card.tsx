@@ -51,7 +51,7 @@ export function AccountProviderCard({
             aria-label={t("accounts.openDetails", { name })}
             className="group focus-visible:ring-ring/50 flex min-w-0 items-center gap-3 rounded-md focus-visible:ring-4"
           >
-            <ProviderBrandIcon kind={provider.kind} />
+            <ProviderBrandIcon kind={provider.kind} endpoint={provider.baseUrl} />
             <div className="min-w-0">
               <Tooltip content={name}>
                 <h2 className="group-hover:text-primary truncate text-sm font-semibold">{name}</h2>
