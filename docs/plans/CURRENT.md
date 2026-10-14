@@ -12,7 +12,7 @@
 
 ## Recently Completed
 
-- [TASK-20261014-008](../tasks/completed/2026-10/TASK-20261014-008-claude-desktop-shared-config.md) Claude Desktop 恢复共享配置入口，源分支与 main 完整质量门通过；实际开发窗口重新读取／应用已写入 3001 和 10 个模型，保留备份与包缓存，客户端需完全退出重开加载。main 实现提交 `6285c0c`。
+- [TASK-20261014-008](../tasks/completed/2026-10/TASK-20261014-008-claude-desktop-shared-config.md) 修复共享目录选择与重新读取恢复基准；正常桌面启动开发版避开 Codex 文件重定向，真实文件更新为 3001／10 模型，Claude 重启后 Code／连接 healthy 已验收，最终 main 完整质量门通过。main 修复提交 `fa69dc6`。
 - [TASK-20261014-007](../tasks/completed/2026-10/TASK-20261014-007-merge-agent-scrollbars-main.md) 滚动条优化合入本地 main，保留既有 Atria／Gemini 实现并统一任务编号；合并后完整质量门／384 项前端测试通过。合并提交 `b47dfa6`。
 - [TASK-20261014-006](../tasks/completed/2026-10/TASK-20261014-006-agent-config-scrollbars.md) 一键配置弹窗正文与模型目录统一细圆角悬停滚动条，去掉系统箭头、固定占位；完整质量门和深浅主题原生显隐／独立滚动／拖动验收通过。实现提交 `b078db0`。
 - [TASK-20261014-005](../tasks/completed/2026-10/TASK-20261014-005-merge-main-and-restart-dev.md) Gemini 与 Atria 图标合入本地 main，保留双方配额界面并消除任务编号冲突；完整质量门／384 项前端测试通过，已重新运行正常 task dev，原生图标和 Gemini 资源模块验收通过，3001 网关恢复运行。合并提交 `1311430`。
