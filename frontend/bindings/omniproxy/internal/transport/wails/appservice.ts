@@ -54,6 +54,9 @@ import * as routing$1 from "../../core/routing/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
 import * as logger$0 from "../../infrastructure/logger/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as minimax$0 from "../../provider/minimax/models.js";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -335,6 +338,13 @@ export function LogsRead(query: logger$0.Query): $CancellablePromise<logger$0.Sn
     return $Call.ByID(2906447574, query);
 }
 
+/**
+ * MiniMaxQuota 只返回公开订阅资源，真实 Key 始终保留在后端受控回调。
+ */
+export function MiniMaxQuota(id: string): $CancellablePromise<minimax$0.Quota> {
+    return $Call.ByID(829182076, id);
+}
+
 export function ModelCatalog(): $CancellablePromise<modelcatalog$0.Item[] | null> {
     return $Call.ByID(3199922049);
 }
@@ -348,6 +358,13 @@ export function ModelSync(id: string): $CancellablePromise<modelcatalog$0.Item[]
  */
 export function OpenGoogleConsole(page: string): $CancellablePromise<void> {
     return $Call.ByID(4008506523, page);
+}
+
+/**
+ * OpenMiniMaxConsole 从已存地区解析固定官方页面，不接受任意 URL。
+ */
+export function OpenMiniMaxConsole(id: string): $CancellablePromise<void> {
+    return $Call.ByID(2577185073, id);
 }
 
 /**

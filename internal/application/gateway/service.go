@@ -17,6 +17,7 @@ import (
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -55,6 +56,7 @@ type Service struct {
 	mimo            *mimo.Client
 	stepfun         *stepfun.Client
 	kimi            *kimi.Client
+	minimax         *minimax.Client
 	googleResources GoogleResourceObserver
 }
 
@@ -72,6 +74,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.mimo = mimo.New(nil)
 	s.stepfun = stepfun.New(nil)
 	s.kimi = kimi.New(nil)
+	s.minimax = minimax.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	s.server = proxy.New(opts)
 	return s
@@ -130,6 +133,7 @@ func (s *Service) Forward(ctx context.Context, request proxy.Request, consume fu
 type target struct {
 	stepfun   *stepfun.Options
 	kimi      *kimi.Options
+	minimax   *minimax.Options
 	updatedAt string
 	snapshot  proxy.TargetSnapshot
 	accountID string

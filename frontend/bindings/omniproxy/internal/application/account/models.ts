@@ -6,12 +6,16 @@
 import * as kimi$0 from "../../provider/kimi/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as minimax$0 from "../../provider/minimax/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as stepfun$0 from "../../provider/stepfun/models.js";
 
 /**
  * BatchCreateInput 批量创建自动命名的账号，不接受自定义名称。
  */
 export interface BatchCreateInput {
+    "minimax"?: minimax$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "providerId": string;
@@ -22,6 +26,7 @@ export interface BatchCreateInput {
  * CreateInput contains fields for a new API Key account. APIKey is never persisted in SQLite.
  */
 export interface CreateInput {
+    "minimax"?: minimax$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "providerId": string;
@@ -33,6 +38,7 @@ export interface CreateInput {
  * Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
  */
 export interface Item {
+    "minimax"?: minimax$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "id": string;
@@ -52,6 +58,7 @@ export interface Item {
  * UpdateInput 更新指定账号；APIKey 留空保留原凭证，Name 留空自动命名。
  */
 export interface UpdateInput {
+    "minimax"?: minimax$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "id": string;

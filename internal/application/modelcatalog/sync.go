@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 	"time"
 )
@@ -74,6 +75,8 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			}
 			return discoveryError
 		})
+	} else if kind == minimax.Kind && current.AuthMethod == account.AuthAPIKey {
+		models, err = s.syncMiniMax(ctx, current)
 	} else if kind == kimi.Kind && current.AuthMethod == account.AuthAPIKey {
 		models, err = s.syncKimi(ctx, current)
 	} else if kind == stepfun.Kind && current.AuthMethod == account.AuthAPIKey {

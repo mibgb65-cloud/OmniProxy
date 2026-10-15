@@ -1,3 +1,4 @@
+import { miniMaxQuotaOptions } from "../accounts/use-minimax-quota"
 import { useQueries, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAccounts } from "../accounts/use-accounts"
@@ -28,6 +29,10 @@ export function useQuotaOverview() {
     [accounts.data, providers.data],
   )
   const subscriptions = items.filter((item) => item.kind === "subscription")
+  const minimaxPlans = items.filter((item) => item.kind === "minimax_plan")
+  const minimaxQueries = useQueries({
+    queries: minimaxPlans.map((item) => miniMaxQuotaOptions(item.account)),
+  })
   const balances = items.filter((item) => item.kind === "balance")
   const subscriptionQueries = useQueries({
     queries: subscriptions.map((item) => subscriptionQuotaOptions(item.account)),
@@ -64,13 +69,18 @@ export function useQuotaOverview() {
   const balanceById = new Map(
     balances.map((item, index) => [item.account.id, balanceQueries[index]]),
   )
+  const minimaxById = new Map(
+    minimaxPlans.map((item, index) => [item.account.id, minimaxQueries[index]]),
+  )
   const entries = items.map((item) => {
+    const minimaxQuery = minimaxById.get(item.account.id)
     const quotaQuery = subscriptionById.get(item.account.id)
     const balanceQuery = balanceById.get(item.account.id)
-    const query = quotaQuery ?? balanceQuery
+    const query = minimaxQuery ?? quotaQuery ?? balanceQuery
     return makeQuotaEntry(
       item,
       {
+        minimax: minimaxQuery?.data,
         quota: quotaQuery?.data,
         balance: balanceQuery?.data,
         pending: query?.isPending ?? false,

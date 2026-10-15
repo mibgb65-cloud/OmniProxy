@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 	"strings"
 	"time"
@@ -34,6 +35,7 @@ var (
 
 // Item 返回账号元数据；自动名称含用户要求的 Key 前缀，不应写入日志。
 type Item struct {
+	MiniMax       *minimax.Options `json:"minimax,omitempty"`
 	Kimi          *kimi.Options    `json:"kimi,omitempty"`
 	StepFun       *stepfun.Options `json:"stepfun,omitempty"`
 	ID            string           `json:"id"`
@@ -51,6 +53,7 @@ type Item struct {
 
 // CreateInput contains fields for a new API Key account. APIKey is never persisted in SQLite.
 type CreateInput struct {
+	MiniMax    *minimax.Options `json:"minimax,omitempty"`
 	Kimi       *kimi.Options    `json:"kimi,omitempty"`
 	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
 	ProviderID string           `json:"providerId"`
@@ -60,6 +63,7 @@ type CreateInput struct {
 
 // BatchCreateInput 批量创建自动命名的账号，不接受自定义名称。
 type BatchCreateInput struct {
+	MiniMax    *minimax.Options `json:"minimax,omitempty"`
 	Kimi       *kimi.Options    `json:"kimi,omitempty"`
 	StepFun    *stepfun.Options `json:"stepfun,omitempty"`
 	ProviderID string           `json:"providerId"`
@@ -88,8 +92,8 @@ func NewService(db *sql.DB, store CredentialStore) *Service {
 func (s *Service) List(ctx context.Context) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
-		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0)
-		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0),COALESCE(mm.region,''),COALESCE(mm.billing_mode,''),COALESCE(mm.config_version,0)
+		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id LEFT JOIN minimax_account_options mm ON mm.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("account: list: %w", err)
 	}

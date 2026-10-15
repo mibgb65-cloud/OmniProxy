@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261015-004](../tasks/completed/2026-10/TASK-20261015-004-minimax-api-implementation.md) MiniMax 国内／海外 × 按量／订阅账号、原生文本三协议／思考／函数工具／SSE、目录与隔离路由、当次用量及官方订阅窗口；完整质量门／407 项前端测试、实际开发与隔离原生深浅主题通过。普通余额、高级 Responses 工具及真实 Key／长窗口仍待验证。
 - [TASK-20261015-003](../tasks/completed/2026-10/TASK-20261015-003-minimax-api-plan.md) MiniMax 国内／海外 × 按量／订阅接入规划，采用账号级选项和通道隔离；核对现行 `.cn` 域名、原生三协议、模型发现及订阅额度入口，保留旧域名／套餐和资源契约待验证项。规划提交 `199867a`，接入代码尚未实施。
 - [TASK-20261015-002](../tasks/completed/2026-10/TASK-20261015-002-remove-agent-config-intro.md) 移除一键配置弹窗的两段通用说明及中英文孤立翻译，将可访问描述关联到现有重启提示；原生窗口和完整质量门／401 项前端测试通过。实现提交 `34f855f`。
 - [TASK-20261014-017](../tasks/completed/2026-10/TASK-20261014-017-kimi-api-implementation.md) Kimi 四款现役模型、国内／海外账号配置、模型同步与地区路由、原生思考／工具／SSE／用量；K3 三协议、K2.7 Code／K2.6 Chat／Messages、高速版 Chat。完整质量门／401 项前端测试及原生深浅主题通过。实现提交 `a20b0ab`，真实 Key／长窗口待验证。

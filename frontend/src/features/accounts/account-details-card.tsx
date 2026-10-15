@@ -1,3 +1,5 @@
+import { MiniMaxResource } from "./minimax-resource"
+import { MiniMaxBadge } from "./minimax-options"
 import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { StepFunPlanResource } from "./stepfun-resource"
@@ -33,6 +35,7 @@ export function AccountDetailsCard({
               <h3 className="truncate font-semibold">{accountDisplayName(account)}</h3>
             </Tooltip>
             <StepFunBadge account={account} />
+            <MiniMaxBadge account={account} />
             <KimiPlatformBadge account={account} />
             <p className="text-muted-foreground text-xs">
               {t(
@@ -65,6 +68,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.minimax || account.providerId === "builtin_minimax" ? (
+          <>
+            <MiniMaxResource account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : account.stepfun?.billingMode === "step_plan" ? (

@@ -8,6 +8,7 @@ import (
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -22,7 +23,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		return nil, err
 	}
 	ids := originalModels(data)
-	rules = append(append(rules, stepAliases(data)...), kimiAliases(data)...)
+	rules = append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...)
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)
@@ -72,6 +73,9 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		if entry.ProviderKind == "google" {
 			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。
 			entry.Protocols = []string{"chat_completions"}
+		}
+		if entry.ProviderKind == minimax.Kind {
+			entry.Metadata = minimax.ModelMetadata(entry.TargetModel)
 		}
 		if entry.ProviderKind == kimi.Kind {
 			if entry.Metadata.ContextWindow == nil {

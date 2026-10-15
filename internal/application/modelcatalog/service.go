@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -35,10 +36,11 @@ type Service struct {
 	client       *deepseek.Client
 	stepfun      *stepfun.Client
 	kimi         *kimi.Client
+	minimax      *minimax.Client
 }
 
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil)}
+	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil)}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")
@@ -73,5 +75,10 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 	if err != nil || len(items)+len(presets)+len(step)+len(kimiItems) > 10000 {
 		return nil, ErrUnavailable
 	}
-	return append(append(append(items, presets...), step...), kimiItems...), nil
+	items = append(append(append(items, presets...), step...), kimiItems...)
+	miniItems, err := s.minimaxPresets(ctx, items)
+	if err != nil || len(items)+len(miniItems) > 10000 {
+		return nil, ErrUnavailable
+	}
+	return append(items, miniItems...), nil
 }

@@ -111,5 +111,8 @@ func matchRoute(model string, rules []core.Rule, data snapshot) (core.Rule, bool
 	if rule, matched := core.Match(model, stepAliases(data)); matched {
 		return rule, true
 	}
-	return core.Match(model, kimiAliases(data))
+	if rule, matched := core.Match(model, kimiAliases(data)); matched {
+		return rule, true
+	}
+	return core.Match(model, minimaxAliases(data))
 }

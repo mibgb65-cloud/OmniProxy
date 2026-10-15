@@ -1,3 +1,4 @@
+import type { MiniMaxQuota } from "../../services/minimax"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 import type { AccountBalanceInfo } from "../../services/balance"
 import type { SubscriptionQuota } from "../../services/subscription"
@@ -17,10 +18,11 @@ export type QuotaStatus = (typeof quotaStatuses)[number]
 export type QuotaAccount = {
   account: AccountItem
   provider?: ProviderConfiguration
-  kind: "subscription" | "balance" | "google" | "step_plan" | "unsupported"
+  kind: "subscription" | "balance" | "google" | "step_plan" | "minimax_plan" | "unsupported"
   canQuery: boolean
 }
 export type QuotaSnapshot = {
+  minimax?: MiniMaxQuota
   quota?: SubscriptionQuota
   balance?: AccountBalanceInfo
   pending: boolean
@@ -38,18 +40,22 @@ export function describeQuotaAccounts(
   return accounts.map((account) => {
     const provider = byId.get(account.providerId)
     const kind =
-      provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
-        ? "step_plan"
-        : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
-          ? "balance"
-          : provider?.kind === "openai" && account.authMethod === "subscription_login"
-            ? "subscription"
-            : provider?.kind === "deepseek" &&
-                (!account.authMethod || account.authMethod === "api_key")
-              ? "balance"
-              : provider?.kind === "google" && account.authMethod === "api_key"
-                ? "google"
-                : "unsupported"
+      provider?.kind === "minimax" &&
+      account.minimax?.billingMode === "subscription" &&
+      ["cn", "global"].includes(account.minimax.region)
+        ? "minimax_plan"
+        : provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
+          ? "step_plan"
+          : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
+            ? "balance"
+            : provider?.kind === "openai" && account.authMethod === "subscription_login"
+              ? "subscription"
+              : provider?.kind === "deepseek" &&
+                  (!account.authMethod || account.authMethod === "api_key")
+                ? "balance"
+                : provider?.kind === "google" && account.authMethod === "api_key"
+                  ? "google"
+                  : "unsupported"
     const canQuery =
       kind !== "unsupported" &&
       kind !== "google" &&
@@ -83,6 +89,17 @@ export function quotaEntryStatus(
   snapshot: QuotaSnapshot,
   now: number,
 ): QuotaStatus {
+  if (item.kind === "minimax_plan") {
+    if (snapshot.error) return "error"
+    if (!snapshot.minimax) return snapshot.pending ? "pending" : "unknown"
+    const buckets = (snapshot.minimax.buckets ?? []).filter(
+      (b) => b.model === "general" || b.model.startsWith("MiniMax-M"),
+    )
+    const windows = buckets.flatMap((b) => [b.interval, b.weekly])
+    if (windows.length === 0 || windows.some((w) => w.status === "unknown")) return "unknown"
+    if (windows.some((w) => w.resetsAt && Date.parse(w.resetsAt) <= now)) return "stale"
+    return windows.some((w) => w.remainingPercent === 0) ? "exhausted" : "normal"
+  }
   if (item.kind === "unsupported") return "unsupported"
   if (item.kind === "google" || item.kind === "step_plan") return "unknown"
   if (!item.canQuery) return "unauthenticated"
@@ -119,7 +136,8 @@ export function makeQuotaEntry(
     ...item,
     ...snapshot,
     status: quotaEntryStatus(item, snapshot, now),
-    fetchedAt: snapshot.quota?.fetchedAt ?? snapshot.balance?.fetchedAt ?? "",
+    fetchedAt:
+      snapshot.minimax?.fetchedAt ?? snapshot.quota?.fetchedAt ?? snapshot.balance?.fetchedAt ?? "",
   }
 }
 

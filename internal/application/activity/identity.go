@@ -14,7 +14,7 @@ func subject(target proxy.TargetSnapshot) (string, error) {
 	if target.ProviderKind == "kimi" {
 		parts = append(parts, target.ProviderRegion)
 	}
-	if target.ProviderKind == "stepfun" {
+	if target.ProviderKind == "stepfun" || target.ProviderKind == "minimax" {
 		parts = append(parts, target.ProviderRegion, target.BillingMode)
 	}
 	if target.AuthMethod == "subscription_login" {

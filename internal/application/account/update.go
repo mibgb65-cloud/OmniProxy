@@ -9,6 +9,7 @@ import (
 
 	"omniproxy/internal/infrastructure/credential"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -17,6 +18,7 @@ var ErrConflict = errors.New("account: concurrent update")
 
 // UpdateInput 更新指定账号；APIKey 留空保留原凭证，Name 留空自动命名。
 type UpdateInput struct {
+	MiniMax *minimax.Options `json:"minimax,omitempty"`
 	Kimi    *kimi.Options    `json:"kimi,omitempty"`
 	StepFun *stepfun.Options `json:"stepfun,omitempty"`
 	ID      string           `json:"id"`
@@ -50,6 +52,10 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, err
 	}
+	minimaxOptions, err := s.prepareMiniMax(ctx, item.ProviderID, input.MiniMax, &item)
+	if err != nil {
+		return result, err
+	}
 	if item.AuthMethod == AuthSubscription {
 		return s.updateSubscriptionName(ctx, item, input)
 	}
@@ -61,6 +67,9 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 			return result, err
 		}
 		defer clear(key)
+		if err := validateMiniMaxKey(minimaxOptions, key); err != nil {
+			return result, err
+		}
 		if err := validateKimiKey(kimiOptions, key); err != nil {
 			return result, err
 		}
@@ -69,6 +78,13 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 		}
 	}
 	var name string
+	if !keyChanged && input.MiniMax != nil {
+		if err := s.UseAPIKeyAt(ctx, item.ID, item.UpdatedAt, func(currentKey []byte) error {
+			return validateMiniMaxKey(minimaxOptions, currentKey)
+		}); err != nil {
+			return result, err
+		}
+	}
 	if strings.TrimSpace(input.Name) != "" {
 		name, err = validateName(input.Name)
 	} else if keyChanged {
@@ -140,6 +156,14 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 			return result, err
 		}
 	}
+	if input.MiniMax != nil && (item.MiniMax == nil || !item.MiniMax.SamePool(*minimaxOptions)) {
+		if err = saveMiniMax(ctx, tx, item.ID, minimaxOptions); err != nil {
+			return result, err
+		}
+		if _, err = tx.ExecContext(ctx, `DELETE FROM account_models WHERE account_id=?`, item.ID); err != nil {
+			return result, err
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return result, fmt.Errorf("account: commit update: %w", err)
 	}
@@ -147,6 +171,7 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	item.Name, item.UpdatedAt = name, timestamp
 	item.StepFun = options
 	item.Kimi = kimiOptions
+	item.MiniMax = minimaxOptions
 	result.Account = item
 	if keyChanged && oldRef != "" {
 		// 已提交后不能把清理失败误报为未保存，否则重试可能再次替换凭证。

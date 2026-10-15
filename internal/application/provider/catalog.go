@@ -5,6 +5,7 @@ import (
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -33,7 +34,7 @@ var definitions = []Definition{
 	{Kind: "deepseek", Name: "DeepSeek", DefaultBaseURL: "https://api.deepseek.com", Models: []string{"DeepSeek V4.1 Flash", "DeepSeek V4 Pro"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: "zhipu", Name: "Zhipu AI", DefaultBaseURL: "https://open.bigmodel.cn/api/paas/v4", Models: []string{"GLM-5.3", "GLM-5.3-Flash", "GLM-5.2", "GLM-4.7"}, AuthMethods: []string{AuthAPIKey}},
 	{Kind: kimi.Kind, Name: "Moonshot AI", DefaultBaseURL: kimi.DefaultBaseURL, Models: kimi.Models(), AuthMethods: []string{AuthAPIKey}},
-	{Kind: "minimax", Name: "MiniMax", DefaultBaseURL: "https://api.minimax.io/v1", Models: []string{"MiniMax M3", "MiniMax M2.7", "MiniMax M2.5", "MiniMax Speech 2.8"}, AuthMethods: []string{AuthAPIKey}},
+	{Kind: minimax.Kind, Name: "MiniMax", DefaultBaseURL: minimax.DefaultBaseURL, Models: append([]string{minimax.PreviewModel}, minimax.Models()...), AuthMethods: []string{AuthAPIKey}},
 	{Kind: mimo.Kind, Name: "Xiaomi MiMo", DefaultBaseURL: mimo.DefaultBaseURL, Models: mimo.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: stepfun.Kind, Name: "StepFun", DefaultBaseURL: stepfun.DefaultBaseURL, Models: stepfun.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},

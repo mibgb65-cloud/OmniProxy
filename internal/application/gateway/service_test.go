@@ -70,6 +70,13 @@ func setupService(t *testing.T, handler http.Handler) (*Service, *sql.DB, *testS
 	if _, err = db.Exec(string(kimiSchema)); err != nil {
 		t.Fatal(err)
 	}
+	miniSchema, err := os.ReadFile("../../../migrations/024_minimax_account_options.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(string(miniSchema)); err != nil {
+		t.Fatal(err)
+	}
 	service := New(proxy.Options{}, provider.NewService(db), account.NewService(db, store), nil)
 	if _, err := service.Start(); err != nil {
 		t.Fatal(err)

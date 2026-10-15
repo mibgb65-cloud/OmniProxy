@@ -1,3 +1,5 @@
+import type { MiniMaxOptions } from "../../services/minimax"
+import { validMiniMaxOptions } from "../../services/minimax"
 import type { KimiOptions } from "../../services/kimi"
 import type { StepFunOptions as Options } from "../../services/stepfun"
 import { useMemo, useRef, useState } from "react"
@@ -15,15 +17,23 @@ export function useAccountForm({
   providerId,
   stepEnabled = false,
   kimiEnabled = false,
+  minimaxEnabled = false,
   onSubmit,
   onBatchSubmit,
 }: {
   providerId: string
   stepEnabled?: boolean
   kimiEnabled?: boolean
+  minimaxEnabled?: boolean
   onSubmit: (input: CreateAccountInput) => Promise<void>
   onBatchSubmit: (input: CreateAccountsInput) => Promise<void>
 }) {
+  const [minimax, setMiniMax] = useState<MiniMaxOptions>({
+    region: "cn",
+    billingMode: "payg",
+    version: 0,
+  })
+  const [invalidMiniMax, setInvalidMiniMax] = useState(false)
   const [kimi, setKimi] = useState<KimiOptions>({ region: "cn", version: 0 })
   const [stepfun, setStepFun] = useState<Options>({ region: "cn", billingMode: "payg", version: 0 })
   const [mode, setMode] = useState<"single" | "batch">("single")
@@ -56,15 +66,24 @@ export function useAccountForm({
           batchKeys.some((key) => !validAPIKey(key))
     setInvalidName(nameError)
     setInvalidKey(keyError)
-    if (nameError || keyError) return
+    const minimaxError = minimaxEnabled && !validMiniMaxOptions(minimax)
+    setInvalidMiniMax(minimaxError)
+    if (nameError || keyError || minimaxError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
     try {
+      const minimaxOptions = minimaxEnabled ? { minimax } : {}
       const stepOptions = stepEnabled ? { stepfun } : {}
       const kimiOptions = kimiEnabled ? { kimi } : {}
       if (mode === "batch")
-        await onBatchSubmit({ providerId, apiKeys: batchKeys, ...stepOptions, ...kimiOptions })
+        await onBatchSubmit({
+          providerId,
+          apiKeys: batchKeys,
+          ...stepOptions,
+          ...kimiOptions,
+          ...minimaxOptions,
+        })
       else
         await onSubmit({
           providerId,
@@ -72,6 +91,7 @@ export function useAccountForm({
           apiKey: apiKey.trim(),
           ...stepOptions,
           ...kimiOptions,
+          ...minimaxOptions,
         })
     } catch {
       setSaveError(true)
@@ -81,6 +101,9 @@ export function useAccountForm({
     }
   }
   return {
+    minimax,
+    setMiniMax,
+    invalidMiniMax,
     kimi,
     setKimi,
     stepfun,

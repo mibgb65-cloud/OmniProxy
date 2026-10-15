@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import type { FormEvent } from "react"
 import type { AccountItem, UpdateAccountInput } from "../../services/omniproxy"
+import { validMiniMaxOptions, type MiniMaxOptions } from "../../services/minimax"
 import type { KimiOptions } from "../../services/kimi"
 import type { StepFunOptions as Options } from "../../services/stepfun"
 import { validAccountName, validAPIKey } from "./account-input"
@@ -10,6 +11,11 @@ export function useAccountEditForm(
   account: AccountItem,
   onSubmit: (input: UpdateAccountInput) => Promise<void>,
 ) {
+  const minimaxEnabled = Boolean(account.minimax || account.providerId === "builtin_minimax")
+  const [minimax, setMiniMax] = useState<MiniMaxOptions>(
+    account.minimax ?? { region: "", billingMode: "", version: 0 },
+  )
+  const [invalidMiniMax, setInvalidMiniMax] = useState(false)
   const kimiEnabled = Boolean(account.kimi || account.providerId === "builtin_kimi")
   const [kimi, setKimi] = useState<KimiOptions>(account.kimi ?? { region: "", version: 0 })
   const [invalidKimi, setInvalidKimi] = useState(false)
@@ -37,7 +43,9 @@ export function useAccountEditForm(
     setInvalidStep(stepError)
     const kimiError = kimiEnabled && !["cn", "global"].includes(kimi.region)
     setInvalidKimi(kimiError)
-    if (nameError || keyError || stepError || kimiError) return
+    const minimaxError = minimaxEnabled && !validMiniMaxOptions(minimax)
+    setInvalidMiniMax(minimaxError)
+    if (nameError || keyError || stepError || kimiError || minimaxError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
@@ -48,6 +56,7 @@ export function useAccountEditForm(
         apiKey: apiKey.trim(),
         ...(stepEnabled ? { stepfun } : {}),
         ...(kimiEnabled ? { kimi } : {}),
+        ...(minimaxEnabled ? { minimax } : {}),
       })
     } catch {
       setSaveError(true)
@@ -58,6 +67,10 @@ export function useAccountEditForm(
   }
 
   return {
+    minimaxEnabled,
+    minimax,
+    setMiniMax,
+    invalidMiniMax,
     name,
     setName,
     apiKey,

@@ -38,6 +38,13 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err := validateKimiKey(kimiOptions, key); err != nil {
 		return Item{}, err
 	}
+	minimaxOptions, err := s.prepareMiniMax(ctx, input.ProviderID, input.MiniMax, nil)
+	if err != nil {
+		return Item{}, err
+	}
+	if err := validateMiniMaxKey(minimaxOptions, key); err != nil {
+		return Item{}, err
+	}
 	id, err := newID()
 	if err != nil {
 		return Item{}, fmt.Errorf("account: generate ID: %w", err)
@@ -63,6 +70,9 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		err = saveKimi(ctx, tx, item.ID, kimiOptions)
 	}
 	if err == nil {
+		err = saveMiniMax(ctx, tx, item.ID, minimaxOptions)
+	}
+	if err == nil {
 		err = tx.Commit()
 	}
 	if err != nil {
@@ -72,6 +82,7 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	}
 	item.StepFun = options
 	item.Kimi = kimiOptions
+	item.MiniMax = minimaxOptions
 	return item, nil
 }
 

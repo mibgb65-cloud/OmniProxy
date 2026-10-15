@@ -1,3 +1,4 @@
+import { MiniMaxBadge } from "./minimax-options"
 import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { Tooltip } from "../../components/ui/tooltip"
@@ -90,6 +91,7 @@ export function AccountProviderCard({
                       <p className="truncate text-sm font-medium">{accountDisplayName(account)}</p>
                     </Tooltip>
                     <StepFunBadge account={account} />
+                    <MiniMaxBadge account={account} />
                     <KimiPlatformBadge account={account} />
                     <p className="text-muted-foreground text-xs">
                       {t(

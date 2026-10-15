@@ -1,4 +1,5 @@
 import { useAccountEditForm } from "./use-account-edit-form"
+import { MiniMaxOptionsFields } from "./minimax-options"
 import { KimiPlatformFields } from "./kimi-platform"
 import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
@@ -31,6 +32,10 @@ export function AccountEditForm({
     saving,
     nameRef,
     submit,
+    minimaxEnabled,
+    minimax,
+    setMiniMax,
+    invalidMiniMax,
     kimiEnabled,
     kimi,
     setKimi,
@@ -88,6 +93,14 @@ export function AccountEditForm({
           </Dialog.Close>
         </div>
         <form onSubmit={submit} className="space-y-4">
+          {minimaxEnabled ? (
+            <MiniMaxOptionsFields
+              value={minimax}
+              onChange={setMiniMax}
+              disabled={saving}
+              invalid={invalidMiniMax}
+            />
+          ) : null}
           {kimiEnabled ? (
             <KimiPlatformFields
               value={kimi}

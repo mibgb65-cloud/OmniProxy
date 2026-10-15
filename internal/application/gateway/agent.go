@@ -14,6 +14,9 @@ func (s *Service) SetSubscription(service SubscriptionAccess) { s.subscription =
 
 // forwardAgent 订阅 Responses 原样流式转发，跨协议保留文本及工具调用关联。
 func (s *Service) forwardAgent(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
+	if target.kind == "minimax" {
+		return s.forwardMiniMax(ctx, target, request, consume)
+	}
 	if target.kind == "kimi" {
 		return s.forwardKimi(ctx, target, request, consume)
 	}

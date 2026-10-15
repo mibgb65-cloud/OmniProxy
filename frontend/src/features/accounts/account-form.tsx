@@ -1,3 +1,4 @@
+import { MiniMaxOptionsFields } from "./minimax-options"
 import { KimiPlatformFields } from "./kimi-platform"
 import { useRef } from "react"
 import { X } from "lucide-react"
@@ -33,6 +34,7 @@ export function AccountForm({
     providerId: provider.id,
     stepEnabled: provider.kind === "stepfun",
     kimiEnabled: provider.kind === "kimi",
+    minimaxEnabled: provider.kind === "minimax",
     onSubmit,
     onBatchSubmit,
   })
@@ -94,6 +96,14 @@ export function AccountForm({
             ))}
           </Tabs.List>
           <form onSubmit={form.submit} className="space-y-4">
+            {provider.kind === "minimax" ? (
+              <MiniMaxOptionsFields
+                value={form.minimax}
+                onChange={form.setMiniMax}
+                disabled={form.saving}
+                invalid={form.invalidMiniMax}
+              />
+            ) : null}
             {provider.kind === "kimi" ? (
               <KimiPlatformFields
                 value={form.kimi}

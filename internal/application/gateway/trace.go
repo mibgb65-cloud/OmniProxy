@@ -14,6 +14,10 @@ func snapshotTarget(p provider.Configuration, a account.Item) proxy.TargetSnapsh
 		target.ProviderRegion = a.StepFun.Region
 		target.BillingMode = a.StepFun.BillingMode
 	}
+	if a.MiniMax != nil {
+		target.ProviderRegion = a.MiniMax.Region
+		target.BillingMode = a.MiniMax.BillingMode
+	}
 	if a.Kimi != nil {
 		target.ProviderRegion = a.Kimi.Region
 	}

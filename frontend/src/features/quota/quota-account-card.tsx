@@ -1,3 +1,4 @@
+import { MiniMaxBadge } from "../accounts/minimax-options"
 import { KimiPlatformBadge } from "../accounts/kimi-platform"
 import { Link } from "@tanstack/react-router"
 import { StepFunBadge } from "../accounts/stepfun-options"
@@ -60,6 +61,7 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
                 </span>
               )}
               <StepFunBadge account={entry.account} />
+              <MiniMaxBadge account={entry.account} />
               <KimiPlatformBadge account={entry.account} />
               {!entry.account.enabled ? <AccountStatusBadge enabled={false} /> : null}
             </div>
