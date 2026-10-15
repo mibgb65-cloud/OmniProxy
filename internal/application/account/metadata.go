@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -16,17 +17,21 @@ func (s *Service) get(ctx context.Context, id string) (Item, string, error) {
 	var options stepfun.Options
 	var kimiOptions kimi.Options
 	var minimaxOptions minimax.Options
+	var mimoOptions mimo.Options
 	err := s.db.QueryRowContext(ctx, `
 		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.credential_ref, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
-		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0),COALESCE(mm.region,''),COALESCE(mm.billing_mode,''),COALESCE(mm.config_version,0)
-		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id LEFT JOIN minimax_account_options mm ON mm.account_id=a.id WHERE a.id = ?`, id).Scan(
-		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version, &kimiOptions.Region, &kimiOptions.Version, &minimaxOptions.Region, &minimaxOptions.BillingMode, &minimaxOptions.Version,
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0),COALESCE(mm.region,''),COALESCE(mm.billing_mode,''),COALESCE(mm.config_version,0),COALESCE(mi.region,''),COALESCE(mi.billing_mode,''),COALESCE(mi.config_version,0)
+		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id LEFT JOIN minimax_account_options mm ON mm.account_id=a.id LEFT JOIN mimo_account_options mi ON mi.account_id=a.id WHERE a.id = ?`, id).Scan(
+		&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &ref, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version, &kimiOptions.Region, &kimiOptions.Version, &minimaxOptions.Region, &minimaxOptions.BillingMode, &minimaxOptions.Version, &mimoOptions.Region, &mimoOptions.BillingMode, &mimoOptions.Version,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Item{}, "", ErrNotFound
 	}
 	if err != nil {
 		return Item{}, "", fmt.Errorf("account: read: %w", err)
+	}
+	if mimoOptions.Version > 0 {
+		item.MiMo = &mimoOptions
 	}
 	if minimaxOptions.Version > 0 {
 		item.MiniMax = &minimaxOptions
@@ -47,8 +52,12 @@ func scanItem(row scanner) (Item, error) {
 	var options stepfun.Options
 	var kimiOptions kimi.Options
 	var minimaxOptions minimax.Options
-	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version, &kimiOptions.Region, &kimiOptions.Version, &minimaxOptions.Region, &minimaxOptions.BillingMode, &minimaxOptions.Version); err != nil {
+	var mimoOptions mimo.Options
+	if err := row.Scan(&item.ID, &item.ProviderID, &item.Name, &item.Enabled, &item.CreatedAt, &item.UpdatedAt, &item.AuthMethod, &item.AuthEmail, &item.AuthPlan, &item.AuthState, &item.AuthAccountID, &options.Region, &options.BillingMode, &options.Version, &kimiOptions.Region, &kimiOptions.Version, &minimaxOptions.Region, &minimaxOptions.BillingMode, &minimaxOptions.Version, &mimoOptions.Region, &mimoOptions.BillingMode, &mimoOptions.Version); err != nil {
 		return Item{}, fmt.Errorf("account: scan: %w", err)
+	}
+	if mimoOptions.Version > 0 {
+		item.MiMo = &mimoOptions
 	}
 	if minimaxOptions.Version > 0 {
 		item.MiniMax = &minimaxOptions

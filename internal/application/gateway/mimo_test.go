@@ -65,7 +65,7 @@ func TestMiMoNativeGatewayStreamsRoutingAndUsage(t *testing.T) {
 				if _, err := db.Exec(`UPDATE providers SET base_url=? WHERE id='builtin_mimo'`, upstream.URL+"/v1"); err != nil {
 					t.Fatal(err)
 				}
-				if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at) VALUES('mimo-account','builtin_mimo','MiMo','test-ref','2026-10-14T00:00:00Z','2026-10-14T00:00:00Z')`); err != nil {
+				if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at) VALUES('mimo-account','builtin_mimo','MiMo','test-ref','2026-10-14T00:00:00Z','2026-10-14T00:00:00Z'); INSERT INTO mimo_account_options(account_id,region,billing_mode) VALUES('mimo-account','','payg')`); err != nil {
 					t.Fatal(err)
 				}
 				store := &testStore{}

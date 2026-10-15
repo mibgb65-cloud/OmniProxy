@@ -6,6 +6,9 @@
 import * as kimi$0 from "../../provider/kimi/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as mimo$0 from "../../provider/mimo/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as minimax$0 from "../../provider/minimax/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -16,6 +19,7 @@ import * as stepfun$0 from "../../provider/stepfun/models.js";
  */
 export interface BatchCreateInput {
     "minimax"?: minimax$0.Options | null;
+    "mimo"?: mimo$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "providerId": string;
@@ -27,6 +31,7 @@ export interface BatchCreateInput {
  */
 export interface CreateInput {
     "minimax"?: minimax$0.Options | null;
+    "mimo"?: mimo$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "providerId": string;
@@ -39,6 +44,7 @@ export interface CreateInput {
  */
 export interface Item {
     "minimax"?: minimax$0.Options | null;
+    "mimo"?: mimo$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "id": string;
@@ -59,6 +65,7 @@ export interface Item {
  */
 export interface UpdateInput {
     "minimax"?: minimax$0.Options | null;
+    "mimo"?: mimo$0.Options | null;
     "kimi"?: kimi$0.Options | null;
     "stepfun"?: stepfun$0.Options | null;
     "id": string;

@@ -21,8 +21,10 @@ func endpoint(base, path string) (string, error) {
 	if ip := net.ParseIP(u.Hostname()); ip != nil {
 		loopback = loopback || ip.IsLoopback()
 	}
-	// 普通 Key 只发往官方按量域名；回环地址用于本机代理及无凭证契约测试。
-	if !loopback && (!strings.EqualFold(u.Hostname(), "api.xiaomimimo.com") || u.Scheme != "https" || u.Port() != "" && u.Port() != "443") {
+	// 仅允许精确的官方通道；不能接受相似域名或任意集群后缀。
+	host := strings.ToLower(u.Hostname())
+	allowed := host == "api.xiaomimimo.com" || host == "token-plan-cn.xiaomimimo.com" || host == "token-plan-sgp.xiaomimimo.com" || host == "token-plan-ams.xiaomimimo.com"
+	if !loopback && (!allowed || u.Scheme != "https" || u.Port() != "" && u.Port() != "443") {
 		return "", proxy.Failure("invalid_configuration", 503)
 	}
 	if loopback && u.Scheme != "http" && u.Scheme != "https" {

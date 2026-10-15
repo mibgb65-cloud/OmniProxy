@@ -69,7 +69,7 @@ func TestNativeEndpointsAuthenticationAndResponses(t *testing.T) {
 }
 
 func TestEndpointCredentialRedirectAndCancellationSafety(t *testing.T) {
-	for _, base := range []string{"https://api.xiaomimimo.com.evil.test/v1", "https://user:pass@api.xiaomimimo.com/v1", "https://api.xiaomimimo.com/v1?key=private", "https://api.xiaomimimo.com:8443/v1", "http://api.xiaomimimo.com/v1", "https://token-plan-cn.xiaomimimo.com/v1", "https://api.xiaomimimo.com/v1/../other", "http://127.0.0.1:0/v1", "https://api.xiaomimimo.com/v1#fragment"} {
+	for _, base := range []string{"https://api.xiaomimimo.com.evil.test/v1", "https://user:pass@api.xiaomimimo.com/v1", "https://api.xiaomimimo.com/v1?key=private", "https://api.xiaomimimo.com:8443/v1", "http://api.xiaomimimo.com/v1", "https://token-plan-unknown.xiaomimimo.com/v1", "https://api.xiaomimimo.com/v1/../other", "http://127.0.0.1:0/v1", "https://api.xiaomimimo.com/v1#fragment"} {
 		if _, err := endpoint(base, "/v1/models"); err == nil {
 			t.Fatal("unsafe endpoint accepted", base)
 		}

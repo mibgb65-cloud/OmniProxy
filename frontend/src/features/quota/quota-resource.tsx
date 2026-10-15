@@ -1,3 +1,4 @@
+import { MiMoPlanResource } from "../accounts/mimo-resource"
 import { MiniMaxResource } from "../accounts/minimax-resource"
 import { KimiBalanceValues } from "../accounts/kimi-balance"
 import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-resource"
@@ -11,6 +12,7 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
   const { t } = useTranslation()
   if (entry.kind === "minimax_plan" || entry.provider?.kind === "minimax")
     return <MiniMaxResource account={entry.account} />
+  if (entry.kind === "mimo_plan") return <MiMoPlanResource account={entry.account} />
   if (entry.kind === "step_plan") return <StepFunPlanResource account={entry.account} />
   if (entry.kind === "unsupported" || !entry.canQuery) {
     return (

@@ -15,7 +15,7 @@ import (
 func (c *Client) DiscoverModels(ctx context.Context, base string, key []byte) (models []string, result error) {
 	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel()
-	if !validKey(key) {
+	if !keyMatchesBase(base, key) {
 		return nil, proxy.Failure("invalid_credential", 503)
 	}
 	address, err := endpoint(base, "/v1/models")
@@ -56,7 +56,7 @@ func (c *Client) DiscoverModels(ctx context.Context, base string, key []byte) (m
 		if !routing.ValidModel(model.ID) {
 			return nil, proxy.Failure("invalid_model_catalog", 502)
 		}
-		if SupportsModel(model.ID) && !seen[model.ID] {
+		if SupportsModel(model.ID) && (!planBase(base) || model.ID != "mimo-v2.6-pro-ultraspeed") && !seen[model.ID] {
 			models = append(models, model.ID)
 			seen[model.ID] = true
 		}

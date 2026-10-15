@@ -38,8 +38,15 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err := validateKimiKey(kimiOptions, key); err != nil {
 		return Item{}, err
 	}
+	mimoOptions, err := s.prepareMiMo(ctx, input.ProviderID, input.MiMo, nil)
+	if err != nil {
+		return Item{}, err
+	}
 	minimaxOptions, err := s.prepareMiniMax(ctx, input.ProviderID, input.MiniMax, nil)
 	if err != nil {
+		return Item{}, err
+	}
+	if err := validateMiMoKey(mimoOptions, key); err != nil {
 		return Item{}, err
 	}
 	if err := validateMiniMaxKey(minimaxOptions, key); err != nil {
@@ -73,6 +80,9 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 		err = saveMiniMax(ctx, tx, item.ID, minimaxOptions)
 	}
 	if err == nil {
+		err = saveMiMo(ctx, tx, item.ID, mimoOptions)
+	}
+	if err == nil {
 		err = tx.Commit()
 	}
 	if err != nil {
@@ -83,6 +93,7 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	item.StepFun = options
 	item.Kimi = kimiOptions
 	item.MiniMax = minimaxOptions
+	item.MiMo = mimoOptions
 	return item, nil
 }
 

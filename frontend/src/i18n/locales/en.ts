@@ -1,3 +1,4 @@
+import { mimoEn } from "./mimo-en"
 import { subscriptionEn } from "./subscription-en"
 import type { zh } from "./zh"
 import { gatewayEn } from "./gateway-en"
@@ -15,6 +16,7 @@ import { googleEn } from "./google-en"
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...mimoEn,
   "minimax.connection": "MiniMax connection",
   "minimax.region": "Platform",
   "minimax.cn": "China",

@@ -34,8 +34,11 @@ func (c *Client) Forward(ctx context.Context, base string, key []byte, request p
 	if err != nil {
 		return err
 	}
-	if !validKey(key) || consume == nil {
+	if !keyMatchesBase(address, key) || consume == nil {
 		return proxy.Failure("invalid_credential", 503)
+	}
+	if planBase(address) && !SupportsAccountModel(Options{BillingMode: "token_plan", Region: "cn"}, request.Model) {
+		return proxy.Failure("unsupported_model", 400)
 	}
 	body, err := validatedBody(request)
 	if err != nil {

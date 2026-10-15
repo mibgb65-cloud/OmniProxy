@@ -44,7 +44,11 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.withMiniMaxPresets(ctx, result)
+	result, err = s.withMiniMaxPresets(ctx, result)
+	if err != nil {
+		return nil, err
+	}
+	return s.withMiMoPresets(ctx, result)
 }
 func targetSupports(data snapshot, providerID, accountID, model string) bool {
 	for _, p := range data.providers {

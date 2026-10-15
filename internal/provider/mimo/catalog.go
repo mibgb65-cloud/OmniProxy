@@ -1,4 +1,4 @@
-// Package mimo 提供小米 MiMo 按量 API 的原生协议适配器。
+// Package mimo 提供小米 MiMo 普通按量和 Token Plan 的原生协议适配器。
 package mimo
 
 import catalog "omniproxy/internal/core/modelcatalog"

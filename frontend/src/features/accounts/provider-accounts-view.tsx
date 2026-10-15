@@ -83,6 +83,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           ) : null}
           {provider.kind !== "stepfun" &&
             provider.kind !== "kimi" &&
+            provider.kind !== "mimo" &&
             provider.kind !== "deepseek" &&
             provider.kind !== "google" &&
             (provider.kind !== "openai" ||
@@ -91,6 +92,9 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             ) : null)}
           {provider.kind === "stepfun" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("stepfun.routingHint")}</p>
+          ) : null}
+          {provider.kind === "mimo" ? (
+            <p className="text-muted-foreground text-sm leading-6">{t("mimo.routingHint")}</p>
           ) : null}
           {provider.kind === "kimi" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("kimi.routingHint")}</p>

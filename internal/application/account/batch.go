@@ -23,6 +23,10 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 	if err != nil {
 		return nil, err
 	}
+	mimoOptions, err := s.prepareMiMo(ctx, input.ProviderID, input.MiMo, nil)
+	if err != nil {
+		return nil, err
+	}
 	minimaxOptions, err := s.prepareMiniMax(ctx, input.ProviderID, input.MiniMax, nil)
 	if err != nil {
 		return nil, err
@@ -44,6 +48,9 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 			return nil, fmt.Errorf("account: batch key %d: %w", i+1, keyErr)
 		}
 		keys[i] = key
+		if err := validateMiMoKey(mimoOptions, key); err != nil {
+			return nil, err
+		}
 		if err := validateMiniMaxKey(minimaxOptions, key); err != nil {
 			return nil, err
 		}
@@ -113,6 +120,13 @@ func (s *Service) CreateBatch(ctx context.Context, input BatchCreateInput) (item
 				return nil, err
 			}
 			items[i].MiniMax = &copy
+		}
+		if mimoOptions != nil {
+			copy := *mimoOptions
+			if err := saveMiMo(ctx, tx, item.ID, &copy); err != nil {
+				return nil, err
+			}
+			items[i].MiMo = &copy
 		}
 		if kimiOptions != nil {
 			copy := *kimiOptions

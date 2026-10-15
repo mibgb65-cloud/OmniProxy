@@ -130,6 +130,30 @@ describe("ProviderAccountsView", () => {
   })
 
   it.each(["cards", "list"] as const)(
+    "shows a regional MiMo Token Plan with unknown credits in %s mode",
+    async (accountView) => {
+      useUIStore.setState({ accountView })
+      vi.mocked(listProviders).mockResolvedValue([
+        { ...provider, id: "builtin_mimo", kind: "mimo", name: "MiMo" },
+      ])
+      vi.mocked(listAccounts).mockResolvedValue([
+        {
+          ...account,
+          providerId: "builtin_mimo",
+          authMethod: "api_key",
+          mimo: { region: "sgp", billingMode: "token_plan", version: 1 },
+        },
+      ])
+      renderPage("builtin_mimo")
+      expect(await screen.findByText("Token Plan · 新加坡")).toBeInTheDocument()
+      expect(screen.getByText("Token Plan 套餐额度")).toBeInTheDocument()
+      expect(screen.queryByText("充值余额")).not.toBeInTheDocument()
+      expect(readAccountBalance).not.toHaveBeenCalled()
+      expect(screen.getByRole("button", { name: "查看官方套餐" })).toBeEnabled()
+    },
+  )
+
+  it.each(["cards", "list"] as const)(
     "shows Kimi's official cash and voucher balances in %s mode",
     async (accountView) => {
       useUIStore.setState({ accountView })

@@ -1,3 +1,4 @@
+import { MiMoOptionsFields } from "./mimo-options"
 import { MiniMaxOptionsFields } from "./minimax-options"
 import { KimiPlatformFields } from "./kimi-platform"
 import { useRef } from "react"
@@ -35,6 +36,7 @@ export function AccountForm({
     stepEnabled: provider.kind === "stepfun",
     kimiEnabled: provider.kind === "kimi",
     minimaxEnabled: provider.kind === "minimax",
+    mimoEnabled: provider.kind === "mimo",
     onSubmit,
     onBatchSubmit,
   })
@@ -96,6 +98,14 @@ export function AccountForm({
             ))}
           </Tabs.List>
           <form onSubmit={form.submit} className="space-y-4">
+            {provider.kind === "mimo" ? (
+              <MiMoOptionsFields
+                value={form.mimo}
+                onChange={form.setMiMo}
+                disabled={form.saving}
+                invalid={form.invalidMiMo}
+              />
+            ) : null}
             {provider.kind === "minimax" ? (
               <MiniMaxOptionsFields
                 value={form.minimax}

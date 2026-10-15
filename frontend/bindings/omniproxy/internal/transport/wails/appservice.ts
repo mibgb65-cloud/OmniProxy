@@ -361,6 +361,13 @@ export function OpenGoogleConsole(page: string): $CancellablePromise<void> {
 }
 
 /**
+ * OpenMiMoConsole 只打开固定官方套餐页面，不接收任意地址或读取 Key。
+ */
+export function OpenMiMoConsole(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1068080872, id);
+}
+
+/**
  * OpenMiniMaxConsole 从已存地区解析固定官方页面，不接受任意 URL。
  */
 export function OpenMiniMaxConsole(id: string): $CancellablePromise<void> {

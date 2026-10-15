@@ -1,6 +1,7 @@
 import type { TranslationKey } from "../../i18n/translation"
 
 const codes = new Map<string, TranslationKey>([
+  ["ambiguous_mimo_pool", "routing.error.ambiguous_mimo_pool"],
   ["ambiguous_minimax_pool", "routing.error.ambiguous_minimax_pool"],
   ["ambiguous_kimi_platform", "routing.error.ambiguous_kimi_platform"],
   ["ambiguous_stepfun_pool", "routing.error.ambiguous_stepfun_pool"],

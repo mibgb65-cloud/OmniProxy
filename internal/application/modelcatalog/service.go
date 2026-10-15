@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/kimi"
+	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -37,10 +38,11 @@ type Service struct {
 	stepfun      *stepfun.Client
 	kimi         *kimi.Client
 	minimax      *minimax.Client
+	mimo         *mimo.Client
 }
 
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil)}
+	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil)}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")

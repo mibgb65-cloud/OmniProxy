@@ -1,3 +1,4 @@
+import { validMiMoOptions, validMiMoKey, type MiMoOptions } from "../../services/mimo"
 import type { MiniMaxOptions } from "../../services/minimax"
 import { validMiniMaxOptions } from "../../services/minimax"
 import type { KimiOptions } from "../../services/kimi"
@@ -18,6 +19,7 @@ export function useAccountForm({
   stepEnabled = false,
   kimiEnabled = false,
   minimaxEnabled = false,
+  mimoEnabled = false,
   onSubmit,
   onBatchSubmit,
 }: {
@@ -25,9 +27,12 @@ export function useAccountForm({
   stepEnabled?: boolean
   kimiEnabled?: boolean
   minimaxEnabled?: boolean
+  mimoEnabled?: boolean
   onSubmit: (input: CreateAccountInput) => Promise<void>
   onBatchSubmit: (input: CreateAccountsInput) => Promise<void>
 }) {
+  const [mimo, setMiMo] = useState<MiMoOptions>({ region: "", billingMode: "payg", version: 0 })
+  const [invalidMiMo, setInvalidMiMo] = useState(false)
   const [minimax, setMiniMax] = useState<MiniMaxOptions>({
     region: "cn",
     billingMode: "payg",
@@ -59,20 +64,23 @@ export function useAccountForm({
     const nameError = mode === "single" && !validAccountName(name)
     const keyError =
       mode === "single"
-        ? !validAPIKey(apiKey)
+        ? !validAPIKey(apiKey) || (mimoEnabled && !validMiMoKey(mimo, apiKey))
         : batchKeys.length === 0 ||
           batchKeys.length > MAX_BATCH_KEYS ||
           new TextEncoder().encode(batchText).length > MAX_BATCH_TEXT_BYTES ||
-          batchKeys.some((key) => !validAPIKey(key))
+          batchKeys.some((key) => !validAPIKey(key) || (mimoEnabled && !validMiMoKey(mimo, key)))
     setInvalidName(nameError)
     setInvalidKey(keyError)
     const minimaxError = minimaxEnabled && !validMiniMaxOptions(minimax)
     setInvalidMiniMax(minimaxError)
-    if (nameError || keyError || minimaxError) return
+    const mimoError = mimoEnabled && !validMiMoOptions(mimo)
+    setInvalidMiMo(mimoError)
+    if (nameError || keyError || minimaxError || mimoError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
     try {
+      const mimoOptions = mimoEnabled ? { mimo } : {}
       const minimaxOptions = minimaxEnabled ? { minimax } : {}
       const stepOptions = stepEnabled ? { stepfun } : {}
       const kimiOptions = kimiEnabled ? { kimi } : {}
@@ -83,6 +91,7 @@ export function useAccountForm({
           ...stepOptions,
           ...kimiOptions,
           ...minimaxOptions,
+          ...mimoOptions,
         })
       else
         await onSubmit({
@@ -92,6 +101,7 @@ export function useAccountForm({
           ...stepOptions,
           ...kimiOptions,
           ...minimaxOptions,
+          ...mimoOptions,
         })
     } catch {
       setSaveError(true)
@@ -101,6 +111,9 @@ export function useAccountForm({
     }
   }
   return {
+    mimo,
+    setMiMo,
+    invalidMiMo,
     minimax,
     setMiniMax,
     invalidMiniMax,

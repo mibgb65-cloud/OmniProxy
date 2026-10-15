@@ -1,3 +1,5 @@
+import { MiMoBadge } from "./mimo-options"
+import { MiMoPlanResource } from "./mimo-resource"
 import { MiniMaxResource } from "./minimax-resource"
 import { MiniMaxBadge } from "./minimax-options"
 import { KimiPlatformBadge } from "./kimi-platform"
@@ -36,6 +38,7 @@ export function AccountDetailsCard({
             </Tooltip>
             <StepFunBadge account={account} />
             <MiniMaxBadge account={account} />
+            <MiMoBadge account={account} />
             <KimiPlatformBadge account={account} />
             <p className="text-muted-foreground text-xs">
               {t(
@@ -68,6 +71,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.mimo?.billingMode === "token_plan" ? (
+          <>
+            <MiMoPlanResource account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : account.minimax || account.providerId === "builtin_minimax" ? (

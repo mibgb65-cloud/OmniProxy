@@ -54,7 +54,7 @@ func TestMiMoPresetDiscoveryFailureAndCredentialRotation(t *testing.T) {
 	if _, err := db.Exec(`UPDATE providers SET base_url=? WHERE id='builtin_mimo'`, upstream.URL+"/v1"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at) VALUES('a','builtin_mimo','MiMo','protected-ref','now','now')`); err != nil {
+	if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at) VALUES('a','builtin_mimo','MiMo','protected-ref','now','now'); INSERT INTO mimo_account_options(account_id,region,billing_mode) VALUES('a','','payg')`); err != nil {
 		t.Fatal(err)
 	}
 	store := &mimoStore{}

@@ -150,6 +150,10 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 	for _, account := range data.accounts {
 		accounts = append(accounts, core.Account{ID: account.ID, ProviderID: account.ProviderID, CreatedAt: account.CreatedAt, Enabled: account.Enabled && eligible(data, account, result.Model)})
 	}
+	if mimoAmbiguous(data, allowed, result.Model, rule.AccountID) {
+		result.ErrorCode = "ambiguous_mimo_pool"
+		return result
+	}
 	if minimaxAmbiguous(data, allowed, result.Model, rule.AccountID) {
 		result.ErrorCode = "ambiguous_minimax_pool"
 		return result

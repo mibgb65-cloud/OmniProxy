@@ -1,3 +1,4 @@
+import { validMiMoOptions, validMiMoKey, type MiMoOptions } from "../../services/mimo"
 import { useRef, useState } from "react"
 import type { FormEvent } from "react"
 import type { AccountItem, UpdateAccountInput } from "../../services/omniproxy"
@@ -11,6 +12,11 @@ export function useAccountEditForm(
   account: AccountItem,
   onSubmit: (input: UpdateAccountInput) => Promise<void>,
 ) {
+  const mimoEnabled = Boolean(account.mimo || account.providerId === "builtin_mimo")
+  const [mimo, setMiMo] = useState<MiMoOptions>(
+    account.mimo ?? { region: "", billingMode: "", version: 0 },
+  )
+  const [invalidMiMo, setInvalidMiMo] = useState(false)
   const minimaxEnabled = Boolean(account.minimax || account.providerId === "builtin_minimax")
   const [minimax, setMiniMax] = useState<MiniMaxOptions>(
     account.minimax ?? { region: "", billingMode: "", version: 0 },
@@ -36,7 +42,8 @@ export function useAccountEditForm(
     event.preventDefault()
     if (savingRef.current) return
     const nameError = !validAccountName(name)
-    const keyError = apiKey.trim() !== "" && !validAPIKey(apiKey)
+    const keyError =
+      apiKey.trim() !== "" && (!validAPIKey(apiKey) || (mimoEnabled && !validMiMoKey(mimo, apiKey)))
     setInvalidName(nameError)
     setInvalidKey(keyError)
     const stepError = stepEnabled && !validStepOptions(stepfun)
@@ -45,7 +52,9 @@ export function useAccountEditForm(
     setInvalidKimi(kimiError)
     const minimaxError = minimaxEnabled && !validMiniMaxOptions(minimax)
     setInvalidMiniMax(minimaxError)
-    if (nameError || keyError || stepError || kimiError || minimaxError) return
+    const mimoError = mimoEnabled && !validMiMoOptions(mimo)
+    setInvalidMiMo(mimoError)
+    if (nameError || keyError || stepError || kimiError || minimaxError || mimoError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
@@ -57,6 +66,7 @@ export function useAccountEditForm(
         ...(stepEnabled ? { stepfun } : {}),
         ...(kimiEnabled ? { kimi } : {}),
         ...(minimaxEnabled ? { minimax } : {}),
+        ...(mimoEnabled ? { mimo } : {}),
       })
     } catch {
       setSaveError(true)
@@ -67,6 +77,10 @@ export function useAccountEditForm(
   }
 
   return {
+    mimoEnabled,
+    mimo,
+    setMiMo,
+    invalidMiMo,
     minimaxEnabled,
     minimax,
     setMiniMax,

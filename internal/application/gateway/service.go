@@ -131,6 +131,7 @@ func (s *Service) Forward(ctx context.Context, request proxy.Request, consume fu
 }
 
 type target struct {
+	mimo      *mimo.Options
 	stepfun   *stepfun.Options
 	kimi      *kimi.Options
 	minimax   *minimax.Options

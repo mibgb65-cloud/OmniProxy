@@ -10,7 +10,7 @@ import (
 func TestMiMoRoutingCatalogAliasesAndAccountEligibility(t *testing.T) {
 	s, db := fixture(t)
 	ctx := context.Background()
-	if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('mimo-account','builtin_mimo','MiMo','protected-ref',1,'2026-10-14T00:00:00Z','2026-10-14T00:00:00Z')`); err != nil {
+	if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('mimo-account','builtin_mimo','MiMo','protected-ref',1,'2026-10-14T00:00:00Z','2026-10-14T00:00:00Z'); INSERT INTO mimo_account_options(account_id,region,billing_mode) VALUES('mimo-account','','payg')`); err != nil {
 		t.Fatal(err)
 	}
 	for _, model := range mimo.Models() {
@@ -40,7 +40,7 @@ func TestMiMoRoutingCatalogAliasesAndAccountEligibility(t *testing.T) {
 			t.Fatal("native protocols or metadata lost")
 		}
 	}
-	if found != len(mimo.Models())+1 {
+	if found != 2*len(mimo.Models())+1 {
 		t.Fatal("models or alias missing", found)
 	}
 	for _, change := range []string{`UPDATE accounts SET enabled=0 WHERE id='mimo-account'`, `UPDATE accounts SET enabled=1,auth_method='subscription_login' WHERE id='mimo-account'`, `UPDATE providers SET enabled=0 WHERE id='builtin_mimo'`} {
@@ -61,7 +61,8 @@ func TestMiMoDiscoveredAccountRestrictsPresetsAndDefaults(t *testing.T) {
 	s, db := fixture(t)
 	ctx := context.Background()
 	if _, err := db.Exec(`INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('mimo-account','builtin_mimo','MiMo','protected-ref',1,'2026-10-14T00:00:00Z','2026-10-14T00:00:00Z');
-		INSERT INTO account_models(account_id,model,name,fetched_at,account_version,metadata_json) VALUES('mimo-account','mimo-v2.6-flash','Flash','now','protected-ref:','{}')`); err != nil {
+ INSERT INTO mimo_account_options(account_id,region,billing_mode) VALUES('mimo-account','','payg');
+		INSERT INTO account_models(account_id,model,name,fetched_at,account_version,metadata_json) VALUES('mimo-account','mimo-v2.6-flash','Flash','now','protected-ref::mimo:1','{}')`); err != nil {
 		t.Fatal(err)
 	}
 	preview, err := s.Resolve(ctx, "mimo-v2.6-pro")

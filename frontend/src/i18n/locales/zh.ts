@@ -1,3 +1,4 @@
+import { mimoZh } from "./mimo-zh"
 import { subscriptionZh } from "./subscription-zh"
 import { gatewayZh } from "./gateway-zh"
 import { routingZh } from "./routing-zh"
@@ -15,6 +16,7 @@ import { googleZh } from "./google-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...mimoZh,
   "minimax.connection": "MiniMax 连接",
   "minimax.region": "平台",
   "minimax.cn": "国内",

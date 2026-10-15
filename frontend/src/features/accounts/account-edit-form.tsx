@@ -1,4 +1,5 @@
 import { useAccountEditForm } from "./use-account-edit-form"
+import { MiMoOptionsFields } from "./mimo-options"
 import { MiniMaxOptionsFields } from "./minimax-options"
 import { KimiPlatformFields } from "./kimi-platform"
 import { X } from "lucide-react"
@@ -32,6 +33,10 @@ export function AccountEditForm({
     saving,
     nameRef,
     submit,
+    mimoEnabled,
+    mimo,
+    setMiMo,
+    invalidMiMo,
     minimaxEnabled,
     minimax,
     setMiniMax,
@@ -93,6 +98,14 @@ export function AccountEditForm({
           </Dialog.Close>
         </div>
         <form onSubmit={submit} className="space-y-4">
+          {mimoEnabled ? (
+            <MiMoOptionsFields
+              value={mimo}
+              onChange={setMiMo}
+              disabled={saving}
+              invalid={invalidMiMo}
+            />
+          ) : null}
           {minimaxEnabled ? (
             <MiniMaxOptionsFields
               value={minimax}

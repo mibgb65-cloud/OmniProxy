@@ -122,8 +122,11 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		}
 		for _, account := range accounts {
 			if account.ID == request.AccountID && account.ProviderID == provider.ID && account.Enabled {
-				if (provider.Kind == "stepfun" || provider.Kind == "kimi" || provider.Kind == "minimax") && request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
+				if (provider.Kind == "stepfun" || provider.Kind == "kimi" || provider.Kind == "minimax" || provider.Kind == "mimo") && request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
 					return target{}, proxy.Failure("route_configuration_changed", 503)
+				}
+				if provider.Kind == "mimo" && (account.MiMo == nil || !account.MiMo.Valid()) {
+					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				if provider.Kind == "minimax" && (account.AuthMethod != "api_key" || account.MiniMax == nil || !account.MiniMax.Valid()) {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
@@ -143,7 +146,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if provider.Kind == "openai" && (account.AuthMethod != "subscription_login" || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				return target{accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi, minimax: account.MiniMax}, nil
+				return target{accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi, minimax: account.MiniMax, mimo: account.MiMo}, nil
 			}
 		}
 		return target{}, proxy.Failure("route_account_unavailable", 503)

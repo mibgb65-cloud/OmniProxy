@@ -82,7 +82,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 	} else if kind == stepfun.Kind && current.AuthMethod == account.AuthAPIKey {
 		models, err = s.syncStep(ctx, current)
 	} else if kind == "mimo" && current.AuthMethod == account.AuthAPIKey {
-		models, err = s.syncMiMo(ctx, id, base)
+		models, err = s.syncMiMo(ctx, current, base)
 	} else {
 		return nil, ErrUnavailable
 	}

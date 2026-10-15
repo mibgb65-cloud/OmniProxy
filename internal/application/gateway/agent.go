@@ -65,11 +65,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 		return s.forwardGoogle(ctx, target, request, consume)
 	}
 	if target.kind == "mimo" {
-		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
-			return s.mimo.Forward(ctx, target.baseURL, key, request, func(response proxy.Response) error {
-				return consume(proxy.ObserveResponse(ctx, request.Trace, response, request.Protocol))
-			})
-		})
+		return s.forwardMiMo(ctx, target, request, consume)
 	}
 	if target.kind != "" && target.kind != "deepseek" {
 		return proxy.Failure("adapter_unavailable", 503)

@@ -23,7 +23,7 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		return nil, err
 	}
 	ids := originalModels(data)
-	rules = append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...)
+	rules = append(append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...), mimoAliases(data)...)
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)

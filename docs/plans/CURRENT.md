@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261015-007](../tasks/active/TASK-20261015-007-mimo-token-plan.md) 小米 MiMo Token Plan 个人／团队 Key、中国／新加坡／欧洲集群、账号配置及通道路由，完整验证中。
 
 ## Recently Completed
 
