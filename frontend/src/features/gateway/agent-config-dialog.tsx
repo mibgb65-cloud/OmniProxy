@@ -1,11 +1,12 @@
 import { Dialog } from "radix-ui"
-import { Check, RefreshCw, X } from "lucide-react"
+import { RefreshCw, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { ScrollRegion } from "../../components/common/scroll-region"
 import { Button } from "../../components/ui/button"
 import { agentTitle, type AgentClient } from "../../services/agents"
 import { useAgentConfigForm } from "./use-agent-config-form"
 import { AgentCatalogPreview } from "./agent-catalog-preview"
+import { AgentConfigSuccessToast } from "./agent-config-success-toast"
 
 export function AgentConfigDialog({
   item,
@@ -113,17 +114,9 @@ function ConfigForm({
                 {t(`agents.error.${error}`)}
               </p>
             ) : null}
-            {success ? (
-              <p
-                role="status"
-                className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400"
-              >
-                <Check className="size-4" />
-                {t("agents.success")}
-              </p>
-            ) : null}
           </div>
         </ScrollRegion>
+        {success ? <AgentConfigSuccessToast /> : null}
         <div className="flex shrink-0 justify-end gap-3 border-t pt-4">
           {!success ? (
             <Button variant="outline" disabled={busy} onClick={() => void reload()}>

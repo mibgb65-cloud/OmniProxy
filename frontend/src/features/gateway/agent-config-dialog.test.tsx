@@ -80,7 +80,16 @@ it("无需选择模型即可预览完整目录、应用并使用同一文件和�
       catalogRevision: "catalog-revision",
     }),
   )
-  expect(await screen.findByRole("status")).toHaveTextContent("配置已保存")
+  await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("配置已保存"))
+  const notice = screen
+    .getByRole("button", { name: "关闭保存成功提示" })
+    .closest("[data-slot='agent-config-success-toast']")!
+  expect(notice.closest(".scroll-region")).toBeNull()
+  expect(screen.getByRole("dialog")).toContainElement(notice as HTMLElement)
+  await user.click(screen.getByRole("button", { name: "关闭保存成功提示" }))
+  expect(screen.queryByText("配置已保存，原配置已加密备份。")).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "应用配置" })).not.toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "配置预览" })).not.toBeInTheDocument()
 })
 it("配置被外部修改时保持弹窗并展示安全错误", async () => {
   vi.mocked(applyAgentConfig).mockRejectedValue(new Error("private raw config"))
@@ -89,6 +98,7 @@ it("配置被外部修改时保持弹窗并展示安全错误", async () => {
   await user.click(screen.getByRole("button", { name: "配置预览" }))
   await user.click(await screen.findByRole("button", { name: "应用配置" }))
   expect(await screen.findByRole("alert")).toHaveTextContent("重新读取配置")
+  expect(screen.queryByRole("button", { name: "关闭保存成功提示" })).not.toBeInTheDocument()
   expect(screen.queryByText("private raw config")).not.toBeInTheDocument()
 })
 it("目录更新后回到预览步骤，允许重新读取后再应用", async () => {

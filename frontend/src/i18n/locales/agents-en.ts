@@ -108,6 +108,8 @@ export const agentsEn = {
   "agents.noModels":
     "Sync account models or configure an available route on the Routing page first.",
   "agents.success": "Configuration saved with an encrypted backup.",
+  "agents.successNotification": "Configuration saved notification",
+  "agents.dismissSuccess": "Dismiss configuration saved notification",
   "agents.restored": "Original configuration restored.",
   "agents.error.config_changed":
     "Another tool modified the file. Reload configuration, preview, and apply again. Current edits are preserved.",

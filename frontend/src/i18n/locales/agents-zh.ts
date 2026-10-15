@@ -103,6 +103,8 @@ export const agentsZh = {
   "agents.stopped": "网关尚未启动，可以先保存接入配置；使用客户端调用模型前，请启动网关。",
   "agents.noModels": "请先在路由页同步账号模型或配置可用路由，再应用接入配置。",
   "agents.success": "配置已保存，原配置已加密备份。",
+  "agents.successNotification": "配置保存通知",
+  "agents.dismissSuccess": "关闭保存成功提示",
   "agents.restored": "已恢复原配置。",
   "agents.error.config_changed":
     "文件已被其他工具修改，请点击「重新读取配置」，再预览并应用；会保留当前改动。",

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261015-008](../tasks/active/TASK-20261015-008-agent-config-success-toast.md) 客户端配置保存成功改为弹窗顶部悬浮提示，验证自动收起、交互与滚动／主题显示。
 
 ## Recently Completed
 

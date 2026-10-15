@@ -105,7 +105,7 @@ it.each(agentClientIds)(
         catalogRevision: "catalog-revision",
       }),
     )
-    expect(await screen.findByRole("status")).toHaveTextContent("配置已保存")
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("配置已保存"))
     await user.click(screen.getAllByRole("button", { name: "关闭" })[0]!)
     expect(screen.getByRole("button", { name: "启动网关" })).toBeEnabled()
     expect(startGateway).not.toHaveBeenCalled()
