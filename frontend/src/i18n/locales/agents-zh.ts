@@ -1,6 +1,5 @@
 export const agentsZh = {
   "agents.title": "本地 Agent 接入",
-  "agents.description": "通过独立的本地 API Key 接入网关，保留原有登录与会话。",
   "agents.codex": "Codex CLI / Desktop",
   "agents.claude": "Claude Code CLI",
   "agents.claude-desktop": "Claude Code Desktop",
@@ -85,7 +84,6 @@ export const agentsZh = {
   "agents.provider": "保留提供商标识",
   "agents.model": "默认模型或路由",
   "agents.choose": "选择模型或路由",
-  "agents.automaticModels": "自动提供可用模型与路由，无需在此选择单个模型；接入后在客户端中切换。",
   "agents.defaultModel": "默认模型",
   "agents.catalogMode": "模型目录",
   "agents.catalogCount": "将提供 {{count}} 个模型／路由",

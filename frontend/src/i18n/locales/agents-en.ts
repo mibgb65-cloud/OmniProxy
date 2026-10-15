@@ -1,7 +1,5 @@
 export const agentsEn = {
   "agents.title": "Local agent connections",
-  "agents.description":
-    "Connect with a dedicated local API key while preserving sign-in and sessions.",
   "agents.codex": "Codex CLI / Desktop",
   "agents.claude": "Claude Code CLI",
   "agents.claude-desktop": "Claude Code Desktop",
@@ -89,8 +87,6 @@ export const agentsEn = {
   "agents.provider": "Preserved provider ID",
   "agents.model": "Default model or route",
   "agents.choose": "Choose a model or route",
-  "agents.automaticModels":
-    "Available models and routes are configured automatically. Choose your model in the client after connecting.",
   "agents.defaultModel": "Default model",
   "agents.catalogMode": "Model catalog",
   "agents.catalogCount": "Provides {{count}} models / routes",

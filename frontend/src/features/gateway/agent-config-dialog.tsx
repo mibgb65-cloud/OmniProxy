@@ -80,13 +80,6 @@ function ConfigForm({
           viewportClassName="pr-1"
         >
           <div className="space-y-5">
-            <Dialog.Description
-              id="agent-config-description"
-              className="text-muted-foreground text-sm"
-            >
-              {t("agents.description")}
-            </Dialog.Description>
-            <p className="text-muted-foreground text-sm">{t("agents.automaticModels")}</p>
             {item.client === "claude" ? (
               <p className="text-muted-foreground text-xs">{t("agents.cliModelHint")}</p>
             ) : null}
@@ -109,7 +102,12 @@ function ConfigForm({
                 {t("agents.desktopHint")}
               </p>
             ) : null}
-            <p className="text-muted-foreground text-xs">{t("agents.restart")}</p>
+            <Dialog.Description
+              id="agent-config-description"
+              className="text-muted-foreground text-xs"
+            >
+              {t("agents.restart")}
+            </Dialog.Description>
             {error ? (
               <p role="alert" className="text-destructive text-sm">
                 {t(`agents.error.${error}`)}
