@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261015-009](../tasks/active/TASK-20261015-009-sidebar-link-drag.md) 禁止侧栏导航的浏览器原生链接拖放，修复误拖显示本地地址预览，验证展开／收起和导航操作。
 
 ## Recently Completed
 

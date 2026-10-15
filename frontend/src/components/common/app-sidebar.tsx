@@ -52,7 +52,7 @@ export function AppSidebar() {
     >
       {/* 图标固定在收起态的水平中心，避免宽度过渡时切换对齐方式产生跳动。 */}
       <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-5 whitespace-nowrap">
-        <img src="/app-icon.png" alt="" className="size-6 shrink-0" />
+        <img src="/app-icon.png" alt="" draggable={false} className="size-6 shrink-0" />
         <SidebarLabel collapsed={collapsed} className="font-semibold">
           OmniProxy
         </SidebarLabel>
@@ -107,8 +107,11 @@ function SidebarLink({
       <Link
         to={item.to}
         aria-label={label}
+        // 桌面导航不提供网页链接拖放，避免误拖时出现标题与本地 URL 的拖影。
+        draggable={false}
+        onDragStart={(event) => event.preventDefault()}
         // 固定行高，防止移除文字后由较矮的图标撑高而导致整列导航上移。
-        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 overflow-hidden rounded-md px-4 text-sm whitespace-nowrap data-[active=true]:font-medium"
+        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 overflow-hidden rounded-md px-4 text-sm whitespace-nowrap select-none data-[active=true]:font-medium"
         activeProps={{ "data-active": "true" }}
       >
         <Icon className="size-4 shrink-0" />

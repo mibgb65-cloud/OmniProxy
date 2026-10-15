@@ -1,5 +1,5 @@
 import { createMemoryHistory, createRouter, RouterContextProvider } from "@tanstack/react-router"
-import { act, isInaccessible, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, isInaccessible, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -24,7 +24,7 @@ function renderSidebar() {
       </I18nProvider>
     )
   }
-  return render(<AppSidebar />, { wrapper: Wrapper })
+  return { ...render(<AppSidebar />, { wrapper: Wrapper }), router }
 }
 
 describe("AppSidebar", () => {
@@ -53,6 +53,26 @@ describe("AppSidebar", () => {
     expect(screen.getByText("Accounts")).toBeInTheDocument()
     expect(screen.queryByText("仪表盘")).not.toBeInTheDocument()
   })
+
+  it.each([false, true])(
+    "blocks native navigation dragging while preserving mouse and keyboard navigation (collapsed=%s)",
+    async (sidebarCollapsed) => {
+      useUIStore.setState({ sidebarCollapsed })
+      const user = userEvent.setup()
+      const { router, container } = renderSidebar()
+      for (const link of screen.getAllByRole("link")) {
+        expect(link).toHaveAttribute("draggable", "false")
+        expect(fireEvent.dragStart(link)).toBe(false)
+      }
+      expect(container.querySelector<HTMLImageElement>("aside img")?.draggable).toBe(false)
+      expect(router.history.location.pathname).toBe("/")
+      await user.click(screen.getByRole("link", { name: "提供商" }))
+      await waitFor(() => expect(router.history.location.pathname).toBe("/providers"))
+      act(() => screen.getByRole("link", { name: "账号" }).focus())
+      await user.keyboard("{Enter}")
+      await waitFor(() => expect(router.history.location.pathname).toBe("/accounts"))
+    },
+  )
 
   it("collapses to icons only and restores labels", async () => {
     const user = userEvent.setup()
