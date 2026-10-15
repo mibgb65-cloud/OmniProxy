@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261015-010](../tasks/active/TASK-20261015-010-mimo-provider-access-info.md) 同步小米提供商卡片的 Token Plan 标识、三集群兼容地址及按量探测范围，验证浮层与账号地址一致。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261015-010](../tasks/completed/2026-10/TASK-20261015-010-mimo-provider-access-info.md) 小米外层提供商卡片补充 Token Plan 入口和三集群 OpenAI／Anthropic 基础地址、个人／团队 Key 及模型范围，明确按量默认入口和探测范围；浮层不撑高卡片，账号表单共用地区常量。完整质量门／439 项前端测试及原生深浅主题最小窗口、布局和焦点检查通过。实现提交 `19ffc59`。
 - [TASK-20261015-009](../tasks/completed/2026-10/TASK-20261015-009-sidebar-link-drag.md) 关闭侧栏链接／品牌图片默认拖放及导航文字选中，修复误拖出现标题／本地 URL 拖影；点击和键盘导航保持可用。完整质量门／433 项前端测试及原生展开／收起拖动验证通过。实现提交 `8461b1a`。
 - [TASK-20261015-008](../tasks/completed/2026-10/TASK-20261015-008-agent-config-success-toast.md) 客户端配置保存成功改为弹窗顶部悬浮通知，5 秒收起、可手动关闭、悬停／聚焦暂停，脱离正文滚动且不改变保存状态。完整质量门／431 项前端测试、960×600 原生深浅主题与滚动验收通过；只写临时 Codex 验收夹具。实现提交 `2dfe07a`。
 - [TASK-20261015-007](../tasks/completed/2026-10/TASK-20261015-007-mimo-token-plan.md) 小米 MiMo 普通／Token Plan、个人／团队 Key 与中国／新加坡／欧洲集群，账号单个／批量／编辑、原生三协议、目录／通道路由和当次计费归属。完整质量门／428 项前端测试通过。实现提交 `f5b0591`；官方剩余 Credits、真实套餐 Key／长窗口和原生桌面显示待验收。

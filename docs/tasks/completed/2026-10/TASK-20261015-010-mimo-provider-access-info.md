@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -50,8 +50,14 @@ In Progress
 
 ## Git
 
-待提交。
+`19ffc59f774126adc141aac41659a792e265d774 fix(providers): 同步 MiMo Token Plan 接入信息`
+
+随后补交任务归档和 CURRENT 完成状态。原有四份无关未跟踪任务文档保持原样，未纳入提交。
 
 ## Result
 
 小米外层提供商卡片已同步 Token Plan 支持及三集群协议地址，按量默认入口与探测范围清晰区分，账号配置与实际调用行为保持；完整质量门及原生小窗口检查通过。
+
+## Completed
+
+2026-10-15 21:37（Asia/Singapore）
