@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -25,6 +26,7 @@ type Client interface {
 }
 
 type Info struct {
+	Kimi      *kimi.Balance          `json:"kimi,omitempty"`
 	StepFun   *stepfun.Balance       `json:"stepfun,omitempty"`
 	Available bool                   `json:"available"`
 	Entries   []deepseek.BalanceInfo `json:"entries"`
@@ -38,13 +40,14 @@ type Service struct {
 	providers ProviderReader
 	client    Client
 	stepfun   *stepfun.Client
+	kimi      *kimi.Client
 }
 
 func New(accounts AccountAccess, providers ProviderReader, client Client) *Service {
 	if client == nil {
 		client = officialClient
 	}
-	return &Service{accounts: accounts, providers: providers, client: client, stepfun: stepfun.New(nil)}
+	return &Service{accounts: accounts, providers: providers, client: client, stepfun: stepfun.New(nil), kimi: kimi.New(nil)}
 }
 
 func failure(code string) error { return errors.New("balance: " + code) }
@@ -66,6 +69,9 @@ func (s *Service) Read(ctx context.Context, id string) (Info, error) {
 	}
 	allowed := false
 	for _, value := range providers {
+		if value.ID == item.ProviderID && value.Kind == kimi.Kind {
+			return s.readKimi(readCtx, item)
+		}
 		if value.ID == item.ProviderID && value.Kind == stepfun.Kind {
 			return s.readStep(readCtx, item)
 		}

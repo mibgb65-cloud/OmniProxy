@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## Kimi 普通 API 余额（2026-10-15）
+
+`provider/kimi.ReadBalance` 复用固定地区及禁止重定向的原生 HTTP 客户端，严格校验成功状态和有界十进制响应。`application/balance` 在受保护账号版本回调内查询并复核地区／版本，以独立 Kimi DTO 返回可用、代金券及现金金额，保留负现金与精度；可用状态采用精确十进制比较。账号详情／配额和仪表盘沿用共享缓存与有界队列，无新增接口方法、迁移或依赖。见 `product/KIMI.md`、`product/BALANCE.md`。
+
 ## MiniMax 双平台／两类 Key（2026-10-15）
 
 迁移 024 保存 MiniMax 账号地区、计费类型和版本；旧 URL 只能确定地区，计费类型待用户确认。`provider/minimax` 使用固定现行 `.cn`／`.io` 主机和受保护 Key 回调处理原生三协议与模型发现，不跨通道回退。目录版本、别名路由、在途快照和历史计费身份沿用 Step／Kimi 模式。`application/minimaxquota` 查询固定 `www` 官方订阅入口并在返回前复查账号，前端共享有界缓存；不把次数零值当满额，不将本机 Tokens 当官方剩余。普通余额与高级 Responses 工具保持未开放，详见 `product/MINIMAX.md`。

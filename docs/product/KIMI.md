@@ -43,7 +43,15 @@ Responses API 当前明确仅支持 K3。Messages 参考主要描述 K3，官方
 
 契约测试使用伪 Key 和独立数据库，验证两地区原生调用、工具／推理历史、SSE、参数、安全边界、缓存及迁移。真实 API Key 调用、真实 Codex／Claude 工具任务与长窗口仍待账号验收。
 
-本次是普通开放平台模型接入。Kimi Code 订阅账号、余额、文件／Batch、托管智能体和独立搜索接口没有接入；不能将 K2.7 Code 模型名称当成订阅认证或套餐额度证明。
+本次是普通开放平台模型接入。普通 API 账号余额已接入，见下文。Kimi Code 订阅账号及其额度、文件／Batch、托管智能体和独立搜索接口没有接入；不能将 K2.7 Code 模型名称当成订阅认证或套餐额度证明。
+
+## 普通 API 余额
+
+账号卡片／列表与配额页查询所选地区的 `GET /v1/users/me/balance`：国内固定 `api.moonshot.cn`、CNY／¥，海外固定 `api.moonshot.ai`、USD／US$。显示官方可用余额、代金券余额和现金余额，保留十进制精度；现金可为负数，可用余额小于等于零标记不足，不按现金加代金券重新计算。
+
+复用受保护 Key 回调、10 秒超时、64 KiB 响应上限和稳定错误码，禁止重定向和跨地区回退，不使用提供商自定义地址。查询结束复核账号版本与地区，变更 Key 或地区后不接受旧响应。前端与配额页共享 60 秒缓存、10 分钟保留和最多两个并发；刷新及失败保留同一版本旧快照，首次失败不显示零。仪表盘只读缓存，主动检查才查询官方接口。此处是平台账户余额，多把 Key 不代表多个独立余额池，不做加总。
+
+契约与页面测试使用伪凭据；真实 Key 查询及桌面显示待实际账号验收。实施记录：TASK-20261015-006。
 
 ## 官方参考
 
@@ -52,6 +60,7 @@ Responses API 当前明确仅支持 K3。Messages 参考主要描述 K3，官方
 - [国内 API 概述](https://platform.kimi.com/docs/api/overview)、[海外 API 概述](https://platform.kimi.ai/docs/api/overview)
 - [Chat](https://platform.kimi.com/docs/api/chat)、[Responses](https://platform.kimi.com/docs/api/responses)、[Messages](https://platform.kimi.com/docs/api/messages)
 - [目录](https://platform.kimi.com/docs/api/list-models)、[思考历史](https://platform.kimi.com/docs/guide/use-thinking-models)
+- [国内余额](https://platform.kimi.com/docs/api/balance)、[海外余额](https://platform.kimi.ai/docs/api/balance)（2026-10-15 核对）
 - [Codex](https://platform.kimi.com/docs/guide/codex-kimi)、[Claude Code](https://platform.kimi.com/docs/guide/claude-code-kimi)
 
-核对日期：2026-10-14。实施记录：TASK-20261014-017。
+核对日期：模型协议 2026-10-14，余额协议 2026-10-15。实施记录：TASK-20261014-017、TASK-20261015-006。

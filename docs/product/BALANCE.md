@@ -1,6 +1,8 @@
 # API Key 账号余额查询
 
-DeepSeek 和阶跃星辰普通按量 API Key 账号支持官方余额查询。阶跃支持账号级国内／海外，账户类型与累计金额单独建模，国内已确认人民币 CNY、海外币种待确认，不套用 DeepSeek 的剩余分项及充足标志；Step Plan 剩余 Credit 未接入。阶跃详细边界见 `STEPFUN.md`，下文为 DeepSeek 协议与展示规则。
+DeepSeek、阶跃星辰和 Kimi 普通按量 API Key 账号支持官方余额查询。阶跃支持账号级国内／海外，账户类型与累计金额单独建模，国内已确认人民币 CNY、海外币种待确认，不套用 DeepSeek 的剩余分项及充足标志；Step Plan 剩余 Credit 未接入。阶跃详细边界见 `STEPFUN.md`，下文为 DeepSeek 协议与展示规则。
+
+Kimi 按账号地区查询固定官方 `/v1/users/me/balance`，国内 CNY、海外 USD，独立展示可用／代金券／现金余额。现金可为欠费负数，可用金额大于零表示余额充足，不套用充值余额语义，不用浮点计算或重新相加；详情、配额和仪表盘共享已有查询缓存及队列。10 秒超时、64 KiB 响应上限、严格成功状态和十进制字段校验，查询前后检查账号版本，禁止重定向与跨地区认证。Kimi Code 订阅额度不包含在此功能中。见 `KIMI.md` 及[国内](https://platform.kimi.com/docs/api/balance)／[海外](https://platform.kimi.ai/docs/api/balance)官方余额说明。
 
 ## 使用
 

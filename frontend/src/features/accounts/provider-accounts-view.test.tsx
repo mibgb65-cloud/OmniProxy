@@ -23,6 +23,7 @@ import {
 } from "../../services/omniproxy"
 import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
+import { readAccountBalance } from "../../services/balance"
 
 vi.mock("../../services/balance", () => ({
   readAccountBalance: vi.fn(async () => ({
@@ -127,6 +128,42 @@ describe("ProviderAccountsView", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("未找到该提供商")
     expect(screen.queryByText("主账号")).not.toBeInTheDocument()
   })
+
+  it.each(["cards", "list"] as const)(
+    "shows Kimi's official cash and voucher balances in %s mode",
+    async (accountView) => {
+      useUIStore.setState({ accountView })
+      vi.mocked(listProviders).mockResolvedValue([
+        { ...provider, id: "builtin_kimi", kind: "kimi", name: "Kimi" },
+      ])
+      vi.mocked(listAccounts).mockResolvedValue([
+        {
+          ...account,
+          providerId: "builtin_kimi",
+          authMethod: "api_key",
+          kimi: { region: "global", version: 1 },
+        },
+      ])
+      vi.mocked(readAccountBalance).mockResolvedValueOnce({
+        available: true,
+        entries: null,
+        fetchedAt: "2026-10-15T00:00:00Z",
+        kimi: {
+          currency: "USD",
+          available: "1.000000000000000001",
+          voucher: "1.000000000000000001",
+          cash: "-3.00001",
+        },
+      })
+      renderPage("builtin_kimi")
+      expect(await screen.findByText("US$1.000000000000000001")).toBeInTheDocument()
+      expect(screen.getByText("现金余额")).toBeInTheDocument()
+      expect(screen.getByText("代金券余额")).toBeInTheDocument()
+      expect(screen.getByText("-3.00001")).toBeInTheDocument()
+      expect(screen.queryByText("充值余额")).not.toBeInTheDocument()
+      expect(screen.queryByText("待接入")).not.toBeInTheDocument()
+    },
+  )
 
   it("opens a themed confirmation and cancels without deleting, restoring focus", async () => {
     const user = userEvent.setup()

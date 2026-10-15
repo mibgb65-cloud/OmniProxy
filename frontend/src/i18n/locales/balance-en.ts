@@ -1,6 +1,9 @@
 export const balanceEn = {
   "balance.title": "Balance",
   "balance.total": "Total balance",
+  "balance.availableAmount": "Available balance",
+  "balance.voucher": "Voucher balance",
+  "balance.cash": "Cash balance",
   "balance.granted": "Granted balance",
   "balance.toppedUp": "Topped-up balance",
   "balance.available": "Balance sufficient",
@@ -11,7 +14,7 @@ export const balanceEn = {
   "balance.error.unauthorized": "The API key is invalid or expired. Check or replace it.",
   "balance.error.forbidden": "This account cannot query its balance.",
   "balance.error.rate_limited": "Too many requests. Refresh later.",
-  "balance.error.service_unavailable": "The DeepSeek balance service is temporarily unavailable.",
+  "balance.error.service_unavailable": "The provider's balance service is temporarily unavailable.",
   "balance.error.network_failed": "Balance could not be loaded. Check the connection and refresh.",
   "balance.error.invalid_response": "Balance data could not be read. Refresh later.",
   "balance.error.credential_unavailable":

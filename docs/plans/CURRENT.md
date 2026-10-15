@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261015-006](../tasks/active/TASK-20261015-006-kimi-balance.md) Kimi 国内／海外普通 API 官方余额查询及账号／配额展示，实现与回归验证中。
 
 ## Recently Completed
 

@@ -50,7 +50,9 @@ export function describeQuotaAccounts(
             ? "balance"
             : provider?.kind === "openai" && account.authMethod === "subscription_login"
               ? "subscription"
-              : provider?.kind === "deepseek" &&
+              : (provider?.kind === "deepseek" ||
+                    (provider?.kind === "kimi" &&
+                      ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
                   (!account.authMethod || account.authMethod === "api_key")
                 ? "balance"
                 : provider?.kind === "google" && account.authMethod === "api_key"
@@ -107,6 +109,7 @@ export function quotaEntryStatus(
   if (!snapshot.quota && !snapshot.balance) return snapshot.pending ? "pending" : "unknown"
   if (item.kind === "balance") {
     if (snapshot.balance?.stepfun) return "unknown"
+    if (snapshot.balance?.kimi) return snapshot.balance.available ? "normal" : "exhausted"
     if (!snapshot.balance?.entries?.length) return "unknown"
     return snapshot.balance.available ? "normal" : "exhausted"
   }

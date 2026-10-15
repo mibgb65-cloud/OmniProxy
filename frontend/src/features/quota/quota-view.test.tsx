@@ -6,7 +6,7 @@ import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/su
 import { readAccountBalance } from "../../services/balance"
 import { useUIStore } from "../../stores/ui-store"
 import { selectOption } from "../../test/select-option"
-import { renderQuota, resetQuotaServices, quota } from "./quota-test-helpers"
+import { renderQuota, resetQuotaServices, quota, accounts, providers } from "./quota-test-helpers"
 
 vi.mock("../../services/omniproxy", async (original) => ({
   ...(await original<typeof import("../../services/omniproxy")>()),
@@ -74,6 +74,42 @@ describe("quota overview", () => {
     expect(screen.getByRole("button", { name: "刷新当前列表" })).toBeDisabled()
     expect(readSubscriptionQuota).toHaveBeenCalledTimes(2)
     expect(readAccountBalance).toHaveBeenCalledTimes(2)
+  })
+
+  it("queries Kimi's regional balance, counts exhaustion and skips unconfirmed platforms", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0]!, id: "builtin_kimi", kind: "kimi", name: "Kimi" },
+    ])
+    const account = {
+      ...accounts[3]!,
+      id: "kimi-known",
+      providerId: "builtin_kimi",
+      name: "Kimi CN",
+      kimi: { region: "cn", version: 1 },
+    }
+    vi.mocked(listAccounts).mockResolvedValue([
+      account,
+      { ...account, id: "kimi-unknown", name: "Kimi unknown", kimi: undefined },
+    ])
+    vi.mocked(readAccountBalance).mockResolvedValue({
+      available: false,
+      entries: null,
+      fetchedAt: "2026-10-15T00:00:00Z",
+      kimi: { currency: "CNY", available: "0.00000", voucher: "0", cash: "-3.00001" },
+    })
+    renderQuota()
+    await ready()
+    expect(await screen.findByText("¥0.00000")).toBeInTheDocument()
+    expect(screen.getByText("现金余额")).toBeInTheDocument()
+    expect(screen.getByText("-3.00001")).toBeInTheDocument()
+    expect(readAccountBalance).toHaveBeenCalledExactlyOnceWith("kimi-known")
+    expect(screen.getByText("可监控账号").closest('[data-slot="card"]')).toHaveTextContent("1")
+    expect(
+      screen.queryByRole("button", { name: "刷新 Kimi unknown 的资源" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getAllByText("额度耗尽／余额不足")[0]!.closest('[data-slot="card"]'),
+    ).toHaveTextContent("1")
   })
 
   it("retains last quota and refresh time while a row refresh fails, then allows retry", async () => {

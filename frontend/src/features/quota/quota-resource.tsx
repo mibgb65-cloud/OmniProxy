@@ -1,4 +1,5 @@
 import { MiniMaxResource } from "../accounts/minimax-resource"
+import { KimiBalanceValues } from "../accounts/kimi-balance"
 import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-resource"
 import { useTranslation } from "react-i18next"
 import { balanceError } from "../../services/balance"
@@ -35,6 +36,8 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
         </div>
       ) : entry.balance?.stepfun ? (
         <StepFunBalanceValues value={entry.balance.stepfun} />
+      ) : entry.balance?.kimi ? (
+        <KimiBalanceValues value={entry.balance.kimi} />
       ) : entry.balance ? (
         <div className="space-y-3">
           {(entry.balance.entries ?? []).map((item) => (

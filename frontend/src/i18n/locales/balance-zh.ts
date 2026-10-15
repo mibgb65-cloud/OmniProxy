@@ -1,6 +1,9 @@
 export const balanceZh = {
   "balance.title": "余额",
   "balance.total": "总余额",
+  "balance.availableAmount": "可用余额",
+  "balance.voucher": "代金券余额",
+  "balance.cash": "现金余额",
   "balance.granted": "赠送余额",
   "balance.toppedUp": "充值余额",
   "balance.available": "余额充足",
@@ -11,7 +14,7 @@ export const balanceZh = {
   "balance.error.unauthorized": "API Key 无效或已失效，请检查或更换。",
   "balance.error.forbidden": "当前账号没有余额查询权限。",
   "balance.error.rate_limited": "查询过于频繁，请稍后刷新。",
-  "balance.error.service_unavailable": "DeepSeek 余额服务暂时不可用。",
+  "balance.error.service_unavailable": "提供商余额服务暂时不可用。",
   "balance.error.network_failed": "余额查询未完成，请检查网络后刷新。",
   "balance.error.invalid_response": "余额数据暂时不可读，请稍后刷新。",
   "balance.error.credential_unavailable": "无法读取账号密钥，请检查或重新保存。",
