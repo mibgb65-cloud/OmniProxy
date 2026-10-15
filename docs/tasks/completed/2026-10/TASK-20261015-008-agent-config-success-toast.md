@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -56,7 +56,9 @@ In Progress
 
 # Git
 
-待提交。
+`2dfe07a7baff202b141e0321570f10586bc9ec17 fix(gateway): 将配置保存成功改为悬浮提示`
+
+随后补交归档与 CURRENT 完成状态。仅提交本任务文件，原有四份无关未跟踪任务记录保持原样。
 
 # Deviations
 
@@ -65,3 +67,7 @@ In Progress
 # Result
 
 已将滚动正文末尾的成功文字替换为弹窗顶部的短暂悬浮通知，无需滚动即可确认保存与加密备份结果；完整质量门、交互回归及深浅主题原生滚动验收通过。
+
+# Completed
+
+2026-10-15 17:55（Asia/Singapore）
