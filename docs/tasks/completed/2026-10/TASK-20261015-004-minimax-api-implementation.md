@@ -59,7 +59,7 @@ Completed
 - PASS：`task verify BIN_DIR=tmp/minimax-20261015/verify-bin`，格式、Go vet／staticcheck／ESLint、类型检查、全部 Go 测试、74 个前端测试文件／407 项测试与生产构建通过。已有 uname／tail 缺失、jsdom scrollTo 和大包提示不影响结果，无新增 Lint 警告。
 - PASS：质量门期间最后一处配额展示分支另行完成 Prettier／ESLint／TypeScript 检查；完整前端测试和生产构建已覆盖该最终分支。随后仅添加常量中文说明，不改变行为。
 - PASS：项目原生开发窗口 PID 43740、路径 `E:/go/new/wails3-v/OmniProxy/bin/omniproxy.exe` 验证新表单与四组合／批量／深浅主题；独立 test profile 的质量门构建也完成相同检查并逐张查看截图。未输入／保存 Key，恢复原主题，隔离进程从托盘正常退出；证据在忽略目录 `tmp/minimax-20261015/`。
-- `git diff --check`、UTF-8 无 BOM／LF、暂存范围和敏感内容检查见提交前复核；既有四份无关未跟踪任务记录保持原状。
+- PASS：`git diff --check`、UTF-8 无 BOM／LF、任务链接、暂存范围及新增内容敏感模式检查；仅提交本任务 76 个文件，既有四份无关未跟踪任务记录保持原状。
 
 # Documentation
 
@@ -75,7 +75,7 @@ Completed
 
 # Git
 
-待提交后记录实现提交；保留既有四份无关未跟踪任务记录。
+`0014521` feat(minimax): 接入双平台按量与订阅账号及原生协议。保留既有四份无关未跟踪任务记录，未推送。
 
 # Result
 
