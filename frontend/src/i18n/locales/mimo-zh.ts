@@ -1,4 +1,13 @@
 export const mimoZh = {
+  "mimo.openAccess": "查看 Token Plan 接入信息",
+  "mimo.closeAccess": "关闭 Token Plan 接入信息",
+  "mimo.accessTitle": "Token Plan 接入",
+  "mimo.accessDescription":
+    "以下为兼容协议的基础地址。个人版使用 tp- Key，团队版使用 ttp- Key；请在账号中选择控制台指定的集群。",
+  "mimo.accessModels": "套餐支持 mimo-v2.6-pro、mimo-v2.6-flash；高速版使用普通按量 API。",
+  "mimo.apiEndpoint": "按量入口",
+  "mimo.probePayg": "测试按量入口",
+  "mimo.probeScope": "卡片测试范围：普通按量默认入口。Token Plan 调用使用账号所选集群。",
   "mimo.connection": "小米 MiMo 连接",
   "mimo.billing": "计费方式",
   "mimo.payg": "普通按量 API",

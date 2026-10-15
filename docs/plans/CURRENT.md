@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261015-010](../tasks/active/TASK-20261015-010-mimo-provider-access-info.md) 同步小米提供商卡片的 Token Plan 标识、三集群兼容地址及按量探测范围，验证浮层与账号地址一致。
 
 ## Recently Completed
 

@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next"
 import { SelectField } from "../../components/ui/select-field"
-import { miMoEndpoint, validMiMoOptions, type MiMoOptions } from "../../services/mimo"
+import {
+  MIMO_PLAN_REGIONS,
+  miMoEndpoint,
+  validMiMoOptions,
+  type MiMoOptions,
+} from "../../services/mimo"
 import type { AccountItem } from "../../services/omniproxy"
 
 export function MiMoOptionsFields({
@@ -53,11 +58,10 @@ export function MiMoOptionsFields({
             disabled={disabled}
             aria-invalid={invalid}
             aria-describedby="mimo-key-hint"
-            options={[
-              { value: "cn", label: t("mimo.cn") },
-              { value: "sgp", label: t("mimo.sgp") },
-              { value: "ams", label: t("mimo.ams") },
-            ]}
+            options={MIMO_PLAN_REGIONS.map((region) => ({
+              value: region,
+              label: t(`mimo.${region}`),
+            }))}
             onValueChange={(region) => onChange({ ...value, region })}
           />
         </div>

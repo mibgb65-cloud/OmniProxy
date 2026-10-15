@@ -1,4 +1,15 @@
 export const mimoEn = {
+  "mimo.openAccess": "View Token Plan access details",
+  "mimo.closeAccess": "Close Token Plan access details",
+  "mimo.accessTitle": "Token Plan access",
+  "mimo.accessDescription":
+    "These are base URLs for the compatible protocols. Use a personal tp- or team ttp- Key, and select the cluster shown in the console when configuring the account.",
+  "mimo.accessModels":
+    "The plan supports mimo-v2.6-pro and mimo-v2.6-flash. Ultraspeed uses the pay-as-you-go API.",
+  "mimo.apiEndpoint": "Pay-as-you-go",
+  "mimo.probePayg": "Test pay-as-you-go",
+  "mimo.probeScope":
+    "The card tests the default pay-as-you-go endpoint. Token Plan calls use the cluster selected for the account.",
   "mimo.connection": "Xiaomi MiMo connection",
   "mimo.billing": "Billing mode",
   "mimo.payg": "Pay-as-you-go API",

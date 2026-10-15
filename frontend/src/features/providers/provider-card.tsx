@@ -7,6 +7,7 @@ import type { ProviderProbeResult } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "./provider-brand-icon"
 import { ProviderPowerButton } from "./provider-power-button"
 import { ModelPreview } from "./model-preview"
+import { MiMoAccessDetails } from "./mimo-access-details"
 import "./provider-probe-tooltip.css"
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
@@ -57,8 +58,13 @@ export function ProviderCard({
               </Tooltip>
               <ModelPreview name={name} models={models} />
               {endpoint ? (
-                <Tooltip content={endpoint}>
-                  <p className="text-muted-foreground truncate text-xs">{endpoint}</p>
+                <Tooltip
+                  content={kind === "mimo" ? `${t("mimo.apiEndpoint")} · ${endpoint}` : endpoint}
+                >
+                  <p className="text-muted-foreground truncate text-xs">
+                    {kind === "mimo" ? `${t("mimo.apiEndpoint")} · ` : ""}
+                    {endpoint}
+                  </p>
                 </Tooltip>
               ) : null}
             </div>
@@ -76,6 +82,7 @@ export function ProviderCard({
               {t("providers.apiKey")}
             </span>
           ) : null}
+          {kind === "mimo" && authMethods?.includes("api_key") ? <MiMoAccessDetails /> : null}
           {plannedAuthMethods?.includes("subscription_login") ? (
             <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
               {t("providers.subscriptionPlanned")}
@@ -122,7 +129,9 @@ export function ProviderCard({
                 disabled={probePending || !endpoint}
                 className="cursor-pointer"
               >
-                {probePending ? t("providers.testing") : t("providers.test")}
+                {probePending
+                  ? t("providers.testing")
+                  : t(kind === "mimo" ? "mimo.probePayg" : "providers.test")}
               </Button>
             </div>
             {actions}
