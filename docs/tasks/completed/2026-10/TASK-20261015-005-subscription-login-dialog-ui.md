@@ -59,7 +59,7 @@ Completed
 
 # Git
 
-待提交后记录实现提交；保留四份既有未跟踪任务记录。
+`4086f19` feat(accounts): 优化 ChatGPT 订阅登录弹窗。仅提交本任务 10 个文件，四份既有未跟踪任务记录保持原状，未推送。
 
 # Deviations
 
