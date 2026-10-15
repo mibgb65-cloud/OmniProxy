@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261015-002](../tasks/completed/2026-10/TASK-20261015-002-remove-agent-config-intro.md) 移除一键配置弹窗的两段通用说明及中英文孤立翻译，将可访问描述关联到现有重启提示；原生窗口和完整质量门／401 项前端测试通过。实现提交 `34f855f`。
 - [TASK-20261014-017](../tasks/completed/2026-10/TASK-20261014-017-kimi-api-implementation.md) Kimi 四款现役模型、国内／海外账号配置、模型同步与地区路由、原生思考／工具／SSE／用量；K3 三协议、K2.7 Code／K2.6 Chat／Messages、高速版 Chat。完整质量门／401 项前端测试及原生深浅主题通过。实现提交 `a20b0ab`，真实 Key／长窗口待验证。
 - [TASK-20261014-016](../tasks/completed/2026-10/TASK-20261014-016-stepfun-api-implementation.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合、账号选项、隔离路由、原生三协议及普通余额；国内人民币／海外币种待确认，完整质量门／397 项前端测试及原生深浅主题通过。实现提交 `77b11d5`，真实 Key／长窗口和 Step Plan 剩余查询待验证。
 - [TASK-20261014-015](../tasks/completed/2026-10/TASK-20261014-015-stepfun-api-plan.md) 阶跃星辰国内／海外 × 按量 API／Step Plan 四组合规划，明确账号级选项、计费池隔离、原生三协议及余额／Credit 边界；官方资料和文档检查通过。规划提交 `3f3212d`，接入代码尚未实施。

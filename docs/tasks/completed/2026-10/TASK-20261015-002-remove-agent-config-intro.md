@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -48,15 +48,17 @@ In Progress
 
 ## Documentation
 
-按实际结果更新当前任务看板；产品配置行为未变。
+已在 CURRENT 登记完成；产品配置行为未变，无需修改产品或接口文档。
 
 ## Git
 
-待提交。四个既有未跟踪任务记录不属于本任务，保持原样。
+`34f855faa06a6eac061e90d75e9d44a5c9cb3ea9 fix(gateway): 精简一键配置弹窗说明`
+
+仅提交本任务代码与记录；四个既有未跟踪任务记录保持原样。
 
 ## Result
 
-两段说明已从共用弹窗移除，开发窗口已更新；原生界面及完整质量门通过，待提交归档。
+两段说明已从共用弹窗移除，开发窗口已更新；原生界面及完整质量门通过，代码已提交并归档本记录。构建后再次核对 main 原生窗口、开发版健康接口和 Vite 热更新，均正常。
 
 ## Deviations
 
@@ -65,3 +67,7 @@ None.
 ## Remaining Risks
 
 无新增业务风险。既有 jsdom `scrollTo` 与 Vite 体积提示未影响验证结果。
+
+## Completed
+
+2026-10-15 11:37（Asia/Singapore）
