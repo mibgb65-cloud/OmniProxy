@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -125,8 +125,16 @@ None.
 
 # Git
 
-待提交。
+## Commit
+
+`e4958db998efcf2c87cb380c9e7174ab6b77abce feat(balance): 接入 Kimi 国内与海外 API 余额显示`
+
+完成后补交任务归档与 CURRENT 状态更新。未提交、改写或删除原有四份无关未跟踪任务文档。
 
 # Result
 
 已接入 Kimi 普通 API 账号的国内／海外官方余额及账号／配额展示，并纳入仪表盘资源分类；完整质量门通过。真实 Key 和原生桌面验收仍待后续，Kimi Code 订阅额度不属于本次实现。
+
+# Completed
+
+2026-10-15 16:45（Asia/Singapore）
