@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -45,8 +45,14 @@ In Progress
 
 ## Git
 
-待提交。
+`8461b1a588a416c07332862c51e5ca36b1f8bf4f fix(frontend): 禁止侧栏导航意外拖出链接预览`
+
+随后补交任务归档和 CURRENT 完成状态。原有四份无关未跟踪任务文档保持原样，未纳入提交。
 
 ## Result
 
 已修复侧栏误拖触发 WebView2 原生链接拖放预览的问题，正常导航保持可用；完整质量门与原生拖动验证通过。
+
+## Completed
+
+2026-10-15 18:05（Asia/Singapore）
