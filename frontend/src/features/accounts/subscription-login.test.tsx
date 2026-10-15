@@ -94,6 +94,9 @@ describe("ChatGPT subscription sign-in", () => {
     const { user, client } = setup()
     client.setQueryData(["accounts"], [])
     await user.click(screen.getByRole("button", { name: "登录 ChatGPT" }))
+    expect(screen.getByRole("dialog", { name: "登录 ChatGPT 账号" })).toBeInTheDocument()
+    expect(screen.getByText("授权凭证仅保存在本机系统凭证库。")).toBeInTheDocument()
+    expect(screen.queryByText(/转发将在后续接入/)).not.toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "开始授权" }))
     expect(await screen.findByText("等待官方页面完成授权")).toBeInTheDocument()
     expect(beginSubscription).toHaveBeenCalledWith({

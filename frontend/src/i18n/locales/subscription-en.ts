@@ -113,11 +113,14 @@ export const subscriptionEn = {
   "subscription.deleteNotice":
     "Signs out this account and removes its local authorization credentials and record.",
   "subscription.add": "Sign in with ChatGPT",
-  "subscription.title": "ChatGPT subscription sign-in",
+  "subscription.title": "Sign in to ChatGPT",
   "subscription.type": "ChatGPT / Codex",
   "subscription.description":
-    "Authorize on the official OpenAI page to use your ChatGPT account’s Codex access. Credentials stay in the system credential store.",
+    "Connect through the official OpenAI page to use your Codex subscription access.",
   "subscription.namePlaceholder": "Optional; defaults to account identity",
+  "subscription.browserHint": "Sign in and authorize in your browser.",
+  "subscription.deviceHint": "Enter a device code on the official page.",
+  "subscription.secureStorage": "Credentials stay in your local system credential store.",
   "subscription.mode": "Sign-in method",
   "subscription.browser": "Browser authorization",
   "subscription.device": "Device code",
@@ -128,8 +131,6 @@ export const subscriptionEn = {
   "subscription.open": "Open official authorization page",
   "subscription.completed": "Authorization complete. Account saved.",
   "subscription.cancelled": "Authorization cancelled.",
-  "subscription.scope":
-    "This version manages account authorization. Subscription request forwarding will follow.",
   "subscription.starting": "Starting sign-in…",
   "subscription.start": "Start authorization",
   "subscription.done": "Done",
