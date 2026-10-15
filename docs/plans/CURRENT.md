@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261015-007](../tasks/active/TASK-20261015-007-mimo-token-plan.md) 小米 MiMo Token Plan 个人／团队 Key、中国／新加坡／欧洲集群、账号配置及通道路由，完整验证中。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261015-007](../tasks/completed/2026-10/TASK-20261015-007-mimo-token-plan.md) 小米 MiMo 普通／Token Plan、个人／团队 Key 与中国／新加坡／欧洲集群，账号单个／批量／编辑、原生三协议、目录／通道路由和当次计费归属。完整质量门／428 项前端测试通过。实现提交 `f5b0591`；官方剩余 Credits、真实套餐 Key／长窗口和原生桌面显示待验收。
 - [TASK-20261015-006](../tasks/completed/2026-10/TASK-20261015-006-kimi-balance.md) Kimi 国内／海外普通 API 官方可用、代金券与现金余额，账号卡片／列表及配额展示、仪表盘资源分类，复用版本隔离和共享缓存。完整质量门／415 项前端测试通过。实现提交 `e4958db`；真实 Key／原生桌面显示待验收，Code 订阅额度未接入。
 - [TASK-20261015-005](../tasks/completed/2026-10/TASK-20261015-005-subscription-login-dialog-ui.md) ChatGPT 登录弹窗品牌标题、授权方式卡片、固定操作区和状态面板，移除过时转发提示；完整质量门／408 项前端测试、原生深浅主题和 960×600 最小窗口通过，未触发真实授权。实现提交 `4086f19`。
 - [TASK-20261015-004](../tasks/completed/2026-10/TASK-20261015-004-minimax-api-implementation.md) MiniMax 国内／海外 × 按量／订阅账号、原生文本三协议／思考／函数工具／SSE、目录与隔离路由、当次用量及官方订阅窗口；完整质量门／407 项前端测试、实际开发与隔离原生深浅主题通过。实现提交 `0014521`；普通余额、高级 Responses 工具及真实 Key／长窗口仍待验证。

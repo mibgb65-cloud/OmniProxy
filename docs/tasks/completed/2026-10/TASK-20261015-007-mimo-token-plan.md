@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -133,8 +133,16 @@ None.
 
 # Git
 
-待提交。
+## Commit
+
+`f5b059166bd23f369cd9ca4e1029d89e3e65b4ed feat(mimo): 接入 Token Plan 三地区账号与原生调用`
+
+随后提交任务归档和 CURRENT 完成状态。原有四份无关未跟踪任务文档保持原样，未纳入提交。
 
 # Result
 
 已完成 MiMo Token Plan 个人／团队 Key 和中国／新加坡／欧洲集群接入，支持账号配置、原生调用、模型目录、通道路由及当次用量归属；完整质量门通过。官方套餐剩余尚无已确认的 Key 接口，显示未知并提供固定平台入口；真实账号与原生桌面验收仍待后续。
+
+# Completed
+
+2026-10-15 17:11（Asia/Singapore）
