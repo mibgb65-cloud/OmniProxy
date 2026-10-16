@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -74,8 +74,14 @@ In Progress
 
 # Git
 
-待提交。
+实现提交：`88714b7d8ff2cc01ce548eee574cc3de827aa47f feat(routing): 统一 River 模型路由并恢复 DeepSeek 双上下文选项`。
+
+分支 `codex/river-builtin-provider`；归档记录及看板由后续文档提交保存。
 
 # Result
 
-待完成。
+短名称、逻辑 Flash 归组和服务商优先级、DeepSeek 普通／1M 双选及旧配置兼容已完成。当前开发窗口路由归组已生效，客户端菜单通过既有受管刷新流程更新，运行中的 Claude 需重新加载菜单；未发起真实推理或新增智谱适配器。
+
+# Completed
+
+2026-10-17（Asia/Singapore）

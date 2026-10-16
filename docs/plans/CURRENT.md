@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261017-003](../tasks/active/TASK-20261017-003-unified-model-routing-and-labels.md)：统一 River 短名称、Flash 服务商优先级与 DeepSeek 普通／1M 双选项，正在验证。
+暂无进行中的任务。
 
 ## Recently Completed
 
+- [TASK-20261017-003](../tasks/completed/2026-10/TASK-20261017-003-unified-model-routing-and-labels.md)：River NVIDIA／GLM 短名称、Flash 与直连 DeepSeek 共用优先级、DeepSeek 普通／1M 双选及旧 ID／规则／菜单默认兼容；迁移 030 保留已有逻辑偏好。完整质量门／474 项前端测试及当前开发窗口归组验收通过；实现提交 `88714b7`。
 - [TASK-20261017-002](../tasks/completed/2026-10/TASK-20261017-002-river-provider-icon.md)：补齐 River 官方本地图标，保留品牌底色、比例与圆角尺寸，修复共享入口的通用图标回退。完整质量门／473 项前端测试及当前开发窗口深浅主题验收通过；实现提交 `288c748`。
 - [TASK-20261017-001](../tasks/completed/2026-10/TASK-20261017-001-river-builtin-provider.md)：River 第十一家内置服务商，三款官方模型、账号目录同步、路由、原生 Chat／Responses 和 Messages 文本工具转换。完整质量门／472 项前端测试与隔离原生窗口验收通过；实现提交 `ad8ada2`。真实 Key、图片及长窗口仍待验证。
 - [TASK-20261016-009](../tasks/completed/2026-10/TASK-20261016-009-google-subscription-quota.md)：Google Antigravity 真实分组额度、重置时间、共享缓存与可选模型浮层；真实只读查询返回两组四窗口／6 个型号，区分 3 个 Gemini Chat 适配与 3 个第三方待接入型号。完整质量门／469 项前端测试及开发窗口验收通过，未发送推理。实现提交 `662361b`。
