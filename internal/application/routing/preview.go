@@ -10,10 +10,11 @@ import (
 )
 
 type snapshot struct {
-	providers   []provider.Configuration
-	accounts    []account.Item
-	models      []discoveredModel
-	preferences map[string][]string
+	providers    []provider.Configuration
+	accounts     []account.Item
+	models       []discoveredModel
+	preferences  map[string][]string
+	mimoSettings MiMoSettings
 }
 
 func (s *Service) snapshot(ctx context.Context) (snapshot, error) {
@@ -36,7 +37,11 @@ func (s *Service) snapshot(ctx context.Context) (snapshot, error) {
 	if err != nil {
 		return snapshot{}, err
 	}
-	return snapshot{providers: providers, accounts: accounts, models: models, preferences: preferences}, nil
+	mimoSettings, err := s.GetMiMoSettings(ctx)
+	if err != nil {
+		return snapshot{}, err
+	}
+	return snapshot{providers: providers, accounts: accounts, models: models, preferences: preferences, mimoSettings: mimoSettings}, nil
 }
 
 // List 读取配置和实时诊断，不读取凭证；删除目标后规则仍可编辑修复。
@@ -150,10 +155,7 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 	for _, account := range data.accounts {
 		accounts = append(accounts, core.Account{ID: account.ID, ProviderID: account.ProviderID, CreatedAt: account.CreatedAt, Enabled: account.Enabled && eligible(data, account, result.Model)})
 	}
-	if mimoAmbiguous(data, allowed, result.Model, rule.AccountID) {
-		result.ErrorCode = "ambiguous_mimo_pool"
-		return result
-	}
+	prioritizeMiMoAccounts(data, accounts, allowed, rule.AccountID)
 	if minimaxAmbiguous(data, allowed, result.Model, rule.AccountID) {
 		result.ErrorCode = "ambiguous_minimax_pool"
 		return result

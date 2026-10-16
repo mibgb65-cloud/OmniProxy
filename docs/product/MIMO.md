@@ -4,7 +4,7 @@
 
 提供商总览卡片同时展示 API Key 和可展开的 Token Plan 标识。套餐浮层列出中国／新加坡／欧洲的 OpenAI 与 Anthropic 兼容基础地址、个人／团队 Key 说明及套餐模型范围；打开明细不会撑高卡片。卡片上的常驻地址明确标为「按量入口」，连通性按钮为「测试按量入口」；实际套餐转发仍由账号所选集群决定。
 
-账号详情页在「卡片／列表」切换左侧提供设置按钮，与 OpenAI 使用同款入口和局部浮层。当前面板显示「暂无可配置项」，支持关闭按钮、再次点击入口、Escape 和外部点击关闭。
+账号详情页在「卡片／列表」切换左侧提供设置按钮，与 OpenAI 使用同款入口和局部浮层。面板中的「默认使用顺序」可选 `Token Plan → API Key（按量）` 或 `API Key（按量） → Token Plan`，初始 Token Plan 优先，选择后自动保存并对下一次请求生效。支持关闭按钮、再次点击入口、Escape 和外部点击关闭；读取失败可重试，保存失败保留原顺序。
 
 1. 在账号页选择已有的 Xiaomi MiMo 提供商，选择「普通按量 API」或「Token Plan」。套餐账号选择控制台指定的中国／新加坡／欧洲集群，填入个人 `tp-` 或团队 `ttp-` 专属 Key；普通按量使用原普通 Key。单个、批量与编辑均支持，批量共用计费／集群选项。凭证沿用受保护存储，不写入数据库或日志。
 2. 自动显示明确标注「官方预设 · 账号访问权限待验证」的对话模型。可在路由页的模型目录选择该账号，点击「同步官方模型」，查询实际 `/v1/models`。
@@ -42,7 +42,7 @@ Token Plan 当前仅列入 `mimo-v2.6-pro`、`mimo-v2.6-flash`；高速版不属
 | 新加坡 sgp | `https://token-plan-sgp.xiaomimimo.com/v1` | `https://token-plan-sgp.xiaomimimo.com/anthropic/v1/messages` |
 | 欧洲 ams | `https://token-plan-ams.xiaomimimo.com/v1` | `https://token-plan-ams.xiaomimimo.com/anthropic/v1/messages` |
 
-Chat Completions／Responses／模型发现分别使用基础地址后的 `/chat/completions`、`/responses`、`/models`；Messages 使用独立 `/anthropic/v1/messages`。套餐由账号结构化选项解析精确官方主机，不使用提供商的按量默认地址，也不自动探测、跨集群重试或回退到按量。普通通道拒绝套餐 Key，套餐拒绝普通 Key。实际套餐集群以官方控制台显示为准。
+Chat Completions／Responses／模型发现分别使用基础地址后的 `/chat/completions`、`/responses`、`/models`；Messages 使用独立 `/anthropic/v1/messages`。套餐由账号结构化选项解析精确官方主机，不使用提供商的按量默认地址，也不自动探测或在请求失败后跨集群／计费通道重试。普通通道拒绝套餐 Key，套餐拒绝普通 Key。实际套餐集群以官方控制台显示为准。
 
 JSON／SSE 原样返回，思考内容、工具调用关联和增量事件不经跨协议转换；官方用量由既有观察器记录。Chat 流式请求合并 `stream_options.include_usage=true`，兼容 `max_tokens` 到官方 `max_completion_tokens`。输出参数、思考开关、消息／工具类型及整体请求大小均受校验。
 
@@ -60,7 +60,9 @@ Responses 不支持上游持久响应引用、后台任务和 context_management
 
 迁移 025 保存账号级 MiMo 计费方式、套餐集群和版本。旧官方与可识别回环按量地址保持按量，未知地址提示确认；不读取 Key 猜套餐。修改集群或计费方式清除旧目录并递增通道版本；替换 Key 使原凭据快照失效，重命名保留通道版本。目录同步和网关转发通过账号版本受控读取 Key，同步写回前复核版本。
 
-同时存在多个计费通道／集群时，裸模型名提示歧义，可使用 `mimo-api/mimo-v2.6-pro`、`mimo-cn-plan/mimo-v2.6-pro`、`mimo-sgp-plan/mimo-v2.6-pro`、`mimo-ams-plan/mimo-v2.6-pro`，或创建固定账号的精确规则。显式规则优先；通道名只在本机解析，上游仍接收原模型 ID。网关模型目录及现有客户端配置流程共享这项决策。请求历史记录当次 `billingMode` 和区域，不因账号后续编辑而改变。
+同时存在多个计费通道／集群时，裸模型名按默认顺序选择：先遵循服务商优先级，每个服务商内优先选择首选计费方式的已启用且支持该模型账号；没有候选时选择另一计费方式。同一通道及多个套餐集群沿用账号创建时间、ID 的稳定顺序；例如高速版仅普通按量支持，即使 Token Plan 优先也选择普通按量。额度未知不会被推断为满额或耗尽，请求发出后的失败不换账号／通道重试。
+
+公共模型列表、网关 `/v1/models` 及受管客户端目录仅发布一次原模型名，不再自动列出各个 MiMo 通道副本。旧 `mimo-api/mimo-v2.6-pro`、`mimo-cn-plan/mimo-v2.6-pro`、`mimo-sgp-plan/mimo-v2.6-pro`、`mimo-ams-plan/mimo-v2.6-pro` 继续兼容解析，包括旧 Claude `[1m]`／桌面编码 ID；用户显式创建的别名继续发布。固定账号及显式通道优先于默认顺序，通道名只在本机解析，上游仍接收原模型 ID。设置保存沿用已有受管目录刷新，客户端可能需要重新加载目录；不修改凭据或集群，也不改变已选定目标的在途请求。请求历史记录当次 `billingMode` 和区域，不因账号后续编辑而改变。
 
 ### 套餐资源与验证边界
 
@@ -81,4 +83,4 @@ Responses 不支持上游持久响应引用、后台任务和 context_management
 - [官方 OpenCode 区域配置](https://github.com/XiaomiMiMo/awesome-mimo-agent/blob/main/docs/opencode.md)
 - [API Key 额度接口功能请求](https://github.com/XiaomiMiMo/MiMo-Code/issues/2495)（不能作为接口已发布的依据）
 
-相关任务：TASK-20261014-011、TASK-20261015-007。Token Plan 协议核对：2026-10-15。
+相关任务：TASK-20261014-011、TASK-20261015-007、TASK-20261016-003；默认顺序见 ADR-010。Token Plan 协议核对：2026-10-15。

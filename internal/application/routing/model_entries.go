@@ -14,6 +14,15 @@ import (
 
 // Catalog 使用实际路由决策的账号元数据，不把其他同名模型的能力混入目标。
 func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
+	return s.catalog(ctx, false)
+}
+
+// CompatibilityCatalog 仅供旧 Claude 上下文／桌面编码 ID 解析，不重新公布通道重复项。
+func (s *Service) CompatibilityCatalog(ctx context.Context) ([]catalog.Entry, error) {
+	return s.catalog(ctx, true)
+}
+
+func (s *Service) catalog(ctx context.Context, legacyMiMo bool) ([]catalog.Entry, error) {
 	data, err := s.snapshot(ctx)
 	if err != nil {
 		return nil, err
@@ -23,7 +32,11 @@ func (s *Service) Catalog(ctx context.Context) ([]catalog.Entry, error) {
 		return nil, err
 	}
 	ids := originalModels(data)
-	rules = append(append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...), mimoAliases(data)...)
+	// MiMo 同名模型按默认计费顺序解析；旧通道别名仅兼容解析，不再自动发布到菜单。
+	rules = append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...)
+	if legacyMiMo {
+		rules = append(rules, mimoAliases(data)...)
+	}
 	for _, rule := range rules {
 		if rule.Enabled {
 			ids = append(ids, rule.Alias)

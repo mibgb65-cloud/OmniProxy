@@ -46,6 +46,8 @@ rather than editing history.
 
 ## Index
 
+MiMo 默认通道选择与目录去重见 [ADR-010](ADR-010-mimo-default-billing-order.md)。
+
 | ADR                                                              | Status  | Summary                                   |
 | ---------------------------------------------------------------- | ------- | ----------------------------------------- |
 | [ADR-001](ADR-001-wails3-go-react-stack.md)                      | Accepted| Wails 3 + Go core + React frontend stack  |

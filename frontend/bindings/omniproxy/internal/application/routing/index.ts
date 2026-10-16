@@ -5,6 +5,7 @@ export type {
     DefaultRoute,
     Input,
     Item,
+    MiMoSettings,
     Preview,
     ProviderOption,
     ProviderPriority

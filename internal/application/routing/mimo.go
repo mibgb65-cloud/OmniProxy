@@ -54,21 +54,26 @@ func mimoTargetSupports(data snapshot, providerID, accountID, model string) bool
 	return false
 }
 
-func mimoAmbiguous(data snapshot, allowed map[string]bool, model, fixed string) bool {
+// 每个服务商先选有合格账号的首选计费通道；其后仍使用核心的服务商／创建时间顺序。
+// 固定账号和兼容的显式通道别名不受默认顺序覆盖，也不在请求失败后换通道重试。
+func prioritizeMiMoAccounts(data snapshot, candidates []core.Account, allowed map[string]bool, fixed string) {
 	if fixed != "" {
-		return false
+		return
 	}
-	var first *mimo.Options
-	for _, a := range data.accounts {
-		if !a.Enabled || a.AuthMethod != account.AuthAPIKey || !allowed[a.ProviderID] || a.MiMo == nil || !mimoTargetSupports(data, a.ProviderID, a.ID, model) {
+	modes := map[string]string{}
+	for index, a := range data.accounts {
+		if !candidates[index].Enabled || !allowed[a.ProviderID] || a.MiMo == nil || !a.MiMo.Valid() {
 			continue
 		}
-		if first != nil && !first.SamePool(*a.MiMo) {
-			return true
+		if modes[a.ProviderID] == "" || a.MiMo.BillingMode == data.mimoSettings.PreferredBillingMode {
+			modes[a.ProviderID] = a.MiMo.BillingMode
 		}
-		first = a.MiMo
 	}
-	return false
+	for index, a := range data.accounts {
+		if a.MiMo != nil && modes[a.ProviderID] != "" && a.MiMo.BillingMode != modes[a.ProviderID] {
+			candidates[index].Enabled = false
+		}
+	}
 }
 
 // 默认通道别名由结构化配置生成，再精确匹配，不根据用户输入拆解并猜测计费方式。

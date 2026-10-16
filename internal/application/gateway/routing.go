@@ -29,6 +29,17 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 		}
 		model, found := catalog.ResolveClaudeModel(entries, request.Model)
 		if !found {
+			if source, ok := s.router.(interface {
+				CompatibilityCatalog(context.Context) ([]catalog.Entry, error)
+			}); ok {
+				legacy, err := source.CompatibilityCatalog(ctx)
+				if err != nil {
+					return request, proxy.Failure("model_catalog_unavailable", 503)
+				}
+				model, found = catalog.ResolveClaudeModel(legacy, request.Model)
+			}
+		}
+		if !found {
 			return request, proxy.Failure("unsupported_model", 400)
 		}
 		body, err := core.RewriteModel(request.Body, model)

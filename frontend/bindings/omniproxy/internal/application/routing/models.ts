@@ -40,6 +40,13 @@ export interface Item {
 }
 
 /**
+ * MiMoSettings 是所有 MiMo 提供商共用的默认计费通道顺序。
+ */
+export interface MiMoSettings {
+    "preferredBillingMode": string;
+}
+
+/**
  * Preview 包含配置解析结果，不读取密钥、调用模型或返回凭证引用。
  */
 export interface Preview {

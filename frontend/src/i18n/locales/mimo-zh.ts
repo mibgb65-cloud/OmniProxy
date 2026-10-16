@@ -1,7 +1,19 @@
 export const mimoZh = {
   "mimo.settings.title": "小米 MiMo 账号设置",
   "mimo.settings.close": "关闭账号设置",
-  "mimo.settings.empty": "暂无可配置项",
+  "mimo.settings.order": "默认使用顺序",
+  "mimo.settings.planFirst": "Token Plan → API Key（按量）",
+  "mimo.settings.apiFirst": "API Key（按量） → Token Plan",
+  "mimo.settings.orderDescription":
+    "同名模型只显示一次。优先使用所选通道；没有已启用且支持该模型的账号时，使用下一通道。",
+  "mimo.settings.orderScope":
+    "修改后自动保存，适用于所有小米 MiMo 账号。固定账号与显式通道优先；同一通道按账号创建顺序选择，请求失败不会换通道重试。",
+  "mimo.settings.loading": "正在读取默认顺序…",
+  "mimo.settings.loadFailed": "无法读取默认使用顺序，请重试。",
+  "mimo.settings.retry": "重新读取",
+  "mimo.settings.saveFailed": "保存失败，原有顺序已保留，请重试。",
+  "mimo.settings.saving": "正在保存…",
+  "mimo.settings.saved": "默认使用顺序已保存并生效。",
   "mimo.openAccess": "查看 Token Plan 接入信息",
   "mimo.closeAccess": "关闭 Token Plan 接入信息",
   "mimo.accessTitle": "Token Plan 接入",
@@ -24,7 +36,7 @@ export const mimoZh = {
   "mimo.keyHint":
     "普通按量使用普通 Key；Token Plan 使用个人 tp- 或团队 ttp- Key，并选择控制台显示的集群。一批账号共用此选择。",
   "mimo.routingHint":
-    "普通按量和 Token Plan 分别计费；存在多个通道时，请选择通道模型名或固定账号。套餐调用失败不会自动改用按量通道。",
+    "普通按量和 Token Plan 分别计费；同名模型按设置中的默认使用顺序选择账号，也可用固定账号或显式通道。请求失败不会换通道重试。",
   "mimo.quotaTitle": "Token Plan 套餐额度",
   "mimo.quotaUnknown":
     "官方剩余 Credits 暂未查询。本机 Token 用量可在用量页查看；套餐额度和有效期请到官方平台查询。",

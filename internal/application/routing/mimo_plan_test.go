@@ -30,8 +30,8 @@ func TestMiMoPlanRoutingSeparatesClustersAndBillingPools(t *testing.T) {
 		}
 	}
 	preview, err := s.Resolve(ctx, "mimo-v2.6-pro")
-	if err != nil || preview.Routable || preview.ErrorCode != "ambiguous_mimo_pool" {
-		t.Fatal("ambiguous cluster guessed", preview, err)
+	if err != nil || !preview.Routable || preview.AccountID != cnID {
+		t.Fatal("default plan order not applied", preview, err)
 	}
 	preview, err = s.Resolve(ctx, "fixed-cn")
 	if err != nil || !preview.Routable {

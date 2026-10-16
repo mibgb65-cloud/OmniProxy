@@ -276,6 +276,13 @@ export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings>
 }
 
 /**
+ * GetMiMoSettings 读取 MiMo 默认计费顺序，不访问凭据或上游模型。
+ */
+export function GetMiMoSettings(): $CancellablePromise<routing$0.MiMoSettings> {
+    return $Call.ByID(2277291200);
+}
+
+/**
  * GoogleResources 仅读取项目绑定与本机观察，不调用推理或冒充官方剩余查询。
  */
 export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
@@ -489,6 +496,13 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
  */
 export function SetGoogleProject(input: googlequota$0.BindingInput): $CancellablePromise<void> {
     return $Call.ByID(2698725425, input);
+}
+
+/**
+ * SetMiMoPreferredBillingMode 保存默认顺序并沿用受管客户端目录刷新。
+ */
+export function SetMiMoPreferredBillingMode(mode: string): $CancellablePromise<routing$0.MiMoSettings> {
+    return $Call.ByID(1468950690, mode);
 }
 
 /**

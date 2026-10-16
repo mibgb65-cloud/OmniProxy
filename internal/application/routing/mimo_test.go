@@ -40,7 +40,7 @@ func TestMiMoRoutingCatalogAliasesAndAccountEligibility(t *testing.T) {
 			t.Fatal("native protocols or metadata lost")
 		}
 	}
-	if found != 2*len(mimo.Models())+1 {
+	if found != len(mimo.Models())+1 {
 		t.Fatal("models or alias missing", found)
 	}
 	for _, change := range []string{`UPDATE accounts SET enabled=0 WHERE id='mimo-account'`, `UPDATE accounts SET enabled=1,auth_method='subscription_login' WHERE id='mimo-account'`, `UPDATE providers SET enabled=0 WHERE id='builtin_mimo'`} {

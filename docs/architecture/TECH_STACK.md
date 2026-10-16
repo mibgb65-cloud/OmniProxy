@@ -92,6 +92,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - Kimi 普通 API 同样使用标准库与 DPAPI，迁移 023 管理账号地区与目录失效；原生协议按官方模型能力开放，不新增 SDK 或依赖。
 - MiniMax 双平台按量／订阅复用标准库原生 HTTP／SSE、DPAPI 与已有查询队列，迁移 024 保存账号选项和目录版本；订阅资源使用独立公开 DTO 与固定官方入口，无新增 SDK 或依赖。
 - 小米 MiMo Token Plan 复用已有标准库原生 HTTP／SSE 和 DPAPI，迁移 025 保存账号计费通道／cn、sgp、ams 集群及目录版本；通道隔离路由沿用现有结构，无新增 SDK 或依赖。
+- 迁移 026 保存 MiMo 应用级默认计费顺序；路由与客户端目录复用既有组件，原通道名仅兼容解析，无新增依赖。
 
 ## Build Tools
 

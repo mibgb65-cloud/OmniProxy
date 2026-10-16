@@ -75,7 +75,7 @@ accounts need one local place to:
 - 路由页依据已有模型目录自动展示同名初步映射，无需逐条新增规则；同名模型可保存多个服务商的优先级顺序。精确规则优先，默认映射按顺序选择可用服务商，跳过不可用配置，其余候选沿用自动选择；预览／网关／客户端目录保持一致。本次覆盖现有 DeepSeek 和 ChatGPT/Codex 适配器。
 - 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE，其他提供商及自动调度仍待接入。
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
-- 小米 MiMo 支持普通按量及 Token Plan 个人／团队 Key、套餐中国／新加坡／欧洲集群，按账号选择计费通道和区域。普通三个 V2.6 对话模型、套餐 Pro／Flash，官方模型同步、通道隔离路由和客户端目录共用；原生三协议保留文本、思考、函数调用及 JSON／SSE，并记录当次区域／计费归属。预设与账号发现区分，套餐官方剩余未知并提供平台入口；余额、多模态及语音接口未接入，真实 Key／长窗口待验证。详见 `docs/product/MIMO.md`。
+- 小米 MiMo 支持普通按量及 Token Plan 个人／团队 Key、套餐中国／新加坡／欧洲集群，按账号选择计费通道和区域。账号设置可保存 Token Plan／API Key 默认顺序，同名模型统一发布；无合格首选账号时选下一通道，固定账号／旧显式通道继续优先，请求失败不跨通道重试。普通三个 V2.6 对话模型、套餐 Pro／Flash，官方模型同步、路由和客户端目录共用；原生三协议保留文本、思考、函数调用及 JSON／SSE，并记录当次区域／计费归属。预设与账号发现区分，套餐官方剩余未知并提供平台入口；余额、多模态及语音接口未接入，真实 Key／长窗口待验证。详见 `docs/product/MIMO.md`。
 - 阶跃星辰支持账号级国内／海外和按量 API／Step Plan 四组合，原生文本协议按模型开放，通道模型名隔离路由与计费；支持普通模型同步、官方普通余额和本机用量，Step Plan 官方剩余保持未知。详见 `docs/product/STEPFUN.md`；真实 Key 与长窗口验收待完成。
 - Kimi 普通 API Key 支持账号级国内／海外、K3／K2.7 Code／高速版／K2.6、官方模型同步与地区路由；K3 原生三协议、K2.7 Code／K2.6 原生 Chat／Messages、高速版 Chat，思考／工具／SSE 与缓存用量保持。支持按地区查询官方可用／代金券／现金余额，国内 CNY、海外 USD，账号详情与配额页共享缓存；旧下线模型移除，Code 订阅暂未接入，真实 Key／长窗口仍待验证。详见 `docs/product/KIMI.md`。
 - MiniMax 支持账号级国内／海外 × 按量／订阅 Key，五款普通模型与订阅同步发现的 M3.1 预览、原生文本三协议／思考／函数工具／SSE、目录及通道路由。提供官方订阅窗口查询与本机用量；旧账号需确认计费类型，普通余额及高级 Agent 工具未接入，真实 Key／长窗口待验证。详见 `docs/product/MINIMAX.md`。
