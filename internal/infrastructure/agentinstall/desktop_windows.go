@@ -17,6 +17,9 @@ func (b *Backend) inspectDesktop(ctx context.Context, product Product) Detection
 	if detected, found := registryDesktop(ctx, product); found {
 		return detected
 	}
+	if len(product.AppxNames) == 0 {
+		return Detection{State: "not_installed"}
+	}
 	path := filepath.Join(os.Getenv("SystemRoot"), "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
 	// AppxNames 只来自固定目录，逐个精确查询，避免同名或通配符软件被误判。
 	script := "$ErrorActionPreference='Stop'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); $items=@(foreach ($name in @('" + strings.Join(product.AppxNames, "','") + "')) { Get-AppxPackage -Name $name | Select-Object Name,@{n='Version';e={$_.Version.ToString()}},InstallLocation,@{n='Status';e={$_.Status.ToString()}} }); ConvertTo-Json -InputObject $items -Compress"
@@ -60,7 +63,7 @@ func registryDesktop(ctx context.Context, product Product) (Detection, bool) {
 				if err := entry.Close(); err != nil {
 					return unknown("detection_failed"), true
 				}
-				matches := product.ID == "codex-desktop" && (display == "Codex" || display == "ChatGPT") && strings.HasPrefix(publisher, "OpenAI") || product.ID == "claude-desktop" && display == "Claude" && strings.HasPrefix(publisher, "Anthropic")
+				matches := product.ID == "codex-desktop" && (display == "Codex" || display == "ChatGPT") && strings.HasPrefix(publisher, "OpenAI") || product.ID == "claude-desktop" && display == "Claude" && strings.HasPrefix(publisher, "Anthropic") || product.ID == "opencode-desktop" && (display == "OpenCode" || display == "opencode") && (strings.HasPrefix(publisher, "Anomaly") || strings.HasPrefix(publisher, "SST")) || product.ID == "harness-desktop" && display == "DeepSeek Harness" && strings.HasPrefix(publisher, "DeepSeek")
 				if matches {
 					if !validVersion(version) || len(location) > 4096 {
 						return unknown("detection_failed"), true

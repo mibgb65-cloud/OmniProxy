@@ -71,7 +71,7 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	if err != nil {
 		return preparation{}, err
 	}
-	body, exists, err := read(path)
+	body, exists, err := s.readClient(input.Client, path)
 	if err != nil {
 		return preparation{}, err
 	}
@@ -107,6 +107,12 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		selected = entries[0].ID
 	}
 	mode := "client-default"
+	if input.Client == "opencode" {
+		mode = "opencode-model-list"
+	}
+	if isHarness(input.Client) {
+		mode = "harness-model-list"
+	}
 	provider := ""
 	if input.Client == "codex" {
 		var config map[string]any
@@ -156,6 +162,12 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	plan.Summary = fmt.Sprintf("配置文件：%s\n可用模型／路由：%d 个\n默认模型：%s\n目录方式：%s\n接入：本地网关 API Key\n原提供商标识：%s（保留）\n保留官方登录及全部会话；应用前保存加密备份。", path, len(entries), selected, mode, provider)
 	if input.Client == "claude-desktop" {
 		plan.Summary += "\n启用第三方网关模式并选中 OmniProxy 本地配置；完全退出并重新启动 Claude 后进入 Code。"
+	}
+	if input.Client == "opencode" {
+		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n默认模型：%s\nCLI 与 Desktop 共用全局配置；保留其他提供商及设置，应用前保存加密备份。", path, len(entries), selected)
+	}
+	if isHarness(input.Client) {
+		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n凭据文件：%s\n只更新本 profile 的 OmniProxy 提供商及独立凭据引用；应用前保存加密备份。\n保存后在 Harness 中选择 OmniProxy 模型；其他 profile 与启动覆盖保持原样。", path, len(entries), s.paths.HarnessCredentials)
 	}
 	key := []byte("<本地接入 API Key>")
 	patched, _, err := s.buildPlan(input.Client, body, key, plan)

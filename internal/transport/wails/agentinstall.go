@@ -80,3 +80,10 @@ func (s *AppService) AgentOpenClaudeCode() error {
 	}
 	return nil
 }
+
+// AgentOpenClient 打开固定的 OpenCode 或 Harness 本机入口，不接受路径或命令参数。
+func (s *AppService) AgentOpenClient(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	return runtime.Launch(ctx, id)
+}

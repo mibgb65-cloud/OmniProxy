@@ -75,14 +75,14 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 		}
 		return nil
 	}
-	if err := writeAtomic(prepared.path, patched, input.Revision); err != nil {
+	if err := s.writeClient(input.Client, prepared.path, patched, input.Revision); err != nil {
 		return nil, errors.Join(err, rollbackCatalog())
 	}
 	if err := desktop.write(); err != nil {
-		return nil, errors.Join(err, rollbackFile(prepared.path, digest(patched, true), before), rollbackCatalog())
+		return nil, errors.Join(err, s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{staged, desktop}); err != nil {
-		return nil, errors.Join(err, desktop.rollback(3), rollbackFile(prepared.path, digest(patched, true), before), rollbackCatalog())
+		return nil, errors.Join(err, desktop.rollback(3), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	committed = true
 	if err := s.SetEnabled(ctx, input.Client, true); err != nil {

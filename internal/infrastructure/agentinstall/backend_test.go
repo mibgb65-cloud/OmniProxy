@@ -19,6 +19,14 @@ func TestOnlyFixedPackagesAndSafeFlagsAreInstalled(t *testing.T) {
 	}
 	t.Setenv("PATH", root)
 	for _, product := range Products() {
+		if product.PackageID == "" {
+			called := false
+			b := &Backend{run: func(context.Context, string, ...string) ([]byte, error) { called = true; return nil, nil }}
+			if b.Install(context.Background(), product.ID, nil) == nil || called {
+				t.Fatal("manual-only product reached installer")
+			}
+			continue
+		}
 		called := false
 		b := &Backend{run: func(_ context.Context, path string, args ...string) ([]byte, error) {
 			called = true

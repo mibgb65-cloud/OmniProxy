@@ -129,6 +129,13 @@ export function AgentOpenClaudeCode(): $CancellablePromise<void> {
     return $Call.ByID(2742116713);
 }
 
+/**
+ * AgentOpenClient 打开固定的 OpenCode 或 Harness 本机入口，不接受路径或命令参数。
+ */
+export function AgentOpenClient(id: string): $CancellablePromise<void> {
+    return $Call.ByID(541638397, id);
+}
+
 export function AgentPreview(input: agentconfig$0.Input): $CancellablePromise<string> {
     return $Call.ByID(3256128818, input);
 }

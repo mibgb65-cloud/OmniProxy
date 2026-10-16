@@ -18,7 +18,7 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 	if s.db.QueryRowContext(ctx, `SELECT credential_ref,applied_hash FROM agent_backups WHERE client=?`, client).Scan(&ref, &hash) != nil {
 		return nil, failure("backup_unavailable")
 	}
-	body, exists, err := read(path)
+	body, exists, err := s.readClient(client, path)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +58,8 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 			return nil, err
 		}
 	}
-	if original.Exists {
-		err = writeAtomic(path, original.Body, hash)
+	if original.Exists || isHarness(client) {
+		err = s.writeClient(client, path, original.Body, hash)
 	} else {
 		err = removeOwned(path, hash)
 	}
@@ -72,7 +72,7 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 		}
 	}
 	if err := s.deleteRestoreRecords(ctx, client, desktop != nil); err != nil {
-		return nil, errors.Join(err, rollbackFile(path, digest(original.Body, original.Exists), fileSnapshot{body, exists, revision}), desktop.rollback(3))
+		return nil, errors.Join(err, s.rollbackClient(client, path, digest(original.Body, original.Exists), fileSnapshot{body, exists, revision}), desktop.rollback(3))
 	}
 	if err = s.store.Delete(ref); err != nil {
 		return nil, failure("backup_failed")

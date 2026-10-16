@@ -14,6 +14,7 @@ export interface Item {
     "installState": string;
     "errorCode": string;
     "officialURL": string;
+    "canInstall": boolean;
     "progress"?: agentinstall$0.Progress | null;
     "startedAt"?: string;
     "finishedAt"?: string;

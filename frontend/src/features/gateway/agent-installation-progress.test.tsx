@@ -7,6 +7,7 @@ import { useUIStore } from "../../stores/ui-store"
 import { AgentInstallationProgress } from "./agent-installation-progress"
 
 const item: AgentInstallation = {
+  canInstall: true,
   id: "claude-code",
   detection: { state: "not_installed", path: "", version: "", errorCode: "" },
   installState: "installing",

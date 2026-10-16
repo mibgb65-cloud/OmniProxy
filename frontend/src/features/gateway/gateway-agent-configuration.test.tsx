@@ -47,6 +47,9 @@ const clientNames = {
   codex: "Codex CLI / Desktop",
   claude: "Claude Code CLI",
   "claude-desktop": "Claude Code Desktop",
+  opencode: "OpenCode CLI / Desktop",
+  "harness-web": "DeepSeek Harness Web",
+  "harness-desktop": "DeepSeek Harness Desktop",
 } as const
 
 async function openClient(

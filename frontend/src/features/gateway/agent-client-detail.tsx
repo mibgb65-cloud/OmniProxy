@@ -49,6 +49,11 @@ export function AgentClientDetail({
           <p className="text-muted-foreground text-sm">{t(agent.description)}</p>
         </div>
       </div>
+      {client === "opencode" || client.startsWith("harness-") ? (
+        <p className="text-muted-foreground text-sm leading-6">
+          {t(client === "opencode" ? "agents.opencodeHint" : "agents.harnessHint")}
+        </p>
+      ) : null}
       <AgentInstallationCard client={client} state={installations} />
       {item ? (
         <AgentClientSettings key={client} item={item} models={models} running={running} />

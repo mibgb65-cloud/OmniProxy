@@ -6,6 +6,7 @@ import { AgentClientDetail } from "./agent-client-detail"
 import { AgentClientTile } from "./agent-client-tile"
 import { type AgentClientId } from "./agent-clients"
 import { ClaudeClientsTile } from "./claude-clients-tile"
+import { HarnessClientsTile } from "./harness-clients-tile"
 import { useAgentInstallations } from "./use-agent-installations"
 
 export function LocalAgents({
@@ -69,6 +70,19 @@ export function LocalAgents({
               installationsUnavailable={installations.data.isError}
             />
             <ClaudeClientsTile
+              items={items}
+              pending={data.isPending}
+              installations={installations.data.isError ? undefined : installations.data.data}
+              installationsUnavailable={installations.data.isError}
+            />
+            <AgentClientTile
+              client="opencode"
+              item={items.find((item) => item.client === "opencode")}
+              pending={data.isPending}
+              installations={installations.data.isError ? undefined : installations.data.data}
+              installationsUnavailable={installations.data.isError}
+            />
+            <HarnessClientsTile
               items={items}
               pending={data.isPending}
               installations={installations.data.isError ? undefined : installations.data.data}

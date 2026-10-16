@@ -1,6 +1,13 @@
 import type { AgentClient } from "../../services/agents"
 
-export const agentClientIds = ["codex", "claude", "claude-desktop"] as const
+export const agentClientIds = [
+  "codex",
+  "claude",
+  "claude-desktop",
+  "opencode",
+  "harness-web",
+  "harness-desktop",
+] as const
 export type AgentClientId = (typeof agentClientIds)[number]
 
 export const agentClients = {
@@ -14,6 +21,21 @@ export const agentClients = {
     title: "agents.claude-desktop",
     description: "agents.desktopDescription",
     icon: "claude-color.svg",
+  },
+  opencode: {
+    title: "agents.opencode",
+    description: "agents.opencodeDescription",
+    icon: "opencode.svg",
+  },
+  "harness-web": {
+    title: "agents.harnessWeb",
+    description: "agents.harnessWebDescription",
+    icon: "",
+  },
+  "harness-desktop": {
+    title: "agents.harnessDesktop",
+    description: "agents.harnessDesktopDescription",
+    icon: "",
   },
 } as const
 

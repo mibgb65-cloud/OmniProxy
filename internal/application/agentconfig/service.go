@@ -7,10 +7,10 @@ import (
 
 func (s *Service) Inspect(ctx context.Context) ([]Item, error) {
 	items := []Item{}
-	for _, client := range []string{"codex", "claude", "claude-desktop"} {
+	for _, client := range Clients() {
 		path, _ := s.path(client)
 		i := Item{Client: client, Path: path}
-		body, exists, err := read(path)
+		body, exists, err := s.readClient(client, path)
 		if err != nil {
 			i.ErrorCode = "unsafe_config"
 		} else {

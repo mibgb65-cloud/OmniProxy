@@ -43,8 +43,12 @@ func (s *Service) install(ctx context.Context, id string) {
 
 // Start 校验 ID 和真实安装状态后启动后台任务；既有版本不会被升级或覆盖。
 func (s *Service) Start(ctx context.Context, id string) (Snapshot, error) {
-	if _, err := runtime.Find(id); err != nil {
+	product, err := runtime.Find(id)
+	if err != nil {
 		return Snapshot{}, err
+	}
+	if product.PackageID == "" {
+		return Snapshot{}, runtime.ErrUnavailable
 	}
 	s.refreshMu.Lock()
 	defer s.refreshMu.Unlock()

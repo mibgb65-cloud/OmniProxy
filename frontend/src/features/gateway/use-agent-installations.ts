@@ -6,6 +6,7 @@ import {
   installAgent,
   openAgentInstallationOfficial,
   openClaudeCode,
+  openAgentClient,
 } from "../../services/agent-installation"
 import type { AgentInstallTarget } from "./agent-installation-targets"
 
@@ -42,6 +43,7 @@ export function useAgentInstallations(active: boolean) {
     mutationFn: (id: AgentInstallTarget) => openAgentInstallationOfficial(id),
   })
   const launch = useMutation({ mutationFn: openClaudeCode })
+  const open = useMutation({ mutationFn: (id: AgentInstallTarget) => openAgentClient(id) })
   const mutating = useIsMutating({ mutationKey: agentInstallQueryKey }) > 0
   return {
     data,
@@ -49,17 +51,20 @@ export function useAgentInstallations(active: boolean) {
     install,
     official,
     launch,
+    open,
     busy: !!data.data?.busy || mutating,
     start: (id: AgentInstallTarget) => {
       refresh.reset()
       official.reset()
       launch.reset()
+      open.reset()
       install.mutate(id)
     },
     recheck: () => {
       install.reset()
       official.reset()
       launch.reset()
+      open.reset()
       refresh.mutate()
     },
   }

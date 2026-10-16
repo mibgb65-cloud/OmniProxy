@@ -5,7 +5,11 @@ export type AgentClient = Item
 export type AgentInput = Input
 export const listAgentClients = () => AppService.AgentClients()
 export async function rereadAgentConfig(client: string): Promise<AgentClient> {
-  if (client !== "codex" && client !== "claude" && client !== "claude-desktop")
+  if (
+    !["codex", "claude", "claude-desktop", "opencode", "harness-web", "harness-desktop"].includes(
+      client,
+    )
+  )
     throw new Error("agent: invalid_client")
   const items = await listAgentClients()
   const item = items?.find((item) => item.client === client)
@@ -57,6 +61,12 @@ export function agentTitle(client: string) {
       return "agents.claude"
     case "claude-desktop":
       return "agents.claude-desktop"
+    case "opencode":
+      return "agents.opencode"
+    case "harness-web":
+      return "agents.harnessWeb"
+    case "harness-desktop":
+      return "agents.harnessDesktop"
     default:
       return "agents.title"
   }

@@ -32,6 +32,10 @@ func Products() []Product {
 		{ID: "claude-code", PackageID: "Anthropic.ClaudeCode", Source: "winget", Command: "claude", OfficialURL: "https://code.claude.com/docs/en/setup"},
 		// 商店新版改用 AnthropicPBC.Claude，旧版 Claude 仍需识别，避免安装成功后误报。
 		{ID: "claude-desktop", PackageID: "9P6K58THS811", Source: "msstore", AppxNames: []string{"AnthropicPBC.Claude", "Claude"}, OfficialURL: "https://code.claude.com/docs/en/desktop"},
+		{ID: "opencode-cli", Command: "opencode", OfficialURL: "https://opencode.ai/docs/"},
+		{ID: "opencode-desktop", OfficialURL: "https://opencode.ai/download"},
+		{ID: "harness-cli", Command: "dsh", OfficialURL: "https://github.com/deepseek-ai/deepseek-harness"},
+		{ID: "harness-desktop", OfficialURL: "https://www.deepseek.com/en/harness/"},
 	}
 }
 

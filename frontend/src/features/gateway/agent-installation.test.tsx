@@ -14,6 +14,7 @@ import {
   installAgentMock,
   openAgentInstallationOfficialMock,
   openClaudeCodeMock,
+  openAgentClientMock,
   listAgentClientsMock,
 } from "./gateway-test-helpers"
 
@@ -61,6 +62,45 @@ it("打开详情只检测，Codex CLI 与桌面应用分别提供安装入口", 
   expect(screen.getByRole("button", { name: "安装 Codex Desktop" })).toBeEnabled()
   expect(installAgentMock).not.toHaveBeenCalled()
   expect(openAgentInstallationOfficialMock).not.toHaveBeenCalled()
+})
+
+it("OpenCode CLI／Desktop 共用配置，未核实安装渠道仅提供官方入口", async () => {
+  getAgentInstallationsMock.mockResolvedValue({
+    ...missing,
+    items: ["opencode-cli", "opencode-desktop"].map((id) => ({
+      ...missing.items[0],
+      id,
+      canInstall: false,
+    })),
+  })
+  const user = userEvent.setup()
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=opencode" })
+  expect(
+    await screen.findByRole("heading", { name: "OpenCode CLI / Desktop", level: 2 }),
+  ).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: /^安装 OpenCode/ })).not.toBeInTheDocument()
+  await user.click(screen.getByRole("button", { name: "OpenCode Desktop 官方安装说明" }))
+  expect(openAgentInstallationOfficialMock).toHaveBeenCalledWith("opencode-desktop")
+  expect(installAgentMock).not.toHaveBeenCalled()
+})
+
+it("Harness Web 的打开入口只提交固定客户端 ID", async () => {
+  getAgentInstallationsMock.mockResolvedValue({
+    ...missing,
+    items: [
+      {
+        ...missing.items[0],
+        id: "harness-cli",
+        canInstall: false,
+        detection: { state: "installed", version: "", path: "test/dsh.cmd", errorCode: "" },
+      },
+    ],
+  })
+  const user = userEvent.setup()
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=harness-web" })
+  await user.click(await screen.findByRole("button", { name: "打开 DeepSeek Harness CLI / Web" }))
+  expect(openAgentClientMock).toHaveBeenCalledExactlyOnceWith("harness-cli")
+  expect(installAgentMock).not.toHaveBeenCalled()
 })
 
 it("安装只提交固定 ID，进行中禁止重复安装，轮询真实结果后展示版本", async () => {

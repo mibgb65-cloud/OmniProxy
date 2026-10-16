@@ -23,6 +23,7 @@ type Item struct {
 	InstallState string            `json:"installState"`
 	ErrorCode    string            `json:"errorCode"`
 	OfficialURL  string            `json:"officialURL"`
+	CanInstall   bool              `json:"canInstall"`
 	Progress     *runtime.Progress `json:"progress,omitempty"`
 	StartedAt    string            `json:"startedAt,omitempty"`
 	FinishedAt   string            `json:"finishedAt,omitempty"`
@@ -54,7 +55,7 @@ type Service struct {
 func New(backend Backend) *Service {
 	s := &Service{backend: backend, items: map[string]Item{}, installTimeout: 20 * time.Minute}
 	for _, product := range runtime.Products() {
-		s.items[product.ID] = Item{ID: product.ID, Detection: runtime.Detection{State: "unknown"}, InstallState: "idle", OfficialURL: product.OfficialURL}
+		s.items[product.ID] = Item{ID: product.ID, Detection: runtime.Detection{State: "unknown"}, InstallState: "idle", OfficialURL: product.OfficialURL, CanInstall: product.PackageID != ""}
 	}
 	return s
 }

@@ -60,7 +60,11 @@ func (s *AppService) AgentCopyKey(client string) error {
 	if s.agents == nil || s.copyText == nil {
 		return errors.New("agent: unavailable")
 	}
-	if client != "codex" && client != "claude" && client != "claude-desktop" {
+	valid := false
+	for _, id := range agentconfig.Clients() {
+		valid = valid || client == id
+	}
+	if !valid {
 		return errors.New("agent: invalid_client")
 	}
 	key, err := s.agents.Key(context.Background(), client)

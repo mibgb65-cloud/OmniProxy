@@ -18,11 +18,20 @@ export function AgentInstallationCard({
 }) {
   const { t } = useTranslation()
   const snapshot = state.data.isError ? undefined : state.data.data
+  const usesInstaller = clientInstallationTargets[client].some((id) => {
+    const item = snapshot?.items?.find((item) => item.id === id)
+    return item && item.canInstall !== false
+  })
   const installError =
     state.install.variables && clientInstallationTargets[client].includes(state.install.variables)
       ? state.install.error
       : null
-  const error = installError ?? state.refresh.error ?? state.official.error ?? state.launch.error
+  const error =
+    installError ??
+    state.refresh.error ??
+    state.official.error ??
+    state.launch.error ??
+    state.open.error
   return (
     <Card className="min-w-0 gap-4">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
@@ -80,7 +89,19 @@ export function AgentInstallationCard({
                       {t("agents.install.openCode")}
                     </Button>
                   ) : null}
-                  {item?.detection.state !== "installed" ? (
+                  {(id.startsWith("opencode-") || id.startsWith("harness-")) &&
+                  item?.detection.state === "installed" ? (
+                    <Button
+                      size="sm"
+                      disabled={state.open.isPending}
+                      aria-label={t("agents.install.openClient", { client: label })}
+                      onClick={() => state.open.mutate(id)}
+                    >
+                      <Code2 aria-hidden="true" />
+                      {t("agents.install.openClient", { client: label })}
+                    </Button>
+                  ) : null}
+                  {item?.detection.state !== "installed" && item?.canInstall !== false ? (
                     <Button
                       size="sm"
                       disabled={
@@ -117,6 +138,9 @@ export function AgentInstallationCard({
                 </div>
               </div>
               <AgentInstallationProgress item={item} label={label} starting={starting} />
+              {item?.canInstall === false && item.detection.state !== "installed" ? (
+                <p className="text-muted-foreground text-xs">{t("agents.install.manual")}</p>
+              ) : null}
               {code ? (
                 <p role="alert" className="text-destructive text-xs">
                   {t(`agents.install.error.${agentInstallationError(`agentinstall: ${code}`)}`)}
@@ -135,12 +159,16 @@ export function AgentInstallationCard({
             {t(`agents.install.error.${agentInstallationError(error)}`)}
           </p>
         ) : null}
-        {snapshot && !snapshot.installerAvailable ? (
+        {usesInstaller && snapshot && !snapshot.installerAvailable ? (
           <p className="text-muted-foreground text-xs">
             {t("agents.install.error.installer_unavailable")}
           </p>
         ) : null}
-        <p className="text-muted-foreground text-xs leading-5">{t("agents.install.agreements")}</p>
+        {usesInstaller ? (
+          <p className="text-muted-foreground text-xs leading-5">
+            {t("agents.install.agreements")}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   )

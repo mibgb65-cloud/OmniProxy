@@ -8,6 +8,10 @@ Agent 协议目录。详情见 [Google 订阅](GOOGLE_SUBSCRIPTION.md)。
 
 ## 使用
 
+OpenCode CLI／Desktop 共用一张接入卡片；DeepSeek Harness 的 Desktop／Web 在同一卡片中
+分别配置 profile。均支持本地 Chat 文本／函数工具目录、独立 Key、加密备份／恢复及目录
+刷新，安装检测和固定官方入口共用原流程。详情见 [HARNESS_OPENCODE.md](HARNESS_OPENCODE.md)。
+
 River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具接入；Messages 转换需要缓冲，不是原生增量流。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。
 
 1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／River／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。

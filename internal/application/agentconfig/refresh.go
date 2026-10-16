@@ -15,7 +15,7 @@ func (s *Service) RefreshCatalog(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var result error
-	for _, client := range []string{"codex", "claude", "claude-desktop"} {
+	for _, client := range Clients() {
 		var expected string
 		err := s.db.QueryRowContext(ctx, `SELECT applied_hash FROM agent_backups WHERE client=?`, client).Scan(&expected)
 		if err == nil {
@@ -39,13 +39,16 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	if err != nil {
 		return err
 	}
-	before, err := snapshotFile(path)
+	before, err := s.snapshotClient(client, path)
 	if err != nil {
 		return err
 	}
 	defer clear(before.body)
 	if before.revision != expected {
 		return failure("config_changed")
+	}
+	if client == "opencode" || isHarness(client) {
+		return s.refreshGatewayClient(ctx, client, path, before, entries)
 	}
 	if client == "codex" {
 		return s.refreshCodex(ctx, entries, before)

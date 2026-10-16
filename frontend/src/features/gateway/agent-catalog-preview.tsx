@@ -8,6 +8,8 @@ const modeLabels = {
   "desktop-model-list": "agents.mode.desktop",
   "cli-model-list": "agents.mode.cli",
   "client-default": "agents.mode.default",
+  "opencode-model-list": "agents.mode.opencode",
+  "harness-model-list": "agents.mode.harness",
 } as const
 
 export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
@@ -20,7 +22,11 @@ export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
     <section className="bg-muted/30 space-y-3 rounded-lg border p-4 text-sm">
       <dl className="space-y-2">
         <div className="flex flex-wrap justify-between gap-2">
-          <dt className="text-muted-foreground">{t("agents.defaultModel")}</dt>
+          <dt className="text-muted-foreground">
+            {t(
+              plan.mode === "harness-model-list" ? "agents.suggestedModel" : "agents.defaultModel",
+            )}
+          </dt>
           <dd className="min-w-0 font-mono wrap-anywhere">{plan.defaultModel}</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2">

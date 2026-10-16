@@ -4,14 +4,18 @@ export function AgentBrandIcon({ client }: { client: AgentClientId }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex size-14 shrink-0 items-center justify-center rounded-2xl border ${client === "codex" ? "border-zinc-800 bg-zinc-950" : "border-[#D97757]/20 bg-[#D97757]/10"}`}
+      className={`flex size-14 shrink-0 items-center justify-center rounded-2xl border ${client === "codex" ? "border-zinc-800 bg-zinc-950" : client.startsWith("claude") ? "border-[#D97757]/20 bg-[#D97757]/10" : "bg-muted/30"}`}
     >
       <img
-        src={`/agent-icons/${agentClients[client].icon}`}
+        src={
+          client.startsWith("harness-")
+            ? "/provider-icons/deepseek-color.svg"
+            : `/agent-icons/${agentClients[client].icon}`
+        }
         alt=""
         width={32}
         height={32}
-        className={`size-8 ${client === "codex" ? "brightness-0 invert" : ""}`}
+        className={`size-8 ${client === "codex" ? "brightness-0 invert" : client === "opencode" ? "dark:invert" : ""}`}
       />
     </span>
   )

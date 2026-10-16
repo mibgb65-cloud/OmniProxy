@@ -16,6 +16,9 @@ func (s *Service) clientEntries(ctx context.Context, client string) ([]catalog.E
 	if err != nil {
 		return nil, err
 	}
+	if client == "opencode" || isHarness(client) {
+		return gatewayEntries(entries), nil
+	}
 	protocol := "messages"
 	if client == "codex" {
 		protocol = "responses"
@@ -65,6 +68,9 @@ func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
 }
 
 func existingModel(client string, body []byte) string {
+	if client == "opencode" {
+		return openCodeModel(body)
+	}
 	var config map[string]any
 	if client == "codex" {
 		if toml.Unmarshal(body, &config) == nil {

@@ -18,8 +18,9 @@ type Catalog interface {
 	AvailableModels(context.Context) ([]string, error)
 }
 type Paths struct {
-	Codex, Claude, ClaudeDesktop                 string
-	ClaudeDesktopNormal, ClaudeDesktopThirdParty string
+	Codex, Claude, ClaudeDesktop                             string
+	ClaudeDesktopNormal, ClaudeDesktopThirdParty             string
+	OpenCode, HarnessWeb, HarnessDesktop, HarnessCredentials string
 }
 type Item struct {
 	Client     string `json:"client"`
@@ -76,6 +77,12 @@ func (s *Service) path(client string) (string, error) {
 		return s.paths.Claude, nil
 	case "claude-desktop":
 		return s.paths.ClaudeDesktop, nil
+	case "opencode":
+		return s.paths.OpenCode, nil
+	case "harness-web":
+		return s.paths.HarnessWeb, nil
+	case "harness-desktop":
+		return s.paths.HarnessDesktop, nil
 	}
 	return "", failure("invalid_client")
 }

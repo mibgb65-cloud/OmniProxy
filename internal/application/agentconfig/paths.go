@@ -32,7 +32,37 @@ func DefaultPaths() (Paths, error) {
 	return Paths{
 		Codex: filepath.Join(codex, "config.toml"), Claude: filepath.Join(claude, "settings.json"),
 		ClaudeDesktop: profile, ClaudeDesktopNormal: normal, ClaudeDesktopThirdParty: thirdParty,
+		OpenCode:           openCodePath(home),
+		HarnessWeb:         filepath.Join(harnessHome(home), "profiles", "web", "cordis.patch.yml"),
+		HarnessDesktop:     filepath.Join(harnessHome(home), "profiles", "desktop", "cordis.patch.yml"),
+		HarnessCredentials: filepath.Join(harnessHome(home), ".credentials.yaml"),
 	}, nil
+}
+
+func harnessHome(home string) string {
+	if value := os.Getenv("DSH_HOME"); value != "" {
+		return value
+	}
+	return filepath.Join(home, ".dsh")
+}
+
+func openCodePath(home string) string {
+	if value := os.Getenv("OPENCODE_CONFIG"); value != "" {
+		return value
+	}
+	base := os.Getenv("XDG_CONFIG_HOME")
+	if base == "" {
+		base = filepath.Join(home, ".config")
+	}
+	base = filepath.Join(base, "opencode")
+	if custom := os.Getenv("OPENCODE_CONFIG_DIR"); custom != "" {
+		base = custom
+	}
+	jsonc := filepath.Join(base, "opencode.jsonc")
+	if _, err := os.Lstat(jsonc); !os.IsNotExist(err) {
+		return jsonc
+	}
+	return filepath.Join(base, "opencode.json")
 }
 
 func desktopClientPaths(cache string) (profile, normal, thirdParty string, err error) {

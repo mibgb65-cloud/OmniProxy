@@ -9,6 +9,7 @@ export const installAgent = (id: string) => AppService.AgentInstall(id)
 export const openAgentInstallationOfficial = (id: string) =>
   AppService.AgentInstallationOpenOfficial(id)
 export const openClaudeCode = () => AppService.AgentOpenClaudeCode()
+export const openAgentClient = (id: string) => AppService.AgentOpenClient(id)
 
 export function agentInstallationError(error: unknown) {
   const code = String(error instanceof Error ? error.message : error).replace("agentinstall: ", "")

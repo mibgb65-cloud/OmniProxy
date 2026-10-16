@@ -113,6 +113,10 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 
 ## Major Dependencies
 
+客户端配置适配增加 `gopkg.in/yaml.v3 v3.0.1`（已有 go.sum 来源，保留 Harness YAML 节点／
+注释）及 `github.com/tailscale/hujson`（固定伪版本，正确解析和增量修改 OpenCode JSONC）。
+两者只用于已有本地配置文件，不引入客户端 SDK 或 Agent 运行时。
+
 | Dependency                | Purpose                              | Why                                                    |
 | ------------------------- | ------------------------------------ | ------------------------------------------------------ |
 | `wailsapp/wails/v3`       | Desktop shell, bindings, events      | Chosen desktop framework (ADR-001)                     |

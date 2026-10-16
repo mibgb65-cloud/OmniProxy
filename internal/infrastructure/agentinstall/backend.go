@@ -49,6 +49,9 @@ func (b *Backend) Install(ctx context.Context, id string, report func(Progress))
 	if err != nil {
 		return err
 	}
+	if product.PackageID == "" {
+		return ErrUnavailable
+	}
 	if runtime.GOOS != "windows" {
 		return ErrUnavailable
 	}
@@ -134,6 +137,12 @@ func cliPath(product Product) string {
 		if product.Command == "codex" {
 			candidates = append(candidates, filepath.Join(local, "Programs", "OpenAI", "Codex", "bin", "codex.exe"))
 		}
+	}
+	if roaming := os.Getenv("APPDATA"); roaming != "" {
+		candidates = append(candidates, filepath.Join(roaming, "npm", product.Command+".cmd"))
+	}
+	if node := os.Getenv("NVM_SYMLINK"); node != "" {
+		candidates = append(candidates, filepath.Join(node, product.Command+".cmd"))
 	}
 	if home != "" {
 		candidates = append(candidates, filepath.Join(home, ".local", "bin", product.Command+".exe"))

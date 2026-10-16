@@ -1,5 +1,14 @@
 # Architecture Overview
 
+## Harness／OpenCode 客户端（2026-10-17）
+
+`application/agentconfig` 扩展 OpenCode 共用配置和 Harness 两个 profile，不修改核心代理
+协议。OpenCode 使用 HuJSON 增量修改 JSONC；Harness 使用 YAML 节点保留设置，通过受控
+文件快照将 profile 与单个凭据引用一起校验／备份／回滚，恢复不会覆盖共享凭据文件中的
+其他项。沿用现有 DPAPI 备份表和精确鉴权白名单，无迁移；仅传递本地接入 Key。
+安装器返回明确的可安装标记；未核实渠道的新目标只提供官方说明和固定本机打开入口，
+不能由前端传递任意路径或命令。见 `product/HARNESS_OPENCODE.md`、ADR-005。
+
 ## Google 账号资源与 Agent 模型（2026-10-17）
 
 API Key 项目资源内嵌对应账号卡片／列表，共享查询保持项目维度，配额总览仍按项目归组。
