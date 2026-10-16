@@ -10,7 +10,7 @@ River 是内置 API Key 服务商，默认启用；已有安装通过迁移 029 
 | `nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4` | 1048576 | 131072（官方 128K） | 未公布，使用上游默认 |
 | `zai-org/GLM-5.3-Flash` | 1048576 | 131072（官方 128K） | low／high／max，不能关闭思考 |
 
-模型 ID 保留前缀与大小写，与直连 DeepSeek 模型区分；也可配置自定义别名或固定账号。停用服务商／账号后，不在可调用目录中发布对应模型。
+公共目录使用 `deepseek-flash`、`NVIDIA-Nemotron-3.5` 和 `GLM-5.3-Flash`，其中 Flash 与直连 DeepSeek 合并为同款模型，在路由页保存服务商优先级。选择 River 后才还原上表的完整官方 ID；选择直连后发送 `deepseek-flash`。优先级只选择配置可用的候选，不新增请求失败重试。智谱直连尚未接入，不发布虚构 GLM 候选。旧 River 完整 ID、精确规则、固定账号、Claude `[1m]` 和 Desktop 摘要仍兼容解析，公共菜单不重复发布旧 ID；旧优先级通过迁移 030 归入逻辑模型，已有逻辑配置优先。也可配置自定义别名或固定账号。停用服务商／账号后，不在可调用目录中发布对应模型。
 
 Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函数工具调用、工具结果及官方 usage。Chat 流式请求添加 `stream_options.include_usage`。Responses 无状态，客户端必须发送完整历史；拒绝 `store: true`、`background: true`、`previous_response_id`、`conversation` 和上下文管理引用，不静默丢失历史。仅支持函数工具，不开放托管搜索、计算机等专用工具。
 

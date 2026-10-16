@@ -130,10 +130,11 @@ func (s *Service) Models(ctx context.Context) ([]string, error) {
 	ids := []string{}
 	seen := map[string]bool{}
 	for _, m := range data.models {
+		id := publicModel(data, m.providerID, m.model)
 		for _, a := range data.accounts {
-			if a.ID == m.accountID && a.Enabled && eligible(data, a, m.model) && !seen[m.model] {
-				ids = append(ids, m.model)
-				seen[m.model] = true
+			if a.ID == m.accountID && a.Enabled && eligible(data, a, id) && !seen[id] {
+				ids = append(ids, id)
+				seen[id] = true
 			}
 		}
 	}

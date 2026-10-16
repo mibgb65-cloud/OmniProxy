@@ -20,7 +20,7 @@ func TestClaudeContextOptionsApplyRefreshAndRestore(t *testing.T) {
 			ctx := context.Background()
 			input := Input{Client: client, Revision: digest(nil, false), Model: "deepseek-flash[1m]"}
 			plan, err := s.PreviewPlan(ctx, input)
-			if err != nil || len(plan.Models) != 2 || plan.DefaultModel != input.Model {
+			if err != nil || len(plan.Models) != 3 || plan.DefaultModel != input.Model {
 				t.Fatal("long context selection unavailable", err)
 			}
 			if _, err := s.Apply(ctx, input); err != nil {
@@ -46,7 +46,7 @@ func TestClaudeContextOptionsApplyRefreshAndRestore(t *testing.T) {
 					}
 				}
 			} else {
-				checkDesktopVariants(t, config, input.Model, 2)
+				checkDesktopVariants(t, config, input.Model, 3)
 				source.entries = append(source.entries, catalog.Entry{ID: "deepseek-v4-pro", ProviderKind: "deepseek", Metadata: catalog.Metadata{ContextWindow: &window}})
 				if err := s.RefreshCatalog(ctx); err != nil {
 					t.Fatal(err)
@@ -55,7 +55,7 @@ func TestClaudeContextOptionsApplyRefreshAndRestore(t *testing.T) {
 				if err != nil || json.Unmarshal(body, &config) != nil {
 					t.Fatal("cannot read refreshed catalog", err)
 				}
-				checkDesktopVariants(t, config, "", 3)
+				checkDesktopVariants(t, config, "", 5)
 			}
 			if _, err := s.Restore(ctx, client); err != nil {
 				t.Fatal(err)
@@ -89,7 +89,7 @@ func checkDesktopVariants(t *testing.T, config map[string]any, selected string, 
 			t.Fatal("ordinary model context flags changed")
 		}
 	}
-	if len(models) != count || seen[catalog.DesktopAlias("deepseek-flash")] != "" || seen[catalog.DesktopAlias("deepseek-flash[1m]")] != "deepseek-flash[1m]" {
+	if len(models) != count || seen[catalog.DesktopAlias("deepseek-flash")] != "deepseek-flash" || seen[catalog.DesktopAlias("deepseek-flash[1m]")] != "deepseek-flash[1m]" {
 		t.Fatal("desktop variants incomplete or mislabeled")
 	}
 	if selected != "" && models[0].(map[string]any)["name"] != catalog.DesktopAlias(selected) {
@@ -97,7 +97,7 @@ func checkDesktopVariants(t *testing.T, config map[string]any, selected string, 
 	}
 }
 
-func TestLegacyDeepSeekDefaultUpgradesWithoutSwitchingModels(t *testing.T) {
+func TestDeepSeekDefaultPreservesOrdinaryAndLongChoices(t *testing.T) {
 	s, source := catalogFixture(t)
 	window := catalog.ClaudeLongContextWindow
 	source.entries = []catalog.Entry{{ID: "gpt-default", Metadata: catalog.Metadata{IsDefault: true}}, {ID: "deepseek-flash", ProviderKind: "deepseek", Metadata: catalog.Metadata{ContextWindow: &window}}}
@@ -110,14 +110,14 @@ func TestLegacyDeepSeekDefaultUpgradesWithoutSwitchingModels(t *testing.T) {
 	}
 	for _, selected := range []string{"", "deepseek-flash", "deepseek-flash[1m]"} {
 		plan, err := s.PreviewPlan(context.Background(), Input{Client: "claude", Revision: digest(body, true), Model: selected})
-		if err != nil || plan.DefaultModel != "deepseek-flash[1m]" || len(plan.Models) != 2 {
-			t.Fatal("legacy DeepSeek default did not upgrade to 1M", err)
+		expected := selected
+		if expected == "" {
+			expected = "deepseek-flash"
 		}
-		for _, entry := range plan.Models {
-			if entry.ID == "deepseek-flash" {
-				t.Fatal("ordinary DeepSeek option remained")
-			}
+		if err != nil || plan.DefaultModel != expected || len(plan.Models) != 3 {
+			t.Fatal("DeepSeek default choice changed", plan.DefaultModel, err)
 		}
+
 	}
 	plan, err := s.PreviewPlan(context.Background(), Input{Client: "codex", Revision: digest(nil, false), Model: "deepseek-flash"})
 	if err != nil || plan.DefaultModel != "deepseek-flash" {

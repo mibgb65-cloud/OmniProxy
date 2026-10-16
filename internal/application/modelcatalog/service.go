@@ -60,7 +60,7 @@ func New(db *sql.DB, accounts *account.Service, providers *provider.Service, sub
 var ErrUnavailable = errors.New("models: unavailable")
 
 func (s *Service) List(ctx context.Context) ([]Item, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.fetched_at,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model LIMIT 10001`)
+	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.fetched_at,m.metadata_json,p.kind FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN providers p ON p.id=a.provider_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model LIMIT 10001`)
 	if err != nil {
 		return nil, ErrUnavailable
 	}
@@ -68,9 +68,12 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 	items := []Item{}
 	for rows.Next() {
 		var i Item
-		var metadata string
-		if rows.Scan(&i.AccountID, &i.ProviderID, &i.Model, &i.Name, &i.FetchedAt, &metadata) != nil || len(metadata) > 16384 || json.Unmarshal([]byte(metadata), &i.Metadata) != nil || core.ValidateMetadata(i.Metadata) != nil {
+		var metadata, kind string
+		if rows.Scan(&i.AccountID, &i.ProviderID, &i.Model, &i.Name, &i.FetchedAt, &metadata, &kind) != nil || len(metadata) > 16384 || json.Unmarshal([]byte(metadata), &i.Metadata) != nil || core.ValidateMetadata(i.Metadata) != nil {
 			return nil, ErrUnavailable
+		}
+		if kind == river.Kind {
+			i.Model, i.Name = river.PublicModel(i.Model), river.ModelName(i.Model)
 		}
 		items = append(items, i)
 	}

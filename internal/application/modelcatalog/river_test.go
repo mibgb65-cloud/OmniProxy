@@ -70,12 +70,12 @@ func TestRiverPresetDiscoveryFailureAndCredentialRotation(t *testing.T) {
 		}
 	}
 	items, err = s.Sync(ctx, "a")
-	if err != nil || len(items) != 1 || items[0].Model != "deepseek-ai/DeepSeek-V4.1-Flash" || items[0].Source == "preset" || items[0].FetchedAt == "" {
+	if err != nil || len(items) != 1 || items[0].Model != "deepseek-flash" || items[0].Source == "preset" || items[0].FetchedAt == "" {
 		t.Fatal("discovered models not authoritative", items, err)
 	}
 	router := routes.New(db, s.providers, s.accounts)
 	entries, err := router.Catalog(ctx)
-	if err != nil || len(entries) != 1 || entries[0].ID != river.DeepSeekFlash {
+	if err != nil || len(entries) != 1 || entries[0].ID != river.PublicModel(river.DeepSeekFlash) {
 		t.Fatal("routing disagrees with discovered account catalog", entries, err)
 	}
 	for _, value := range store.last {

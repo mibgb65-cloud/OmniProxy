@@ -153,8 +153,8 @@ describe("路由页面", () => {
       {
         accountId: "river-account",
         providerId: "builtin_river",
-        model: "deepseek-ai/DeepSeek-V4.1-Flash",
-        name: "deepseek-ai/DeepSeek-V4.1-Flash",
+        model: "deepseek-flash",
+        name: "deepseek-flash",
         fetchedAt: "",
         source: "preset",
       },
@@ -168,7 +168,7 @@ describe("路由页面", () => {
     await selectOption(
       user,
       dialog.getByRole("combobox", { name: "实际模型 ID" }),
-      "deepseek-ai/DeepSeek-V4.1-Flash",
+      "deepseek-flash",
     )
     await selectOption(user, dialog.getByRole("combobox", { name: "账号范围" }), "River account")
     await user.click(dialog.getByRole("button", { name: "保存规则" }))
@@ -176,10 +176,57 @@ describe("路由页面", () => {
       expect(createRoute).toHaveBeenCalledWith({
         alias: "research",
         providerId: "builtin_river",
-        model: "deepseek-ai/DeepSeek-V4.1-Flash",
+        model: "deepseek-flash",
         accountId: "river-account",
         enabled: true,
       }),
+    )
+  })
+
+  it("旧 River 原始模型规则可在逻辑目录归并后继续编辑保存", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      ...providers,
+      { ...providers[0], id: "builtin_river", kind: "river", name: "River" },
+    ])
+    saved = [
+      {
+        ...ruleItem,
+        rule: {
+          ...ruleItem.rule,
+          alias: "research",
+          providerId: "builtin_river",
+          model: "deepseek-ai/DeepSeek-V4.1-Flash",
+          accountId: "",
+        },
+        providerName: "River",
+      },
+    ]
+    listModelCatalogMock.mockResolvedValue([
+      {
+        accountId: "river-account",
+        providerId: "builtin_river",
+        model: "deepseek-flash",
+        name: "DeepSeek-Flash",
+        fetchedAt: "",
+        source: "preset",
+      },
+    ])
+    const user = userEvent.setup()
+    renderRouting("rules")
+    await user.click(await screen.findByRole("button", { name: "编辑规则“research”" }))
+    const dialog = within(screen.getByRole("dialog"))
+    await user.clear(dialog.getByRole("textbox", { name: "客户端模型名" }))
+    await user.type(dialog.getByRole("textbox", { name: "客户端模型名" }), "research-updated")
+    await user.click(dialog.getByRole("button", { name: "保存规则" }))
+    await waitFor(() =>
+      expect(updateRoute).toHaveBeenCalledWith(
+        ruleItem.rule.id,
+        expect.objectContaining({
+          alias: "research-updated",
+          providerId: "builtin_river",
+          model: "deepseek-ai/DeepSeek-V4.1-Flash",
+        }),
+      ),
     )
   })
 

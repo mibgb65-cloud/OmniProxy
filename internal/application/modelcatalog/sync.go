@@ -90,7 +90,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
 			ids, e := s.river.DiscoverModels(ctx, base, key)
 			for _, m := range ids {
-				models = append(models, codex.Model{ID: m, Name: m, Metadata: river.ModelMetadata(m)})
+				models = append(models, codex.Model{ID: m, Name: river.ModelName(m), Metadata: river.ModelMetadata(m)})
 			}
 			return e
 		})

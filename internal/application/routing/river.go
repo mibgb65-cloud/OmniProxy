@@ -29,7 +29,7 @@ func (s *Service) withRiverPresets(ctx context.Context, models []discoveredModel
 				continue
 			}
 			for _, id := range river.Models() {
-				models = append(models, discoveredModel{accountID: a.ID, providerID: p.ID, model: id, name: id, metadata: river.ModelMetadata(id)})
+				models = append(models, discoveredModel{accountID: a.ID, providerID: p.ID, model: id, name: river.ModelName(id), metadata: river.ModelMetadata(id)})
 			}
 		}
 	}
@@ -40,6 +40,7 @@ func (s *Service) withRiverPresets(ctx context.Context, models []discoveredModel
 }
 
 func riverTargetSupports(data snapshot, providerID, accountID, model string) bool {
+	model = river.UpstreamModel(model)
 	if !river.SupportsModel(model) {
 		return false
 	}
@@ -49,4 +50,22 @@ func riverTargetSupports(data snapshot, providerID, accountID, model string) boo
 		}
 	}
 	return false
+}
+
+func publicModel(data snapshot, providerID, model string) string {
+	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == river.Kind {
+			return river.PublicModel(model)
+		}
+	}
+	return model
+}
+
+func upstreamModel(data snapshot, providerID, model string) string {
+	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == river.Kind {
+			return river.UpstreamModel(model)
+		}
+	}
+	return model
 }

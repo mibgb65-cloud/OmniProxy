@@ -56,6 +56,13 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	}
 	if client == "claude" {
 		claudePickerSettings(config, entries)
+		if env, ok := config["env"].(map[string]any); ok {
+			for _, key := range []string{"ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL"} {
+				if selected, ok := env[key].(string); ok {
+					env[key] = upgradeClaudeDefault(entries, selected)
+				}
+			}
+		}
 		if err := subscriptionCompactSettings(config, entries); err != nil {
 			return err
 		}
@@ -108,20 +115,28 @@ func (s *Service) refreshCodex(ctx context.Context, entries []catalog.Entry, con
 		return err
 	}
 	configBody := config.body
-	selected, _ := values["model"].(string)
+	original, _ := values["model"].(string)
+	selected := upgradeClaudeDefault(entries, original)
 	present := false
 	for _, entry := range entries {
 		if entry.ID == selected {
 			present = true
 		}
 	}
-	configChanged := !present && len(entries) > 0
+	if !present && len(entries) > 0 {
+		selected = entries[0].ID
+	}
+	configChanged := selected != original
 	if configChanged {
 		provider, _ := values["model_provider"].(string)
 		if provider == "" {
 			provider = "openai"
 		}
-		configBody, err = patchTOML(config.body, provider, map[string]string{"model": quote(entries[0].ID), "model_reasoning_effort": ""})
+		fields := map[string]string{"model": quote(selected)}
+		if !present {
+			fields["model_reasoning_effort"] = ""
+		}
+		configBody, err = patchTOML(config.body, provider, fields)
 		if err == nil {
 			err = writeAtomic(s.paths.Codex, configBody, config.revision)
 		}

@@ -21,7 +21,7 @@ export function RoutingEditorFields({
     register,
     control,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, defaultValues },
   } = useFormContext<RouteInput>()
   const providerId = useWatch({ control, name: "providerId" })
   const alias = useWatch({ control, name: "alias" })
@@ -34,6 +34,13 @@ export function RoutingEditorFields({
       ...catalog
         .filter((m) => m.providerId === providerId && (!accountId || m.accountId === accountId))
         .map((m) => m.model),
+      // 旧 River 规则保留原始目标供原位编辑，是否仍可调用由后端再次核对。
+      ...(provider?.kind === "river" &&
+      providerId === defaultValues?.providerId &&
+      accountId === defaultValues?.accountId &&
+      defaultValues?.model
+        ? [defaultValues.model]
+        : []),
       ...(provider?.kind === "deepseek"
         ? models.filter((m) => m === "deepseek-flash" || m === "deepseek-v4-pro")
         : []),

@@ -34,7 +34,7 @@ func (s *Service) presetItems(ctx context.Context, cached []Item) ([]Item, error
 				continue
 			}
 			for _, id := range river.Models() {
-				item.Model, item.Name = id, id
+				item.Model, item.Name = river.PublicModel(id), river.ModelName(id)
 				item.Metadata, item.Source = river.ModelMetadata(id), "preset"
 				items = append(items, item)
 			}

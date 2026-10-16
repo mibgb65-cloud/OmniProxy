@@ -25,6 +25,9 @@ func TestRiverPresetRoutingAliasesAndEligibility(t *testing.T) {
 	if err != nil || !preview.Routable || !preview.Matched || preview.Model != river.DeepSeekFlash {
 		t.Fatal("alias failed", preview, err)
 	}
+	if err := s.SetProviderOrder(ctx, "deepseek-flash", []string{"builtin_river", "builtin_deepseek"}); err != nil {
+		t.Fatal(err)
+	}
 	entries, err := s.Catalog(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -47,7 +50,7 @@ func TestRiverPresetRoutingAliasesAndEligibility(t *testing.T) {
 	}
 	found = 0
 	for _, item := range defaults {
-		if item.Model == river.DeepSeekFlash && item.Preview.Routable {
+		if item.Model == "deepseek-flash" && item.Preview.Routable {
 			found++
 		}
 	}

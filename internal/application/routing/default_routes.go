@@ -20,11 +20,11 @@ func originalModels(data snapshot) []string {
 			if provider.Kind == "mimo" && !mimoTargetSupports(data, provider.ID, "", id) {
 				continue
 			}
-			seen[id] = true
+			seen[publicModel(data, provider.ID, id)] = true
 		}
 	}
 	for _, model := range data.models {
-		seen[model.model] = true
+		seen[publicModel(data, model.providerID, model.model)] = true
 	}
 	for model := range data.preferences {
 		seen[model] = true
@@ -56,7 +56,7 @@ func (s *Service) DefaultRoutes(ctx context.Context) ([]DefaultRoute, error) {
 			item.PreferredProviderID = order[0]
 		}
 		for _, model := range data.models {
-			if model.model == id && model.name != "" {
+			if publicModel(data, model.providerID, model.model) == id && model.name != "" {
 				item.Name = model.name
 				break
 			}

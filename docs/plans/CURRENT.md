@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-003](../tasks/active/TASK-20261017-003-unified-model-routing-and-labels.md)：统一 River 短名称、Flash 服务商优先级与 DeepSeek 普通／1M 双选项，正在验证。
 
 ## Recently Completed
 

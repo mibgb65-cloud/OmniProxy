@@ -60,6 +60,11 @@ export function RoutingEditor({
   } = methods
   const submit = handleSubmit(async (input) => {
     setSaveError(null)
+    const existingRiverTarget =
+      initial?.rule.providerId === input.providerId &&
+      initial.rule.model === input.model &&
+      initial.rule.accountId === input.accountId &&
+      providers.some((item) => item.id === input.providerId && item.kind === "river")
     if (
       !providers.some(
         (item) =>
@@ -71,7 +76,7 @@ export function RoutingEditor({
             (["openai", "google"].includes(item.kind) &&
               catalog.some((model) => model.providerId === item.id))),
       ) ||
-      !models.includes(input.model)
+      (!models.includes(input.model) && !existingRiverTarget)
     ) {
       setError("providerId", { type: "validate" })
       setFocus("providerId")

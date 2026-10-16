@@ -129,8 +129,8 @@ it("River API Key 可同步官方模型，发现结果替换预设", async () =>
     {
       accountId: "a",
       providerId: "p",
-      model: "zai-org/GLM-5.3-Flash",
-      name: "zai-org/GLM-5.3-Flash",
+      model: "GLM-5.3-Flash",
+      name: "GLM-5.3-Flash",
       fetchedAt: "",
       source: "preset",
     },
@@ -139,8 +139,8 @@ it("River API Key 可同步官方模型，发现结果替换预设", async () =>
     {
       accountId: "a",
       providerId: "p",
-      model: "deepseek-ai/DeepSeek-V4.1-Flash",
-      name: "deepseek-ai/DeepSeek-V4.1-Flash",
+      model: "deepseek-flash",
+      name: "deepseek-flash",
       fetchedAt: "now",
     },
   ])
@@ -149,12 +149,12 @@ it("River API Key 可同步官方模型，发现结果替换预设", async () =>
     accounts: [{ ...catalogProps.accounts[0], authMethod: "api_key" }],
   })
   const user = userEvent.setup()
-  expect(await screen.findByText("zai-org/GLM-5.3-Flash")).toBeInTheDocument()
+  expect(await screen.findByText("GLM-5.3-Flash")).toBeInTheDocument()
   await selectOption(user, screen.getByRole("combobox"), "Account · River")
   await user.click(screen.getByRole("button", { name: "同步官方模型" }))
-  expect(await screen.findByText("deepseek-ai/DeepSeek-V4.1-Flash")).toBeInTheDocument()
+  expect(await screen.findByText("deepseek-flash")).toBeInTheDocument()
   expect(syncAccountModels).toHaveBeenCalledWith("a")
-  expect(screen.queryByText("zai-org/GLM-5.3-Flash")).not.toBeInTheDocument()
+  expect(screen.queryByText("GLM-5.3-Flash")).not.toBeInTheDocument()
 })
 
 it("模型与服务商双向分组，同一服务商的账号共用模型标题并保留各自能力", async () => {

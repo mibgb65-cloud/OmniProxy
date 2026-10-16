@@ -33,6 +33,13 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 		return nil, err
 	}
 	ids := originalModels(data)
+	if legacyChannels {
+		for _, model := range data.models {
+			if publicModel(data, model.providerID, model.model) != model.model {
+				ids = append(ids, model.model)
+			}
+		}
+	}
 	// MiMo／StepFun 同名模型按设置解析；旧通道只兼容解析，不自动发布副本。
 	rules = append(rules, minimaxAliases(data)...)
 	if legacyChannels {
@@ -83,6 +90,9 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 		}
 		if entry.ProviderKind == river.Kind {
 			entry.Metadata = river.ModelMetadata(entry.TargetModel)
+			if !matched {
+				entry.Name = river.ModelName(entry.TargetModel)
+			}
 		}
 		if entry.ProviderKind == atria.Kind {
 			entry.Metadata = atria.ModelMetadata(entry.TargetModel)

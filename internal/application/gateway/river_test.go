@@ -83,14 +83,18 @@ func TestRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T) {
 				if _, err := router.Create(context.Background(), routes.Input{Alias: "research", ProviderID: "builtin_river", Model: "deepseek-ai/DeepSeek-V4.1-Flash", Enabled: true}); err != nil {
 					t.Fatal(err)
 				}
+				if err := router.SetProviderOrder(context.Background(), "deepseek-flash", []string{"builtin_river"}); err != nil {
+					t.Fatal(err)
+				}
 				service.SetRouter(router)
 				if _, err := service.Start(); err != nil {
 					t.Fatal(err)
 				}
 				defer service.Stop(context.Background())
 				path, body := atriaInput(protocol, stream)
+				body = strings.ReplaceAll(body, `"research"`, `"deepseek-flash"`)
 				if protocol == "messages" {
-					body = fmt.Sprintf(`{"model":"research","stream":%t,"max_tokens":16,"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, stream)
+					body = fmt.Sprintf(`{"model":"deepseek-flash[1m]","stream":%t,"max_tokens":16,"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, stream)
 				}
 				response, err := http.Post(service.Info().Runtime.Address+"/v1/"+path, "application/json", strings.NewReader(body))
 				if err != nil {

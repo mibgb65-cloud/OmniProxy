@@ -7,6 +7,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 	catalog "omniproxy/internal/core/modelcatalog"
+	"omniproxy/internal/provider/river"
 )
 
 // clientEntries 仅排除已经确认不适合当前客户端的模型，未知能力保持未知。
@@ -33,15 +34,30 @@ func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
 			return selected
 		}
 	}
+	// 旧 River 原始 ID 和 Desktop 摘要继续指向归一后的同款型号，不能因菜单去重而切换默认模型。
+	for _, original := range river.Models() {
+		for _, suffix := range []string{"", catalog.ClaudeLongContextSuffix} {
+			old := original + suffix
+			alias := catalog.DesktopAlias(old)
+			if selected != old && selected != alias && selected != strings.TrimSuffix(alias, catalog.ClaudeLongContextSuffix) {
+				continue
+			}
+			for _, entry := range entries {
+				if entry.ID == river.PublicModel(original)+suffix {
+					return entry.ID
+				}
+			}
+		}
+	}
 	for _, entry := range entries {
 		alias := catalog.DesktopAlias(entry.ID)
 		if selected == alias || selected == strings.TrimSuffix(alias, catalog.ClaudeLongContextSuffix) {
 			return entry.ID
 		}
-		if (entry.ProviderKind == "deepseek" || entry.Metadata.ContextVerified) && entry.ID == selected+catalog.ClaudeLongContextSuffix {
+		if entry.Metadata.ContextVerified && entry.ID == selected+catalog.ClaudeLongContextSuffix {
 			return entry.ID
 		}
-		if (entry.ProviderKind == "deepseek" || entry.Metadata.ContextVerified) && strings.HasSuffix(entry.ID, catalog.ClaudeLongContextSuffix) && selected == catalog.DesktopAlias(strings.TrimSuffix(entry.ID, catalog.ClaudeLongContextSuffix)) {
+		if entry.Metadata.ContextVerified && strings.HasSuffix(entry.ID, catalog.ClaudeLongContextSuffix) && selected == catalog.DesktopAlias(strings.TrimSuffix(entry.ID, catalog.ClaudeLongContextSuffix)) {
 			return entry.ID
 		}
 	}

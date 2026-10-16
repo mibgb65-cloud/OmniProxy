@@ -177,6 +177,8 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 		return result
 	}
 	result.AccountID, result.ProviderID, result.Routable = selected.ID, selected.ProviderID, true
+	// 优先级按逻辑型号选择服务商，选定后再还原对应上游 ID，避免跨厂商误发模型名。
+	result.Model = upstreamModel(data, selected.ProviderID, result.Model)
 	result.PreferenceApplied = result.PreferredProviderID != "" && result.PreferredProviderID == selected.ProviderID
 	for index, id := range providerOrder {
 		if id == selected.ProviderID {

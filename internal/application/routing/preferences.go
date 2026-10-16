@@ -8,6 +8,7 @@ import (
 	"time"
 
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/river"
 )
 
 const (
@@ -67,6 +68,7 @@ func (s *Service) SetPreferredProvider(ctx context.Context, model, providerID st
 	if !core.ValidModel(model) || validateID(providerID, true) != nil {
 		return ErrInvalidInput
 	}
+	model = river.PublicModel(model)
 	if providerID == "" {
 		return s.SetProviderOrder(ctx, model, nil)
 	}
@@ -91,6 +93,7 @@ func (s *Service) SetProviderOrder(ctx context.Context, model string, providerID
 	if !core.ValidModel(model) || !validProviderOrder(providerIDs) {
 		return ErrInvalidInput
 	}
+	model = river.PublicModel(model)
 	if len(providerIDs) == 0 {
 		if _, err := s.db.ExecContext(ctx, `DELETE FROM model_provider_preferences WHERE model=?`, model); err != nil {
 			return fmt.Errorf("routing: save failed")

@@ -61,7 +61,7 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 		}
 		return request, proxy.Failure("route_"+decision.ErrorCode, 503)
 	}
-	if decision.Matched {
+	if decision.Matched || decision.Model != request.Model {
 		body, err := core.RewriteModel(request.Body, decision.Model)
 		if err != nil {
 			return request, proxy.Failure("invalid_request", 400)

@@ -63,7 +63,7 @@ Windows 的第三方配置入口为 `%LOCALAPPDATA%\Claude-3p\configLibrary`，�
 
 Claude Code Desktop 的配置使用稳定兼容路由名，标签显示实际模型／用户路由名称。Messages 请求先用当前可用目录解析兼容名，再进入现有精确路由和账号选择；目录或路由移除后，旧配置不能继续调用。兼容名不写入用户路由表，其他客户端目录继续使用原模型 ID。
 
-Claude CLI / Desktop 对已确认支持 1M 的 DeepSeek 模型及其路由只提供长上下文选项，例如 `deepseek-flash[1m]`、`deepseek-v4-pro[1m]`，不再展示普通 200K 选项；旧 DeepSeek 默认自动升级到对应 1M。未知上下文不生成变体，其他提供商沿用已有默认。DeepSeek Flash / Pro 的官方上下文元数据在同步和旧快照读取时补齐，路由继承实际目标能力。[DeepSeek 官方接入说明](https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code/)、[官方模型能力](https://api-docs.deepseek.com/quick_start/pricing/)、[Claude Code 上下文说明](https://code.claude.com/docs/en/model-config)。
+Claude CLI / Desktop 为 DeepSeek Flash／Pro 同时保留普通和 `[1m]` 两种选项，例如 `deepseek-flash`／`deepseek-flash[1m]`、`deepseek-v4-pro`／`deepseek-v4-pro[1m]`；已有普通默认保持普通，已有 1M 默认保持 1M。River Flash 归入同一逻辑模型并共用服务商优先级；NVIDIA、GLM 使用短名称，旧完整 ID／Desktop 摘要和上下文选项保持兼容。未知上下文不生成变体，已实测 GPT 订阅的仅 1M 规则保持独立。这里的 `[1m]` 是客户端选项，不作为上游模型 ID 发送。
 
 Desktop 使用独立的长上下文基础兼容 ID，以及原生 `supports1m=true` / `prefer1m=true`，避免配置归一化合并选项或选中标签后仍按 200K 调用。客户端去掉后缀后网关仍可识别；上一版普通和共享基础 ID 的请求保留解析兼容，不改上游真实模型。应用与目录刷新复用同一格式。实际桌面菜单和上下文显示必须验收，写入条目数量或 CLI 参数验证不能替代原生结果。
 

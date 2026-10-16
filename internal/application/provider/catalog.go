@@ -39,7 +39,7 @@ var definitions = []Definition{
 	{Kind: mimo.Kind, Name: "Xiaomi MiMo", DefaultBaseURL: mimo.DefaultBaseURL, Models: mimo.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: stepfun.Kind, Name: "StepFun", DefaultBaseURL: stepfun.DefaultBaseURL, Models: stepfun.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},
-	{Kind: river.Kind, Name: "River", DefaultBaseURL: river.DefaultBaseURL, Models: river.Models(), AuthMethods: []string{AuthAPIKey}},
+	{Kind: river.Kind, Name: "River", DefaultBaseURL: river.DefaultBaseURL, Models: river.DisplayModels(), AuthMethods: []string{AuthAPIKey}},
 }
 
 // Catalog returns an independent snapshot of the built-in provider kinds.
