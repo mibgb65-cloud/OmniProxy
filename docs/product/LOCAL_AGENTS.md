@@ -79,7 +79,7 @@ Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在�
 
 - Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
 - Claude Desktop 写入完整的 `inferenceModels`，支持从其模型选择器切换网关模型和别名，不依赖只识别 Claude ID 的自动发现。
-- Claude Code CLI 自动配置默认模型；可用 ID 可通过 `/model <模型ID>` 切换，菜单展示受客户端版本影响。
+- Claude Code CLI 自动配置默认模型及完整 `/model` 菜单；也可通过完整模型 ID 切换，旧版客户端需支持 `modelPicker` 才会显示列表。
 
 模型同步和路由／资源变更会更新未被外部修改的受管目录，客户端重启后生效；不会结束正在进行的会话。本地目录使用加密备份和文件版本保护，与原客户端配置一同恢复。目录位置已有未受管文件时拒绝接管。目录刷新失败记录安全错误，原有配置的外部修改不会被覆盖。
 
@@ -89,7 +89,9 @@ Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在�
 
 Codex 不改 model_provider，官方登录和会话根目录不变。内置 openai 通过专用本地接入路径；自定义提供商保留表名。认证助手／活跃配置 profile 冲突时拒绝自动修改。
 
-Claude CLI 只合并接入 env，不退出原登录。Desktop 应用时添加并选中「OmniProxy · 本地网关」第三方推理配置条目，合并两份启动配置的 `deploymentMode=3p`。原模式和选择保存为可恢复的非敏感状态；官方登录和原会话文件不改写。组织托管策略仍优先。[官方 Desktop 接入说明](https://code.claude.com/docs/en/llm-gateway-connect#desktop-app)。
+Claude CLI 合并接入 env、完整模型菜单及已确认的压缩设置，不退出原登录。`modelPicker.options` 使用预览中的模型 ID 和名称，`replaceBuiltInOptions=true` 替换重复档位和不可用的内置模型，保留 Default 行；不伪装模型身份，不覆盖已有 `availableModels` 限制。受管目录刷新同时更新 CLI 菜单，仍要求文件未被外部修改；原菜单随加密备份恢复。本机 Claude Code 2.1.292 已确认支持，旧版未显示时可更新或输入完整模型 ID。[官方模型菜单说明](https://code.claude.com/docs/en/model-config#add-a-custom-model-option)。
+
+Desktop 应用时添加并选中「OmniProxy · 本地网关」第三方推理配置条目，合并两份启动配置的 `deploymentMode=3p`。原模式和选择保存为可恢复的非敏感状态；官方登录和原会话文件不改写。组织托管策略仍优先。[官方 Desktop 接入说明](https://code.claude.com/docs/en/llm-gateway-connect#desktop-app)。
 
 「恢复原配置」按加密备份恢复原文件，原本没有文件时删除本次创建的文件。外部修改会阻止覆盖；Desktop 同时恢复原启动模式和配置选择，保留接入后新增的非受管设置。主配置版本和激活状态同事务提交，多文件写入或提交失败会回退；外部改变受管模式或当前配置时拒绝恢复。恢复同时停用 Key，重新应用可启用。旧版没有模式快照的配置仍保留先切回原配置再移除的保护。
 

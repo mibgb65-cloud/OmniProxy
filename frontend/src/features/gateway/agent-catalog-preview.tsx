@@ -6,6 +6,7 @@ const modeLabels = {
   "local-catalog": "agents.mode.local",
   "remote-catalog": "agents.mode.remote",
   "desktop-model-list": "agents.mode.desktop",
+  "cli-model-list": "agents.mode.cli",
   "client-default": "agents.mode.default",
 } as const
 

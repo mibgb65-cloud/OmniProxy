@@ -124,6 +124,8 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		if err := s.checkCatalogFile(ctx); err != nil {
 			return failed(err)
 		}
+	} else if input.Client == "claude" {
+		mode = "cli-model-list"
 	} else if input.Client == "claude-desktop" {
 		mode = "desktop-model-list"
 		desktop, err := s.prepareDesktopChange(ctx, true, false)

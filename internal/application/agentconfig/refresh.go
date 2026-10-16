@@ -15,7 +15,7 @@ func (s *Service) RefreshCatalog(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var result error
-	for _, client := range []string{"codex", "claude-desktop"} {
+	for _, client := range []string{"codex", "claude", "claude-desktop"} {
 		var expected string
 		err := s.db.QueryRowContext(ctx, `SELECT applied_hash FROM agent_backups WHERE client=?`, client).Scan(&expected)
 		if err == nil {
@@ -54,8 +54,15 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	if json.Unmarshal(before.body, &config) != nil {
 		return failure("invalid_config")
 	}
-	selected := upgradeClaudeDefault(entries, existingModel(client, before.body))
-	config["inferenceModels"] = catalog.DesktopModels(entries, selected)
+	if client == "claude" {
+		claudePickerSettings(config, entries)
+		if err := subscriptionCompactSettings(config, entries); err != nil {
+			return err
+		}
+	} else {
+		selected := upgradeClaudeDefault(entries, existingModel(client, before.body))
+		config["inferenceModels"] = catalog.DesktopModels(entries, selected)
+	}
 	body, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return failure("invalid_config")

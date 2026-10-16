@@ -53,6 +53,7 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 			if json.Unmarshal(patched, &config) != nil {
 				return nil, provider, failure("invalid_config")
 			}
+			claudePickerSettings(config, plan.Models)
 			if err := subscriptionCompactSettings(config, plan.Models); err != nil {
 				return nil, provider, err
 			}

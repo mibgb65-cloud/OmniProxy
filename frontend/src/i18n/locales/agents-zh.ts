@@ -90,6 +90,7 @@ export const agentsZh = {
   "agents.mode.local": "应用管理的本地目录",
   "agents.mode.remote": "网关远程目录",
   "agents.mode.desktop": "桌面客户端模型列表",
+  "agents.mode.cli": "CLI 模型菜单",
   "agents.mode.default": "客户端默认模型",
   "agents.catalogRefreshHint":
     "目录更新后重新启动客户端。优先沿用仍可用的原模型；未知能力保留为待确认。",
@@ -128,7 +129,7 @@ export const agentsZh = {
   "agents.error.catalog_conflict": "受管目录位置已有其他文件，请先检查文件冲突。",
   "agents.error.catalog_too_large": "模型目录过大，超出客户端接入限制。请精简可用模型或路由。",
   "agents.cliModelHint":
-    "Claude Code CLI 可使用 /model <模型ID> 切换；模型菜单展示取决于客户端版本。",
+    "将模型列表写入 /model 菜单；也可使用 /model <模型ID> 切换。旧版客户端若未显示列表，请更新 Claude Code。",
   "models.title": "官方模型目录",
   "models.account": "同步账号",
   "models.choose": "选择账号",

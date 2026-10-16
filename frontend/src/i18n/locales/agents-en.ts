@@ -93,6 +93,7 @@ export const agentsEn = {
   "agents.mode.local": "Application-managed local catalog",
   "agents.mode.remote": "Remote gateway catalog",
   "agents.mode.desktop": "Desktop client model list",
+  "agents.mode.cli": "CLI model picker",
   "agents.mode.default": "Client default model",
   "agents.catalogRefreshHint":
     "Restart the client after catalog updates. An existing available model is preserved; unknown capabilities remain unconfirmed.",
@@ -144,7 +145,7 @@ export const agentsEn = {
   "agents.error.catalog_too_large":
     "The model catalog exceeds the client connection limit. Reduce available models or routes.",
   "agents.cliModelHint":
-    "Use /model <model-id> in Claude Code CLI to switch models. Picker entries depend on the client version.",
+    "Adds the model list to the /model picker. You can also switch with /model <model-id>. Update older Claude Code clients if the list does not appear.",
   "models.title": "Official model catalog",
   "models.account": "Account to sync",
   "models.choose": "Choose an account",
