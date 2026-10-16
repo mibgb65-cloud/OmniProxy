@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -64,8 +64,14 @@ In Progress
 
 ## Git
 
-实现及文档已核对，待提交；保留任务开始前五个无关未跟踪记录。
+实现提交：`c1ccced8c40cd0915d84eaf0620b39ba14b92efb` — `fix(config): 补齐 Claude CLI 完整模型菜单与目录刷新`。
+
+保留任务开始前五个无关未跟踪记录；任务完成归档及看板另行提交。
 
 ## Result
 
 CLI 模型菜单已与 18 项接入预览对齐，并已在用户的实际配置上应用。现有 CLI 会话重启后读取新菜单。
+
+## Completed
+
+2026-10-16 21:50（Asia/Singapore）
