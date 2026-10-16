@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -112,9 +112,13 @@ Antigravity 内部只读接口格式与实际账号权限需核实；不同额�
 
 # Git
 
-待提交。
+`662361bf2de1ceb0bf9f464758ec86d37cc5cd0b feat(quota): 接入 Google 订阅额度与可选模型`
 
 # Result
 
 额度占位已替换为真实官方分组窗口；用户补充的可选模型入口已完成，具体型号和网关
 适配边界清晰。完整质量门、真实只读服务及开发窗口验证通过。
+
+# Completed
+
+2026-10-17 01:44
