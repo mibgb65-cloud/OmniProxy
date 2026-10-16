@@ -1,6 +1,9 @@
 import { Bot } from "lucide-react"
 
-const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?: boolean }> = {
+const brandIcons: Record<
+  string,
+  { file: string; monochrome?: boolean; darkTile?: boolean; fullTile?: boolean }
+> = {
   openai: { file: "openai.svg", monochrome: true },
   anthropic: { file: "anthropic.svg", monochrome: true },
   google: { file: "google-color.svg" },
@@ -11,6 +14,7 @@ const brandIcons: Record<string, { file: string; monochrome?: boolean; darkTile?
   mimo: { file: "xiaomimimo.svg", monochrome: true },
   stepfun: { file: "stepfun-color.svg" },
   atria: { file: "atria.png" },
+  river: { file: "river.png", fullTile: true },
 }
 
 function resolveBrandIcon(kind: string, endpoint?: string) {
@@ -40,14 +44,14 @@ export function ProviderBrandIcon({ kind, endpoint }: { kind: string; endpoint?:
   const brandIcon = resolveBrandIcon(kind, endpoint)
   return (
     <span
-      className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${brandIcon?.monochrome || brandIcon?.darkTile ? "bg-zinc-950" : brandIcon ? "border-border border bg-white" : "bg-slate-700 text-white"}`}
+      className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${brandIcon?.fullTile ? "overflow-hidden" : brandIcon?.monochrome || brandIcon?.darkTile ? "bg-zinc-950" : brandIcon ? "border-border border bg-white" : "bg-slate-700 text-white"}`}
       aria-hidden="true"
     >
       {brandIcon ? (
         <img
           src={`/provider-icons/${brandIcon.file}`}
           alt=""
-          className={`size-6 object-contain ${brandIcon.monochrome ? "brightness-0 invert" : ""}`}
+          className={`${brandIcon.fullTile ? "size-full" : "size-6"} object-contain ${brandIcon.monochrome ? "brightness-0 invert" : ""}`}
         />
       ) : (
         <Bot className="size-5" />

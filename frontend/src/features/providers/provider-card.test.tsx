@@ -15,6 +15,7 @@ const brandIcons = {
   mimo: "xiaomimimo.svg",
   stepfun: "stepfun-color.svg",
   atria: "atria.png",
+  river: "river.png",
 } as const
 
 function renderCard(kind: string, endpoint = "https://example.test/v1", authMethods = ["api_key"]) {
