@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -58,8 +58,14 @@ In Progress
 
 # Git
 
-待填写。
+实现提交：`fc1fa0186f8fe0635f184bd8dd37456300ea02ad feat(frontend): 合并 Claude CLI 与 Desktop 入口展示`。
+
+归档记录和 CURRENT 由后续文档提交保存。
 
 # Result
 
 CLI 与 Desktop 已在同一 Claude Code 卡片显示，两个配置入口和独立状态均保留。
+
+# Completed
+
+2026-10-17（Asia/Singapore）

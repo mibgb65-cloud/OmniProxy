@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261017-005](../tasks/completed/2026-10/TASK-20261017-005-group-claude-client-entries.md)：Claude Code CLI／Desktop 合并为同一张入口卡片，各自保留安装／接入状态、详情导航与返回焦点。完整质量门／479 项前端测试、原生深浅主题及 960×600 验收通过；实现提交 `fc1fa01`。
 - [TASK-20261017-004](../tasks/completed/2026-10/TASK-20261017-004-google-account-resources-and-agent-models.md)：Gemini 项目资源移入对应 API Key 卡片／列表；六款 Antigravity 订阅模型接入 Agent 三协议目录与同步入口。完整质量门／476 项前端测试、原生深浅主题／960×600、Opus／Sonnet／GPT-OSS 真实 Responses 及 Gemini／Sonnet 两轮工具续接通过。实现提交 `dc11eca`。
 - [TASK-20261017-003](../tasks/completed/2026-10/TASK-20261017-003-unified-model-routing-and-labels.md)：River NVIDIA／GLM 短名称、Flash 与直连 DeepSeek 共用优先级、DeepSeek 普通／1M 双选及旧 ID／规则／菜单默认兼容；迁移 030 保留已有逻辑偏好。完整质量门／474 项前端测试及当前开发窗口归组验收通过；实现提交 `88714b7`。
 - [TASK-20261017-002](../tasks/completed/2026-10/TASK-20261017-002-river-provider-icon.md)：补齐 River 官方本地图标，保留品牌底色、比例与圆角尺寸，修复共享入口的通用图标回退。完整质量门／473 项前端测试及当前开发窗口深浅主题验收通过；实现提交 `288c748`。
