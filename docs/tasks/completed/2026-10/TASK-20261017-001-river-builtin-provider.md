@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -91,8 +91,14 @@ In Progress
 
 # Git
 
-待提交。
+实现提交：`ad8ada2fe949255cc38a6d6c31b33ac18c173f37 feat(provider): 内置接入 River 模型与推理接口`。
+
+分支：`codex/river-builtin-provider`；归档记录由后续文档提交保存。
 
 # Result
 
-待完成。
+River 内置接入、必要验证、产品文档与实现提交完成。升级后可在 River 账号入口添加 API Key 并使用官方预设／同步模型；当前运行中的开发进程没有替换，下一次从当前源码启动后迁移自动生效。隔离验收进程已结束，无真实推理或用户账号／客户端配置写入。
+
+# Completed
+
+2026-10-17（Asia/Singapore）

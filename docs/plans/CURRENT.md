@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261017-001](../tasks/active/TASK-20261017-001-river-builtin-provider.md)：River 内置服务商、三款模型及原生 Chat／Responses、Messages 转换，正在验证。
+暂无进行中的任务。
 
 ## Recently Completed
 
+- [TASK-20261017-001](../tasks/completed/2026-10/TASK-20261017-001-river-builtin-provider.md)：River 第十一家内置服务商，三款官方模型、账号目录同步、路由、原生 Chat／Responses 和 Messages 文本工具转换。完整质量门／472 项前端测试与隔离原生窗口验收通过；实现提交 `ad8ada2`。真实 Key、图片及长窗口仍待验证。
 - [TASK-20261016-009](../tasks/completed/2026-10/TASK-20261016-009-google-subscription-quota.md)：Google Antigravity 真实分组额度、重置时间、共享缓存与可选模型浮层；真实只读查询返回两组四窗口／6 个型号，区分 3 个 Gemini Chat 适配与 3 个第三方待接入型号。完整质量门／469 项前端测试及开发窗口验收通过，未发送推理。实现提交 `662361b`。
 - [TASK-20261016-008](../tasks/completed/2026-10/TASK-20261016-008-google-subscription-label.md)：修复 Google 提供商与配额卡片误标 ChatGPT / Codex，提供商／账号标签共用品牌选择，未知类型使用中性订阅标签。完整质量门／456 项前端测试及实际提供商页标签核对通过。实现提交 `0c5c10e`。
 - [TASK-20261016-007](../tasks/completed/2026-10/TASK-20261016-007-google-antigravity-subscription.md)：独立 Google / Antigravity 订阅登录、DPAPI 凭证、真实模型发现、文本／工具 Chat JSON/SSE、路由与用量。完整质量门／452 项前端测试通过，协作真实授权后发现 14 个模型，固定账号调用 Gemini 2.5 Flash 返回 HTTP 200（输入 6／输出 1 Token），开发窗口视觉核对通过。实现提交 `80e6ba8`；官方剩余额度、其他协议及高级模型／长窗口仍待验证。
