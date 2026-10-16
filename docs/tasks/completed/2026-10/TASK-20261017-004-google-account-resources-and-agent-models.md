@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -100,9 +100,15 @@ Responses／Messages 暂不承诺逐 Token 增量输出；无需引入新适配�
 
 # Git
 
-待填写。
+实现提交：`dc11eca5fd1093d8afa5c8298693fcbe078a3ede feat(google): 整合账号资源并接入 Agent 订阅模型`。
+
+分支 `codex/river-builtin-provider`；归档记录及 CURRENT 由后续文档提交保存。
 
 # Result
 
 资源已按账号归位；截图中的六款订阅型号已进入 Agent 协议目录，实际同步和推理／工具续接
-通过。完整质量门通过，提交后归档。
+通过。完整质量门通过，实现已提交并归档。
+
+# Completed
+
+2026-10-17（Asia/Singapore）
