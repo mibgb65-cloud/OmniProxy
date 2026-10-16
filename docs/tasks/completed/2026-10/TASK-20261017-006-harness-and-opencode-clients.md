@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -106,9 +106,15 @@ OpenCode 项目／环境／组织配置或远程后端、Harness 主目录／启
 
 # Git
 
-待填写。
+实现提交：`a49f2347febd00176a72841c6c0d5d19c92e1bda feat(gateway): 接入 Harness 与 OpenCode 本地客户端`。
+
+分支 `codex/river-builtin-provider`；归档记录与 CURRENT 由后续文档提交保存。
 
 # Result
 
 两个产品的本地接入功能已完成，配置全生命周期、关键隔离保护和真实客户端流式／工具
 续接通过，开发窗口已更新。完整质量门通过；用户可在客户端接入页预览并应用。
+
+# Completed
+
+2026-10-17（Asia/Singapore）

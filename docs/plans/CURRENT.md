@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261017-006](../tasks/completed/2026-10/TASK-20261017-006-harness-and-opencode-clients.md)：接入 OpenCode CLI／Desktop 共享配置、Harness Web／Desktop 独立 profile，支持 Key、模型目录、预览／备份恢复、检测与固定打开入口。完整质量门／484 项前端测试、真实 Harness／OpenCode CLI 隔离 SSE／工具／思考续接及原生三个预览、深浅主题／960×600 验证通过；实际 Desktop 界面调用待验收。实现提交 `a49f234`。
 - [TASK-20261017-005](../tasks/completed/2026-10/TASK-20261017-005-group-claude-client-entries.md)：Claude Code CLI／Desktop 合并为同一张入口卡片，各自保留安装／接入状态、详情导航与返回焦点。完整质量门／479 项前端测试、原生深浅主题及 960×600 验收通过；实现提交 `fc1fa01`。
 - [TASK-20261017-004](../tasks/completed/2026-10/TASK-20261017-004-google-account-resources-and-agent-models.md)：Gemini 项目资源移入对应 API Key 卡片／列表；六款 Antigravity 订阅模型接入 Agent 三协议目录与同步入口。完整质量门／476 项前端测试、原生深浅主题／960×600、Opus／Sonnet／GPT-OSS 真实 Responses 及 Gemini／Sonnet 两轮工具续接通过。实现提交 `dc11eca`。
 - [TASK-20261017-003](../tasks/completed/2026-10/TASK-20261017-003-unified-model-routing-and-labels.md)：River NVIDIA／GLM 短名称、Flash 与直连 DeepSeek 共用优先级、DeepSeek 普通／1M 双选及旧 ID／规则／菜单默认兼容；迁移 030 保留已有逻辑偏好。完整质量门／474 项前端测试及当前开发窗口归组验收通过；实现提交 `88714b7`。
