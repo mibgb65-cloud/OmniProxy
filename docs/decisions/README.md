@@ -48,6 +48,7 @@ rather than editing history.
 
 MiMo 默认通道选择与目录去重见 [ADR-010](ADR-010-mimo-default-billing-order.md)。
 StepFun 同款设置与有限复用见 [ADR-011](ADR-011-stepfun-default-billing-order.md)。
+Kimi Code 订阅 Key、计费／地区顺序与身份保留见 [ADR-012](ADR-012-kimi-coding-and-default-order.md)。
 
 | ADR                                                              | Status  | Summary                                   |
 | ---------------------------------------------------------------- | ------- | ----------------------------------------- |

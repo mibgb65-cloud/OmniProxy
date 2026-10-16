@@ -18,6 +18,8 @@ const (
 
 // Request 保留协议正文；只解析代理需要的模型和流式标志。
 type Request struct {
+	// 仅有界保留真实客户端标识供要求工具身份的上游使用，不包含认证头或进入日志。
+	ClientUserAgent  string
 	AccountUpdatedAt string
 	Trace            *Trace
 	Protocol         string

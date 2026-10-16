@@ -24,6 +24,7 @@ func snapshotTarget(p provider.Configuration, a account.Item) proxy.TargetSnapsh
 	}
 	if a.Kimi != nil {
 		target.ProviderRegion = a.Kimi.Region
+		target.BillingMode = a.Kimi.Mode()
 	}
 	return target
 }

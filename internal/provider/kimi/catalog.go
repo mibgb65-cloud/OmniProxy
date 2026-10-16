@@ -14,17 +14,39 @@ const DefaultBaseURL = "https://api.moonshot.cn/v1"
 
 // Options 保存公开平台选择与并发配置版本，不包含 Key。
 type Options struct {
-	Region  string `json:"region"`
-	Version int64  `json:"version"`
+	BillingMode string `json:"billingMode,omitempty"`
+	Region      string `json:"region"`
+	Version     int64  `json:"version"`
 }
 
 // Valid 只接受两个已确认的官方平台。
-func (o Options) Valid() bool { return (o.Region == "cn" || o.Region == "global") && o.Version >= 0 }
+func (o Options) Valid() bool {
+	return (o.Region == "cn" || o.Region == "global") && (o.BillingMode == "" || o.BillingMode == "payg" || o.BillingMode == "coding") && o.Version >= 0
+}
+
+// Mode 将旧调用方未指定的计费方式保持为普通按量，不能默认升级为订阅。
+func (o Options) Mode() string {
+	if o.BillingMode == "" {
+		return "payg"
+	}
+	return o.BillingMode
+}
+
+// SamePool 比较凭证所属计费方式及地区，不包含乐观锁版本。
+func (o Options) SamePool(other Options) bool {
+	return o.Region == other.Region && o.Mode() == other.Mode()
+}
 
 // BaseURL 固定解析平台，错误时不尝试另一个平台的认证。
 func (o Options) BaseURL() (string, error) {
 	if !o.Valid() {
 		return "", errors.New("kimi: invalid_configuration")
+	}
+	if o.Mode() == "coding" {
+		if o.Region == "global" {
+			return "https://api.kimi.ai/coding/v1", nil
+		}
+		return "https://api.kimi.com/coding/v1", nil
 	}
 	if o.Region == "global" {
 		return "https://api.moonshot.ai/v1", nil

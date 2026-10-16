@@ -3,7 +3,7 @@ import { useRef, useState } from "react"
 import type { FormEvent } from "react"
 import type { AccountItem, UpdateAccountInput } from "../../services/omniproxy"
 import { validMiniMaxOptions, type MiniMaxOptions } from "../../services/minimax"
-import type { KimiOptions } from "../../services/kimi"
+import { validKimiOptions, type KimiOptions } from "../../services/kimi"
 import type { StepFunOptions as Options } from "../../services/stepfun"
 import { validAccountName, validAPIKey } from "./account-input"
 import { validStepOptions } from "./stepfun-input"
@@ -48,7 +48,7 @@ export function useAccountEditForm(
     setInvalidKey(keyError)
     const stepError = stepEnabled && !validStepOptions(stepfun)
     setInvalidStep(stepError)
-    const kimiError = kimiEnabled && !["cn", "global"].includes(kimi.region)
+    const kimiError = kimiEnabled && !validKimiOptions(kimi)
     setInvalidKimi(kimiError)
     const minimaxError = minimaxEnabled && !validMiniMaxOptions(minimax)
     setInvalidMiniMax(minimaxError)

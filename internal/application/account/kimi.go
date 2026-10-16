@@ -46,9 +46,9 @@ func saveKimi(ctx context.Context, tx *sql.Tx, id string, o *kimi.Options) error
 	if o == nil {
 		return nil
 	}
-	result, err := tx.ExecContext(ctx, `INSERT INTO kimi_account_options(account_id,region,config_version)VALUES(?,?,1)
-ON CONFLICT(account_id) DO UPDATE SET region=excluded.region,config_version=config_version+1
-WHERE kimi_account_options.config_version=?`, id, o.Region, o.Version)
+	result, err := tx.ExecContext(ctx, `INSERT INTO kimi_account_options(account_id,region,billing_mode,config_version)VALUES(?,?,?,1)
+ON CONFLICT(account_id) DO UPDATE SET region=excluded.region,billing_mode=excluded.billing_mode,config_version=config_version+1
+WHERE kimi_account_options.config_version=?`, id, o.Region, o.Mode(), o.Version)
 	if err != nil {
 		return fmt.Errorf("account: save Kimi platform: %w", err)
 	}

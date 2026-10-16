@@ -19,6 +19,17 @@ export function KimiPlatformFields({
     <fieldset className="space-y-2" disabled={disabled} aria-describedby="kimi-platform-hint">
       <legend className="mb-2 text-sm font-medium">{t("kimi.platform")}</legend>
       <SelectField
+        id="kimi-billing"
+        aria-label={t("kimi.billing")}
+        value={value.billingMode || "payg"}
+        disabled={disabled}
+        options={[
+          { value: "payg", label: t("kimi.api") },
+          { value: "coding", label: t("kimi.coding") },
+        ]}
+        onValueChange={(billingMode) => onChange({ ...value, billingMode })}
+      />
+      <SelectField
         id="kimi-platform"
         aria-label={t("kimi.platform")}
         value={value.region}
@@ -48,9 +59,11 @@ export function KimiPlatformBadge({ account }: { account: AccountItem }) {
   if (!account.kimi && account.providerId !== "builtin_kimi") return null
   return (
     <span className="bg-muted text-muted-foreground inline-flex rounded-md px-2 py-0.5 text-[11px]">
-      {account.kimi
-        ? t(account.kimi.region === "cn" ? "kimi.cn" : "kimi.global")
-        : t("kimi.needsConfiguration")}
+      {account.kimi?.billingMode === "coding"
+        ? `${t("kimi.coding")} · ${t(account.kimi.region === "cn" ? "kimi.cn" : "kimi.global")}`
+        : account.kimi
+          ? t(account.kimi.region === "cn" ? "kimi.cn" : "kimi.global")
+          : t("kimi.needsConfiguration")}
     </span>
   )
 }

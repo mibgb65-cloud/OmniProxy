@@ -1,4 +1,5 @@
 import { MiMoBadge } from "./mimo-options"
+import { KimiCodeResource } from "./kimi-code-resource"
 import { MiMoPlanResource } from "./mimo-resource"
 import { MiniMaxResource } from "./minimax-resource"
 import { MiniMaxBadge } from "./minimax-options"
@@ -71,6 +72,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.kimi?.billingMode === "coding" ? (
+          <>
+            <KimiCodeResource account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : account.mimo?.billingMode === "token_plan" ? (

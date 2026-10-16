@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Service) syncKimi(ctx context.Context, current account.Item) ([]codex.Model, error) {
-	if current.Kimi == nil || !current.Kimi.Valid() {
+	if current.Kimi == nil || !current.Kimi.Valid() || current.Kimi.Mode() != "payg" {
 		return nil, ErrUnavailable
 	}
 	models := []codex.Model{}
@@ -46,8 +46,8 @@ func (s *Service) kimiPresets(ctx context.Context, cached []Item) ([]Item, error
 		if !kimiProviders[a.ProviderID] || a.AuthMethod != account.AuthAPIKey || a.Kimi == nil || !a.Kimi.Valid() || synced[a.ID] {
 			continue
 		}
-		for _, id := range kimi.Models() {
-			items = append(items, Item{AccountID: a.ID, ProviderID: a.ProviderID, Model: id, Name: id, Source: "preset", Metadata: kimi.ModelMetadata(id)})
+		for _, id := range kimi.AccountModels(*a.Kimi) {
+			items = append(items, Item{AccountID: a.ID, ProviderID: a.ProviderID, Model: id, Name: id, Source: "preset", Metadata: kimi.AccountModelMetadata(*a.Kimi, id)})
 		}
 		if len(items) > 10000 {
 			return nil, ErrUnavailable

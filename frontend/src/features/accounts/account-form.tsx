@@ -119,6 +119,7 @@ export function AccountForm({
                 value={form.kimi}
                 onChange={form.setKimi}
                 disabled={form.saving}
+                invalid={form.invalidKimi}
               />
             ) : null}
             {provider.kind === "stepfun" ? (

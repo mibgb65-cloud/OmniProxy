@@ -1,4 +1,5 @@
 import { mimoZh } from "./mimo-zh"
+import { kimiSettingsZh } from "./kimi-settings-zh"
 import { stepfunSettingsZh } from "./stepfun-settings-zh"
 import { subscriptionZh } from "./subscription-zh"
 import { gatewayZh } from "./gateway-zh"
@@ -18,6 +19,7 @@ import { googleZh } from "./google-zh"
  */
 export const zh = {
   ...mimoZh,
+  ...kimiSettingsZh,
   ...stepfunSettingsZh,
   "minimax.connection": "MiniMax 连接",
   "minimax.region": "平台",
@@ -260,10 +262,11 @@ export const zh = {
   "kimi.cn": "国内",
   "kimi.global": "海外",
   "kimi.choose": "请选择 API Key 所属平台",
-  "kimi.keyHint": "国内与海外平台的 Key 不能混用。新账号默认国内；一批账号共用平台选择。",
+  "kimi.keyHint":
+    "普通 API 与 Kimi Code 使用各自的 Key 和地区入口。一批账号共用计费及地区选择；新账号默认国内普通 API。",
   "kimi.needsConfiguration": "需确认平台",
   "kimi.routingHint":
-    "支持 K3、K2.7 Code 及高速版、K2.6。国内／海外可分别使用通道模型名；K3 支持原生 Responses，其他模型不显示为 Codex 目标。",
+    "普通 API／Kimi Code 订阅与国内／海外按设置顺序选择，同款模型合并显示。固定账号及显式通道优先，失败不会跨通道重试；协议和上下文以所选账号能力为准。",
   "routing.error.ambiguous_kimi_platform": "存在多个 Kimi 平台，请选择固定账号或地区模型名。",
   "providers.kind.kimi": "月之暗面（Kimi）",
   "providers.kind.minimax": "MiniMax",

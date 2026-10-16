@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## Kimi Code 与默认使用顺序（2026-10-16）
+
+迁移 028 追加账号计费字段及 Kimi 首选计费／地区表，旧账号按量身份和目录版本保持。`provider/kimi` 按账号固定解析普通／coding 两地区入口及原生模型映射，沿用保护凭据回调与原生三协议／SSE。路由共用计费筛选后应用地区顺序，目录使用实际账号能力，旧通道／Claude ID 仅兼容解析。Core 有界保留真实客户端 User-Agent，订阅上游原样使用，不依赖 Wails 或 React；订阅余额／发现不调用未核实接口。前端账号、设置、未知资源及受管目录复用既有组件。见 ADR-012、`product/KIMI.md`。
+
 ## StepFun 默认计费顺序（2026-10-16）
 
 迁移 027 独立保存 StepFun 首选计费方式，初始 Step Plan 优先；与 MiMo 共用应用层合格候选筛选及前端设置保存组件，保留服务商优先级、账号稳定顺序与各自缓存／持久值。公开目录移除 StepFun 自动通道副本，旧通道及 Claude ID 沿用兼容目录解析；Router 能力、账号版本和原生协议边界不变。见 ADR-011、`product/STEPFUN.md`。

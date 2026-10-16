@@ -40,6 +40,14 @@ export interface Item {
 }
 
 /**
+ * KimiSettings 独立保存计费方式及同计费方式内的地区优先级。
+ */
+export interface KimiSettings {
+    "preferredBillingMode": string;
+    "preferredRegion": string;
+}
+
+/**
  * MiMoSettings 是所有 MiMo 提供商共用的默认计费通道顺序。
  */
 export interface MiMoSettings {

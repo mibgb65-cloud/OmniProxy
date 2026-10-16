@@ -19,6 +19,9 @@ type Model struct {
 
 // DiscoverModels 有界发现当前账号的模型，失败不使用别的区域。
 func (c *Client) DiscoverModels(ctx context.Context, o Options, key []byte) (models []Model, result error) {
+	if o.Mode() != "payg" {
+		return nil, proxy.Failure("models_unavailable", 503)
+	}
 	if !ValidAPIKey(key) {
 		return nil, proxy.Failure("invalid_credential", 503)
 	}

@@ -162,7 +162,7 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 			return result, err
 		}
 	}
-	if input.Kimi != nil && (item.Kimi == nil || item.Kimi.Region != kimiOptions.Region) {
+	if input.Kimi != nil && (item.Kimi == nil || !item.Kimi.SamePool(*kimiOptions)) {
 		if err = saveKimi(ctx, tx, item.ID, kimiOptions); err != nil {
 			return result, err
 		}

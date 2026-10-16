@@ -84,6 +84,13 @@ func setupService(t *testing.T, handler http.Handler) (*Service, *sql.DB, *testS
 	if _, err = db.Exec(string(mimoSchema)); err != nil {
 		t.Fatal(err)
 	}
+	codeSchema, err := os.ReadFile("../../../migrations/028_kimi_coding_and_settings.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(string(codeSchema)); err != nil {
+		t.Fatal(err)
+	}
 	service := New(proxy.Options{}, provider.NewService(db), account.NewService(db, store), nil)
 	if _, err := service.Start(); err != nil {
 		t.Fatal(err)

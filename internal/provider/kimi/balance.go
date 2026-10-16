@@ -26,6 +26,9 @@ func balanceFailure(code string) error { return errors.New("balance: " + code) }
 
 // ReadBalance 仅查询账号所选地区的固定官方接口，不尝试另一地区的 Key。
 func (c *Client) ReadBalance(ctx context.Context, o Options, key []byte) (result Balance, err error) {
+	if o.Mode() != "payg" {
+		return result, balanceFailure("unsupported")
+	}
 	base, err := o.BaseURL()
 	if err != nil {
 		return result, balanceFailure("configuration_unavailable")

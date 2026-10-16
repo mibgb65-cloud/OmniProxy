@@ -16,6 +16,7 @@ import { useAccounts } from "./use-accounts"
 import { OpenAIAccountSettings } from "./openai-account-settings"
 import { MiMoAccountSettings } from "./mimo-account-settings"
 import { StepFunAccountSettings } from "./stepfun-account-settings"
+import { KimiAccountSettings } from "./kimi-account-settings"
 import { GoogleResources } from "../google/google-resources"
 import "./account-card-grid.css"
 
@@ -74,6 +75,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               {provider.kind === "openai" ? <OpenAIAccountSettings /> : null}
               {provider.kind === "mimo" ? <MiMoAccountSettings /> : null}
               {provider.kind === "stepfun" ? <StepFunAccountSettings /> : null}
+              {provider.kind === "kimi" ? <KimiAccountSettings /> : null}
               <AccountViewToggle />
               <AddAccountDialog
                 provider={provider}

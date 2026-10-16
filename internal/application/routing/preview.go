@@ -16,6 +16,7 @@ type snapshot struct {
 	preferences  map[string][]string
 	mimoSettings MiMoSettings
 	stepSettings StepFunSettings
+	kimiSettings KimiSettings
 }
 
 func (s *Service) snapshot(ctx context.Context) (snapshot, error) {
@@ -46,7 +47,11 @@ func (s *Service) snapshot(ctx context.Context) (snapshot, error) {
 	if err != nil {
 		return snapshot{}, err
 	}
-	return snapshot{providers: providers, accounts: accounts, models: models, preferences: preferences, mimoSettings: mimoSettings, stepSettings: stepSettings}, nil
+	kimiSettings, err := s.GetKimiSettings(ctx)
+	if err != nil {
+		return snapshot{}, err
+	}
+	return snapshot{providers: providers, accounts: accounts, models: models, preferences: preferences, mimoSettings: mimoSettings, stepSettings: stepSettings, kimiSettings: kimiSettings}, nil
 }
 
 // List 读取配置和实时诊断，不读取凭证；删除目标后规则仍可编辑修复。
@@ -161,12 +166,9 @@ func evaluate(model string, rule core.Rule, matched bool, data snapshot) Preview
 		accounts = append(accounts, core.Account{ID: account.ID, ProviderID: account.ProviderID, CreatedAt: account.CreatedAt, Enabled: account.Enabled && eligible(data, account, result.Model)})
 	}
 	prioritizeBillingAccounts(data, accounts, allowed, rule.AccountID)
+	prioritizeKimiRegion(data, accounts, allowed, rule.AccountID)
 	if minimaxAmbiguous(data, allowed, result.Model, rule.AccountID) {
 		result.ErrorCode = "ambiguous_minimax_pool"
-		return result
-	}
-	if kimiAmbiguous(data, allowed, result.Model, rule.AccountID) {
-		result.ErrorCode = "ambiguous_kimi_platform"
 		return result
 	}
 	selected, count, code := core.SelectPrioritizedAccount(accounts, allowed, rule.AccountID, providerOrder)

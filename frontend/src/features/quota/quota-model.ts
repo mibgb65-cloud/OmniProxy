@@ -24,6 +24,7 @@ export type QuotaAccount = {
     | "google"
     | "step_plan"
     | "mimo_plan"
+    | "kimi_coding"
     | "minimax_plan"
     | "unsupported"
   canQuery: boolean
@@ -47,34 +48,40 @@ export function describeQuotaAccounts(
   return accounts.map((account) => {
     const provider = byId.get(account.providerId)
     const kind =
-      provider?.kind === "mimo" &&
+      provider?.kind === "kimi" &&
       account.authMethod === "api_key" &&
-      account.mimo?.billingMode === "token_plan" &&
-      ["cn", "sgp", "ams"].includes(account.mimo.region)
-        ? "mimo_plan"
-        : provider?.kind === "minimax" &&
-            account.minimax?.billingMode === "subscription" &&
-            ["cn", "global"].includes(account.minimax.region)
-          ? "minimax_plan"
-          : provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
-            ? "step_plan"
-            : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
-              ? "balance"
-              : provider?.kind === "openai" && account.authMethod === "subscription_login"
-                ? "subscription"
-                : (provider?.kind === "deepseek" ||
-                      (provider?.kind === "kimi" &&
-                        ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
-                    (!account.authMethod || account.authMethod === "api_key")
-                  ? "balance"
-                  : provider?.kind === "google" && account.authMethod === "api_key"
-                    ? "google"
-                    : "unsupported"
+      account.kimi?.billingMode === "coding" &&
+      ["cn", "global"].includes(account.kimi.region)
+        ? "kimi_coding"
+        : provider?.kind === "mimo" &&
+            account.authMethod === "api_key" &&
+            account.mimo?.billingMode === "token_plan" &&
+            ["cn", "sgp", "ams"].includes(account.mimo.region)
+          ? "mimo_plan"
+          : provider?.kind === "minimax" &&
+              account.minimax?.billingMode === "subscription" &&
+              ["cn", "global"].includes(account.minimax.region)
+            ? "minimax_plan"
+            : provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
+              ? "step_plan"
+              : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
+                ? "balance"
+                : provider?.kind === "openai" && account.authMethod === "subscription_login"
+                  ? "subscription"
+                  : (provider?.kind === "deepseek" ||
+                        (provider?.kind === "kimi" &&
+                          ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
+                      (!account.authMethod || account.authMethod === "api_key")
+                    ? "balance"
+                    : provider?.kind === "google" && account.authMethod === "api_key"
+                      ? "google"
+                      : "unsupported"
     const canQuery =
       kind !== "unsupported" &&
       kind !== "google" &&
       kind !== "step_plan" &&
       kind !== "mimo_plan" &&
+      kind !== "kimi_coding" &&
       !(
         kind === "subscription" &&
         ["logged_out", "reauth_required"].includes(account.authState ?? "")
@@ -116,7 +123,12 @@ export function quotaEntryStatus(
     return windows.some((w) => w.remainingPercent === 0) ? "exhausted" : "normal"
   }
   if (item.kind === "unsupported") return "unsupported"
-  if (item.kind === "google" || item.kind === "step_plan" || item.kind === "mimo_plan")
+  if (
+    item.kind === "google" ||
+    item.kind === "step_plan" ||
+    item.kind === "mimo_plan" ||
+    item.kind === "kimi_coding"
+  )
     return "unknown"
   if (!item.canQuery) return "unauthenticated"
   if (snapshot.error) return "error"

@@ -1,7 +1,7 @@
 import { validMiMoOptions, validMiMoKey, type MiMoOptions } from "../../services/mimo"
 import type { MiniMaxOptions } from "../../services/minimax"
 import { validMiniMaxOptions } from "../../services/minimax"
-import type { KimiOptions } from "../../services/kimi"
+import { validKimiOptions, type KimiOptions } from "../../services/kimi"
 import type { StepFunOptions as Options } from "../../services/stepfun"
 import { useMemo, useRef, useState } from "react"
 import type { FormEvent } from "react"
@@ -40,6 +40,7 @@ export function useAccountForm({
   })
   const [invalidMiniMax, setInvalidMiniMax] = useState(false)
   const [kimi, setKimi] = useState<KimiOptions>({ region: "cn", version: 0 })
+  const [invalidKimi, setInvalidKimi] = useState(false)
   const [stepfun, setStepFun] = useState<Options>({ region: "cn", billingMode: "payg", version: 0 })
   const [mode, setMode] = useState<"single" | "batch">("single")
   const [name, setName] = useState("")
@@ -75,7 +76,9 @@ export function useAccountForm({
     setInvalidMiniMax(minimaxError)
     const mimoError = mimoEnabled && !validMiMoOptions(mimo)
     setInvalidMiMo(mimoError)
-    if (nameError || keyError || minimaxError || mimoError) return
+    const kimiError = kimiEnabled && !validKimiOptions(kimi)
+    setInvalidKimi(kimiError)
+    if (nameError || keyError || minimaxError || mimoError || kimiError) return
     savingRef.current = true
     setSaving(true)
     setSaveError(false)
@@ -118,6 +121,7 @@ export function useAccountForm({
     setMiniMax,
     invalidMiniMax,
     kimi,
+    invalidKimi,
     setKimi,
     stepfun,
     setStepFun,

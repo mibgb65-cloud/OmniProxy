@@ -23,7 +23,12 @@ export function BillingOrderSettings({ provider }: { provider: BillingOrderProvi
           disabled={!settings.isSuccess || settings.isFetching || saving}
           options={[
             {
-              value: provider === "mimo" ? "token_plan" : "step_plan",
+              value:
+                provider === "mimo"
+                  ? "token_plan"
+                  : provider === "stepfun"
+                    ? "step_plan"
+                    : "coding",
               label: t(`${provider}.settings.planFirst`),
             },
             { value: "payg", label: t(`${provider}.settings.apiFirst`) },

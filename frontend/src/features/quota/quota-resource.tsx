@@ -1,4 +1,5 @@
 import { MiMoPlanResource } from "../accounts/mimo-resource"
+import { KimiCodeResource } from "../accounts/kimi-code-resource"
 import { MiniMaxResource } from "../accounts/minimax-resource"
 import { KimiBalanceValues } from "../accounts/kimi-balance"
 import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-resource"
@@ -10,6 +11,7 @@ import { quotaWindows, type QuotaEntry } from "./quota-model"
 
 export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }) {
   const { t } = useTranslation()
+  if (entry.kind === "kimi_coding") return <KimiCodeResource account={entry.account} />
   if (entry.kind === "minimax_plan" || entry.provider?.kind === "minimax")
     return <MiniMaxResource account={entry.account} />
   if (entry.kind === "mimo_plan") return <MiMoPlanResource account={entry.account} />

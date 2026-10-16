@@ -5,6 +5,7 @@ export type {
     DefaultRoute,
     Input,
     Item,
+    KimiSettings,
     MiMoSettings,
     Preview,
     ProviderOption,

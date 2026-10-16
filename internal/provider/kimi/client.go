@@ -48,6 +48,9 @@ func endpoint(o Options, protocol string) (string, error) {
 	case "responses":
 		return base + "/responses", nil
 	case "messages":
+		if o.Mode() == "coding" {
+			return base + "/messages", nil
+		}
 		return strings.TrimSuffix(base, "/v1") + "/anthropic/v1/messages", nil
 	default:
 		return "", proxy.Failure("unsupported_protocol", 400)
@@ -63,7 +66,7 @@ func (c *Client) Forward(ctx context.Context, o Options, key []byte, request pro
 	if !ValidAPIKey(key) || consume == nil {
 		return proxy.Failure("invalid_credential", 503)
 	}
-	body, err := validatedBody(request)
+	body, err := validatedAccountBody(o, request)
 	if err != nil {
 		return err
 	}
@@ -73,8 +76,18 @@ func (c *Client) Forward(ctx context.Context, o Options, key []byte, request pro
 		return proxy.Failure("upstream_unavailable", 502)
 	}
 	req.Header.Set("Authorization", "Bearer "+string(key))
-	req.Header.Set("Content-Type", "application/json")
 	defer req.Header.Del("Authorization")
+	req.Header.Set("Content-Type", "application/json")
+	if o.Mode() == "coding" {
+		if !proxy.ValidClientUserAgent(request.ClientUserAgent) {
+			return proxy.Failure("invalid_request", 400)
+		}
+		identity := request.ClientUserAgent
+		if identity == "" {
+			identity = "OmniProxy"
+		}
+		req.Header.Set("User-Agent", identity)
+	}
 	if request.Protocol == "messages" {
 		req.Header.Set("Anthropic-Version", "2023-06-01")
 	}

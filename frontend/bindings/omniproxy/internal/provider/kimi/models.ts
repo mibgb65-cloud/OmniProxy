@@ -15,6 +15,7 @@ export interface Balance {
  * Options 保存公开平台选择与并发配置版本，不包含 Key。
  */
 export interface Options {
+    "billingMode"?: string;
     "region": string;
     "version": number;
 }

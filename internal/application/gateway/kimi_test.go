@@ -101,8 +101,8 @@ func TestKimiRegionalGatewayNativeProtocolsAndCacheUsage(t *testing.T) {
 		t.Fatal("unexpected upstream retry")
 	}
 	decision, err := router.Resolve(ctx, "kimi-k3")
-	if err != nil || decision.Routable || decision.ErrorCode != "ambiguous_kimi_platform" {
-		t.Fatalf("platform ambiguity: %+v %v", decision, err)
+	if err != nil || !decision.Routable || decision.AccountID != ids["cn"] {
+		t.Fatalf("default region priority not applied: %+v %v", decision, err)
 	}
 	page, err := observer.Requests(ctx, activity.RequestQuery{Limit: 100})
 	if err != nil || len(page.Items) != 6 {

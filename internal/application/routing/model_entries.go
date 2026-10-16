@@ -33,8 +33,10 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 	}
 	ids := originalModels(data)
 	// MiMo／StepFun 同名模型按设置解析；旧通道只兼容解析，不自动发布副本。
-	rules = append(append(rules, kimiAliases(data)...), minimaxAliases(data)...)
+	rules = append(rules, minimaxAliases(data)...)
 	if legacyChannels {
+		ids = append(ids, "k3", "kimi-for-coding-highspeed")
+		rules = append(rules, kimiAliases(data)...)
 		rules = append(rules, stepAliases(data)...)
 		rules = append(rules, mimoAliases(data)...)
 	}
@@ -96,11 +98,19 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 				entry.Metadata = kimi.ModelMetadata(entry.TargetModel)
 			}
 			entry.Protocols = []string{"chat_completions"}
-			if kimi.Supports(entry.TargetModel, "messages") {
-				entry.Protocols = append(entry.Protocols, "messages")
-			}
-			if kimi.Supports(entry.TargetModel, "responses") {
-				entry.Protocols = append(entry.Protocols, "responses")
+			for _, a := range data.accounts {
+				if a.ID == decision.AccountID && a.Kimi != nil {
+					if kimi.SupportsAccount(*a.Kimi, entry.TargetModel, "messages") {
+						entry.Protocols = append(entry.Protocols, "messages")
+					}
+					if kimi.SupportsAccount(*a.Kimi, entry.TargetModel, "responses") {
+						entry.Protocols = append(entry.Protocols, "responses")
+					}
+					if a.Kimi.Mode() == "coding" {
+						entry.Metadata = kimi.AccountModelMetadata(*a.Kimi, entry.TargetModel)
+					}
+					break
+				}
 			}
 		}
 		if entry.ProviderKind == stepfun.Kind {

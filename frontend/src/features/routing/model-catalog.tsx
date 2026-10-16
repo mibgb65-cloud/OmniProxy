@@ -44,7 +44,7 @@ export function ModelCatalog({
           ((p.kind === "deepseek" ||
             p.kind === "google" ||
             p.kind === "mimo" ||
-            (p.kind === "kimi" && a.kimi != null) ||
+            (p.kind === "kimi" && a.kimi != null && a.kimi.billingMode !== "coding") ||
             (p.kind === "minimax" &&
               a.minimax != null &&
               ["payg", "subscription"].includes(a.minimax.billingMode))) &&

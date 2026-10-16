@@ -6,6 +6,9 @@ import (
 )
 
 func preferredBilling(data snapshot, a account.Item) (mode, preferred string) {
+	if a.Kimi != nil && a.Kimi.Valid() {
+		return a.Kimi.Mode(), data.kimiSettings.PreferredBillingMode
+	}
 	if a.MiMo != nil && a.MiMo.Valid() {
 		return a.MiMo.BillingMode, data.mimoSettings.PreferredBillingMode
 	}

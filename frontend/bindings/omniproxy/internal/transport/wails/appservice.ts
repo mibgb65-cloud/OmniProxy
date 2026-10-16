@@ -276,6 +276,13 @@ export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings>
 }
 
 /**
+ * GetKimiSettings 读取独立计费及地区偏好，不读取凭据。
+ */
+export function GetKimiSettings(): $CancellablePromise<routing$0.KimiSettings> {
+    return $Call.ByID(257572704);
+}
+
+/**
  * GetMiMoSettings 读取 MiMo 默认计费顺序，不访问凭据或上游模型。
  */
 export function GetMiMoSettings(): $CancellablePromise<routing$0.MiMoSettings> {
@@ -372,6 +379,13 @@ export function ModelSync(id: string): $CancellablePromise<modelcatalog$0.Item[]
  */
 export function OpenGoogleConsole(page: string): $CancellablePromise<void> {
     return $Call.ByID(4008506523, page);
+}
+
+/**
+ * OpenKimiCodeConsole 只打开固定官方订阅控制台。
+ */
+export function OpenKimiCodeConsole(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1292007763, id);
 }
 
 /**
@@ -503,6 +517,20 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
  */
 export function SetGoogleProject(input: googlequota$0.BindingInput): $CancellablePromise<void> {
     return $Call.ByID(2698725425, input);
+}
+
+/**
+ * SetKimiPreferredBillingMode 保存计费顺序并刷新受管目录。
+ */
+export function SetKimiPreferredBillingMode(mode: string): $CancellablePromise<routing$0.KimiSettings> {
+    return $Call.ByID(2590325298, mode);
+}
+
+/**
+ * SetKimiPreferredRegion 保存同计费方式内的地区顺序。
+ */
+export function SetKimiPreferredRegion(region: string): $CancellablePromise<routing$0.KimiSettings> {
+    return $Call.ByID(3565389798, region);
 }
 
 /**

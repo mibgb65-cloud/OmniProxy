@@ -1,4 +1,5 @@
 import { mimoEn } from "./mimo-en"
+import { kimiSettingsEn } from "./kimi-settings-en"
 import { stepfunSettingsEn } from "./stepfun-settings-en"
 import { subscriptionEn } from "./subscription-en"
 import type { zh } from "./zh"
@@ -18,6 +19,7 @@ import { googleEn } from "./google-en"
  */
 export const en: Record<keyof typeof zh, string> = {
   ...mimoEn,
+  ...kimiSettingsEn,
   ...stepfunSettingsEn,
   "minimax.connection": "MiniMax connection",
   "minimax.region": "Platform",
@@ -274,10 +276,10 @@ export const en: Record<keyof typeof zh, string> = {
   "kimi.global": "Global",
   "kimi.choose": "Choose the platform that issued this API key",
   "kimi.keyHint":
-    "Keys issued by China and global platforms are separate. New accounts default to China; a batch shares its platform choice.",
+    "Ordinary API and Kimi Code use their own Keys and regional endpoints. A batch shares billing and region choices; new accounts default to the ordinary China API.",
   "kimi.needsConfiguration": "Platform needs confirmation",
   "kimi.routingHint":
-    "K3, K2.7 Code and high-speed variant, and K2.6 are supported. Use regional model names for China/global. Native Responses is available for K3; other models are excluded from Codex targets.",
+    "Ordinary API, Kimi Code and regions follow the saved order; shared models are listed once. Fixed accounts and explicit channels take precedence. Failed requests are not retried across channels; protocols and context follow the selected account.",
   "routing.error.ambiguous_kimi_platform":
     "Multiple Kimi platforms are available. Choose a fixed account or a regional model name.",
   "providers.kind.kimi": "Moonshot AI (Kimi)",

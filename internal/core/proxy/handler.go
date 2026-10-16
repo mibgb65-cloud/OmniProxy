@@ -81,6 +81,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("invalid_content_type", 415))
 		return
 	}
+	if len(r.Header.Values("User-Agent")) > 1 || !ValidClientUserAgent(r.UserAgent()) {
+		writeFailure(w, Failure("invalid_request", 400))
+		return
+	}
 	// 在读取正文前占用并发名额，避免大量并行正文绕过上游并发限制占用内存。
 	select {
 	case s.slots <- struct{}{}:
@@ -124,6 +128,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	request.Trace = trace
+	request.ClientUserAgent = r.UserAgent()
 	if err := trace.Update(r.Context(), request, TargetSnapshot{}); err != nil {
 		writeFailure(w, err)
 		return

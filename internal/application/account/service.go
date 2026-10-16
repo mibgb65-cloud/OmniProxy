@@ -96,7 +96,7 @@ func NewService(db *sql.DB, store CredentialStore) *Service {
 func (s *Service) List(ctx context.Context) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT a.id, a.provider_id, a.name, a.enabled, a.created_at, a.updated_at, a.auth_method, a.auth_email, a.auth_plan, a.auth_state, a.auth_account_id,
-		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0),COALESCE(mm.region,''),COALESCE(mm.billing_mode,''),COALESCE(mm.config_version,0),COALESCE(mi.region,''),COALESCE(mi.billing_mode,''),COALESCE(mi.config_version,0)
+		COALESCE(s.region,''),COALESCE(s.billing_mode,''),COALESCE(s.config_version,0),COALESCE(k.region,''),COALESCE(k.config_version,0),COALESCE(k.billing_mode,''),COALESCE(mm.region,''),COALESCE(mm.billing_mode,''),COALESCE(mm.config_version,0),COALESCE(mi.region,''),COALESCE(mi.billing_mode,''),COALESCE(mi.config_version,0)
 		FROM accounts a LEFT JOIN stepfun_account_options s ON s.account_id=a.id LEFT JOIN kimi_account_options k ON k.account_id=a.id LEFT JOIN minimax_account_options mm ON mm.account_id=a.id LEFT JOIN mimo_account_options mi ON mi.account_id=a.id ORDER BY a.created_at DESC, a.id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("account: list: %w", err)

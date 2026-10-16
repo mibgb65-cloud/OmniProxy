@@ -6,6 +6,10 @@ import (
 )
 
 func validatedBody(request proxy.Request) ([]byte, error) {
+	return validatedAccountBody(Options{Region: "cn"}, request)
+}
+
+func validatedAccountBody(o Options, request proxy.Request) ([]byte, error) {
 	path := "/v1/" + request.Protocol
 	if request.Protocol == "chat" {
 		path = "/v1/chat/completions"
@@ -17,7 +21,7 @@ func validatedBody(request proxy.Request) ([]byte, error) {
 	if parsed.Model != request.Model || parsed.Stream != request.Stream {
 		return nil, proxy.Failure("invalid_request", 400)
 	}
-	if !Supports(parsed.Model, request.Protocol) {
+	if !SupportsAccount(o, parsed.Model, request.Protocol) {
 		return nil, proxy.Failure("unsupported_model", 400)
 	}
 	var fields map[string]json.RawMessage
@@ -44,7 +48,7 @@ func validatedBody(request proxy.Request) ([]byte, error) {
 			fields["max_completion_tokens"] = raw
 			delete(fields, "max_tokens")
 		}
-		if err := chatParameters(fields, request.Model); err != nil {
+		if err := accountChatParameters(o, fields, request.Model); err != nil {
 			return nil, err
 		}
 		if request.Stream {
@@ -87,7 +91,7 @@ func validatedBody(request proxy.Request) ([]byte, error) {
 		}
 	}
 	if request.Protocol == "messages" {
-		if raw, exists := fields["output_config"]; exists && request.Model == "kimi-k3" {
+		if raw, exists := fields["output_config"]; exists && (request.Model == "kimi-k3" || o.Mode() == "coding") {
 			if err := validateEffort(raw, "effort"); err != nil {
 				return nil, err
 			}
@@ -101,6 +105,15 @@ func validatedBody(request proxy.Request) ([]byte, error) {
 	}
 	if err := validateTools(fields["tools"], request.Protocol, 0); err != nil {
 		return nil, err
+	}
+	if o.Mode() == "coding" {
+		if err := codingParameters(fields, request); err != nil {
+			return nil, err
+		}
+		fields["model"], err = json.Marshal(UpstreamModel(o, request.Model))
+		if err != nil {
+			return nil, proxy.Failure("invalid_request", 400)
+		}
 	}
 	body, err := json.Marshal(fields)
 	limit := proxy.MaxRequestBytes

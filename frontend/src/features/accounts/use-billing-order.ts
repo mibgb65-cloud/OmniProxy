@@ -1,10 +1,12 @@
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getMiMoSettings, setMiMoPreferredBillingMode } from "../../services/mimo-settings"
 import { getStepFunSettings, setStepFunPreferredBillingMode } from "../../services/stepfun-settings"
+import { getKimiSettings, setKimiPreferredBillingMode } from "../../services/kimi-settings"
 
-export type BillingOrderProvider = "mimo" | "stepfun"
+export type BillingOrderProvider = "mimo" | "stepfun" | "kimi"
 
 const services = {
+  kimi: { read: getKimiSettings, save: setKimiPreferredBillingMode },
   mimo: { read: getMiMoSettings, save: setMiMoPreferredBillingMode },
   stepfun: { read: getStepFunSettings, save: setStepFunPreferredBillingMode },
 }

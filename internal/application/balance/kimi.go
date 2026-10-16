@@ -9,6 +9,9 @@ import (
 )
 
 func (s *Service) readKimi(ctx context.Context, item account.Item) (Info, error) {
+	if item.Kimi != nil && item.Kimi.Mode() != "payg" {
+		return Info{}, failure("unsupported")
+	}
 	if item.Kimi == nil || !item.Kimi.Valid() {
 		return Info{}, failure("configuration_unavailable")
 	}

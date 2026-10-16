@@ -94,6 +94,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - 小米 MiMo Token Plan 复用已有标准库原生 HTTP／SSE 和 DPAPI，迁移 025 保存账号计费通道／cn、sgp、ams 集群及目录版本；通道隔离路由沿用现有结构，无新增 SDK 或依赖。
 - 迁移 026 保存 MiMo 应用级默认计费顺序；路由与客户端目录复用既有组件，原通道名仅兼容解析，无新增依赖。
 - 迁移 027 独立保存 StepFun 默认计费顺序，与 MiMo 共用合格账号筛选及前端设置交互，无新增依赖。
+- 迁移 028 增加 Kimi 普通／Code 计费选项及独立计费／地区顺序，复用原生 HTTP／SSE、DPAPI、路由及设置组件，不新增依赖。
 
 ## Build Tools
 

@@ -29,8 +29,8 @@ func (s *Service) withKimiPresets(ctx context.Context, models []discoveredModel)
 		if !allowed[a.ProviderID] || a.AuthMethod != "api_key" || a.Kimi == nil || !a.Kimi.Valid() || synced[a.ID] {
 			continue
 		}
-		for _, id := range kimi.Models() {
-			models = append(models, discoveredModel{accountID: a.ID, providerID: a.ProviderID, model: id, name: id, metadata: kimi.ModelMetadata(id)})
+		for _, id := range kimi.AccountModels(*a.Kimi) {
+			models = append(models, discoveredModel{accountID: a.ID, providerID: a.ProviderID, model: id, name: id, metadata: kimi.AccountModelMetadata(*a.Kimi, id)})
 		}
 	}
 	if len(models) > 10000 {
@@ -40,11 +40,8 @@ func (s *Service) withKimiPresets(ctx context.Context, models []discoveredModel)
 }
 
 func kimiTargetSupports(data snapshot, providerID, accountID, model string) bool {
-	if !kimi.SupportsModel(model) {
-		return false
-	}
 	for _, a := range data.accounts {
-		if a.ProviderID != providerID || accountID != "" && a.ID != accountID || a.Kimi == nil || !a.Kimi.Valid() {
+		if a.ProviderID != providerID || accountID != "" && a.ID != accountID || a.Kimi == nil || !kimi.SupportsAccount(*a.Kimi, model, "chat") {
 			continue
 		}
 		for _, m := range data.models {
@@ -56,21 +53,24 @@ func kimiTargetSupports(data snapshot, providerID, accountID, model string) bool
 	return false
 }
 
-func kimiAmbiguous(data snapshot, allowed map[string]bool, model, fixed string) bool {
+func prioritizeKimiRegion(data snapshot, candidates []core.Account, allowed map[string]bool, fixed string) {
 	if fixed != "" {
-		return false
+		return
 	}
-	region := ""
-	for _, a := range data.accounts {
-		if !a.Enabled || !allowed[a.ProviderID] || a.Kimi == nil || !kimiTargetSupports(data, a.ProviderID, a.ID, model) {
+	regions := map[string]string{}
+	for i, a := range data.accounts {
+		if !candidates[i].Enabled || !allowed[a.ProviderID] || a.Kimi == nil || !a.Kimi.Valid() {
 			continue
 		}
-		if region != "" && region != a.Kimi.Region {
-			return true
+		if regions[a.ProviderID] == "" || a.Kimi.Region == data.kimiSettings.PreferredRegion {
+			regions[a.ProviderID] = a.Kimi.Region
 		}
-		region = a.Kimi.Region
 	}
-	return false
+	for i, a := range data.accounts {
+		if a.Kimi != nil && regions[a.ProviderID] != "" && regions[a.ProviderID] != a.Kimi.Region {
+			candidates[i].Enabled = false
+		}
+	}
 }
 
 func kimiAliases(data snapshot) []core.Rule {
@@ -91,10 +91,13 @@ func kimiAliases(data snapshot) []core.Rule {
 			continue
 		}
 		for _, m := range models[a.ID] {
-			if !kimi.SupportsModel(m.model) {
+			if !kimi.SupportsAccount(*a.Kimi, m.model, "chat") {
 				continue
 			}
 			alias := "kimi-" + a.Kimi.Region + "/" + m.model
+			if a.Kimi.Mode() == "coding" {
+				alias = "kimi-code-" + a.Kimi.Region + "/" + m.model
+			}
 			if seen[alias] {
 				continue
 			}
