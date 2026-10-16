@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261016-005](../tasks/completed/2026-10/TASK-20261016-005-kimi-default-order-and-model-dedup.md) Kimi 普通／Code 订阅 Key × 国内／海外、默认计费／地区顺序与六款逻辑模型去重，旧配置／Claude ID 兼容、真实身份保留，订阅未知额度独立展示。完整质量门／449 项前端测试、原生三协议／流式集成及正常桌面设置／表单／深浅主题／960×600 验收通过。实现提交 `4337082`；真实订阅 Key／套餐及长窗口待验证。
 - [TASK-20261016-004](../tasks/completed/2026-10/TASK-20261016-004-stepfun-default-billing-order.md) 阶跃星辰账号设置支持 Step Plan／API Key 默认顺序与同名模型去重，复用 MiMo 设置交互及候选筛选，偏好独立；旧通道／Claude ID／固定账号兼容。完整质量门／444 项前端测试、三协议集成及正常桌面保存／深浅主题／960×600 验收通过。实现提交 `6bbcc8e`。
 - [TASK-20261016-003](../tasks/completed/2026-10/TASK-20261016-003-mimo-default-billing-order.md) MiMo 设置保存 Token Plan／API Key 默认使用顺序，同名模型统一发布；保留固定账号、服务商顺序、旧通道及 Claude 上下文 ID 兼容，失败不跨通道重试。完整质量门／443 项前端测试、三协议网关集成及正常桌面持久值／深浅主题／960×600 验收通过。实现提交 `90fdeb0`。
 - [TASK-20261016-002](../tasks/completed/2026-10/TASK-20261016-002-mimo-account-settings.md) 小米 MiMo 账号页增加与 OpenAI 共用的设置入口和局部空面板；完整质量门／439 项前端测试及原生深浅主题、960×600 和关闭／焦点检查通过，开发窗口已更新。实现提交 `2b94ac0`。
