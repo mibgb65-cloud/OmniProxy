@@ -78,7 +78,11 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
                     : "bg-muted text-muted-foreground",
               )}
             >
-              {t(`quota.status.${entry.status}`)}
+              {t(
+                entry.kind === "google_subscription" && entry.status === "exhausted"
+                  ? "google.quota.exhausted"
+                  : `quota.status.${entry.status}`,
+              )}
             </span>
           </div>
         </div>

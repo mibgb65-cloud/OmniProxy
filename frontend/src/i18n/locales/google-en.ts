@@ -7,8 +7,32 @@ export const googleEn: Record<keyof typeof googleZh, string> = {
   "google.subscriptionStorage":
     "Authorization is stored separately in protected local credentials. Use the same Google account when signing in again.",
   "google.subscriptionType": "Google / Antigravity",
-  "google.subscriptionQuotaUnknown":
-    "Remaining subscription quota is unavailable. Sync account models on the routing page; Google determines access and rate limits.",
+  "google.quota.title": "Antigravity subscription quota",
+  "google.models.title": "Available models",
+  "google.models.refresh": "Refresh Google model list",
+  "google.models.loading": "Loading models available to this account…",
+  "google.models.show": "View all {{count}} account models",
+  "google.models.close": "Close account model list",
+  "google.models.count": "{{supported}} connected · {{total}} available upstream",
+  "google.models.connected": "Connected to this gateway · Chat API",
+  "google.models.pending": "Available upstream · Gateway support pending",
+  "google.models.hint":
+    "Connected models support Chat API; other entries describe the upstream catalog. Google determines access for each request.",
+  "google.models.noAdapter": "These models are not yet supported by this gateway",
+  "google.models.empty": "Google has not returned any selectable models.",
+  "google.models.failed":
+    "The model list is unavailable. Refresh to retry; quota queries are independent.",
+  "google.quota.refresh": "Refresh Google subscription quota",
+  "google.quota.loading": "Loading official Google quota…",
+  "google.quota.missing": "Google has not returned any available quota windows.",
+  "google.quota.gemini": "Gemini models",
+  "google.quota.thirdParty": "Third-party models (Claude / GPT)",
+  "google.quota.fiveHour": "5h quota",
+  "google.quota.weekly": "Weekly quota",
+  "google.quota.exhausted": "A quota window is exhausted",
+  "google.quota.hint":
+    "Official shared Antigravity quota, shown separately by model group; never added together or converted to request counts.",
+  "subscription.error.quota_changed": "Account authorization changed. Refresh quota and try again.",
   "subscription.error.agy_unavailable":
     "Antigravity CLI (agy) was not found. Install the official component and try again.",
   "subscription.error.client_incompatible":

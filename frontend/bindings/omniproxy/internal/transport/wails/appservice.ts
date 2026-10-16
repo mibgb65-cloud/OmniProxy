@@ -56,6 +56,9 @@ import * as routing$1 from "../../core/routing/models.js";
 import * as logger$0 from "../../infrastructure/logger/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as antigravity$0 from "../../provider/antigravity/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as minimax$0 from "../../provider/minimax/models.js";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -301,6 +304,20 @@ export function GetStepFunSettings(): $CancellablePromise<routing$0.StepFunSetti
  */
 export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
     return $Call.ByID(3772564351);
+}
+
+/**
+ * GoogleSubscriptionModels 返回当前账号官方选择器模型与本机适配状态。
+ */
+export function GoogleSubscriptionModels(id: string): $CancellablePromise<antigravity$0.AccountModel[] | null> {
+    return $Call.ByID(870172681, id);
+}
+
+/**
+ * GoogleSubscriptionQuota 返回官方公开额度窗口，不返回身份、项目或授权凭据。
+ */
+export function GoogleSubscriptionQuota(id: string): $CancellablePromise<antigravity$0.Quota> {
+    return $Call.ByID(1926496089, id);
 }
 
 /**

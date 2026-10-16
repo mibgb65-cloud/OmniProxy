@@ -62,7 +62,7 @@ accounts need one local place to:
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。
-- Google 增加 Antigravity 独立订阅登录，提供浏览器授权、身份校验、刷新／退出、真实账号 Gemini 模型发现及文本／工具 Chat JSON／SSE；凭证走 DPAPI，不混用普通 API Key。首版剩余额度未知，其他协议与真实订阅权限验收见 `docs/product/GOOGLE_SUBSCRIPTION.md`。
+- Google 增加 Antigravity 独立订阅登录，提供浏览器授权、身份校验、刷新／退出、真实账号 Gemini 模型发现及文本／工具 Chat JSON／SSE；凭证走 DPAPI，不混用普通 API Key。账号详情／配额总览支持官方模型组额度、剩余百分比及重置时间，并展示账号可选模型和网关适配状态，共享身份隔离缓存与手动刷新；其他协议与真实订阅权限验收见 `docs/product/GOOGLE_SUBSCRIPTION.md`。
 - OpenAI 支持通过本机官方 Codex 组件登录 ChatGPT 订阅账号，提供浏览器／设备码授权、多账号隔离、身份与套餐、刷新、退出和重新登录。系统凭证库与官方加密命名空间保存授权，已支持订阅 Responses 转发；详见 `docs/product/SUBSCRIPTION.md`、`docs/product/LOCAL_AGENTS.md`。
 - OpenAI 账号设置提供应用级 Codex WebSocket 开关，默认开启、持久保存，控制当前网关的握手和连接内后续请求，不改写 Codex CLI／桌面端的提供商身份、认证或会话，HTTP/SSE 保持可用。
 - OpenAI 账号设置在入口旁局部展开，自动激活 Codex 额度窗口默认关闭，切换开关直接持久保存并生效；对未开始的 5h／周窗口发送原账号最小消息并复查，持久去重防止重复消耗，已激活窗口不发送。

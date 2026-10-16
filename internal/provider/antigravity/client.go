@@ -126,7 +126,7 @@ func (c *Client) post(ctx context.Context, endpoint, token string, payload, resu
 
 // ErrorCode 只允许已知错误进入 UI，不返回动态正文。
 func ErrorCode(err error) string {
-	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed"} {
+	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed", "quota_changed"} {
 		if err != nil && strings.Contains(err.Error(), "google_subscription: "+code) {
 			return code
 		}

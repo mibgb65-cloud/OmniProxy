@@ -1,4 +1,6 @@
 import type { MiniMaxQuota } from "../../services/minimax"
+import type { GoogleSubscriptionQuota } from "../../services/google-subscription"
+import { googleQuotaState } from "../google/google-quota-model"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 import type { AccountBalanceInfo } from "../../services/balance"
 import type { SubscriptionQuota } from "../../services/subscription"
@@ -20,6 +22,7 @@ export type QuotaAccount = {
   provider?: ProviderConfiguration
   kind:
     | "subscription"
+    | "google_subscription"
     | "balance"
     | "google"
     | "step_plan"
@@ -30,6 +33,7 @@ export type QuotaAccount = {
   canQuery: boolean
 }
 export type QuotaSnapshot = {
+  googleQuota?: GoogleSubscriptionQuota
   minimax?: MiniMaxQuota
   quota?: SubscriptionQuota
   balance?: AccountBalanceInfo
@@ -47,7 +51,7 @@ export function describeQuotaAccounts(
   const byId = new Map(providers.map((provider) => [provider.id, provider]))
   return accounts.map((account) => {
     const provider = byId.get(account.providerId)
-    const kind =
+    let kind: QuotaAccount["kind"] =
       provider?.kind === "kimi" &&
       account.authMethod === "api_key" &&
       account.kimi?.billingMode === "coding" &&
@@ -76,12 +80,15 @@ export function describeQuotaAccounts(
                     : provider?.kind === "google" && account.authMethod === "api_key"
                       ? "google"
                       : "unsupported"
+    if (provider?.kind === "google" && account.authMethod === "subscription_login")
+      kind = "google_subscription"
     const canQuery =
       kind !== "unsupported" &&
       kind !== "google" &&
       kind !== "step_plan" &&
       kind !== "mimo_plan" &&
       kind !== "kimi_coding" &&
+      (kind !== "google_subscription" || account.authState === "authenticated") &&
       !(
         kind === "subscription" &&
         ["logged_out", "reauth_required"].includes(account.authState ?? "")
@@ -111,6 +118,12 @@ export function quotaEntryStatus(
   snapshot: QuotaSnapshot,
   now: number,
 ): QuotaStatus {
+  if (item.kind === "google_subscription") {
+    if (!item.canQuery) return "unauthenticated"
+    if (snapshot.error) return "error"
+    if (!snapshot.googleQuota) return snapshot.pending ? "pending" : "unknown"
+    return googleQuotaState(snapshot.googleQuota, now)
+  }
   if (item.kind === "minimax_plan") {
     if (snapshot.error) return "error"
     if (!snapshot.minimax) return snapshot.pending ? "pending" : "unknown"
@@ -166,7 +179,11 @@ export function makeQuotaEntry(
     ...snapshot,
     status: quotaEntryStatus(item, snapshot, now),
     fetchedAt:
-      snapshot.minimax?.fetchedAt ?? snapshot.quota?.fetchedAt ?? snapshot.balance?.fetchedAt ?? "",
+      snapshot.googleQuota?.fetchedAt ??
+      snapshot.minimax?.fetchedAt ??
+      snapshot.quota?.fetchedAt ??
+      snapshot.balance?.fetchedAt ??
+      "",
   }
 }
 

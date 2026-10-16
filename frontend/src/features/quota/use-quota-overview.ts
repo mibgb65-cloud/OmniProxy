@@ -1,4 +1,5 @@
 import { miniMaxQuotaOptions } from "../accounts/use-minimax-quota"
+import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
 import { useQueries, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAccounts } from "../accounts/use-accounts"
@@ -29,6 +30,10 @@ export function useQuotaOverview() {
     [accounts.data, providers.data],
   )
   const subscriptions = items.filter((item) => item.kind === "subscription")
+  const googleSubscriptions = items.filter((item) => item.kind === "google_subscription")
+  const googleQueries = useQueries({
+    queries: googleSubscriptions.map((item) => googleSubscriptionQuotaOptions(item.account)),
+  })
   const minimaxPlans = items.filter((item) => item.kind === "minimax_plan")
   const minimaxQueries = useQueries({
     queries: minimaxPlans.map((item) => miniMaxQuotaOptions(item.account)),
@@ -48,8 +53,11 @@ export function useQuotaOverview() {
   useEffect(() => {
     const versions = new Map<string, string>()
     for (const item of items) {
-      if (item.kind !== "subscription" || !item.canQuery) continue
-      const key = subscriptionQuotaOptions(item.account).queryKey
+      if (!["subscription", "google_subscription"].includes(item.kind) || !item.canQuery) continue
+      const key =
+        item.kind === "google_subscription"
+          ? googleSubscriptionQuotaOptions(item.account).queryKey
+          : subscriptionQuotaOptions(item.account).queryKey
       const scope = JSON.stringify(key)
       const oldVersion = previous.current.get(scope)
       versions.set(scope, item.account.updatedAt)
@@ -69,17 +77,22 @@ export function useQuotaOverview() {
   const balanceById = new Map(
     balances.map((item, index) => [item.account.id, balanceQueries[index]]),
   )
+  const googleById = new Map(
+    googleSubscriptions.map((item, index) => [item.account.id, googleQueries[index]]),
+  )
   const minimaxById = new Map(
     minimaxPlans.map((item, index) => [item.account.id, minimaxQueries[index]]),
   )
   const entries = items.map((item) => {
+    const googleQuery = googleById.get(item.account.id)
     const minimaxQuery = minimaxById.get(item.account.id)
     const quotaQuery = subscriptionById.get(item.account.id)
     const balanceQuery = balanceById.get(item.account.id)
-    const query = minimaxQuery ?? quotaQuery ?? balanceQuery
+    const query = googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery
     return makeQuotaEntry(
       item,
       {
+        googleQuota: googleQuery?.data,
         minimax: minimaxQuery?.data,
         quota: quotaQuery?.data,
         balance: balanceQuery?.data,

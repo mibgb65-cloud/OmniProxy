@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { accounts, providers, quota, balance } from "./quota-test-helpers"
+import { googleQuotaAccount, googleQuotaFixture } from "../google/google-quota-test-helpers"
 import {
   describeQuotaAccounts,
   makeQuotaEntry,
@@ -13,6 +14,23 @@ const base: QuotaSnapshot = { pending: false, fetching: false, error: null }
 const now = Date.parse("2026-10-09T00:00:00Z")
 
 describe("quota overview model", () => {
+  it("includes Google subscriptions in shared monitoring and preserves their distinct source", () => {
+    const [google] = describeQuotaAccounts(
+      [googleQuotaAccount],
+      [{ ...providers[0]!, id: "builtin_google", kind: "google", name: "Google" }],
+    )
+    expect(google).toMatchObject({ kind: "google_subscription", canQuery: true })
+    const entry = makeQuotaEntry(google!, { ...base, googleQuota: googleQuotaFixture }, now)
+    expect(entry).toMatchObject({ status: "normal", fetchedAt: googleQuotaFixture.fetchedAt })
+    expect(quotaSummary([entry])).toMatchObject({ monitored: 1, known: 1 })
+    expect(
+      makeQuotaEntry(
+        { ...google!, canQuery: false },
+        { ...base, googleQuota: googleQuotaFixture },
+        now,
+      ).status,
+    ).toBe("unauthenticated")
+  })
   it("classifies capability and authorization independently of account enablement", () => {
     expect(items[0]).toMatchObject({ kind: "subscription", canQuery: true })
     expect(items[2]).toMatchObject({ kind: "subscription", canQuery: false })

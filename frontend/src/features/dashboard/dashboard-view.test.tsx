@@ -5,6 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { readDashboard, type DashboardInfo } from "../../services/dashboard"
 import { readSubscriptionQuota } from "../../services/subscription"
 import { readAccountBalance } from "../../services/balance"
+import { listAccounts, listProviders } from "../../services/omniproxy"
+import {
+  readGoogleSubscriptionQuota,
+  readGoogleSubscriptionModels,
+} from "../../services/google-subscription"
+import { googleQuotaAccount, googleQuotaFixture } from "../google/google-quota-test-helpers"
+import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
 import { useUIStore } from "../../stores/ui-store"
 import { subscriptionQuotaKey } from "../accounts/use-subscription-quota"
 import {
@@ -37,14 +44,49 @@ vi.mock("../../services/balance", async (original) => ({
   ...(await original<typeof import("../../services/balance")>()),
   readAccountBalance: vi.fn(),
 }))
+vi.mock("../../services/google-subscription", () => ({
+  readGoogleSubscriptionQuota: vi.fn(),
+  readGoogleSubscriptionModels: vi.fn(),
+}))
 vi.mock("@wailsio/runtime", async (original) => ({
   ...(await original<typeof import("@wailsio/runtime")>()),
   Events: { On: vi.fn(() => vi.fn()) },
 }))
 
 describe("dashboard overview", () => {
+  it("reads cached Google quota without a network request and refreshes only on demand", async () => {
+    vi.mocked(listAccounts).mockResolvedValue([googleQuotaAccount])
+    vi.mocked(listProviders).mockResolvedValue([
+      {
+        id: "builtin_google",
+        kind: "google",
+        name: "Google",
+        source: "builtin",
+        enabled: true,
+        baseUrl: "",
+        createdAt: "",
+        updatedAt: "",
+      },
+    ])
+    vi.mocked(readGoogleSubscriptionQuota).mockResolvedValue(googleQuotaFixture)
+    renderDashboard((client) =>
+      client.setQueryData(
+        googleSubscriptionQuotaOptions(googleQuotaAccount).queryKey,
+        googleQuotaFixture,
+      ),
+    )
+    expect(await screen.findByText(/已缓存 1 \/ 1/)).toBeInTheDocument()
+    expect(readGoogleSubscriptionQuota).not.toHaveBeenCalled()
+    const button = screen.getByRole("button", { name: "检查资源" })
+    await waitFor(() => expect(button).toBeEnabled())
+    await userEvent.setup().click(button)
+    expect(await screen.findByText("已检查 1 个账号，0 个查询失败。")).toBeInTheDocument()
+    expect(readGoogleSubscriptionQuota).toHaveBeenCalledTimes(1)
+    expect(readSubscriptionQuota).not.toHaveBeenCalled()
+  })
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(readGoogleSubscriptionModels).mockResolvedValue([])
     useUIStore.setState({ language: "zh" })
     resetDashboardServices()
   })

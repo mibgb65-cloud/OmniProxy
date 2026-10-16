@@ -72,6 +72,28 @@ func (s *AppService) openGoogleSubscription(id string) error {
 
 func googleSession(id string) bool { return strings.HasPrefix(id, "google_") }
 
+// GoogleSubscriptionQuota 返回官方公开额度窗口，不返回身份、项目或授权凭据。
+func (s *AppService) GoogleSubscriptionQuota(id string) (antigravity.Quota, error) {
+	manager, err := s.googleSubscriptionService()
+	if err != nil {
+		return antigravity.Quota{}, err
+	}
+	ctx, cancel := subscriptionContext()
+	defer cancel()
+	return manager.ReadQuota(ctx, id)
+}
+
+// GoogleSubscriptionModels 返回当前账号官方选择器模型与本机适配状态。
+func (s *AppService) GoogleSubscriptionModels(id string) ([]antigravity.AccountModel, error) {
+	manager, err := s.googleSubscriptionService()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := subscriptionContext()
+	defer cancel()
+	return manager.ReadAccountModels(ctx, id)
+}
+
 func (s *AppService) shutdownGoogleSubscription() {
 	s.googleAuth.mu.Lock()
 	s.googleAuth.closed = true

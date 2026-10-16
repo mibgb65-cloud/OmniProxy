@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { listAccounts, listProviders } from "../../services/omniproxy"
 import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/subscription"
 import { readAccountBalance } from "../../services/balance"
+import {
+  readGoogleSubscriptionQuota,
+  readGoogleSubscriptionModels,
+} from "../../services/google-subscription"
+import { googleQuotaFixture } from "../google/google-quota-test-helpers"
 import { useUIStore } from "../../stores/ui-store"
 import { selectOption } from "../../test/select-option"
 import { renderQuota, resetQuotaServices, quota, accounts, providers } from "./quota-test-helpers"
@@ -21,6 +26,10 @@ vi.mock("../../services/balance", async (original) => ({
   ...(await original<typeof import("../../services/balance")>()),
   readAccountBalance: vi.fn(),
 }))
+vi.mock("../../services/google-subscription", () => ({
+  readGoogleSubscriptionQuota: vi.fn(),
+  readGoogleSubscriptionModels: vi.fn(),
+}))
 vi.mock("@wailsio/runtime", async (original) => ({
   ...(await original<typeof import("@wailsio/runtime")>()),
   Events: { On: vi.fn(() => vi.fn()) },
@@ -32,6 +41,7 @@ async function ready() {
 
 describe("quota overview", () => {
   it("labels Google subscriptions correctly without querying Codex quota", async () => {
+    vi.mocked(readGoogleSubscriptionQuota).mockResolvedValue(googleQuotaFixture)
     vi.mocked(listAccounts).mockResolvedValue([
       { ...accounts[0], id: "google-sub", providerId: "builtin_google", authPlan: "g1-pro-tier" },
     ])
@@ -40,11 +50,14 @@ describe("quota overview", () => {
     ])
     renderQuota()
     expect(await screen.findByText("Google / Antigravity")).toBeInTheDocument()
+    expect(await screen.findByText("75%")).toBeInTheDocument()
+    expect(readGoogleSubscriptionQuota).toHaveBeenCalledWith("google-sub")
     expect(screen.queryByText("ChatGPT / Codex")).not.toBeInTheDocument()
     expect(readSubscriptionQuota).not.toHaveBeenCalled()
   })
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(readGoogleSubscriptionModels).mockResolvedValue([])
     localStorage.clear()
     useUIStore.setState({ language: "zh" })
     resetQuotaServices()

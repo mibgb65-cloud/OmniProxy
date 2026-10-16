@@ -2,6 +2,16 @@
 
 ## Google Antigravity 订阅（2026-10-16）
 
+订阅额度通过独立 `GoogleSubscriptionQuota` → `application/googlesubscription.ReadQuota`
+→ `provider/antigravity.ReadQuota` 读取 `retrieveUserQuotaSummary`，保留官方分组与窗口。
+DTO 仅包含额度、标签与时间，比例／重置严格验证；读取前后核对授权版本，网络不占用
+整个刷新互斥锁。前端与其他订阅共用实际 RPC 串行队列，详情／总览共享 60 秒缓存，
+仪表盘默认不触发上游。没有新依赖、迁移、推理请求或额度历史持久化。
+
+`GoogleSubscriptionModels` 复用相同授权版本保护，独立读取官方模型选择器引用，
+过滤内部条目并标记现有网关适配状态；前端模型缓存与额度缓存分离，详情／总览共用。
+不改变路由既有 Gemini 模型及历史别名兼容行为。
+
 `provider/antigravity` 使用标准库实现独立 Google OAuth、账号项目／模型查询与
 Gemini Chat JSON／增量 SSE 转换；只接受固定官方 HTTPS 主机并保留工具签名。
 `application/googlesubscription` 管理一次性回调、超时、取消及刷新互斥，

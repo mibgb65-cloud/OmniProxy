@@ -19,6 +19,14 @@ import { getAccountKeyPreview, type AccountItem } from "../../services/omniproxy
 import { SubscriptionLoginDialog } from "./subscription-login-dialog"
 import { AccountKeyPreview } from "./account-key-preview"
 import { AccountDetailsCard } from "./account-details-card"
+import {
+  readGoogleSubscriptionQuota,
+  readGoogleSubscriptionModels,
+} from "../../services/google-subscription"
+vi.mock("../../services/google-subscription", () => ({
+  readGoogleSubscriptionQuota: vi.fn(),
+  readGoogleSubscriptionModels: vi.fn(),
+}))
 
 vi.mock("@wailsio/runtime", () => ({ Events: { On: vi.fn(() => vi.fn()) } }))
 vi.mock("../../services/subscription", async (original) => ({
@@ -87,7 +95,7 @@ describe("ChatGPT subscription sign-in", () => {
       />,
     )
     expect(screen.getByText("Google / Antigravity")).toBeInTheDocument()
-    expect(screen.getByText(/订阅剩余额度暂未接入/)).toBeInTheDocument()
+    expect(screen.getByText("Antigravity 订阅额度")).toBeInTheDocument()
     expect(readSubscriptionQuota).not.toHaveBeenCalled()
     expect(getAccountKeyPreview).not.toHaveBeenCalled()
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
@@ -95,6 +103,8 @@ describe("ChatGPT subscription sign-in", () => {
   })
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(readGoogleSubscriptionModels).mockResolvedValue([])
+    vi.mocked(readGoogleSubscriptionQuota).mockResolvedValue({ groups: [], fetchedAt: "" })
     useUIStore.setState({ language: "zh" })
     state = {
       id: "test-session",

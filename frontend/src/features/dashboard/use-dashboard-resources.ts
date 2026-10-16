@@ -2,6 +2,7 @@ import { useQueries } from "@tanstack/react-query"
 import { useState } from "react"
 import { accountBalanceOptions } from "../accounts/use-account-balance"
 import { subscriptionQuotaOptions } from "../accounts/use-subscription-quota"
+import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
 import { describeQuotaAccounts, makeQuotaEntry, quotaSummary } from "../quota/quota-model"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 
@@ -14,6 +15,13 @@ export function useDashboardResources(
   const [result, setResult] = useState<{ total: number; failed: number } | null>(null)
   const items = describeQuotaAccounts(accounts, providers)
   const subscriptions = items.filter((item) => item.kind === "subscription")
+  const googleSubscriptions = items.filter((item) => item.kind === "google_subscription")
+  const googleQueries = useQueries({
+    queries: googleSubscriptions.map((item) => ({
+      ...googleSubscriptionQuotaOptions(item.account),
+      enabled: false,
+    })),
+  })
   const balances = items.filter((item) => item.kind === "balance")
   // 只订阅共享缓存，首页挂载不会批量调用官方接口；主动检查复用同一查询与队列。
   const quotas = useQueries({
@@ -26,16 +34,21 @@ export function useDashboardResources(
     queries: balances.map((item) => ({ ...accountBalanceOptions(item.account), enabled: false })),
   })
   const quotaById = new Map(subscriptions.map((item, index) => [item.account.id, quotas[index]]))
+  const googleById = new Map(
+    googleSubscriptions.map((item, index) => [item.account.id, googleQueries[index]]),
+  )
   const balanceById = new Map(
     balances.map((item, index) => [item.account.id, balanceQueries[index]]),
   )
   const entries = items.map((item) => {
+    const google = googleById.get(item.account.id)
     const quota = quotaById.get(item.account.id)
     const balance = balanceById.get(item.account.id)
-    const query = quota ?? balance
+    const query = google ?? quota ?? balance
     return makeQuotaEntry(
       item,
       {
+        googleQuota: google?.data,
         quota: quota?.data,
         balance: balance?.data,
         pending: !!query?.isPending && !!query?.isFetching,
@@ -66,7 +79,7 @@ export function useDashboardResources(
   return {
     entries,
     summary: quotaSummary(entries),
-    checked: entries.filter((item) => item.quota || item.balance).length,
+    checked: entries.filter((item) => item.googleQuota || item.quota || item.balance).length,
     lastChecked: dates.length ? new Date(Math.max(...dates)).toISOString() : "",
     busy,
     result,

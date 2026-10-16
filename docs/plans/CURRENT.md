@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261016-009](../tasks/active/TASK-20261016-009-google-subscription-quota.md)：Google Antigravity 真实分组额度、重置时间、共享缓存及账号可选模型已实现；真实只读服务返回两组四窗口和 6 个可选型号，明确区分 3 个已有 Chat 适配与 3 个待接入型号，完整质量门／原生界面验收进行中。
 
 ## Recently Completed
 

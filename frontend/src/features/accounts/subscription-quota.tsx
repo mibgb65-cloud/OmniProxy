@@ -8,21 +8,13 @@ import { subscriptionError, type SubscriptionQuotaWindow } from "../../services/
 import { useSubscriptionQuota } from "./use-subscription-quota"
 import { QuotaResetTime } from "./quota-reset-time"
 import "./subscription-quota.css"
+import { GoogleSubscriptionQuota } from "../google/google-subscription-quota"
 
 export function SubscriptionQuota({ account }: { account: AccountItem }) {
   return account.providerId === "builtin_google" ? (
-    <GoogleSubscriptionQuota />
+    <GoogleSubscriptionQuota account={account} />
   ) : (
     <CodexSubscriptionQuota account={account} />
-  )
-}
-
-function GoogleSubscriptionQuota() {
-  const { t } = useTranslation()
-  return (
-    <p className="bg-muted/20 text-muted-foreground rounded-xl border p-3 text-xs leading-5">
-      {t("google.subscriptionQuotaUnknown")}
-    </p>
   )
 }
 

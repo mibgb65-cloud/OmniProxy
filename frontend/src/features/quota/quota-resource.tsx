@@ -8,9 +8,28 @@ import { balanceError } from "../../services/balance"
 import { subscriptionError } from "../../services/subscription"
 import { SubscriptionQuotaRow } from "../accounts/subscription-quota"
 import { quotaWindows, type QuotaEntry } from "./quota-model"
+import { GoogleQuotaValues } from "../google/google-quota-values"
+import { GoogleSubscriptionModels } from "../google/google-subscription-models"
 
 export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }) {
   const { t } = useTranslation()
+  if (entry.kind === "google_subscription")
+    return (
+      <div className="bg-muted/20 space-y-3 rounded-xl border p-3" aria-busy={entry.fetching}>
+        <GoogleSubscriptionModels account={entry.account} />
+        {entry.canQuery ? (
+          <GoogleQuotaValues quota={entry.googleQuota} loading={entry.pending} now={now} />
+        ) : (
+          <p className="text-muted-foreground text-xs">{t("quota.signInHint")}</p>
+        )}
+        {entry.error ? (
+          <p role="alert" className="text-destructive text-xs">
+            {t(`subscription.error.${subscriptionError(entry.error)}`)}
+          </p>
+        ) : null}
+        <p className="text-muted-foreground text-[10px] leading-5">{t("google.quota.hint")}</p>
+      </div>
+    )
   if (entry.kind === "kimi_coding") return <KimiCodeResource account={entry.account} />
   if (entry.kind === "minimax_plan" || entry.provider?.kind === "minimax")
     return <MiniMaxResource account={entry.account} />

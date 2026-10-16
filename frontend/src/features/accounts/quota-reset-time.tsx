@@ -7,9 +7,11 @@ import type { SubscriptionQuotaWindow } from "../../services/subscription"
 export function QuotaResetTime({
   window,
   now,
+  showNotStarted = true,
 }: {
-  window?: SubscriptionQuotaWindow | null
+  window?: (Pick<SubscriptionQuotaWindow, "resetsAt"> & { remainingPercent?: number | null }) | null
   now: number
+  showNotStarted?: boolean
 }) {
   const { t } = useTranslation()
   const resetsAt = window?.resetsAt
@@ -34,7 +36,7 @@ export function QuotaResetTime({
       label = t("subscription.quota.minutes", { minutes })
     }
     detail = t("subscription.quota.resetAt", { time: formatAccountTime(resetsAt || "") })
-  } else if (window?.remainingPercent === 100) {
+  } else if (showNotStarted && window?.remainingPercent === 100) {
     // 没有重置目标时本地倒计时尚未开始；提示中明确官方时间暂未返回。
     label = t("subscription.quota.notStarted")
   }
