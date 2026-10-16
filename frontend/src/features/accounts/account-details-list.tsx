@@ -16,6 +16,7 @@ import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
 import { SubscriptionQuota } from "./subscription-quota"
 import { AccountBalance } from "./account-balance"
+import { GoogleAccountResource } from "../google/google-account-resource"
 
 export function AccountDetailsList({
   accounts,
@@ -24,9 +25,11 @@ export function AccountDetailsList({
   onDelete,
   onEdit,
   balanceSupported = false,
+  googleSupported = false,
 }: {
   accounts: AccountItem[]
   balanceSupported?: boolean
+  googleSupported?: boolean
 } & Omit<AccountItemActionsProps, "account">) {
   const { t } = useTranslation()
   const hasSubscriptions = accounts.some((account) => account.authMethod === "subscription_login")
@@ -97,6 +100,13 @@ export function AccountDetailsList({
                 {account.authMethod === "subscription_login" ? (
                   <div className="min-w-72">
                     <SubscriptionQuota account={account} />
+                  </div>
+                ) : googleSupported || account.providerId === "builtin_google" ? (
+                  <div className="max-w-md min-w-72">
+                    <GoogleAccountResource
+                      account={account}
+                      accounts={accounts.filter((item) => item.authMethod === "api_key")}
+                    />
                   </div>
                 ) : account.kimi?.billingMode === "coding" ? (
                   <KimiCodeResource account={account} />

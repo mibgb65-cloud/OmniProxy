@@ -1,8 +1,8 @@
 package antigravity
 
 import (
+	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -41,6 +41,7 @@ type responseState struct {
 	calls             []object
 	usage             object
 	created           int64
+	remember          func([]object)
 }
 
 func (s *responseState) accept(data []byte) (object, error) {
@@ -81,7 +82,7 @@ func (s *responseState) accept(data []byte) (object, error) {
 				}
 				id := part.Call.ID
 				if id == "" {
-					id = fmt.Sprintf("call_%d", len(s.calls))
+					id = "call_" + rand.Text()
 				}
 				call := object{"index": len(s.calls), "id": id, "type": "function", "function": object{"name": part.Call.Name, "arguments": string(part.Call.Args)}}
 				if part.Signature != "" {
@@ -96,6 +97,12 @@ func (s *responseState) accept(data []byte) (object, error) {
 			switch candidate.Finish {
 			case "STOP":
 				s.finish = "stop"
+			case "OTHER":
+				// Antigravity 的 Claude 工具响应实测使用 OTHER；只有完整工具块才是可续接终态。
+				if !strings.HasPrefix(s.model, "claude-") || len(s.calls) == 0 {
+					return nil, proxy.Failure("invalid_upstream_response", 502)
+				}
+				s.finish = "tool_calls"
 			case "MAX_TOKENS":
 				s.finish = "length"
 			case "SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII":
@@ -132,6 +139,9 @@ func (s *responseState) envelope(stream bool, delta object) object {
 func (s *responseState) completed(stream bool) (object, error) {
 	if s.finish == "" {
 		return nil, proxy.Failure("invalid_upstream_response", 502)
+	}
+	if s.remember != nil {
+		s.remember(s.calls)
 	}
 	finish := s.finish
 	if len(s.calls) > 0 {

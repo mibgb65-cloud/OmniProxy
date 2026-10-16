@@ -100,8 +100,14 @@ func (c *Client) Project(ctx context.Context, cred *Credentials) error {
 func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) {
 	var value struct {
 		Models map[string]struct {
-			Name string `json:"displayName"`
+			Name     string `json:"displayName"`
+			Internal bool   `json:"isInternal"`
 		} `json:"models"`
+		Sorts []struct {
+			Groups []struct {
+				IDs []string `json:"modelIds"`
+			} `json:"groups"`
+		} `json:"agentModelSorts"`
 	}
 	if err := c.post(ctx, inferenceURL+"/v1internal:fetchAvailableModels", cred.AccessToken, map[string]string{"project": cred.Project}, &value); err != nil {
 		return nil, err
@@ -110,8 +116,26 @@ func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) 
 		return nil, Failure("invalid_response")
 	}
 	models := []Model{}
+	selected := map[string]bool{}
+	if len(value.Sorts) > 32 {
+		return nil, Failure("invalid_response")
+	}
+	for _, order := range value.Sorts {
+		if len(order.Groups) > 64 {
+			return nil, Failure("invalid_response")
+		}
+		for _, group := range order.Groups {
+			if len(group.IDs) > 1000 {
+				return nil, Failure("invalid_response")
+			}
+			for _, id := range group.IDs {
+				selected[id] = true
+			}
+		}
+	}
 	for id, item := range value.Models {
-		if !supportedModel(id) {
+		// Gemini 历史别名保留兼容；新增第三方型号必须由当前官方选择器明确列出。
+		if item.Internal || !supportedModel(id) || (!strings.HasPrefix(id, "gemini-") && !selected[id]) {
 			continue
 		}
 		name := strings.TrimSpace(item.Name)
@@ -122,13 +146,18 @@ func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) 
 		if _, err := modelcatalog.Normalize([]modelcatalog.Entry{entry}); err != nil {
 			return nil, Failure("invalid_response")
 		}
-		models = append(models, Model{ID: id, Name: name})
+		tools := true
+		models = append(models, Model{ID: id, Name: name, Metadata: modelcatalog.Metadata{InputModalities: []string{"text"}, ToolUse: &tools}})
 	}
 	sort.Slice(models, func(i, j int) bool { return models[i].ID < models[j].ID })
 	return models, nil
 }
 
 func supportedModel(id string) bool {
+	switch id {
+	case "claude-opus-4-6-thinking", "claude-sonnet-4-6", "claude-sonnet-4-6-thinking", "gpt-oss-120b-medium":
+		return true
+	}
 	if !strings.HasPrefix(id, "gemini-") || len(id) > 128 {
 		return false
 	}

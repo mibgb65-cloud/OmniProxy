@@ -1,5 +1,11 @@
 # 本地 Agent 接入与模型同步
 
+Google / Antigravity 订阅账号支持将实际发现的 Gemini、Claude Opus／Sonnet 4.6 及
+GPT-OSS 文本型号同步到 Agent 目录，入口为账号卡片“同步到 AI Agent”或路由模型同步。
+Responses／Messages 通过既有文本和工具转换接入，支持 JSON／有界 SSE；运行中的
+客户端需重新加载模型菜单。普通 Gemini API Key 仍仅支持 Chat，不进入不兼容的
+Agent 协议目录。详情见 [Google 订阅](GOOGLE_SUBSCRIPTION.md)。
+
 ## 使用
 
 River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具接入；Messages 转换需要缓冲，不是原生增量流。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。

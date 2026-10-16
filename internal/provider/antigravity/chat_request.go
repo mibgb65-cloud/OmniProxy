@@ -155,16 +155,12 @@ func chatPayload(request proxy.Request, cred Credentials) ([]byte, error) {
 		}
 		native["tools"] = []any{object{"functionDeclarations": declarations}}
 	}
-	if len(input.ToolChoice) > 0 && string(input.ToolChoice) != "null" {
-		var choice string
-		if json.Unmarshal(input.ToolChoice, &choice) != nil {
-			return nil, proxy.Failure("unsupported_content", 400)
-		}
-		mode := map[string]string{"auto": "AUTO", "none": "NONE", "required": "ANY"}[choice]
-		if mode == "" {
-			return nil, proxy.Failure("unsupported_content", 400)
-		}
-		native["toolConfig"] = object{"functionCallingConfig": object{"mode": mode}}
+	choice, err := toolChoice(input.ToolChoice, input.Tools)
+	if err != nil {
+		return nil, err
+	}
+	if choice != nil {
+		native["toolConfig"] = choice
 	}
 	config, err := generationOptions(fields)
 	if err != nil {

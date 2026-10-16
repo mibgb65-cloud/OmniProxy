@@ -17,6 +17,8 @@ import { SubscriptionQuota } from "./subscription-quota"
 import { AccountTimeFooter } from "./account-time-footer"
 import { AccountBalance } from "./account-balance"
 import { subscriptionTypeKey } from "../providers/provider-labels"
+import type { AccountItem } from "../../services/omniproxy"
+import { GoogleAccountResource } from "../google/google-account-resource"
 
 export function AccountDetailsCard({
   account,
@@ -26,7 +28,12 @@ export function AccountDetailsCard({
   onEdit,
   balanceSupported = false,
   googleSupported = false,
-}: AccountItemActionsProps & { balanceSupported?: boolean; googleSupported?: boolean }) {
+  googleAccounts,
+}: AccountItemActionsProps & {
+  balanceSupported?: boolean
+  googleSupported?: boolean
+  googleAccounts?: AccountItem[]
+}) {
   const { t } = useTranslation()
   const subscription = account.authMethod === "subscription_login"
 
@@ -73,6 +80,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : googleSupported || account.providerId === "builtin_google" ? (
+          <>
+            <GoogleAccountResource account={account} accounts={googleAccounts ?? [account]} />
             <AccountTimeFooter account={account} />
           </>
         ) : account.kimi?.billingMode === "coding" ? (

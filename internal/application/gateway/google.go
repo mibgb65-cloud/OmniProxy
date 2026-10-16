@@ -26,18 +26,16 @@ type GoogleResourceObserver interface {
 func (s *Service) SetGoogleResources(observer GoogleResourceObserver) { s.googleResources = observer }
 
 func (s *Service) forwardGoogle(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
-	if request.Protocol != "chat" {
-		return proxy.Failure("unsupported_protocol", 400)
-	}
 	if target.authMethod == "subscription_login" {
 		if s.googleAuth == nil {
 			return proxy.Failure("adapter_unavailable", 503)
 		}
 		return s.googleAuth.Use(ctx, target.accountID, func(cred antigravity.Credentials) error {
-			return s.antigravity.Forward(ctx, cred, request, func(response proxy.Response) error {
-				return consume(proxy.ObserveResponse(ctx, request.Trace, response, "chat"))
-			})
+			return s.forwardGoogleAgent(ctx, cred, request, consume)
 		})
+	}
+	if request.Protocol != "chat" {
+		return proxy.Failure("unsupported_protocol", 400)
 	}
 	if err := s.googleOutputLimit(ctx, target, request); err != nil {
 		return err

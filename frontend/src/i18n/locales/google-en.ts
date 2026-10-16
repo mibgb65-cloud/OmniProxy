@@ -3,7 +3,7 @@ export const googleEn: Record<keyof typeof googleZh, string> = {
   "google.subscriptionAdd": "Sign in with Google",
   "google.subscriptionTitle": "Sign in to Google AI",
   "google.subscriptionDescription":
-    "Authorize Antigravity on Google's official page to use Gemini models and subscription quota available to your account. Initial sign-in requires a compatible local Antigravity CLI.",
+    "Authorize Antigravity on Google's official page to use models and subscription quota available to your account. Initial sign-in requires a compatible local Antigravity CLI.",
   "google.subscriptionStorage":
     "Authorization is stored separately in protected local credentials. Use the same Google account when signing in again.",
   "google.subscriptionType": "Google / Antigravity",
@@ -14,10 +14,16 @@ export const googleEn: Record<keyof typeof googleZh, string> = {
   "google.models.show": "View all {{count}} account models",
   "google.models.close": "Close account model list",
   "google.models.count": "{{supported}} connected · {{total}} available upstream",
-  "google.models.connected": "Connected to this gateway · Chat API",
+  "google.models.connected": "Available to AI agents · Chat / Responses / Messages",
   "google.models.pending": "Available upstream · Gateway support pending",
   "google.models.hint":
-    "Connected models support Chat API; other entries describe the upstream catalog. Google determines access for each request.",
+    "Sync supported models to select them in AI agents for text and tool calls. Google determines access for each request.",
+  "google.models.sync": "Sync to AI agents",
+  "google.models.syncing": "Syncing models…",
+  "google.models.synced":
+    "Synced. Select models in client integration; reload model menus in running agents.",
+  "google.models.syncFailed":
+    "Model sync failed. Retry; existing client configurations remain available.",
   "google.models.noAdapter": "These models are not yet supported by this gateway",
   "google.models.empty": "Google has not returned any selectable models.",
   "google.models.failed":

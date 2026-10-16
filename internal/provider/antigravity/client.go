@@ -21,7 +21,10 @@ const userURL = "https://www.googleapis.com/oauth2/v2/userinfo"
 const maxResponse = 8 << 20
 
 // Client 只访问固定官方端点；测试通过 RoundTripper 注入契约服务。
-type Client struct{ http *http.Client }
+type Client struct {
+	http       *http.Client
+	signatures signatureCache
+}
 
 // New 创建拒绝重定向且具有有限握手等待的客户端。
 func New(transport http.RoundTripper) *Client {

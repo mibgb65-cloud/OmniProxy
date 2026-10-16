@@ -1,26 +1,16 @@
-import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import type { AccountItem } from "../../services/omniproxy"
-import { openGoogleConsole, readGoogleResources } from "../../services/google"
+import { openGoogleConsole } from "../../services/google"
 import { GoogleResourceCard } from "./google-resource-card"
+import { useGoogleResources } from "./use-google-resources"
 
 export function GoogleResources({ accounts }: { accounts: AccountItem[] }) {
   const { t } = useTranslation()
   const [openFailed, setOpenFailed] = useState(false)
-  // 编辑或更换 Key 会改变版本；新查询不显示上个凭证的绑定和观察。
-  const version = accounts
-    .map((account) => `${account.id}:${account.updatedAt}`)
-    .sort()
-    .join("|")
-  const query = useQuery({
-    queryKey: ["google-resources", version],
-    queryFn: readGoogleResources,
-    enabled: accounts.length > 0,
-    refetchInterval: 30_000,
-  })
+  const query = useGoogleResources(accounts)
   if (!accounts.length) return null
   async function open(page: "usage" | "billing") {
     setOpenFailed(false)

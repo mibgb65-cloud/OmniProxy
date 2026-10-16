@@ -1,5 +1,14 @@
 # Architecture Overview
 
+## Google 账号资源与 Agent 模型（2026-10-17）
+
+API Key 项目资源内嵌对应账号卡片／列表，共享查询保持项目维度，配额总览仍按项目归组。
+Antigravity 第三方文本型号只按官方选择器与精确适配白名单发布；订阅路由目录开放
+Responses／Messages，普通 API Key 保持 Chat。网关复用 `core/agentprotocol` 的文本与
+工具转换，Chat 保留增量 SSE，其他协议缓冲完整结果；256 条／1 小时的授权与内容摘要
+隔离内存缓存恢复工具签名，不保存对话正文。账号“同步到 AI Agent”沿用 ModelSync
+和受管菜单刷新，不新增接口、数据表或依赖。
+
 ## River 内置推理（2026-10-17）
 
 迁移 029 追加第十一家内置服务商。`provider/river` 使用标准库原生 Chat／Responses HTTP／SSE，Messages 复用现有文本工具转换并缓冲完整结果。账号、DPAPI、目录凭据版本校验、路由和原上游 usage 沿用现有边界。模型预设与实时发现区分，仅开放已核对的三款文本模型；详情见 `docs/product/RIVER.md`。

@@ -19,6 +19,12 @@ func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Re
 		return err
 	}
 	defer clear(body)
+	restored, err := c.restoreSignatures(body, cred, request.Model)
+	if err != nil {
+		return proxy.Failure("invalid_request", 400)
+	}
+	body = restored
+	defer clear(restored)
 	endpoint := inferenceURL + "/v1internal:generateContent"
 	if request.Stream {
 		endpoint = inferenceURL + "/v1internal:streamGenerateContent?alt=sse"
@@ -29,6 +35,7 @@ func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Re
 	}
 	defer resp.Body.Close()
 	state := responseState{model: request.Model, id: "chatcmpl-" + rand.Text()}
+	state.remember = func(calls []object) { c.rememberSignatures(cred, request.Model, calls) }
 	if request.Stream {
 		if !strings.HasPrefix(resp.Header.Get("Content-Type"), "text/event-stream") {
 			return proxy.Failure("invalid_upstream_response", 502)

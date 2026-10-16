@@ -24,6 +24,14 @@ import {
 import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
 import { readAccountBalance } from "../../services/balance"
+import { readGoogleResources, openGoogleConsole } from "../../services/google"
+
+vi.mock("../../services/google", () => ({
+  readGoogleResources: vi.fn(),
+  openGoogleConsole: vi.fn(),
+  setGoogleProject: vi.fn(),
+  googleError: () => "failed",
+}))
 
 vi.mock("../../services/balance", () => ({
   readAccountBalance: vi.fn(async () => ({
@@ -121,6 +129,50 @@ describe("ProviderAccountsView", () => {
     expect(deleteButton.textContent).toBe("")
     expect(deleteButton).not.toHaveAttribute("title")
     expect(screen.getByRole("link", { name: "返回账号" })).toHaveAttribute("href", "/accounts")
+  })
+
+  it("embeds shared Google resources in the matching key cards and list rows", async () => {
+    const google = { ...provider, id: "builtin_google", kind: "google", name: "Google" }
+    const keys: AccountItem[] = ["key-a", "key-b"].map((id) => ({
+      ...account,
+      id,
+      name: id,
+      providerId: google.id,
+      authMethod: "api_key",
+    }))
+    vi.mocked(listProviders).mockResolvedValue([google])
+    vi.mocked(listAccounts).mockResolvedValue(keys)
+    vi.mocked(readGoogleResources).mockResolvedValue([
+      {
+        id: "project:shared-project",
+        projectId: "shared-project",
+        accountIds: keys.map((item) => item.id),
+        verified: false,
+        officialRemaining: null,
+        observations: [],
+      },
+    ])
+    const user = userEvent.setup()
+    renderPage(google.id)
+    await screen.findAllByText("shared-project")
+    const regions = screen.getAllByRole("region", { name: "Gemini 项目资源" })
+    expect(regions).toHaveLength(2)
+    for (const [index, region] of regions.entries()) {
+      expect(within(region).getAllByRole("button", { name: /绑定项目：/ })).toHaveLength(1)
+      expect(
+        within(region).getByRole("button", { name: `绑定项目：${keys[index].name}` }),
+      ).toBeInTheDocument()
+      expect(region.closest('[data-slot="card"]')).toContainElement(
+        screen.getByRole("heading", { name: keys[index].name }),
+      )
+    }
+    expect(readGoogleResources).toHaveBeenCalledTimes(1)
+    await user.click(within(regions[0]).getByRole("button", { name: "官方用量／限流" }))
+    expect(openGoogleConsole).toHaveBeenCalledWith("usage")
+    await user.click(screen.getByRole("radio", { name: "列表展示" }))
+    const table = screen.getByRole("table")
+    expect(within(table).getAllByRole("region", { name: "Gemini 项目资源" })).toHaveLength(2)
+    expect(readGoogleResources).toHaveBeenCalledTimes(1)
   })
 
   it("handles a deleted or unknown provider ID", async () => {

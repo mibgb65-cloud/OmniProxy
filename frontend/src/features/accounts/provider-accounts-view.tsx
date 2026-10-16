@@ -17,7 +17,6 @@ import { OpenAIAccountSettings } from "./openai-account-settings"
 import { MiMoAccountSettings } from "./mimo-account-settings"
 import { StepFunAccountSettings } from "./stepfun-account-settings"
 import { KimiAccountSettings } from "./kimi-account-settings"
-import { GoogleResources } from "../google/google-resources"
 import "./account-card-grid.css"
 
 export function ProviderAccountsView({ providerId }: { providerId: string }) {
@@ -105,14 +104,6 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           {provider.kind === "kimi" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("kimi.routingHint")}</p>
           ) : null}
-          {provider.kind === "google" ? (
-            <>
-              <p className="text-muted-foreground text-sm">{t("google.chatOnly")}</p>
-              <GoogleResources
-                accounts={items.filter((account) => account.authMethod === "api_key")}
-              />
-            </>
-          ) : null}
           {actions.actionError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("accounts.actionFailed")}
@@ -135,6 +126,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
               onDelete={actions.deleteItem}
               onEdit={actions.editItem}
               balanceSupported={["deepseek", "stepfun", "kimi"].includes(provider.kind)}
+              googleSupported={provider.kind === "google"}
             />
           ) : (
             <div className="account-card-grid">
@@ -148,6 +140,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
                   onEdit={actions.editItem}
                   balanceSupported={["deepseek", "stepfun", "kimi"].includes(provider.kind)}
                   googleSupported={provider.kind === "google"}
+                  googleAccounts={items.filter((item) => item.authMethod === "api_key")}
                 />
               ))}
             </div>

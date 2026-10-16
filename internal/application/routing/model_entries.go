@@ -101,8 +101,13 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 			entry.Metadata = mimo.ModelMetadata(entry.TargetModel)
 		}
 		if entry.ProviderKind == "google" {
-			// 首版只有 Chat 无损透传，不能把尚未验证的跨协议 Agent 模型写入客户端目录。
 			entry.Protocols = []string{"chat_completions"}
+			for _, a := range data.accounts {
+				if a.ID == decision.AccountID && a.AuthMethod == "subscription_login" {
+					entry.Protocols = append(entry.Protocols, "responses", "messages")
+					break
+				}
+			}
 		}
 		if entry.ProviderKind == minimax.Kind {
 			entry.Metadata = minimax.ModelMetadata(entry.TargetModel)

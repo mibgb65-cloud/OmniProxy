@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
+import { syncAccountModels } from "../../services/models"
 import {
   readGoogleSubscriptionModels,
   readGoogleSubscriptionQuota,
@@ -20,6 +21,7 @@ vi.mock("../../services/google-subscription", () => ({
   readGoogleSubscriptionModels: vi.fn(),
   readGoogleSubscriptionQuota: vi.fn(),
 }))
+vi.mock("../../services/models", () => ({ syncAccountModels: vi.fn() }))
 
 function setup(quota = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -51,7 +53,9 @@ it("shows current account models and separates gateway adapters from upstream ch
   await user.click(trigger)
   const dialog = screen.getByRole("dialog", { name: "可选模型" })
   expect(view.container).not.toContainElement(dialog)
-  expect(within(dialog).getByText("当前网关已接入 · Chat API")).toBeInTheDocument()
+  expect(
+    within(dialog).getByText("可接入 AI Agent · Chat / Responses / Messages"),
+  ).toBeInTheDocument()
   expect(within(dialog).getByText("上游可选 · 当前网关待接入")).toBeInTheDocument()
   expect(within(dialog).getByText("gemini-current-high")).toBeInTheDocument()
   expect(within(dialog).getByText("claude-current")).toBeInTheDocument()
@@ -77,4 +81,20 @@ it("retains the last model list while refresh fails", async () => {
   await user.click(screen.getByRole("button", { name: "刷新 Google 模型列表" }))
   await screen.findByRole("alert")
   expect(screen.getByRole("button", { name: "查看全部 3 个账号模型" })).toBeInTheDocument()
+})
+
+it("syncs this account to agent menus and allows retry without losing quota", async () => {
+  vi.mocked(syncAccountModels)
+    .mockRejectedValueOnce(new Error("private-token"))
+    .mockResolvedValueOnce([])
+  const user = userEvent.setup()
+  setup(true)
+  await screen.findByRole("button", { name: "查看全部 3 个账号模型" })
+  await user.click(screen.getByRole("button", { name: "同步到 AI Agent" }))
+  expect(await screen.findByRole("alert")).toHaveTextContent("模型同步失败")
+  expect(screen.queryByText(/private-token/)).not.toBeInTheDocument()
+  expect(screen.getAllByRole("progressbar")).toHaveLength(4)
+  await user.click(screen.getByRole("button", { name: "同步到 AI Agent" }))
+  expect(await screen.findByText(/已同步，可在客户端接入中选择/)).toBeInTheDocument()
+  expect(syncAccountModels).toHaveBeenNthCalledWith(2, googleQuotaAccount.id)
 })
