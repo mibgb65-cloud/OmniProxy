@@ -1,4 +1,7 @@
 export const mimoEn = {
+  "mimo.settings.title": "Xiaomi MiMo account settings",
+  "mimo.settings.close": "Close account settings",
+  "mimo.settings.empty": "No settings available yet",
   "mimo.openAccess": "View Token Plan access details",
   "mimo.closeAccess": "Close Token Plan access details",
   "mimo.accessTitle": "Token Plan access",

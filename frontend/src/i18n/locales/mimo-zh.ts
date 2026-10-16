@@ -1,4 +1,7 @@
 export const mimoZh = {
+  "mimo.settings.title": "小米 MiMo 账号设置",
+  "mimo.settings.close": "关闭账号设置",
+  "mimo.settings.empty": "暂无可配置项",
   "mimo.openAccess": "查看 Token Plan 接入信息",
   "mimo.closeAccess": "关闭 Token Plan 接入信息",
   "mimo.accessTitle": "Token Plan 接入",

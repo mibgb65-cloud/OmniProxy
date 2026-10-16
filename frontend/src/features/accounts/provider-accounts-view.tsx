@@ -14,6 +14,7 @@ import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 import { OpenAIAccountSettings } from "./openai-account-settings"
+import { MiMoAccountSettings } from "./mimo-account-settings"
 import { GoogleResources } from "../google/google-resources"
 import "./account-card-grid.css"
 
@@ -70,6 +71,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {provider.kind === "openai" ? <OpenAIAccountSettings /> : null}
+              {provider.kind === "mimo" ? <MiMoAccountSettings /> : null}
               <AccountViewToggle />
               <AddAccountDialog
                 provider={provider}
