@@ -3,6 +3,8 @@ export const agentsEn = {
   "agents.codex": "Codex CLI / Desktop",
   "agents.claude": "Claude Code CLI",
   "agents.claude-desktop": "Claude Code Desktop",
+  "agents.claudeGroup": "Claude Code",
+  "agents.claudeGroupDescription": "Choose the CLI or desktop app to configure its connection.",
   "agents.selectClient": "Choose a local agent, then open its configuration page to connect it.",
   "agents.codexDescription": "Shared connection settings for the CLI and desktop app.",
   "agents.claudeDescription": "Connect Claude Code in your terminal.",

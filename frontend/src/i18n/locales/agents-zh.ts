@@ -3,6 +3,8 @@ export const agentsZh = {
   "agents.codex": "Codex CLI / Desktop",
   "agents.claude": "Claude Code CLI",
   "agents.claude-desktop": "Claude Code Desktop",
+  "agents.claudeGroup": "Claude Code",
+  "agents.claudeGroupDescription": "选择终端或桌面应用，分别配置接入。",
   "agents.selectClient": "选择要接入的本地 Agent，进入配置页面后完成一键配置。",
   "agents.codexDescription": "CLI 与桌面应用共享接入配置。",
   "agents.claudeDescription": "接入终端中的 Claude Code。",

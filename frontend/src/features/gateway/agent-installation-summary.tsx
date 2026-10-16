@@ -8,10 +8,12 @@ export function AgentInstallationSummary({
   client,
   snapshot,
   unavailable,
+  compact = false,
 }: {
   client: AgentClientId
   snapshot?: AgentInstallSnapshot
   unavailable?: boolean
+  compact?: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -20,7 +22,9 @@ export function AgentInstallationSummary({
         const item = snapshot?.items?.find((item) => item.id === id)
         return (
           <div key={id} className="flex flex-wrap items-center justify-between gap-2">
-            <dt className="text-muted-foreground">{t(agentInstallationTargets[id])}</dt>
+            <dt className={compact ? "sr-only" : "text-muted-foreground"}>
+              {t(agentInstallationTargets[id])}
+            </dt>
             <dd
               className={
                 item?.detection.state === "installed"

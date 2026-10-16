@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { getAppInfo, listAccounts, listProviders } from "../../services/omniproxy"
@@ -15,6 +15,7 @@ import {
   resetGatewayRuntime,
   restoreAgentConfigMock,
   setAgentEnabledMock,
+  getAgentInstallationsMock,
 } from "./gateway-test-helpers"
 
 vi.mock("../../services/gateway", () => ({
@@ -57,12 +58,14 @@ beforeEach(() => {
   ])
 })
 
-it("入口展示三个客户端卡片，点击仅导航，前进后退恢复详情与卡片焦点", async () => {
+it("入口按 Codex 与 Claude 归组，点击仅导航，前进后退恢复详情与卡片焦点", async () => {
   const user = userEvent.setup()
   const { router } = renderGateway("clients")
   const tile = await screen.findByRole("link", { name: "配置 Codex CLI / Desktop" })
-  expect(screen.getByRole("link", { name: "配置 Claude Code CLI" })).toBeInTheDocument()
-  expect(screen.getByRole("link", { name: "配置 Claude Code Desktop" })).toBeInTheDocument()
+  const claude = screen.getByRole("region", { name: "Claude Code" })
+  expect(within(claude).getAllByRole("link")).toHaveLength(2)
+  expect(within(claude).getByRole("link", { name: "配置 Claude Code CLI" })).toBeInTheDocument()
+  expect(within(claude).getByRole("link", { name: "配置 Claude Code Desktop" })).toBeInTheDocument()
   expect(screen.queryByText(codex.path)).not.toBeInTheDocument()
   expect(screen.queryByRole("button", { name: "一键配置" })).not.toBeInTheDocument()
   tile.focus()
@@ -81,6 +84,41 @@ it("入口展示三个客户端卡片，点击仅导航，前进后退恢复详�
   expect(await screen.findByRole("heading", { name: "Codex CLI / Desktop" })).toBeInTheDocument()
   await act(async () => router.history.forward())
   expect(await screen.findByRole("link", { name: "配置 Codex CLI / Desktop" })).toBeInTheDocument()
+})
+
+it.each([
+  ["claude", "Claude Code CLI"],
+  ["claude-desktop", "Claude Code Desktop"],
+])("Claude 分组中的 %s 保留独立键盘入口和返回焦点", async (client, title) => {
+  const user = userEvent.setup()
+  const { router } = renderGateway("clients")
+  const entry = await screen.findByRole("link", { name: `配置 ${title}` })
+  entry.focus()
+  await user.keyboard("{Enter}")
+  expect(await screen.findByRole("heading", { name: title, level: 2 })).toHaveFocus()
+  expect(router.state.location.search).toEqual({ tab: "clients", client })
+  expect(applyAgentConfigMock).not.toHaveBeenCalled()
+  await user.click(screen.getByRole("link", { name: "返回本地 Agent" }))
+  await waitFor(() => expect(screen.getByRole("link", { name: `配置 ${title}` })).toHaveFocus())
+})
+
+it("Claude 分组分别展示 CLI 与 Desktop 的安装和接入状态", async () => {
+  getAgentInstallationsMock.mockResolvedValue({
+    items: ["claude-code", "claude-desktop"].map((id) => ({
+      id,
+      detection: { state: id === "claude-code" ? "installed" : "not_installed" },
+      installState: "idle",
+    })),
+    busy: false,
+    installerAvailable: true,
+  })
+  renderGateway("clients")
+  const cli = await screen.findByRole("link", { name: "配置 Claude Code CLI" })
+  const desktop = screen.getByRole("link", { name: "配置 Claude Code Desktop" })
+  expect(await within(cli).findByText("已安装")).toBeInTheDocument()
+  expect(within(cli).getByText("尚未配置")).toBeInTheDocument()
+  expect(within(desktop).getByText("未安装")).toBeInTheDocument()
+  expect(within(desktop).getByText("接入 Key 已停用")).toBeInTheDocument()
 })
 
 it("深链接直接打开客户端，切换选项卡后保留选择", async () => {

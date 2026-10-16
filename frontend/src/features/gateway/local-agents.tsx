@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next"
 import { listAgentClients } from "../../services/agents"
 import { AgentClientDetail } from "./agent-client-detail"
 import { AgentClientTile } from "./agent-client-tile"
-import { agentClientIds, type AgentClientId } from "./agent-clients"
+import { type AgentClientId } from "./agent-clients"
+import { ClaudeClientsTile } from "./claude-clients-tile"
 import { useAgentInstallations } from "./use-agent-installations"
 
 export function LocalAgents({
@@ -59,17 +60,20 @@ export function LocalAgents({
             <h2 className="text-base font-semibold">{t("agents.title")}</h2>
             <p className="text-muted-foreground text-sm">{t("agents.selectClient")}</p>
           </div>
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {agentClientIds.map((client) => (
-              <AgentClientTile
-                key={client}
-                client={client}
-                item={items.find((item) => item.client === client)}
-                pending={data.isPending}
-                installations={installations.data.isError ? undefined : installations.data.data}
-                installationsUnavailable={installations.data.isError}
-              />
-            ))}
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <AgentClientTile
+              client="codex"
+              item={items.find((item) => item.client === "codex")}
+              pending={data.isPending}
+              installations={installations.data.isError ? undefined : installations.data.data}
+              installationsUnavailable={installations.data.isError}
+            />
+            <ClaudeClientsTile
+              items={items}
+              pending={data.isPending}
+              installations={installations.data.isError ? undefined : installations.data.data}
+              installationsUnavailable={installations.data.isError}
+            />
           </div>
         </>
       )}
