@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -128,9 +128,18 @@ Responses／Messages 转换无法无损保留 Google 工具签名，继续复用
 
 # Git
 
-待提交。
+## Commit
+
+`80e6ba8ccc52084dc2e1b44f34c74fdb344d0f1d feat(provider): 接入 Google Antigravity 订阅`
+
+变更位于 `codex/google-antigravity-subscription`，未推送。归档同时收录生成器更新的
+Wails 绑定注释；绑定方法和数据结构未发生额外变化。原有其他任务记录未修改或提交。
 
 # Result
 
 已完成独立 Google 订阅最小链路，通过真实登录／14 模型发现／一次 HTTP 200 网关请求、
 用量归属、桌面视觉检查及最终完整质量门。真实高级模型、工具／流式及长窗口的权限仍需单独验证。
+
+# Completed
+
+2026-10-16 22:53

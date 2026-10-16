@@ -583,7 +583,7 @@ export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
 }
 
 /**
- * SubscriptionBegin 通过官方本机 Codex 组件启动隔离授权。
+ * SubscriptionBegin 按提供商启动独立的 Codex 或 Google 浏览器授权。
  */
 export function SubscriptionBegin(input: subscription$0.Input): $CancellablePromise<subscription$0.State> {
     return $Call.ByID(544809649, input);
