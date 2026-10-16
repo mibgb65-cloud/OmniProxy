@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261016-008](../tasks/active/TASK-20261016-008-google-subscription-label.md)：修复 Google 提供商／配额卡片误标 ChatGPT，统一按提供商选择品牌；相关 42 项测试通过，完整质量门与桌面核对进行中。
+暂无当前任务。
 
 ## Recently Completed
 
+- [TASK-20261016-008](../tasks/completed/2026-10/TASK-20261016-008-google-subscription-label.md)：修复 Google 提供商与配额卡片误标 ChatGPT / Codex，提供商／账号标签共用品牌选择，未知类型使用中性订阅标签。完整质量门／456 项前端测试及实际提供商页标签核对通过。实现提交 `0c5c10e`。
 - [TASK-20261016-007](../tasks/completed/2026-10/TASK-20261016-007-google-antigravity-subscription.md)：独立 Google / Antigravity 订阅登录、DPAPI 凭证、真实模型发现、文本／工具 Chat JSON/SSE、路由与用量。完整质量门／452 项前端测试通过，协作真实授权后发现 14 个模型，固定账号调用 Gemini 2.5 Flash 返回 HTTP 200（输入 6／输出 1 Token），开发窗口视觉核对通过。实现提交 `80e6ba8`；官方剩余额度、其他协议及高级模型／长窗口仍待验证。
 - [TASK-20261016-006](../tasks/completed/2026-10/TASK-20261016-006-claude-cli-model-picker.md) 修复 Claude CLI 只配置默认档位、未发布完整模型菜单；补齐显式菜单与受管刷新，保留加密备份和外部编辑保护。完整质量门／450 项前端测试、原生预览应用及 Claude Code 2.1.292 实际 18 模型菜单验证通过。实现提交 `c1ccced`；原 CLI 重启后生效，未发送上游推理请求。
 - [TASK-20261016-005](../tasks/completed/2026-10/TASK-20261016-005-kimi-default-order-and-model-dedup.md) Kimi 普通／Code 订阅 Key × 国内／海外、默认计费／地区顺序与六款逻辑模型去重，旧配置／Claude ID 兼容、真实身份保留，订阅未知额度独立展示。完整质量门／449 项前端测试、原生三协议／流式集成及正常桌面设置／表单／深浅主题／960×600 验收通过。实现提交 `4337082`；真实订阅 Key／套餐及长窗口待验证。

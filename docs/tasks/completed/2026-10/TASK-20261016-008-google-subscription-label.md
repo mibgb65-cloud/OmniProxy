@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -55,8 +55,14 @@ In Progress
 
 # Git
 
-待提交。
+`0c5c10edd7a5be01d53825ec865337293e6f84d8 fix(frontend): 按提供商显示订阅品牌标签`
+
+位于 `codex/google-antigravity-subscription`，未推送；原有其他任务记录保持不动。
 
 # Result
 
 已修复截图中的品牌误标，并同步消除配额页同类问题；账号与提供商标签共用相同选择逻辑。
+
+## Completed
+
+2026-10-16 23:00
