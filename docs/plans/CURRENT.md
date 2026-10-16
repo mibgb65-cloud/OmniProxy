@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261017-002](../tasks/completed/2026-10/TASK-20261017-002-river-provider-icon.md)：补齐 River 官方本地图标，保留品牌底色、比例与圆角尺寸，修复共享入口的通用图标回退。完整质量门／473 项前端测试及当前开发窗口深浅主题验收通过；实现提交 `288c748`。
 - [TASK-20261017-001](../tasks/completed/2026-10/TASK-20261017-001-river-builtin-provider.md)：River 第十一家内置服务商，三款官方模型、账号目录同步、路由、原生 Chat／Responses 和 Messages 文本工具转换。完整质量门／472 项前端测试与隔离原生窗口验收通过；实现提交 `ad8ada2`。真实 Key、图片及长窗口仍待验证。
 - [TASK-20261016-009](../tasks/completed/2026-10/TASK-20261016-009-google-subscription-quota.md)：Google Antigravity 真实分组额度、重置时间、共享缓存与可选模型浮层；真实只读查询返回两组四窗口／6 个型号，区分 3 个 Gemini Chat 适配与 3 个第三方待接入型号。完整质量门／469 项前端测试及开发窗口验收通过，未发送推理。实现提交 `662361b`。
 - [TASK-20261016-008](../tasks/completed/2026-10/TASK-20261016-008-google-subscription-label.md)：修复 Google 提供商与配额卡片误标 ChatGPT / Codex，提供商／账号标签共用品牌选择，未知类型使用中性订阅标签。完整质量门／456 项前端测试及实际提供商页标签核对通过。实现提交 `0c5c10e`。

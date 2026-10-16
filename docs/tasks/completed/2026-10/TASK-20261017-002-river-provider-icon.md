@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -53,8 +53,14 @@ In Progress
 
 # Git
 
-待提交。
+`288c7486ec3a81ac71c4a68618f3d4b2d42d6ab0 fix(frontend): 补齐 River 官方品牌图标`。
+
+分支 `codex/river-builtin-provider`。归档记录与 CURRENT 由后续文档提交保存。
 
 # Result
 
-待完成。
+River 官方图标已在当前开发窗口生效，共享入口一致，深浅主题原生核对与完整质量门通过。
+
+# Completed
+
+2026-10-17（Asia/Singapore）
