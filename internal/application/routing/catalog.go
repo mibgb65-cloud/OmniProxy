@@ -8,6 +8,7 @@ import (
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/river"
 )
 
 type discoveredModel struct {
@@ -48,10 +49,17 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 	if err != nil {
 		return nil, err
 	}
+	result, err = s.withRiverPresets(ctx, result)
+	if err != nil {
+		return nil, err
+	}
 	return s.withMiMoPresets(ctx, result)
 }
 func targetSupports(data snapshot, providerID, accountID, model string) bool {
 	for _, p := range data.providers {
+		if p.ID == providerID && p.Kind == river.Kind {
+			return riverTargetSupports(data, providerID, accountID, model)
+		}
 		if p.ID == providerID && p.Kind == "minimax" {
 			return minimaxTargetSupports(data, providerID, accountID, model)
 		}
@@ -88,7 +96,7 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == "deepseek" && a.AuthMethod != account.AuthSubscription {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
-		if (p.Kind == atria.Kind || p.Kind == mimo.Kind) && a.AuthMethod == account.AuthAPIKey {
+		if (p.Kind == atria.Kind || p.Kind == mimo.Kind || p.Kind == river.Kind) && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "minimax" && a.AuthMethod == account.AuthAPIKey {

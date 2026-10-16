@@ -40,8 +40,8 @@ func TestMigrationPreservesExistingConfigurationsAndAccounts(t *testing.T) {
 		t.Fatal(err)
 	}
 	items, err := NewService(db).List(ctx)
-	if err != nil || len(items) != 11 {
-		t.Fatalf("upgraded List = (%v, %v), want eleven", items, err)
+	if err != nil || len(items) != 12 {
+		t.Fatalf("upgraded List = (%v, %v), want twelve", items, err)
 	}
 	legacy, err := NewService(db).get(ctx, legacyID)
 	if err != nil || legacy.Source != SourceCustom || legacy.Enabled || legacy.Kind != "openai" || legacy.BaseURL != "https://existing.example/v1" {

@@ -124,6 +124,39 @@ it("MiMo 普通 API Key 可同步官方模型，发现结果替换预设", async
   expect(screen.queryByText("mimo-v2.6-pro")).not.toBeInTheDocument()
 })
 
+it("River API Key 可同步官方模型，发现结果替换预设", async () => {
+  vi.mocked(listModelCatalog).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "zai-org/GLM-5.3-Flash",
+      name: "zai-org/GLM-5.3-Flash",
+      fetchedAt: "",
+      source: "preset",
+    },
+  ])
+  vi.mocked(syncAccountModels).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "deepseek-ai/DeepSeek-V4.1-Flash",
+      name: "deepseek-ai/DeepSeek-V4.1-Flash",
+      fetchedAt: "now",
+    },
+  ])
+  renderCatalog({
+    providers: [{ ...catalogProps.providers[0], kind: "river", name: "River" }],
+    accounts: [{ ...catalogProps.accounts[0], authMethod: "api_key" }],
+  })
+  const user = userEvent.setup()
+  expect(await screen.findByText("zai-org/GLM-5.3-Flash")).toBeInTheDocument()
+  await selectOption(user, screen.getByRole("combobox"), "Account · River")
+  await user.click(screen.getByRole("button", { name: "同步官方模型" }))
+  expect(await screen.findByText("deepseek-ai/DeepSeek-V4.1-Flash")).toBeInTheDocument()
+  expect(syncAccountModels).toHaveBeenCalledWith("a")
+  expect(screen.queryByText("zai-org/GLM-5.3-Flash")).not.toBeInTheDocument()
+})
+
 it("模型与服务商双向分组，同一服务商的账号共用模型标题并保留各自能力", async () => {
   vi.mocked(listModelCatalog).mockResolvedValue([
     {

@@ -11,6 +11,7 @@ import (
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/minimax"
+	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
 	"time"
 )
@@ -84,6 +85,14 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 				models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: item.Metadata})
 			}
 			return discoveryError
+		})
+	} else if kind == river.Kind && current.AuthMethod == account.AuthAPIKey {
+		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
+			ids, e := s.river.DiscoverModels(ctx, base, key)
+			for _, m := range ids {
+				models = append(models, codex.Model{ID: m, Name: m, Metadata: river.ModelMetadata(m)})
+			}
+			return e
 		})
 	} else if kind == minimax.Kind && current.AuthMethod == account.AuthAPIKey {
 		models, err = s.syncMiniMax(ctx, current)

@@ -12,15 +12,17 @@
 
 公共顶栏显示运行状态、实际地址摘要、启停与刷新入口，和选项卡导航一起在内容滚动时保持可见。页面分为四个选项卡：
 
-- **运行概览**：默认页面，显示 DeepSeek／Atria／Gemini／MiMo API Key 接入资源概况、当前 API 协议、只读运行参数和模型路由入口。
+- **运行概览**：默认页面，显示 DeepSeek／River／Atria／Gemini／MiMo API Key 接入资源概况、当前 API 协议、只读运行参数和模型路由入口。
 - **客户端接入**：本地 Agent 品牌图标卡片；点击后进入对应客户端配置页，进行一键配置、预览／应用、独立接入 Key 复制、启停和恢复。
   卡片单独展示软件安装状态，详情页支持检测和安装；Codex CLI 与桌面应用分开处理。
 - **手动接入**：通用 Base URL、Codex／Claude 端点与配置摘要、复制及官方说明。
-- **测试诊断**：DeepSeek／Atria／Gemini／MiMo API Key 元数据接入检查，以及请求记录／运行日志入口。
+- **测试诊断**：DeepSeek／River／Atria／Gemini／MiMo API Key 元数据接入检查，以及请求记录／运行日志入口。
 
 选项卡使用 `/gateway?tab=overview|clients|manual|diagnostics` 定位，缺省或非法值回到运行概览，支持刷新及前进／后退。方向键移动页签焦点，Enter／Space 激活。面板首次访问才加载，访问后保留到离开网关页面；往返切换保留手动配置模式、进行中的操作与结果，隐藏面板不接收键盘焦点。切换后内容回到顶部。刷新同步更新网关、资源元数据及已加载的客户端配置，不调用模型。
 
-运行参数只读；资源概况和接入检查覆盖 DeepSeek／Atria／Gemini／MiMo API Key，ChatGPT / Codex 使用已有订阅账号接入。统计仅表示配置，不表示密钥有效或目录已同步。手动配置摘要含占位符，不包含完整密钥；独立 Key 继续通过桌面端复制。
+运行参数只读；资源概况和接入检查覆盖 DeepSeek／River／Atria／Gemini／MiMo API Key，ChatGPT / Codex 使用已有订阅账号接入。统计仅表示配置，不表示密钥有效或目录已同步。手动配置摘要含占位符，不包含完整密钥；独立 Key 继续通过桌面端复制。
+
+River 原生转发 Chat／Responses JSON 与 SSE；Messages 文本／工具通过 Chat 转换，完整上游结果返回后才生成下游 SSE。添加 API Key 后提供三款官方预设，可同步实际目录；详细能力与限制见 [RIVER.md](RIVER.md)。
 
 Atria 使用独立原生适配器，将 Chat Completions／Responses／Messages 转发到官方相应端点，保留 JSON、SSE 和工具调用正文。只接受文本内容与整数 1–65536 的输出上限；使用既有受控凭证、错误分类、Retry-After、取消及请求／用量统计。模型预设为 `Atria-Dawn-Preview`，不表示 Key 已验证，不新增隐式重试、自动调度、余额查询或上游 WebSocket。
 

@@ -1,0 +1,52 @@
+package routing
+
+import (
+	"context"
+	"omniproxy/internal/application/account"
+	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/river"
+)
+
+func (s *Service) withRiverPresets(ctx context.Context, models []discoveredModel) ([]discoveredModel, error) {
+	accounts, err := s.accounts.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	providers, err := s.providers.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	synced := map[string]bool{}
+	for _, m := range models {
+		synced[m.accountID] = true
+	}
+	for _, p := range providers {
+		if p.Kind != river.Kind {
+			continue
+		}
+		for _, a := range accounts {
+			if a.ProviderID != p.ID || a.AuthMethod != account.AuthAPIKey || synced[a.ID] {
+				continue
+			}
+			for _, id := range river.Models() {
+				models = append(models, discoveredModel{accountID: a.ID, providerID: p.ID, model: id, name: id, metadata: river.ModelMetadata(id)})
+			}
+		}
+	}
+	if len(models) > 10000 {
+		return nil, core.ErrInvalidInput
+	}
+	return models, nil
+}
+
+func riverTargetSupports(data snapshot, providerID, accountID, model string) bool {
+	if !river.SupportsModel(model) {
+		return false
+	}
+	for _, m := range data.models {
+		if m.providerID == providerID && m.model == model && (accountID == "" || m.accountID == accountID) {
+			return true
+		}
+	}
+	return false
+}

@@ -24,8 +24,8 @@ func testService(t *testing.T) *Service {
 	return NewService(db)
 }
 
-func TestCatalogContainsTenProviderKinds(t *testing.T) {
-	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria"}
+func TestCatalogContainsElevenProviderKinds(t *testing.T) {
+	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria", "river"}
 	definitions := Catalog()
 	if len(definitions) != len(want) {
 		t.Fatalf("Catalog length = %d, want %d", len(definitions), len(want))
@@ -52,8 +52,8 @@ func TestBuiltInProvidersStartEnabledAndCanOnlyToggle(t *testing.T) {
 	ctx := context.Background()
 	service := testService(t)
 	items, err := service.List(ctx)
-	if err != nil || len(items) != 10 {
-		t.Fatalf("List = (%v, %v), want ten built-ins", items, err)
+	if err != nil || len(items) != 11 {
+		t.Fatalf("List = (%v, %v), want eleven built-ins", items, err)
 	}
 	for _, item := range items {
 		if item.Source != SourceBuiltIn || !item.Enabled || item.ID != "builtin_"+item.Kind {
@@ -87,8 +87,8 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("Create = %+v", item)
 	}
 	items, err := NewService(service.db).List(ctx)
-	if err != nil || len(items) != 11 {
-		t.Fatalf("persisted List = (%v, %v), want eleven", items, err)
+	if err != nil || len(items) != 12 {
+		t.Fatalf("persisted List = (%v, %v), want twelve", items, err)
 	}
 	updated, err := service.Update(ctx, item.ID, UpdateInput{Name: "Backup", BaseURL: "https://backup.example.test/v1"})
 	if err != nil || updated.Name != "Backup" || !updated.Enabled {
@@ -105,7 +105,7 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("second Delete = %v, want ErrNotFound", err)
 	}
 	items, err = service.List(ctx)
-	if err != nil || len(items) != 10 {
+	if err != nil || len(items) != 11 {
 		t.Fatalf("List after Delete = (%v, %v)", items, err)
 	}
 }
@@ -130,7 +130,7 @@ func TestCustomProviderValidation(t *testing.T) {
 			t.Errorf("invalid case %d = %v, want ErrInvalidInput", i, err)
 		}
 	}
-	if items, err := service.List(ctx); err != nil || len(items) != 10 {
+	if items, err := service.List(ctx); err != nil || len(items) != 11 {
 		t.Fatalf("invalid inputs wrote rows: %v, %v", items, err)
 	}
 	if _, err := service.Create(ctx, CreateInput{Name: "Local proxy", BaseURL: "http://127.0.0.1:8080/v1"}); err != nil {

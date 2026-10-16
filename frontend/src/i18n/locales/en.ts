@@ -314,6 +314,7 @@ export const en: Record<keyof typeof zh, string> = {
     "Multiple StepFun platforms or billing channels are available. Choose a fixed account or a channel model name.",
   "providers.kind.stepfun": "StepFun",
   "providers.kind.atria": "Atria",
+  "providers.kind.river": "River",
 
   "pages.accounts.title": "Accounts",
   "accounts.loading": "Loading accounts…",

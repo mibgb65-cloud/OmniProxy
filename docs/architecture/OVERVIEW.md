@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## River 内置推理（2026-10-17）
+
+迁移 029 追加第十一家内置服务商。`provider/river` 使用标准库原生 Chat／Responses HTTP／SSE，Messages 复用现有文本工具转换并缓冲完整结果。账号、DPAPI、目录凭据版本校验、路由和原上游 usage 沿用现有边界。模型预设与实时发现区分，仅开放已核对的三款文本模型；详情见 `docs/product/RIVER.md`。
+
 ## Google Antigravity 订阅（2026-10-16）
 
 订阅额度通过独立 `GoogleSubscriptionQuota` → `application/googlesubscription.ReadQuota`
@@ -157,13 +161,13 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages ten default-enabled
+> Current state: `internal/application/provider` manages eleven default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`. The gateway forwards DeepSeek,
-> ChatGPT / Codex subscription, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat requests; other provider adapters are pending.
+> ChatGPT / Codex subscription, River, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -262,10 +266,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, Atria, and OpenAI-compatible endpoints. Ten named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, River, and OpenAI-compatible endpoints. Eleven named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

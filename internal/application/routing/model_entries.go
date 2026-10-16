@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
+	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
 )
 
@@ -79,6 +80,9 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 		if entry.ProviderKind == "deepseek" && entry.Metadata.ContextWindow == nil {
 			// 兼容已同步但尚未保存上下文元数据的旧快照，按实际路由目标补齐。
 			entry.Metadata.ContextWindow = deepseek.ModelMetadata(entry.TargetModel).ContextWindow
+		}
+		if entry.ProviderKind == river.Kind {
+			entry.Metadata = river.ModelMetadata(entry.TargetModel)
 		}
 		if entry.ProviderKind == atria.Kind {
 			entry.Metadata = atria.ModelMetadata(entry.TargetModel)

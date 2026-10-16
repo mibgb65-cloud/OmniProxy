@@ -42,6 +42,7 @@ export function ModelCatalog({
           a.stepfun?.billingMode === "payg" &&
           a.authMethod === "api_key") ||
           ((p.kind === "deepseek" ||
+            p.kind === "river" ||
             p.kind === "google" ||
             p.kind === "mimo" ||
             (p.kind === "kimi" && a.kimi != null && a.kimi.billingMode !== "coding") ||

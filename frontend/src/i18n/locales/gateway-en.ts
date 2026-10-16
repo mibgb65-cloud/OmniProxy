@@ -10,7 +10,7 @@ export const gatewayEn: Record<keyof typeof gatewayZh, string> = {
   "gateway.tabs.manualHint":
     "Copy endpoint addresses and configuration snippets for clients you manage manually.",
   "gateway.tabs.diagnosticsHint":
-    "Check DeepSeek / Atria / Gemini / MiMo API key configuration. See request history and runtime logs for actual request results.",
+    "Check DeepSeek / River / Atria / Gemini / MiMo API key configuration. See request history and runtime logs for actual request results.",
   "gateway.summary.title": "Connection overview",
   "gateway.links.title": "Related pages",
   "gateway.sidebar.title": "Gateway",
@@ -75,7 +75,7 @@ export const gatewayEn: Record<keyof typeof gatewayZh, string> = {
   "gateway.summary.accounts": "Configured API key accounts",
   "gateway.summary.protocol": "API protocol",
   "gateway.summary.accountsHint":
-    "These counts cover enabled DeepSeek / Atria / Gemini / MiMo API key resources. ChatGPT / Codex uses subscription accounts. Automatic failover is not available yet.",
+    "These counts cover enabled DeepSeek / River / Atria / Gemini / MiMo API key resources. ChatGPT / Codex uses subscription accounts. Automatic failover is not available yet.",
   "gateway.loading": "Loading…",
   "gateway.unavailable": "Could not load",
   "gateway.connection.title": "General API address",
@@ -114,10 +114,10 @@ export const gatewayEn: Record<keyof typeof gatewayZh, string> = {
   "gateway.check.runtime": "Local configuration",
   "gateway.check.runtimeHint": "Read the current proxy port and runtime profile.",
   "gateway.check.providers": "Providers",
-  "gateway.check.providersHint": "Enable a DeepSeek, Atria, Gemini, or MiMo provider.",
+  "gateway.check.providersHint": "Enable a DeepSeek, River, Atria, Gemini, or MiMo provider.",
   "gateway.check.accounts": "Accounts",
   "gateway.check.accountsHint":
-    "Configure at least one enabled API key account for an enabled DeepSeek, Atria, Gemini, or MiMo provider.",
+    "Configure at least one enabled API key account for an enabled DeepSeek, River, Atria, Gemini, or MiMo provider.",
   "gateway.check.configured": "Configured",
   "gateway.check.read": "Loaded",
   "gateway.check.missing": "Needs configuration",

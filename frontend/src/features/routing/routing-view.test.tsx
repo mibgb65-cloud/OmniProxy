@@ -134,6 +134,55 @@ describe("路由页面", () => {
     )
   })
 
+  it("River 官方预设可用于新增并保存显式路由", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      ...providers,
+      { ...providers[0], id: "builtin_river", kind: "river", name: "River" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      ...accounts,
+      {
+        ...accounts[0],
+        id: "river-account",
+        providerId: "builtin_river",
+        name: "River account",
+        authMethod: "api_key",
+      },
+    ])
+    listModelCatalogMock.mockResolvedValue([
+      {
+        accountId: "river-account",
+        providerId: "builtin_river",
+        model: "deepseek-ai/DeepSeek-V4.1-Flash",
+        name: "deepseek-ai/DeepSeek-V4.1-Flash",
+        fetchedAt: "",
+        source: "preset",
+      },
+    ])
+    const user = userEvent.setup()
+    renderRouting("rules")
+    await user.click((await screen.findAllByRole("button", { name: "新增规则" }))[0])
+    const dialog = within(screen.getByRole("dialog"))
+    await user.type(dialog.getByRole("textbox", { name: "客户端模型名" }), "research")
+    await selectOption(user, dialog.getByRole("combobox", { name: "提供商配置" }), "River")
+    await selectOption(
+      user,
+      dialog.getByRole("combobox", { name: "实际模型 ID" }),
+      "deepseek-ai/DeepSeek-V4.1-Flash",
+    )
+    await selectOption(user, dialog.getByRole("combobox", { name: "账号范围" }), "River account")
+    await user.click(dialog.getByRole("button", { name: "保存规则" }))
+    await waitFor(() =>
+      expect(createRoute).toHaveBeenCalledWith({
+        alias: "research",
+        providerId: "builtin_river",
+        model: "deepseek-ai/DeepSeek-V4.1-Flash",
+        accountId: "river-account",
+        enabled: true,
+      }),
+    )
+  })
+
   it("空状态不创建示例数据，新增规则后刷新列表并恢复焦点", async () => {
     const user = userEvent.setup()
     renderRouting("rules")

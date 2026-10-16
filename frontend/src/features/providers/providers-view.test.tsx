@@ -39,6 +39,7 @@ const kinds = [
   "mimo",
   "stepfun",
   "atria",
+  "river",
 ]
 const catalog: ProviderDefinition[] = kinds.map((kind) => ({
   kind,
@@ -111,15 +112,19 @@ describe("ProvidersView", () => {
     vi.mocked(probeProvider).mockResolvedValue({ reachable: true, latencyMs: 42, statusCode: 401 })
   })
 
-  it("shows ten enabled built-ins without an add action", async () => {
+  it("shows eleven enabled built-ins without an add action", async () => {
     renderPage()
     expect(
       await screen.findByRole("button", { name: "切换OpenAI提供商的启用状态" }),
     ).toHaveAttribute("aria-pressed", "true")
     expect(screen.getByRole("heading", { name: "提供商" })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "内置提供商" })).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(10)
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(11)
     expect(screen.getByRole("button", { name: "切换Atria提供商的启用状态" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(screen.getByRole("button", { name: "切换River提供商的启用状态" })).toHaveAttribute(
       "aria-pressed",
       "true",
     )
@@ -207,7 +212,7 @@ describe("ProvidersView", () => {
     expect(
       await screen.findByRole("button", { name: "切换My endpoint提供商的启用状态" }),
     ).toHaveAttribute("aria-pressed", "true")
-    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(11)
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(12)
   })
 
   it("edits, disables and deletes only the custom provider", async () => {
@@ -224,7 +229,7 @@ describe("ProvidersView", () => {
     await user.click(screen.getByRole("button", { name: "删除" }))
     await user.click(screen.getAllByRole("button", { name: "删除" })[1])
     expect(await screen.findByText("还没有自定义提供商。")).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(10)
+    expect(screen.getAllByRole("button", { name: /切换.*提供商的启用状态/ })).toHaveLength(11)
   })
 
   it("keeps an existing provider configuration with an empty URL editable", async () => {

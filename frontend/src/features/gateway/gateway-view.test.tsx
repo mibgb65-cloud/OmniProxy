@@ -38,7 +38,7 @@ describe("网关页面", () => {
     vi.mocked(listAccounts).mockResolvedValue(accounts)
   })
 
-  it.each(["atria", "mimo"])(
+  it.each(["atria", "mimo", "river"])(
     "仅有 %s API Key 账号时接入检查显示已配置，排除订阅账号",
     async (kind) => {
       vi.mocked(listProviders).mockResolvedValue([

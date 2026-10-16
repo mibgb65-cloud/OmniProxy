@@ -48,6 +48,7 @@ export function RoutingEditorFields({
       const unsupported =
         p.kind !== "deepseek" &&
         p.kind !== "atria" &&
+        p.kind !== "river" &&
         p.kind !== "mimo" &&
         p.kind !== "stepfun" &&
         p.kind !== "kimi" &&

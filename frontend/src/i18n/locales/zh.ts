@@ -299,6 +299,7 @@ export const zh = {
     "存在多个阶跃平台或计费通道，请选择固定账号或通道模型名。",
   "providers.kind.stepfun": "阶跃星辰",
   "providers.kind.atria": "Atria",
+  "providers.kind.river": "River",
 
   "pages.accounts.title": "账号",
   "accounts.loading": "正在加载账号…",

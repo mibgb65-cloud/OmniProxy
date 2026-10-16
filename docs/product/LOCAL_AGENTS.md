@@ -2,7 +2,9 @@
 
 ## 使用
 
-1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。
+River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具接入；Messages 转换需要缓冲，不是原生增量流。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。
+
+1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／River／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。
 2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。
 3. 可以直接使用已同步模型，也可以新建精确路由并固定账号。
 4. 在网关页「客户端接入」选项卡的「本地 Agent 接入」点击 Codex、Claude Code CLI 或 Claude Desktop Code 品牌卡片，进入对应的配置页面；无需先启动网关。卡片只展示客户端名称、简介与接入状态。

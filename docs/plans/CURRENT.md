@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-001](../tasks/active/TASK-20261017-001-river-builtin-provider.md)：River 内置服务商、三款模型及原生 Chat／Responses、Messages 转换，正在验证。
 
 ## Recently Completed
 

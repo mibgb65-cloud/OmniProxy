@@ -54,6 +54,9 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	if target.kind == "openai" {
 		return proxy.Failure("adapter_unavailable", 503)
 	}
+	if target.kind == "river" {
+		return s.forwardRiver(ctx, target, request, consume)
+	}
 	if target.kind == "atria" {
 		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
 			return s.atria.Forward(ctx, target.baseURL, key, request, func(response proxy.Response) error {

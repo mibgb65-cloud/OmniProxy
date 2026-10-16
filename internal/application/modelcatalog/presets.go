@@ -5,13 +5,14 @@ import (
 
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/river"
 )
 
 // presetItems 不读取凭证，也不伪造查询时间；预设与账号发现的来源在 UI 中区分。
 func (s *Service) presetItems(ctx context.Context, cached []Item) ([]Item, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT a.id,a.provider_id,p.kind,COALESCE(mi.region,''),COALESCE(mi.billing_mode,''),COALESCE(mi.config_version,0) FROM accounts a
 		JOIN providers p ON p.id=a.provider_id LEFT JOIN mimo_account_options mi ON mi.account_id=a.id
-		WHERE p.kind IN (?,?) AND a.auth_method='api_key' ORDER BY a.provider_id,a.id LIMIT 10001`, atria.Kind, mimo.Kind)
+		WHERE p.kind IN (?,?,?) AND a.auth_method='api_key' ORDER BY a.provider_id,a.id LIMIT 10001`, atria.Kind, mimo.Kind, river.Kind)
 	if err != nil {
 		return nil, ErrUnavailable
 	}
@@ -27,6 +28,17 @@ func (s *Service) presetItems(ctx context.Context, cached []Item) ([]Item, error
 		var options mimo.Options
 		if rows.Scan(&item.AccountID, &item.ProviderID, &kind, &options.Region, &options.BillingMode, &options.Version) != nil || len(items) >= 10000 {
 			return nil, ErrUnavailable
+		}
+		if kind == river.Kind {
+			if synced[item.AccountID] {
+				continue
+			}
+			for _, id := range river.Models() {
+				item.Model, item.Name = id, id
+				item.Metadata, item.Source = river.ModelMetadata(id), "preset"
+				items = append(items, item)
+			}
+			continue
 		}
 		if kind == mimo.Kind {
 			if synced[item.AccountID] || !options.Valid() {
