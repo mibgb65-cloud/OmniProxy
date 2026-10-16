@@ -1,5 +1,33 @@
 import type { googleZh } from "./google-zh"
 export const googleEn: Record<keyof typeof googleZh, string> = {
+  "google.subscriptionAdd": "Sign in with Google",
+  "google.subscriptionTitle": "Sign in to Google AI",
+  "google.subscriptionDescription":
+    "Authorize Antigravity on Google's official page to use Gemini models and subscription quota available to your account. Initial sign-in requires a compatible local Antigravity CLI.",
+  "google.subscriptionStorage":
+    "Authorization is stored separately in protected local credentials. Use the same Google account when signing in again.",
+  "google.subscriptionType": "Google / Antigravity",
+  "google.subscriptionQuotaUnknown":
+    "Remaining subscription quota is unavailable. Sync account models on the routing page; Google determines access and rate limits.",
+  "subscription.error.agy_unavailable":
+    "Antigravity CLI (agy) was not found. Install the official component and try again.",
+  "subscription.error.client_incompatible":
+    "The installed Antigravity client configuration is not recognized. Check the official component version.",
+  "subscription.error.reauth_required": "Google authorization expired. Sign in again.",
+  "subscription.error.access_denied":
+    "Google denied access. Check account permissions and supported regions.",
+  "subscription.error.rate_limited": "Google is rate limiting requests. Try again later.",
+  "subscription.error.project_unavailable":
+    "Google did not return an Antigravity project. Complete account setup in the official application first.",
+  "subscription.error.invalid_response":
+    "Google returned an unrecognized response. Try again later.",
+  "subscription.error.upstream_unavailable":
+    "Google could not be reached. Check your connection and try again.",
+  "subscription.error.credential_unavailable":
+    "Local Google authorization could not be read. Sign in again.",
+  "subscription.error.invalid_input":
+    "Authorization parameters are invalid. Close the dialog and start again.",
+  "subscription.error.cancelled": "Authorization was cancelled. You can start again.",
   "google.resources": "Gemini project resources",
   "google.description":
     "Keys in the same project share rate limits. This view shows declared projects and locally observed errors; official remaining resources are not connected.",

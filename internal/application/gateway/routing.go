@@ -151,13 +151,13 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if (provider.Kind == "atria" || provider.Kind == "mimo") && account.AuthMethod != "api_key" {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				if provider.Kind == "google" && account.AuthMethod != "api_key" {
+				if provider.Kind == "google" && account.AuthMethod != "api_key" && !(account.AuthMethod == "subscription_login" && account.AuthState == "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				if provider.Kind == "openai" && (account.AuthMethod != "subscription_login" || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				return target{accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi, minimax: account.MiniMax, mimo: account.MiMo}, nil
+				return target{authMethod: account.AuthMethod, accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi, minimax: account.MiniMax, mimo: account.MiMo}, nil
 			}
 		}
 		return target{}, proxy.Failure("route_account_unavailable", 503)

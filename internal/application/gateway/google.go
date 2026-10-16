@@ -5,8 +5,19 @@ import (
 	"encoding/json"
 	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/core/proxy"
+	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/google"
 )
+
+// GoogleSubscriptionAccess 只允许在后端回调内使用订阅令牌。
+type GoogleSubscriptionAccess interface {
+	Use(context.Context, string, func(antigravity.Credentials) error) error
+}
+
+// SetGoogleSubscription 安装独立订阅通道。
+func (s *Service) SetGoogleSubscription(service GoogleSubscriptionAccess) {
+	s.googleAuth = service
+}
 
 type GoogleResourceObserver interface {
 	Record(context.Context, string, string, string, google.Failure) error
@@ -17,6 +28,16 @@ func (s *Service) SetGoogleResources(observer GoogleResourceObserver) { s.google
 func (s *Service) forwardGoogle(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
 	if request.Protocol != "chat" {
 		return proxy.Failure("unsupported_protocol", 400)
+	}
+	if target.authMethod == "subscription_login" {
+		if s.googleAuth == nil {
+			return proxy.Failure("adapter_unavailable", 503)
+		}
+		return s.googleAuth.Use(ctx, target.accountID, func(cred antigravity.Credentials) error {
+			return s.antigravity.Forward(ctx, cred, request, func(response proxy.Response) error {
+				return consume(proxy.ObserveResponse(ctx, request.Trace, response, "chat"))
+			})
+		})
 	}
 	if err := s.googleOutputLimit(ctx, target, request); err != nil {
 		return err

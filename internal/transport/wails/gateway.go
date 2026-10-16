@@ -45,6 +45,12 @@ func (s *AppService) initGateway() {
 	}
 	s.gateway.SetRouter(routes.New(s.db, provider.NewService(s.db), account.NewService(s.db, store)))
 	s.gateway.SetGoogleResources(googlequota.New(s.db))
+	google, googleError := s.googleSubscriptionService()
+	if googleError == nil {
+		s.gateway.SetGoogleSubscription(google)
+	} else if s.log != nil {
+		s.log.Warn("Google subscription unavailable", "module", "gateway", "code", "google_subscription_unavailable")
+	}
 	subscription, err := s.subscriptionService()
 	if err == nil {
 		s.gateway.SetSubscription(subscription)

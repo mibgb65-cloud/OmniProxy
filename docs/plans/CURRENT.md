@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261016-007](../tasks/active/TASK-20261016-007-google-antigravity-subscription.md)：参考 CLIProxyAPI 接入独立 Google / Antigravity 订阅，核心授权／目录／Chat JSON/SSE、工具签名与用量契约已通过，正在执行完整质量门和协作真实登录验证。
 
 ## Recently Completed
 

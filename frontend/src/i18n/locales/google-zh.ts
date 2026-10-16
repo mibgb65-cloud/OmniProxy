@@ -1,4 +1,25 @@
 export const googleZh = {
+  "google.subscriptionAdd": "登录 Google",
+  "google.subscriptionTitle": "登录 Google AI 订阅",
+  "google.subscriptionDescription":
+    "通过 Google 官方页面授权 Antigravity，使用账号实际可用的 Gemini 模型与订阅额度。首次登录需本机安装兼容的 Antigravity CLI。",
+  "google.subscriptionStorage": "授权独立保存于本机受保护凭证库。重新登录需使用同一 Google 账号。",
+  "google.subscriptionType": "Google / Antigravity",
+  "google.subscriptionQuotaUnknown":
+    "订阅剩余额度暂未接入。请在路由页同步账号模型；可用权限与限流由 Google 决定。",
+  "subscription.error.agy_unavailable": "未找到 Antigravity CLI（agy），请先安装官方组件后重试。",
+  "subscription.error.client_incompatible":
+    "无法识别本机 Antigravity 客户端配置，请检查官方组件版本。",
+  "subscription.error.reauth_required": "Google 授权已失效，请重新登录。",
+  "subscription.error.access_denied": "Google 未允许此次访问，请检查账号权限和服务可用地区。",
+  "subscription.error.rate_limited": "Google 当前限制请求频率，请稍后重试。",
+  "subscription.error.project_unavailable":
+    "Google 未返回可用的 Antigravity 项目，请先在官方应用完成账号初始化。",
+  "subscription.error.invalid_response": "Google 返回的数据无法识别，请稍后重试。",
+  "subscription.error.upstream_unavailable": "无法连接 Google，请检查网络后重试。",
+  "subscription.error.credential_unavailable": "无法读取本机 Google 授权，请重新登录。",
+  "subscription.error.invalid_input": "授权参数无效，请关闭弹窗后重新开始。",
+  "subscription.error.cancelled": "授权已取消，可以重新开始。",
   "google.resources": "Gemini 项目资源",
   "google.description":
     "同一项目的多个 API Key 共享限流。这里显示项目声明与本机错误观察；官方剩余资源尚未连接。",

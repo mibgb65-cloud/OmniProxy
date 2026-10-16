@@ -1,5 +1,15 @@
 # Architecture Overview
 
+## Google Antigravity 订阅（2026-10-16）
+
+`provider/antigravity` 使用标准库实现独立 Google OAuth、账号项目／模型查询与
+Gemini Chat JSON／增量 SSE 转换；只接受固定官方 HTTPS 主机并保留工具签名。
+`application/googlesubscription` 管理一次性回调、超时、取消及刷新互斥，
+`application/account` 复用 DPAPI 保护 token bundle；模型目录的授权版本检查
+拒绝旧登录响应，普通 token 轮换则在同一事务内保留原目录。Wails 既有订阅绑定
+按 Google／Codex 分发，共享前端会话组件和变更事件，Core 不依赖两者。
+无新依赖／迁移，不跨计费通道重试。见 ADR-013 与 `product/GOOGLE_SUBSCRIPTION.md`。
+
 ## Kimi Code 与默认使用顺序（2026-10-16）
 
 迁移 028 追加账号计费字段及 Kimi 首选计费／地区表，旧账号按量身份和目录版本保持。`provider/kimi` 按账号固定解析普通／coding 两地区入口及原生模型映射，沿用保护凭据回调与原生三协议／SSE。路由共用计费筛选后应用地区顺序，目录使用实际账号能力，旧通道／Claude ID 仅兼容解析。Core 有界保留真实客户端 User-Agent，订阅上游原样使用，不依赖 Wails 或 React；订阅余额／发现不调用未核实接口。前端账号、设置、未知资源及受管目录复用既有组件。见 ADR-012、`product/KIMI.md`。

@@ -10,6 +10,23 @@ import { QuotaResetTime } from "./quota-reset-time"
 import "./subscription-quota.css"
 
 export function SubscriptionQuota({ account }: { account: AccountItem }) {
+  return account.providerId === "builtin_google" ? (
+    <GoogleSubscriptionQuota />
+  ) : (
+    <CodexSubscriptionQuota account={account} />
+  )
+}
+
+function GoogleSubscriptionQuota() {
+  const { t } = useTranslation()
+  return (
+    <p className="bg-muted/20 text-muted-foreground rounded-xl border p-3 text-xs leading-5">
+      {t("google.subscriptionQuotaUnknown")}
+    </p>
+  )
+}
+
+function CodexSubscriptionQuota({ account }: { account: AccountItem }) {
   const { t } = useTranslation()
   const query = useSubscriptionQuota(account)
   const [now, setNow] = useState(() => Date.now())

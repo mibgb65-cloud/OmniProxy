@@ -6,6 +6,7 @@ import (
 	"omniproxy/internal/application/account"
 	core "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/infrastructure/codex"
+	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/kimi"
@@ -53,6 +54,15 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			return nil, ErrUnavailable
 		}
 		models, err = s.subscription.Models(ctx, id)
+	} else if kind == "google" && current.AuthMethod == account.AuthSubscription {
+		if s.googleAuth == nil {
+			return nil, ErrUnavailable
+		}
+		var discovered []antigravity.Model
+		discovered, initialVersion, err = s.googleAuth.Models(ctx, id)
+		for _, item := range discovered {
+			models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: item.Metadata})
+		}
 	} else if kind == "deepseek" && current.AuthMethod == account.AuthAPIKey {
 		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
 			ids, e := s.client.DiscoverModels(ctx, key)

@@ -88,6 +88,19 @@ func (s *AppService) DeleteAccount(id string) error {
 		return err
 	}
 	if item.AuthMethod == account.AuthSubscription {
+		if service.CheckGoogleProvider(context.Background(), item.ProviderID) == nil {
+			manager, err := s.googleSubscriptionService()
+			if err != nil {
+				return err
+			}
+			ctx, cancel := subscriptionContext()
+			defer cancel()
+			err = manager.Delete(ctx, id)
+			if err == nil {
+				s.refreshAgentCatalog()
+			}
+			return err
+		}
 		manager, err := s.subscriptionService()
 		if err != nil {
 			return err

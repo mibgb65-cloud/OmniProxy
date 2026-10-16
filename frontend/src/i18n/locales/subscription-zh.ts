@@ -136,5 +136,5 @@ export const subscriptionZh = {
   "subscription.error.cleanup_failed":
     "授权清理未完成。下次开始登录时会先重试清理，请检查系统凭证库后重试。",
   "subscription.error.browser_failed": "未能打开浏览器，请点击“打开官方授权页面”重试。",
-  "subscription.error.operation_failed": "操作未完成，请检查网络和 Codex CLI 后重试。",
+  "subscription.error.operation_failed": "操作未完成，请检查网络和登录组件后重试。",
 } as const

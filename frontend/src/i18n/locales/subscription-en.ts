@@ -159,5 +159,5 @@ export const subscriptionEn = {
   "subscription.error.browser_failed":
     "Could not open the browser. Use “Open official authorization page” to retry.",
   "subscription.error.operation_failed":
-    "Operation incomplete. Check your network and Codex CLI, then try again.",
+    "Operation incomplete. Check your network and sign-in component, then try again.",
 } as const

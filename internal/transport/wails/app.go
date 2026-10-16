@@ -65,6 +65,7 @@ type AppService struct {
 	stopLogs         func()
 	stopActivity     func()
 	subscription     subscriptionState
+	googleAuth       googleSubscriptionState
 }
 
 // NewAppService creates the bound application service.
@@ -143,6 +144,7 @@ func (s *AppService) ServiceShutdown() error {
 		s.stopActivity()
 	}
 	s.shutdownSubscription()
+	s.shutdownGoogleSubscription()
 	s.shutdownLogs()
 	var installationErr error
 	if s.installations != nil {

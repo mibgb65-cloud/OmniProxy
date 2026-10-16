@@ -49,7 +49,7 @@ export function ModelCatalog({
               a.minimax != null &&
               ["payg", "subscription"].includes(a.minimax.billingMode))) &&
             a.authMethod === "api_key") ||
-          (p.kind === "openai" &&
+          (["openai", "google"].includes(p.kind) &&
             a.authMethod === "subscription_login" &&
             a.authState === "authenticated")),
     ),

@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/application/provider"
 	core "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/infrastructure/codex"
+	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
@@ -19,6 +20,11 @@ import (
 
 type Subscription interface {
 	Models(context.Context, string) ([]codex.Model, error)
+}
+
+// GoogleSubscription 返回与实际授权版本绑定的订阅目录。
+type GoogleSubscription interface {
+	Models(context.Context, string) ([]antigravity.Model, string, error)
 }
 type Item struct {
 	AccountID  string        `json:"accountId"`
@@ -39,10 +45,14 @@ type Service struct {
 	kimi         *kimi.Client
 	minimax      *minimax.Client
 	mimo         *mimo.Client
+	googleAuth   GoogleSubscription
 }
 
+// SetGoogleSubscription 安装独立 Google 授权目录，不混用 Gemini API Key。
+func (s *Service) SetGoogleSubscription(service GoogleSubscription) { s.googleAuth = service }
+
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil)}
+	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil), nil}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")

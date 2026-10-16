@@ -22,7 +22,13 @@ export function SubscriptionLoginDialog({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const label = t(accountId ? "subscription.relogin" : "subscription.add")
+  const label = t(
+    accountId
+      ? "subscription.relogin"
+      : providerId === "builtin_google"
+        ? "google.subscriptionAdd"
+        : "subscription.add",
+  )
   const trigger = (
     <Dialog.Trigger asChild>
       <Button
@@ -51,6 +57,7 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
   const [name, setName] = useState("")
   const [mode, setMode] = useState("browser")
   const login = useSubscriptionLogin({ providerId, accountId })
+  const google = providerId === "builtin_google"
   const waiting = login.view?.state === "waiting"
   const complete = login.view?.state === "completed"
   const busy = waiting || login.starting
@@ -70,14 +77,14 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
         <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-5">
           <div className="flex min-w-0 items-start gap-3.5">
             <div className="border-border/60 flex size-12 shrink-0 items-center justify-center rounded-xl border bg-zinc-950">
-              <ProviderBrandIcon kind="openai" />
+              <ProviderBrandIcon kind={google ? "google" : "openai"} />
             </div>
             <div className="min-w-0 space-y-1.5 pt-0.5">
               <Dialog.Title className="text-lg font-semibold tracking-tight">
-                {t("subscription.title")}
+                {t(google ? "google.subscriptionTitle" : "subscription.title")}
               </Dialog.Title>
               <Dialog.Description className="text-muted-foreground text-sm leading-6">
-                {t("subscription.description")}
+                {t(google ? "google.subscriptionDescription" : "subscription.description")}
               </Dialog.Description>
             </div>
           </div>
@@ -101,7 +108,7 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
           }}
         >
           <div className="min-h-0 space-y-5 overflow-y-auto px-6 pb-6">
-            {!busy && !complete ? (
+            {!google && !busy && !complete ? (
               <SubscriptionLoginMethod id={id} value={mode} onChange={setMode} />
             ) : null}
             {!accountId && !complete && !busy ? (
@@ -129,7 +136,7 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
             <SubscriptionLoginStatus login={login} />
             <p className="text-muted-foreground flex items-start gap-2 text-xs leading-5">
               <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-              {t("subscription.secureStorage")}
+              {t(google ? "google.subscriptionStorage" : "subscription.secureStorage")}
             </p>
           </div>
           <div className="bg-muted/20 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t px-6 py-4">

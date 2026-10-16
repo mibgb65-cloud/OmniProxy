@@ -15,7 +15,13 @@ func (s *AppService) modelCatalog() (*modelcatalog.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	return modelcatalog.New(s.db, accounts, provider.NewService(s.db), subscription), nil
+	service := modelcatalog.New(s.db, accounts, provider.NewService(s.db), subscription)
+	google, err := s.googleSubscriptionService()
+	if err != nil {
+		return nil, err
+	}
+	service.SetGoogleSubscription(google)
+	return service, nil
 }
 func (s *AppService) ModelCatalog() ([]modelcatalog.Item, error) {
 	service, err := s.modelCatalog()

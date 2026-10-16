@@ -11,6 +11,7 @@ import (
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/chatgpt"
 	"omniproxy/internal/provider/deepseek"
@@ -58,6 +59,8 @@ type Service struct {
 	kimi            *kimi.Client
 	minimax         *minimax.Client
 	googleResources GoogleResourceObserver
+	googleAuth      GoogleSubscriptionAccess
+	antigravity     *antigravity.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -71,6 +74,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
 	s.atria = atria.New(nil)
 	s.google = google.New(nil)
+	s.antigravity = antigravity.New(nil)
 	s.mimo = mimo.New(nil)
 	s.stepfun = stepfun.New(nil)
 	s.kimi = kimi.New(nil)
@@ -131,15 +135,16 @@ func (s *Service) Forward(ctx context.Context, request proxy.Request, consume fu
 }
 
 type target struct {
-	mimo      *mimo.Options
-	stepfun   *stepfun.Options
-	kimi      *kimi.Options
-	minimax   *minimax.Options
-	updatedAt string
-	snapshot  proxy.TargetSnapshot
-	accountID string
-	baseURL   string
-	kind      string
+	authMethod string
+	mimo       *mimo.Options
+	stepfun    *stepfun.Options
+	kimi       *kimi.Options
+	minimax    *minimax.Options
+	updatedAt  string
+	snapshot   proxy.TargetSnapshot
+	accountID  string
+	baseURL    string
+	kind       string
 }
 
 func (s *Service) selectTarget(ctx context.Context) (target, error) {

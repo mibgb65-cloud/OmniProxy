@@ -70,8 +70,17 @@ func subscriptionContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), 30*time.Second)
 }
 
-// SubscriptionBegin 通过官方本机 Codex 组件启动隔离授权。
+// SubscriptionBegin 按提供商启动独立的 Codex 或 Google 浏览器授权。
 func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.State, error) {
+	if input.ProviderID == "builtin_google" {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return subscription.State{}, err
+		}
+		ctx, cancel := subscriptionContext()
+		defer cancel()
+		return manager.Begin(ctx, input)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return subscription.State{}, err
@@ -83,6 +92,13 @@ func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.S
 
 // SubscriptionRead 读取当前会话，不返回任何令牌。
 func (s *AppService) SubscriptionRead(id string) (subscription.State, error) {
+	if googleSession(id) {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return subscription.State{}, err
+		}
+		return manager.Read(id)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return subscription.State{}, err
@@ -92,6 +108,13 @@ func (s *AppService) SubscriptionRead(id string) (subscription.State, error) {
 
 // SubscriptionCurrent 恢复仍在运行的后台授权，不启动或刷新登录。
 func (s *AppService) SubscriptionCurrent(providerID, accountID string) (subscription.State, error) {
+	if providerID == "builtin_google" {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return subscription.State{}, err
+		}
+		return manager.Current(providerID, accountID)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return subscription.State{}, err
@@ -104,6 +127,13 @@ func (s *AppService) SubscriptionCurrent(providerID, accountID string) (subscrip
 
 // SubscriptionCancel 取消隔离授权并清理临时系统凭证。
 func (s *AppService) SubscriptionCancel(id string) (subscription.State, error) {
+	if googleSession(id) {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return subscription.State{}, err
+		}
+		return manager.Cancel(id)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return subscription.State{}, err
@@ -113,6 +143,9 @@ func (s *AppService) SubscriptionCancel(id string) (subscription.State, error) {
 
 // SubscriptionOpen 只打开由官方组件返回且仍在等待中的授权位置。
 func (s *AppService) SubscriptionOpen(id string) error {
+	if googleSession(id) {
+		return s.openGoogleSubscription(id)
+	}
 	view, err := s.SubscriptionRead(id)
 	if err != nil || view.State != "waiting" || !codex.ValidAuthorizationURL(view.URL) {
 		return errors.New("subscription: invalid_session")
@@ -128,6 +161,15 @@ func (s *AppService) SubscriptionOpen(id string) error {
 
 // SubscriptionRefresh 请求官方组件刷新授权并更新账号状态。
 func (s *AppService) SubscriptionRefresh(id string) (account.Item, error) {
+	if s.googleAccount(id) {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return account.Item{}, err
+		}
+		ctx, cancel := subscriptionContext()
+		defer cancel()
+		return manager.Refresh(ctx, id)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return account.Item{}, err
@@ -139,6 +181,15 @@ func (s *AppService) SubscriptionRefresh(id string) (account.Item, error) {
 
 // SubscriptionLogout 清除该账号系统凭证并保留账号元数据。
 func (s *AppService) SubscriptionLogout(id string) (account.Item, error) {
+	if s.googleAccount(id) {
+		manager, err := s.googleSubscriptionService()
+		if err != nil {
+			return account.Item{}, err
+		}
+		ctx, cancel := subscriptionContext()
+		defer cancel()
+		return manager.Logout(ctx, id)
+	}
 	service, err := s.subscriptionService()
 	if err != nil {
 		return account.Item{}, err

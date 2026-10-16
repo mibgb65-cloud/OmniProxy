@@ -60,6 +60,39 @@ function setup(children = <SubscriptionLoginDialog providerId="builtin_openai" /
   return { user: userEvent.setup(), client }
 }
 describe("ChatGPT subscription sign-in", () => {
+  it("Google 授权仅提供浏览器方式且保持独立存储说明", async () => {
+    const { user } = setup(<SubscriptionLoginDialog providerId="builtin_google" />)
+    await user.click(screen.getByRole("button", { name: "登录 Google" }))
+    expect(screen.getByRole("dialog", { name: "登录 Google AI 订阅" })).toBeInTheDocument()
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    expect(screen.getByText(/授权独立保存于本机受保护凭证库/)).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "开始授权" }))
+    await waitFor(() =>
+      expect(beginSubscription).toHaveBeenCalledWith({
+        providerId: "builtin_google",
+        accountId: undefined,
+        name: "",
+        mode: "browser",
+      }),
+    )
+  })
+  it("Google 订阅不查询 Codex 额度或展示重置卡", () => {
+    setup(
+      <AccountDetailsCard
+        account={{ ...item, providerId: "builtin_google", authPlan: "test-tier" }}
+        busy={false}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={vi.fn()}
+      />,
+    )
+    expect(screen.getByText("Google / Antigravity")).toBeInTheDocument()
+    expect(screen.getByText(/订阅剩余额度暂未接入/)).toBeInTheDocument()
+    expect(readSubscriptionQuota).not.toHaveBeenCalled()
+    expect(getAccountKeyPreview).not.toHaveBeenCalled()
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /重置卡/ })).not.toBeInTheDocument()
+  })
   beforeEach(() => {
     vi.clearAllMocks()
     useUIStore.setState({ language: "zh" })

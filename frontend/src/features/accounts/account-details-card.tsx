@@ -44,7 +44,9 @@ export function AccountDetailsCard({
             <p className="text-muted-foreground text-xs">
               {t(
                 account.authMethod === "subscription_login"
-                  ? "subscription.type"
+                  ? account.providerId === "builtin_google"
+                    ? "google.subscriptionType"
+                    : "subscription.type"
                   : "accounts.apiKey",
               )}
             </p>

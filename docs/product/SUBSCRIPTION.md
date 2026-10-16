@@ -1,5 +1,8 @@
 # ChatGPT 订阅账号
 
+Google AI / Antigravity 使用独立订阅通道与浏览器授权，详见
+[Google 订阅说明](GOOGLE_SUBSCRIPTION.md)；不共用本文的 Codex 额度、重置卡或系统登录。
+
 OpenAI 账号支持 API Key 与 ChatGPT / Codex 两种认证方式。订阅授权已用于模型目录同步与 Responses 转发，跨协议支持文本和工具；具体权限仍由官方每次请求决定，见 `LOCAL_AGENTS.md`。
 
 ## 使用

@@ -30,7 +30,9 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
           <SubscriptionAccountID id={account.authAccountId} />
         </div>
         <div className="text-muted-foreground flex shrink-0 items-center gap-1">
-          <ResetCreditsPopover account={account} disabled={mutation.isPending} />
+          {account.providerId !== "builtin_google" ? (
+            <ResetCreditsPopover account={account} disabled={mutation.isPending} />
+          ) : null}
           <Tooltip content={t("subscription.refresh")}>
             <Button
               type="button"
