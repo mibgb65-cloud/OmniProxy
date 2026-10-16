@@ -33,7 +33,7 @@ func TestGatewayUsesModelProviderPreferenceWithoutRestart(t *testing.T) {
 	defer backup.Close()
 	second := httptest.NewServer(handler("second"))
 	defer second.Close()
-	for _, name := range []string{"003_model_routes.sql", "012_model_provider_preferences.sql", "015_model_provider_order.sql", "026_mimo_settings.sql"} {
+	for _, name := range []string{"003_model_routes.sql", "012_model_provider_preferences.sql", "015_model_provider_order.sql", "026_mimo_settings.sql", "027_stepfun_settings.sql"} {
 		sql, err := os.ReadFile("../../../migrations/" + name)
 		if err != nil {
 			t.Fatal(err)

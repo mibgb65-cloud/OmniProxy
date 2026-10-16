@@ -47,6 +47,7 @@ rather than editing history.
 ## Index
 
 MiMo 默认通道选择与目录去重见 [ADR-010](ADR-010-mimo-default-billing-order.md)。
+StepFun 同款设置与有限复用见 [ADR-011](ADR-011-stepfun-default-billing-order.md)。
 
 | ADR                                                              | Status  | Summary                                   |
 | ---------------------------------------------------------------- | ------- | ----------------------------------------- |

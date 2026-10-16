@@ -22,7 +22,7 @@ func (s *Service) CompatibilityCatalog(ctx context.Context) ([]catalog.Entry, er
 	return s.catalog(ctx, true)
 }
 
-func (s *Service) catalog(ctx context.Context, legacyMiMo bool) ([]catalog.Entry, error) {
+func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.Entry, error) {
 	data, err := s.snapshot(ctx)
 	if err != nil {
 		return nil, err
@@ -32,9 +32,10 @@ func (s *Service) catalog(ctx context.Context, legacyMiMo bool) ([]catalog.Entry
 		return nil, err
 	}
 	ids := originalModels(data)
-	// MiMo 同名模型按默认计费顺序解析；旧通道别名仅兼容解析，不再自动发布到菜单。
-	rules = append(append(append(rules, stepAliases(data)...), kimiAliases(data)...), minimaxAliases(data)...)
-	if legacyMiMo {
+	// MiMo／StepFun 同名模型按设置解析；旧通道只兼容解析，不自动发布副本。
+	rules = append(append(rules, kimiAliases(data)...), minimaxAliases(data)...)
+	if legacyChannels {
+		rules = append(rules, stepAliases(data)...)
 		rules = append(rules, mimoAliases(data)...)
 	}
 	for _, rule := range rules {

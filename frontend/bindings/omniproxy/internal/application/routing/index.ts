@@ -8,5 +8,6 @@ export type {
     MiMoSettings,
     Preview,
     ProviderOption,
-    ProviderPriority
+    ProviderPriority,
+    StepFunSettings
 } from "./models.js";

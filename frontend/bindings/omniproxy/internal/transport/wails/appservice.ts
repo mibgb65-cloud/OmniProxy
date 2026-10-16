@@ -283,6 +283,13 @@ export function GetMiMoSettings(): $CancellablePromise<routing$0.MiMoSettings> {
 }
 
 /**
+ * GetStepFunSettings 读取 StepFun 默认计费顺序，不访问凭据或上游模型。
+ */
+export function GetStepFunSettings(): $CancellablePromise<routing$0.StepFunSettings> {
+    return $Call.ByID(2937152435);
+}
+
+/**
  * GoogleResources 仅读取项目绑定与本机观察，不调用推理或冒充官方剩余查询。
  */
 export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
@@ -531,6 +538,13 @@ export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePr
  */
 export function SetRouteEnabled(id: string, enabled: boolean): $CancellablePromise<routing$1.Rule> {
     return $Call.ByID(3920308617, id, enabled);
+}
+
+/**
+ * SetStepFunPreferredBillingMode 保存默认顺序并沿用受管客户端目录刷新。
+ */
+export function SetStepFunPreferredBillingMode(mode: string): $CancellablePromise<routing$0.StepFunSettings> {
+    return $Call.ByID(1619912929, mode);
 }
 
 /**

@@ -1,4 +1,5 @@
 import { mimoEn } from "./mimo-en"
+import { stepfunSettingsEn } from "./stepfun-settings-en"
 import { subscriptionEn } from "./subscription-en"
 import type { zh } from "./zh"
 import { gatewayEn } from "./gateway-en"
@@ -17,6 +18,7 @@ import { googleEn } from "./google-en"
  */
 export const en: Record<keyof typeof zh, string> = {
   ...mimoEn,
+  ...stepfunSettingsEn,
   "minimax.connection": "MiniMax connection",
   "minimax.region": "Platform",
   "minimax.cn": "China",
@@ -304,7 +306,7 @@ export const en: Record<keyof typeof zh, string> = {
   "stepfun.openPlatform": "Open official platform",
   "stepfun.openFailed": "Could not open the platform. Try again.",
   "stepfun.routingHint":
-    "Platforms and billing modes route separately. Use a channel model name; with multiple channels, a plain model name needs a fixed account.",
+    "Platforms follow each account's configuration. Shared model names follow the default usage order in settings. Fixed accounts and explicit channels take precedence; failed requests are not retried through another channel.",
   "routing.error.ambiguous_stepfun_pool":
     "Multiple StepFun platforms or billing channels are available. Choose a fixed account or a channel model name.",
   "providers.kind.stepfun": "StepFun",

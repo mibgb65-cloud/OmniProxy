@@ -84,3 +84,10 @@ export interface ProviderPriority {
     "name": string;
     "available": boolean;
 }
+
+/**
+ * StepFunSettings 是所有 StepFun 提供商共用的默认计费通道顺序。
+ */
+export interface StepFunSettings {
+    "preferredBillingMode": string;
+}

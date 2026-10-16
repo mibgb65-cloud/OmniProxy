@@ -1,4 +1,5 @@
 import { mimoZh } from "./mimo-zh"
+import { stepfunSettingsZh } from "./stepfun-settings-zh"
 import { subscriptionZh } from "./subscription-zh"
 import { gatewayZh } from "./gateway-zh"
 import { routingZh } from "./routing-zh"
@@ -17,6 +18,7 @@ import { googleZh } from "./google-zh"
  */
 export const zh = {
   ...mimoZh,
+  ...stepfunSettingsZh,
   "minimax.connection": "MiniMax 连接",
   "minimax.region": "平台",
   "minimax.cn": "国内",
@@ -288,7 +290,7 @@ export const zh = {
   "stepfun.openPlatform": "打开官方平台",
   "stepfun.openFailed": "无法打开平台，请稍后重试。",
   "stepfun.routingHint":
-    "国内、海外和计费方式分别路由。可使用通道模型名；多通道共存时，普通模型名需绑定固定账号。",
+    "国内／海外按账号配置路由，同名模型按设置中的默认使用顺序选择账号。固定账号与显式通道优先，请求失败不会换通道重试。",
   "routing.error.ambiguous_stepfun_pool":
     "存在多个阶跃平台或计费通道，请选择固定账号或通道模型名。",
   "providers.kind.stepfun": "阶跃星辰",

@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## StepFun 默认计费顺序（2026-10-16）
+
+迁移 027 独立保存 StepFun 首选计费方式，初始 Step Plan 优先；与 MiMo 共用应用层合格候选筛选及前端设置保存组件，保留服务商优先级、账号稳定顺序与各自缓存／持久值。公开目录移除 StepFun 自动通道副本，旧通道及 Claude ID 沿用兼容目录解析；Router 能力、账号版本和原生协议边界不变。见 ADR-011、`product/STEPFUN.md`。
+
 ## MiMo 默认计费顺序（2026-10-16）
 
 迁移 026 保存 MiMo 的应用级首选计费方式，初始 Token Plan 优先；路由快照读取持久设置，在每个服务商内过滤合格计费通道后复用核心账号选择，保留固定账号与服务商优先级。公共目录停止生成 MiMo 通道副本，兼容目录仅供旧 Claude 上下文／桌面编码 ID 解析。Wails 设置绑定复用受管目录刷新，前端沿用 TanStack Query 的读取、即时保存及互斥；无新的依赖、凭据处理或失败重试。见 ADR-010、`product/MIMO.md`。

@@ -56,12 +56,14 @@ func TestLocalGatewayAliasRewriteAndDynamicModels(t *testing.T) {
 	if _, err := db.Exec(string(order)); err != nil {
 		t.Fatal(err)
 	}
-	settings, err := os.ReadFile("../../../migrations/026_mimo_settings.sql")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.Exec(string(settings)); err != nil {
-		t.Fatal(err)
+	for _, name := range []string{"026_mimo_settings.sql", "027_stepfun_settings.sql"} {
+		settings, err := os.ReadFile("../../../migrations/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(string(settings)); err != nil {
+			t.Fatal(err)
+		}
 	}
 	router := routes.New(db, provider.NewService(db), account.NewService(db, store))
 	if _, err := service.Stop(context.Background()); err != nil {

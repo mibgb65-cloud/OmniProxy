@@ -54,23 +54,6 @@ func stepTargetSupports(data snapshot, providerID, accountID, model string) bool
 	return false
 }
 
-func stepAmbiguous(data snapshot, allowed map[string]bool, model, fixed string) bool {
-	if fixed != "" {
-		return false
-	}
-	var first *stepfun.Options
-	for _, a := range data.accounts {
-		if !a.Enabled || !allowed[a.ProviderID] || a.StepFun == nil || !stepTargetSupports(data, a.ProviderID, a.ID, model) {
-			continue
-		}
-		if first != nil && !first.SamePool(*a.StepFun) {
-			return true
-		}
-		first = a.StepFun
-	}
-	return false
-}
-
 // 默认通道别名由结构化配置生成，再精确匹配，不根据用户输入拆解并猜测计费方式。
 func stepAliases(data snapshot) []core.Rule {
 	ids := map[string]bool{}

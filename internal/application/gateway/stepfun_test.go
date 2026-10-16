@@ -110,8 +110,8 @@ func TestStepFourPoolsRouteAndRecordUsage(t *testing.T) {
 		t.Fatalf("native requests=%d", calls)
 	}
 	decision, err := router.Resolve(ctx, "step-5-preview")
-	if err != nil || decision.Routable || decision.ErrorCode != "ambiguous_stepfun_pool" {
-		t.Fatalf("mixed billing did not reject ambiguity: %+v %v", decision, err)
+	if err != nil || !decision.Routable || decision.AccountID != ids["cn/step_plan"] {
+		t.Fatalf("default Step Plan order not applied: %+v %v", decision, err)
 	}
 	page, err := observer.Requests(ctx, activity.RequestQuery{Limit: 100})
 	if err != nil || len(page.Items) != 12 {
