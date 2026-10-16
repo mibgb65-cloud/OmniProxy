@@ -231,6 +231,7 @@ export const zh = {
   "providers.power.disable": "停用提供商",
   "providers.apiKey": "API Key",
   "providers.subscriptionPlanned": "订阅登录 · 待接入",
+  "providers.subscriptionLogin": "订阅登录",
   "providers.name": "配置名称",
   "providers.namePlaceholder": "例如：我的兼容接口",
   "providers.baseUrl": "Base URL",

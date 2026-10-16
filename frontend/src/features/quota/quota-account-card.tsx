@@ -13,6 +13,7 @@ import { accountDisplayName, formatAccountTime } from "../accounts/account-displ
 import { AccountStatusBadge } from "../accounts/account-status-badge"
 import { SubscriptionPlanBadge } from "../accounts/subscription-plan-badge"
 import { QuotaResource } from "./quota-resource"
+import { subscriptionTypeKey } from "../providers/provider-labels"
 import type { QuotaEntry } from "./quota-model"
 
 export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: number }) {
@@ -56,7 +57,7 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
                 <span className="text-muted-foreground text-xs">
                   {t(
                     entry.account.authMethod === "subscription_login"
-                      ? "subscription.type"
+                      ? subscriptionTypeKey(entry.provider?.kind ?? entry.account.providerId)
                       : "accounts.apiKey",
                   )}
                 </span>

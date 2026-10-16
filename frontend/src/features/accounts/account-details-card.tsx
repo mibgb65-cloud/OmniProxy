@@ -16,6 +16,7 @@ import { AccountKeyPreview } from "./account-key-preview"
 import { SubscriptionQuota } from "./subscription-quota"
 import { AccountTimeFooter } from "./account-time-footer"
 import { AccountBalance } from "./account-balance"
+import { subscriptionTypeKey } from "../providers/provider-labels"
 
 export function AccountDetailsCard({
   account,
@@ -44,9 +45,7 @@ export function AccountDetailsCard({
             <p className="text-muted-foreground text-xs">
               {t(
                 account.authMethod === "subscription_login"
-                  ? account.providerId === "builtin_google"
-                    ? "google.subscriptionType"
-                    : "subscription.type"
+                  ? subscriptionTypeKey(account.providerId)
                   : "accounts.apiKey",
               )}
             </p>

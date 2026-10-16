@@ -31,6 +31,18 @@ async function ready() {
 }
 
 describe("quota overview", () => {
+  it("labels Google subscriptions correctly without querying Codex quota", async () => {
+    vi.mocked(listAccounts).mockResolvedValue([
+      { ...accounts[0], id: "google-sub", providerId: "builtin_google", authPlan: "g1-pro-tier" },
+    ])
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0], id: "builtin_google", kind: "google", name: "Google" },
+    ])
+    renderQuota()
+    expect(await screen.findByText("Google / Antigravity")).toBeInTheDocument()
+    expect(screen.queryByText("ChatGPT / Codex")).not.toBeInTheDocument()
+    expect(readSubscriptionQuota).not.toHaveBeenCalled()
+  })
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()

@@ -241,6 +241,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.power.disable": "Disable provider",
   "providers.apiKey": "API key",
   "providers.subscriptionPlanned": "Subscription login · Planned",
+  "providers.subscriptionLogin": "Subscription login",
   "providers.name": "Configuration name",
   "providers.namePlaceholder": "For example: My compatible endpoint",
   "providers.baseUrl": "Base URL",

@@ -8,6 +8,7 @@ import { ProviderBrandIcon } from "./provider-brand-icon"
 import { ProviderPowerButton } from "./provider-power-button"
 import { ModelPreview } from "./model-preview"
 import { MiMoAccessDetails } from "./mimo-access-details"
+import { subscriptionTypeKey } from "./provider-labels"
 import "./provider-probe-tooltip.css"
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
@@ -90,7 +91,7 @@ export function ProviderCard({
           ) : null}
           {authMethods?.includes("subscription_login") ? (
             <span className="border-border bg-muted/50 rounded-md border px-2 py-0.5 text-xs">
-              {t("subscription.type")}
+              {t(subscriptionTypeKey(kind))}
             </span>
           ) : null}
         </div>

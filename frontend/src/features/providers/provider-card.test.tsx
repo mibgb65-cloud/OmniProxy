@@ -1,7 +1,8 @@
-import { render } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { ProviderCard } from "./provider-card"
+import { useUIStore } from "../../stores/ui-store"
 
 const brandIcons = {
   openai: "openai.svg",
@@ -16,7 +17,7 @@ const brandIcons = {
   atria: "atria.png",
 } as const
 
-function renderCard(kind: string, endpoint = "https://example.test/v1") {
+function renderCard(kind: string, endpoint = "https://example.test/v1", authMethods = ["api_key"]) {
   return render(
     <I18nProvider>
       <ProviderCard
@@ -24,7 +25,7 @@ function renderCard(kind: string, endpoint = "https://example.test/v1") {
         name={kind}
         enabled
         disabled={false}
-        authMethods={["api_key"]}
+        authMethods={authMethods}
         plannedAuthMethods={[]}
         models={[]}
         endpoint={endpoint}
@@ -37,6 +38,27 @@ function renderCard(kind: string, endpoint = "https://example.test/v1") {
 }
 
 describe("ProviderCard icons", () => {
+  beforeEach(() => useUIStore.setState({ language: "zh" }))
+
+  it.each(["zh", "en"] as const)(
+    "keeps Google and OpenAI subscription brands separate in %s",
+    (language) => {
+      useUIStore.setState({ language })
+      const google = renderCard("google", undefined, ["api_key", "subscription_login"])
+      expect(screen.getByText("Google / Antigravity")).toBeInTheDocument()
+      expect(screen.queryByText("ChatGPT / Codex")).not.toBeInTheDocument()
+      google.unmount()
+      renderCard("openai", undefined, ["api_key", "subscription_login"])
+      expect(screen.getByText("ChatGPT / Codex")).toBeInTheDocument()
+      expect(screen.queryByText("Google / Antigravity")).not.toBeInTheDocument()
+    },
+  )
+
+  it("uses a neutral subscription label for an unknown provider", () => {
+    renderCard("openai-compatible", undefined, ["subscription_login"])
+    expect(screen.getByText("订阅登录")).toBeInTheDocument()
+    expect(screen.queryByText("ChatGPT / Codex")).not.toBeInTheDocument()
+  })
   it.each(Object.entries(brandIcons))("uses the %s brand asset", (kind, file) => {
     const { container } = renderCard(kind)
     expect(container.querySelector("img")).toHaveAttribute("src", `/provider-icons/${file}`)

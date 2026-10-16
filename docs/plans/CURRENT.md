@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无当前任务。
+- [TASK-20261016-008](../tasks/active/TASK-20261016-008-google-subscription-label.md)：修复 Google 提供商／配额卡片误标 ChatGPT，统一按提供商选择品牌；相关 42 项测试通过，完整质量门与桌面核对进行中。
 
 ## Recently Completed
 

@@ -14,7 +14,11 @@ import type {
   ProviderConfiguration,
 } from "../../services/omniproxy"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
-import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
+import {
+  isKnownProviderKind,
+  providerNameKeys,
+  subscriptionTypeKey,
+} from "../providers/provider-labels"
 import { AccountItemActions } from "./account-item-actions"
 import { AddAccountDialog } from "./add-account-dialog"
 import { accountDisplayName } from "./account-display"
@@ -96,9 +100,7 @@ export function AccountProviderCard({
                     <p className="text-muted-foreground text-xs">
                       {t(
                         account.authMethod === "subscription_login"
-                          ? account.providerId === "builtin_google"
-                            ? "google.subscriptionType"
-                            : "subscription.type"
+                          ? subscriptionTypeKey(provider.kind)
                           : "accounts.apiKey",
                       )}{" "}
                       · {account.enabled ? t("accounts.enabled") : t("accounts.disabled")}
