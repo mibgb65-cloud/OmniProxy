@@ -1,4 +1,4 @@
-import { LoaderCircle, Power } from "lucide-react"
+import { Power } from "lucide-react"
 import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -6,6 +6,7 @@ import { Tooltip } from "../../components/ui/tooltip"
 import { cn } from "../../lib/utils"
 import { useSidebarGatewayStatus } from "./use-sidebar-gateway-status"
 import "./sidebar-gateway-status.css"
+import { GatewayActionIcon } from "./gateway-action-icon"
 
 export function SidebarGatewayStatus({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation()
@@ -26,7 +27,6 @@ export function SidebarGatewayStatus({ collapsed }: { collapsed: boolean }) {
       : gateway.state === "error" || gateway.info.isError
         ? "bg-destructive"
         : "bg-muted-foreground/50"
-  const Icon = gateway.controlsBusy ? LoaderCircle : Power
   const tooltip = collapsed ? (
     <div className="space-y-1">
       <p>
@@ -117,19 +117,13 @@ export function SidebarGatewayStatus({ collapsed }: { collapsed: boolean }) {
               disabled={gateway.controlsBusy || !gateway.info.isSuccess}
               onClick={gateway.toggle}
               className={cn(
-                "cursor-pointer rounded-lg border transition-colors",
-                gateway.isRunning
+                "gateway-action-button cursor-pointer rounded-lg border",
+                gateway.isRunning && !gateway.controlsBusy
                   ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
                   : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
-              <Icon
-                className={cn(
-                  "size-4",
-                  gateway.controlsBusy && "animate-spin motion-reduce:animate-none",
-                )}
-                aria-hidden="true"
-              />
+              <GatewayActionIcon pending={gateway.controlsBusy} icon={Power} />
             </Button>
           </span>
         </Tooltip>

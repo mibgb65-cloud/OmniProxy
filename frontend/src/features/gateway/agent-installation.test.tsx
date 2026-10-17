@@ -58,7 +58,7 @@ beforeEach(() => {
 
 it("打开详情只检测，Codex CLI 与桌面应用分别提供安装入口", async () => {
   renderGateway("clients", { entry: "/gateway?tab=clients&client=codex" })
-  expect(await screen.findByRole("button", { name: "安装 Codex CLI" })).toBeEnabled()
+  await waitFor(() => expect(screen.getByRole("button", { name: "安装 Codex CLI" })).toBeEnabled())
   expect(screen.getByRole("button", { name: "安装 Codex Desktop" })).toBeEnabled()
   expect(installAgentMock).not.toHaveBeenCalled()
   expect(openAgentInstallationOfficialMock).not.toHaveBeenCalled()
@@ -78,7 +78,9 @@ it("OpenCode CLI／Desktop 共用配置，未核实安装渠道仅提供官方�
   expect(
     await screen.findByRole("heading", { name: "OpenCode CLI / Desktop", level: 2 }),
   ).toBeInTheDocument()
-  expect(screen.queryByRole("button", { name: /^安装 OpenCode/ })).not.toBeInTheDocument()
+  await waitFor(() =>
+    expect(screen.queryAllByRole("button", { name: /^安装 OpenCode/ })).toHaveLength(0),
+  )
   await user.click(screen.getByRole("button", { name: "OpenCode Desktop 官方安装说明" }))
   expect(openAgentInstallationOfficialMock).toHaveBeenCalledWith("opencode-desktop")
   expect(installAgentMock).not.toHaveBeenCalled()
@@ -195,7 +197,7 @@ it("没有 WinGet 时阻止安装，并支持固定官方说明入口", async ()
   const user = userEvent.setup()
   renderGateway("clients", { entry: "/gateway?tab=clients&client=claude-desktop" })
   expect(await screen.findByRole("button", { name: "安装 Claude Code Desktop" })).toBeDisabled()
-  expect(screen.getByText(/未找到 WinGet/)).toBeInTheDocument()
+  expect(await screen.findByText(/未找到 WinGet/)).toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "Claude Code Desktop 官方安装说明" }))
   await waitFor(() =>
     expect(openAgentInstallationOfficialMock).toHaveBeenCalledWith("claude-desktop"),
@@ -214,7 +216,11 @@ it("Claude Code Desktop 说明共用安装包，已安装时提供 Code 编程�
   const user = userEvent.setup()
   renderGateway("clients", { entry: "/gateway?tab=clients&client=claude-desktop" })
   expect(await screen.findByText(/与 Chat 共用安装包/)).toBeInTheDocument()
-  expect(screen.queryByRole("button", { name: "安装 Claude Code Desktop" })).not.toBeInTheDocument()
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "安装 Claude Code Desktop" }),
+    ).not.toBeInTheDocument(),
+  )
   await user.click(await screen.findByRole("button", { name: "打开 Claude Code" }))
   expect(openClaudeCodeMock).toHaveBeenCalledTimes(1)
   expect(installAgentMock).not.toHaveBeenCalled()

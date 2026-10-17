@@ -1,0 +1,46 @@
+.gateway-action-button {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: ease-out;
+}
+
+.gateway-action-button:disabled {
+  opacity: 0.8;
+}
+
+.gateway-action-idle,
+.gateway-action-spinner {
+  transition: opacity 220ms ease-out;
+}
+
+.gateway-action-spinner {
+  opacity: 0;
+  animation: gateway-action-spin 1.4s linear infinite paused;
+}
+
+.gateway-action-icon[data-pending="true"] .gateway-action-idle {
+  opacity: 0;
+}
+
+.gateway-action-icon[data-pending="true"] .gateway-action-spinner {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+@keyframes gateway-action-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gateway-action-button,
+  .gateway-action-idle,
+  .gateway-action-spinner {
+    transition: none;
+  }
+
+  .gateway-action-spinner {
+    animation: none;
+  }
+}

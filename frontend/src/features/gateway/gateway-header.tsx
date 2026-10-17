@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { gatewayErrorKey, gatewayOperationErrorKey } from "./gateway-errors"
 import type { GatewayPreparation } from "./use-gateway-preparation"
+import { GatewayActionIcon } from "./gateway-action-icon"
 
 export function GatewayHeader({ data }: { data: GatewayPreparation }) {
   const { t } = useTranslation()
@@ -12,8 +13,6 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
   const toggleLabel = gateway.controlsBusy
     ? stateLabel
     : t(gateway.isRunning ? "gateway.status.stop" : "gateway.status.start")
-  const buttonTransition =
-    "transition-[background-color,border-color,color,box-shadow,opacity] motion-reduce:transition-none"
 
   return (
     <header className="space-y-3">
@@ -38,13 +37,16 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             <Button
-              className={buttonTransition}
+              className="gateway-action-button px-3"
               disabled={gateway.controlsBusy || !gateway.info.isSuccess}
               aria-busy={gateway.controlsBusy}
               onClick={gateway.toggle}
               aria-describedby="gateway-control-notice"
             >
-              {gateway.isRunning ? <Square aria-hidden="true" /> : <Play aria-hidden="true" />}
+              <GatewayActionIcon
+                pending={gateway.controlsBusy}
+                icon={gateway.isRunning ? Square : Play}
+              />
               <StableActionLabel
                 label={toggleLabel}
                 labels={[
@@ -57,8 +59,8 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
             </Button>
             <Button
               variant="outline"
-              className={buttonTransition}
-              disabled={data.isRefreshing}
+              className="gateway-action-button"
+              disabled={data.isRefreshing || data.checksLoading}
               aria-busy={data.isRefreshing}
               onClick={() => void data.refresh()}
             >

@@ -120,10 +120,15 @@ describe("网关运行控制", () => {
       const user = userEvent.setup()
       renderGateway()
       const control = await screen.findByRole("button", { name: labels[0] })
+      const refreshControl = screen.getByRole("button", {
+        name: language === "zh" ? "刷新接入检查" : "Refresh readiness checks",
+      })
       await user.click(control)
       expect(await screen.findByRole("button", { name: labels[1] })).toBe(control)
       expect(control).toBeDisabled()
       expect(control).toHaveAttribute("aria-busy", "true")
+      expect(refreshControl).toBeEnabled()
+      expect(refreshControl).toHaveAttribute("aria-busy", "false")
       await user.click(control)
       expect(startGateway).toHaveBeenCalledTimes(1)
       await act(async () =>
@@ -133,6 +138,8 @@ describe("网关运行控制", () => {
       await user.click(control)
       expect(await screen.findByRole("button", { name: labels[3] })).toBe(control)
       expect(control).toBeDisabled()
+      expect(refreshControl).toBeEnabled()
+      expect(refreshControl).toHaveAttribute("aria-busy", "false")
       await act(async () => finishStop(gatewayInfo))
       expect(await screen.findByRole("button", { name: labels[0] })).toBe(control)
       expect(control).toBeEnabled()

@@ -1,4 +1,4 @@
-import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAppInfo } from "../../hooks/use-app-info"
 import { listAccounts, listProviders } from "../../services/omniproxy"
 import {
@@ -7,10 +7,10 @@ import {
   type PreparationState,
 } from "./gateway-preparation"
 import { useGatewayRuntime } from "./use-gateway-runtime"
+import { withGatewayFeedback } from "./gateway-action-feedback"
 
 export function useGatewayPreparation() {
   const client = useQueryClient()
-  const agentsFetching = useIsFetching({ queryKey: ["agent-clients"] }) > 0
   const runtime = useAppInfo()
   const gateway = useGatewayRuntime()
   // 共享只读查询键，让账号、提供商页面的缓存失效自然同步到接入检查。
@@ -57,15 +57,18 @@ export function useGatewayPreparation() {
           ? "configured"
           : "missing"
 
-  async function refresh() {
-    await Promise.all([
-      runtime.refetch(),
-      providers.refetch(),
-      accounts.refetch(),
-      gateway.info.refetch(),
-      client.refetchQueries({ queryKey: ["agent-clients"], type: "active" }),
-    ])
-  }
+  const refresh = useMutation({
+    mutationFn: () =>
+      withGatewayFeedback(async () => {
+        await Promise.all([
+          runtime.refetch(),
+          providers.refetch(),
+          accounts.refetch(),
+          gateway.info.refetch(),
+          client.refetchQueries({ queryKey: ["agent-clients"], type: "active" }),
+        ])
+      }),
+  })
 
   return {
     runtime,
@@ -76,13 +79,13 @@ export function useGatewayPreparation() {
     runtimeState,
     providerState,
     accountState,
-    isRefreshing:
-      runtime.isFetching ||
-      providers.isFetching ||
-      accounts.isFetching ||
-      gateway.info.isFetching ||
-      agentsFetching,
-    refresh,
+    checksLoading:
+      runtime.isPending || providers.isPending || accounts.isPending || gateway.info.isPending,
+    // 后台状态同步不属于用户手动刷新，不切换按钮的文案和动画。
+    isRefreshing: refresh.isPending,
+    refresh: () => {
+      if (!refresh.isPending) refresh.mutate()
+    },
   }
 }
 

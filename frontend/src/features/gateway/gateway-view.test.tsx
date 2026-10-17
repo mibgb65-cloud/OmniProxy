@@ -91,7 +91,8 @@ describe("网关页面", () => {
     expect(screen.queryByText("0")).not.toBeInTheDocument()
     await user.click(screen.getByRole("tab", { name: "手动接入" }))
     expect(screen.getByRole("button", { name: "复制配置地址" })).toBeDisabled()
-    expect(screen.getByRole("button", { name: "正在刷新…" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "刷新接入检查" })).toBeDisabled()
+    expect(screen.queryByRole("button", { name: "正在刷新…" })).not.toBeInTheDocument()
   })
 
   it("空资源提供配置入口，并允许启动后补充接入配置", async () => {

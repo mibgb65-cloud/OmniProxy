@@ -8,7 +8,8 @@ import {
 import { Events } from "@wailsio/runtime"
 import { useEffect } from "react"
 import type { TranslationKey } from "../../i18n/translation"
-import { getGatewayInfo, startGateway, stopGateway } from "../../services/gateway"
+import { getGatewayInfo, startGateway, stopGateway, type GatewayInfo } from "../../services/gateway"
+import { withGatewayFeedback } from "./gateway-action-feedback"
 
 const gatewayQueryKey = ["gateway-runtime"] as const
 const gatewayStartKey = [...gatewayQueryKey, "start"] as const
@@ -17,16 +18,20 @@ const gatewayStopKey = [...gatewayQueryKey, "stop"] as const
 export function useGatewayRuntime() {
   const client = useQueryClient()
   const info = useQuery({ queryKey: gatewayQueryKey, queryFn: getGatewayInfo })
+  const changeRuntime = (operation: () => Promise<GatewayInfo>) =>
+    withGatewayFeedback(async () => {
+      const result = await operation()
+      client.setQueryData(gatewayQueryKey, result)
+      return result
+    })
   const start = useMutation({
     mutationKey: gatewayStartKey,
-    mutationFn: startGateway,
-    onSuccess: (data) => client.setQueryData(gatewayQueryKey, data),
+    mutationFn: () => changeRuntime(startGateway),
     onError: () => client.invalidateQueries({ queryKey: gatewayQueryKey }),
   })
   const stop = useMutation({
     mutationKey: gatewayStopKey,
-    mutationFn: stopGateway,
-    onSuccess: (data) => client.setQueryData(gatewayQueryKey, data),
+    mutationFn: () => changeRuntime(stopGateway),
     onError: () => client.invalidateQueries({ queryKey: gatewayQueryKey }),
   })
   // 侧栏和网关页共用操作中状态，避免不同入口重复提交启停。
@@ -67,7 +72,12 @@ export function useGatewayRuntime() {
               : "gateway.status.unknown"
 
   function toggle() {
-    if (isStarting || isStopping || state === "stopping" || !info.isSuccess) return
+    if (
+      client.isMutating({ mutationKey: gatewayQueryKey }) ||
+      state === "stopping" ||
+      !info.isSuccess
+    )
+      return
     start.reset()
     stop.reset()
     if (state === "running") stop.mutate()

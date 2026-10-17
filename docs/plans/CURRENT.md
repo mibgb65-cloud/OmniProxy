@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-020](../tasks/active/TASK-20261017-020-gateway-action-feedback.md)：网关后台同步与手动刷新反馈解耦，主按钮／侧栏统一柔和启停动画，正在验证。
 
 ## Recently Completed
 
