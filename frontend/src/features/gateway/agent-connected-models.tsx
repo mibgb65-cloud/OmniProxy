@@ -7,18 +7,22 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { agentError, getConfiguredAgentModels, type AgentClient } from "../../services/agents"
+import "./agent-connected-models.css"
 
 export function AgentConnectedModels({ item }: { item: AgentClient }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
+  const [only1m, setOnly1m] = useState(false)
   const data = useQuery({
     queryKey: ["agent-configured-models", item.client, item.revision, item.canRestore],
     queryFn: () => getConfiguredAgentModels(item.client),
     enabled: item.canRestore,
   })
   const models = item.canRestore && !data.isError ? (data.data?.models ?? []) : []
-  const visible = models.filter((model) =>
-    `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase()),
+  const visible = models.filter(
+    (model) =>
+      (!only1m || model.id.endsWith("[1m]")) &&
+      `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase()),
   )
   return (
     <Card role="region" aria-labelledby="agent-connected-models-title" className="min-w-0 gap-4">
@@ -57,22 +61,39 @@ export function AgentConnectedModels({ item }: { item: AgentClient }) {
           <p className="text-muted-foreground py-8 text-sm">{t("agents.loading")}</p>
         ) : models.length ? (
           <>
-            <Input
-              type="search"
-              value={query}
-              aria-label={t("agents.searchConnectedModels")}
-              placeholder={t("agents.searchConnectedModels")}
-              onChange={(event) => setQuery(event.target.value)}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                type="search"
+                className="min-w-0 flex-[1_1_14rem]"
+                value={query}
+                aria-label={t("agents.searchConnectedModels")}
+                placeholder={t("agents.searchConnectedModels")}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              <Button
+                variant="outline"
+                aria-pressed={only1m}
+                className="aria-pressed:bg-accent aria-pressed:text-accent-foreground shrink-0"
+                onClick={() => setOnly1m((value) => !value)}
+              >
+                {t("agents.only1mModels")}
+              </Button>
+            </div>
+            <p aria-live="polite" aria-atomic="true" className="text-muted-foreground text-xs">
+              {t("agents.connectedModelsCount", { count: visible.length, total: models.length })}
+            </p>
             <ScrollRegion
               as="section"
               ariaLabel={t("agents.connectedModels")}
               className="max-h-[min(34rem,60dvh)]"
               viewportClassName="pr-2"
             >
-              <ul className="divide-y">
+              <ul className="agent-connected-model-grid grid gap-2">
                 {visible.map((model) => (
-                  <li key={model.id} className="min-w-0 space-y-2 py-3 first:pt-0">
+                  <li
+                    key={model.id}
+                    className="bg-muted/20 min-w-0 space-y-2 rounded-lg border p-3"
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="min-w-0 text-sm font-medium wrap-anywhere">
                         {model.name || model.id}

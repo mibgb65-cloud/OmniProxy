@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-019](../tasks/active/TASK-20261017-019-connected-model-cards.md)：已接入模型改为紧凑卡片，增加 [1m] 快筛，移除接入配置区的网关停止提示，正在验证。
 
 ## Recently Completed
 

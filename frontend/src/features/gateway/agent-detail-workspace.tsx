@@ -13,13 +13,11 @@ export function AgentDetailWorkspace({
   client,
   item,
   models,
-  running,
   installations,
 }: {
   client: AgentClientId
   item: AgentClient
   models: string[]
-  running: boolean
   installations: AgentInstallations
 }) {
   const [editor, setEditor] = useState<{ item: AgentClient; reread: boolean } | null>(null)
@@ -55,7 +53,6 @@ export function AgentDetailWorkspace({
           <AgentClientSettings
             item={item}
             models={models}
-            running={running}
             onConfigure={configure}
             editing={!!editor}
           />

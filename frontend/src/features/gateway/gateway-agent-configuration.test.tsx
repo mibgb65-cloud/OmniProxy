@@ -98,7 +98,7 @@ it.each(agentClientIds)(
     await openClient(user, client)
     const configure = await screen.findByRole("button", { name: "一键配置" })
     expect(configure).toBeEnabled()
-    expect(screen.getByText(/可以先保存接入配置/)).toBeInTheDocument()
+    expect(screen.queryByText(/可以先保存接入配置/)).not.toBeInTheDocument()
     await user.click(configure)
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     expect(await screen.findByText("将提供 2 个模型／路由")).toBeInTheDocument()
@@ -154,14 +154,14 @@ it("Qwen 历史设置需要官方迁移时提示先启动客户端，不允许�
   expect(applyAgentConfigMock).not.toHaveBeenCalled()
 })
 
-it("英文提示也说明可先保存配置、调用前启动", async () => {
+it("英文界面不再展示停止提示，仍允许配置", async () => {
   const user = userEvent.setup()
   renderGateway("clients")
   await openClient(user)
   await screen.findByRole("button", { name: "一键配置" })
   act(() => useUIStore.setState({ language: "en" }))
   expect(await screen.findByRole("button", { name: "Configure" })).toBeEnabled()
-  expect(screen.getByText(/You can save the connection configuration now/)).toHaveTextContent(
-    "start the gateway before making model requests",
-  )
+  expect(
+    screen.queryByText(/You can save the connection configuration now/),
+  ).not.toBeInTheDocument()
 })

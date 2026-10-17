@@ -10,13 +10,11 @@ import { useAgentActions } from "./use-agent-actions"
 export function AgentClientSettings({
   item,
   models,
-  running,
   onConfigure,
   editing,
 }: {
   item: AgentClient
   models: string[]
-  running: boolean
   onConfigure: (item: AgentClient, reread?: boolean) => void
   editing: boolean
 }) {
@@ -131,7 +129,6 @@ export function AgentClientSettings({
           {!models.length ? (
             <p className="text-muted-foreground text-sm">{t("agents.noModels")}</p>
           ) : null}
-          {!running ? <p className="text-muted-foreground text-sm">{t("agents.stopped")}</p> : null}
         </CardContent>
       </Card>
     </>

@@ -132,6 +132,8 @@ export const agentsEn = {
     "Models saved in this agent’s configuration. Restart the client to load them; availability depends on actual requests.",
   "agents.refreshModels": "Refresh models",
   "agents.searchConnectedModels": "Search configured models",
+  "agents.only1mModels": "[1m] only",
+  "agents.connectedModelsCount": "Showing {{count}} / {{total}}",
   "agents.modelsKeyDisabled": "The access key is disabled. Model configuration is retained.",
   "agents.noConnectedModels": "No models configured",
   "agents.noConnectedModelsHint":
@@ -179,8 +181,6 @@ export const agentsEn = {
   "agents.restart": "Restart the client after saving. Existing sessions are preserved.",
   "agents.desktopHint":
     "Applying activates third-party gateway mode and selects the OmniProxy local gateway profile. Quit Claude completely and restart, then open Code to use the local gateway without signing in to an Anthropic account. Existing settings and sessions are preserved. Restore configuration also restores the original startup mode.",
-  "agents.stopped":
-    "The gateway is stopped. You can save the connection configuration now; start the gateway before making model requests from the client.",
   "agents.noModels":
     "Sync account models or configure an available route on the Routing page first.",
   "agents.success": "Configuration saved with an encrypted backup.",

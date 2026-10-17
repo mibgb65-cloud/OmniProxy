@@ -88,7 +88,6 @@ export function GatewayView({
           selectedClient={client}
           active={tab === "clients"}
           models={data.gateway.info.data?.models ?? []}
-          running={data.gateway.isRunning}
         />
       </TabsContent>
       <TabsContent

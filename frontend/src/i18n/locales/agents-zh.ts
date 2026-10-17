@@ -128,6 +128,8 @@ export const agentsZh = {
     "展示已写入当前 Agent 配置的模型。客户端重启后读取，实际可用性以调用结果为准。",
   "agents.refreshModels": "刷新模型",
   "agents.searchConnectedModels": "搜索已接入模型",
+  "agents.only1mModels": "仅看 [1m]",
+  "agents.connectedModelsCount": "显示 {{count}} / {{total}} 个",
   "agents.modelsKeyDisabled": "接入 Key 已停用，模型配置仍保留。",
   "agents.noConnectedModels": "尚未接入模型",
   "agents.noConnectedModelsHint": "点击「一键配置」选择需要接入的模型，保存后将在这里展示。",
@@ -172,7 +174,6 @@ export const agentsZh = {
   "agents.restart": "保存后重新启动对应客户端，正在进行的会话不会被改写。",
   "agents.desktopHint":
     "应用时自动启用第三方网关模式，并选中「OmniProxy · 本地网关」配置。完全退出并重新启动 Claude 后，进入 Code 即可使用本地网关，无需官方账号登录。原设置与会话会保留，恢复原配置可还原启动模式。",
-  "agents.stopped": "网关尚未启动，可以先保存接入配置；使用客户端调用模型前，请启动网关。",
   "agents.noModels": "请先在路由页同步账号模型或配置可用路由，再应用接入配置。",
   "agents.success": "配置已保存，原配置已加密备份。",
   "agents.successNotification": "配置保存通知",

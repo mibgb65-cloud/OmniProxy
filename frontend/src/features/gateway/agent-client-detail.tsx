@@ -13,14 +13,12 @@ export function AgentClientDetail({
   item,
   pending,
   models,
-  running,
   installations,
 }: {
   client: AgentClientId
   item?: AgentClient
   pending: boolean
   models: string[]
-  running: boolean
   installations: AgentInstallations
 }) {
   const { t } = useTranslation()
@@ -71,7 +69,6 @@ export function AgentClientDetail({
           client={client}
           item={item}
           models={models}
-          running={running}
           installations={installations}
         />
       ) : (

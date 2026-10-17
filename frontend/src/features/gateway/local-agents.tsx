@@ -11,12 +11,10 @@ import "./agent-client-grid.css"
 
 export function LocalAgents({
   models,
-  running,
   selectedClient,
   active,
 }: {
   models: string[]
-  running: boolean
   selectedClient?: AgentClientId
   active: boolean
 }) {
@@ -57,7 +55,6 @@ export function LocalAgents({
           item={items.find((item) => item.client === selectedClient)}
           pending={data.isPending}
           models={models}
-          running={running}
           installations={installations}
         />
       ) : (
