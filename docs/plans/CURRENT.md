@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-009](../tasks/active/TASK-20261017-009-harness-desktop-detection.md)：修复 Harness Desktop 带版本名称／空发布者的 NSIS 安装漏检，核对实际目录与打开入口。
 
 ## Recently Completed
 

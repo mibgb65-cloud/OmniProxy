@@ -5,6 +5,9 @@ import "strings"
 func codingDesktopMatches(id, display, publisher string) bool {
 	var names, publishers []string
 	switch id {
+	case "harness-desktop":
+		names = []string{"DeepSeek Harness"}
+		publishers = []string{"DeepSeek"}
 	case "kilocode-desktop":
 		names = []string{"Kilo Desktop", "Kilo"}
 		publishers = []string{"Kilo", "Anaconda"}

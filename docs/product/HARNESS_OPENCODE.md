@@ -63,6 +63,12 @@ OmniProxy 的本地 Key 和原配置备份继续使用 DPAPI，数据库只保�
 所需的 `web` 参数，不把任务、路径、凭据传入命令。Portable、非标准安装或远程客户端
 可能需要用户从原入口打开，配置操作不以安装检测成功为前提。
 
+Harness Desktop 的 Windows NSIS 安装记录可能使用带版本名称（如
+`DeepSeek Harness 0.2.0-rc.2`）且发布者为空。检测兼容这种记录：校验精确产品名和
+合法版本，并从 DisplayIcon 确认固定的现存 `DeepSeek Harness.exe`，据此定位安装目录。
+支持注册于其他盘符／自定义目录的安装，不执行图标参数或卸载命令。已知发布者的原
+安装记录继续识别；没有安装记录的 Portable 仍不进行全盘扫描。
+
 ## 验证记录
 
 2026-10-17：本机 Harness `0.1.0-rc.7` 与隔离安装的 OpenCode CLI `1.19.3` 读取本实现

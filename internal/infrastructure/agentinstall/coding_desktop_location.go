@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
-func mimoDesktopName(id string) string {
+func nsisDesktopName(id string) string {
 	switch id {
+	case "harness-desktop":
+		return "DeepSeek Harness"
 	case "mimo-desktop-cn":
 		return "Xiaomi MiMo"
 	case "mimo-desktop-global":
@@ -17,7 +19,7 @@ func mimoDesktopName(id string) string {
 }
 
 func codingDesktopLocation(id, display, publisher, version, location, icon string) (string, bool) {
-	name := mimoDesktopName(id)
+	name := nsisDesktopName(id)
 	if name == "" {
 		return location, codingDesktopMatches(id, display, publisher)
 	}
@@ -30,8 +32,8 @@ func codingDesktopLocation(id, display, publisher, version, location, icon strin
 	if codingDesktopMatches(id, display, publisher) && filepath.IsAbs(location) {
 		return location, true
 	}
-	// MiMo 的已验证 NSIS 注册项不填发布者或安装目录，只提供 DisplayIcon。
-	// 只接受对应地区的精确产品名和现存固定主程序，绝不执行卸载命令或图标参数。
+	// Harness／MiMo 的已验证 NSIS 注册项可能不填发布者或安装目录，只提供 DisplayIcon。
+	// 只接受精确产品名和现存固定主程序，绝不执行卸载命令或图标参数。
 	if publisher != "" || !validVersion(version) || len(icon) > 4096 {
 		return "", false
 	}

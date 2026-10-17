@@ -8,6 +8,7 @@ import (
 
 func TestCodingDesktopDetectionChecksProductAndPublisher(t *testing.T) {
 	for _, item := range []struct{ id, name, publisher string }{
+		{"harness-desktop", "DeepSeek Harness", "DeepSeek"},
 		{"kilocode-desktop", "Kilo Desktop", "Kilo"},
 		{"qwen-code-desktop", "Qwen Code", "Alibaba"},
 		{"mimo-desktop-cn", "Xiaomi MiMo", "Xiaomi"},
@@ -25,7 +26,7 @@ func TestCodingDesktopDetectionChecksProductAndPublisher(t *testing.T) {
 func TestMiMoDesktopRegionsAndNSISMetadata(t *testing.T) {
 	root := t.TempDir()
 	for _, id := range []string{"mimo-desktop-cn", "mimo-desktop-global"} {
-		name := mimoDesktopName(id)
+		name := nsisDesktopName(id)
 		path := filepath.Join(root, name+".exe")
 		if err := os.WriteFile(path, []byte("fixture"), 0600); err != nil {
 			t.Fatal(err)
