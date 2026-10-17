@@ -83,7 +83,7 @@ accounts need one local place to:
 - Kimi 支持普通 API／Kimi Code 订阅 Key 与国内／海外账号、默认计费及地区顺序，同款模型统一展示，固定账号／显式通道及旧 ID 保持兼容。订阅原生三协议、型号映射与真实客户端身份保留；普通 K3 三协议、K2.7 Code／K2.6 Chat／Messages、高速版 Chat 能力保持。普通 API 官方可用／代金券／现金余额按地区查询，国内 CNY、海外 USD；订阅剩余额度未知并提供控制台入口，不推断套餐或 1M 权限，不跨通道失败重试。真实 Key／长窗口仍待验证。详见 `docs/product/KIMI.md`。
 - MiniMax 支持账号级国内／海外 × 按量／订阅 Key，五款普通模型与订阅同步发现的 M3.1 预览、原生文本三协议／思考／函数工具／SSE、目录及通道路由。提供官方订阅窗口查询与本机用量；旧账号需确认计费类型，普通余额及高级 Agent 工具未接入，真实 Key／长窗口待验证。详见 `docs/product/MINIMAX.md`。
 - 网关页支持 Codex CLI／Desktop、Claude Code CLI／Desktop、OpenCode CLI／Desktop、DeepSeek Harness Web／Desktop，以及 Kilo／Qwen／MiMo Code 本机引擎配置和 CLI／Desktop 入口；支持独立接入 Key、预览、加密备份和恢复。保留原有设置与官方会话，桌面宿主覆盖范围见产品说明。路由页可同步 ChatGPT／DeepSeek 官方模型目录并按账号选择；详见 `docs/product/LOCAL_AGENTS.md`。
-- 一键接入自动提供适用的模型／路由目录，无需手选单个模型；优先保留仍可用的原默认。目录记录官方已确认元数据并保留未知能力，Codex 按身份／核心版本适配本地或远程目录，Claude Desktop 提供完整显式列表。受管目录支持安全更新和恢复。
+- 一键接入默认配置全部适用模型／路由，也可搜索、逐项选择并指定所选范围内的默认模型，禁止空选择；优先保留仍可用的原默认。目录记录官方已确认元数据并保留未知能力，Codex 按身份／核心版本适配本地或远程目录，部分选择使用本地目录；Claude Desktop 提供所选显式列表。受管目录刷新保留选择，支持安全更新和恢复。
 - Quota monitoring and usage statistics.
 - DeepSeek、阶跃星辰与 Kimi 普通 API Key 账号支持官方余额查询，按各自协议展示币种、金额及分项，提供手动刷新；详见 `docs/product/BALANCE.md`。
 - Codex 订阅账号详情可查询真实额度窗口、剩余百分比及重置时间；Plus／Team 普通套餐展示 5h 与周额度，其他套餐仅周额度。配额页集中展示跨账号订阅额度及 DeepSeek／阶跃星辰／Kimi 余额、异常概况、搜索／筛选和受控刷新，与账号详情共享缓存；额度历史和推理权限验证仍待后续实现。详见 `docs/product/QUOTA.md`。

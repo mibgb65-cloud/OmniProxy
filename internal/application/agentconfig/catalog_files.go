@@ -67,7 +67,7 @@ func (s *Service) saveBackup(ctx context.Context, table, client string, file fil
 	if err != nil {
 		return failure("backup_failed")
 	}
-	if _, err = s.db.ExecContext(ctx, "INSERT INTO "+table+" VALUES(?,?,?,?)", client, ref, file.revision, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+	if _, err = s.db.ExecContext(ctx, "INSERT INTO "+table+" (client,credential_ref,applied_hash,updated_at) VALUES(?,?,?,?)", client, ref, file.revision, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 		return errors.Join(failure("backup_failed"), s.store.Delete(ref))
 	}
 	return nil

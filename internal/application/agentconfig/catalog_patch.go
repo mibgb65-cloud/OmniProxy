@@ -35,6 +35,8 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 			updates["model_providers."+provider+".model_catalog_url"] = quote(fmt.Sprintf("http://127.0.0.1:%d/v1/codex-models", s.port))
 		} else {
 			updates["model_catalog_json"] = quote(s.catalogPath())
+			updates["features.api_key_model_discovery"] = "false"
+			updates["model_providers."+provider+".model_catalog_url"] = ""
 		}
 		var original map[string]any
 		if toml.Unmarshal(body, &original) == nil {

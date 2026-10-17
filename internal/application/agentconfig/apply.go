@@ -2,13 +2,14 @@ package agentconfig
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
 	catalog "omniproxy/internal/core/modelcatalog"
 )
 
-// Apply 自动提供完整目录；旧调用者显式传入 Model 时仍校验该默认模型。
+// Apply 未指定 ModelIDs 时提供完整目录；显式选择只写入所选模型。
 func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultErr error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -81,7 +82,7 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 	if err := desktop.write(); err != nil {
 		return nil, errors.Join(err, s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
-	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{staged, desktop}); err != nil {
+	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{rebase: staged, desktop: desktop, saveSelection: true, modelIDs: input.ModelIDs}); err != nil {
 		return nil, errors.Join(err, desktop.rollback(3), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	committed = true
@@ -92,8 +93,10 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 }
 
 type fileVersionCommit struct {
-	rebase  backupRebase
-	desktop *desktopChange
+	rebase        backupRebase
+	desktop       *desktopChange
+	saveSelection bool
+	modelIDs      []string
 }
 
 func (s *Service) commitFileVersions(ctx context.Context, client, configHash string, catalogWritten bool, catalogHash string, options ...fileVersionCommit) error {
@@ -108,6 +111,19 @@ func (s *Service) commitFileVersions(ctx context.Context, client, configHash str
 		}
 		if err := commitDesktopChange(ctx, tx, options[0].desktop); err != nil {
 			return err
+		}
+		if options[0].saveSelection {
+			var selection any
+			if options[0].modelIDs != nil {
+				encoded, err := json.Marshal(options[0].modelIDs)
+				if err != nil {
+					return failure("invalid_model_selection")
+				}
+				selection = string(encoded)
+			}
+			if _, err := tx.ExecContext(ctx, `UPDATE agent_backups SET model_ids=? WHERE client=?`, selection, client); err != nil {
+				return failure("backup_failed")
+			}
 		}
 	}
 	now := time.Now().UTC().Format(time.RFC3339Nano)

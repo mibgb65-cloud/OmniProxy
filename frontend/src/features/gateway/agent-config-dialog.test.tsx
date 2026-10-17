@@ -69,7 +69,7 @@ it("无需选择模型即可预览完整目录、应用并使用同一文件和�
   expect(screen.getByRole("button", { name: "配置预览" })).toBeEnabled()
   expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "配置预览" }))
-  expect(await screen.findByText("GPT Test")).toBeInTheDocument()
+  expect(await screen.findByRole("checkbox", { name: "配置 GPT Test" })).toBeChecked()
   expect(screen.getByText("将提供 1 个模型／路由")).toBeInTheDocument()
   expect(applyAgentConfig).not.toHaveBeenCalled()
   await user.click(screen.getByRole("button", { name: "应用配置" }))

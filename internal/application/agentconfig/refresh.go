@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"slices"
 
 	"github.com/pelletier/go-toml/v2"
 	catalog "omniproxy/internal/core/modelcatalog"
@@ -20,6 +21,9 @@ func (s *Service) RefreshCatalog(ctx context.Context) error {
 		err := s.db.QueryRowContext(ctx, `SELECT applied_hash FROM agent_backups WHERE client=?`, client).Scan(&expected)
 		if err == nil {
 			entries, catalogError := s.clientEntries(ctx, client)
+			if catalogError == nil {
+				entries, catalogError = s.selectedCatalog(ctx, client, entries)
+			}
 			if catalogError != nil {
 				result = errors.Join(result, catalogError)
 			} else {
@@ -62,7 +66,11 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 		if env, ok := config["env"].(map[string]any); ok {
 			for _, key := range []string{"ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL", "ANTHROPIC_DEFAULT_HAIKU_MODEL"} {
 				if selected, ok := env[key].(string); ok {
-					env[key] = upgradeClaudeDefault(entries, selected)
+					model := upgradeClaudeDefault(entries, selected)
+					if len(entries) > 0 && !slices.ContainsFunc(entries, func(entry catalog.Entry) bool { return entry.ID == model }) {
+						model = entries[0].ID
+					}
+					env[key] = model
 				}
 			}
 		}

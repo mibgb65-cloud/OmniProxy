@@ -45,8 +45,21 @@ function ConfigForm({
   reread: boolean
 }) {
   const { t } = useTranslation()
-  const { preview, busy, error, success, current, acceptCurrent, reloaded, run, reload } =
-    useAgentConfigForm(item, reread)
+  const {
+    preview,
+    busy,
+    error,
+    success,
+    current,
+    acceptCurrent,
+    reloaded,
+    run,
+    reload,
+    selectedIds,
+    defaultModel,
+    selectModels,
+    selectDefault,
+  } = useAgentConfigForm(item, reread)
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
@@ -84,7 +97,18 @@ function ConfigForm({
             {item.client === "claude" ? (
               <p className="text-muted-foreground text-xs">{t("agents.cliModelHint")}</p>
             ) : null}
-            {preview ? <AgentCatalogPreview plan={preview} /> : null}
+            {preview ? (
+              <AgentCatalogPreview
+                plan={preview}
+                selection={{
+                  ids: selectedIds,
+                  defaultModel,
+                  disabled: busy || success,
+                  onChange: selectModels,
+                  onDefaultChange: selectDefault,
+                }}
+              />
+            ) : null}
             {reloaded ? (
               <p
                 role="status"
@@ -129,7 +153,11 @@ function ConfigForm({
           </Button>
           {!success ? (
             <Button
-              disabled={busy || (current.errorCode === "config_changed" && !reloaded)}
+              disabled={
+                busy ||
+                (!!preview && selectedIds.length === 0) ||
+                (current.errorCode === "config_changed" && !reloaded)
+              }
               onClick={() => void run(!!preview)}
             >
               {t(busy ? "agents.applying" : preview ? "agents.apply" : "agents.preview")}

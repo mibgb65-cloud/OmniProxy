@@ -142,6 +142,18 @@ export const agentsEn = {
   "agents.defaultModel": "Default model",
   "agents.catalogMode": "Model catalog",
   "agents.catalogCount": "Provides {{count}} models / routes",
+  "agents.modelSelectionHint":
+    "All models are included by default. Select only the models you need; catalog refreshes preserve your selection.",
+  "agents.modelsSelected": "{{count}} / {{total}} selected",
+  "agents.selectAllModels": "Select all",
+  "agents.clearModels": "Clear selection",
+  "agents.searchModels": "Search model name or ID",
+  "agents.selectModel": "Configure {{model}}",
+  "agents.selectAtLeastOneModel": "Select at least one model.",
+  "agents.noMatchingModels": "No matching models.",
+  "agents.error.invalid_model_selection":
+    "Invalid model selection. Preview again and select available models.",
+  "agents.error.invalid_model": "Choose a default model from the selected models.",
   "agents.mode.local": "Application-managed local catalog",
   "agents.mode.remote": "Remote gateway catalog",
   "agents.mode.desktop": "Desktop client model list",

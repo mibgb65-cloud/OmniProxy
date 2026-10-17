@@ -8,6 +8,7 @@ import * as modelcatalog$0 from "../../core/modelcatalog/models.js";
 export interface Input {
     "client": string;
     "model"?: string;
+    "modelIds"?: string[] | null;
     "revision": string;
     "catalogRevision"?: string;
     "acceptCurrentConfig"?: boolean;

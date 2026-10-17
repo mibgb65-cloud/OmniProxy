@@ -22,6 +22,10 @@ export function useAgentConfigForm(
   reloaded: boolean
   run: (apply: boolean) => Promise<void>
   reload: () => Promise<void>
+  selectedIds: string[]
+  defaultModel: string
+  selectModels: (ids: string[]) => void
+  selectDefault: (id: string) => void
 } {
   const client = useQueryClient()
   const [preview, setPreview] = useState<AgentPlan | null>(null)
@@ -31,10 +35,27 @@ export function useAgentConfigForm(
   const [current, setCurrent] = useState(item)
   const [acceptCurrent, setAcceptCurrent] = useState(reread && item.errorCode === "config_changed")
   const [reloaded, setReloaded] = useState(reread)
+  const [modelIds, setModelIds] = useState<string[] | null>(null)
+  const [model, setModel] = useState("")
+  const selectedModels = (preview?.models ?? []).filter(
+    (entry) => modelIds === null || modelIds.includes(entry.id),
+  )
+  const defaultModel =
+    selectedModels.find((entry) => entry.id === (model || preview?.defaultModel))?.id ??
+    selectedModels[0]?.id ??
+    ""
+  function selectModels(ids: string[]) {
+    setModelIds(ids.length === preview?.models?.length ? null : ids)
+  }
+  function resetSelection() {
+    setModelIds(null)
+    setModel("")
+  }
   async function reload() {
     setBusy(true)
     setError("")
     setPreview(null)
+    resetSelection()
     setSuccess(false)
     try {
       const next = await rereadAgentConfig(current.client)
@@ -56,6 +77,8 @@ export function useAgentConfigForm(
       revision: current.revision,
       ...(acceptCurrent ? { acceptCurrentConfig: true } : {}),
       ...(apply && preview ? { catalogRevision: preview.catalogRevision } : {}),
+      ...(apply && modelIds !== null ? { modelIds } : {}),
+      ...(apply && defaultModel && (model || modelIds !== null) ? { model: defaultModel } : {}),
     }
     try {
       if (apply) {
@@ -73,6 +96,7 @@ export function useAgentConfigForm(
         code === "models_unavailable"
       ) {
         setPreview(null)
+        resetSelection()
         if (code === "config_changed") {
           setAcceptCurrent(false)
           setReloaded(false)
@@ -82,5 +106,19 @@ export function useAgentConfigForm(
       setBusy(false)
     }
   }
-  return { preview, busy, error, success, current, acceptCurrent, reloaded, run, reload }
+  return {
+    preview,
+    busy,
+    error,
+    success,
+    current,
+    acceptCurrent,
+    reloaded,
+    run,
+    reload,
+    selectedIds: selectedModels.map((entry) => entry.id),
+    defaultModel,
+    selectModels,
+    selectDefault: setModel,
+  }
 }

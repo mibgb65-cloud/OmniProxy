@@ -89,6 +89,23 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	if len(entries) == 0 {
 		return failed(failure("no_models"))
 	}
+	// 版本绑定完整源目录；用户可在该快照中调整所选子集和默认模型。
+	serialized, err := json.Marshal(struct {
+		Models          []catalog.Entry
+		Client, Version string
+		Port            int
+	}{entries, input.Client, s.codexVersion, s.port})
+	if err != nil {
+		return failed(failure("models_unavailable"))
+	}
+	revision := digest(serialized, true)
+	if input.CatalogRevision != "" && input.CatalogRevision != revision {
+		return failed(failure("catalog_changed"))
+	}
+	entries, err = filterSelectedModels(entries, input.ModelIDs, true)
+	if err != nil {
+		return failed(err)
+	}
 	selected := input.Model
 	if selected == "" {
 		selected = existingModel(input.Client, body)
@@ -133,7 +150,7 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 			provider = "openai"
 		}
 		mode = "local-catalog"
-		if provider != "openai" && supportsRemoteCatalog(s.codexVersion) {
+		if input.ModelIDs == nil && provider != "openai" && supportsRemoteCatalog(s.codexVersion) {
 			mode = "remote-catalog"
 		}
 		if err := s.checkCatalogFile(ctx); err != nil {
@@ -148,18 +165,6 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 			return failed(err)
 		}
 		desktop.clear()
-	}
-	serialized, err := json.Marshal(struct {
-		Models        []catalog.Entry
-		Mode, Default string
-		Port          int
-	}{entries, mode, selected, s.port})
-	if err != nil {
-		return failed(failure("models_unavailable"))
-	}
-	revision := digest(serialized, true)
-	if input.CatalogRevision != "" && input.CatalogRevision != revision {
-		return failed(failure("catalog_changed"))
 	}
 	if input.Client == "codex" {
 		if _, err := catalog.CodexJSON(entries); err != nil {

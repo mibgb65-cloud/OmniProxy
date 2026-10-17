@@ -46,6 +46,8 @@ export function agentError(error: unknown) {
     case "key_disabled":
     case "desktop_profile_active":
     case "no_models":
+    case "invalid_model_selection":
+    case "invalid_model":
     case "models_unavailable":
     case "catalog_changed":
     case "catalog_conflict":

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-014](../tasks/active/TASK-20261017-014-agent-model-selection.md)：一键配置默认全选，支持模型搜索／勾选与默认模型，保存选择并在目录刷新时保留；正在验证。
 
 ## Recently Completed
 

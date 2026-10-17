@@ -1,5 +1,9 @@
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ScrollRegion } from "../../components/common/scroll-region"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { SelectField } from "../../components/ui/select-field"
 import type { AgentPlan } from "../../services/agents"
 
 const modeLabels = {
@@ -15,22 +19,62 @@ const modeLabels = {
   "mimo-code-model-list": "agents.mode.mimoCode",
 } as const
 
-export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
+type ModelSelection = {
+  ids: string[]
+  defaultModel: string
+  disabled: boolean
+  onChange: (ids: string[]) => void
+  onDefaultChange: (id: string) => void
+}
+
+export function AgentCatalogPreview({
+  plan,
+  selection,
+}: {
+  plan: AgentPlan
+  selection?: ModelSelection
+}) {
   const { t } = useTranslation()
+  const [query, setQuery] = useState("")
   const models = plan.models ?? []
-  const mode = Object.hasOwn(modeLabels, plan.mode)
-    ? modeLabels[plan.mode as keyof typeof modeLabels]
+  const modeName =
+    plan.mode === "remote-catalog" && selection && selection.ids.length !== models.length
+      ? "local-catalog"
+      : plan.mode
+  const mode = Object.hasOwn(modeLabels, modeName)
+    ? modeLabels[modeName as keyof typeof modeLabels]
     : "agents.mode.default"
+  const count = selection?.ids.length ?? models.length
+  const visibleModels = models.filter((model) =>
+    `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase()),
+  )
   return (
     <section className="bg-muted/30 space-y-3 rounded-lg border p-4 text-sm">
       <dl className="space-y-2">
         <div className="flex flex-wrap justify-between gap-2">
-          <dt className="text-muted-foreground">
+          <dt id="agent-default-model-label" className="text-muted-foreground">
             {t(
               plan.mode === "harness-model-list" ? "agents.suggestedModel" : "agents.defaultModel",
             )}
           </dt>
-          <dd className="min-w-0 font-mono wrap-anywhere">{plan.defaultModel}</dd>
+          <dd className="max-w-full min-w-0 sm:w-80">
+            {selection && plan.mode !== "harness-model-list" ? (
+              <SelectField
+                aria-labelledby="agent-default-model-label"
+                value={selection.defaultModel}
+                disabled={selection.disabled || count === 0}
+                onValueChange={selection.onDefaultChange}
+                options={models
+                  .filter((model) => selection.ids.includes(model.id))
+                  .map((model) => ({ value: model.id, label: model.name }))}
+                placeholder={t("agents.choose")}
+              />
+            ) : (
+              <span className="font-mono wrap-anywhere">
+                {selection?.defaultModel ?? plan.defaultModel}
+              </span>
+            )}
+          </dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2">
           <dt className="text-muted-foreground">{t("agents.catalogMode")}</dt>
@@ -39,29 +83,94 @@ export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
       </dl>
       <details open>
         <summary className="cursor-pointer font-medium">
-          {t("agents.catalogCount", { count: models.length })}
+          {t("agents.catalogCount", { count })}
         </summary>
+        {selection ? (
+          <div className="mt-3 space-y-2">
+            <p className="text-muted-foreground text-xs">{t("agents.modelSelectionHint")}</p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span aria-live="polite" aria-atomic="true" className="text-muted-foreground text-xs">
+                {t("agents.modelsSelected", { count, total: models.length })}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={selection.disabled || count === models.length}
+                  onClick={() => selection.onChange(models.map((model) => model.id))}
+                >
+                  {t("agents.selectAllModels")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={selection.disabled || count === 0}
+                  onClick={() => selection.onChange([])}
+                >
+                  {t("agents.clearModels")}
+                </Button>
+              </div>
+            </div>
+            <Input
+              type="search"
+              aria-label={t("agents.searchModels")}
+              placeholder={t("agents.searchModels")}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            {count === 0 ? (
+              <p role="alert" className="text-destructive text-xs">
+                {t("agents.selectAtLeastOneModel")}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         <ScrollRegion
           as="section"
-          ariaLabel={t("agents.catalogCount", { count: models.length })}
+          ariaLabel={t("agents.catalogCount", { count })}
           className="mt-2 max-h-48 border-t"
           viewportClassName="pt-3"
         >
           <ul className="space-y-2">
-            {models.map((model) => (
-              <li key={model.id} className="space-y-1 text-xs">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-medium wrap-anywhere">{model.name}</span>
-                  <code className="text-muted-foreground min-w-0 wrap-anywhere">{model.id}</code>
-                </div>
-                <p className="text-muted-foreground">
-                  {model.metadata.contextWindow
-                    ? t("models.contextWindow", { count: model.metadata.contextWindow })
-                    : t("models.metadataUnknown")}
-                </p>
+            {visibleModels.map((model) => (
+              <li key={model.id} className="text-xs">
+                <label className="hover:bg-accent/40 flex min-h-11 cursor-pointer items-start gap-3 rounded-md p-1.5">
+                  {selection ? (
+                    <input
+                      type="checkbox"
+                      className="accent-primary focus-visible:ring-ring mt-0.5 size-4 shrink-0 cursor-pointer rounded focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label={t("agents.selectModel", { model: model.name })}
+                      checked={selection.ids.includes(model.id)}
+                      disabled={selection.disabled}
+                      onChange={(event) =>
+                        selection.onChange(
+                          event.target.checked
+                            ? [...selection.ids, model.id]
+                            : selection.ids.filter((id) => id !== model.id),
+                        )
+                      }
+                    />
+                  ) : null}
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <span className="font-medium wrap-anywhere">{model.name}</span>
+                      <code className="text-muted-foreground min-w-0 wrap-anywhere">
+                        {model.id}
+                      </code>
+                    </div>
+                    <p className="text-muted-foreground">
+                      {model.metadata.contextWindow
+                        ? t("models.contextWindow", { count: model.metadata.contextWindow })
+                        : t("models.metadataUnknown")}
+                    </p>
+                  </div>
+                </label>
               </li>
             ))}
           </ul>
+          {visibleModels.length === 0 ? (
+            <p className="text-muted-foreground py-3 text-xs">{t("agents.noMatchingModels")}</p>
+          ) : null}
         </ScrollRegion>
       </details>
       <p className="text-muted-foreground text-xs leading-5">{t("agents.catalogRefreshHint")}</p>
