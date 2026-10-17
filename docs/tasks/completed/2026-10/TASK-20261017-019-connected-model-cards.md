@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -45,8 +45,14 @@ AgentConnectedModels 当前按行展示实际受管目录，仅支持文字搜�
 
 ## Git
 
-待提交。
+`40af71190698e63606ea96342ba98c8fc22f7f42` — `feat(gateway): 已接入模型改为卡片并增加百万上下文快筛`。
+
+任务归档与 CURRENT 完成状态另行提交。
 
 ## Result
 
 紧凑卡片、[1m] 快筛和停止提示移除均已完成；开发版已更新，定向测试、完整质量门与原生验证全部通过。
+
+## Completed
+
+2026-10-17 18:35（Asia/Singapore）。
