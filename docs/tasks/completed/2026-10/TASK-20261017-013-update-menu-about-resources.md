@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -61,9 +61,13 @@ In Progress
 
 ## Git
 
-待提交。
+`ab69094` — `feat(settings): 独立更新入口并修复关于页底部布局`。
 
 ## Result
 
 更新检查一级菜单、五项关于占位和底部截断修复均已完成；完整质量门及开发版／最终生产构建的原生验收通过。
 五个资源暂不可点击属于用户确认的占位状态，待后续提供真实地址或正文后接入。
+
+## Completed
+
+2026-10-17（Asia/Singapore）。
