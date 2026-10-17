@@ -41,17 +41,19 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
     data.defaults.isFetching
   return (
     <Card ref={cardRef} className="min-w-0 gap-4" aria-label={t("routing.defaults.title")}>
-      <CardHeader className="gap-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      <CardHeader className="flex flex-wrap justify-between gap-3">
+        <div className="min-w-0 flex-1 basis-80 space-y-2">
           <h2 className="text-base font-semibold">{t("routing.defaults.title")}</h2>
+          <p className="text-muted-foreground text-sm">{t("routing.defaults.description")}</p>
+        </div>
+        <div className="ml-auto flex max-w-full flex-col items-end gap-2">
           <span className="text-muted-foreground text-xs">
             {t("routing.defaults.count", { count: items.length })}
           </span>
+          <ModelProviderViewToggle value={view} onChange={setView} />
         </div>
-        <p className="text-muted-foreground text-sm">{t("routing.defaults.description")}</p>
       </CardHeader>
       <CardContent className="min-w-0 space-y-4">
-        <ModelProviderViewToggle value={view} onChange={setView} />
         {data.defaults.isPending && !data.catalog.isError ? (
           <p role="status" className="text-muted-foreground text-sm">
             {t("routing.defaults.loading")}
