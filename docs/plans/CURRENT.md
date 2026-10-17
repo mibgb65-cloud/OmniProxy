@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261017-008](../tasks/active/TASK-20261017-008-unify-agent-client-cards.md)：统一本地 Agent 为产品分组卡片，共享详情保留各软件入口和返回焦点，进行回归及原生检查。
+暂无进行中的任务。
 
 ## Recently Completed
 
+- [TASK-20261017-008](../tasks/completed/2026-10/TASK-20261017-008-unify-agent-client-cards.md)：七个产品统一为分组卡片、15 个软件入口分别展示安装／接入状态，共用详情并保留原入口可见焦点。完整质量门／500 项前端测试、原生十组导航和返回焦点、深浅主题／960×600 验收通过；开发版已更新。实现提交 `b4d3657`。
 - [TASK-20261017-007](../tasks/completed/2026-10/TASK-20261017-007-kilo-qwen-mimo-code-clients.md)：接入 Kilo／Qwen／MiMo Code 本机模型配置、独立 Key、预览／备份恢复与软件入口；MiMo CLI／国内桌面版／国际桌面版同一卡片独立检测和打开。完整质量门／491 项前端测试、三个实际 CLI 的 SSE／工具／思考续接与恢复、原生两版状态／深浅主题／960×600 验收通过；实际桌面对话与 Qwen 后台记忆边界已注明。实现提交 `c58d931`。
 - [TASK-20261017-006](../tasks/completed/2026-10/TASK-20261017-006-harness-and-opencode-clients.md)：接入 OpenCode CLI／Desktop 共享配置、Harness Web／Desktop 独立 profile，支持 Key、模型目录、预览／备份恢复、检测与固定打开入口。完整质量门／484 项前端测试、真实 Harness／OpenCode CLI 隔离 SSE／工具／思考续接及原生三个预览、深浅主题／960×600 验证通过；实际 Desktop 界面调用待验收。实现提交 `a49f234`。
 - [TASK-20261017-005](../tasks/completed/2026-10/TASK-20261017-005-group-claude-client-entries.md)：Claude Code CLI／Desktop 合并为同一张入口卡片，各自保留安装／接入状态、详情导航与返回焦点。完整质量门／479 项前端测试、原生深浅主题及 960×600 验收通过；实现提交 `fc1fa01`。

@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -61,8 +61,13 @@ Codex／OpenCode／Kilo／Qwen／MiMo 的各入口共用现有详情地址；不
 
 ## Git
 
-待填写。
+实现提交：`b4d365723a3202e48b688410b5ad2d6f7e2d3cd4`
+（`refactor(gateway): 统一本地 Agent 产品分组入口`）。
+分支：`codex/river-builtin-provider`；未推送。
 
 ## Result
 
-待填写。
+七个产品统一为参考图二的分组卡片，15 个软件入口分别展示安装／接入状态。
+共用配置的软件进入原同一详情，Claude／Harness 的独立配置保持对应关系，返回恢复
+实际来源入口且保持可见。完整质量门和原生验收通过，开发窗口已更新。
+原有五个无关未跟踪任务记录保持原样。
