@@ -85,6 +85,7 @@ export function useAgentConfigForm(
         await applyAgentConfig(input)
         setSuccess(true)
         await client.invalidateQueries({ queryKey: ["agent-clients"] })
+        await client.invalidateQueries({ queryKey: ["agent-configured-models"] })
       } else setPreview(await previewAgentPlan(input))
     } catch (error) {
       const code = agentError(error)

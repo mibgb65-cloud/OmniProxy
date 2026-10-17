@@ -5,7 +5,7 @@ import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { applyAgentConfig, previewAgentPlan } from "../../services/agents"
 import { useUIStore } from "../../stores/ui-store"
-import { AgentConfigDialog } from "./agent-config-dialog"
+import { AgentConfigEditor } from "./agent-config-editor"
 
 vi.mock("../../services/agents", () => ({
   previewAgentPlan: vi.fn(),
@@ -41,7 +41,7 @@ async function open() {
   render(
     <I18nProvider>
       <QueryClientProvider client={new QueryClient()}>
-        <AgentConfigDialog
+        <AgentConfigEditor
           item={{
             client: "codex",
             path: "test/config.toml",

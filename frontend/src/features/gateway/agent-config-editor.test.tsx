@@ -9,7 +9,7 @@ import {
   previewAgentPlan,
   rereadAgentConfig,
 } from "../../services/agents"
-import { AgentConfigDialog } from "./agent-config-dialog"
+import { AgentConfigEditor } from "./agent-config-editor"
 import { useUIStore } from "../../stores/ui-store"
 
 vi.mock("../../services/agents", () => ({
@@ -34,7 +34,7 @@ function mount() {
   render(
     <I18nProvider>
       <QueryClientProvider client={client}>
-        <AgentConfigDialog item={item} onClose={vi.fn()} />
+        <AgentConfigEditor item={item} onClose={vi.fn()} />
       </QueryClientProvider>
     </I18nProvider>,
   )
@@ -65,7 +65,7 @@ beforeEach(() => {
 it("无需选择模型即可预览完整目录、应用并使用同一文件和目录版本", async () => {
   const user = userEvent.setup()
   mount()
-  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  expect(screen.getByRole("region", { name: "配置接入模型" })).toBeInTheDocument()
   expect(screen.getByRole("button", { name: "配置预览" })).toBeEnabled()
   expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "配置预览" }))
@@ -85,7 +85,9 @@ it("无需选择模型即可预览完整目录、应用并使用同一文件和�
     .getByRole("button", { name: "关闭保存成功提示" })
     .closest("[data-slot='agent-config-success-toast']")!
   expect(notice.closest(".scroll-region")).toBeNull()
-  expect(screen.getByRole("dialog")).toContainElement(notice as HTMLElement)
+  expect(screen.getByRole("region", { name: "配置接入模型" })).toContainElement(
+    notice as HTMLElement,
+  )
   await user.click(screen.getByRole("button", { name: "关闭保存成功提示" }))
   expect(screen.queryByText("配置已保存，原配置已加密备份。")).not.toBeInTheDocument()
   expect(screen.queryByRole("button", { name: "应用配置" })).not.toBeInTheDocument()

@@ -4,6 +4,8 @@ import type { Input, Item } from "../../bindings/omniproxy/internal/application/
 export type AgentClient = Item
 export type AgentInput = Input
 export const listAgentClients = () => AppService.AgentClients()
+export const getConfiguredAgentModels = (client: string) => AppService.AgentConfiguredModels(client)
+export type ConfiguredAgentCatalog = Awaited<ReturnType<typeof getConfiguredAgentModels>>
 export async function rereadAgentConfig(client: string): Promise<AgentClient> {
   if (
     ![

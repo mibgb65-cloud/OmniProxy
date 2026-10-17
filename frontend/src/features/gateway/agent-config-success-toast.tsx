@@ -36,7 +36,7 @@ export function AgentConfigSuccessToast() {
             </Button>
           </Toast.Close>
         </Toast.Root>
-        {/* 位于弹窗非滚动层，既不会随目录滚走，也保留模态框内的焦点和播报语义。 */}
+        {/* 位于配置面板的非滚动层，避免目录滚动遮挡结果并保留播报语义。 */}
         <Toast.Viewport
           label={t("agents.successNotification")}
           className="m-0 flex list-none justify-center p-0 outline-none"

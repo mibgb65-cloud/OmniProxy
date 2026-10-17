@@ -23,7 +23,10 @@ export function useAgentActions(item: AgentClient): {
       else await setAgentEnabled(item.client, !item.configured)
     },
     onSuccess: async (_, action) => {
-      if (action !== "copy") await client.invalidateQueries({ queryKey: ["agent-clients"] })
+      if (action !== "copy") {
+        await client.invalidateQueries({ queryKey: ["agent-clients"] })
+        await client.invalidateQueries({ queryKey: ["agent-configured-models"] })
+      }
     },
   })
   const notice =

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-017](../tasks/active/TASK-20261017-017-agent-detail-model-panel.md)：Agent 详情页两栏与右侧模型展示／内联配置，正在验证。
 
 ## Recently Completed
 

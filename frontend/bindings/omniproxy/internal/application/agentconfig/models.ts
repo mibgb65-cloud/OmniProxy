@@ -5,6 +5,14 @@
 // @ts-ignore: Unused imports
 import * as modelcatalog$0 from "../../core/modelcatalog/models.js";
 
+/**
+ * ConfiguredCatalog 是实际受管模型目录，不表示客户端已重启或模型调用已验证。
+ */
+export interface ConfiguredCatalog {
+    "models": ModelSummary[] | null;
+    "defaultModel": string;
+}
+
 export interface Input {
     "client": string;
     "model"?: string;
@@ -23,6 +31,14 @@ export interface Item {
     "canRestore": boolean;
     "revision": string;
     "errorCode": string;
+}
+
+/**
+ * ModelSummary 仅包含客户端目录中的公开标识，不暴露配置和凭据。
+ */
+export interface ModelSummary {
+    "id": string;
+    "name": string;
 }
 
 /**

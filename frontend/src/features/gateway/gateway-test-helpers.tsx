@@ -17,6 +17,9 @@ import { Route as GatewayRoute } from "../../app/routes/gateway"
 import { SidebarGatewayStatus } from "./sidebar-gateway-status"
 import type { GatewayTab } from "./gateway-tabs"
 const listAgentClientsMock = vi.hoisted(() => vi.fn().mockResolvedValue([]))
+const getConfiguredAgentModelsMock = vi.hoisted(() =>
+  vi.fn().mockResolvedValue({ models: [], defaultModel: "" }),
+)
 const previewAgentConfigMock = vi.hoisted(() => vi.fn())
 const previewAgentPlanMock = vi.hoisted(() => vi.fn())
 const applyAgentConfigMock = vi.hoisted(() => vi.fn())
@@ -33,6 +36,7 @@ const openAgentClientMock = vi.hoisted(() => vi.fn())
 const agentErrorMock = vi.hoisted(() => vi.fn(() => "failed"))
 export {
   listAgentClientsMock,
+  getConfiguredAgentModelsMock,
   previewAgentConfigMock,
   previewAgentPlanMock,
   applyAgentConfigMock,
@@ -59,6 +63,7 @@ vi.mock("../../services/agent-installation", () => ({
 }))
 vi.mock("../../services/agents", () => ({
   listAgentClients: listAgentClientsMock,
+  getConfiguredAgentModels: getConfiguredAgentModelsMock,
   previewAgentConfig: previewAgentConfigMock,
   previewAgentPlan: previewAgentPlanMock,
   applyAgentConfig: applyAgentConfigMock,

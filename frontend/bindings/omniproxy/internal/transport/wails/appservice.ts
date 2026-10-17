@@ -88,6 +88,13 @@ export function AgentClients(): $CancellablePromise<agentconfig$0.Item[] | null>
 }
 
 /**
+ * AgentConfiguredModels 仅返回实际受管目录的公开模型信息。
+ */
+export function AgentConfiguredModels(client: string): $CancellablePromise<agentconfig$0.ConfiguredCatalog> {
+    return $Call.ByID(3217099128, client);
+}
+
+/**
  * AgentCopyKey 在桌面端复制本地接入 Key，不通过绑定返回完整凭据。
  */
 export function AgentCopyKey(client: string): $CancellablePromise<void> {

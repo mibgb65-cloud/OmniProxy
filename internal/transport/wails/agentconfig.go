@@ -14,6 +14,14 @@ func (s *AppService) AgentClients() ([]agentconfig.Item, error) {
 	return s.agents.Inspect(context.Background())
 }
 
+// AgentConfiguredModels 仅返回实际受管目录的公开模型信息。
+func (s *AppService) AgentConfiguredModels(client string) (agentconfig.ConfiguredCatalog, error) {
+	if s.agents == nil {
+		return agentconfig.ConfiguredCatalog{}, errors.New("agent: unavailable")
+	}
+	return s.agents.ConfiguredModels(context.Background(), client)
+}
+
 func (s *AppService) refreshAgentCatalog() {
 	if s.agents == nil {
 		return

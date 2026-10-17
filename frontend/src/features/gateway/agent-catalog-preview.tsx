@@ -30,9 +30,11 @@ type ModelSelection = {
 export function AgentCatalogPreview({
   plan,
   selection,
+  expanded = false,
 }: {
   plan: AgentPlan
   selection?: ModelSelection
+  expanded?: boolean
 }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
@@ -128,7 +130,7 @@ export function AgentCatalogPreview({
         <ScrollRegion
           as="section"
           ariaLabel={t("agents.catalogCount", { count })}
-          className="mt-2 max-h-48 border-t"
+          className={expanded ? "mt-2 max-h-[min(26rem,45dvh)] border-t" : "mt-2 max-h-48 border-t"}
           viewportClassName="pt-3"
         >
           <ul className="space-y-2">

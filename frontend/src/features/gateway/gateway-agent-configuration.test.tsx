@@ -100,8 +100,7 @@ it.each(agentClientIds)(
     expect(configure).toBeEnabled()
     expect(screen.getByText(/可以先保存接入配置/)).toBeInTheDocument()
     await user.click(configure)
-    expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "配置预览" }))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     expect(await screen.findByText("将提供 2 个模型／路由")).toBeInTheDocument()
     const input = { client, revision: agent.revision }
     expect(previewAgentPlanMock).toHaveBeenCalledWith(input)
@@ -113,7 +112,7 @@ it.each(agentClientIds)(
       }),
     )
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("配置已保存"))
-    await user.click(screen.getAllByRole("button", { name: "关闭" })[0]!)
+    expect(await screen.findByRole("heading", { name: "已接入模型" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "启动网关" })).toBeEnabled()
     expect(startGateway).not.toHaveBeenCalled()
   },
@@ -148,7 +147,6 @@ it("Qwen 历史设置需要官方迁移时提示先启动客户端，不允许�
   renderGateway("clients")
   await openClient(user, "qwen-code")
   await user.click(await screen.findByRole("button", { name: "一键配置" }))
-  await user.click(screen.getByRole("button", { name: "配置预览" }))
   expect(
     await screen.findByText("请先启动当前版 Qwen Code，完成设置升级后重新读取配置。"),
   ).toBeInTheDocument()

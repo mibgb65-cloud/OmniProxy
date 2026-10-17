@@ -5,24 +5,24 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { agentError, rereadAgentConfig, type AgentClient } from "../../services/agents"
-import { AgentConfigDialog } from "./agent-config-dialog"
 import { useAgentActions } from "./use-agent-actions"
 
 export function AgentClientSettings({
   item,
   models,
   running,
+  onConfigure,
+  editing,
 }: {
   item: AgentClient
   models: string[]
   running: boolean
+  onConfigure: (item: AgentClient, reread?: boolean) => void
+  editing: boolean
 }) {
   const { t } = useTranslation()
   const actions = useAgentActions(item)
-  // 预览与应用使用打开时的文件版本，后台刷新不能替换该快照。
-  const [selected, setSelected] = useState<AgentClient | null>(null)
   const queryClient = useQueryClient()
-  const [reread, setReread] = useState(false)
   const [reloading, setReloading] = useState(false)
   const [reloadError, setReloadError] = useState<ReturnType<typeof agentError> | null>(null)
   async function reload() {
@@ -31,8 +31,8 @@ export function AgentClientSettings({
     try {
       const next = await rereadAgentConfig(item.client)
       await queryClient.invalidateQueries({ queryKey: ["agent-clients"] })
-      setReread(true)
-      setSelected(next)
+      await queryClient.invalidateQueries({ queryKey: ["agent-configured-models"] })
+      onConfigure(next, true)
     } catch (error) {
       setReloadError(agentError(error))
     } finally {
@@ -47,7 +47,7 @@ export function AgentClientSettings({
           <Button
             variant="outline"
             size="sm"
-            disabled={actions.busy || reloading}
+            disabled={editing || actions.busy || reloading}
             onClick={() => void reload()}
           >
             <RefreshCw aria-hidden="true" className={reloading ? "motion-safe:animate-spin" : ""} />
@@ -75,11 +75,9 @@ export function AgentClientSettings({
           </dl>
           <div className="flex flex-wrap gap-2 border-t pt-5">
             <Button
-              disabled={actions.busy || !models.length || !!item.errorCode}
-              onClick={() => {
-                setReread(false)
-                setSelected(item)
-              }}
+              data-agent-configure
+              disabled={editing || actions.busy || !models.length || !!item.errorCode}
+              onClick={() => onConfigure(item)}
             >
               <Settings2 aria-hidden="true" />
               {t("agents.configure")}
@@ -88,7 +86,7 @@ export function AgentClientSettings({
               <>
                 <Button
                   variant="outline"
-                  disabled={actions.busy}
+                  disabled={editing || actions.busy}
                   onClick={() => actions.run("copy")}
                 >
                   <Copy aria-hidden="true" />
@@ -96,7 +94,7 @@ export function AgentClientSettings({
                 </Button>
                 <Button
                   variant="outline"
-                  disabled={actions.busy}
+                  disabled={editing || actions.busy}
                   onClick={() => actions.run("toggle")}
                 >
                   <Power aria-hidden="true" />
@@ -104,7 +102,7 @@ export function AgentClientSettings({
                 </Button>
                 <Button
                   variant="outline"
-                  disabled={actions.busy || !!item.errorCode}
+                  disabled={editing || actions.busy || !!item.errorCode}
                   onClick={() => actions.run("restore")}
                 >
                   <RotateCcw aria-hidden="true" />
@@ -136,7 +134,6 @@ export function AgentClientSettings({
           {!running ? <p className="text-muted-foreground text-sm">{t("agents.stopped")}</p> : null}
         </CardContent>
       </Card>
-      <AgentConfigDialog item={selected} reread={reread} onClose={() => setSelected(null)} />
     </>
   )
 }

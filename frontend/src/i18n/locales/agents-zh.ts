@@ -121,6 +121,16 @@ export const agentsZh = {
     "请先应用「一键配置」以启用本地网关，再完全退出并重新启动 Claude。",
   "agents.install.error.failed": "操作失败，请重新检测后重试。",
   "agents.configure": "一键配置",
+  "agents.configureModels": "配置接入模型",
+  "agents.cancelConfiguration": "取消配置",
+  "agents.connectedModels": "已接入模型",
+  "agents.connectedModelsHint":
+    "展示已写入当前 Agent 配置的模型。客户端重启后读取，实际可用性以调用结果为准。",
+  "agents.refreshModels": "刷新模型",
+  "agents.searchConnectedModels": "搜索已接入模型",
+  "agents.modelsKeyDisabled": "接入 Key 已停用，模型配置仍保留。",
+  "agents.noConnectedModels": "尚未接入模型",
+  "agents.noConnectedModelsHint": "点击「一键配置」选择需要接入的模型，保存后将在这里展示。",
   "agents.reread": "重新读取配置",
   "agents.rereadSuccess": "已重新读取当前配置，请重新预览后应用。",
   "agents.rereadChangesNotice":

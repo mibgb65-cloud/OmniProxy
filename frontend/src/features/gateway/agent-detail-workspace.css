@@ -1,0 +1,14 @@
+.agent-detail-workspace {
+  container-type: inline-size;
+}
+
+@container (min-width: 68rem) {
+  .agent-detail-columns {
+    grid-template-columns: minmax(20rem, 0.85fr) minmax(0, 1.15fr);
+  }
+
+  .agent-detail-models {
+    position: sticky;
+    top: 0;
+  }
+}

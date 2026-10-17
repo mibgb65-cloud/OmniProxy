@@ -3,9 +3,9 @@ import { ArrowLeft } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { AgentClient } from "../../services/agents"
 import { AgentBrandIcon } from "./agent-brand-icon"
-import { AgentClientSettings } from "./agent-client-settings"
-import { agentClients, agentStatusKey, type AgentClientId } from "./agent-clients"
+import { AgentDetailWorkspace } from "./agent-detail-workspace"
 import { AgentInstallationCard } from "./agent-installation-card"
+import { agentClients, agentStatusKey, type AgentClientId } from "./agent-clients"
 import type { AgentInstallations } from "./use-agent-installations"
 
 export function AgentClientDetail({
@@ -65,13 +65,22 @@ export function AgentClientDetail({
           )}
         </p>
       ) : null}
-      <AgentInstallationCard client={client} state={installations} />
       {item ? (
-        <AgentClientSettings key={client} item={item} models={models} running={running} />
+        <AgentDetailWorkspace
+          key={client}
+          client={client}
+          item={item}
+          models={models}
+          running={running}
+          installations={installations}
+        />
       ) : (
-        <p role={pending ? "status" : "alert"} className="text-muted-foreground text-sm">
-          {t(pending ? "agents.loading" : "agents.unavailable")}
-        </p>
+        <>
+          <AgentInstallationCard client={client} state={installations} />
+          <p role={pending ? "status" : "alert"} className="text-muted-foreground text-sm">
+            {t(pending ? "agents.loading" : "agents.unavailable")}
+          </p>
+        </>
       )}
     </div>
   )

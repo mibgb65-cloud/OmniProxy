@@ -125,6 +125,17 @@ export const agentsEn = {
     "Apply one-click configuration to activate the local gateway first, then quit Claude completely and restart.",
   "agents.install.error.failed": "Operation failed. Check installation status and retry.",
   "agents.configure": "Configure",
+  "agents.configureModels": "Configure agent models",
+  "agents.cancelConfiguration": "Cancel configuration",
+  "agents.connectedModels": "Configured models",
+  "agents.connectedModelsHint":
+    "Models saved in this agent’s configuration. Restart the client to load them; availability depends on actual requests.",
+  "agents.refreshModels": "Refresh models",
+  "agents.searchConnectedModels": "Search configured models",
+  "agents.modelsKeyDisabled": "The access key is disabled. Model configuration is retained.",
+  "agents.noConnectedModels": "No models configured",
+  "agents.noConnectedModelsHint":
+    "Choose Configure to select and save models. They will appear here after saving.",
   "agents.reread": "Reload configuration",
   "agents.rereadSuccess": "Current configuration reloaded. Preview again before applying.",
   "agents.rereadChangesNotice":
