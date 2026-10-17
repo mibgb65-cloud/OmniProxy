@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -52,8 +52,12 @@ Publisher 为空，InstallLocation 为 `D:/DSH`，DisplayIcon 指向该目录的
 
 ## Git
 
-待填写。
+实现提交：`8f2d06f71877e09b425d77537710eef0306d9638`
+（`fix(gateway): 修复 Harness Desktop 安装漏检`）。
+分支：`codex/river-builtin-provider`；未推送。
 
 ## Result
 
-待填写。
+已正确识别用户安装在 `D:/DSH` 的 Harness Desktop `0.2.0-rc.2`，开发界面与实际打开
+验证通过。修复针对安装记录格式，适用于同格式的自定义目录安装；未硬编码用户路径。
+完整质量门通过，原有无关未跟踪任务记录保持原样。
