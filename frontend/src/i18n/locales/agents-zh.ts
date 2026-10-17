@@ -1,5 +1,28 @@
 export const agentsZh = {
+  "agents.error.client_upgrade_required": "请先启动当前版 Qwen Code，完成设置升级后重新读取配置。",
   "agents.title": "本地 Agent 接入",
+  "agents.kilocode": "Kilo Code CLI / Desktop",
+  "agents.qwenCode": "Qwen Code CLI / Desktop",
+  "agents.mimoCode": "MiMo Code CLI / Desktop",
+  "agents.kilocodeDescription": "配置 Kilo 的本机模型提供商。",
+  "agents.qwenCodeDescription": "终端与官方桌面应用共用 Qwen 用户设置。",
+  "agents.mimoCodeDescription": "CLI、国内版与国际版桌面应用共用本机模型配置。",
+  "agents.mimoCodeHint":
+    "国内版（Xiaomi MiMo）与国际版（Xiaomi MiMo AI）分别检测和打开，共用预览所示的本机引擎提供商。保存后重启对应版本，并在模型选择器中选择 OmniProxy；自定义目录或启动覆盖可能优先。",
+  "agents.codingEngineHint":
+    "将 OmniProxy 模型写入预览所示的本机引擎配置。桌面应用若指定独立目录或内联设置，需使用其实际配置范围；保存后重新加载并选择 OmniProxy 模型。",
+  "agents.qwenCodeHint":
+    "更新用户设置中的 OpenAI 兼容模型与独立 Key 引用，保留其他模型、权限和会话。项目、系统或启动设置可能具有更高优先级；保存后重新加载客户端。",
+  "agents.mode.kilocode": "Kilo 模型列表",
+  "agents.mode.qwenCode": "Qwen Code 模型列表",
+  "agents.mode.mimoCode": "MiMo Code 模型列表",
+  "agents.install.kilocodeCli": "Kilo Code CLI",
+  "agents.install.kilocodeDesktop": "Kilo Desktop",
+  "agents.install.qwenCodeCli": "Qwen Code CLI",
+  "agents.install.qwenCodeDesktop": "Qwen Code Desktop",
+  "agents.install.mimoCodeCli": "MiMo Code CLI",
+  "agents.install.mimoDesktopCn": "MiMo Desktop 国内版",
+  "agents.install.mimoDesktopGlobal": "MiMo Desktop 国际版",
   "agents.opencode": "OpenCode CLI / Desktop",
   "agents.opencodeDescription": "终端与桌面应用共用全局模型配置。",
   "agents.opencodeHint":

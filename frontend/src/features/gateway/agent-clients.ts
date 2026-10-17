@@ -7,6 +7,9 @@ export const agentClientIds = [
   "opencode",
   "harness-web",
   "harness-desktop",
+  "kilocode",
+  "qwen-code",
+  "mimo-code",
 ] as const
 export type AgentClientId = (typeof agentClientIds)[number]
 
@@ -37,6 +40,17 @@ export const agentClients = {
     description: "agents.harnessDesktopDescription",
     icon: "",
   },
+  kilocode: {
+    title: "agents.kilocode",
+    description: "agents.kilocodeDescription",
+    icon: "kilocode.svg",
+  },
+  "qwen-code": {
+    title: "agents.qwenCode",
+    description: "agents.qwenCodeDescription",
+    icon: "qwen-color.svg",
+  },
+  "mimo-code": { title: "agents.mimoCode", description: "agents.mimoCodeDescription", icon: "" },
 } as const
 
 export function isAgentClientId(value: unknown): value is AgentClientId {

@@ -16,7 +16,7 @@ func (s *Service) clientEntries(ctx context.Context, client string) ([]catalog.E
 	if err != nil {
 		return nil, err
 	}
-	if client == "opencode" || isHarness(client) {
+	if isChatClient(client) {
 		return gatewayEntries(entries), nil
 	}
 	protocol := "messages"
@@ -68,8 +68,11 @@ func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
 }
 
 func existingModel(client string, body []byte) string {
-	if client == "opencode" {
+	if isCompatibleClient(client) {
 		return openCodeModel(body)
+	}
+	if client == "qwen-code" {
+		return qwenCodeModel(body)
 	}
 	var config map[string]any
 	if client == "codex" {

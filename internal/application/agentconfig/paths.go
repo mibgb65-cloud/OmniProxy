@@ -36,6 +36,7 @@ func DefaultPaths() (Paths, error) {
 		HarnessWeb:         filepath.Join(harnessHome(home), "profiles", "web", "cordis.patch.yml"),
 		HarnessDesktop:     filepath.Join(harnessHome(home), "profiles", "desktop", "cordis.patch.yml"),
 		HarnessCredentials: filepath.Join(harnessHome(home), ".credentials.yaml"),
+		KiloCode:           kiloConfigPath(home), QwenCode: filepath.Join(qwenHome(home), "settings.json"), MiMoCode: mimoCodeConfigPath(home),
 	}, nil
 }
 

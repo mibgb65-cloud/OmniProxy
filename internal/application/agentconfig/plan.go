@@ -110,6 +110,15 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	if input.Client == "opencode" {
 		mode = "opencode-model-list"
 	}
+	if input.Client == "kilocode" {
+		mode = "kilo-model-list"
+	}
+	if input.Client == "qwen-code" {
+		mode = "qwen-model-list"
+	}
+	if input.Client == "mimo-code" {
+		mode = "mimo-code-model-list"
+	}
 	if isHarness(input.Client) {
 		mode = "harness-model-list"
 	}
@@ -168,6 +177,9 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	}
 	if isHarness(input.Client) {
 		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n凭据文件：%s\n只更新本 profile 的 OmniProxy 提供商及独立凭据引用；应用前保存加密备份。\n保存后在 Harness 中选择 OmniProxy 模型；其他 profile 与启动覆盖保持原样。", path, len(entries), s.paths.HarnessCredentials)
+	}
+	if input.Client == "kilocode" || input.Client == "mimo-code" || input.Client == "qwen-code" {
+		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n默认模型：%s\n保留其他提供商、权限和会话；应用前保存加密备份。\n配置当前本机引擎；桌面宿主的独立数据目录、内联设置或启动覆盖可能优先。", path, len(entries), selected)
 	}
 	key := []byte("<本地接入 API Key>")
 	patched, _, err := s.buildPlan(input.Client, body, key, plan)

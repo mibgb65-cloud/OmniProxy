@@ -15,6 +15,9 @@ func gatewayClientFixture(t *testing.T) (*Service, *changingCatalog) {
 	s, source := catalogFixture(t)
 	root := filepath.Dir(filepath.Dir(s.paths.Codex))
 	s.paths.OpenCode = filepath.Join(root, "opencode", "opencode.jsonc")
+	s.paths.KiloCode = filepath.Join(root, "kilo", "kilo.jsonc")
+	s.paths.QwenCode = filepath.Join(root, "qwen", "settings.json")
+	s.paths.MiMoCode = filepath.Join(root, "mimo", "mimocode.jsonc")
 	s.paths.HarnessWeb = filepath.Join(root, "harness", "profiles", "web", "cordis.patch.yml")
 	s.paths.HarnessDesktop = filepath.Join(root, "harness", "profiles", "desktop", "cordis.patch.yml")
 	s.paths.HarnessCredentials = filepath.Join(root, "harness", ".credentials.yaml")
@@ -30,7 +33,7 @@ func writeGatewayFixture(t *testing.T, path, body string) {
 }
 
 func TestGatewayClientsPreviewApplyRefreshAndRestore(t *testing.T) {
-	for _, client := range []string{"opencode", "harness-web", "harness-desktop"} {
+	for _, client := range []string{"opencode", "kilocode", "mimo-code", "harness-web", "harness-desktop"} {
 		t.Run(client, func(t *testing.T) {
 			s, source := gatewayClientFixture(t)
 			ctx := context.Background()
@@ -128,7 +131,7 @@ func TestHarnessProfilesShareCredentialsWithoutOverwritingEachOther(t *testing.T
 }
 
 func TestGatewayClientsRefuseExternalEditsAndUnsafeInput(t *testing.T) {
-	for _, client := range []string{"opencode", "harness-web"} {
+	for _, client := range []string{"opencode", "kilocode", "mimo-code", "qwen-code", "harness-web"} {
 		s, _ := gatewayClientFixture(t)
 		ctx := context.Background()
 		path, _ := s.path(client)
@@ -138,7 +141,7 @@ func TestGatewayClientsRefuseExternalEditsAndUnsafeInput(t *testing.T) {
 		}
 		body, _ := os.ReadFile(path)
 		body = append(body, []byte("\n# external change\n")...)
-		if client == "opencode" {
+		if !isHarness(client) {
 			body = append(body[:len(body)-len("# external change\n")], []byte("// external change\n")...)
 		}
 		if os.WriteFile(path, body, 0600) != nil {

@@ -21,6 +21,7 @@ type Paths struct {
 	Codex, Claude, ClaudeDesktop                             string
 	ClaudeDesktopNormal, ClaudeDesktopThirdParty             string
 	OpenCode, HarnessWeb, HarnessDesktop, HarnessCredentials string
+	KiloCode, QwenCode, MiMoCode                             string
 }
 type Item struct {
 	Client     string `json:"client"`
@@ -79,6 +80,12 @@ func (s *Service) path(client string) (string, error) {
 		return s.paths.ClaudeDesktop, nil
 	case "opencode":
 		return s.paths.OpenCode, nil
+	case "kilocode":
+		return s.paths.KiloCode, nil
+	case "qwen-code":
+		return s.paths.QwenCode, nil
+	case "mimo-code":
+		return s.paths.MiMoCode, nil
 	case "harness-web":
 		return s.paths.HarnessWeb, nil
 	case "harness-desktop":

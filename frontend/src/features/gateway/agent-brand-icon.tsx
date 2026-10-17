@@ -8,14 +8,16 @@ export function AgentBrandIcon({ client }: { client: AgentClientId }) {
     >
       <img
         src={
-          client.startsWith("harness-")
-            ? "/provider-icons/deepseek-color.svg"
-            : `/agent-icons/${agentClients[client].icon}`
+          client === "mimo-code"
+            ? "/provider-icons/xiaomimimo.svg"
+            : client.startsWith("harness-")
+              ? "/provider-icons/deepseek-color.svg"
+              : `/agent-icons/${agentClients[client].icon}`
         }
         alt=""
         width={32}
         height={32}
-        className={`size-8 ${client === "codex" ? "brightness-0 invert" : client === "opencode" ? "dark:invert" : ""}`}
+        className={`size-8 ${client === "codex" ? "brightness-0 invert" : client === "opencode" || client === "kilocode" || client === "mimo-code" ? "dark:invert" : ""}`}
       />
     </span>
   )

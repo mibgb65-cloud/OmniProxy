@@ -47,7 +47,7 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	if before.revision != expected {
 		return failure("config_changed")
 	}
-	if client == "opencode" || isHarness(client) {
+	if isChatClient(client) {
 		return s.refreshGatewayClient(ctx, client, path, before, entries)
 	}
 	if client == "codex" {

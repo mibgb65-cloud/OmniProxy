@@ -6,9 +6,17 @@ export type AgentInput = Input
 export const listAgentClients = () => AppService.AgentClients()
 export async function rereadAgentConfig(client: string): Promise<AgentClient> {
   if (
-    !["codex", "claude", "claude-desktop", "opencode", "harness-web", "harness-desktop"].includes(
-      client,
-    )
+    ![
+      "codex",
+      "claude",
+      "claude-desktop",
+      "opencode",
+      "harness-web",
+      "harness-desktop",
+      "kilocode",
+      "qwen-code",
+      "mimo-code",
+    ].includes(client)
   )
     throw new Error("agent: invalid_client")
   const items = await listAgentClients()
@@ -31,6 +39,7 @@ export function agentError(error: unknown) {
     ?.replace("agent: ", "")
   switch (code) {
     case "config_changed":
+    case "client_upgrade_required":
     case "invalid_config":
     case "auth_conflict":
     case "profile_conflict":
@@ -67,6 +76,12 @@ export function agentTitle(client: string) {
       return "agents.harnessWeb"
     case "harness-desktop":
       return "agents.harnessDesktop"
+    case "kilocode":
+      return "agents.kilocode"
+    case "qwen-code":
+      return "agents.qwenCode"
+    case "mimo-code":
+      return "agents.mimoCode"
     default:
       return "agents.title"
   }

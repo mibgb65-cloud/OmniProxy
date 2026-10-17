@@ -9,12 +9,15 @@ import (
 )
 
 func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte, string, error) {
-	if client == "opencode" {
+	if isCompatibleClient(client) || client == "qwen-code" {
 		var owned bool
-		if s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM agent_backups WHERE client='opencode')`).Scan(&owned) != nil {
+		if s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM agent_backups WHERE client=?)`, client).Scan(&owned) != nil {
 			return nil, "", failure("backup_unavailable")
 		}
-		return buildOpenCode(body, key, s.port, plan, owned)
+		if client == "qwen-code" {
+			return buildQwenCode(body, key, s.port, plan, owned)
+		}
+		return buildCompatibleClient(client, body, key, s.port, plan, owned)
 	}
 	if isHarness(client) {
 		return buildHarness(client, body, key, s.port, plan)

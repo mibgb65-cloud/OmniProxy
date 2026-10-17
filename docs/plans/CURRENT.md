@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-007](../tasks/active/TASK-20261017-007-kilo-qwen-mimo-code-clients.md)：接入 Kilo／Qwen／MiMo Code 本机引擎与 CLI／Desktop 入口，进行完整质量门和原生验收。
 
 ## Recently Completed
 

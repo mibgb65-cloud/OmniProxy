@@ -7,6 +7,7 @@ import { useUIStore } from "../../stores/ui-store"
 import { agentClientIds, type AgentClientId } from "./agent-clients"
 import {
   accounts,
+  agentErrorMock,
   applyAgentConfigMock,
   appInfo,
   gatewayInfo,
@@ -50,6 +51,9 @@ const clientNames = {
   opencode: "OpenCode CLI / Desktop",
   "harness-web": "DeepSeek Harness Web",
   "harness-desktop": "DeepSeek Harness Desktop",
+  kilocode: "Kilo Code CLI / Desktop",
+  "qwen-code": "Qwen Code CLI / Desktop",
+  "mimo-code": "MiMo Code CLI / Desktop",
 } as const
 
 async function openClient(
@@ -133,6 +137,22 @@ it("停止状态下原配置异常时仍阻止覆盖", async () => {
   renderGateway("clients")
   await openClient(user)
   expect(await screen.findByRole("button", { name: "一键配置" })).toBeDisabled()
+  expect(applyAgentConfigMock).not.toHaveBeenCalled()
+})
+
+it("Qwen 历史设置需要官方迁移时提示先启动客户端，不允许应用", async () => {
+  agentErrorMock.mockReturnValueOnce("client_upgrade_required")
+  listAgentClientsMock.mockResolvedValue([{ ...agent, client: "qwen-code" }])
+  previewAgentPlanMock.mockRejectedValueOnce(new Error("agent: client_upgrade_required"))
+  const user = userEvent.setup()
+  renderGateway("clients")
+  await openClient(user, "qwen-code")
+  await user.click(await screen.findByRole("button", { name: "一键配置" }))
+  await user.click(screen.getByRole("button", { name: "配置预览" }))
+  expect(
+    await screen.findByText("请先启动当前版 Qwen Code，完成设置升级后重新读取配置。"),
+  ).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "应用配置" })).not.toBeInTheDocument()
   expect(applyAgentConfigMock).not.toHaveBeenCalled()
 })
 

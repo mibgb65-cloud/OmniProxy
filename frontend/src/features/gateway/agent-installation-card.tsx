@@ -89,7 +89,11 @@ export function AgentInstallationCard({
                       {t("agents.install.openCode")}
                     </Button>
                   ) : null}
-                  {(id.startsWith("opencode-") || id.startsWith("harness-")) &&
+                  {(id.startsWith("opencode-") ||
+                    id.startsWith("harness-") ||
+                    id.startsWith("kilocode-") ||
+                    id.startsWith("qwen-code-") ||
+                    id.startsWith("mimo-")) &&
                   item?.detection.state === "installed" ? (
                     <Button
                       size="sm"

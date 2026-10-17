@@ -88,6 +88,16 @@ export function LocalAgents({
               installations={installations.data.isError ? undefined : installations.data.data}
               installationsUnavailable={installations.data.isError}
             />
+            {(["kilocode", "qwen-code", "mimo-code"] as const).map((client) => (
+              <AgentClientTile
+                key={client}
+                client={client}
+                item={items.find((item) => item.client === client)}
+                pending={data.isPending}
+                installations={installations.data.isError ? undefined : installations.data.data}
+                installationsUnavailable={installations.data.isError}
+              />
+            ))}
           </div>
         </>
       )}

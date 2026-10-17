@@ -1,5 +1,29 @@
 export const agentsEn = {
+  "agents.error.client_upgrade_required":
+    "Start the current Qwen Code first, let it upgrade its settings, then reload the configuration.",
   "agents.title": "Local agent connections",
+  "agents.kilocode": "Kilo Code CLI / Desktop",
+  "agents.qwenCode": "Qwen Code CLI / Desktop",
+  "agents.mimoCode": "MiMo Code CLI / Desktop",
+  "agents.kilocodeDescription": "Configure model providers for the local Kilo engine.",
+  "agents.qwenCodeDescription": "The CLI and official desktop app share Qwen user settings.",
+  "agents.mimoCodeDescription": "Configure models for the local MiMo Code engine.",
+  "agents.codingEngineHint":
+    "OmniProxy models are written to the local engine file shown in the preview. Desktop apps using a separate directory or inline settings need that actual configuration scope. Reload and select an OmniProxy model after saving.",
+  "agents.qwenCodeHint":
+    "Update OpenAI-compatible models and a dedicated key reference in user settings, preserving other models, permissions and sessions. Project, system or startup settings may take precedence. Reload after saving.",
+  "agents.mode.kilocode": "Kilo model list",
+  "agents.mode.qwenCode": "Qwen Code model list",
+  "agents.mode.mimoCode": "MiMo Code model list",
+  "agents.install.kilocodeCli": "Kilo Code CLI",
+  "agents.install.kilocodeDesktop": "Kilo Desktop",
+  "agents.install.qwenCodeCli": "Qwen Code CLI",
+  "agents.install.qwenCodeDesktop": "Qwen Code Desktop",
+  "agents.install.mimoCodeCli": "MiMo Code CLI",
+  "agents.install.mimoDesktopCn": "MiMo Desktop (China)",
+  "agents.install.mimoDesktopGlobal": "MiMo Desktop (International)",
+  "agents.mimoCodeHint":
+    "The China (Xiaomi MiMo) and international (Xiaomi MiMo AI) apps are detected and opened separately. Both use the local engine provider shown in the preview. Restart the relevant app and select an OmniProxy model; custom directories or launch overrides may take precedence.",
   "agents.opencode": "OpenCode CLI / Desktop",
   "agents.opencodeDescription": "The CLI and desktop app share global model settings.",
   "agents.opencodeHint":

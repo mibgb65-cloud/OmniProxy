@@ -60,11 +60,16 @@ func registryDesktop(ctx context.Context, product Product) (Detection, bool) {
 				publisher, _, _ := entry.GetStringValue("Publisher")
 				version, _, _ := entry.GetStringValue("DisplayVersion")
 				location, _, _ := entry.GetStringValue("InstallLocation")
+				icon, _, _ := entry.GetStringValue("DisplayIcon")
 				if err := entry.Close(); err != nil {
 					return unknown("detection_failed"), true
 				}
 				matches := product.ID == "codex-desktop" && (display == "Codex" || display == "ChatGPT") && strings.HasPrefix(publisher, "OpenAI") || product.ID == "claude-desktop" && display == "Claude" && strings.HasPrefix(publisher, "Anthropic") || product.ID == "opencode-desktop" && (display == "OpenCode" || display == "opencode") && (strings.HasPrefix(publisher, "Anomaly") || strings.HasPrefix(publisher, "SST")) || product.ID == "harness-desktop" && display == "DeepSeek Harness" && strings.HasPrefix(publisher, "DeepSeek")
-				if matches {
+				codingLocation, codingMatch := codingDesktopLocation(product.ID, display, publisher, version, location, icon)
+				if codingMatch {
+					location = codingLocation
+				}
+				if matches || codingMatch {
 					if !validVersion(version) || len(location) > 4096 {
 						return unknown("detection_failed"), true
 					}

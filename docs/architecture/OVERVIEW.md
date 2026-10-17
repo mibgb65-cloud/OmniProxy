@@ -1,5 +1,19 @@
 # Architecture Overview
 
+## Kilo／Qwen／MiMo Code 客户端（2026-10-17）
+
+`application/agentconfig` 新增三个独立接入 ID，复用既有加密备份、版本校验、Key 鉴权
+与目录刷新。Kilo／MiMo 复用 JSONC 提供商合并器；Qwen 使用用户设置的模型列表、专用
+环境引用和 OpenAI Chat 认证选择，保留其他协议与 OAuth 文件。配置路径遵循各引擎
+当前环境和文件优先级；桌面宿主的独立目录／内联覆盖不凭空推测。安装检测与打开使用
+固定产品 ID，未经核实的安装包只提供官方入口。无新增依赖、迁移或跨层依赖。
+MiMo 的国内／国际桌面目标各自检测和打开，使用已验证的 `Xiaomi MiMo`／`Xiaomi MiMo AI`
+产品名与主程序名；兼容缺失 Publisher／InstallLocation 的 NSIS 项，保持两版状态独立。
+
+Kilo 实际发送纯文本内容数组，`core/proxy` 在既有校验前将有界 `text` 部分合为字符串，
+保留工具和扩展字段；图片／未知部分、超量或超长内容仍拒绝。字符串请求保持原字节。
+详见 `product/KILO_QWEN_MIMO_CODE.md`。
+
 ## Harness／OpenCode 客户端（2026-10-17）
 
 `application/agentconfig` 扩展 OpenCode 共用配置和 Harness 两个 profile，不修改核心代理

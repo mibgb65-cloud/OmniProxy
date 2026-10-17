@@ -103,6 +103,34 @@ it("Harness Web 的打开入口只提交固定客户端 ID", async () => {
   expect(installAgentMock).not.toHaveBeenCalled()
 })
 
+it.each([
+  ["kilocode", "Kilo Code", "Kilo Desktop"],
+  ["qwen-code", "Qwen Code", "Qwen Code Desktop"],
+])(
+  "%s 同页显示 CLI 与 Desktop，并按固定 ID 打开已安装软件",
+  async (client, title, desktopTitle) => {
+    getAgentInstallationsMock.mockResolvedValue({
+      ...missing,
+      items: ["cli", "desktop"].map((kind) => ({
+        ...missing.items[0],
+        id: `${client}-${kind}`,
+        canInstall: false,
+        detection: { state: "installed", path: "test/client.exe", version: "", errorCode: "" },
+      })),
+    })
+    const user = userEvent.setup()
+    renderGateway("clients", { entry: `/gateway?tab=clients&client=${client}` })
+    expect(
+      await screen.findByRole("heading", { name: `${title} CLI / Desktop`, level: 2 }),
+    ).toBeInTheDocument()
+    await user.click(await screen.findByRole("button", { name: `打开 ${title} CLI` }))
+    expect(openAgentClientMock).toHaveBeenLastCalledWith(`${client}-cli`)
+    await user.click(await screen.findByRole("button", { name: `打开 ${desktopTitle}` }))
+    expect(openAgentClientMock).toHaveBeenLastCalledWith(`${client}-desktop`)
+    expect(installAgentMock).not.toHaveBeenCalled()
+  },
+)
+
 it("安装只提交固定 ID，进行中禁止重复安装，轮询真实结果后展示版本", async () => {
   const running = {
     ...missing,
@@ -133,6 +161,33 @@ it("安装只提交固定 ID，进行中禁止重复安装，轮询真实结果�
   expect(screen.getByRole("button", { name: "安装 Claude Code CLI" })).toBeDisabled()
   expect(await screen.findByText("已安装 · 2.1.99", {}, { timeout: 5000 })).toBeInTheDocument()
   expect(screen.queryByRole("button", { name: "安装 Claude Code CLI" })).not.toBeInTheDocument()
+})
+
+it("MiMo CLI、国内桌面版、国际桌面版独立检测和打开，未安装版本保留对应官方入口", async () => {
+  getAgentInstallationsMock.mockResolvedValue({
+    ...missing,
+    items: ["mimo-code-cli", "mimo-desktop-cn", "mimo-desktop-global"].map((id) => ({
+      ...missing.items[0],
+      id,
+      canInstall: false,
+      detection: {
+        state: id === "mimo-desktop-global" ? "not_installed" : "installed",
+        path: "test/client.exe",
+        version: "",
+        errorCode: "",
+      },
+    })),
+  })
+  const user = userEvent.setup()
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=mimo-code" })
+  await user.click(await screen.findByRole("button", { name: "打开 MiMo Desktop 国内版" }))
+  expect(openAgentClientMock).toHaveBeenLastCalledWith("mimo-desktop-cn")
+  await user.click(screen.getByRole("button", { name: "打开 MiMo Code CLI" }))
+  expect(openAgentClientMock).toHaveBeenLastCalledWith("mimo-code-cli")
+  await user.click(screen.getByRole("button", { name: "MiMo Desktop 国际版 官方安装说明" }))
+  expect(openAgentInstallationOfficialMock).toHaveBeenLastCalledWith("mimo-desktop-global")
+  expect(screen.queryByRole("button", { name: "打开 MiMo Desktop 国际版" })).not.toBeInTheDocument()
+  expect(installAgentMock).not.toHaveBeenCalled()
 })
 
 it("没有 WinGet 时阻止安装，并支持固定官方说明入口", async () => {

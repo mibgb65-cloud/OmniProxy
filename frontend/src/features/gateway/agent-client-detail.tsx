@@ -54,6 +54,17 @@ export function AgentClientDetail({
           {t(client === "opencode" ? "agents.opencodeHint" : "agents.harnessHint")}
         </p>
       ) : null}
+      {client === "kilocode" || client === "qwen-code" || client === "mimo-code" ? (
+        <p className="text-muted-foreground text-sm leading-6">
+          {t(
+            client === "qwen-code"
+              ? "agents.qwenCodeHint"
+              : client === "mimo-code"
+                ? "agents.mimoCodeHint"
+                : "agents.codingEngineHint",
+          )}
+        </p>
+      ) : null}
       <AgentInstallationCard client={client} state={installations} />
       {item ? (
         <AgentClientSettings key={client} item={item} models={models} running={running} />

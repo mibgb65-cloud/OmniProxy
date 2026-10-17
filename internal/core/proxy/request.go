@@ -24,6 +24,16 @@ func ParseRequest(body []byte) (Request, error) {
 			return Request{}, Failure("invalid_request", 400)
 		}
 	}
+	if normalized, changed, err := normalizeChatText(fields["messages"]); err != nil {
+		return Request{}, err
+	} else if changed {
+		fields["messages"] = normalized
+		normalizedBody, err := json.Marshal(fields)
+		if err != nil {
+			return Request{}, Failure("invalid_messages", 400)
+		}
+		body = normalizedBody
+	}
 	if err := validateMessages(fields["messages"]); err != nil {
 		return Request{}, err
 	}

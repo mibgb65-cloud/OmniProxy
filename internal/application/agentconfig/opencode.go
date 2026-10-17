@@ -43,7 +43,7 @@ func openCodeConfig(body []byte) (hujson.Value, map[string]any, error) {
 	return value, config, nil
 }
 
-func buildOpenCode(body, key []byte, port int, plan Plan, owned bool) ([]byte, string, error) {
+func buildCompatibleClient(client string, body, key []byte, port int, plan Plan, owned bool) ([]byte, string, error) {
 	value, config, err := openCodeConfig(body)
 	if err != nil {
 		return nil, "", err
@@ -76,7 +76,24 @@ func buildOpenCode(body, key []byte, port int, plan Plan, owned bool) ([]byte, s
 		models[entry.ID] = model
 	}
 	provider := map[string]any{"name": "OmniProxy", "npm": "@ai-sdk/openai-compatible", "options": map[string]any{"baseURL": root, "apiKey": string(key)}, "models": models}
+	if client == "mimo-code" {
+		provider["only_configured_models"] = true
+	}
 	patch := []map[string]any{}
+	if client == "kilocode" || client == "mimo-code" {
+		schema, ok := config["$schema"].(string)
+		if config["$schema"] != nil && !ok {
+			return nil, "", failure("invalid_config")
+		}
+		if schema == "" || schema == "https://opencode.ai/config.json" {
+			// 客户端首次启动会补写 schema；预先补齐，避免无业务变化也破坏备份版本。
+			schema = "https://app.kilo.ai/config.json"
+			if client == "mimo-code" {
+				schema = "https://mimo.xiaomi.com/mimocode/config.json"
+			}
+			patch = append(patch, map[string]any{"op": "add", "path": "/$schema", "value": schema})
+		}
+	}
 	if providers == nil {
 		patch = append(patch, map[string]any{"op": "add", "path": "/provider", "value": map[string]any{}})
 	}

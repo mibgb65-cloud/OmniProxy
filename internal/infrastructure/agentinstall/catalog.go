@@ -36,6 +36,13 @@ func Products() []Product {
 		{ID: "opencode-desktop", OfficialURL: "https://opencode.ai/download"},
 		{ID: "harness-cli", Command: "dsh", OfficialURL: "https://github.com/deepseek-ai/deepseek-harness"},
 		{ID: "harness-desktop", OfficialURL: "https://www.deepseek.com/en/harness/"},
+		{ID: "kilocode-cli", Command: "kilo", OfficialURL: "https://kilo.ai/docs/code-with-ai/platforms/cli"},
+		{ID: "kilocode-desktop", OfficialURL: "https://kilo.ai/docs/desktop/overview"},
+		{ID: "qwen-code-cli", Command: "qwen", OfficialURL: "https://github.com/QwenLM/qwen-code"},
+		{ID: "qwen-code-desktop", OfficialURL: "https://github.com/QwenLM/qwen-code/releases/tag/desktop-latest"},
+		{ID: "mimo-code-cli", Command: "mimo", OfficialURL: "https://github.com/XiaomiMiMo/MiMo-Code"},
+		{ID: "mimo-desktop-cn", OfficialURL: "https://mimo.xiaomimimo.com/desktop/invite/"},
+		{ID: "mimo-desktop-global", OfficialURL: "https://mimo-ai.xiaomimimo.com/desktop/invite/"},
 	}
 }
 

@@ -10,6 +10,9 @@ const modeLabels = {
   "client-default": "agents.mode.default",
   "opencode-model-list": "agents.mode.opencode",
   "harness-model-list": "agents.mode.harness",
+  "kilo-model-list": "agents.mode.kilocode",
+  "qwen-model-list": "agents.mode.qwenCode",
+  "mimo-code-model-list": "agents.mode.mimoCode",
 } as const
 
 export function AgentCatalogPreview({ plan }: { plan: AgentPlan }) {
