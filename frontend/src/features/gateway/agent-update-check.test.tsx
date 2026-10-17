@@ -68,7 +68,7 @@ it("按需检查并显示真实版本；加载只影响检查按钮，重复点�
   resolve({ state: "available", currentVersion: "2.9.0.0", latestVersion: "2.10.0" })
   expect(await screen.findByText("发现新版本 2.10.0")).toHaveAttribute("role", "status")
   expect(screen.getByText("已安装 · 2.9.0.0")).toBeInTheDocument()
-  expect(screen.getByRole("button", { name: "检查更新" })).toBeEnabled()
+  expect(screen.getByRole("button", { name: "更新" })).toBeEnabled()
   expect(installAgentMock).not.toHaveBeenCalled()
 })
 

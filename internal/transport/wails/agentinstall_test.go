@@ -20,6 +20,9 @@ func TestInstallationBindingsRejectMissingServiceAndArbitraryURL(t *testing.T) {
 	if _, err := s.AgentInstallationCheckUpdate("claude-desktop"); err == nil {
 		t.Fatal("missing service checked for updates")
 	}
+	if _, err := s.AgentInstallationUpdate("claude-desktop"); err == nil {
+		t.Fatal("missing service updated software")
+	}
 	var opened string
 	s.openAgentURL = func(url string) error { opened = url; return nil }
 	if err := s.AgentInstallationOpenOfficial("https://malicious.invalid"); err == nil || opened != "" {

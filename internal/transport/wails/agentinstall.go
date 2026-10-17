@@ -61,6 +61,16 @@ func (s *AppService) AgentInstallationCheckUpdate(id string) (runtime.UpdateChec
 	return s.installations.CheckUpdate(ctx, id)
 }
 
+// AgentInstallationUpdate 仅在显式点击后启动固定客户端更新，返回后台任务快照。
+func (s *AppService) AgentInstallationUpdate(id string) (agentinstall.Snapshot, error) {
+	if s.installations == nil {
+		return agentinstall.Snapshot{}, errors.New("agentinstall: unavailable")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+	return s.installations.StartUpdate(ctx, id)
+}
+
 // AgentInstallationOpenOfficial 只打开固定客户端的官方说明，不接受任意 URL。
 func (s *AppService) AgentInstallationOpenOfficial(id string) error {
 	product, err := runtime.Find(id)

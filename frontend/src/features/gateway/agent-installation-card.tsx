@@ -30,6 +30,9 @@ export function AgentInstallationCard({
       : null
   const error =
     installError ??
+    (state.upgrade.variables && clientInstallationTargets[client].includes(state.upgrade.variables)
+      ? state.upgrade.error
+      : null) ??
     state.refresh.error ??
     state.official.error ??
     state.launch.error ??
@@ -83,7 +86,7 @@ export function AgentInstallationCard({
                     {item?.detection.version ? ` · ${item.detection.version}` : ""}
                   </p>
                   {id === "claude-desktop" && item?.detection.state === "installed" ? (
-                    <AgentUpdateStatus check={state.update} />
+                    <AgentUpdateStatus check={state.update} item={item} />
                   ) : null}
                 </div>
                 <AgentInstallationActions

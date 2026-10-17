@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-024](../tasks/active/TASK-20261017-024-agent-update-action.md)：发现新版本后切换「更新」，对接官方固定包后台升级与真实版本核对，正在验证。
 
 ## Recently Completed
 

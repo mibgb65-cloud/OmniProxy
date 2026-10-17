@@ -1,5 +1,13 @@
 export const agentsEn = {
   "agents.update.check": "Check for updates",
+  "agents.update.install": "Update",
+  "agents.update.updating": "Updating…",
+  "agents.update.completed": "Updated to {{version}}",
+  "agents.install.error.update_failed": "Update failed. Close Claude and try again.",
+  "agents.install.error.update_unavailable":
+    "This version is not available through the update channel yet. Try later or see the official guide.",
+  "agents.install.error.update_interrupted":
+    "Update interrupted. Check the installed version again.",
   "agents.update.checking": "Checking…",
   "agents.update.available": "New version available: {{version}}",
   "agents.update.current": "No newer version available",

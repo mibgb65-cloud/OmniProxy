@@ -25,7 +25,7 @@ export function AgentInstallationActions({
   return (
     <div className="flex flex-wrap gap-2">
       {id === "claude-desktop" && item?.detection.state === "installed" ? (
-        <AgentUpdateButton check={state.update} disabled={state.busy} />
+        <AgentUpdateButton state={state} item={item} />
       ) : null}
       {id === "claude-desktop" && item?.detection.state === "installed" ? (
         <Button size="sm" disabled={state.launch.isPending} onClick={() => state.launch.mutate()}>

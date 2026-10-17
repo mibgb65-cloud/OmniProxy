@@ -8,6 +8,7 @@ export const getAgentInstallations = () => AppService.AgentInstallations()
 export const refreshAgentInstallations = () => AppService.AgentInstallationsRefresh()
 export const installAgent = (id: string) => AppService.AgentInstall(id)
 export const checkAgentUpdate = (id: string) => AppService.AgentInstallationCheckUpdate(id)
+export const updateAgent = (id: string) => AppService.AgentInstallationUpdate(id)
 export const openAgentInstallationOfficial = (id: string) =>
   AppService.AgentInstallationOpenOfficial(id)
 export const openClaudeCode = () => AppService.AgentOpenClaudeCode()
@@ -27,6 +28,9 @@ export function agentInstallationError(error: unknown) {
     case "official_unavailable":
     case "launch_failed":
     case "activation_required":
+    case "update_failed":
+    case "update_unavailable":
+    case "update_interrupted":
       return code
     default:
       return "failed"

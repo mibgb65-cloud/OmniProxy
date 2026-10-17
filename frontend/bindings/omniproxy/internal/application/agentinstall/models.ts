@@ -18,6 +18,8 @@ export interface Item {
     "progress"?: agentinstall$0.Progress | null;
     "startedAt"?: string;
     "finishedAt"?: string;
+    "operation"?: string;
+    "updateVersion"?: string;
 }
 
 /**

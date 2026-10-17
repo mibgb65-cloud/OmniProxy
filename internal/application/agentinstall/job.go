@@ -59,6 +59,7 @@ func (s *Service) Start(ctx context.Context, id string) (Snapshot, error) {
 	}
 	s.active = id
 	item := s.items[id]
+	item.Operation, item.UpdateVersion = "install", ""
 	item.InstallState, item.ErrorCode = "checking", ""
 	item.Progress, item.StartedAt, item.FinishedAt = &runtime.Progress{Phase: "preparing"}, time.Now().UTC().Format(time.RFC3339Nano), ""
 	s.items[id] = item

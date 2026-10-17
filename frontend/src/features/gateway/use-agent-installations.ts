@@ -5,6 +5,7 @@ import {
   refreshAgentInstallations,
   installAgent,
   checkAgentUpdate,
+  updateAgent,
   openAgentInstallationOfficial,
   openClaudeCode,
   openAgentClient,
@@ -22,13 +23,6 @@ export function useAgentInstallations(active: boolean) {
     refetchInterval: (query) => (query.state.data?.busy ? 1000 : false),
   })
   const wasBusy = useRef(false)
-  useEffect(() => {
-    if (wasBusy.current && data.data && !data.data.busy) {
-      void client.invalidateQueries({ queryKey: ["agent-clients"] })
-      void client.invalidateQueries({ queryKey: ["gateway-runtime"] })
-    }
-    wasBusy.current = data.data?.busy ?? false
-  }, [data.data, client])
   const refresh = useMutation({
     mutationKey: [...agentInstallQueryKey, "refresh"],
     mutationFn: refreshAgentInstallations,
@@ -63,6 +57,35 @@ export function useAgentInstallations(active: boolean) {
       )
     },
   })
+  const upgrade = useMutation({
+    mutationKey: [...agentInstallQueryKey, "update"],
+    mutationFn: (id: AgentInstallTarget) => updateAgent(id),
+    onSuccess: (snapshot) => {
+      client.setQueryData(agentInstallQueryKey, snapshot)
+      if (
+        !snapshot.busy &&
+        !snapshot.items?.some(
+          (item) => item.operation === "update" && item.installState === "failed",
+        )
+      )
+        update.reset()
+    },
+    onError: () => client.invalidateQueries({ queryKey: agentInstallQueryKey }),
+  })
+  const resetUpdate = update.reset
+  useEffect(() => {
+    if (wasBusy.current && data.data && !data.data.busy) {
+      if (
+        data.data.items?.some(
+          (item) => item.operation === "update" && item.installState === "completed",
+        )
+      )
+        resetUpdate()
+      void client.invalidateQueries({ queryKey: ["agent-clients"] })
+      void client.invalidateQueries({ queryKey: ["gateway-runtime"] })
+    }
+    wasBusy.current = data.data?.busy ?? false
+  }, [data.data, client, resetUpdate])
   const mutating = useIsMutating({ mutationKey: agentInstallQueryKey }) > 0
   return {
     data,
@@ -72,16 +95,27 @@ export function useAgentInstallations(active: boolean) {
     launch,
     open,
     update,
+    upgrade,
     busy: !!data.data?.busy || mutating,
     start: (id: AgentInstallTarget) => {
+      upgrade.reset()
       refresh.reset()
       official.reset()
       launch.reset()
       open.reset()
       install.mutate(id)
     },
+    startUpdate: (id: AgentInstallTarget) => {
+      refresh.reset()
+      install.reset()
+      official.reset()
+      launch.reset()
+      open.reset()
+      upgrade.mutate(id)
+    },
     recheck: () => {
       update.reset()
+      upgrade.reset()
       install.reset()
       official.reset()
       launch.reset()

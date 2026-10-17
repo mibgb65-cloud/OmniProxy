@@ -18,15 +18,17 @@ type Backend interface {
 
 // Item 仅返回安装元数据和稳定状态，不暴露安装器输出。
 type Item struct {
-	ID           string            `json:"id"`
-	Detection    runtime.Detection `json:"detection"`
-	InstallState string            `json:"installState"`
-	ErrorCode    string            `json:"errorCode"`
-	OfficialURL  string            `json:"officialURL"`
-	CanInstall   bool              `json:"canInstall"`
-	Progress     *runtime.Progress `json:"progress,omitempty"`
-	StartedAt    string            `json:"startedAt,omitempty"`
-	FinishedAt   string            `json:"finishedAt,omitempty"`
+	ID            string            `json:"id"`
+	Detection     runtime.Detection `json:"detection"`
+	InstallState  string            `json:"installState"`
+	ErrorCode     string            `json:"errorCode"`
+	OfficialURL   string            `json:"officialURL"`
+	CanInstall    bool              `json:"canInstall"`
+	Progress      *runtime.Progress `json:"progress,omitempty"`
+	StartedAt     string            `json:"startedAt,omitempty"`
+	FinishedAt    string            `json:"finishedAt,omitempty"`
+	Operation     string            `json:"operation,omitempty"`
+	UpdateVersion string            `json:"updateVersion,omitempty"`
 }
 
 // Snapshot 将安装器可用性与各客户端状态一次性提供给界面。
@@ -109,7 +111,7 @@ func (s *Service) Refresh(ctx context.Context) Snapshot {
 		}
 		item := s.items[result.id]
 		item.Detection = result.detection
-		if item.Detection.State == "installed" && item.InstallState == "failed" {
+		if item.Detection.State == "installed" && item.InstallState == "failed" && (item.Operation != "update" || runtime.DesktopVersionAtLeast(item.Detection.Version, item.UpdateVersion)) {
 			item.InstallState, item.ErrorCode = "completed", ""
 		}
 		if item.Detection.State != "installed" && item.InstallState == "completed" {

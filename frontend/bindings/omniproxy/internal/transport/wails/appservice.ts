@@ -126,6 +126,13 @@ export function AgentInstallationOpenOfficial(id: string): $CancellablePromise<v
 }
 
 /**
+ * AgentInstallationUpdate 仅在显式点击后启动固定客户端更新，返回后台任务快照。
+ */
+export function AgentInstallationUpdate(id: string): $CancellablePromise<agentinstall$0.Snapshot> {
+    return $Call.ByID(1906845815, id);
+}
+
+/**
  * AgentInstallations 返回本机安装元数据和后台任务快照，不执行安装。
  */
 export function AgentInstallations(): $CancellablePromise<agentinstall$0.Snapshot> {

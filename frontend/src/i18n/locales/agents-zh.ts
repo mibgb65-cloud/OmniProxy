@@ -1,5 +1,11 @@
 export const agentsZh = {
   "agents.update.check": "检查更新",
+  "agents.update.install": "更新",
+  "agents.update.updating": "更新中…",
+  "agents.update.completed": "已更新至 {{version}}",
+  "agents.install.error.update_failed": "更新失败，请关闭 Claude 后重试。",
+  "agents.install.error.update_unavailable": "更新渠道暂未提供该版本，请稍后重试或查看官方说明。",
+  "agents.install.error.update_interrupted": "更新已中断，请重新检测版本。",
   "agents.update.checking": "检查中…",
   "agents.update.available": "发现新版本 {{version}}",
   "agents.update.current": "暂无新版本",
