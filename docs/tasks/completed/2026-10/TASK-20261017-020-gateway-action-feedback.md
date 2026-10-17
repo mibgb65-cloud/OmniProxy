@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -49,8 +49,14 @@ In Progress
 
 ## Git
 
-待提交。
+`1625cbaf69f5a49f62823092870894785ff9493a` — `fix(gateway): 解耦刷新状态并柔化启停动画反馈`。
+
+任务归档与 CURRENT 完成状态另行提交。
 
 ## Result
 
 刷新反馈已解耦，主按钮／侧栏柔和启停动画及共享互斥完成；开发版已更新，完整质量门、生产构建和原生验证通过。
+
+## Completed
+
+2026-10-17 18:52（Asia/Singapore）。
