@@ -1,0 +1,4 @@
+.default-model-route-grid {
+  /* 按容器和字号分配列数，筛选后的少量卡片沿用列宽，窄窗口允许收缩到单列。 */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+}

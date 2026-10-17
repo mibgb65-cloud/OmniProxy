@@ -26,7 +26,7 @@ export function DefaultModelRouteRow({
   const result = item.preview
   const order = savedProviderOrder(item)
   return (
-    <li className="grid min-w-0 gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)]">
+    <li className="bg-background/40 flex min-w-0 flex-col gap-3 rounded-lg border p-4">
       <div className="min-w-0 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
           <code className="text-sm font-medium wrap-anywhere">{item.model}</code>
@@ -64,7 +64,7 @@ export function DefaultModelRouteRow({
           </p>
         ) : null}
       </div>
-      <div className="min-w-0 space-y-1.5">
+      <div className="mt-auto min-w-0 space-y-1.5 border-t pt-3">
         <SelectField
           aria-label={t(
             groupProviderName ? "routing.grouping.preferLabel" : "routing.defaults.preferLabel",

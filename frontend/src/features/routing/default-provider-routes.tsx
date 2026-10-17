@@ -30,7 +30,7 @@ export function DefaultProviderRoutes({
                 {t("routing.defaults.count", { count: group.items.length })}
               </span>
             </div>
-            <ul className="divide-border min-w-0 divide-y" aria-label={name}>
+            <ul className="default-model-route-grid grid min-w-0 gap-3 p-3" aria-label={name}>
               {group.items.map((item) => (
                 <DefaultModelRouteRow
                   key={item.model}

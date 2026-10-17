@@ -8,6 +8,7 @@ import { ModelProviderViewToggle, type ModelProviderView } from "./model-provide
 import type { RoutingData } from "./use-routing"
 import type { DefaultModelRoute } from "../../services/routing"
 import { ProviderPriorityEditor } from "./provider-priority-editor"
+import "./default-model-route-grid.css"
 
 export function DefaultModelRoutes({ data }: { data: RoutingData }) {
   const { t } = useTranslation()
@@ -97,7 +98,7 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
               />
             ) : (
               <ul
-                className="divide-border min-w-0 divide-y rounded-lg border"
+                className="default-model-route-grid grid min-w-0 gap-3"
                 aria-label={t("routing.defaults.title")}
               >
                 {visible.map((item) => (
