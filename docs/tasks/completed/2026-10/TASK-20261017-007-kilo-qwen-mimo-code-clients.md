@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -25,7 +25,7 @@ In Progress
 JSON(C) 提供商配置，分别按自身配置目录与覆盖环境选择文件，不读写 OpenCode 文件。
 Qwen Desktop 通过普通 qwen serve 运行，沿用 QWEN_HOME/settings.json；新增独立模型
 目录／环境引用配置，保留其他协议模型、权限、OAuth 文件和会话。
-桌面宿主可能覆盖引擎目录或内联配置；MiMo 国内／国际版路径正在额外核对，不能把
+桌面宿主可能覆盖引擎目录或内联配置；MiMo 国内／国际版已核对下述发行版规则，不能把
 相同引擎表述成任何桌面版本都必定共用一个默认目录。
 
 补充本机只读依据：已安装国内版 `Xiaomi MiMo 26.922.222056`，卸载注册表缺少 Publisher
@@ -98,8 +98,14 @@ Qwen Desktop 通过普通 qwen serve 运行，沿用 QWEN_HOME/settings.json；�
 
 # Git
 
-待填写。
+实现提交：`c58d931930cf54edc4bfe0f0b4822f4edcf68846`
+（`feat(gateway): 接入 Kilo、Qwen 与 MiMo 双版本客户端`）。
+工作分支：`codex/river-builtin-provider`；未推送。
 
 # Result
 
-待填写。
+完成 Kilo、Qwen Code、MiMo Code 本机模型接入，MiMo 同一卡片支持 CLI 和国内／国际
+两个桌面软件目标。完整质量门、实际三个 CLI 调用及配置恢复、原生状态／预览／布局
+验收通过。桌面实际模型对话和 Qwen 后台记忆边界见 Verification 与产品说明，不把
+配置写入、安装检测或模拟上游结果等同于真实厂商模型权限。原真实客户端文件未应用
+本任务配置，既有无关未跟踪任务记录保持原样。
