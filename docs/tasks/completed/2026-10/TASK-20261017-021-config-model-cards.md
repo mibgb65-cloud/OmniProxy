@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -47,8 +47,14 @@ In Progress
 
 ## Git
 
-待提交。
+`4e21a35c644200452e5ce7e403bf124ad36d0f19` — `feat(gateway): 配置模型复用可选卡片网格与快筛`。
+
+任务归档和 CURRENT 完成状态另行提交。
 
 ## Result
 
 配置模型已使用同款可选卡片和 [1m] 快筛，开发版已更新；原有选择／提交行为保留，完整质量门及原生验证通过。
+
+## Completed
+
+2026-10-17 19:23（Asia/Singapore）。
