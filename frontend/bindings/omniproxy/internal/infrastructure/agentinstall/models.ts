@@ -20,3 +20,12 @@ export interface Progress {
     "downloadedBytes": number;
     "totalBytes": number;
 }
+
+/**
+ * UpdateCheck 仅返回可验证的公开版本；unknown 不能解释为没有更新。
+ */
+export interface UpdateCheck {
+    "state": string;
+    "currentVersion": string;
+    "latestVersion": string;
+}

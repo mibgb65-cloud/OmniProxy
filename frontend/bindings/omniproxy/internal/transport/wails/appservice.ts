@@ -53,6 +53,9 @@ import * as subscription$0 from "../../application/subscription/models.js";
 import * as routing$1 from "../../core/routing/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as agentinstall$1 from "../../infrastructure/agentinstall/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as logger$0 from "../../infrastructure/logger/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -106,6 +109,13 @@ export function AgentCopyKey(client: string): $CancellablePromise<void> {
  */
 export function AgentInstall(id: string): $CancellablePromise<agentinstall$0.Snapshot> {
     return $Call.ByID(3055535909, id);
+}
+
+/**
+ * AgentInstallationCheckUpdate 只查询固定客户端的官方版本，不下载安装包。
+ */
+export function AgentInstallationCheckUpdate(id: string): $CancellablePromise<agentinstall$1.UpdateCheck> {
+    return $Call.ByID(755116775, id);
 }
 
 /**

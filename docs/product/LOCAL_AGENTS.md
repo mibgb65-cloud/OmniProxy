@@ -64,6 +64,8 @@ Harness 保持显示建议模型，不提供默认模型写入；保存后仍需
 
 卡片显示真实的软件安装状态，与网关接入 Key 状态分别展示。详情页的「软件安装」支持只读检测、重新检测、安装和官方说明。Codex CLI 与桌面应用分别检测；Claude Code CLI 和 Claude Desktop 也各自检测。
 
+已安装的 Claude Code Desktop 提供「检查更新」，点击后重新核对本机版本，并读取[官方 Windows 发布入口](https://support.claude.com/en/articles/12622703-deploy-claude-desktop-for-windows)的最新 MSIX 版本。结果区分发现新版本、暂无新版本、无法确认与失败；检查不下载安装包，不改写配置，打开客户端仍可使用。该结果针对官方公开发布版本，商店或组织分发可能有不同的发布时间；本次不扩展其他客户端的更新渠道。版本格式或发布地址变化时不判断最新，可查看官方说明。
+
 Windows 使用固定 WinGet 包与安装源：
 
 | 软件 | 软件包 ID | 安装源 |

@@ -51,6 +51,16 @@ func (s *AppService) AgentInstall(id string) (agentinstall.Snapshot, error) {
 	return s.installations.Start(ctx, id)
 }
 
+// AgentInstallationCheckUpdate 只查询固定客户端的官方版本，不下载安装包。
+func (s *AppService) AgentInstallationCheckUpdate(id string) (runtime.UpdateCheck, error) {
+	if s.installations == nil {
+		return runtime.UpdateCheck{}, errors.New("agentinstall: unavailable")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	return s.installations.CheckUpdate(ctx, id)
+}
+
 // AgentInstallationOpenOfficial 只打开固定客户端的官方说明，不接受任意 URL。
 func (s *AppService) AgentInstallationOpenOfficial(id string) error {
 	product, err := runtime.Find(id)

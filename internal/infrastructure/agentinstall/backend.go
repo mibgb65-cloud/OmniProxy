@@ -2,6 +2,7 @@ package agentinstall
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 type Backend struct {
 	run        func(context.Context, string, ...string) ([]byte, error)
 	runInstall func(context.Context, string, []string, func(Progress)) error
+	updateHTTP *http.Client
 }
 
 // New 创建只在用户明确安装时执行包管理器的运行适配器。

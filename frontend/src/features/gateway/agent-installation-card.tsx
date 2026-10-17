@@ -1,4 +1,4 @@
-import { Code2, Download, ExternalLink, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
@@ -8,6 +8,8 @@ import { agentInstallationTargets, clientInstallationTargets } from "./agent-ins
 import { agentInstallationStatus } from "./agent-installation-status"
 import type { AgentInstallations } from "./use-agent-installations"
 import { AgentInstallationProgress } from "./agent-installation-progress"
+import { AgentUpdateStatus } from "./agent-update-check"
+import { AgentInstallationActions } from "./agent-installation-actions"
 
 export function AgentInstallationCard({
   client,
@@ -36,7 +38,12 @@ export function AgentInstallationCard({
     <Card className="min-w-0 gap-4">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
         <h3 className="text-base font-semibold">{t("agents.install.title")}</h3>
-        <Button variant="outline" size="sm" disabled={state.busy} onClick={state.recheck}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={state.busy || state.update.isPending}
+          onClick={state.recheck}
+        >
           <RefreshCw
             aria-hidden="true"
             className={state.refresh.isPending ? "motion-safe:animate-spin" : ""}
@@ -54,8 +61,6 @@ export function AgentInstallationCard({
         {clientInstallationTargets[client].map((id) => {
           const item = snapshot?.items?.find((item) => item.id === id)
           const label = t(agentInstallationTargets[id])
-          const pending =
-            item && ["checking", "installing", "verifying"].includes(item.installState)
           const starting = state.install.isPending && state.install.variables === id
           const code = item?.errorCode || item?.detection.errorCode
           return (
@@ -77,69 +82,17 @@ export function AgentInstallationCard({
                     )}
                     {item?.detection.version ? ` · ${item.detection.version}` : ""}
                   </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
                   {id === "claude-desktop" && item?.detection.state === "installed" ? (
-                    <Button
-                      size="sm"
-                      disabled={state.launch.isPending}
-                      onClick={() => state.launch.mutate()}
-                    >
-                      <Code2 aria-hidden="true" />
-                      {t("agents.install.openCode")}
-                    </Button>
+                    <AgentUpdateStatus check={state.update} />
                   ) : null}
-                  {(id.startsWith("opencode-") ||
-                    id.startsWith("harness-") ||
-                    id.startsWith("kilocode-") ||
-                    id.startsWith("qwen-code-") ||
-                    id.startsWith("mimo-")) &&
-                  item?.detection.state === "installed" ? (
-                    <Button
-                      size="sm"
-                      disabled={state.open.isPending}
-                      aria-label={t("agents.install.openClient", { client: label })}
-                      onClick={() => state.open.mutate(id)}
-                    >
-                      <Code2 aria-hidden="true" />
-                      {t("agents.install.openClient", { client: label })}
-                    </Button>
-                  ) : null}
-                  {item?.detection.state !== "installed" && item?.canInstall !== false ? (
-                    <Button
-                      size="sm"
-                      disabled={
-                        state.busy ||
-                        !snapshot?.installerAvailable ||
-                        item?.detection.state !== "not_installed"
-                      }
-                      aria-label={t("agents.install.installClient", { client: label })}
-                      onClick={() => state.start(id)}
-                    >
-                      <Download
-                        aria-hidden="true"
-                        className={pending ? "motion-safe:animate-pulse" : ""}
-                      />
-                      {t(
-                        starting
-                          ? "agents.install.checking"
-                          : pending
-                            ? "agents.install.installing"
-                            : "agents.install.install",
-                      )}
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={state.official.isPending}
-                    onClick={() => state.official.mutate(id)}
-                    aria-label={t("agents.install.officialClient", { client: label })}
-                  >
-                    <ExternalLink aria-hidden="true" />
-                    {t("agents.install.official")}
-                  </Button>
                 </div>
+                <AgentInstallationActions
+                  id={id}
+                  item={item}
+                  snapshot={snapshot}
+                  label={label}
+                  state={state}
+                />
               </div>
               <AgentInstallationProgress item={item} label={label} starting={starting} />
               {item?.canInstall === false && item.detection.state !== "installed" ? (

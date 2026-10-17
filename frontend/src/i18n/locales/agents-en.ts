@@ -1,4 +1,10 @@
 export const agentsEn = {
+  "agents.update.check": "Check for updates",
+  "agents.update.checking": "Checking…",
+  "agents.update.available": "New version available: {{version}}",
+  "agents.update.current": "No newer version available",
+  "agents.update.unknown": "Latest version unavailable. See the official guide.",
+  "agents.update.failed": "Update check failed. Please try again.",
   "agents.codexGroup": "Codex",
   "agents.opencodeGroup": "OpenCode",
   "agents.kilocodeGroup": "Kilo Code",

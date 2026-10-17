@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-023](../tasks/active/TASK-20261017-023-agent-update-check.md)：Claude Code Desktop 软件安装区增加按需官方版本检查，正在进行质量门与原生验证。
 
 ## Recently Completed
 

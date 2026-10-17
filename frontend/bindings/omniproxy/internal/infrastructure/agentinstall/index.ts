@@ -3,5 +3,6 @@
 
 export type {
     Detection,
-    Progress
+    Progress,
+    UpdateCheck
 } from "./models.js";

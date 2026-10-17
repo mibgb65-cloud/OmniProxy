@@ -4,6 +4,7 @@ import {
   getAgentInstallations,
   refreshAgentInstallations,
   installAgent,
+  checkAgentUpdate,
   openAgentInstallationOfficial,
   openClaudeCode,
   openAgentClient,
@@ -44,6 +45,24 @@ export function useAgentInstallations(active: boolean) {
   })
   const launch = useMutation({ mutationFn: openClaudeCode })
   const open = useMutation({ mutationFn: (id: AgentInstallTarget) => openAgentClient(id) })
+  const update = useMutation({
+    mutationFn: (id: AgentInstallTarget) => checkAgentUpdate(id),
+    onSuccess: (result, id) => {
+      if (!result.currentVersion) return
+      client.setQueryData<Awaited<ReturnType<typeof getAgentInstallations>>>(
+        agentInstallQueryKey,
+        (snapshot) =>
+          snapshot && {
+            ...snapshot,
+            items: (snapshot.items ?? []).map((item) =>
+              item.id === id
+                ? { ...item, detection: { ...item.detection, version: result.currentVersion } }
+                : item,
+            ),
+          },
+      )
+    },
+  })
   const mutating = useIsMutating({ mutationKey: agentInstallQueryKey }) > 0
   return {
     data,
@@ -52,6 +71,7 @@ export function useAgentInstallations(active: boolean) {
     official,
     launch,
     open,
+    update,
     busy: !!data.data?.busy || mutating,
     start: (id: AgentInstallTarget) => {
       refresh.reset()
@@ -61,6 +81,7 @@ export function useAgentInstallations(active: boolean) {
       install.mutate(id)
     },
     recheck: () => {
+      update.reset()
       install.reset()
       official.reset()
       launch.reset()

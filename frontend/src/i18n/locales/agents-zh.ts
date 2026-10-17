@@ -1,4 +1,10 @@
 export const agentsZh = {
+  "agents.update.check": "检查更新",
+  "agents.update.checking": "检查中…",
+  "agents.update.available": "发现新版本 {{version}}",
+  "agents.update.current": "暂无新版本",
+  "agents.update.unknown": "暂时无法确认最新版本，请查看官方说明。",
+  "agents.update.failed": "检查更新失败，请稍后重试。",
   "agents.codexGroup": "Codex",
   "agents.opencodeGroup": "OpenCode",
   "agents.kilocodeGroup": "Kilo Code",

@@ -3,9 +3,11 @@ import type { Snapshot, Item } from "../../bindings/omniproxy/internal/applicati
 
 export type AgentInstallSnapshot = Snapshot
 export type AgentInstallation = Item
+export type { UpdateCheck as AgentUpdateCheck } from "../../bindings/omniproxy/internal/infrastructure/agentinstall"
 export const getAgentInstallations = () => AppService.AgentInstallations()
 export const refreshAgentInstallations = () => AppService.AgentInstallationsRefresh()
 export const installAgent = (id: string) => AppService.AgentInstall(id)
+export const checkAgentUpdate = (id: string) => AppService.AgentInstallationCheckUpdate(id)
 export const openAgentInstallationOfficial = (id: string) =>
   AppService.AgentInstallationOpenOfficial(id)
 export const openClaudeCode = () => AppService.AgentOpenClaudeCode()
