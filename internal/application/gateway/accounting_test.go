@@ -55,6 +55,13 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 		if _, err = db.Exec(string(stepHistory)); err != nil {
 			t.Fatal(err)
 		}
+		firstTokenSQL, err := os.ReadFile("../../../migrations/032_request_first_token.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(firstTokenSQL)); err != nil {
+			t.Fatal(err)
+		}
 		observer := activity.New(db)
 		server := proxy.New(proxy.Options{Port: 0, Upstream: service, Models: []string{"deepseek-flash"}, Observer: observer})
 		if _, err = server.Start(); err != nil {
@@ -79,6 +86,9 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 		item, err := observer.Request(context.Background(), id)
 		if err != nil || item.InputTokens != "12" || item.OutputTokens != "4" || !item.UsageComplete {
 			t.Fatal("upstream usage lost", item, err)
+		}
+		if (item.FirstTokenMS != nil) != stream {
+			t.Fatal("first-token timing lost or fabricated across conversion", item)
 		}
 		totals, err := observer.Usage(context.Background())
 		if err != nil || totals.AllTime.TotalTokens != "16" {

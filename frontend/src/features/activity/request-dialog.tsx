@@ -120,6 +120,11 @@ export function RequestDialog({
                             : "activity.unknown",
                       ),
                     ],
+                    [
+                      "activity.firstToken",
+                      item.firstTokenMs == null ? "—" : `${item.firstTokenMs} ms`,
+                    ],
+                    ["activity.latency", item.state === "pending" ? "—" : `${item.latencyMs} ms`],
                     ["activity.errorCode", item.errorCode || "—"],
                   ] as const
                 ).map(([label, value]) => (

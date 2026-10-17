@@ -52,7 +52,10 @@ describe("网关选项卡导航", () => {
     await user.click(screen.getByRole("tab", { name: "手动接入" }))
     await user.click(screen.getByRole("tab", { name: "客户端接入" }))
     expect(listAgentClients).toHaveBeenCalledTimes(1)
-    expect(Events.On).toHaveBeenCalledTimes(1)
+    expect(Events.On).toHaveBeenCalledTimes(2)
+    expect(
+      vi.mocked(Events.On).mock.calls.filter((call) => call[0] === "activity:updated"),
+    ).toHaveLength(1)
     await user.click(screen.getByRole("button", { name: "刷新接入检查" }))
     await waitFor(() => expect(listAgentClients).toHaveBeenCalledTimes(2))
   })
@@ -64,7 +67,7 @@ describe("网关选项卡导航", () => {
       expect(
         await screen.findByRole("tab", { name: "运行概览", selected: true }),
       ).toBeInTheDocument()
-      expect(screen.getByRole("heading", { name: "基础配置" })).toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: "接入与运行配置" })).toBeInTheDocument()
       expect(screen.queryByRole("region", { name: "Codex 接口" })).not.toBeInTheDocument()
     },
   )

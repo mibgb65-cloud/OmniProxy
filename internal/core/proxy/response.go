@@ -71,6 +71,11 @@ func copyResponse(w http.ResponseWriter, response Response, stream bool, committ
 }
 
 func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
+	var trace *Trace
+	if tracked, ok := w.(*trackedWriter); ok {
+		trace = tracked.trace
+	}
+	firstContent := false
 	controller := http.NewResponseController(w)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("X-Accel-Buffering", "no")
@@ -98,6 +103,7 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
 			if data != "" && !done && (!json.Valid([]byte(data)) || hasUpstreamError([]byte(data))) {
 				return Failure("upstream_stream_failed", 502)
 			}
+			firstContent = firstContent || trace.hasFirstContent([]byte(data))
 		}
 		if err := controller.SetWriteDeadline(time.Now().Add(15 * time.Second)); err != nil && !errors.Is(err, http.ErrNotSupported) {
 			return Failure("client_write_failed", 502)
@@ -112,6 +118,11 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
 		}
 		if err := controller.Flush(); err != nil {
 			return err
+		}
+		// 客户端在空行后才能解析完整 SSE 事件；不能在 data 行或响应头处提前计时。
+		if firstContent && (line == "" || done) {
+			trace.markFirstToken()
+			firstContent = false
 		}
 		if done {
 			return nil

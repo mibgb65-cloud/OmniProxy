@@ -4,8 +4,9 @@ import type {
   DashboardPoint,
   DashboardQuery,
   DashboardSummary,
+  DashboardProvider,
 } from "../../bindings/omniproxy/internal/application/activity"
 
-export type { DashboardInfo, DashboardPoint, DashboardQuery, DashboardSummary }
+export type { DashboardInfo, DashboardPoint, DashboardQuery, DashboardSummary, DashboardProvider }
 export const readDashboard = (query: DashboardQuery): Promise<DashboardInfo> =>
   AppService.DashboardRead(query)

@@ -142,6 +142,9 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 					if err := socket.Write(ctx, websocket.MessageText, data); err != nil {
 						return err
 					}
+					if trace.hasFirstContent(data) {
+						trace.markFirstToken()
+					}
 				}
 				return scanner.Err()
 			})

@@ -30,6 +30,7 @@ export const activityZh = {
   "activity.account": "账号",
   "activity.state": "结果",
   "activity.latency": "耗时",
+  "activity.firstToken": "首字耗时",
   "activity.search": "搜索请求 ID、模型、邮箱或账号",
   "activity.all": "全部结果",
   "activity.success": "成功",

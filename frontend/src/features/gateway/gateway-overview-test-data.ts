@@ -1,0 +1,148 @@
+import type { DashboardInfo, DashboardQuery, DashboardSummary } from "../../services/dashboard"
+import type { RequestItem } from "../../services/activity"
+
+export const metricsSummary: DashboardSummary = {
+  requests: 4,
+  success: 2,
+  failed: 1,
+  cancelled: 1,
+  pending: 0,
+  inputTokens: "22",
+  outputTokens: "8",
+  totalTokens: "30",
+  completeUsage: 2,
+  successRate: (2 / 3) * 100,
+  averageLatencyMs: 1200,
+  averageFirstTokenMs: 80,
+  firstTokenSamples: 2,
+}
+
+export function gatewayStatisticsFixture(query: DashboardQuery): DashboardInfo {
+  const start = query.boundaries?.[0] ?? Math.floor(Date.now() / 1000)
+  const recent: RequestItem[] = [
+    {
+      id: "1".repeat(32),
+      model: "deepseek-flash",
+      providerName: "DeepSeek",
+      state: "success",
+      firstTokenMs: 160,
+      latencyMs: 1000,
+      inputTokens: "12",
+      outputTokens: "6",
+      inputKnown: true,
+      outputKnown: true,
+      usageComplete: true,
+    },
+    {
+      id: "2".repeat(32),
+      model: "river-model",
+      providerName: "River",
+      state: "failed",
+      latencyMs: 1400,
+      inputTokens: "0",
+      outputTokens: "0",
+      inputKnown: false,
+      outputKnown: false,
+      usageComplete: false,
+    },
+    {
+      id: "3".repeat(32),
+      model: "deepseek-flash",
+      providerName: "DeepSeek",
+      state: "cancelled",
+      firstTokenMs: 40,
+      latencyMs: 800,
+      inputTokens: "10",
+      outputTokens: "2",
+      inputKnown: true,
+      outputKnown: true,
+      usageComplete: false,
+    },
+    {
+      id: "4".repeat(32),
+      model: "deepseek-flash",
+      providerName: "DeepSeek",
+      state: "success",
+      firstTokenMs: 0,
+      latencyMs: 1200,
+      inputTokens: "0",
+      outputTokens: "0",
+      inputKnown: true,
+      outputKnown: true,
+      usageComplete: true,
+    },
+  ].map((item) => ({
+    ...item,
+    startedAt: new Date((start + 60) * 1000).toISOString(),
+    finishedAt: new Date((start + 62) * 1000).toISOString(),
+    protocol: "chat",
+    transport: "http",
+    inputModel: item.model,
+    stream: true,
+    providerId: item.providerName,
+    accountId: "a",
+    accountName: "test",
+    email: "",
+    workspaceId: "",
+    accountDeleted: false,
+    statusCode: item.state === "failed" ? 502 : 200,
+    errorCode: "",
+  }))
+  return {
+    summary: metricsSummary,
+    points: (query.boundaries ?? [start, start + 900]).slice(0, -1).map((value, index) => ({
+      start: value,
+      end: query.boundaries?.[index + 1] ?? value + 900,
+      summary:
+        index === 0
+          ? {
+              ...metricsSummary,
+              requests: 3,
+              cancelled: 0,
+              inputTokens: "12",
+              outputTokens: "6",
+              totalTokens: "18",
+            }
+          : index === 1
+            ? {
+                ...metricsSummary,
+                requests: 1,
+                success: 0,
+                failed: 0,
+                cancelled: 1,
+                inputTokens: "10",
+                outputTokens: "2",
+                totalTokens: "12",
+                completeUsage: 0,
+                successRate: null,
+                averageLatencyMs: null,
+                averageFirstTokenMs: null,
+                firstTokenSamples: 0,
+              }
+            : {
+                ...metricsSummary,
+                requests: 0,
+                success: 0,
+                failed: 0,
+                cancelled: 0,
+                inputTokens: "0",
+                outputTokens: "0",
+                totalTokens: "0",
+                completeUsage: 0,
+                successRate: null,
+                averageLatencyMs: null,
+                averageFirstTokenMs: null,
+                firstTokenSamples: 0,
+              },
+    })),
+    recent,
+    historyIncomplete: false,
+    capturedFrom: start,
+    updatedAt: new Date().toISOString(),
+    pendingNow: 5,
+    providerDistribution: [
+      { providerId: "a", providerName: "DeepSeek", requests: 7 },
+      { providerId: "b", providerName: "River", requests: 3 },
+    ],
+  }
+}

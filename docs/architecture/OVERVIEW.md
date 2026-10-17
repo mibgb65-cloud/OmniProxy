@@ -92,6 +92,8 @@ Gemini Chat JSON／增量 SSE 转换；只接受固定官方 HTTPS 主机并保�
 
 ## 代理统计（2026-10-09）
 
+2026-10-17：`core/proxy.Trace` 使用单调时钟记录首次有效下游流式内容；HTTP 等完整 SSE 事件刷新，WebSocket 等消息写出，跳过元数据与空事件。迁移 032 保存可空明细及独立桶总和／成功样本，结束事务原子提交并保留幂等与溢出保护。`DashboardRead` 增加可选首字、全部未结束请求和累计提供商分布；网关与首页共用查询缓存／本地更新信号，界面不调用模型，无新增依赖。定义与取舍见 ADR-014。
+
 迁移 009 增加独立 provider_id＋model 累计，与原用量差值事务同步。用量查询新增可选 providerModels 字段，按具体提供商配置展示模型表，保留原全局模型汇总。资源删除和请求淘汰不影响该累计；历史回填不能确定归属时保留历史名称分组。
 
 `core/proxy.Trace` 统一 HTTP／WebSocket 请求 ID 与生命周期，原上游 usageReader 采集官方快照，避免跨协议默认零值污染统计。`application/activity` 实现 RequestObserver，迁移 008 事务更新请求明细及独立累计／每日汇总，记录身份快照，无资源删除外键。Wails 提供薄查询／保留设置绑定，用量与请求页通过 TanStack Query 读取；日志按 request_id 双向关联。见 ADR-006 与 `docs/product/ACTIVITY.md`。

@@ -44,6 +44,7 @@ type RequestItem struct {
 	StatusCode     int    `json:"statusCode"`
 	ErrorCode      string `json:"errorCode"`
 	LatencyMS      int64  `json:"latencyMs"`
+	FirstTokenMS   *int64 `json:"firstTokenMs,omitempty"`
 	InputTokens    string `json:"inputTokens"`
 	OutputTokens   string `json:"outputTokens"`
 	InputKnown     bool   `json:"inputKnown"`

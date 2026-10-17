@@ -17,6 +17,7 @@ import { Route as GatewayRoute } from "../../app/routes/gateway"
 import { SidebarGatewayStatus } from "./sidebar-gateway-status"
 import type { GatewayTab } from "./gateway-tabs"
 const listAgentClientsMock = vi.hoisted(() => vi.fn().mockResolvedValue([]))
+const readDashboardMock = vi.hoisted(() => vi.fn())
 const getConfiguredAgentModelsMock = vi.hoisted(() =>
   vi.fn().mockResolvedValue({ models: [], defaultModel: "" }),
 )
@@ -38,6 +39,7 @@ const updateAgentMock = vi.hoisted(() => vi.fn())
 const openAgentUpdateMock = vi.hoisted(() => vi.fn())
 const agentErrorMock = vi.hoisted(() => vi.fn(() => "failed"))
 export {
+  readDashboardMock,
   listAgentClientsMock,
   getConfiguredAgentModelsMock,
   previewAgentConfigMock,
@@ -58,6 +60,7 @@ export {
   openAgentUpdateMock,
   agentErrorMock,
 }
+vi.mock("../../services/dashboard", () => ({ readDashboard: readDashboardMock }))
 vi.mock("../../services/agent-installation", async () => ({
   getAgentInstallations: getAgentInstallationsMock,
   refreshAgentInstallations: refreshAgentInstallationsMock,
@@ -170,6 +173,7 @@ export const gatewayInfo: GatewayInfo = {
 }
 
 export function resetGatewayRuntime() {
+  readDashboardMock.mockReturnValue(new Promise(() => {}))
   const installations = {
     items: ["codex-cli", "codex-desktop", "claude-code", "claude-desktop"].map((id) => ({
       id,

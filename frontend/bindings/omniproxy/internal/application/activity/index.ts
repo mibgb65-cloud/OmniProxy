@@ -5,6 +5,7 @@ export type {
     Breakdown,
     DashboardInfo,
     DashboardPoint,
+    DashboardProvider,
     DashboardQuery,
     DashboardSummary,
     ProviderModel,

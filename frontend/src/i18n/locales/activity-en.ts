@@ -30,6 +30,7 @@ export const activityEn = {
   "activity.account": "Account",
   "activity.state": "Outcome",
   "activity.latency": "Latency",
+  "activity.firstToken": "First-token latency",
   "activity.search": "Search request ID, model, email or account",
   "activity.all": "All outcomes",
   "activity.success": "Success",

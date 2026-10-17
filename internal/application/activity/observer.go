@@ -119,6 +119,9 @@ func (s *Service) Finish(ctx context.Context, event proxy.RequestEvent) error {
 	if event.LatencyMS < 0 || event.LatencyMS > int64((24*time.Hour)/time.Millisecond) {
 		return ErrInvalid
 	}
+	if event.FirstTokenMS != nil && (!event.Stream || *event.FirstTokenMS < 0 || *event.FirstTokenMS > event.LatencyMS) {
+		return ErrInvalid
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -138,11 +141,14 @@ func (s *Service) Finish(ctx context.Context, event proxy.RequestEvent) error {
 			return ErrUnavailable
 		}
 	}
-	if _, err = tx.ExecContext(ctx, `UPDATE request_records SET finished_at=?,state=?,status_code=?,error_code=?,latency_ms=? WHERE id=? AND state='pending'`, timeText(event.FinishedAt), event.State, event.StatusCode, event.ErrorCode, event.LatencyMS, event.ID); err != nil {
+	if _, err = tx.ExecContext(ctx, `UPDATE request_records SET finished_at=?,state=?,status_code=?,error_code=?,latency_ms=?,first_token_ms=? WHERE id=? AND state='pending'`, timeText(event.FinishedAt), event.State, event.StatusCode, event.ErrorCode, event.LatencyMS, event.FirstTokenMS, event.ID); err != nil {
 		return ErrUnavailable
 	}
 	start, err := time.Parse(time.RFC3339Nano, startedAt)
 	if err != nil || finishDashboard(ctx, tx, start, event.State, event.LatencyMS) != nil {
+		return ErrUnavailable
+	}
+	if err := finishFirstToken(ctx, tx, start, event); err != nil {
 		return ErrUnavailable
 	}
 	if err = prune(ctx, tx); err != nil {

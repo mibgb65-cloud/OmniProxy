@@ -17,6 +17,7 @@ var uiFieldKeys = map[string]bool{
 	"profile": true, "app_id": true, "freed_bytes": true, "error": true,
 	"operation": true, "enabled": true, "stage": true, "attempt": true, "state": true,
 	"input_tokens": true, "output_tokens": true, "usage_state": true,
+	"first_token_ms": true,
 }
 
 type scopedAttr struct {

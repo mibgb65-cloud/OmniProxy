@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-type dashboardCounts struct{ requests, success, failed, cancelled, latency, input, output, complete int64 }
+type dashboardCounts struct{ requests, success, failed, cancelled, latency, input, output, complete, firstToken, firstTokenSamples int64 }
 
 func (c *dashboardCounts) add(other dashboardCounts) error {
-	for _, pair := range [][2]*int64{{&c.requests, &other.requests}, {&c.success, &other.success}, {&c.failed, &other.failed}, {&c.cancelled, &other.cancelled}, {&c.latency, &other.latency}, {&c.input, &other.input}, {&c.output, &other.output}, {&c.complete, &other.complete}} {
+	for _, pair := range [][2]*int64{{&c.requests, &other.requests}, {&c.success, &other.success}, {&c.failed, &other.failed}, {&c.cancelled, &other.cancelled}, {&c.latency, &other.latency}, {&c.input, &other.input}, {&c.output, &other.output}, {&c.complete, &other.complete}, {&c.firstToken, &other.firstToken}, {&c.firstTokenSamples, &other.firstTokenSamples}} {
 		if *pair[1] < 0 || *pair[0] > math.MaxInt64-*pair[1] {
 			return ErrUnavailable
 		}
@@ -26,6 +26,11 @@ func (c dashboardCounts) summary() DashboardSummary {
 	if completed := c.success + c.failed; completed > 0 {
 		rate, latency := float64(c.success)/float64(completed)*100, float64(c.latency)/float64(completed)
 		result.SuccessRate, result.AverageLatencyMS = &rate, &latency
+	}
+	result.FirstTokenSamples = c.firstTokenSamples
+	if c.firstTokenSamples > 0 {
+		value := float64(c.firstToken) / float64(c.firstTokenSamples)
+		result.AverageFirstTokenMS = &value
 	}
 	return result
 }
@@ -75,6 +80,16 @@ func (s *Service) Dashboard(ctx context.Context, query DashboardQuery) (Dashboar
 	}
 	result.HistoryIncomplete = incomplete && query.Boundaries[0] < result.CapturedFrom
 	result.Recent, err = readDashboardRecent(ctx, tx, query.Boundaries[0], query.Boundaries[len(query.Boundaries)-1])
+	if err != nil {
+		return result, ErrUnavailable
+	}
+	result.ProviderDistribution, err = readDashboardProviders(ctx, tx)
+	var pending int64
+	// 使用已有全局桶计算未结束请求，避免保留百万条明细时每次刷新扫描整表。
+	if err != nil || tx.QueryRowContext(ctx, `SELECT COALESCE(SUM(MAX(0,requests-success-failed-cancelled)),0) FROM dashboard_buckets`).Scan(&pending) != nil {
+		return result, ErrUnavailable
+	}
+	result.PendingNow = &pending
 	if err != nil || tx.Commit() != nil {
 		return result, ErrUnavailable
 	}
@@ -83,7 +98,7 @@ func (s *Service) Dashboard(ctx context.Context, query DashboardQuery) (Dashboar
 
 func readDashboardCounts(ctx context.Context, tx *sql.Tx, bounds []int64) ([]dashboardCounts, error) {
 	counts := make([]dashboardCounts, len(bounds)-1)
-	rows, err := tx.QueryContext(ctx, `SELECT bucket,requests,success,failed,cancelled,latency_ms,input_tokens,output_tokens,complete_usage FROM dashboard_buckets WHERE bucket>=? AND bucket<? ORDER BY bucket`, bounds[0], bounds[len(bounds)-1])
+	rows, err := tx.QueryContext(ctx, `SELECT bucket,requests,success,failed,cancelled,latency_ms,input_tokens,output_tokens,complete_usage,first_token_ms,first_token_samples FROM dashboard_buckets WHERE bucket>=? AND bucket<? ORDER BY bucket`, bounds[0], bounds[len(bounds)-1])
 	if err != nil {
 		return nil, ErrUnavailable
 	}
@@ -92,7 +107,7 @@ func readDashboardCounts(ctx context.Context, tx *sql.Tx, bounds []int64) ([]das
 	for rows.Next() {
 		var bucket int64
 		var c dashboardCounts
-		if rows.Scan(&bucket, &c.requests, &c.success, &c.failed, &c.cancelled, &c.latency, &c.input, &c.output, &c.complete) != nil {
+		if rows.Scan(&bucket, &c.requests, &c.success, &c.failed, &c.cancelled, &c.latency, &c.input, &c.output, &c.complete, &c.firstToken, &c.firstTokenSamples) != nil {
 			return nil, ErrUnavailable
 		}
 		for index+1 < len(counts) && bucket >= bounds[index+1] {

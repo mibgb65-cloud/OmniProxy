@@ -9,6 +9,7 @@ type trackedWriter struct {
 	http.ResponseWriter
 	status int
 	code   string
+	trace  *Trace
 }
 
 func (w *trackedWriter) WriteHeader(status int) {
@@ -40,6 +41,10 @@ func (t *Trace) completeLogged(status int, code string, log *slog.Logger) {
 		if t.event.Usage.Complete {
 			usageState = "complete"
 		}
-		log.Info("gateway request finished", "module", "gateway", "request_id", t.ID(), "model", t.event.Model, "status_code", status, "code", code, "latency_ms", t.event.LatencyMS, "input_tokens", t.event.Usage.Input, "output_tokens", t.event.Usage.Output, "usage_state", usageState)
+		fields := []any{"module", "gateway", "request_id", t.ID(), "model", t.event.Model, "status_code", status, "code", code, "latency_ms", t.event.LatencyMS, "input_tokens", t.event.Usage.Input, "output_tokens", t.event.Usage.Output, "usage_state", usageState}
+		if t.event.FirstTokenMS != nil {
+			fields = append(fields, "first_token_ms", *t.event.FirstTokenMS)
+		}
+		log.Info("gateway request finished", fields...)
 	}
 }

@@ -89,6 +89,7 @@ accounts need one local place to:
 - DeepSeek、阶跃星辰与 Kimi 普通 API Key 账号支持官方余额查询，按各自协议展示币种、金额及分项，提供手动刷新；详见 `docs/product/BALANCE.md`。
 - Codex 订阅账号详情可查询真实额度窗口、剩余百分比及重置时间；Plus／Team 普通套餐展示 5h 与周额度，其他套餐仅周额度。配额页集中展示跨账号订阅额度及 DeepSeek／阶跃星辰／Kimi 余额、异常概况、搜索／筛选和受控刷新，与账号详情共享缓存；额度历史和推理权限验证仍待后续实现。详见 `docs/product/QUOTA.md`。
 - Request history with success/failure classification.
+- 网关运行概览展示真实请求指标、成功／失败趋势、可筛选最近记录、累计上游分布和接入信息。新增首字耗时按下游有效流式内容写出计时，区分旧数据／非流式未知与真实 0，均值显示成功流式样本数；共用本地记账与独立聚合，不调用模型。详见 `docs/product/GATEWAY.md`。
 - 仪表盘提供本地今日／7 天／30 天运行总览、请求／Token／成功率／完整耗时、结果趋势、待处理问题、最近请求及资源／客户端配置概况；资源默认读缓存，官方查询由用户主动触发。独立时间桶保留明细清理后的聚合，历史缺口明确标示。详见 `docs/product/DASHBOARD.md`。
 - 已实现持久请求明细、输入／输出 Token 累计及每日／成员／模型汇总；删除账号与明细淘汰不减少累计。请求默认保存 10000、设置可调整，日志缓存最多 5000，request_id 双向关联。Team 同时按邮箱和 account_id 识别。详见 `docs/product/ACTIVITY.md`。
 - Provider health detection.

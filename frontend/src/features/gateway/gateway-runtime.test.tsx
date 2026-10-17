@@ -36,6 +36,7 @@ describe("网关运行控制", () => {
     localStorage.clear()
     useUIStore.setState({ language: "zh" })
     resetGatewayRuntime()
+    vi.mocked(Events.On).mockImplementation(() => vi.fn())
     vi.mocked(getAppInfo).mockResolvedValue(appInfo)
     vi.mocked(listProviders).mockResolvedValue(providers)
     vi.mocked(listAccounts).mockResolvedValue(accounts)
@@ -69,10 +70,14 @@ describe("网关运行控制", () => {
 
   it("状态事件刷新快照，卸载时清理订阅", async () => {
     const unsubscribe = vi.fn()
-    vi.mocked(Events.On).mockReturnValueOnce(unsubscribe)
+    vi.mocked(Events.On).mockImplementation((name) =>
+      name === "gateway:status" ? unsubscribe : vi.fn(),
+    )
     const { unmount } = renderGateway()
     await screen.findByText("已停止")
-    const callback = vi.mocked(Events.On).mock.calls[0]?.[1]
+    const callback = vi
+      .mocked(Events.On)
+      .mock.calls.find((call) => call[0] === "gateway:status")?.[1]
     expect(callback).toBeDefined()
     vi.mocked(getGatewayInfo).mockResolvedValue({
       ...gatewayInfo,

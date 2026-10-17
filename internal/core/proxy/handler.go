@@ -99,7 +99,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("X-Request-ID", trace.ID())
-	writer := &trackedWriter{ResponseWriter: w}
+	writer := &trackedWriter{ResponseWriter: w, trace: trace}
 	w = writer
 	defer func() { trace.completeLogged(writer.status, writer.code, s.opts.Logger) }()
 	controller := http.NewResponseController(w)

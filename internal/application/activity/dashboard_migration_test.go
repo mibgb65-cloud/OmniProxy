@@ -23,7 +23,7 @@ func TestDashboardMigrationBackfillMarksMissingHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, entry := range entries {
-		if entry.Name() == "010_dashboard_buckets.sql" {
+		if entry.Name() >= "010_dashboard_buckets.sql" {
 			continue
 		}
 		raw, err := os.ReadFile("../../../migrations/" + entry.Name())
@@ -54,6 +54,9 @@ func TestDashboardMigrationBackfillMarksMissingHistory(t *testing.T) {
 	}
 	if !info.HistoryIncomplete || info.Summary.Requests != 1 || info.Summary.TotalTokens != "30" {
 		t.Fatal("missing historical requests were fabricated", info)
+	}
+	if info.Summary.FirstTokenSamples != 0 || info.Summary.AverageFirstTokenMS != nil || info.Recent[0].FirstTokenMS != nil {
+		t.Fatal("legacy total latency was fabricated as first-token latency")
 	}
 	if err := database.Migrate(ctx, db, all); err != nil {
 		t.Fatal(err)

@@ -13,6 +13,8 @@ export interface Breakdown {
  * DashboardInfo 不包含凭据或请求正文，缺失历史不会推算为完整数据。
  */
 export interface DashboardInfo {
+    "providerDistribution"?: DashboardProvider[] | null;
+    "pendingNow"?: number | null;
     "summary": DashboardSummary;
     "points": DashboardPoint[] | null;
     "recent": RequestItem[] | null;
@@ -31,6 +33,15 @@ export interface DashboardPoint {
 }
 
 /**
+ * DashboardProvider 使用与明细保留期独立的累计路由计数，不冒充所选时段的分布。
+ */
+export interface DashboardProvider {
+    "providerId": string;
+    "providerName": string;
+    "requests": number;
+}
+
+/**
  * DashboardQuery 使用客户端本地时区生成的 UTC 边界，不按服务端时区猜测日期。
  */
 export interface DashboardQuery {
@@ -41,6 +52,8 @@ export interface DashboardQuery {
  * DashboardSummary 的结果与 Token 属于同一批按开始时间归属的请求。
  */
 export interface DashboardSummary {
+    "averageFirstTokenMs"?: number | null;
+    "firstTokenSamples"?: number;
     "requests": number;
     "success": number;
     "failed": number;
@@ -86,6 +99,7 @@ export interface RequestItem {
     "statusCode": number;
     "errorCode": string;
     "latencyMs": number;
+    "firstTokenMs"?: number | null;
     "inputTokens": string;
     "outputTokens": string;
     "inputKnown": boolean;

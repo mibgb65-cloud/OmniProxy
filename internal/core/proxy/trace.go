@@ -24,6 +24,7 @@ type RequestEvent struct {
 	State, ErrorCode                       string
 	StatusCode                             int
 	LatencyMS                              int64
+	FirstTokenMS                           *int64
 }
 
 // RequestObserver 在转发前持久化，消费上游用量快照时原子累计，结束更新结果。
@@ -33,9 +34,10 @@ type RequestObserver interface {
 	Finish(context.Context, RequestEvent) error
 }
 type Trace struct {
-	mu       sync.Mutex
-	event    RequestEvent
-	observer RequestObserver
+	mu        sync.Mutex
+	event     RequestEvent
+	observer  RequestObserver
+	startedAt time.Time
 }
 
 func (s *Server) beginTrace(ctx context.Context, protocol, transport string) (*Trace, error) {
@@ -43,7 +45,8 @@ func (s *Server) beginTrace(ctx context.Context, protocol, transport string) (*T
 	if _, err := rand.Read(value); err != nil {
 		return nil, Failure("accounting_unavailable", 503)
 	}
-	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), StartedAt: time.Now().UTC(), Protocol: protocol, Transport: transport, State: "pending"}, observer: s.opts.Observer}
+	now := time.Now()
+	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), StartedAt: now.UTC(), Protocol: protocol, Transport: transport, State: "pending"}, startedAt: now, observer: s.opts.Observer}
 	if trace.observer != nil {
 		if err := trace.observer.Begin(ctx, trace.event); err != nil {
 			return nil, Failure("accounting_unavailable", 503)
@@ -103,7 +106,7 @@ func (t *Trace) finish(status int, code string) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.event.FinishedAt = time.Now().UTC()
-	t.event.LatencyMS = time.Since(t.event.StartedAt).Milliseconds()
+	t.event.LatencyMS = t.elapsedMS()
 	t.event.StatusCode = status
 	t.event.ErrorCode = code
 	t.event.State = "success"

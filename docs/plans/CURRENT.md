@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-026](../tasks/active/TASK-20261017-026-gateway-request-metrics.md)：网关请求概览与首字计时、持久聚合、趋势和最近记录；正在进行质量门与原生验证。
 
 ## Recently Completed
 
