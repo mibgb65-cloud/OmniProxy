@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -63,8 +63,14 @@ In Progress
 
 ## Git
 
-待提交。
+`896b3ee1a98cfc7511b0c85106159545cbea1096` — `feat(gateway): 右侧展示已接入模型并支持内联配置`。
+
+任务归档和 CURRENT 完成状态另行提交。
 
 ## Result
 
 右侧实际模型展示与内联配置均已完成，开发版已更新；完整质量门、Windows 构建和原生界面验收通过。
+
+## Completed
+
+2026-10-17 18:16（Asia/Singapore）。
