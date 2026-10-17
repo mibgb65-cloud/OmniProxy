@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -65,8 +65,14 @@ None.
 
 ## Git
 
-待提交。
+`e6987383740ba7b35f55a40d8c033922d835c18a` — `feat(config): 一键配置支持模型选择并保留刷新范围`。
+
+任务归档与 CURRENT 完成状态另行提交。
 
 ## Result
 
 模型选择、默认全部、选择持久化与目录刷新保护均已实现；完整质量门及最新开发版原生验收通过。
+
+## Completed
+
+2026-10-17 17:25（Asia/Singapore）。
