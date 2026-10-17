@@ -1,4 +1,4 @@
-.agent-connected-model-grid {
+.agent-model-grid {
   /* 按容器宽度和字号分配紧凑卡片，筛选后沿用原列宽，避免单卡撑满整行。 */
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
 }

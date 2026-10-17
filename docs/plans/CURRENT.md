@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-021](../tasks/active/TASK-20261017-021-config-model-cards.md)：配置模型区复用紧凑卡片与 [1m] 快筛，保留勾选和默认模型语义，正在验证。
 
 ## Recently Completed
 

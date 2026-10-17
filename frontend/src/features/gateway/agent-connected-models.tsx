@@ -7,7 +7,8 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { agentError, getConfiguredAgentModels, type AgentClient } from "../../services/agents"
-import "./agent-connected-models.css"
+import { AgentModelCard } from "./agent-model-card"
+import "./agent-model-grid.css"
 
 export function AgentConnectedModels({ item }: { item: AgentClient }) {
   const { t } = useTranslation()
@@ -88,25 +89,13 @@ export function AgentConnectedModels({ item }: { item: AgentClient }) {
               className="max-h-[min(34rem,60dvh)]"
               viewportClassName="pr-2"
             >
-              <ul className="agent-connected-model-grid grid gap-2">
+              <ul className="agent-model-grid grid gap-2">
                 {visible.map((model) => (
-                  <li
-                    key={model.id}
-                    className="bg-muted/20 min-w-0 space-y-2 rounded-lg border p-3"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="min-w-0 text-sm font-medium wrap-anywhere">
-                        {model.name || model.id}
-                      </span>
-                      {model.id === data.data?.defaultModel ? (
-                        <span className="bg-muted text-muted-foreground rounded-md border px-2 py-0.5 text-xs">
-                          {t("agents.defaultModel")}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="text-muted-foreground font-mono text-xs wrap-anywhere">
-                      {model.id}
-                    </p>
+                  <li key={model.id} className="min-w-0">
+                    <AgentModelCard
+                      model={model}
+                      isDefault={model.id === data.data?.defaultModel}
+                    />
                   </li>
                 ))}
               </ul>

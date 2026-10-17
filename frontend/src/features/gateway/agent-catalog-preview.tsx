@@ -5,6 +5,8 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { SelectField } from "../../components/ui/select-field"
 import type { AgentPlan } from "../../services/agents"
+import { AgentModelCard } from "./agent-model-card"
+import "./agent-model-grid.css"
 
 const modeLabels = {
   "local-catalog": "agents.mode.local",
@@ -38,6 +40,7 @@ export function AgentCatalogPreview({
 }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
+  const [only1m, setOnly1m] = useState(false)
   const models = plan.models ?? []
   const modeName =
     plan.mode === "remote-catalog" && selection && selection.ids.length !== models.length
@@ -47,8 +50,10 @@ export function AgentCatalogPreview({
     ? modeLabels[modeName as keyof typeof modeLabels]
     : "agents.mode.default"
   const count = selection?.ids.length ?? models.length
-  const visibleModels = models.filter((model) =>
-    `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase()),
+  const visibleModels = models.filter(
+    (model) =>
+      (!only1m || model.id.endsWith("[1m]")) &&
+      `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase()),
   )
   return (
     <section className="bg-muted/30 space-y-3 rounded-lg border p-4 text-sm">
@@ -113,13 +118,30 @@ export function AgentCatalogPreview({
                 </Button>
               </div>
             </div>
-            <Input
-              type="search"
-              aria-label={t("agents.searchModels")}
-              placeholder={t("agents.searchModels")}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                type="search"
+                className="min-w-0 flex-[1_1_14rem]"
+                aria-label={t("agents.searchModels")}
+                placeholder={t("agents.searchModels")}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              <Button
+                variant="outline"
+                aria-pressed={only1m}
+                className="aria-pressed:bg-accent aria-pressed:text-accent-foreground shrink-0"
+                onClick={() => setOnly1m((value) => !value)}
+              >
+                {t("agents.only1mModels")}
+              </Button>
+            </div>
+            <p aria-live="polite" aria-atomic="true" className="text-muted-foreground text-xs">
+              {t("agents.connectedModelsCount", {
+                count: visibleModels.length,
+                total: models.length,
+              })}
+            </p>
             {count === 0 ? (
               <p role="alert" className="text-destructive text-xs">
                 {t("agents.selectAtLeastOneModel")}
@@ -133,40 +155,27 @@ export function AgentCatalogPreview({
           className={expanded ? "mt-2 max-h-[min(26rem,45dvh)] border-t" : "mt-2 max-h-48 border-t"}
           viewportClassName="pt-3"
         >
-          <ul className="space-y-2">
+          <ul className="agent-model-grid grid gap-2">
             {visibleModels.map((model) => (
-              <li key={model.id} className="text-xs">
-                <label className="hover:bg-accent/40 flex min-h-11 cursor-pointer items-start gap-3 rounded-md p-1.5">
-                  {selection ? (
-                    <input
-                      type="checkbox"
-                      className="accent-primary focus-visible:ring-ring mt-0.5 size-4 shrink-0 cursor-pointer rounded focus-visible:ring-2 focus-visible:ring-offset-2"
-                      aria-label={t("agents.selectModel", { model: model.name })}
-                      checked={selection.ids.includes(model.id)}
-                      disabled={selection.disabled}
-                      onChange={(event) =>
-                        selection.onChange(
-                          event.target.checked
-                            ? [...selection.ids, model.id]
-                            : selection.ids.filter((id) => id !== model.id),
-                        )
-                      }
-                    />
-                  ) : null}
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-medium wrap-anywhere">{model.name}</span>
-                      <code className="text-muted-foreground min-w-0 wrap-anywhere">
-                        {model.id}
-                      </code>
-                    </div>
-                    <p className="text-muted-foreground">
-                      {model.metadata.contextWindow
-                        ? t("models.contextWindow", { count: model.metadata.contextWindow })
-                        : t("models.metadataUnknown")}
-                    </p>
-                  </div>
-                </label>
+              <li key={model.id} className="min-w-0">
+                <AgentModelCard
+                  model={model}
+                  isDefault={model.id === (selection?.defaultModel ?? plan.defaultModel)}
+                  selection={
+                    selection
+                      ? {
+                          checked: selection.ids.includes(model.id),
+                          disabled: selection.disabled,
+                          onChange: (checked) =>
+                            selection.onChange(
+                              checked
+                                ? [...selection.ids, model.id]
+                                : selection.ids.filter((id) => id !== model.id),
+                            ),
+                        }
+                      : undefined
+                  }
+                />
               </li>
             ))}
           </ul>
