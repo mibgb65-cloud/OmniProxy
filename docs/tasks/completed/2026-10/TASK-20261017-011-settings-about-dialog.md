@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -56,9 +56,13 @@ Tabs／ScrollRegion 保持标题与关闭按钮可见，临时打开状态不持
 
 ## Git
 
-待填写。
+`4bbd7bc` — `feat(settings): 合并设置与关于为底部悬浮窗口`。
 
 ## Result
 
 统一入口和悬浮窗口已完成，原有设置与关于功能保留，完整质量门与原生交互验收通过。
 本次仅调整前端入口与容器，无新增后端风险；系统操作沿用既有服务与验证。
+
+## Completed
+
+2026-10-17（Asia/Singapore）。
