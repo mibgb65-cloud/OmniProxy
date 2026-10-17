@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -57,8 +57,12 @@ In Progress
 
 ## Git
 
-待提交。
+实现提交：`8d929daf0a25489696e21b2f172db0581a22717a` — `feat(gateway): 添加 Claude Desktop 按需版本更新检查`。任务记录随随后文档提交归档，未推送远端；无关未跟踪任务文件保持原样。
 
 ## Result
 
-已完成 Claude Code Desktop 按需版本更新检查与原生验证，等待提交归档。
+Claude Code Desktop 按需版本更新检查已完成、验证、提交并归档，正常开发窗口已重新构建更新。官方公开发布版本检查可用，其他客户端更新渠道不在本次范围。
+
+## Completed
+
+2026-10-17 21:33（Asia/Singapore）
