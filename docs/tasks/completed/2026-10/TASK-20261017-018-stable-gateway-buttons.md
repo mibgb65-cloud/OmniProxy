@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -45,8 +45,14 @@ GatewayHeader 按钮宽度由当前文案决定，启停过程和刷新过程更
 
 ## Git
 
-待提交。
+`d10db4e1ef0290d2909d63955d0e62663c78ce3f` — `fix(gateway): 保持启停和刷新按钮状态切换尺寸稳定`。
+
+任务归档与看板完成状态另行提交。
 
 ## Result
 
 网关启停／刷新按钮状态变化不再改变尺寸，开发版已更新，原生几何采样与完整质量门通过。
+
+## Completed
+
+2026-10-17 18:23（Asia/Singapore）。
