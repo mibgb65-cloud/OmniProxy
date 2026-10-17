@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { AboutView } from "../../features/about/about-view"
+import { OpenPreferencesRoute } from "../../features/settings/open-preferences-route"
 
 export const Route = createFileRoute("/about")({
-  component: AboutPage,
+  component: () => <OpenPreferencesRoute tab="about" />,
 })
-
-function AboutPage() {
-  return <AboutView />
-}

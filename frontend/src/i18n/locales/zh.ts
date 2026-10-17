@@ -100,6 +100,9 @@ export const zh = {
   "nav.logs": "日志",
   "nav.settings": "设置",
   "nav.about": "关于",
+  "preferences.title": "设置与关于",
+  "preferences.description": "调整界面偏好、管理本机数据并查看应用信息。",
+  "preferences.close": "关闭设置窗口",
 
   "about.title": "关于",
   "about.description": "应用信息、运行详情与更新检查。",

@@ -4,20 +4,19 @@ import {
   BarChart3,
   Gauge,
   History,
-  Info,
   LayoutDashboard,
   Network,
   PanelLeftClose,
   Route as RouteIcon,
   ScrollText,
   Server,
-  Settings,
   Users,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../ui/button"
 import { SidebarLabel } from "./sidebar-label"
 import { SidebarGatewayStatus } from "../../features/gateway/sidebar-gateway-status"
+import { AppPreferencesDialog } from "../../features/settings/app-preferences-dialog"
 import { ScrollRegion } from "./scroll-region"
 import { cn } from "../../lib/utils"
 import { useUIStore } from "../../stores/ui-store"
@@ -34,8 +33,6 @@ const navItems: NavItem[] = [
   { to: "/usage", labelKey: "nav.usage", icon: BarChart3 },
   { to: "/requests", labelKey: "nav.requests", icon: History },
   { to: "/logs", labelKey: "nav.logs", icon: ScrollText },
-  { to: "/settings", labelKey: "nav.settings", icon: Settings },
-  { to: "/about", labelKey: "nav.about", icon: Info },
 ]
 
 export function AppSidebar() {
@@ -79,7 +76,7 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
+          className="h-9 w-full justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
           onClick={toggleSidebar}
           aria-label={collapsed ? t("common.expand") : t("common.collapse")}
           aria-expanded={!collapsed}
@@ -87,6 +84,7 @@ export function AppSidebar() {
           <PanelLeftClose className={cn("size-4 shrink-0", collapsed && "rotate-180")} />
           <SidebarLabel collapsed={collapsed}>{t("common.collapse")}</SidebarLabel>
         </Button>
+        <AppPreferencesDialog collapsed={collapsed} />
       </div>
     </aside>
   )

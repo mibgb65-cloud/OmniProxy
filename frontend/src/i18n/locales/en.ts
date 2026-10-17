@@ -102,6 +102,10 @@ export const en: Record<keyof typeof zh, string> = {
   "nav.logs": "Logs",
   "nav.settings": "Settings",
   "nav.about": "About",
+  "preferences.title": "Settings & About",
+  "preferences.description":
+    "Adjust preferences, manage local data and view application information.",
+  "preferences.close": "Close settings window",
 
   "about.title": "About",
   "about.description": "Application information, runtime details and update check.",

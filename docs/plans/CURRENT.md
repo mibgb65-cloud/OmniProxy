@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-011](../tasks/active/TASK-20261017-011-settings-about-dialog.md)：合并设置／关于到侧栏底部入口，提供背景模糊悬浮窗口，验证功能、旧链接和焦点行为。
 
 ## Recently Completed
 

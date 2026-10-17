@@ -38,7 +38,9 @@ describe("AppSidebar", () => {
     expect(screen.getByText("OmniProxy")).toBeInTheDocument()
     expect(screen.getByText("仪表盘")).toBeInTheDocument()
     expect(screen.getByText("账号")).toBeInTheDocument()
-    expect(screen.getByText("设置")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "设置与关于" })).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "设置" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "关于" })).not.toBeInTheDocument()
     expect(screen.queryByRole("group", { name: "语言" })).not.toBeInTheDocument()
   })
 
@@ -81,7 +83,7 @@ describe("AppSidebar", () => {
     await user.click(screen.getByRole("button", { name: "折叠" }))
     expect(isInaccessible(screen.getByText("仪表盘"))).toBe(true)
     expect(screen.getByRole("link", { name: "仪表盘" })).toHaveAttribute("href", "/")
-    expect(screen.getAllByRole("link")).toHaveLength(11)
+    expect(screen.getAllByRole("link")).toHaveLength(9)
     expect(screen.getByRole("button", { name: "展开" })).toHaveAttribute("aria-expanded", "false")
 
     await user.click(screen.getByRole("button", { name: "展开" }))
