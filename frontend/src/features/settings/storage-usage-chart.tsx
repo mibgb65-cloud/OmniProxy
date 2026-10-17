@@ -19,9 +19,9 @@ export function StorageUsageChart({ data }: { data: StorageInfo }) {
   })
 
   return (
-    <figure>
+    <figure className="@container">
       <figcaption className="sr-only">{t("settings.storage.breakdown")}</figcaption>
-      <div className="grid gap-6 border-b pb-6 md:grid-cols-[minmax(180px,240px)_minmax(0,1fr)] md:gap-8">
+      <div className="grid gap-4 border-b pb-4 @xl:grid-cols-[minmax(180px,240px)_minmax(0,1fr)] @xl:gap-6">
         <div className="bg-muted/25 flex flex-col justify-center rounded-lg border px-4 py-4">
           <span className="text-muted-foreground text-xs">{t("settings.storage.total")}</span>
           <div className="mt-1 flex items-baseline gap-1.5 tabular-nums">
@@ -47,7 +47,7 @@ export function StorageUsageChart({ data }: { data: StorageInfo }) {
                 />
               ))}
           </div>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 @lg:grid-cols-4">
             {categories.map((category) => (
               <div key={category.name} className="min-w-0">
                 <dt className="text-muted-foreground flex items-center gap-1.5 text-xs">

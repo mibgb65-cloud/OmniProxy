@@ -1,4 +1,4 @@
-import { Info, Settings, X } from "lucide-react"
+import { Database, Info, ScrollText, Settings, X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,6 +10,13 @@ import { Tooltip } from "../../components/ui/tooltip"
 import { AboutView } from "../about/about-view"
 import { useAppPreferences, type AppPreferencesTab } from "./app-preferences-state"
 import { SettingsContent } from "./settings-content"
+
+const SECTIONS = [
+  { value: "settings", label: "preferences.general", icon: Settings },
+  { value: "activity", label: "preferences.activity", icon: ScrollText },
+  { value: "storage", label: "preferences.storage", icon: Database },
+  { value: "about", label: "nav.about", icon: Info },
+] as const
 
 export function AppPreferencesDialog({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation()
@@ -41,75 +48,83 @@ function PreferencesWindow() {
   const setTab = useAppPreferences((state) => state.setTab)
   const activeTab = useRef<HTMLButtonElement>(null)
   const [visited, setVisited] = useState<AppPreferencesTab[]>([tab])
+  const currentSection = SECTIONS.find((section) => section.value === tab)!
   // 已访问页签保留表单和异步反馈，打开窗口时才挂载，关闭后释放内容。
   if (!visited.includes(tab)) setVisited([...visited, tab])
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
       <Dialog.Content
-        className="bg-popover text-popover-foreground fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-2xl border p-6 shadow-2xl outline-none"
+        className="bg-background text-foreground fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none"
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           activeTab.current?.focus()
         }}
       >
-        <header className="flex shrink-0 items-start justify-between gap-4">
-          <div className="min-w-0 space-y-1">
-            <Dialog.Title className="text-lg font-semibold">{t("preferences.title")}</Dialog.Title>
-            <Dialog.Description className="text-muted-foreground text-sm">
-              {t("preferences.description")}
-            </Dialog.Description>
-          </div>
-          <Dialog.Close asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0"
-              aria-label={t("preferences.close")}
-            >
-              <X aria-hidden="true" />
-            </Button>
-          </Dialog.Close>
-        </header>
+        <Dialog.Description className="sr-only">{t("preferences.description")}</Dialog.Description>
         <Tabs
           value={tab}
+          orientation="vertical"
           onValueChange={(value) => {
-            if (value === "settings" || value === "about") setTab(value)
+            const section = SECTIONS.find((section) => section.value === value)
+            if (section) setTab(section.value)
           }}
-          className="flex min-h-0 flex-1 flex-col gap-4"
+          className="grid h-full min-h-0 grid-cols-[9rem_minmax(0,1fr)] sm:grid-cols-[11.5rem_minmax(0,1fr)]"
         >
-          <TabsList className="shrink-0" aria-label={t("preferences.title")}>
-            <TabsTrigger value="settings" ref={tab === "settings" ? activeTab : undefined}>
-              <Settings aria-hidden="true" />
-              {t("nav.settings")}
-            </TabsTrigger>
-            <TabsTrigger value="about" ref={tab === "about" ? activeTab : undefined}>
-              <Info aria-hidden="true" />
-              {t("nav.about")}
-            </TabsTrigger>
-          </TabsList>
-          <ScrollRegion
-            as="section"
-            ariaLabel={t(tab === "settings" ? "nav.settings" : "nav.about")}
-            className="min-h-0 flex-1"
-            viewportClassName="pr-2"
-            pageKey={tab}
-          >
-            <TabsContent
-              value="settings"
-              forceMount={visited.includes("settings") ? true : undefined}
-              hidden={tab !== "settings"}
+          <aside className="flex min-h-0 flex-col border-r px-3 py-5">
+            <Dialog.Title className="text-muted-foreground mb-5 px-3 text-sm font-medium">
+              {t("preferences.title")}
+            </Dialog.Title>
+            <TabsList
+              className="min-h-0 flex-col flex-nowrap gap-1 overflow-y-auto border-0"
+              aria-label={t("preferences.title")}
             >
-              <SettingsContent />
-            </TabsContent>
-            <TabsContent
-              value="about"
-              forceMount={visited.includes("about") ? true : undefined}
-              hidden={tab !== "about"}
+              {SECTIONS.map(({ value, label, icon: Icon }) => (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  ref={tab === value ? activeTab : undefined}
+                  className="data-[state=active]:bg-muted data-[state=active]:text-foreground min-h-10 w-full shrink-0 justify-start rounded-lg border-0 px-3 py-2.5 text-left"
+                >
+                  <Icon aria-hidden="true" />
+                  {t(label)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </aside>
+          <div className="bg-muted/25 flex min-h-0 min-w-0 flex-col">
+            <header className="flex shrink-0 items-center justify-between gap-3 px-5 pt-4 pb-3 sm:px-6">
+              <h2 className="text-sm font-semibold">{t(currentSection.label)}</h2>
+              <Dialog.Close asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground shrink-0"
+                  aria-label={t("preferences.close")}
+                >
+                  <X aria-hidden="true" />
+                </Button>
+              </Dialog.Close>
+            </header>
+            <ScrollRegion
+              as="section"
+              ariaLabel={t(currentSection.label)}
+              className="min-h-0 flex-1 pb-5 pl-5 sm:pl-6"
+              viewportClassName="pr-2 sm:pr-3"
+              pageKey={`preferences-${tab}`}
             >
-              <AboutView embedded />
-            </TabsContent>
-          </ScrollRegion>
+              {SECTIONS.map(({ value }) => (
+                <TabsContent
+                  key={value}
+                  value={value}
+                  forceMount={visited.includes(value) ? true : undefined}
+                  hidden={tab !== value}
+                >
+                  {value === "about" ? <AboutView embedded /> : <SettingsContent section={value} />}
+                </TabsContent>
+              ))}
+            </ScrollRegion>
+          </div>
         </Tabs>
       </Dialog.Content>
     </Dialog.Portal>

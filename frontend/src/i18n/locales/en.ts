@@ -106,6 +106,9 @@ export const en: Record<keyof typeof zh, string> = {
   "preferences.description":
     "Adjust preferences, manage local data and view application information.",
   "preferences.close": "Close settings window",
+  "preferences.general": "General",
+  "preferences.activity": "Requests & logs",
+  "preferences.storage": "Data storage",
 
   "about.title": "About",
   "about.description": "Application information, runtime details and update check.",

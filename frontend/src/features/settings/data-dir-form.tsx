@@ -51,14 +51,14 @@ export function DataDirForm() {
   }
 
   return (
-    <Card className="dark:bg-card/75 gap-0">
-      <CardHeader className="pb-5">
+    <Card className="gap-0 rounded-2xl py-4 shadow-none">
+      <CardHeader className="px-5 pb-4">
         <CardTitle className="text-base">{t("settings.storage.locationTitle")}</CardTitle>
         <CardDescription>{t("settings.storage.locationDescription")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="@container space-y-4 px-5">
         <form
-          className="flex flex-col gap-2 sm:flex-row sm:items-start"
+          className="flex flex-col gap-2 @lg:flex-row @lg:items-start"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >

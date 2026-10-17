@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-export type AppPreferencesTab = "settings" | "about"
+export type AppPreferencesTab = "settings" | "activity" | "storage" | "about"
 
 type AppPreferencesState = {
   open: boolean

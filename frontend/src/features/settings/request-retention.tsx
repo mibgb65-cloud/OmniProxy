@@ -25,15 +25,15 @@ export function RequestRetentionSettings() {
     },
   })
   return (
-    <Card className="min-w-0 gap-4">
-      <CardHeader>
+    <Card className="min-w-0 gap-4 rounded-2xl py-4 shadow-none">
+      <CardHeader className="px-5">
         <CardTitle className="flex items-center gap-2 text-base">
           <Database className="size-4" aria-hidden="true" />
           {t("activity.retentionTitle")}
         </CardTitle>
         <CardDescription>{t("activity.retentionDescription")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-5">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-0 flex-1 space-y-2">
             <label htmlFor="request-record-limit" className="text-sm font-medium">

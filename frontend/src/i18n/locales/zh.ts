@@ -103,6 +103,9 @@ export const zh = {
   "preferences.title": "设置与关于",
   "preferences.description": "调整界面偏好、管理本机数据并查看应用信息。",
   "preferences.close": "关闭设置窗口",
+  "preferences.general": "通用设置",
+  "preferences.activity": "请求与日志",
+  "preferences.storage": "数据存储",
 
   "about.title": "关于",
   "about.description": "应用信息、运行详情与更新检查。",

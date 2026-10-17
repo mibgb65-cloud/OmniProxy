@@ -50,7 +50,7 @@ accounts need one local place to:
 
 ## Core Features
 
-- 侧栏底部“折叠”下方提供“设置与关于”统一入口，以带背景模糊的悬浮窗口展示两个页签；打开时保留当前工作页面，页签切换保留未保存输入，支持键盘关闭和焦点返回。旧 `/settings`、`/about` 链接继续打开对应页签。
+- 侧栏底部“折叠”下方提供“设置与关于”统一入口，以带背景模糊的悬浮窗口展示左侧分类和右侧独立滚动内容；分类为通用设置、请求与日志、数据存储、关于。通用设置紧凑展示启动／关闭行为与字号。打开时保留当前工作页面，切换分类保留未保存输入，支持上下键选择分类、键盘关闭和焦点返回。旧 `/settings`、`/about` 链接继续打开对应分类。
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,
   StepFun, Atria, River, and OpenAI-compatible endpoints).

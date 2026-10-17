@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-012](../tasks/active/TASK-20261017-012-settings-sidebar-layout.md)：设置窗口改为左侧四分类与右侧紧凑分组，正在验证分类、草稿、深浅主题与窗口适配。
 
 ## Recently Completed
 

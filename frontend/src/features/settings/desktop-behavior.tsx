@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
 import {
   useDesktopSettings,
   useSetAutoStart,
@@ -27,12 +27,13 @@ export function DesktopBehavior() {
   const closeBehavior = useSetCloseBehavior()
 
   return (
-    <Card className="dark:bg-card/75 gap-0">
-      <CardHeader className="pb-5">
-        <CardTitle className="text-base">{t("settings.desktop.title")}</CardTitle>
-        <CardDescription>{t("settings.desktop.description")}</CardDescription>
+    <Card className="gap-0 rounded-2xl py-0 shadow-none">
+      <CardHeader className="px-5 pt-4">
+        <CardTitle className="text-muted-foreground text-xs font-medium">
+          {t("settings.desktop.title")}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5 text-sm">
+      <CardContent className="space-y-3 px-5 pb-4 text-sm">
         {isPending ? <p className="text-muted-foreground">{t("dashboard.loading")}</p> : null}
         {isError ? (
           <p className="text-destructive" role="alert">
@@ -43,7 +44,7 @@ export function DesktopBehavior() {
         {data ? (
           <>
             <label
-              className={`bg-muted/15 flex items-center justify-between gap-4 rounded-lg border px-4 py-3 ${
+              className={`flex items-center justify-between gap-4 py-4 ${
                 data.autoStartAvailable && !autoStart.isPending
                   ? "cursor-pointer"
                   : "cursor-default"
@@ -67,7 +68,7 @@ export function DesktopBehavior() {
               />
               <span
                 className={`peer-focus-visible:ring-ring/50 relative h-6 w-11 shrink-0 rounded-full peer-focus-visible:ring-4 ${
-                  data.autoStart ? "bg-blue-600" : "bg-input"
+                  data.autoStart ? "bg-primary" : "bg-input"
                 }`}
                 aria-hidden="true"
               >
@@ -85,25 +86,34 @@ export function DesktopBehavior() {
             ) : null}
 
             <fieldset
-              className="space-y-3 border-t pt-5 disabled:opacity-60"
+              className="min-w-0 space-y-2 border-t pt-4 disabled:opacity-60"
               disabled={closeBehavior.isPending}
             >
-              <legend className="font-medium">{t("settings.desktop.closeTitle")}</legend>
-              <p className="text-muted-foreground text-xs">
-                {t("settings.desktop.closeDescription")}
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {CLOSE_CHOICES.map((choice) => (
-                  <CloseChoice
-                    key={choice.value}
-                    value={choice.value}
-                    label={t(choice.label)}
-                    description={t(choice.description)}
-                    checked={data.closeBehavior === choice.value}
-                    onChange={() => closeBehavior.mutate(choice.value)}
-                  />
-                ))}
+              <legend className="sr-only">{t("settings.desktop.closeTitle")}</legend>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="font-medium" aria-hidden="true">
+                  {t("settings.desktop.closeTitle")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {CLOSE_CHOICES.map((choice) => (
+                    <CloseChoice
+                      key={choice.value}
+                      value={choice.value}
+                      label={t(choice.label)}
+                      description={t(choice.description)}
+                      checked={data.closeBehavior === choice.value}
+                      onChange={() => closeBehavior.mutate(choice.value)}
+                    />
+                  ))}
+                </div>
               </div>
+              <p className="text-muted-foreground text-xs leading-5">
+                {t(
+                  data.closeBehavior === "tray"
+                    ? "settings.desktop.closeToTrayDescription"
+                    : "settings.desktop.closeToExitDescription",
+                )}
+              </p>
             </fieldset>
             {closeBehavior.isError ? (
               <p className="text-destructive text-xs" role="alert">
@@ -137,10 +147,8 @@ function CloseChoice({
 }) {
   return (
     <label
-      className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 ${
-        checked
-          ? "border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/5"
-          : "bg-muted/15"
+      className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 ${
+        checked ? "border-primary/40 bg-muted" : "hover:bg-muted/50"
       }`}
     >
       <input
@@ -149,11 +157,11 @@ function CloseChoice({
         value={value}
         checked={checked}
         onChange={onChange}
-        className="mt-0.5 accent-blue-600"
+        className="accent-primary shrink-0"
       />
       <span>
-        <span className="block font-medium">{label}</span>
-        <span className="text-muted-foreground mt-1 block text-xs">{description}</span>
+        <span className="block text-xs font-medium">{label}</span>
+        <span className="sr-only">{description}</span>
       </span>
     </label>
   )

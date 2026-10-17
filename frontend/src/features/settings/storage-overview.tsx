@@ -16,8 +16,8 @@ export function StorageOverview() {
   const runClean = (target: CleanTarget) => clean.mutate(target)
 
   return (
-    <Card className="dark:bg-card/75 gap-0 overflow-hidden">
-      <CardHeader className="grid-cols-[1fr_auto] items-center pb-5">
+    <Card className="gap-0 overflow-hidden rounded-2xl py-4 shadow-none">
+      <CardHeader className="grid-cols-[1fr_auto] items-center px-5 pb-4">
         <div>
           <CardTitle className="text-base">{t("settings.storage.title")}</CardTitle>
           <CardDescription className="mt-1">{t("settings.storage.description")}</CardDescription>
@@ -39,7 +39,7 @@ export function StorageOverview() {
           </Button>
         </Tooltip>
       </CardHeader>
-      <CardContent className="text-sm">
+      <CardContent className="px-5 text-sm">
         {isPending ? <p className="text-muted-foreground">{t("dashboard.loading")}</p> : null}
         {isError ? (
           <p className="text-destructive">
