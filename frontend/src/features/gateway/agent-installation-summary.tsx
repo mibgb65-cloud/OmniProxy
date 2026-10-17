@@ -1,48 +1,37 @@
 import { useTranslation } from "react-i18next"
 import type { AgentInstallSnapshot } from "../../services/agent-installation"
-import type { AgentClientId } from "./agent-clients"
-import { agentInstallationTargets, clientInstallationTargets } from "./agent-installation-targets"
+import { agentInstallationTargets, type AgentInstallTarget } from "./agent-installation-targets"
 import { agentInstallationStatus } from "./agent-installation-status"
 
 export function AgentInstallationSummary({
-  client,
+  target,
   snapshot,
   unavailable,
-  compact = false,
 }: {
-  client: AgentClientId
+  target: AgentInstallTarget
   snapshot?: AgentInstallSnapshot
   unavailable?: boolean
-  compact?: boolean
 }) {
   const { t } = useTranslation()
+  const item = snapshot?.items?.find((item) => item.id === target)
   return (
     <dl className="space-y-1.5 text-xs">
-      {clientInstallationTargets[client].map((id) => {
-        const item = snapshot?.items?.find((item) => item.id === id)
-        return (
-          <div key={id} className="flex flex-wrap items-center justify-between gap-2">
-            <dt className={compact ? "sr-only" : "text-muted-foreground"}>
-              {t(agentInstallationTargets[id])}
-            </dt>
-            <dd
-              className={
-                item?.detection.state === "installed"
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-muted-foreground"
-              }
-            >
-              {t(
-                snapshot
-                  ? agentInstallationStatus(item)
-                  : unavailable
-                    ? "agents.install.unknown"
-                    : "agents.install.checking",
-              )}
-            </dd>
-          </div>
-        )
-      })}
+      <dt className="sr-only">{t(agentInstallationTargets[target])}</dt>
+      <dd
+        className={
+          item?.detection.state === "installed"
+            ? "text-emerald-700 dark:text-emerald-400"
+            : "text-muted-foreground"
+        }
+      >
+        {t(
+          snapshot
+            ? agentInstallationStatus(item)
+            : unavailable
+              ? "agents.install.unknown"
+              : "agents.install.checking",
+        )}
+      </dd>
     </dl>
   )
 }

@@ -61,7 +61,7 @@ beforeEach(() => {
 it("入口按 Codex 与 Claude 归组，点击仅导航，前进后退恢复详情与卡片焦点", async () => {
   const user = userEvent.setup()
   const { router } = renderGateway("clients")
-  const tile = await screen.findByRole("link", { name: "配置 Codex CLI / Desktop" })
+  const tile = await screen.findByRole("link", { name: "配置 Codex CLI" })
   const claude = screen.getByRole("region", { name: "Claude Code" })
   expect(within(claude).getAllByRole("link")).toHaveLength(2)
   expect(within(claude).getByRole("link", { name: "配置 Claude Code CLI" })).toBeInTheDocument()
@@ -77,13 +77,11 @@ it("入口按 Codex 与 Claude 归组，点击仅导航，前进后退恢复详�
   expect(previewAgentPlanMock).not.toHaveBeenCalled()
   expect(applyAgentConfigMock).not.toHaveBeenCalled()
   await user.click(screen.getByRole("link", { name: "返回本地 Agent" }))
-  await waitFor(() =>
-    expect(screen.getByRole("link", { name: "配置 Codex CLI / Desktop" })).toHaveFocus(),
-  )
+  await waitFor(() => expect(screen.getByRole("link", { name: "配置 Codex CLI" })).toHaveFocus())
   await act(async () => router.history.back())
   expect(await screen.findByRole("heading", { name: "Codex CLI / Desktop" })).toBeInTheDocument()
   await act(async () => router.history.forward())
-  expect(await screen.findByRole("link", { name: "配置 Codex CLI / Desktop" })).toBeInTheDocument()
+  expect(await screen.findByRole("link", { name: "配置 Codex CLI" })).toBeInTheDocument()
 })
 
 it.each([

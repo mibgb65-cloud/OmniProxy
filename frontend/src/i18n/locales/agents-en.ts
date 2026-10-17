@@ -1,4 +1,9 @@
 export const agentsEn = {
+  "agents.codexGroup": "Codex",
+  "agents.opencodeGroup": "OpenCode",
+  "agents.kilocodeGroup": "Kilo Code",
+  "agents.qwenCodeGroup": "Qwen Code",
+  "agents.mimoCodeGroup": "MiMo Code",
   "agents.error.client_upgrade_required":
     "Start the current Qwen Code first, let it upgrade its settings, then reload the configuration.",
   "agents.title": "Local agent connections",

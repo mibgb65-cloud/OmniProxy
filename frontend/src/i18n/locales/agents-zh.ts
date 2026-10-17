@@ -1,4 +1,9 @@
 export const agentsZh = {
+  "agents.codexGroup": "Codex",
+  "agents.opencodeGroup": "OpenCode",
+  "agents.kilocodeGroup": "Kilo Code",
+  "agents.qwenCodeGroup": "Qwen Code",
+  "agents.mimoCodeGroup": "MiMo Code",
   "agents.error.client_upgrade_required": "请先启动当前版 Qwen Code，完成设置升级后重新读取配置。",
   "agents.title": "本地 Agent 接入",
   "agents.kilocode": "Kilo Code CLI / Desktop",

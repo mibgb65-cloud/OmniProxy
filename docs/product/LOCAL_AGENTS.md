@@ -23,10 +23,12 @@ River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工�
 1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／River／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。
 2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。
 3. 可以直接使用已同步模型，也可以新建精确路由并固定账号。
-4. 网关页「客户端接入」按产品归组；Claude Code、Harness 卡片保留各入口的独立状态，其余产品的 CLI／Desktop 放在同一张卡片内。点击进入配置页面，无需先启动网关。
+4. 网关页「客户端接入」全部使用统一的产品分组卡片：品牌与产品标题在上方，内部逐项展示 CLI／Desktop／Web 入口。每项单独显示对应软件的安装状态和实际配置的接入状态，点击进入配置页面，无需先启动网关。
 5. 在配置页点击「一键配置」，随后点击配置预览，检查自动选择的默认模型、目录方式和完整可用列表，再应用。无需手动选择单个模型。配置页同时提供路径、文件状态、接入 Key 复制与启停、原配置恢复。重新启动对应客户端后，在客户端中选择模型；实际调用前需启动网关。
 
-配置页面使用 `/gateway?tab=clients&client=客户端ID` 定位，支持 `codex`、`claude`、`claude-desktop`、`opencode`、`harness-web`、`harness-desktop`、`kilocode`、`qwen-code`、`mimo-code`。支持刷新与前进／后退；非法参数回到卡片目录。返回目录恢复原卡片焦点，选项卡往返保留正在进行的配置操作。点击卡片只导航，不写入客户端配置或发起模型请求。
+Codex、OpenCode、Kilo、Qwen 的 CLI／Desktop 入口进入同一详情；MiMo CLI／国内 Desktop／国际 Desktop 也进入同一详情，共用各产品的接入状态。Claude 的 CLI／Desktop、Harness 的 Desktop／Web 分别进入其独立配置。安装状态始终按软件区分，不因共享 Key 就宣称对应软件已安装。
+
+配置页面使用 `/gateway?tab=clients&client=客户端ID` 定位，支持 `codex`、`claude`、`claude-desktop`、`opencode`、`harness-web`、`harness-desktop`、`kilocode`、`qwen-code`、`mimo-code`。支持刷新与前进／后退；非法参数回到卡片目录。返回目录恢复原软件入口焦点（如从 Desktop 返回仍选中该 Desktop），选项卡往返保留正在进行的配置操作。点击入口只导航，不写入客户端配置或发起模型请求。
 
 配置预览、保存与网关运行状态独立。没有适用的模型／路由时，应先同步账号模型或配置可用路由。目录在预览后变化时，需要重新预览；首次接入使用稳定默认，仍可用的原模型优先保留。
 

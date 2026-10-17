@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-008](../tasks/active/TASK-20261017-008-unify-agent-client-cards.md)：统一本地 Agent 为产品分组卡片，共享详情保留各软件入口和返回焦点，进行回归及原生检查。
 
 ## Recently Completed
 

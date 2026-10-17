@@ -45,15 +45,15 @@ const agent = {
 }
 
 const clientNames = {
-  codex: "Codex CLI / Desktop",
+  codex: "Codex CLI",
   claude: "Claude Code CLI",
   "claude-desktop": "Claude Code Desktop",
-  opencode: "OpenCode CLI / Desktop",
+  opencode: "OpenCode CLI",
   "harness-web": "DeepSeek Harness Web",
   "harness-desktop": "DeepSeek Harness Desktop",
-  kilocode: "Kilo Code CLI / Desktop",
-  "qwen-code": "Qwen Code CLI / Desktop",
-  "mimo-code": "MiMo Code CLI / Desktop",
+  kilocode: "Kilo Code CLI",
+  "qwen-code": "Qwen Code CLI",
+  "mimo-code": "MiMo Code CLI",
 } as const
 
 async function openClient(

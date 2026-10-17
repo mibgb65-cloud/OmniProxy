@@ -99,14 +99,28 @@ export const accounts: AccountItem[] = [
 
 export function renderGateway(
   tab: GatewayTab = "overview",
-  { entry = `/gateway?tab=${tab}`, sidebar = false }: { entry?: string; sidebar?: boolean } = {},
+  {
+    entry = `/gateway?tab=${tab}`,
+    sidebar = false,
+    scrollViewport = false,
+  }: {
+    entry?: string
+    sidebar?: boolean
+    scrollViewport?: boolean
+  } = {},
 ) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const rootRoute = createRootRoute({
     component: () => (
       <>
         {sidebar ? <SidebarGatewayStatus collapsed={false} /> : null}
-        <Outlet />
+        {scrollViewport ? (
+          <main className="scroll-region__viewport">
+            <Outlet />
+          </main>
+        ) : (
+          <Outlet />
+        )}
       </>
     ),
   })
