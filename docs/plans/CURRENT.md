@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-025](../tasks/active/TASK-20261017-025-fix-agent-update-failure.md)：修复更新前重复查询失败、错误码遗漏与商店无适用更新分类，补齐官方下载后备入口，正在验证。
 
 ## Recently Completed
 

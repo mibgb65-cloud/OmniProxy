@@ -86,6 +86,20 @@ func (s *AppService) AgentInstallationOpenOfficial(id string) error {
 	return nil
 }
 
+// AgentInstallationOpenUpdate 仅打开固定 Claude 官方下载页，安装由用户完成。
+func (s *AppService) AgentInstallationOpenUpdate(id string) error {
+	if _, err := runtime.Find(id); err != nil {
+		return err
+	}
+	if id != "claude-desktop" {
+		return runtime.ErrUpdateUnsupported
+	}
+	if s.openAgentURL == nil || s.openAgentURL("https://claude.com/download") != nil {
+		return errors.New("agentinstall: official_unavailable")
+	}
+	return nil
+}
+
 // AgentOpenClaudeCode 打开官方 Code 编程入口，不附带任务、项目路径或凭据。
 func (s *AppService) AgentOpenClaudeCode() error {
 	if s.openAgentURL == nil || s.agents == nil {

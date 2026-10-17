@@ -51,6 +51,7 @@ type Service struct {
 	done           chan struct{}
 	installTimeout time.Duration
 	afterInstalled func(string, runtime.Detection)
+	lastUpdate     *checkedUpdate
 }
 
 // New 创建安装协调服务，不触发检测或安装。

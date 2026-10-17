@@ -84,6 +84,7 @@ func TestUpdateDoesNotTreatOldInstalledVersionOrExitSuccessAsUpdated(t *testing.
 		{"unchanged", "2.9.0.0", "update_unavailable", nil},
 		{"partial-version", "2.9.1.0", "update_unavailable", nil},
 		{"failed", "2.9.0.0", "update_failed", errors.New("private")},
+		{"store-unavailable", "2.9.0.0", "update_unavailable", runtime.ErrUpdateUnavailable},
 		{"updated-despite-error", "2.10.0.0", "", errors.New("private")},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

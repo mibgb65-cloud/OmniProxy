@@ -10,6 +10,9 @@ import (
 // ErrUpdateInstallFailed 不暴露安装器输出。
 var ErrUpdateInstallFailed = errors.New("agentinstall: update_failed")
 
+// ErrUpdateUnavailable 表示当前分发渠道没有适用的新版本。
+var ErrUpdateUnavailable = errors.New("agentinstall: update_unavailable")
+
 // Update 仅显式升级固定 Claude 商店包，保留系统完整性校验和安装策略。
 func (b *Backend) Update(ctx context.Context, id string, report func(Progress)) error {
 	product, err := Find(id)
@@ -33,6 +36,9 @@ func (b *Backend) Update(ctx context.Context, id string, report func(Progress)) 
 	if err != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()
+		}
+		if code := commandExitCode(err); code == 0x8A15002B || code == 0x8A15004F {
+			return ErrUpdateUnavailable
 		}
 		return ErrUpdateInstallFailed
 	}

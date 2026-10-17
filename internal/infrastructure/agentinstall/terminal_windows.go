@@ -102,8 +102,11 @@ func runConsoleCommand(ctx context.Context, path string, args []string, output i
 		return ctx.Err()
 	}
 	var exitCode uint32
-	if err := windows.GetExitCodeProcess(process.Process, &exitCode); err != nil || exitCode != 0 {
+	if err := windows.GetExitCodeProcess(process.Process, &exitCode); err != nil {
 		return ErrInstallFailed
+	}
+	if exitCode != 0 {
+		return commandExitError{code: exitCode}
 	}
 	return nil
 }

@@ -36,7 +36,8 @@ export function AgentInstallationCard({
     state.refresh.error ??
     state.official.error ??
     state.launch.error ??
-    state.open.error
+    state.open.error ??
+    state.updatePage.error
   return (
     <Card className="min-w-0 gap-4">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
@@ -86,7 +87,11 @@ export function AgentInstallationCard({
                     {item?.detection.version ? ` · ${item.detection.version}` : ""}
                   </p>
                   {id === "claude-desktop" && item?.detection.state === "installed" ? (
-                    <AgentUpdateStatus check={state.update} item={item} />
+                    <AgentUpdateStatus
+                      check={state.update}
+                      item={item}
+                      pageOpened={state.updatePage.isSuccess}
+                    />
                   ) : null}
                 </div>
                 <AgentInstallationActions

@@ -2,11 +2,30 @@ package agentinstall
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os/exec"
 	"sync"
 	"time"
 )
+
+// commandExitError 只保留退出码，避免丢失包管理器的明确失败原因。
+type commandExitError struct{ code uint32 }
+
+func (e commandExitError) Error() string { return ErrInstallFailed.Error() }
+func (e commandExitError) Unwrap() error { return ErrInstallFailed }
+
+func commandExitCode(err error) uint32 {
+	var console commandExitError
+	if errors.As(err, &console) {
+		return console.code
+	}
+	var process *exec.ExitError
+	if errors.As(err, &process) {
+		return uint32(process.ExitCode())
+	}
+	return 0
+}
 
 // limitBuffer 消费全部输出但最多保留 64 KiB，不让安装器输出占用无限内存。
 type limitBuffer struct {

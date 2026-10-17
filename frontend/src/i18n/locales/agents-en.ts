@@ -1,11 +1,17 @@
 export const agentsEn = {
   "agents.update.check": "Check for updates",
   "agents.update.install": "Update",
+  "agents.update.download": "Official download",
+  "agents.update.downloadOpened": "Official download page opened. Check again after installing.",
   "agents.update.updating": "Updating…",
   "agents.update.completed": "Updated to {{version}}",
   "agents.install.error.update_failed": "Update failed. Close Claude and try again.",
+  "agents.install.error.update_check_failed":
+    "Update pre-check failed. Check your network and try again.",
+  "agents.install.error.update_unsupported":
+    "Direct updates are unavailable for this client. See the official guide.",
   "agents.install.error.update_unavailable":
-    "This version is not available through the update channel yet. Try later or see the official guide.",
+    "The Store update is unavailable. Use the official download.",
   "agents.install.error.update_interrupted":
     "Update interrupted. Check the installed version again.",
   "agents.update.checking": "Checking…",

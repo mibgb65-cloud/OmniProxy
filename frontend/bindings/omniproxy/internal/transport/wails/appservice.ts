@@ -126,6 +126,13 @@ export function AgentInstallationOpenOfficial(id: string): $CancellablePromise<v
 }
 
 /**
+ * AgentInstallationOpenUpdate 仅打开固定 Claude 官方下载页，安装由用户完成。
+ */
+export function AgentInstallationOpenUpdate(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1165556759, id);
+}
+
+/**
  * AgentInstallationUpdate 仅在显式点击后启动固定客户端更新，返回后台任务快照。
  */
 export function AgentInstallationUpdate(id: string): $CancellablePromise<agentinstall$0.Snapshot> {

@@ -35,6 +35,7 @@ const openClaudeCodeMock = vi.hoisted(() => vi.fn())
 const openAgentClientMock = vi.hoisted(() => vi.fn())
 const checkAgentUpdateMock = vi.hoisted(() => vi.fn())
 const updateAgentMock = vi.hoisted(() => vi.fn())
+const openAgentUpdateMock = vi.hoisted(() => vi.fn())
 const agentErrorMock = vi.hoisted(() => vi.fn(() => "failed"))
 export {
   listAgentClientsMock,
@@ -54,9 +55,10 @@ export {
   openAgentClientMock,
   checkAgentUpdateMock,
   updateAgentMock,
+  openAgentUpdateMock,
   agentErrorMock,
 }
-vi.mock("../../services/agent-installation", () => ({
+vi.mock("../../services/agent-installation", async () => ({
   getAgentInstallations: getAgentInstallationsMock,
   refreshAgentInstallations: refreshAgentInstallationsMock,
   installAgent: installAgentMock,
@@ -65,7 +67,9 @@ vi.mock("../../services/agent-installation", () => ({
   openAgentClient: openAgentClientMock,
   checkAgentUpdate: checkAgentUpdateMock,
   updateAgent: updateAgentMock,
-  agentInstallationError: () => "failed",
+  openAgentUpdate: openAgentUpdateMock,
+  agentInstallationError: (await import("../../services/agent-installation-error"))
+    .agentInstallationError,
 }))
 vi.mock("../../services/agents", () => ({
   listAgentClients: listAgentClientsMock,

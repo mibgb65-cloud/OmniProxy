@@ -9,30 +9,10 @@ export const refreshAgentInstallations = () => AppService.AgentInstallationsRefr
 export const installAgent = (id: string) => AppService.AgentInstall(id)
 export const checkAgentUpdate = (id: string) => AppService.AgentInstallationCheckUpdate(id)
 export const updateAgent = (id: string) => AppService.AgentInstallationUpdate(id)
+export const openAgentUpdate = (id: string) => AppService.AgentInstallationOpenUpdate(id)
 export const openAgentInstallationOfficial = (id: string) =>
   AppService.AgentInstallationOpenOfficial(id)
 export const openClaudeCode = () => AppService.AgentOpenClaudeCode()
 export const openAgentClient = (id: string) => AppService.AgentOpenClient(id)
 
-export function agentInstallationError(error: unknown) {
-  const code = String(error instanceof Error ? error.message : error).replace("agentinstall: ", "")
-  switch (code) {
-    case "installer_unavailable":
-    case "detection_failed":
-    case "version_unavailable":
-    case "install_failed":
-    case "install_interrupted":
-    case "verification_failed":
-    case "busy":
-    case "unsupported_platform":
-    case "official_unavailable":
-    case "launch_failed":
-    case "activation_required":
-    case "update_failed":
-    case "update_unavailable":
-    case "update_interrupted":
-      return code
-    default:
-      return "failed"
-  }
-}
+export { agentInstallationError } from "./agent-installation-error"

@@ -12,6 +12,7 @@ import {
   resetGatewayRuntime,
   checkAgentUpdateMock,
   updateAgentMock,
+  openAgentUpdateMock,
   getAgentInstallationsMock,
   installAgentMock,
   listAgentClientsMock,
@@ -135,5 +136,35 @@ it("没有系统安装器时仍能检查，发现版本后禁用更新操作", a
   renderGateway("clients", { entry: "/gateway?tab=clients&client=claude-desktop" })
   await user.click(await screen.findByRole("button", { name: "检查更新" }))
   expect(await screen.findByRole("button", { name: "更新" })).toBeDisabled()
+  expect(updateAgentMock).not.toHaveBeenCalled()
+})
+
+it("更新前联网检查失败展示具体原因，保留更新重试入口", async () => {
+  updateAgentMock.mockRejectedValue(new Error("agentinstall: update_check_failed"))
+  const user = userEvent.setup()
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=claude-desktop" })
+  await user.click(await screen.findByRole("button", { name: "检查更新" }))
+  await user.click(await screen.findByRole("button", { name: "更新" }))
+  expect(await screen.findByText("更新前检查失败，请检查网络后重试。")).toHaveAttribute(
+    "role",
+    "alert",
+  )
+  expect(screen.queryByText("操作失败，请重新检测后重试。")).not.toBeInTheDocument()
+  expect(screen.getByRole("button", { name: "更新" })).toBeEnabled()
+})
+
+it("商店无适用更新时展示官方下载安装入口，完成后提示重新检测", async () => {
+  const unavailable = snapshot("failed")
+  unavailable.items =
+    unavailable.items?.map((item) => ({ ...item, errorCode: "update_unavailable" })) ?? []
+  getAgentInstallationsMock.mockResolvedValue(unavailable)
+  openAgentUpdateMock.mockResolvedValue(undefined)
+  const user = userEvent.setup()
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=claude-desktop" })
+  const button = await screen.findByRole("button", { name: "官方下载" })
+  expect(screen.getByText("商店更新暂不可用，请通过官方下载。")).toHaveAttribute("role", "alert")
+  await user.click(button)
+  expect(openAgentUpdateMock).toHaveBeenCalledExactlyOnceWith("claude-desktop")
+  expect(await screen.findByText("已打开官方下载页，安装完成后请重新检测。")).toBeInTheDocument()
   expect(updateAgentMock).not.toHaveBeenCalled()
 })

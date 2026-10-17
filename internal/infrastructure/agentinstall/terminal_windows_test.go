@@ -4,11 +4,22 @@ package agentinstall
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 )
+
+func TestBackgroundConsolePreservesExitCodeWithoutRawOutput(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	path := filepath.Join(os.Getenv("SystemRoot"), "System32", "cmd.exe")
+	err := runConsoleCommand(ctx, path, []string{"/d", "/c", "exit /b -1978335189"}, &progressWriter{})
+	if !errors.Is(err, ErrInstallFailed) || commandExitCode(err) != 0x8A15002B || err.Error() != "agentinstall: install_failed" {
+		t.Fatal("exit code lost or raw process detail exposed", err)
+	}
+}
 
 func TestBackgroundConsoleStreamsProgressWithoutInstallingSoftware(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

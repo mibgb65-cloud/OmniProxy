@@ -1,4 +1,4 @@
-import { Download, RefreshCw } from "lucide-react"
+import { Download, ExternalLink, RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import type { AgentInstallations } from "./use-agent-installations"
@@ -20,30 +20,40 @@ export function AgentUpdateButton({
     (item?.operation === "update" &&
       ["checking", "installing", "verifying"].includes(item.installState))
   const available = check.variables === "claude-desktop" && check.data?.state === "available"
-  const pending = check.isPending || updating
+  const manual = item?.operation === "update" && item.errorCode === "update_unavailable"
+  const pending = check.isPending || updating || state.updatePage.isPending
   const labels = [
     "agents.update.check",
     "agents.update.checking",
     "agents.update.install",
     "agents.update.updating",
+    "agents.update.download",
   ] as const
   const label = updating
     ? labels[3]
     : check.isPending
       ? labels[1]
-      : available
-        ? labels[2]
-        : labels[0]
-  const Icon = available && !pending ? Download : RefreshCw
+      : manual
+        ? labels[4]
+        : available
+          ? labels[2]
+          : labels[0]
+  const Icon = manual && !pending ? ExternalLink : available && !pending ? Download : RefreshCw
   return (
     <Button
       variant="outline"
       size="sm"
       className="transition-colors"
-      disabled={state.busy || pending || (available && !state.data.data?.installerAvailable)}
+      disabled={
+        state.busy || pending || (!manual && available && !state.data.data?.installerAvailable)
+      }
       aria-busy={pending}
       onClick={() =>
-        available ? state.startUpdate("claude-desktop") : check.mutate("claude-desktop")
+        manual
+          ? state.updatePage.mutate("claude-desktop")
+          : available
+            ? state.startUpdate("claude-desktop")
+            : check.mutate("claude-desktop")
       }
     >
       <Icon
@@ -62,7 +72,15 @@ export function AgentUpdateButton({
   )
 }
 
-export function AgentUpdateStatus({ check, item }: { check: Check; item?: AgentInstallation }) {
+export function AgentUpdateStatus({
+  check,
+  item,
+  pageOpened,
+}: {
+  check: Check
+  item?: AgentInstallation
+  pageOpened?: boolean
+}) {
   const { t } = useTranslation()
   if (
     check.isPending ||
@@ -71,17 +89,19 @@ export function AgentUpdateStatus({ check, item }: { check: Check; item?: AgentI
   )
     return null
   const result = check.data
-  const message = check.isError
-    ? t("agents.update.failed")
-    : result?.state === "available"
-      ? t("agents.update.available", { version: result.latestVersion })
-      : result?.state === "current"
-        ? t("agents.update.current")
-        : result
-          ? t("agents.update.unknown")
-          : item?.operation === "update" && item.installState === "completed"
-            ? t("agents.update.completed", { version: item.detection.version })
-            : null
+  const message = pageOpened
+    ? t("agents.update.downloadOpened")
+    : check.isError
+      ? t("agents.update.failed")
+      : result?.state === "available"
+        ? t("agents.update.available", { version: result.latestVersion })
+        : result?.state === "current"
+          ? t("agents.update.current")
+          : result
+            ? t("agents.update.unknown")
+            : item?.operation === "update" && item.installState === "completed"
+              ? t("agents.update.completed", { version: item.detection.version })
+              : null
   return message ? (
     <p
       role="status"

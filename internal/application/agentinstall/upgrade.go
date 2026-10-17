@@ -14,7 +14,7 @@ type updateInstaller interface {
 
 // StartUpdate 显式核对官方目标后启动后台更新，不接受前端指定版本或软件包。
 func (s *Service) StartUpdate(ctx context.Context, id string) (Snapshot, error) {
-	checked, err := s.CheckUpdate(ctx, id)
+	checked, err := s.updateTarget(ctx, id)
 	if err != nil {
 		return Snapshot{}, err
 	}
@@ -71,7 +71,7 @@ func (s *Service) runUpdate(ctx context.Context, installer updateInstaller, id, 
 	code := ""
 	if detected.State != "installed" || !runtime.DesktopVersionAtLeast(detected.Version, target) {
 		code = "update_unavailable"
-		if err != nil {
+		if err != nil && !errors.Is(err, runtime.ErrUpdateUnavailable) {
 			code = "update_failed"
 		}
 		if ctx.Err() != nil {

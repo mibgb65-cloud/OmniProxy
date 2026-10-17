@@ -31,6 +31,15 @@ func TestInstallationBindingsRejectMissingServiceAndArbitraryURL(t *testing.T) {
 	if err := s.AgentInstallationOpenOfficial("claude-code"); err != nil || !strings.HasPrefix(opened, "https://code.claude.com/") {
 		t.Fatal("official source not opened")
 	}
+	if err := s.AgentInstallationOpenUpdate("claude-desktop"); err != nil || opened != "https://claude.com/download" {
+		t.Fatal("official update page not opened", err)
+	}
+	opened = ""
+	for _, id := range []string{"claude-code", "https://malicious.invalid"} {
+		if err := s.AgentInstallationOpenUpdate(id); err == nil || opened != "" {
+			t.Fatal("unsupported update page opened")
+		}
+	}
 }
 
 func TestClaudeCodeLauncherUsesOnlyOfficialCodeDeepLink(t *testing.T) {

@@ -41,6 +41,12 @@ func TestUpdateRunsOnlyExactStorePackageWithSafeFlags(t *testing.T) {
 	if err := b.Update(context.Background(), "claude-desktop", nil); !errors.Is(err, ErrUpdateInstallFailed) {
 		t.Fatal("raw installer error escaped", err)
 	}
+	b.runInstall = func(context.Context, string, []string, func(Progress)) error {
+		return commandExitError{code: 0x8A15002B}
+	}
+	if err := b.Update(context.Background(), "claude-desktop", nil); !errors.Is(err, ErrUpdateUnavailable) {
+		t.Fatal("no applicable update was misclassified", err)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	if err := b.Update(ctx, "claude-desktop", nil); !errors.Is(err, context.Canceled) {

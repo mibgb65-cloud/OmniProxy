@@ -6,6 +6,7 @@ import {
   installAgent,
   checkAgentUpdate,
   updateAgent,
+  openAgentUpdate,
   openAgentInstallationOfficial,
   openClaudeCode,
   openAgentClient,
@@ -39,6 +40,7 @@ export function useAgentInstallations(active: boolean) {
   })
   const launch = useMutation({ mutationFn: openClaudeCode })
   const open = useMutation({ mutationFn: (id: AgentInstallTarget) => openAgentClient(id) })
+  const updatePage = useMutation({ mutationFn: (id: AgentInstallTarget) => openAgentUpdate(id) })
   const update = useMutation({
     mutationFn: (id: AgentInstallTarget) => checkAgentUpdate(id),
     onSuccess: (result, id) => {
@@ -96,6 +98,7 @@ export function useAgentInstallations(active: boolean) {
     open,
     update,
     upgrade,
+    updatePage,
     busy: !!data.data?.busy || mutating,
     start: (id: AgentInstallTarget) => {
       upgrade.reset()
@@ -106,6 +109,7 @@ export function useAgentInstallations(active: boolean) {
       install.mutate(id)
     },
     startUpdate: (id: AgentInstallTarget) => {
+      updatePage.reset()
       refresh.reset()
       install.reset()
       official.reset()
@@ -114,6 +118,7 @@ export function useAgentInstallations(active: boolean) {
       upgrade.mutate(id)
     },
     recheck: () => {
+      updatePage.reset()
       update.reset()
       upgrade.reset()
       install.reset()
