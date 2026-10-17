@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Request
 
@@ -34,8 +34,12 @@ In Progress
 
 ## Git
 
-待提交。
+`16235110db298c23e47d11e6f279670772671366` — `style(gateway): 移除配置界面两段冗余提示`。
 
 ## Result
 
 两段冗余说明已移除，开发版已更新，定向验证通过。
+
+## Completed
+
+2026-10-17（Asia/Singapore）。
