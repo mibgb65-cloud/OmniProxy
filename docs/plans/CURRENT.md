@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-018](../tasks/active/TASK-20261017-018-stable-gateway-buttons.md)：网关启停与刷新按钮预留状态文案尺寸，消除点击后的大小变化，正在验证。
 
 ## Recently Completed
 

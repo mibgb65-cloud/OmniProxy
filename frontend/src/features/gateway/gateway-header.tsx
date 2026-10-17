@@ -9,6 +9,11 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
   const { gateway } = data
   const stateLabel = t(gateway.statusKey)
   const runtimeError = gateway.state === "error" && gateway.info.data?.runtime.errorCode
+  const toggleLabel = gateway.controlsBusy
+    ? stateLabel
+    : t(gateway.isRunning ? "gateway.status.stop" : "gateway.status.start")
+  const buttonTransition =
+    "transition-[background-color,border-color,color,box-shadow,opacity] motion-reduce:transition-none"
 
   return (
     <header className="space-y-3">
@@ -33,25 +38,38 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             <Button
+              className={buttonTransition}
               disabled={gateway.controlsBusy || !gateway.info.isSuccess}
+              aria-busy={gateway.controlsBusy}
               onClick={gateway.toggle}
               aria-describedby="gateway-control-notice"
             >
               {gateway.isRunning ? <Square aria-hidden="true" /> : <Play aria-hidden="true" />}
-              {gateway.controlsBusy
-                ? stateLabel
-                : t(gateway.isRunning ? "gateway.status.stop" : "gateway.status.start")}
+              <StableActionLabel
+                label={toggleLabel}
+                labels={[
+                  t("gateway.status.start"),
+                  t("gateway.status.stop"),
+                  t("gateway.status.starting"),
+                  t("gateway.status.stopping"),
+                ]}
+              />
             </Button>
             <Button
               variant="outline"
+              className={buttonTransition}
               disabled={data.isRefreshing}
+              aria-busy={data.isRefreshing}
               onClick={() => void data.refresh()}
             >
               <RefreshCw
                 aria-hidden="true"
                 className={data.isRefreshing ? "motion-safe:animate-spin" : ""}
               />
-              {t(data.isRefreshing ? "gateway.refreshing" : "gateway.refresh")}
+              <StableActionLabel
+                label={t(data.isRefreshing ? "gateway.refreshing" : "gateway.refresh")}
+                labels={[t("gateway.refresh"), t("gateway.refreshing")]}
+              />
             </Button>
           </div>
           <p id="gateway-control-notice" className="text-muted-foreground text-xs leading-5">
@@ -83,5 +101,19 @@ export function GatewayHeader({ data }: { data: GatewayPreparation }) {
         </p>
       ) : null}
     </header>
+  )
+}
+
+function StableActionLabel({ label, labels }: { label: string; labels: string[] }) {
+  return (
+    <span className="inline-grid">
+      {/* 所有状态共用网格单元预留最大文案宽度，避免启停／刷新时挤动按钮；隐藏文案不参与播报。 */}
+      {labels.map((text) => (
+        <span key={text} aria-hidden="true" className="invisible col-start-1 row-start-1">
+          {text}
+        </span>
+      ))}
+      <span className="col-start-1 row-start-1">{label}</span>
+    </span>
   )
 }

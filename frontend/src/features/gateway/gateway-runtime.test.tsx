@@ -94,4 +94,48 @@ describe("网关运行控制", () => {
     expect(screen.queryByText(/private runtime error/)).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "启动网关" })).toBeDisabled()
   })
+
+  it.each(["zh", "en"] as const)(
+    "%s 启停过渡保留同一按钮，禁用重复操作且仅播报当前文案",
+    async (language) => {
+      useUIStore.setState({ language })
+      const labels =
+        language === "zh"
+          ? ["启动网关", "正在启动…", "停止网关", "正在停止…"]
+          : ["Start gateway", "Starting…", "Stop gateway", "Stopping…"]
+      let finishStart!: (value: typeof gatewayInfo) => void
+      let finishStop!: (value: typeof gatewayInfo) => void
+      vi.mocked(startGateway).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishStart = resolve
+          }),
+      )
+      vi.mocked(stopGateway).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishStop = resolve
+          }),
+      )
+      const user = userEvent.setup()
+      renderGateway()
+      const control = await screen.findByRole("button", { name: labels[0] })
+      await user.click(control)
+      expect(await screen.findByRole("button", { name: labels[1] })).toBe(control)
+      expect(control).toBeDisabled()
+      expect(control).toHaveAttribute("aria-busy", "true")
+      await user.click(control)
+      expect(startGateway).toHaveBeenCalledTimes(1)
+      await act(async () =>
+        finishStart({ ...gatewayInfo, runtime: { ...gatewayInfo.runtime, state: "running" } }),
+      )
+      expect(await screen.findByRole("button", { name: labels[2] })).toBe(control)
+      await user.click(control)
+      expect(await screen.findByRole("button", { name: labels[3] })).toBe(control)
+      expect(control).toBeDisabled()
+      await act(async () => finishStop(gatewayInfo))
+      expect(await screen.findByRole("button", { name: labels[0] })).toBe(control)
+      expect(control).toBeEnabled()
+    },
+  )
 })
