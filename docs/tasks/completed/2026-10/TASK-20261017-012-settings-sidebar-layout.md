@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -58,9 +58,13 @@ Task 构建指纹扫描停滞后，使用 `--force build` 执行同一套实际�
 
 ## Git
 
-待提交。
+`e608438` — `feat(settings): 改为侧栏分类与紧凑设置布局`。
 
 ## Result
 
 左侧分类和右侧紧凑设置布局已完成；全部检查阶段和原生交互验收通过。
 没有新增后台行为或依赖，系统设置与数据操作沿用现有服务及验证。
+
+## Completed
+
+2026-10-17（Asia/Singapore）。
