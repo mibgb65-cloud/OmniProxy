@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -51,8 +51,12 @@ In Progress
 
 ## Git
 
-待填写。
+实现提交：`df5ef3fc8d03d8ac60cee864b1fd4762c94b34a0`
+（`fix(gateway): 按内容宽度自适应 Agent 卡片列数`）。
+分支：`codex/river-builtin-provider`；未推送。
 
 ## Result
 
-待填写。
+Agent 卡片已按可用宽度自动增加列数：当前常用大屏宽度实测为三／四／五列，侧栏收起
+后可进一步增列，最小窗口保持可读且无横向越界。原生布局、共享详情返回和完整质量门
+通过，开发版已更新；无关未跟踪任务记录保持原样。

@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261017-010](../tasks/active/TASK-20261017-010-responsive-agent-card-grid.md)：Agent 分组卡片按内容区宽度自动增加列数，核对大屏、最小窗口及侧栏收展。
+暂无进行中的任务。
 
 ## Recently Completed
 
+- [TASK-20261017-010](../tasks/completed/2026-10/TASK-20261017-010-responsive-agent-card-grid.md)：Agent 卡片使用内容区宽度驱动的自适应网格，实测 1440／1920／2560 为 3／4／5 列，侧栏收起继续增列。16 个原生布局场景无横向越界、末行等宽，深浅主题／最小窗口／详情返回及完整质量门／500 项前端测试通过。实现提交 `df5ef3f`。
 - [TASK-20261017-009](../tasks/completed/2026-10/TASK-20261017-009-harness-desktop-detection.md)：兼容 Harness Desktop 带版本名称／空发布者的 NSIS 安装记录，正确识别 `D:/DSH` 的 `0.2.0-rc.2`，原生已安装状态与实际打开验证通过。完整质量门／500 项前端测试及后端边界回归通过，开发版已重建。实现提交 `8f2d06f`。
 - [TASK-20261017-008](../tasks/completed/2026-10/TASK-20261017-008-unify-agent-client-cards.md)：七个产品统一为分组卡片、15 个软件入口分别展示安装／接入状态，共用详情并保留原入口可见焦点。完整质量门／500 项前端测试、原生十组导航和返回焦点、深浅主题／960×600 验收通过；开发版已更新。实现提交 `b4d3657`。
 - [TASK-20261017-007](../tasks/completed/2026-10/TASK-20261017-007-kilo-qwen-mimo-code-clients.md)：接入 Kilo／Qwen／MiMo Code 本机模型配置、独立 Key、预览／备份恢复与软件入口；MiMo CLI／国内桌面版／国际桌面版同一卡片独立检测和打开。完整质量门／491 项前端测试、三个实际 CLI 的 SSE／工具／思考续接与恢复、原生两版状态／深浅主题／960×600 验收通过；实际桌面对话与 Qwen 后台记忆边界已注明。实现提交 `c58d931`。
