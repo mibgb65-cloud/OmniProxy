@@ -1,0 +1,4 @@
+.agent-client-grid {
+  /* 按内容区和字号决定列数；窄容器允许满宽收缩，避免侧栏和缩放导致横向溢出。 */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}

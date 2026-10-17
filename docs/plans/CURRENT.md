@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无进行中的任务。
+- [TASK-20261017-010](../tasks/active/TASK-20261017-010-responsive-agent-card-grid.md)：Agent 分组卡片按内容区宽度自动增加列数，核对大屏、最小窗口及侧栏收展。
 
 ## Recently Completed
 

@@ -7,6 +7,7 @@ import { AgentClientGroupTile } from "./agent-client-group-tile"
 import { agentClientGroups, type AgentClientEntry } from "./agent-client-groups"
 import { type AgentClientId } from "./agent-clients"
 import { useAgentInstallations } from "./use-agent-installations"
+import "./agent-client-grid.css"
 
 export function LocalAgents({
   models,
@@ -65,7 +66,7 @@ export function LocalAgents({
             <h2 className="text-base font-semibold">{t("agents.title")}</h2>
             <p className="text-muted-foreground text-sm">{t("agents.selectClient")}</p>
           </div>
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+          <div className="agent-client-grid grid min-w-0 gap-4">
             {agentClientGroups.map((group) => (
               <AgentClientGroupTile
                 key={group.title}
