@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261017-013](../tasks/active/TASK-20261017-013-update-menu-about-resources.md)：检查更新独立一级分类，关于页增加官网、仓库和三类协议入口；核对资源地址与未配置状态。
 
 ## Recently Completed
 

@@ -5,7 +5,11 @@ import { RequestRetentionSettings } from "./request-retention"
 import { StorageOverview } from "./storage-overview"
 import type { AppPreferencesTab } from "./app-preferences-state"
 
-export function SettingsContent({ section }: { section: Exclude<AppPreferencesTab, "about"> }) {
+export function SettingsContent({
+  section,
+}: {
+  section: Exclude<AppPreferencesTab, "about" | "updates">
+}) {
   return (
     <section className="min-w-0 space-y-4 pb-1">
       {section === "settings" ? (

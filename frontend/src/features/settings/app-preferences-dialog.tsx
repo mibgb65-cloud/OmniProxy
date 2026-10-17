@@ -1,4 +1,4 @@
-import { Database, Info, ScrollText, Settings, X } from "lucide-react"
+import { Database, Info, RefreshCw, ScrollText, Settings, X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { Tooltip } from "../../components/ui/tooltip"
 import { AboutView } from "../about/about-view"
+import { UpdateCard } from "../about/update-card"
 import { useAppPreferences, type AppPreferencesTab } from "./app-preferences-state"
 import { SettingsContent } from "./settings-content"
 
@@ -15,6 +16,7 @@ const SECTIONS = [
   { value: "settings", label: "preferences.general", icon: Settings },
   { value: "activity", label: "preferences.activity", icon: ScrollText },
   { value: "storage", label: "preferences.storage", icon: Database },
+  { value: "updates", label: "about.update.title", icon: RefreshCw },
   { value: "about", label: "nav.about", icon: Info },
 ] as const
 
@@ -106,10 +108,11 @@ function PreferencesWindow() {
                 </Button>
               </Dialog.Close>
             </header>
+            {/* 底部留白随内容滚动，避免视口在窗口边框上方提前截断卡片。 */}
             <ScrollRegion
               as="section"
               ariaLabel={t(currentSection.label)}
-              className="min-h-0 flex-1 pb-5 pl-5 sm:pl-6"
+              className="min-h-0 flex-1 pl-5 sm:pl-6"
               viewportClassName="pr-2 sm:pr-3"
               pageKey={`preferences-${tab}`}
             >
@@ -117,10 +120,17 @@ function PreferencesWindow() {
                 <TabsContent
                   key={value}
                   value={value}
+                  className="pb-5"
                   forceMount={visited.includes(value) ? true : undefined}
                   hidden={tab !== value}
                 >
-                  {value === "about" ? <AboutView embedded /> : <SettingsContent section={value} />}
+                  {value === "about" ? (
+                    <AboutView embedded />
+                  ) : value === "updates" ? (
+                    <UpdateCard />
+                  ) : (
+                    <SettingsContent section={value} />
+                  )}
                 </TabsContent>
               ))}
             </ScrollRegion>

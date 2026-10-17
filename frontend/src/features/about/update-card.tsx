@@ -12,12 +12,12 @@ export function UpdateCard() {
   const status: UpdateStatus | undefined = check.data
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="gap-4 rounded-2xl py-4 shadow-none">
+      <CardHeader className="px-5">
         <CardTitle>{t("about.update.title")}</CardTitle>
         <CardDescription>{t("about.update.description")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="space-y-3 px-5 text-sm">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-muted-foreground">
             {t("about.update.currentVersion", { version: info?.version ?? "…" })}

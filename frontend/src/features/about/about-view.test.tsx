@@ -7,6 +7,7 @@ import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
 import { checkForUpdate, getRuntimeInfo, type RuntimeInfo } from "../../services/omniproxy"
 import { AboutView } from "./about-view"
+import { UpdateCard } from "./update-card"
 
 vi.mock("../../services/omniproxy", () => ({
   getAppInfo: vi.fn(),
@@ -36,7 +37,7 @@ const runtimeInfo: RuntimeInfo = {
   startedAt: new Date(Date.now() - 65_000).toISOString(),
 }
 
-function renderAbout() {
+function renderView(view: ReactNode = <AboutView />) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   function Wrapper({ children }: { children: ReactNode }) {
     return (
@@ -45,18 +46,19 @@ function renderAbout() {
       </I18nProvider>
     )
   }
-  return render(<AboutView />, { wrapper: Wrapper })
+  return render(view, { wrapper: Wrapper })
 }
 
-describe("AboutView", () => {
-  beforeEach(() => {
-    localStorage.clear()
-    useUIStore.setState({ language: "zh" })
-    vi.mocked(getRuntimeInfo).mockResolvedValue(runtimeInfo)
-  })
+beforeEach(() => {
+  vi.clearAllMocks()
+  localStorage.clear()
+  useUIStore.setState({ language: "zh" })
+  vi.mocked(getRuntimeInfo).mockResolvedValue(runtimeInfo)
+})
 
+describe("AboutView", () => {
   it("renders runtime details", async () => {
-    renderAbout()
+    renderView()
 
     await waitFor(() => {
       expect(screen.getByText("go1.26.2")).toBeInTheDocument()
@@ -65,11 +67,38 @@ describe("AboutView", () => {
     expect(screen.getByText("windows/amd64")).toBeInTheDocument()
     expect(screen.getByText("3.50.4")).toBeInTheDocument()
     expect(screen.getByText("3002 / 3892")).toBeInTheDocument()
-    expect(screen.getByText("当前版本：0.1.0")).toBeInTheDocument()
+    expect(screen.getByText("0.1.0")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "检查更新" })).not.toBeInTheDocument()
+    expect(checkForUpdate).not.toHaveBeenCalled()
     // Uptime renders as HH:MM:SS for a start ~65s ago.
     expect(screen.getByText(/^00:01:0\d$/)).toBeInTheDocument()
   })
 
+  it.each([
+    ["zh", ["官网", "开源仓库", "免责协议", "使用协议", "隐私协议"], "待配置"],
+    [
+      "en",
+      ["Official website", "Source repository", "Disclaimer", "Terms of use", "Privacy policy"],
+      "Coming soon",
+    ],
+  ] as const)(
+    "%s 展示五个待配置资源入口，不生成跳转或协议正文",
+    async (language, labels, pending) => {
+      useUIStore.setState({ language })
+      renderView()
+      for (const label of labels) {
+        expect(
+          screen.getByRole("button", { name: new RegExp(`^${label}\\s*${pending}$`) }),
+        ).toBeDisabled()
+      }
+      expect(screen.queryByRole("link")).not.toBeInTheDocument()
+      expect(checkForUpdate).not.toHaveBeenCalled()
+      expect(await screen.findByText("go1.26.2")).toBeInTheDocument()
+    },
+  )
+})
+
+describe("UpdateCard", () => {
   it("reports an available update", async () => {
     const user = userEvent.setup()
     vi.mocked(checkForUpdate).mockResolvedValue({
@@ -80,7 +109,7 @@ describe("AboutView", () => {
       publishedAt: "2026-09-01T10:00:00Z",
       message: "",
     })
-    renderAbout()
+    renderView(<UpdateCard />)
 
     await user.click(await screen.findByRole("button", { name: "检查更新" }))
 
@@ -105,7 +134,7 @@ describe("AboutView", () => {
       publishedAt: "",
       message: "update: repository is not configured",
     })
-    renderAbout()
+    renderView(<UpdateCard />)
 
     await user.click(await screen.findByRole("button", { name: "检查更新" }))
 
@@ -122,7 +151,7 @@ describe("AboutView", () => {
       publishedAt: "",
       message: "",
     })
-    renderAbout()
+    renderView(<UpdateCard />)
 
     await user.click(await screen.findByRole("button", { name: "检查更新" }))
 

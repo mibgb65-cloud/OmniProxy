@@ -1,6 +1,6 @@
 import { act, isInaccessible, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { beforeEach, expect, it } from "vitest"
+import { beforeEach, expect, it, vi } from "vitest"
 import { renderPreferences, resetPreferences } from "./preferences-test-helpers"
 import {
   checkForUpdate,
@@ -109,6 +109,7 @@ it("收起侧栏仍可打开，窗口与页签随语言切换", async () => {
   expect(screen.getByRole("tab", { name: "General" })).toBeInTheDocument()
   expect(screen.getByRole("tab", { name: "Requests & logs" })).toBeInTheDocument()
   expect(screen.getByRole("tab", { name: "Data storage" })).toBeInTheDocument()
+  expect(screen.getByRole("tab", { name: "Check for updates" })).toBeInTheDocument()
   expect(screen.getByRole("tab", { name: "About" })).toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "Close settings window" }))
   await waitFor(() =>
@@ -150,4 +151,31 @@ it("分类支持上下键导航，仅显示当前面板，切换后关闭可重�
   await user.keyboard("{Escape}")
   await user.click(trigger)
   await waitFor(() => expect(screen.getByRole("tab", { name: "关于" })).toHaveFocus())
+})
+
+it("检查更新独立为一级分类，点击按钮才查询，跨分类保留结果", async () => {
+  const user = userEvent.setup()
+  vi.mocked(checkForUpdate).mockResolvedValue({
+    state: "up-to-date",
+    currentVersion: "0.1.0",
+    latestVersion: "v0.1.0",
+    releaseUrl: "",
+    publishedAt: "",
+    message: "",
+  })
+  renderPreferences()
+  await user.click(await screen.findByRole("button", { name: "设置与关于" }))
+  await user.click(screen.getByRole("tab", { name: "关于" }))
+  expect(screen.queryByRole("button", { name: "检查更新" })).not.toBeInTheDocument()
+  await user.click(screen.getByRole("tab", { name: "检查更新" }))
+  expect(screen.getAllByRole("tabpanel")).toHaveLength(1)
+  expect(await screen.findByText("当前版本：0.1.0")).toBeInTheDocument()
+  expect(checkForUpdate).not.toHaveBeenCalled()
+  await user.click(screen.getByRole("button", { name: "检查更新" }))
+  expect(await screen.findByText("已是最新版本。")).toBeInTheDocument()
+  expect(checkForUpdate).toHaveBeenCalledTimes(1)
+  await user.click(screen.getByRole("tab", { name: "关于" }))
+  await user.click(screen.getByRole("tab", { name: "检查更新" }))
+  expect(screen.getByText("已是最新版本。")).toBeInTheDocument()
+  expect(checkForUpdate).toHaveBeenCalledTimes(1)
 })
