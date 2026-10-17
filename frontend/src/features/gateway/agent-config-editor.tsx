@@ -142,7 +142,6 @@ export function AgentConfigEditor({
               {t("agents.desktopHint")}
             </p>
           ) : null}
-          <p className="text-muted-foreground text-xs">{t("agents.restart")}</p>
           {error ? (
             <p role="alert" className="text-destructive text-sm">
               {t(`agents.error.${error}`)}

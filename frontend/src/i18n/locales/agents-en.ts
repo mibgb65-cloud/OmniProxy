@@ -172,13 +172,10 @@ export const agentsEn = {
   "agents.mode.desktop": "Desktop client model list",
   "agents.mode.cli": "CLI model picker",
   "agents.mode.default": "Client default model",
-  "agents.catalogRefreshHint":
-    "Restart the client after catalog updates. An existing available model is preserved; unknown capabilities remain unconfirmed.",
   "agents.preview": "Configuration preview",
   "agents.apply": "Apply configuration",
   "agents.applying": "Applying…",
   "agents.close": "Close",
-  "agents.restart": "Restart the client after saving. Existing sessions are preserved.",
   "agents.desktopHint":
     "Applying activates third-party gateway mode and selects the OmniProxy local gateway profile. Quit Claude completely and restart, then open Code to use the local gateway without signing in to an Anthropic account. Existing settings and sessions are preserved. Restore configuration also restores the original startup mode.",
   "agents.noModels":

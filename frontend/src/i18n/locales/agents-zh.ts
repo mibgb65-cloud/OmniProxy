@@ -165,13 +165,10 @@ export const agentsZh = {
   "agents.mode.desktop": "桌面客户端模型列表",
   "agents.mode.cli": "CLI 模型菜单",
   "agents.mode.default": "客户端默认模型",
-  "agents.catalogRefreshHint":
-    "目录更新后重新启动客户端。优先沿用仍可用的原模型；未知能力保留为待确认。",
   "agents.preview": "配置预览",
   "agents.apply": "应用配置",
   "agents.applying": "正在应用…",
   "agents.close": "关闭",
-  "agents.restart": "保存后重新启动对应客户端，正在进行的会话不会被改写。",
   "agents.desktopHint":
     "应用时自动启用第三方网关模式，并选中「OmniProxy · 本地网关」配置。完全退出并重新启动 Claude 后，进入 Code 即可使用本地网关，无需官方账号登录。原设置与会话会保留，恢复原配置可还原启动模式。",
   "agents.noModels": "请先在路由页同步账号模型或配置可用路由，再应用接入配置。",

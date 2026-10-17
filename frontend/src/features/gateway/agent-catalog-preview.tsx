@@ -184,7 +184,6 @@ export function AgentCatalogPreview({
           ) : null}
         </ScrollRegion>
       </details>
-      <p className="text-muted-foreground text-xs leading-5">{t("agents.catalogRefreshHint")}</p>
     </section>
   )
 }
