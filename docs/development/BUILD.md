@@ -67,6 +67,8 @@ task build
 
 ## Packaging
 
+正式 Windows 资产、版本一致性、SHA256 与发布流程见 [RELEASE](RELEASE.md)。机器级实际安装需要管理员权限，编译安装器不等于完成安装验收。
+
 ```bash
 task package
 ```

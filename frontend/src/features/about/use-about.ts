@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { checkForUpdate, getRuntimeInfo } from "../../services/omniproxy"
 
 export const runtimeInfoQuery = queryOptions({
@@ -14,5 +14,9 @@ export function useRuntimeInfo() {
 export function useCheckForUpdate() {
   // The check must run on demand (button), never on mount: it hits the
   // network and is rate-limited by GitHub.
-  return useMutation({ mutationFn: () => checkForUpdate() })
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => checkForUpdate(),
+    onSuccess: () => client.invalidateQueries({ queryKey: ["application-update"] }),
+  })
 }

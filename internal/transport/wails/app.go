@@ -21,6 +21,8 @@ import (
 	"omniproxy/internal/application/agentinstall"
 	"omniproxy/internal/application/gateway"
 	"omniproxy/internal/application/quotaactivation"
+	"omniproxy/internal/application/updater"
+	"omniproxy/internal/infrastructure/appinstall"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/transport/httpapi"
@@ -66,6 +68,10 @@ type AppService struct {
 	stopActivity     func()
 	subscription     subscriptionState
 	googleAuth       googleSubscriptionState
+	updatesMu        sync.Mutex
+	updates          *updater.Service
+	stopUpdateChecks context.CancelFunc
+	quitForUpdate    func()
 }
 
 // NewAppService creates the bound application service.
@@ -122,6 +128,7 @@ func (s *AppService) Ping() string { return "pong" }
 // the user can resolve the conflict. Returning an error here would make Wails
 // terminate the whole application.
 func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOptions) error {
+	s.startUpdateChecks()
 	if s.quotaActivation != nil {
 		s.quotaActivation.Start(context.Background())
 	}
@@ -137,6 +144,16 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 func (s *AppService) ServiceShutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
+	if s.stopUpdateChecks != nil {
+		s.stopUpdateChecks()
+	}
+	s.updatesMu.Lock()
+	updates := s.updates
+	s.updatesMu.Unlock()
+	var updateErr error
+	if updates != nil {
+		updateErr = updates.Close(ctx)
+	}
 	if s.quotaActivation != nil {
 		s.quotaActivation.Stop()
 	}
@@ -159,7 +176,7 @@ func (s *AppService) ServiceShutdown() error {
 		s.log.Error("control API shutdown failed", "error", err)
 	}
 	s.relocateIfPending()
-	return errors.Join(gatewayErr, installationErr, activationErr)
+	return errors.Join(gatewayErr, installationErr, activationErr, updateErr)
 }
 
 // Run creates the Wails application, opens the main window and blocks until
@@ -179,6 +196,17 @@ func Run(app *App) error {
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 	})
+	app.Service.quitForUpdate = wailsApp.Quit
+	stopInstallerListener, listenerErr := appinstall.ListenForQuit(wailsApp.Quit)
+	if listenerErr != nil {
+		app.Service.log.Warn("installer quit listener unavailable", "error", listenerErr)
+	} else {
+		defer func() {
+			if err := stopInstallerListener(); err != nil {
+				app.Service.log.Warn("installer quit listener close failed", "error", err)
+			}
+		}()
+	}
 
 	app.Service.bindGatewayEvents(wailsApp)
 	app.Service.bindActivityEvents(wailsApp)

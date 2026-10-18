@@ -53,6 +53,9 @@ import * as routing$0 from "../../application/routing/models.js";
 import * as subscription$0 from "../../application/subscription/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as updater$0 from "../../application/updater/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as routing$1 from "../../core/routing/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -194,6 +197,20 @@ export function AgentSetEnabled(client: string, enabled: boolean): $CancellableP
  */
 export function AppInfo(): $CancellablePromise<$models.AppInfo> {
     return $Call.ByID(35009032);
+}
+
+/**
+ * ApplicationUpdate 返回本地快照，打开侧栏或浮窗不会因此联网。
+ */
+export function ApplicationUpdate(): $CancellablePromise<updater$0.Snapshot> {
+    return $Call.ByID(4090353900);
+}
+
+/**
+ * CancelApplicationUpdate 取消下载并保留可重试的状态。
+ */
+export function CancelApplicationUpdate(): $CancellablePromise<updater$0.Snapshot> {
+    return $Call.ByID(1172769938);
 }
 
 /**
@@ -395,6 +412,13 @@ export function ImportLegacyData(directory: string, snapshot: string): $Cancella
 }
 
 /**
+ * InstallApplicationUpdate 安装辅助程序就绪后才正常退出应用，取消 UAC 不退出。
+ */
+export function InstallApplicationUpdate(expected: string): $CancellablePromise<updater$0.Snapshot> {
+    return $Call.ByID(949911903, expected);
+}
+
+/**
  * ListAccounts returns metadata for all saved accounts.
  */
 export function ListAccounts(): $CancellablePromise<account$0.Item[] | null> {
@@ -582,6 +606,13 @@ export function SetAutoStart(enabled: boolean): $CancellablePromise<boolean> {
 }
 
 /**
+ * SetAutomaticUpdateCheck 只控制版本检查，下载和安装始终需要用户点击。
+ */
+export function SetAutomaticUpdateCheck(enabled: boolean): $CancellablePromise<$models.UpdatePreferences> {
+    return $Call.ByID(1192137729, enabled);
+}
+
+/**
  * SetCloseBehavior persists the user's window-close preference.
  */
 export function SetCloseBehavior(value: string): $CancellablePromise<string> {
@@ -678,6 +709,13 @@ export function SetStepFunPreferredBillingMode(mode: string): $CancellablePromis
  */
 export function SetUpdateChannel(channel: string): $CancellablePromise<$models.UpdatePreferences> {
     return $Call.ByID(3850489597, channel);
+}
+
+/**
+ * StartApplicationUpdate 前端只确认版本，不提供下载地址或执行路径。
+ */
+export function StartApplicationUpdate(expected: string): $CancellablePromise<updater$0.Snapshot> {
+    return $Call.ByID(1738796366, expected);
 }
 
 /**

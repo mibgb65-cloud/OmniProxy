@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to package and publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Validate tag
+        id: version
+        env:
+          REQUESTED_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          $tag = $env:REQUESTED_TAG
+          if ($tag -notmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw 'Invalid version tag' }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "prerelease=$($tag.Contains('-').ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.version.outputs.tag }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install build tools
+        run: |
+          npm install -g pnpm@12.6.0
+          if ($LASTEXITCODE -ne 0) { throw 'pnpm setup failed' }
+          go install github.com/go-task/task/v3/cmd/task@v3.53.1
+          if ($LASTEXITCODE -ne 0) { throw 'Task setup failed' }
+          go install honnef.co/go/tools/cmd/staticcheck@v0.8.1
+          if ($LASTEXITCODE -ne 0) { throw 'staticcheck setup failed' }
+          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.30
+          if ($LASTEXITCODE -ne 0) { throw 'Wails setup failed' }
+          choco install nsis -y --no-progress
+          if ($LASTEXITCODE -ne 0) { throw 'NSIS setup failed' }
+          "${env:ProgramFiles(x86)}\NSIS" >> $env:GITHUB_PATH
+      - name: Build and verify release
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: ./scripts/build-release.ps1 -Version $env:RELEASE_TAG
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      RELEASE_TAG: ${{ needs.build.outputs.tag }}
+      IS_PRERELEASE: ${{ needs.build.outputs.prerelease }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.tag }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-release
+          path: release-assets
+      - name: Verify uploaded artifact
+        run: ./scripts/verify-release-assets.ps1 -Version $env:RELEASE_TAG -AssetDirectory release-assets
+      - name: Publish complete release
+        run: |
+          $tag = $env:RELEASE_TAG
+          $existing = gh release view $tag --json isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if (-not ($existing | ConvertFrom-Json).isDraft) { throw 'Refusing to replace an already published release' }
+          } else {
+            gh release create $tag --verify-tag --draft --title "OmniProxy $tag" --notes-file "docs/releases/$tag.md" --latest=false
+            if ($LASTEXITCODE -ne 0) { throw 'Draft creation failed' }
+          }
+          $assets = @(Get-ChildItem release-assets -File | ForEach-Object { $_.FullName })
+          gh release upload $tag @assets --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed' }
+          $remote = gh release view $tag --json assets | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $remote.assets.Count -ne 2) { throw 'Remote asset verification failed' }
+          foreach ($asset in $remote.assets) {
+            $local = Get-Item -LiteralPath (Join-Path release-assets $asset.name)
+            if ($local.Length -ne $asset.size) { throw 'Remote asset size mismatch' }
+          }
+          $pre = $env:IS_PRERELEASE
+          $latest = if ($pre -eq 'true') { 'false' } else { 'true' }
+          gh release edit $tag --draft=false "--prerelease=$pre" "--latest=$latest"
+          if ($LASTEXITCODE -ne 0) { throw 'Release publish failed' }

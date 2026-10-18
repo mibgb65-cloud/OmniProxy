@@ -109,6 +109,7 @@ export interface SubscriptionNotice {
  * UpdatePreferences 是已解析的渠道与仓库，不触发联网。
  */
 export interface UpdatePreferences {
+    "autoCheck": boolean;
     "channel": string;
     "repo": string;
 }

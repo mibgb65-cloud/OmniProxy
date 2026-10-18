@@ -46,6 +46,8 @@ rather than editing history.
 
 ## Index
 
+安装器、完整路径进程管理与应用内升级见 [ADR-017](ADR-017-installation-and-self-update.md)。
+
 旧版只读导入、凭据转换与更新渠道见 [ADR-016](ADR-016-v1-import-and-update-channels.md)。
 
 同通道账号故障切换、冷却与一次请求／多次尝试记账见 [ADR-015](ADR-015-account-failover.md)。

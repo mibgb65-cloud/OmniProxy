@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getUpdatePreferences, setUpdateChannel } from "../../services/updates"
+import {
+  getUpdatePreferences,
+  setUpdateChannel,
+  setAutomaticUpdateCheck,
+} from "../../services/updates"
 
 export function useUpdateChannel(onChanged: () => void) {
   const client = useQueryClient()
@@ -8,8 +12,13 @@ export function useUpdateChannel(onChanged: () => void) {
     mutationFn: setUpdateChannel,
     onSuccess: (data) => {
       client.setQueryData(["update-preferences"], data)
+      void client.invalidateQueries({ queryKey: ["application-update"] })
       onChanged()
     },
   })
-  return { preferences, save }
+  const automatic = useMutation({
+    mutationFn: setAutomaticUpdateCheck,
+    onSuccess: (data) => client.setQueryData(["update-preferences"], data),
+  })
+  return { preferences, save, automatic }
 }

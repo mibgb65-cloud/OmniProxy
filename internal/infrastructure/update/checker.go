@@ -1,8 +1,6 @@
 // Package update checks GitHub Releases for newer OmniProxy versions.
 //
-// It implements the read-only half of the update architecture from the
-// technology baseline (GitHub Releases + Wails Updater): discovering the
-// latest release. Downloading and installing updates is a separate feature.
+// 发布发现与下载网络边界由本包实现，更新状态由 application/updater 管理。
 package update
 
 import (
@@ -24,6 +22,7 @@ const DefaultRepo = "mibgb65-cloud/OmniProxy"
 
 // Release is the subset of the GitHub release payload we need.
 type Release struct {
+	Assets      []Asset   `json:"assets"`
 	Draft       bool      `json:"draft"`
 	Prerelease  bool      `json:"prerelease"`
 	TagName     string    `json:"tag_name"`

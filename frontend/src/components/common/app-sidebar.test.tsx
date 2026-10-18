@@ -7,12 +7,25 @@ import { routeTree } from "../../app/routeTree.gen"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
 import { AppSidebar } from "./app-sidebar"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+vi.mock("../../services/updates", () => ({
+  getApplicationUpdate: vi.fn().mockResolvedValue({
+    currentVersion: "2.0.0-beta.1",
+    checkState: "idle",
+    checkError: "",
+    release: null,
+    download: { state: "idle", version: "", received: 0, total: 0, percent: 0, error: "" },
+    canInstall: false,
+  }),
+}))
 
 vi.mock("../../features/gateway/sidebar-gateway-status", () => ({
   SidebarGatewayStatus: () => <section aria-label="网关" />,
 }))
 
 function renderSidebar() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: ["/"] }),
@@ -20,7 +33,9 @@ function renderSidebar() {
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <I18nProvider>
-        <RouterContextProvider router={router}>{children}</RouterContextProvider>
+        <QueryClientProvider client={client}>
+          <RouterContextProvider router={router}>{children}</RouterContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     )
   }

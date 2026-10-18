@@ -7,6 +7,8 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 
 ## Runtime
 
+应用自身更新继续使用现有 Go／net/http／x/sys 和 NSIS，无额外业务依赖。原用户辅助进程、路径限定进程管理及 Release 验证见 ADR-017。
+
 | Item        | Choice                                  | Status      |
 | ----------- | --------------------------------------- | ----------- |
 | Language    | Go 1.26 (`go.mod` pins `go 1.26.0`)     | in use      |

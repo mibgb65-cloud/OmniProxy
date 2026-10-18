@@ -1,5 +1,11 @@
 # Architecture Overview
 
+## 应用内更新与安装（2026-10-18）
+
+`infrastructure/update` 增加平台资产精确配对、有界下载和受限重定向；`application/updater` 冻结候选、共享检查／下载／安装快照、持久缓存及安装前远端摘要复验。Wails 绑定只接收预期版本，正式运行环境可自动检查，所有下载／安装由用户发起。前端侧栏、浮窗和设置页共用 Query 本地快照，无正文 HTML 渲染。
+
+`infrastructure/appinstall` 在 main 初始化 profile 前分流受限辅助模式，按完整程序路径请求正常退出或超时终止；NSIS 沿用旧登记目录并保留数据。独立更新辅助进程等待提权安装结果，再以原用户令牌重新启动。Release 先 build／verify／package，再在 draft 上传完整资产并最终发布。无需新依赖或迁移，见 ADR-017、`product/UPDATE.md`、`development/RELEASE.md`。
+
 ## v1 导入与更新渠道（2026-10-18）
 
 `infrastructure/legacy` 只读、有界解析固定旧文件并兼容 Windows v1 DPAPI entropy；`application/legacyimport` 预览脱敏结果、复核文件快照并逐账号调用既有创建事务。`account.ImportLegacyKey` 复用校验／密文保存／事务失败清理，确定性旧身份及目标 Key 检查提供幂等性。Wails 串行化导入操作，不自动扫描、不迁移订阅登录或改写客户端；无需数据库迁移。

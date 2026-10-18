@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-008](../tasks/active/TASK-20261018-008-installer-and-in-app-updates.md)：安装／下载校验／静默重启／侧栏浮窗与 Release 流程已实现，完整质量门及用户级／机器级实机生命周期验收通过，待提交归档。
 
 ## Recently Completed
 

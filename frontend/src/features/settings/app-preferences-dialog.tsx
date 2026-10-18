@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Tooltip } from "../../components/ui/tooltip"
 import { AboutView } from "../about/about-view"
 import { UpdateCard } from "../about/update-card"
+import { UpdateBadge } from "../app-update/update-badge"
 import { useAppPreferences, type AppPreferencesTab } from "./app-preferences-state"
 import { SettingsContent } from "./settings-content"
 
@@ -25,22 +26,25 @@ export function AppPreferencesDialog({ collapsed }: { collapsed: boolean }) {
   const open = useAppPreferences((state) => state.open)
   const setOpen = useAppPreferences((state) => state.setOpen)
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Tooltip content={collapsed ? t("preferences.title") : undefined} side="right">
-        <Dialog.Trigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 w-full justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
-            aria-label={t("preferences.title")}
-          >
-            <Settings className="size-4 shrink-0" aria-hidden="true" />
-            <SidebarLabel collapsed={collapsed}>{t("preferences.title")}</SidebarLabel>
-          </Button>
-        </Dialog.Trigger>
-      </Tooltip>
-      {open ? <PreferencesWindow /> : null}
-    </Dialog.Root>
+    <div className="relative flex h-9 w-full items-center gap-1">
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Tooltip content={collapsed ? t("preferences.title") : undefined} side="right">
+          <Dialog.Trigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 min-w-0 flex-1 justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
+              aria-label={t("preferences.title")}
+            >
+              <Settings className="size-4 shrink-0" aria-hidden="true" />
+              <SidebarLabel collapsed={collapsed}>{t("preferences.title")}</SidebarLabel>
+            </Button>
+          </Dialog.Trigger>
+        </Tooltip>
+        {open ? <PreferencesWindow /> : null}
+      </Dialog.Root>
+      <UpdateBadge collapsed={collapsed} onOpen={() => setOpen(false)} />
+    </div>
   )
 }
 

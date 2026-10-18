@@ -38,6 +38,18 @@ vi.mock("../../services/updates", () => ({
     .fn()
     .mockResolvedValue({ channel: "stable", repo: "mibgb65-cloud/OmniProxy" }),
   setUpdateChannel: vi.fn(),
+  setAutomaticUpdateCheck: vi.fn(),
+  getApplicationUpdate: vi.fn().mockResolvedValue({
+    currentVersion: "2.0.0-beta.1",
+    checkState: "idle",
+    checkError: "",
+    release: null,
+    download: { state: "idle", version: "", received: 0, total: 0, percent: 0, error: "" },
+    canInstall: false,
+  }),
+  startApplicationUpdate: vi.fn(),
+  cancelApplicationUpdate: vi.fn(),
+  installApplicationUpdate: vi.fn(),
 }))
 vi.mock("../../services/legacy-import", () => ({
   previewLegacyImport: vi.fn(),

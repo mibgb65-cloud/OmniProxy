@@ -13,6 +13,18 @@ import { getUpdatePreferences, setUpdateChannel } from "../../services/updates"
 vi.mock("../../services/updates", () => ({
   getUpdatePreferences: vi.fn(),
   setUpdateChannel: vi.fn(),
+  setAutomaticUpdateCheck: vi.fn(),
+  getApplicationUpdate: vi.fn().mockResolvedValue({
+    currentVersion: "2.0.0-beta.1",
+    checkState: "idle",
+    checkError: "",
+    release: null,
+    download: { state: "idle", version: "", received: 0, total: 0, percent: 0, error: "" },
+    canInstall: false,
+  }),
+  startApplicationUpdate: vi.fn(),
+  cancelApplicationUpdate: vi.fn(),
+  installApplicationUpdate: vi.fn(),
 }))
 
 vi.mock("../../services/omniproxy", () => ({
@@ -63,10 +75,12 @@ beforeEach(() => {
   vi.mocked(getUpdatePreferences).mockResolvedValue({
     channel: "stable",
     repo: "mibgb65-cloud/OmniProxy",
+    autoCheck: true,
   })
   vi.mocked(setUpdateChannel).mockResolvedValue({
     channel: "beta",
     repo: "mibgb65-cloud/OmniProxy",
+    autoCheck: true,
   })
 })
 

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 
+	"omniproxy/internal/infrastructure/appinstall"
 	"omniproxy/internal/infrastructure/database"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
@@ -28,6 +29,9 @@ var assets embed.FS
 var migrations embed.FS
 
 func main() {
+	if handled, code := appinstall.HandleMode(os.Args[1:]); handled {
+		os.Exit(code)
+	}
 	// Load .env (if present) before resolving the runtime profile so that
 	// environment overrides take effect. Never log the file contents.
 	_ = profile.LoadDotEnv(".env")

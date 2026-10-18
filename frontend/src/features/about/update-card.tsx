@@ -5,14 +5,31 @@ import type { UpdateStatus } from "../../services/omniproxy"
 import { useCheckForUpdate, useRuntimeInfo } from "./use-about"
 import { SelectField } from "../../components/ui/select-field"
 import { useUpdateChannel } from "./use-update-channel"
+import { useApplicationUpdate } from "../app-update/use-application-update"
+import { UpdateControls } from "../app-update/update-controls"
 
 export function UpdateCard() {
   const { t } = useTranslation()
   const { data: info } = useRuntimeInfo()
   const check = useCheckForUpdate()
-  const { preferences, save } = useUpdateChannel(() => check.reset())
+  const { preferences, save, automatic } = useUpdateChannel(() => check.reset())
+  const application = useApplicationUpdate()
 
-  const status: UpdateStatus | undefined = check.data
+  const snapshot = application.data
+  const busy =
+    ["downloading", "verifying", "installing"].includes(snapshot?.download.state ?? "") ||
+    snapshot?.checkState === "checking"
+  const status: UpdateStatus | undefined =
+    snapshot && snapshot.checkState !== "idle"
+      ? {
+          state: snapshot.checkState,
+          currentVersion: snapshot.currentVersion,
+          latestVersion: snapshot.release?.version ?? "",
+          releaseUrl: snapshot.release?.url ?? "",
+          publishedAt: snapshot.release?.publishedAt ?? "",
+          message: snapshot.checkError,
+        }
+      : check.data
 
   return (
     <Card className="gap-4 rounded-2xl py-4 shadow-none">
@@ -30,7 +47,11 @@ export function UpdateCard() {
             className="max-w-xs"
             value={preferences.data?.channel ?? "stable"}
             disabled={
-              preferences.isPending || preferences.isError || save.isPending || check.isPending
+              preferences.isPending ||
+              preferences.isError ||
+              save.isPending ||
+              check.isPending ||
+              busy
             }
             onValueChange={(value) => save.mutate(value)}
             options={[
@@ -39,6 +60,15 @@ export function UpdateCard() {
             ]}
           />
           <p className="text-muted-foreground">{t("updates.manual")}</p>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={preferences.data?.autoCheck ?? true}
+              disabled={preferences.isPending || automatic.isPending}
+              onChange={(event) => automatic.mutate(event.target.checked)}
+            />
+            {t("appUpdate.autoCheck")}
+          </label>
           {preferences.isError || save.isError ? (
             <p role="alert" className="text-destructive">
               {t("updates.settingsFailed")}
@@ -53,7 +83,11 @@ export function UpdateCard() {
             size="sm"
             variant="outline"
             disabled={
-              check.isPending || preferences.isPending || preferences.isError || save.isPending
+              check.isPending ||
+              preferences.isPending ||
+              preferences.isError ||
+              save.isPending ||
+              busy
             }
             onClick={() => check.mutate()}
           >
@@ -97,6 +131,7 @@ export function UpdateCard() {
             {t("about.update.failed", { error: check.error.message })}
           </p>
         ) : null}
+        {snapshot ? <UpdateControls state={snapshot} /> : null}
       </CardContent>
     </Card>
   )

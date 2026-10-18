@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"omniproxy/internal/infrastructure/update"
-	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/version"
 )
 
@@ -79,7 +78,7 @@ type UpdateStatus struct {
 
 // CheckForUpdate 按用户选择的渠道查询正式仓库；配置为空时采用项目默认值。
 func (s *AppService) CheckForUpdate() UpdateStatus {
-	cfg, err := profile.LoadConfig(s.prof.Kind)
+	service, err := s.applicationUpdater()
 	if err != nil {
 		return UpdateStatus{
 			State:          updateStateError,
@@ -88,16 +87,9 @@ func (s *AppService) CheckForUpdate() UpdateStatus {
 		}
 	}
 
-	prefs := updatePreferences(cfg, version.Version)
-	if prefs.Channel != "stable" && prefs.Channel != "beta" {
-		return UpdateStatus{State: updateStateError, CurrentVersion: version.Version, Message: "update: invalid channel"}
-	}
-	checker := newUpdateChecker(prefs.Repo)
-	checker.IncludePrereleases = prefs.Channel == "beta"
 	ctx, cancel := context.WithTimeout(context.Background(), updateCheckTimeout)
 	defer cancel()
-
-	release, err := checker.Latest(ctx)
+	state, err := service.Check(ctx)
 	if err != nil {
 		return UpdateStatus{
 			State:          updateStateError,
@@ -107,14 +99,13 @@ func (s *AppService) CheckForUpdate() UpdateStatus {
 	}
 
 	status := UpdateStatus{
-		State:          updateStateUpToDate,
+		State:          state.CheckState,
 		CurrentVersion: version.Version,
-		LatestVersion:  release.TagName,
-		ReleaseURL:     release.HTMLURL,
-		PublishedAt:    release.PublishedAt.UTC().Format(time.RFC3339),
 	}
-	if version.Compare(release.TagName, version.Version) > 0 {
-		status.State = updateStateAvailable
+	if state.Release != nil {
+		status.LatestVersion = state.Release.Version
+		status.ReleaseURL = state.Release.URL
+		status.PublishedAt = state.Release.PublishedAt
 	}
 	return status
 }
