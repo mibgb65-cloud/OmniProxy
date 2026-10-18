@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261018-016](../tasks/active/TASK-20261018-016-verify-codex-cli-desktop-model-settings.md)：隔离验证 CLI／Desktop 不同内核的模型目录、默认与会话覆盖，已通过四组真实配置／loopback 请求对照；不改当前 Agent 配置，正在验证回归及记录边界。
+暂无。
 
 ## Recently Completed
 
+- [TASK-20261018-016](../tasks/completed/2026-10/TASK-20261018-016-verify-codex-cli-desktop-model-settings.md)：`a804ac1` 增强双内核原生契约及模型设置说明；CLI 0.163.0／Desktop 0.163.0-alpha.10.2、两提供商、实际默认／覆盖／新旧会话请求对照通过，完整质量门／575 项前端测试与 Windows 构建成功。仅后端及隔离协议验收，不宣称真实 Desktop 界面／订阅权限已验证；当前用户配置哈希不变。仅本地提交，未推送／发布。
 - [TASK-20261018-014](../tasks/completed/2026-10/TASK-20261018-014-publish-v2-beta3.md)：源码 `60fb745`／v2.0.0-beta.3 已推送并公开预发布。首次 CI 发现版本隔离缺陷后停止发布；TASK-015 修复，用户授权以精确旧对象租约移动未发布标签。新 CI `39130885754`、Release `39131810901` 成功；公开安装器 19,262,605 bytes／SHA256 `fe23a217d3d8b3e756100cafa9dc81bf2e7af3a077a5b6eaa07770f9ec51f856`，实际更新客户端发现及下载／校验通过。旧 Beta／正式 Latest 保留，Agent 配置／生产 Beta.2 未变。
 - [TASK-20261018-015](../tasks/completed/2026-10/TASK-20261018-015-account-version-clock-isolation.md)：`60fb745` 修复账号修改的时钟重复／回拨版本复用，补齐乐观锁与越界保护。确定性回归先失败后通过、关键回归 20 轮、完整质量门／575 项前端测试、Windows 安装与实际离线 Codex 契约通过；远端 CI `39130885754` 成功，已接续 Beta.3 发布。
 - [TASK-20261018-013](../tasks/completed/2026-10/TASK-20261018-013-fix-codex-isolated-forwarding.md)：`ad79d6e` 修复 Codex WebSocket 预热误转发、错误状态／Retry-After 丢失及完成后等待 EOF，保护嵌套错误原文；隔离实际 CLI 0.163.0 连续三次、临时数据库状态回归、最终完整质量门／575 项前端测试与 Windows 构建通过。当时仅本地验证，随后随 Beta.3 发布（TASK-014）；当前 Agent／生产配置未变，历史上游 400 的具体原因仍待真实账号独立验收。
