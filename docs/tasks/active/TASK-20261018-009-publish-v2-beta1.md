@@ -44,6 +44,8 @@ GitHub Pre-release 包含 CI 构建的 Windows amd64 安装器及匹配 SHA256�
 
 在共用 Task 入口补齐依赖和嵌入资源准备，CI 使用同一个 task verify；不提交编译产物，不使用空白占位文件或跳过任何检查。用无 dist／node_modules 的隔离源码完整运行发布脚本，再推送 main 重跑远端 CI。
 
+第二次 CI `39109546758` 的 agentconfig／Codex 凭据／Claude 启动三组失败已在本机使用真实 Win32 8.3 临时目录别名复现，属于同一原因：测试夹具路径经解析后与短路径拼写不同，触发现有严格路径策略。保留应用路径安全规则，CI 与 Release 的验证步骤统一使用 GitHub runner.temp 作为 TEMP／TMP，让测试夹具位于规范目录；不跳过失败测试、不扩大应用可接受的路径范围。
+
 ## Implementation Result
 
 待完成。
@@ -52,6 +54,7 @@ GitHub Pre-release 包含 CI 构建的 Windows amd64 安装器及匹配 SHA256�
 
 - 无 dist／node_modules 的隔离源码实际执行 `scripts/build-release.ps1 -Version v2.0.0-beta.1` 成功，退出码 0：完整 task verify、575 项前端测试／Go 测试、Windows production 构建、NSIS、原生版本资源及两项发布资产 SHA256 均通过。日志位于忽略目录 `tmp/release-beta1-20261018/clean-release-build.log`。
 - CI／Release 的 actionlint、git diff --check 通过；远端 CI 修复后重跑及公开发布验证待完成。
+- 通过真实 Win32 8.3 临时目录本机复现第二次 CI 的三组失败；改用规范 TEMP／TMP 后，agentconfig、Codex 凭据及 Wails 三个包完整测试（-count=1）全部通过。没有修改测试断言或应用安全策略。
 
 ## Git
 

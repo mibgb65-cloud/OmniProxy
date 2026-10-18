@@ -25,6 +25,8 @@ cd frontend && pnpm test   # frontend only
 
 干净检出直接执行包含根包的 Go 测试前，先运行 `task prepare:assets`，因为 main 的 go:embed 需要真实前端资源。`task test`／`task lint` 已自动处理；仅测试 `./internal/...` 无需桌面资源。
 
+Windows 的配置及凭据测试使用规范绝对路径作为夹具，8.3 短路径别名会触发现有安全判断。GitHub CI／Release 将验证步骤的 TEMP／TMP 指向 `runner.temp`，避免默认 `RUNNER~1` 别名；应用路径安全规则保持一致。
+
 `go test -race` is not used on Windows because the race detector requires CGO
 there; CI runs the same commands as `task test`.
 

@@ -48,6 +48,10 @@ jobs:
       - name: Verify
         run: task --force verify
         shell: bash
+        env:
+          # Windows 默认 TEMP 可能含 8.3 别名；夹具使用 runner 的规范目录。
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

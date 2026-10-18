@@ -61,6 +61,8 @@ jobs:
       - name: Build and verify release
         env:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          TEMP: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
         run: ./scripts/build-release.ps1 -Version $env:RELEASE_TAG
       - uses: actions/upload-artifact@v4
         with:
