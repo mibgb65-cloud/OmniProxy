@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -84,7 +84,9 @@ TASK-017 已确认：网关监听和客户端接入正常，真实 HTTP / WebSoc
 
 # Git
 
-Not committed by Agent.
+ad105c12df49820b69ed72eb018296508271f50b fix(gateway): 兼容订阅响应缺失 SSE 类型头
+
+仅本地提交，未推送／发布。
 
 
 # Documentation
@@ -94,3 +96,7 @@ Not committed by Agent.
 # Result
 
 已确认并修复固定官方订阅端点合法 SSE 缺失 Content-Type 导致的误拒绝。六次真实请求及双 Codex 内核验收通过，完整质量门通过；运行中的生产进程保持不动，部署仍待后续执行。
+
+# Completed
+
+2026-10-18 22:57

@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261018-018](../tasks/active/TASK-20261018-018-fix-subscription-stream-response.md)：修复真实订阅 SSE 缺失 Content-Type 被误拒绝；已完成两个模型／两种传输及双 Codex 内核真实上游验证，最终完整质量门与 Windows 构建通过，待归档；当前生产进程未替换。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261018-018](../tasks/completed/2026-10/TASK-20261018-018-fix-subscription-stream-response.md)：`ad105c1` 修复真实订阅 SSE 缺失媒体类型头被误拒绝；首事件有界校验／原字节回放，保留其他类型与坏流拒绝，并增加枚举化安全诊断。gpt-5.6-luna／gpt-6.1-sol、HTTP／WebSocket 及双 Codex 内核共六次真实请求通过，完整质量门／575 前端测试及 Windows 构建成功。仅本地提交与构建，未推送／发布或替换运行中的 Beta.3。
 
 - [TASK-20261018-016](../tasks/completed/2026-10/TASK-20261018-016-verify-codex-cli-desktop-model-settings.md)：`a804ac1` 增强双内核原生契约及模型设置说明；CLI 0.163.0／Desktop 0.163.0-alpha.10.2、两提供商、实际默认／覆盖／新旧会话请求对照通过，完整质量门／575 项前端测试与 Windows 构建成功。仅后端及隔离协议验收，不宣称真实 Desktop 界面／订阅权限已验证；当前用户配置哈希不变。仅本地提交，未推送／发布。
 - [TASK-20261018-014](../tasks/completed/2026-10/TASK-20261018-014-publish-v2-beta3.md)：源码 `60fb745`／v2.0.0-beta.3 已推送并公开预发布。首次 CI 发现版本隔离缺陷后停止发布；TASK-015 修复，用户授权以精确旧对象租约移动未发布标签。新 CI `39130885754`、Release `39131810901` 成功；公开安装器 19,262,605 bytes／SHA256 `fe23a217d3d8b3e756100cafa9dc81bf2e7af3a077a5b6eaa07770f9ec51f856`，实际更新客户端发现及下载／校验通过。旧 Beta／正式 Latest 保留，Agent 配置／生产 Beta.2 未变。
