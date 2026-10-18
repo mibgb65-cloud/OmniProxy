@@ -57,6 +57,29 @@ export const agentClientGroups = [
     ],
   },
   {
+    title: "agents.kimiCodeGroup",
+    description: "agents.kimiCodeDescription",
+    entries: [{ client: "kimi-code", target: "kimi-code-cli" }],
+  },
+  {
+    title: "agents.piGroup",
+    description: "agents.piDescription",
+    entries: [{ client: "pi", target: "pi-cli" }],
+  },
+  {
+    title: "agents.factoryDroidGroup",
+    description: "agents.factoryDroidDescription",
+    entries: [{ client: "factory-droid", target: "factory-droid-cli" }],
+  },
+  {
+    title: "agents.gooseGroup",
+    description: "agents.gooseDescription",
+    entries: [
+      { client: "goose", target: "goose-cli" },
+      { client: "goose", target: "goose-desktop" },
+    ],
+  },
+  {
     title: "agents.mimoCodeGroup",
     description: "agents.mimoCodeDescription",
     entries: [

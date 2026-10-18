@@ -29,6 +29,7 @@ func DefaultPaths() (Paths, error) {
 	if err != nil {
 		return Paths{}, err
 	}
+	kimiPath, kimiLegacy := kimiCodeConfigPath(home)
 	return Paths{
 		Codex: filepath.Join(codex, "config.toml"), Claude: filepath.Join(claude, "settings.json"),
 		ClaudeDesktop: profile, ClaudeDesktopNormal: normal, ClaudeDesktopThirdParty: thirdParty,
@@ -37,6 +38,9 @@ func DefaultPaths() (Paths, error) {
 		HarnessDesktop:     filepath.Join(harnessHome(home), "profiles", "desktop", "cordis.patch.yml"),
 		HarnessCredentials: filepath.Join(harnessHome(home), ".credentials.yaml"),
 		KiloCode:           kiloConfigPath(home), QwenCode: filepath.Join(qwenHome(home), "settings.json"), MiMoCode: mimoCodeConfigPath(home),
+		KimiCode: kimiPath, KimiCodeLegacy: kimiLegacy,
+		Pi:           filepath.Join(agentHome(home, "PI_CODING_AGENT_DIR", ".pi", "agent"), "models.json"),
+		FactoryDroid: filepath.Join(home, ".factory", "settings.json"), Goose: gooseConfigPath(home),
 	}, nil
 }
 

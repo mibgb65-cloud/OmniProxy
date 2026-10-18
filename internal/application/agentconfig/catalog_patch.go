@@ -9,6 +9,13 @@ import (
 )
 
 func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte, string, error) {
+	if isGatewayAgent(client) {
+		var owned bool
+		if s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM agent_backups WHERE client=?)`, client).Scan(&owned) != nil {
+			return nil, "", failure("backup_unavailable")
+		}
+		return buildGatewayAgent(client, body, key, s.port, plan, owned, s.paths.KimiCodeLegacy)
+	}
 	if isCompatibleClient(client) || client == "qwen-code" {
 		var owned bool
 		if s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM agent_backups WHERE client=?)`, client).Scan(&owned) != nil {

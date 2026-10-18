@@ -54,6 +54,10 @@ const clientNames = {
   kilocode: "Kilo Code CLI",
   "qwen-code": "Qwen Code CLI",
   "mimo-code": "MiMo Code CLI",
+  "kimi-code": "Kimi Code CLI",
+  pi: "Pi CLI",
+  "factory-droid": "Factory Droid CLI",
+  goose: "Goose CLI",
 } as const
 
 async function openClient(

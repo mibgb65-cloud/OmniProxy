@@ -8,6 +8,8 @@ Agent 协议目录。详情见 [Google 订阅](GOOGLE_SUBSCRIPTION.md)。
 
 ## 使用
 
+Kimi Code、Pi、Factory Droid 和 Goose 已加入产品分组，复用独立 Key、模型选择、默认模型、加密备份与恢复；Goose 的 CLI／Desktop 共用配置、分别检测安装。Pi、Goose 的关联文件一起校验和备份，Kimi 区分当前版与旧 Python 版目录及协议。配置位置、官方依据与版本边界见 [Kimi／Pi／Droid／Goose](KIMI_PI_DROID_GOOSE.md)。
+
 Kilo Code、Qwen Code、MiMo Code 各用一张 CLI／Desktop 卡片，提供本机引擎配置、模型
 同步、独立 Key、备份恢复、检测和打开入口；MiMo 在同一卡片分别列出国内／国际桌面版。
 Qwen 官方桌面应用使用普通 `qwen serve`
@@ -38,7 +40,7 @@ River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工�
 
 Codex、OpenCode、Kilo、Qwen 的 CLI／Desktop 入口进入同一详情；MiMo CLI／国内 Desktop／国际 Desktop 也进入同一详情，共用各产品的接入状态。Claude 的 CLI／Desktop、Harness 的 Desktop／Web 分别进入其独立配置。安装状态始终按软件区分，不因共享 Key 就宣称对应软件已安装。
 
-配置页面使用 `/gateway?tab=clients&client=客户端ID` 定位，支持 `codex`、`claude`、`claude-desktop`、`opencode`、`harness-web`、`harness-desktop`、`kilocode`、`qwen-code`、`mimo-code`。支持刷新与前进／后退；非法参数回到卡片目录。返回目录恢复原软件入口焦点（如从 Desktop 返回仍选中该 Desktop），选项卡往返保留正在进行的配置操作。点击入口只导航，不写入客户端配置或发起模型请求。
+配置页面使用 `/gateway?tab=clients&client=客户端ID` 定位，支持 `codex`、`claude`、`claude-desktop`、`opencode`、`harness-web`、`harness-desktop`、`kilocode`、`qwen-code`、`mimo-code`、`kimi-code`、`pi`、`factory-droid`、`goose`。支持刷新与前进／后退；非法参数回到卡片目录。返回目录恢复原软件入口焦点（如从 Desktop 返回仍选中该 Desktop），选项卡往返保留正在进行的配置操作。点击入口只导航，不写入客户端配置或发起模型请求。
 
 配置预览、保存与网关运行状态独立。没有适用的模型／路由时，应先同步账号模型或配置可用路由。目录在预览后变化时，需要重新预览；首次接入使用稳定默认，仍可用的原模型优先保留。
 

@@ -94,6 +94,7 @@ accounts need one local place to:
 - 已实现持久请求明细、输入／输出 Token 累计及每日／成员／模型汇总；删除账号与明细淘汰不减少累计。请求默认保存 10000、设置可调整，日志缓存最多 5000，request_id 双向关联。Team 同时按邮箱和 account_id 识别。详见 `docs/product/ACTIVITY.md`。
 - Provider health detection.
 - Client integration management for external AI tools.
+- Kimi Code、Pi coding agent、Factory Droid CLI 与 Goose CLI／Desktop 支持本地网关模型接入、默认模型、独立 Key、备份恢复和官方软件入口；Pi／Goose 的关联文件共同校验。详见 `docs/product/KIMI_PI_DROID_GOOSE.md`。
 - Local HTTP Control API for CLI/agent/script/MCP access.
 - Windows desktop UI, system tray, single instance, autostart, auto-update.
 

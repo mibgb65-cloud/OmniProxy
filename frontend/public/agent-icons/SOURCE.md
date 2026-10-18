@@ -15,3 +15,11 @@
 - `kilocode.svg`：[Lobe Icons 原始 SVG](https://raw.githubusercontent.com/lobehub/lobe-icons/master/packages/static-svg/icons/kilocode.svg)，SHA-256 `a2aef0e0bb992ebe768bfb8c3a3ab6ff2c2638448b09dd88db27877de1c07a22`。
 - `qwen-color.svg`：[Lobe Icons 原始 SVG](https://raw.githubusercontent.com/lobehub/lobe-icons/master/packages/static-svg/icons/qwen-color.svg)，SHA-256 `77f5768c66d08ce1d3d14e73373975c1bc0454be88c81523ddd0ffd7e2974029`。
 - 保持原始内容，下载后检查无脚本、事件或外部资源引用；适用仓库 MIT 授权，完整文本见 [LICENSE.lobe-icons.txt](../provider-icons/LICENSE.lobe-icons.txt)。MiMo Code 复用已有提供商图标。
+
+## Kimi Code、Pi、Factory Droid 与 Goose（2026-10-18）
+
+- Kimi Code 复用已有 `provider-icons/kimi-color.svg`。
+- `pi.svg`：[Lobe Icons 原始 SVG](https://raw.githubusercontent.com/lobehub/lobe-icons/master/packages/static-svg/icons/pi.svg)，与 [Pi 官方图标](https://pi.dev/favicon.svg) 核对品牌标识；SHA-256 `d82978781b824273c55473822c1f243a6ed34fc6e8c2dbfe1a90dfc66ae43ee8`。
+- `goose.svg`：[Lobe Icons 原始 SVG](https://raw.githubusercontent.com/lobehub/lobe-icons/master/packages/static-svg/icons/goose.svg)，SHA-256 `8779d9a61c5b0be78a3d36cab6843ba5af86218ba2ff1b18eb918c7a8d25bb99`。两者保持原样，沿用上述 MIT 授权。
+- `factory.svg`：来自 [Factory 官方网站 favicon](https://factory.com/favicon.svg)，保持原样；SHA-256 `416ea4962d7b0b8be8bec7f7190c13c22d5f20fdcac401aa72886fd5c81d2fb2`。仅作为 Factory Droid 产品识别标记，商标属于 Factory。
+- 下载后核对 SVG 根节点，检查无脚本、事件、foreignObject 或外部资源引用；所有图标由应用本地静态资源加载。

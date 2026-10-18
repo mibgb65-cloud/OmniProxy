@@ -68,6 +68,9 @@ func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
 }
 
 func existingModel(client string, body []byte) string {
+	if isGatewayAgent(client) {
+		return gatewayAgentModel(client, body)
+	}
 	if isCompatibleClient(client) {
 		return openCodeModel(body)
 	}

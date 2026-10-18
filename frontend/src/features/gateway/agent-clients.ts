@@ -10,6 +10,10 @@ export const agentClientIds = [
   "kilocode",
   "qwen-code",
   "mimo-code",
+  "kimi-code",
+  "pi",
+  "factory-droid",
+  "goose",
 ] as const
 export type AgentClientId = (typeof agentClientIds)[number]
 
@@ -51,6 +55,14 @@ export const agentClients = {
     icon: "qwen-color.svg",
   },
   "mimo-code": { title: "agents.mimoCode", description: "agents.mimoCodeDescription", icon: "" },
+  "kimi-code": { title: "agents.kimiCode", description: "agents.kimiCodeDescription", icon: "" },
+  pi: { title: "agents.pi", description: "agents.piDescription", icon: "pi.svg" },
+  "factory-droid": {
+    title: "agents.factoryDroid",
+    description: "agents.factoryDroidDescription",
+    icon: "factory.svg",
+  },
+  goose: { title: "agents.goose", description: "agents.gooseDescription", icon: "goose.svg" },
 } as const
 
 export function isAgentClientId(value: unknown): value is AgentClientId {

@@ -8,6 +8,8 @@ import (
 
 func nsisDesktopName(id string) string {
 	switch id {
+	case "goose-desktop":
+		return "goose"
 	case "harness-desktop":
 		return "DeepSeek Harness"
 	case "mimo-desktop-cn":

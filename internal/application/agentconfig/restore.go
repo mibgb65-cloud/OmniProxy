@@ -58,7 +58,7 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 			return nil, err
 		}
 	}
-	if original.Exists || isHarness(client) {
+	if original.Exists || isHarness(client) || isBundledClient(client) {
 		err = s.writeClient(client, path, original.Body, hash)
 	} else {
 		err = removeOwned(path, hash)

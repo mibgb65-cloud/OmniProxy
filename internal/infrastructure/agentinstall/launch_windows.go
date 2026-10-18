@@ -22,7 +22,9 @@ func Launch(ctx context.Context, id string) error {
 	case "harness-cli":
 		arguments = "web"
 	case "opencode-cli":
-	case "kilocode-cli", "qwen-code-cli", "mimo-code-cli":
+	case "kilocode-cli", "qwen-code-cli", "mimo-code-cli", "kimi-code-cli", "pi-cli", "factory-droid-cli", "goose-cli":
+	case "goose-desktop":
+		names = []string{"goose.exe", "Goose.exe"}
 	case "opencode-desktop":
 		names = []string{"OpenCode.exe", "opencode.exe"}
 	case "harness-desktop":

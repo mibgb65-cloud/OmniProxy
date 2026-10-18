@@ -1,5 +1,9 @@
 # Architecture Overview
 
+## Kimi Code、Pi、Factory Droid 与 Goose（2026-10-18）
+
+`application/agentconfig` 增加四个精确客户端 ID，沿用 Chat 目录、独立接入 Key、模型选择持久化及加密备份；Kimi 根据当前／旧 Python 配置选择协议。Pi／Goose 使用固定关联路径的有界双文件快照，逐文件版本校验和失败回滚，不引入 SDK、运行时或数据库迁移。`infrastructure/agentinstall` 增加固定官方入口、CLI 版本与 Goose 桌面检测；前端复用产品分组及详情。实现边界见 `product/KIMI_PI_DROID_GOOSE.md`。
+
 ## Kilo／Qwen／MiMo Code 客户端（2026-10-17）
 
 `application/agentconfig` 新增三个独立接入 ID，复用既有加密备份、版本校验、Key 鉴权

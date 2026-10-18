@@ -43,6 +43,11 @@ func Products() []Product {
 		{ID: "mimo-code-cli", Command: "mimo", OfficialURL: "https://github.com/XiaomiMiMo/MiMo-Code"},
 		{ID: "mimo-desktop-cn", OfficialURL: "https://mimo.xiaomimimo.com/desktop/invite/"},
 		{ID: "mimo-desktop-global", OfficialURL: "https://mimo-ai.xiaomimimo.com/desktop/invite/"},
+		{ID: "kimi-code-cli", Command: "kimi", OfficialURL: "https://www.kimi.com/code/docs/en/kimi-code-cli/guides/getting-started"},
+		{ID: "pi-cli", Command: "pi", OfficialURL: "https://pi.dev/"},
+		{ID: "factory-droid-cli", Command: "droid", OfficialURL: "https://docs.factory.com/droid-cli/quickstart"},
+		{ID: "goose-cli", Command: "goose", OfficialURL: "https://goose-docs.ai/docs/getting-started/installation/"},
+		{ID: "goose-desktop", OfficialURL: "https://goose-docs.ai/docs/getting-started/installation/"},
 	}
 }
 

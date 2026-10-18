@@ -62,6 +62,10 @@ it("所有产品使用标题分组，内部按软件列出配置入口", async (
     ["Kilo Code", ["Kilo Code CLI", "Kilo Desktop"]],
     ["Qwen Code", ["Qwen Code CLI", "Qwen Code Desktop"]],
     ["MiMo Code", ["MiMo Code CLI", "MiMo Desktop 国内版", "MiMo Desktop 国际版"]],
+    ["Kimi Code", ["Kimi Code CLI"]],
+    ["Pi", ["Pi CLI"]],
+    ["Factory Droid", ["Factory Droid CLI"]],
+    ["Goose", ["Goose CLI", "Goose Desktop"]],
   ] as const) {
     const group = await screen.findByRole("region", { name: title })
     expect(within(group).getByRole("heading", { name: title, level: 3 })).toBeInTheDocument()
@@ -81,6 +85,7 @@ it.each([
   ["qwen-code", "Qwen Code Desktop", "Qwen Code CLI / Desktop"],
   ["mimo-code", "MiMo Desktop 国内版", "MiMo Code CLI / Desktop"],
   ["mimo-code", "MiMo Desktop 国际版", "MiMo Code CLI / Desktop"],
+  ["goose", "Goose Desktop", "Goose CLI / Desktop"],
 ])("%s 的 %s 进入共享详情，并返回原软件入口", async (client, label, heading) => {
   const user = userEvent.setup()
   const { router } = renderGateway("clients")

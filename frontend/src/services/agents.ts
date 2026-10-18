@@ -18,6 +18,10 @@ export async function rereadAgentConfig(client: string): Promise<AgentClient> {
       "kilocode",
       "qwen-code",
       "mimo-code",
+      "kimi-code",
+      "pi",
+      "factory-droid",
+      "goose",
     ].includes(client)
   )
     throw new Error("agent: invalid_client")
@@ -86,6 +90,14 @@ export function agentTitle(client: string) {
       return "agents.qwenCode"
     case "mimo-code":
       return "agents.mimoCode"
+    case "kimi-code":
+      return "agents.kimiCode"
+    case "pi":
+      return "agents.pi"
+    case "factory-droid":
+      return "agents.factoryDroid"
+    case "goose":
+      return "agents.goose"
     default:
       return "agents.title"
   }

@@ -37,7 +37,11 @@ export function AgentInstallationActions({
         id.startsWith("harness-") ||
         id.startsWith("kilocode-") ||
         id.startsWith("qwen-code-") ||
-        id.startsWith("mimo-")) &&
+        id.startsWith("mimo-") ||
+        id === "kimi-code-cli" ||
+        id === "pi-cli" ||
+        id === "factory-droid-cli" ||
+        id.startsWith("goose-")) &&
       item?.detection.state === "installed" ? (
         <Button
           size="sm"

@@ -114,6 +114,9 @@ func (b *Backend) inspectCLI(ctx context.Context, product Product) Detection {
 	}
 	text := strings.TrimSpace(string(output))
 	version := strings.TrimPrefix(text, "codex-cli ")
+	if product.Command == "kimi" || product.Command == "pi" || product.Command == "droid" || product.Command == "goose" {
+		version = gatewayAgentVersion(product.Command, text)
+	}
 	if product.Command == "claude" {
 		fields := strings.Fields(text)
 		if len(fields) == 0 {
@@ -148,6 +151,9 @@ func cliPath(product Product) string {
 	}
 	if home != "" {
 		candidates = append(candidates, filepath.Join(home, ".local", "bin", product.Command+".exe"))
+		if product.Command == "droid" {
+			candidates = append(candidates, filepath.Join(home, ".factory", "bin", "droid.exe"))
+		}
 	}
 	for _, path := range candidates {
 		if info, err := os.Stat(path); err == nil && info.Mode().IsRegular() {

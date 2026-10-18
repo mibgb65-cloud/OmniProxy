@@ -12,6 +12,9 @@ type harnessBundle struct {
 }
 
 func (s *Service) readClient(client, path string) ([]byte, bool, error) {
+	if isBundledClient(client) {
+		return readBundle(client, path)
+	}
 	if !isHarness(client) {
 		return read(path)
 	}
@@ -45,6 +48,9 @@ func (s *Service) snapshotClient(client, path string) (fileSnapshot, error) {
 }
 
 func (s *Service) writeClient(client, path string, body []byte, revision string) error {
+	if isBundledClient(client) {
+		return writeBundle(client, path, body, revision)
+	}
 	if !isHarness(client) {
 		return writeAtomic(path, body, revision)
 	}
@@ -107,7 +113,7 @@ func (s *Service) writeClient(client, path string, body []byte, revision string)
 }
 
 func (s *Service) rollbackClient(client, path, revision string, before fileSnapshot) error {
-	if isHarness(client) || before.exists {
+	if isHarness(client) || isBundledClient(client) || before.exists {
 		return s.writeClient(client, path, before.body, revision)
 	}
 	return removeOwned(path, revision)

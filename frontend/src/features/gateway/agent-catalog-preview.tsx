@@ -19,6 +19,10 @@ const modeLabels = {
   "kilo-model-list": "agents.mode.kilocode",
   "qwen-model-list": "agents.mode.qwenCode",
   "mimo-code-model-list": "agents.mode.mimoCode",
+  "kimi-code-model-list": "agents.mode.kimiCode",
+  "pi-model-list": "agents.mode.pi",
+  "factory-droid-model-list": "agents.mode.factoryDroid",
+  "goose-model-list": "agents.mode.goose",
 } as const
 
 type ModelSelection = {

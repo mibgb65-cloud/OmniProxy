@@ -94,7 +94,8 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		Models          []catalog.Entry
 		Client, Version string
 		Port            int
-	}{entries, input.Client, s.codexVersion, s.port})
+		Config          string `json:",omitempty"`
+	}{entries, input.Client, s.codexVersion, s.port, s.gatewayAgentIdentity(input.Client, path)})
 	if err != nil {
 		return failed(failure("models_unavailable"))
 	}
@@ -124,6 +125,9 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		selected = entries[0].ID
 	}
 	mode := "client-default"
+	if isGatewayAgent(input.Client) {
+		mode = input.Client + "-model-list"
+	}
 	if input.Client == "opencode" {
 		mode = "opencode-model-list"
 	}
@@ -187,6 +191,9 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n默认模型：%s\n保留其他提供商、权限和会话；应用前保存加密备份。\n配置当前本机引擎；桌面宿主的独立数据目录、内联设置或启动覆盖可能优先。", path, len(entries), selected)
 	}
 	key := []byte("<本地接入 API Key>")
+	if isGatewayAgent(input.Client) {
+		plan.Summary = gatewayAgentSummary(input.Client, path, selected, len(entries))
+	}
 	patched, _, err := s.buildPlan(input.Client, body, key, plan)
 	clear(patched)
 	if err != nil {

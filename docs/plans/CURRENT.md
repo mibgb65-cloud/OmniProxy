@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-002](../tasks/active/TASK-20261018-002-add-four-agents.md)：接入 Kimi Code、Pi、Factory Droid 和 Goose，核对官方配置并扩展检测、受管模型与备份恢复。
 
 ## Recently Completed
 

@@ -31,7 +31,12 @@ func TestConfiguredModelsReadActualManagedMenus(t *testing.T) {
 			// 目录新增尚未刷新到文件时，不能被展示为已经接入。
 			c.entries = append(c.entries, catalog.Entry{ID: "new-model", Name: "New", Protocols: []string{"chat_completions", "messages", "responses"}})
 			got, err := s.ConfiguredModels(ctx, client)
-			if err != nil || len(got.Models) != 1 || got.Models[0].ID != "selected" || got.Models[0].Name != "Selected" {
+			expectedName := "Selected"
+			if client == "goose" {
+				// Goose 自定义 provider 的 ModelInfo 仅提供模型 name（API ID），没有独立展示名称。
+				expectedName = "selected"
+			}
+			if err != nil || len(got.Models) != 1 || got.Models[0].ID != "selected" || got.Models[0].Name != expectedName {
 				t.Fatal("actual selection not read", err, got)
 			}
 			if !isHarness(client) && got.DefaultModel != "selected" {

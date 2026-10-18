@@ -24,7 +24,7 @@ func TestOnlySupportedClientKeysAuthorize(t *testing.T) {
 		t.Fatal("legacy diagnostic key still authorizes")
 	}
 	clear(legacyKey)
-	for _, client := range []string{"codex", "claude", "claude-desktop"} {
+	for _, client := range Clients() {
 		key, err := s.Key(ctx, client)
 		if err != nil {
 			t.Fatal(err)

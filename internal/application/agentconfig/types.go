@@ -22,6 +22,8 @@ type Paths struct {
 	ClaudeDesktopNormal, ClaudeDesktopThirdParty             string
 	OpenCode, HarnessWeb, HarnessDesktop, HarnessCredentials string
 	KiloCode, QwenCode, MiMoCode                             string
+	KimiCode, Pi, FactoryDroid, Goose                        string
+	KimiCodeLegacy                                           bool
 }
 type Item struct {
 	Client     string `json:"client"`
@@ -87,6 +89,14 @@ func (s *Service) path(client string) (string, error) {
 		return s.paths.QwenCode, nil
 	case "mimo-code":
 		return s.paths.MiMoCode, nil
+	case "kimi-code":
+		return s.paths.KimiCode, nil
+	case "pi":
+		return s.paths.Pi, nil
+	case "factory-droid":
+		return s.paths.FactoryDroid, nil
+	case "goose":
+		return s.paths.Goose, nil
 	case "harness-web":
 		return s.paths.HarnessWeb, nil
 	case "harness-desktop":

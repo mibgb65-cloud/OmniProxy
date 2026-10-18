@@ -55,6 +55,8 @@ func (s *Service) ConfiguredModels(ctx context.Context, client string) (Configur
 	}
 	result.DefaultModel = upgradeClaudeDefault(entries, existingModel(client, before.body))
 	switch {
+	case isGatewayAgent(client):
+		result.Models, err = configuredGatewayAgent(client, before.body)
 	case client == "codex":
 		result.Models, err = s.configuredCodex(ctx, before.body, entries)
 	case isHarness(client):

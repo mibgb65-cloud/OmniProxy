@@ -16,6 +16,11 @@ export const agentInstallationTargets = {
   "mimo-code-cli": "agents.install.mimoCodeCli",
   "mimo-desktop-cn": "agents.install.mimoDesktopCn",
   "mimo-desktop-global": "agents.install.mimoDesktopGlobal",
+  "kimi-code-cli": "agents.install.kimiCodeCli",
+  "pi-cli": "agents.install.piCli",
+  "factory-droid-cli": "agents.install.factoryDroidCli",
+  "goose-cli": "agents.install.gooseCli",
+  "goose-desktop": "agents.install.gooseDesktop",
 } as const
 
 export type AgentInstallTarget = keyof typeof agentInstallationTargets
@@ -29,4 +34,8 @@ export const clientInstallationTargets: Record<AgentClientId, AgentInstallTarget
   kilocode: ["kilocode-cli", "kilocode-desktop"],
   "qwen-code": ["qwen-code-cli", "qwen-code-desktop"],
   "mimo-code": ["mimo-code-cli", "mimo-desktop-cn", "mimo-desktop-global"],
+  "kimi-code": ["kimi-code-cli"],
+  pi: ["pi-cli"],
+  "factory-droid": ["factory-droid-cli"],
+  goose: ["goose-cli", "goose-desktop"],
 }
