@@ -4,14 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.1 — 应用／前端使用完整 SemVer，Windows 安装器数字版本为 2.0.0；详见 `product/UPGRADE.md`。
+2.0.0-beta.1 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.1)。应用／前端使用完整 SemVer，Windows 数字版本 2.0.0；Beta.1 保留默认 Beta 更新渠道，正式渠道修复已进入 main、待后续版本交付，详见 `product/UPGRADE.md`。
 
 ## In Progress
 
-- [TASK-20261018-009](../tasks/active/TASK-20261018-009-publish-v2-beta1.md)：main 远端完整 CI 通过，v2.0.0-beta.1 标签已固定到 `18cd42f`；跟进 Release 完整验收重跑及公开资产验证，保留旧版 master 和 v1.3.1 Latest。
+暂无。
 
 ## Recently Completed
 
+- [TASK-20261018-009](../tasks/completed/2026-10/TASK-20261018-009-publish-v2-beta1.md)：首个 v2.0.0-beta.1 已公开预发布，标签应用代码 `18cd42f`；干净环境质量门、远端 CI、源码一致性守卫、自动 NSIS／SHA256／发布及实际下载校验通过。旧 master／v1.3.1 Latest 保留。修复 `14edf51`／`18cd42f`／`ce89b68`；正式渠道编码问题在 Beta.1 说明中列出，main 修复 `38184e9` 通过定向／在线／完整验证，随后续测试版交付；默认 Beta 渠道正常。
 - [TASK-20261018-008](../tasks/completed/2026-10/TASK-20261018-008-installer-and-in-app-updates.md)：安装器／下载进度／SHA256／取消重试／静默重启、侧栏升级标记和版本浮窗、Beta Release 工作流完成。完整质量门／575 项前端测试、用户级和机器级安装／运行中升级／重启／卸载、v1 覆盖、首次完成页普通用户启动与原生深浅／960 验收通过，最终生产安装包资源／SHA256 校验通过。实现 `cae895f`，启动身份修复 `5107c8f`；未操作真实账号／正式安装或发布远端，代码签名尚未接入。
 - [TASK-20261018-007](../tasks/completed/2026-10/TASK-20261018-007-v1-import-and-beta-updates.md)：旧版只读 API Key 预览／导入、快照复核／去重重试及正式／Beta 检查；应用版本 2.0.0-beta.1，Windows 数字资源同步。完整质量门／571 项前端测试、隔离原生深浅／960、最终 Windows 构建与安装器编译通过。实现提交 `c77f3d1`；订阅、未知计费等迁移及手动安装限制见 UPGRADE，未操作真实账号或发布。
 - [TASK-20261018-006](../tasks/completed/2026-10/TASK-20261018-006-sync-latest-main.md)：main 从 `558cdba` 快进至 `a1b4275`，完整纳入当前开发分支 68 个提交并切换至 main。完整质量门、102 文件／567 项前端测试与 Windows 生产构建通过；无额外业务／生成文件变更，五份既有未跟踪记录保持不变。本地同步，无远端推送。

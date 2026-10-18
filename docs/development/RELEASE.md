@@ -5,7 +5,7 @@
 1. 在正常开发提交中同步 `internal/version/version.go` 的完整版本和 `frontend/package.json`，例如 `2.0.0-beta.1`，并添加 `docs/releases/v2.0.0-beta.1.md`。
 2. 本地运行 `./scripts/build-release.ps1 -Version v2.0.0-beta.1`。脚本先确认标签与源码／前端一致，再映射 Windows 数字资源，执行 `task --force verify` 和 `task --force package`。
 3. 使用 Windows 原生版本 API 校验应用及安装器，最终产物复制到空的 `release-assets/`，生成匹配 SHA256 并运行资产验证。拒绝覆盖非空发布目录。
-4. 验收后创建并推送对应版本标签。此操作才会触发发布，本任务不自动创建标签或推送。
+4. 验收后在对应提交创建并推送版本标签。该推送会触发公开发布，应作为明确的版本发布操作执行。
 
 示例：
 
