@@ -4,16 +4,17 @@
 
 ## Current Version
 
-2.0.0-beta.3 — 修复后重新发布中、尚未公开：用户已授权修复账号版本隔离并移动未发布的 Beta.3 标签，旧 Release 已取消；当前公开测试版仍为 Beta.2。应用／前端保留完整 SemVer，Windows 数字版本仍为 2.0.0。
+2.0.0-beta.3 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.3)，包含 Codex 预热／错误状态及账号版本时钟隔离修复；CI／Release／真实更新发现／公开下载及 SHA256 验证通过。应用／前端完整 SemVer，Windows 数字版本仍为 2.0.0。
 
 ## In Progress
 
-- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：本地完整发布构建／575 项前端测试和隔离安装验收通过，main／Beta.3 标签已推送；CI 39128657083 在旧账号快照／额度隔离测试失败，Release 39129204984 已取消。用户已明确授权根因修复后以预期旧对象锁定移动未发布 Beta.3 标签，TASK-015／CI `39130885754` 已完成，新标签仅使用精确旧值租约移动至 `60fb745`，Release `39131810901` 构建中；当前 Agent／生产应用未改动。
+暂无。
 
 ## Recently Completed
 
+- [TASK-20261018-014](../tasks/completed/2026-10/TASK-20261018-014-publish-v2-beta3.md)：源码 `60fb745`／v2.0.0-beta.3 已推送并公开预发布。首次 CI 发现版本隔离缺陷后停止发布；TASK-015 修复，用户授权以精确旧对象租约移动未发布标签。新 CI `39130885754`、Release `39131810901` 成功；公开安装器 19,262,605 bytes／SHA256 `fe23a217d3d8b3e756100cafa9dc81bf2e7af3a077a5b6eaa07770f9ec51f856`，实际更新客户端发现及下载／校验通过。旧 Beta／正式 Latest 保留，Agent 配置／生产 Beta.2 未变。
 - [TASK-20261018-015](../tasks/completed/2026-10/TASK-20261018-015-account-version-clock-isolation.md)：`60fb745` 修复账号修改的时钟重复／回拨版本复用，补齐乐观锁与越界保护。确定性回归先失败后通过、关键回归 20 轮、完整质量门／575 项前端测试、Windows 安装与实际离线 Codex 契约通过；远端 CI `39130885754` 成功，已接续 Beta.3 发布。
-- [TASK-20261018-013](../tasks/completed/2026-10/TASK-20261018-013-fix-codex-isolated-forwarding.md)：`ad79d6e` 修复 Codex WebSocket 预热误转发、错误状态／Retry-After 丢失及完成后等待 EOF，保护嵌套错误原文；隔离实际 CLI 0.163.0 连续三次、临时数据库状态回归、最终完整质量门／575 项前端测试与 Windows 构建通过。当前 Agent 配置哈希／生产进程不变，仅本地提交，未部署／发布；历史上游 400 的具体原因仍待真实账号独立验收。
+- [TASK-20261018-013](../tasks/completed/2026-10/TASK-20261018-013-fix-codex-isolated-forwarding.md)：`ad79d6e` 修复 Codex WebSocket 预热误转发、错误状态／Retry-After 丢失及完成后等待 EOF，保护嵌套错误原文；隔离实际 CLI 0.163.0 连续三次、临时数据库状态回归、最终完整质量门／575 项前端测试与 Windows 构建通过。当时仅本地验证，随后随 Beta.3 发布（TASK-014）；当前 Agent／生产配置未变，历史上游 400 的具体原因仍待真实账号独立验收。
 - [TASK-20261018-011](../tasks/completed/2026-10/TASK-20261018-011-publish-v2-beta2.md)：`5de94cf`／v2.0.0-beta.2 已推送并公开预发布；原生 Beta.2 安装／升级／重启／卸载、CI `39119451562` 与 Release `39119455141` 均成功。公开安装器 19,255,511 bytes／SHA256 `0b4f4e56dc7f1c8a781a1c13fa0913e6f0ea124f8de2c837858346b658e4ce97`，默认更新客户端确认 Beta.1 可发现并下载校验 Beta.2；正式 Latest v1.3.1 与 Beta.1 原资产保留。
 - [TASK-20261018-010](../tasks/completed/2026-10/TASK-20261018-010-fix-installed-startup-and-shortcuts.md)：历史统计库与迁移 008 冲突已定位，本机备份后隔离数据恢复；已实现只读布局识别／旧库保护／有效 v2 沿用／可见失败及日志落盘／独立快捷方式 ICO。最终完整质量门、575 项前端测试、用户级隔离安装／运行中升级／重启／卸载及错误提示通过；生产安装器原生资源校验通过。修复 `7085fe4` 已推送，公开 Beta.1 添加已知问题提示且资产未变，Beta.2 继续交付。
 - [TASK-20261018-009](../tasks/completed/2026-10/TASK-20261018-009-publish-v2-beta1.md)：首个 v2.0.0-beta.1 已公开预发布，标签应用代码 `18cd42f`；干净环境质量门、远端 CI、源码一致性守卫、自动 NSIS／SHA256／发布及实际下载校验通过。旧 master／v1.3.1 Latest 保留。修复 `14edf51`／`18cd42f`／`ce89b68`；正式渠道编码问题在 Beta.1 说明中列出，main 修复 `38184e9` 通过定向／在线／完整验证，随后续测试版交付；默认 Beta 渠道正常。

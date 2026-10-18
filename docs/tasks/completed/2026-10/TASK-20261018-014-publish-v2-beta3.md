@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -52,13 +52,18 @@ In Progress
 
 # Implementation Result
 
-已同步应用／前端／Windows 产品完整版本为 2.0.0-beta.3，数字资源保持 2.0.0.0；新增准确的 Codex 修复发布说明，保留真实账号验收边界。现有 Release 工作流和安装器实现没有修改。最终本地完整发布构建已通过，独立用户级安装生命周期验收最终通过。main 与 Beta.3 标签已经推送，但远端 CI 暴露既有账号版本一致性缺陷；Release 已主动取消且未公开，用户已明确授权替换尚未发布的 Beta.3 标签；根因修复 60fb745 通过新的完整 CI，使用精确旧对象租约将标签移至修复提交，新 Release 39131810901 正在构建。
+已同步应用／前端／Windows 产品完整版本为 2.0.0-beta.3，数字资源保持 2.0.0.0；新增准确的 Codex 修复发布说明，保留真实账号验收边界。现有 Release 工作流和安装器实现没有修改。最终本地完整发布构建与独立用户级安装生命周期验收通过。首次推送后，远端 CI 暴露既有账号版本一致性缺陷，初次 Release 因此取消且没有公开；用户已明确授权替换尚未发布的 Beta.3 标签；根因修复 60fb745 通过新的完整 CI，使用精确旧对象租约将标签移至修复提交，新 Release 39131810901 构建／发布全部成功，公开下载与更新客户端验证完成。
 
 # Verification
 
 - PASS：修复源码 60fb7457b2bc682d1daf66ce86a1af24e9e5a23d 的 CI 39130885754 完整成功；修复后独立安装生命周期再次全部通过。
 - PASS：确认 Beta.3 无 Release、旧工作流已取消、远端旧标签仍为 266fe44 后，依用户授权只对 refs/tags/v2.0.0-beta.3 使用 force-with-lease。新注释标签对象 23439d2a28470ba41267935bf2383f65f4b12233，peeled SHA 为修复源码，main 历史未重写。
-- IN PROGRESS：新 Release 39131810901；尚未宣布公开发布或下载验收通过。
+- PASS：新 Release 39131810901，源码 60fb7457b2bc682d1daf66ce86a1af24e9e5a23d，完整质量门、Windows 构建、NSIS、原生资源、资产校验、上传及发布均成功；未使用 Beta.1 专用测试恢复步骤。
+- PASS：公开 Release ID 416472165，draft=false／prerelease=true，发布于 2026-10-18 21:39:47 UTC+08:00。公开安装器 19262605 bytes，SHA256 `fe23a217d3d8b3e756100cafa9dc81bf2e7af3a077a5b6eaa07770f9ec51f856`，同名校验文件配套。公开 CI 摘要与本地候选不同，已按公开资产独立核对。
+- PASS：实际 update.Checker 读取正式渠道 v1.3.1 与 Beta 渠道 v2.0.0-beta.3；版本比较确认高于 Beta.1／Beta.2。实际 SelectPackage／DownloadClient／Download／VerifyFile 完成 GitHub→release-assets CDN 下载、精确大小和摘要校验，再通过发布资产脚本及 Windows 原生版本资源检查。
+- PASS：Beta.1／Beta.2 Release 正文及资产 ID／名称／大小／摘要保持原样；正式 Latest 仍为 v1.3.1（392117295）。
+- PASS：当前 Agent 配置哈希保持基线一致，生产 PID 8124 未重启，健康接口仍为 2.0.0-beta.2；没有自动安装公开包或发真实模型请求。
+- 查询恢复：一个只读 gh run watch 遇到网络 EOF，另一观察和独立 API 回读确认同一 Release 已成功；没有重跑发布、重复移动标签或覆盖资产，随后只重新执行公开验证。
 
 - PASS：TASK-015 根因修复后重新完整构建发布候选，质量门／575 项前端测试、NSIS、原生资源和摘要成功，独立 Codex 契约连续三次通过；新候选 tmp/beta3-release-20261018/fixed-local-assets，未复用修复前产物。
 
@@ -77,8 +82,18 @@ In Progress
 
 - 源提交／已推送 main：fc7a00845adef914ea8a703efdfa82c7cfac9940。
 - 已推送注释标签对象：266fe44dca4698a8fca67933dfdce06f32210e82，v2.0.0-beta.3，peeled 至上述源提交。
-- 标签已经共享，不擅自移动／删除。修复后若继续使用 Beta.3，需要用户明确授权重建尚未发布的该标签；否则另行确认新版本号。
+- 用户随后明确授权修复后移动尚未发布 Beta.3 标签：旧对象 266fe44 使用精确 force-with-lease 校验后替换为 23439d2a28470ba41267935bf2383f65f4b12233，源码为 60fb7457b2bc682d1daf66ce86a1af24e9e5a23d；没有改写 main 历史或移动其他标签。
+- 新修复源提交、修复归档 69449cb 及最终发布归档均普通推送 main。公开 Beta.3 不再移动标签或覆盖资产。
 
 # Result
 
-未完成公开发布。已完成版本、构建、原生安装验收及 main／标签推送；远端 CI 检出账号版本隔离缺陷，已阻止公开 Release。根因修复和新 CI 已通过，Beta.3 标签依授权安全替换，新发布工作流正在执行。公开发布／下载／更新发现验收尚未完成。当前 Agent 配置及本机生产安装保持不变。
+Beta.3 已公开发布并完成真实下载／摘要／更新发现验收：https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.3。
+包含 Codex 预热／错误状态修复和本次 CI 检出的账号版本时钟隔离根因修复。旧 Beta 和正式 Latest 保留，当前 Agent 配置与本机生产应用保持不变。
+
+## Remaining Risks
+
+安装包尚未代码签名；没有用真实账号发模型请求，历史上游 400 的具体原因仍不能由隔离测试还原。安装生命周期使用独立用户级产品／目录／注册键，不冒充机器级提权验收。本地构建产物与公开 CI 产物摘要分别记录，不应混用。
+
+# Completed
+
+2026-10-18 21:45
