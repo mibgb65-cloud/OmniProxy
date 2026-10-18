@@ -22,7 +22,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 
 ## Frameworks
 
-- Wails 3 (v3.0.0-beta.28) — desktop shell only. Core must not import it.
+- Wails 3 (v3.0.0-beta.30) — desktop shell only. Core must not import it.
 - React 19 + Vite 8 — frontend SPA.
 - chi — router/middleware for the local Control API. No large web framework
   (Gin/Fiber/Echo are explicitly out).
@@ -132,7 +132,7 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 | `zustand`                 | UI state                             | Minimal store; server data stays in Query              |
 | `@wailsio/runtime`        | Wails JS runtime + Vite plugin       | Required by the Wails frontend toolchain               |
 
-Wails Go 模块、CLI 与前端 `@wailsio/runtime` 固定使用同一 beta.28 版本；CI 与 README 的 CLI 安装命令同步固定版本。
+Wails Go 模块、CLI 与前端 `@wailsio/runtime` 固定使用同一 beta.30 版本；CI 与 README 的 CLI 安装命令同步固定版本。
 | `tailwindcss`             | Utility CSS                          | Project standard                                       |
 | `radix-ui`                | Accessible headless primitives       | Backs shadcn/ui components                             |
 | `lucide-react`            | Icons                                | Single icon library                                    |
