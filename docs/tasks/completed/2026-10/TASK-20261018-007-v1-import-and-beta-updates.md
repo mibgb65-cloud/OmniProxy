@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -75,8 +75,14 @@ In Progress
 
 ## Git
 
-待记录。
+实现提交：`c77f3d11802c83d7097213981c372c5fba0de106` — `feat(upgrade): 支持旧版账号导入和 Beta 更新渠道`。
+
+在本地 main 完成，未配置／推送远端；五份既有未跟踪任务记录不纳入提交。
 
 ## Result
 
-功能与验证已完成，待提交实现并归档任务记录。
+旧版兼容 API Key 导入和正式／Beta 检查均已实现并提交到 main，完整质量门、隔离原生交互与安装器编译通过。应用标识为 2.0.0-beta.1，限制及后续实际安装验收见 UPGRADE。
+
+## Completed
+
+2026-10-18（Asia/Singapore）
