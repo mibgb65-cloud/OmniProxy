@@ -4,11 +4,11 @@
 
 ## Current Version
 
-2.0.0-beta.2 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.2)，包含历史统计库启动冲突、图标和正式渠道修复；CI／Release／公开下载及 SHA256 验证通过。应用／前端使用完整 SemVer，Windows 数字版本 2.0.0；详见 `product/UPGRADE.md`。
+2.0.0-beta.3 — 发布准备中，包含 Codex 预热与转发错误状态修复；当前公开测试版仍为 Beta.2。应用／前端保留完整 SemVer，Windows 数字版本仍为 2.0.0。
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：用户已授权推送并发布 Beta.3，正在同步版本、验证最终安装器并准备 CI／Release；不修改当前 Agent 配置或升级本机生产应用。
 
 ## Recently Completed
 
