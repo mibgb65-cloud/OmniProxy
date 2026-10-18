@@ -59,6 +59,8 @@ task build
 
 ## 应用图标
 
+NSIS 同时安装自有 `app-icon-v2.ico`，桌面／开始菜单快捷方式显式引用此文件，避免复用旧 EXE 路径的 Shell 图标缓存。卸载只删除此自有 ICO。更换下一代图标设计时应同时考虑新资源路径，不能仅覆盖图像后假设 Explorer 已刷新。
+
 当前采用 C「钴蓝汇聚」，源设计位于 `design/app-icon/c-cobalt-hub.png`。
 `build/appicon.png` 是构建源图，`task common:generate:icons` 生成 Windows ICO，
 保留 16／20／24／32／40／48／64／96／128／256 像素资源；Windows 窗口和任务栏从可执行文件读取该图标。

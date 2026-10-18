@@ -263,6 +263,7 @@ DeepSeek 适配器在回调结束前关闭响应，禁止上游重定向，仅�
   `modernc.org/sqlite` driver) and applies embedded SQL migrations from
   `migrations/`. The schema only changes through migrations; `schema_version`
   records what has been applied.
+  启动编排在写入前调用只读历史布局识别：已知不兼容统计库隔离到原目录的 `v2` 子目录，持久目录配置不触发搬迁；已有有效 v2 库沿用，混有账号／后期迁移或未知布局时明确失败。Windows 在桌面框架初始化前也能显示失败提示，并先关闭日志文件确保诊断落盘；见 `product/UPGRADE.md`。
 - `infrastructure/logger`: structured `log/slog` setup with a central
   Redactor; sinks are console, rotating file and an in-memory UI buffer.
   The UI buffer exposes bounded structured snapshots with sequence cursors.

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-010](../tasks/active/TASK-20261018-010-fix-installed-startup-and-shortcuts.md)：实际安装启动失败定位为历史统计库与迁移 008 的表名冲突；一致性备份后用户手动运行受审查的恢复脚本，生产窗口／健康接口已恢复，桌面快捷方式引用新 ICO。迁移前布局识别、独立目录、保留有效 v2 库和启动错误提示已实现，完整质量门及隔离安装器回归进行中；公开 Beta.1 资产保持原样。
 
 ## Recently Completed
 

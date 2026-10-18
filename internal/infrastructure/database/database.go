@@ -8,8 +8,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "modernc.org/sqlite" // register the "sqlite" driver
 )
@@ -34,8 +36,10 @@ func Open(cfg Config) (*sql.DB, error) {
 		}
 	}
 
-	dsn := "file:" + filepath.ToSlash(cfg.Path) +
-		"?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=foreign_keys(on)"
+	dsn, err := sqliteDSN(cfg.Path, "_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_pragma=foreign_keys(on)")
+	if err != nil {
+		return nil, err
+	}
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("database: open %s: %w", cfg.Path, err)
@@ -48,4 +52,17 @@ func Open(cfg Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("database: ping %s: %w", cfg.Path, err)
 	}
 	return db, nil
+}
+
+func sqliteDSN(path, query string) (string, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return "", fmt.Errorf("database: resolve path: %w", err)
+	}
+	uriPath := filepath.ToSlash(abs)
+	// Windows 盘符必须是 /C:/…，否则 URL 将 C: 解释为 authority。
+	if !strings.HasPrefix(uriPath, "/") {
+		uriPath = "/" + uriPath
+	}
+	return (&url.URL{Scheme: "file", Path: uriPath, RawQuery: query}).String(), nil
 }

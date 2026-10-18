@@ -42,6 +42,7 @@ Section
     !insertmacro wails.webview2runtime
     SetOutPath $INSTDIR
     !insertmacro wails.files
+    File "/oname=app-icon-v2.ico" "..\icon.ico"
     Call CreateAppShortcuts
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
@@ -65,6 +66,7 @@ Section "uninstall"
     !insertmacro wails.unassociateFiles
     !insertmacro wails.unassociateCustomProtocols
     Delete "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    Delete "$INSTDIR\app-icon-v2.ico"
     !insertmacro wails.deleteUninstaller
     ; 只删除程序自有文件；未知文件及所有账号／数据库始终保留。
     RMDir "$INSTDIR"

@@ -88,11 +88,12 @@ FunctionEnd
 !macroend
 
 Function CreateAppShortcuts
-    CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    ; 独立图标路径避免旧版 EXE 路径的 Shell 缓存继续显示旧图标。
+    CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}" "" "$INSTDIR\app-icon-v2.ico" 0
     ${If} $ExistingInstall == "1"
         IfFileExists "$DESKTOP\${INFO_PRODUCTNAME}.lnk" 0 done
     ${EndIf}
-    CreateShortcut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    CreateShortcut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}" "" "$INSTDIR\app-icon-v2.ico" 0
 done:
 FunctionEnd
 
