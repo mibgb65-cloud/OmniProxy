@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -79,7 +79,9 @@ In Progress
 
 # Git
 
-Not committed by Agent.
+b2eb0a187969663552eda944e396c5ef01a54a20 fix(codex): 修复原生图片能力与请求容量
+
+仅本地提交，未推送／发布。
 
 
 # Evidence Sources
@@ -95,3 +97,7 @@ Not committed by Agent.
 # Result
 
 根因已确认并在本地修复：原生图片能力被错误降为仅文本，另有独立请求容量不足。四次真实图片请求、两内核目录读取、临时配置保护及完整门禁通过。当前用户共享目录仍保持原样，需后续升级修复构建、受控重新应用目录并重新加载客户端后生效；本任务没有发布或自动安装。
+
+# Completed
+
+2026-10-19 00:22

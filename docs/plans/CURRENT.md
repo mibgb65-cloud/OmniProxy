@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261018-020](../tasks/active/TASK-20261018-020-fix-openai-image-input.md)：修复原生 OpenAI 图片能力被误标为仅文本及 2 MiB 请求限制。已完成四次真实图片请求、双内核目录及关键回归；正在执行最终质量门，不改当前用户配置或生产进程。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261018-020](../tasks/completed/2026-10/TASK-20261018-020-fix-openai-image-input.md)：`b2eb0a1` 修复已确认原生 OpenAI 图片能力被降为仅文本，Responses HTTP／WebSocket 改为独立 16 MiB，保留跨协议限制与最后边界。真实 gpt-6.1-sol HTTP／WebSocket、CLI／Desktop 内核共四次图片识别成功；双内核目录、回归五轮及完整质量门／575 前端测试与 Windows 构建通过。仅本地修复，用户配置及目录均未改动；当前存在外部配置差异，升级后需受控重新应用目录并重新加载客户端。
 
 - [TASK-20261018-019](../tasks/completed/2026-10/TASK-20261018-019-publish-v2-beta4.md)：发布源 `6c0bd72`／新标签 v2.0.0-beta.4。CI `39139227077` 与 Release `39139988913` 成功；公开安装器 19,271,304 bytes／SHA256 `56df132691e7e9b561b183a6e3eb421ce1c9940a24494beeb7127518f62935ff`，默认实际更新发现／下载及两项资产验证通过。旧 Beta.1–3 和 stable Latest 保持不变，未自动安装或更改 Agent。
 
