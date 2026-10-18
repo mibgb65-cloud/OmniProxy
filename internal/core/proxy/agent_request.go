@@ -56,5 +56,8 @@ func requestBodyLimit(path string) int {
 	if path == "/v1/messages" {
 		return MaxMessagesRequestBytes
 	}
+	if path == "/v1/responses" {
+		return MaxResponsesRequestBytes
+	}
 	return MaxRequestBytes
 }

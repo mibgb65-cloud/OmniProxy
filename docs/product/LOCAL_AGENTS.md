@@ -225,3 +225,25 @@ Responses 生命周期事件或错误事件。最多检查 512 KiB，不等待�
 真实上游验收：gpt-5.6-luna 与 gpt-6.1-sol 的 HTTP／WebSocket，另有实际安装的
 Codex CLI 0.163.0 与 Desktop 内核 0.163.0-alpha.10.2 均完成请求；不是 Desktop GUI 外壳验收。
 测试没有替换生产软件、刷新账号登录或改写用户 Codex 配置；修复不会自动进入正在运行的旧进程。
+
+
+## 原生 OpenAI Responses 图片输入
+
+Codex 目录只在目标是原生 OpenAI 订阅 Responses、且上游元数据明确包含 `image` 时声明
+`input_modalities=["text","image"]`，别名沿用实际目标能力；未知／仅文本目标保持仅文本。
+其他适配器的上游模型即便支持图片，也不代表网关的跨协议转换已支持图片，不能一律宣传多模态。
+
+Responses HTTP／WebSocket 的 JSON 总量上限为 16 MiB，包括 Base64 图片、文本、工具上下文和
+合并后的历史，不是单张图片的原始文件上限；较大图片的 Base64 约增加三分之一体积。
+HTTP 超限返回 413；WebSocket 过大帧按 1009 关闭，历史合并／路由改写后的超限返回
+`413 / request_too_large`，不会调用上游。普通 Chat Completions 继续使用 2 MiB 上限，
+JSON 嵌套／重复字段、鉴权、并发、读取超时和只监听 loopback 等约束不变。
+
+升级后需要让 Codex 读取新的受管模型目录；若配置或目录存在外部改动，应在接入页预览并
+重新应用，不能绕过哈希保护直接覆盖共享配置。随后重新加载客户端或新建会话，以免继续使用
+旧的仅文本能力快照。无需切换 `model_provider` 或重新登录。
+
+2026-10-19 已用无隐私自建 PNG 验证 gpt-6.1-sol：约 3.16 MB 的图片 JSON 分别通过真实
+HTTP／WebSocket，并由实际 CLI 0.163.0／Desktop 内核 0.163.0-alpha.10.2 附件请求识别
+正确颜色与形状，共四次完整图片请求，用量及首字均记录。不是 Desktop GUI 外壳逐项验收；
+测试使用独立数据库／端口／客户端目录，只读使用应用隔离凭据，没有改动用户真实配置或图片。

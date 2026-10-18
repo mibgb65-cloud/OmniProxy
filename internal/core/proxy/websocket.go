@@ -22,7 +22,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		return
 	}
 	defer socket.CloseNow()
-	socket.SetReadLimit(MaxRequestBytes)
+	socket.SetReadLimit(MaxResponsesRequestBytes)
 	var history []json.RawMessage
 	lastID := ""
 	for {
@@ -77,7 +77,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			return
 		}
 		body, err = json.Marshal(fields)
-		if err != nil || len(body) > MaxRequestBytes {
+		if err != nil || len(body) > MaxResponsesRequestBytes {
 			socketError(r.Context(), socket, "request_too_large")
 			return
 		}
@@ -155,10 +155,17 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 }
 func (s *Server) routeSocketRequest(ctx context.Context, request Request) (Request, error) {
 	if router, ok := s.opts.Upstream.(RequestRouter); ok {
-		return router.RouteRequest(ctx, request)
-	}
-	if !s.supportsModel(request.Model) {
+		var err error
+		request, err = router.RouteRequest(ctx, request)
+		if err != nil {
+			return request, err
+		}
+	} else if !s.supportsModel(request.Model) {
 		return request, Failure("unsupported_model", 400)
+	}
+	// 与 HTTP 一样，别名改写后的最终正文也必须受限，预热和正式请求共用此边界。
+	if len(request.Body) > MaxResponsesRequestBytes {
+		return request, Failure("request_too_large", 413)
 	}
 	return request, nil
 }

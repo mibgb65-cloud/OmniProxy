@@ -30,7 +30,7 @@ func TestInstalledCodexLocalModelCatalog(t *testing.T) {
 		t.Fatal("Codex core path must be absolute")
 	}
 	home := t.TempDir()
-	body, err := catalog.CodexJSON([]catalog.Entry{{ID: "qa-first", Name: "First QA Model"}, {ID: "qa-second", Name: "Second QA Model"}})
+	body, err := catalog.CodexJSON([]catalog.Entry{{ID: "qa-first", Name: "First QA Model", ProviderKind: "openai", Metadata: catalog.Metadata{InputModalities: []string{"text", "image"}}}, {ID: "qa-second", Name: "Second QA Model"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,8 +77,9 @@ func TestInstalledCodexLocalModelCatalog(t *testing.T) {
 	}
 	var response struct {
 		Data []struct {
-			Model string `json:"model"`
-			Name  string `json:"displayName"`
+			Model           string   `json:"model"`
+			Name            string   `json:"displayName"`
+			InputModalities []string `json:"inputModalities"`
 		} `json:"data"`
 	}
 	if err := client.call(ctx, "model/list", map[string]any{"includeHidden": false}, &response); err != nil {
@@ -86,6 +87,9 @@ func TestInstalledCodexLocalModelCatalog(t *testing.T) {
 	}
 	if len(response.Data) != 2 || response.Data[0].Model != "qa-first" || response.Data[1].Model != "qa-second" || response.Data[0].Name != "First QA Model" {
 		t.Fatal("installed core did not consume the generated catalog")
+	}
+	if len(response.Data[0].InputModalities) != 2 || response.Data[0].InputModalities[1] != "image" || len(response.Data[1].InputModalities) != 1 || response.Data[1].InputModalities[0] != "text" {
+		t.Fatal("installed core did not preserve model image capability")
 	}
 	var effective struct {
 		Config struct {

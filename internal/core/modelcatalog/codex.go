@@ -1,6 +1,9 @@
 package modelcatalog
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"slices"
+)
 
 // 兼容模型使用通用编码说明，不复制某个官方模型的能力或专属指令。
 const codingInstructions = "You are a coding assistant. Follow the user's request and project instructions. Use available tools when needed, and report results and limitations accurately."
@@ -65,7 +68,7 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 			BaseInstructions: codingInstructions, ModelMessages: map[string]any{"instructions_template": codingInstructions},
 			SupportsReasoningSummary: false, DefaultReasoningSummary: "none",
 			TruncationPolicy: truncation{"bytes", 10000}, ContextWindow: entry.Metadata.ContextWindow,
-			ExperimentalTools: []string{}, InputModalities: []string{"text"},
+			ExperimentalTools: []string{}, InputModalities: codexInputModalities(entry),
 		})
 	}
 	data, err := json.Marshal(struct {
@@ -75,4 +78,13 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 		return nil, ErrInvalid
 	}
 	return append(data, '\n'), nil
+}
+
+// 只有原生订阅 Responses 直通图片；其他适配器的多模态元数据不等于跨协议图片转换能力。
+func codexInputModalities(entry Entry) []string {
+	modalities := []string{"text"}
+	if entry.ProviderKind == "openai" && slices.Contains(entry.Metadata.InputModalities, "image") {
+		modalities = append(modalities, "image")
+	}
+	return modalities
 }

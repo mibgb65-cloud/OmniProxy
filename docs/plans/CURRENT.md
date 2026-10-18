@@ -4,11 +4,11 @@
 
 ## Current Version
 
-2.0.0-beta.4 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.4)，修复真实订阅 SSE 缺失 Content-Type 导致的误拒绝。两模型／两种传输及双 Codex 内核六次真实请求成功；CI／Release／安装生命周期／真实更新发现与公开下载 SHA256 均通过。Windows 数字版本继续为 2.0.0.0，当前本机生产 Beta.3 未自动替换。
+2.0.0-beta.4 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.4)，修复真实订阅 SSE 缺失 Content-Type 导致的误拒绝。两模型／两种传输及双 Codex 内核六次真实请求成功；CI／Release／安装生命周期／真实更新发现与公开下载 SHA256 均通过。Windows 数字版本继续为 2.0.0.0，用户已升级运行 Beta.4；本地图片接入修复另见 TASK-020，尚未发布。
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-020](../tasks/active/TASK-20261018-020-fix-openai-image-input.md)：修复原生 OpenAI 图片能力被误标为仅文本及 2 MiB 请求限制。已完成四次真实图片请求、双内核目录及关键回归；正在执行最终质量门，不改当前用户配置或生产进程。
 
 ## Recently Completed
 

@@ -10,6 +10,8 @@ import (
 
 const (
 	MaxRequestBytes = 2 << 20
+	// Responses 图片以 Base64 内嵌；使用独立有界容量，不放大普通 Chat Completions。
+	MaxResponsesRequestBytes = 16 << 20
 	// 百万上下文的文本及 JSON 编码可能超过 2 MiB，Messages 使用独立的有界容量。
 	MaxMessagesRequestBytes = 16 << 20
 	maxResponseBytes        = 8 << 20

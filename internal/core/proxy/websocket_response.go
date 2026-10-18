@@ -72,6 +72,8 @@ func socketError(ctx context.Context, socket *websocket.Conn, code string) {
 		status = 403
 	case "gateway_busy":
 		status = 429
+	case "request_too_large":
+		status = 413
 	case "accounting_unavailable":
 		status = 503
 	}
