@@ -4,11 +4,11 @@
 
 ## Current Version
 
-2.0.0-beta.3 — 发布准备中，包含 Codex 预热与转发错误状态修复；当前公开测试版仍为 Beta.2。应用／前端保留完整 SemVer，Windows 数字版本仍为 2.0.0。
+2.0.0-beta.3 — 发布受阻、尚未公开：main／标签已推送，CI 检出既有账号时间戳版本隔离缺陷，Release 已取消；当前公开测试版仍为 Beta.2。应用／前端保留完整 SemVer，Windows 数字版本仍为 2.0.0。
 
 ## In Progress
 
-- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：用户已授权推送并发布 Beta.3，正在同步版本、验证最终安装器并准备 CI／Release；不修改当前 Agent 配置或升级本机生产应用。
+- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：本地完整发布构建／575 项前端测试和隔离安装验收通过，main／Beta.3 标签已推送；CI 39128657083 在旧账号快照／额度隔离测试失败，Release 39129204984 已取消。等待根因修复与共享标签处理授权，不擅自重打标签；当前 Agent／生产应用未改动。
 
 ## Recently Completed
 
