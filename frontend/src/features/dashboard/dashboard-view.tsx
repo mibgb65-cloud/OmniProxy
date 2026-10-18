@@ -27,19 +27,15 @@ export function DashboardView() {
           <div
             role="group"
             aria-label={t("dash.range")}
-            className="bg-muted flex max-w-full flex-wrap rounded-lg p-1"
+            className="bg-muted flex max-w-full flex-wrap gap-1 rounded-lg p-1"
           >
             {([1, 7, 30] as const).map((period) => (
               <Button
                 key={period}
-                variant={data.period === period ? "secondary" : "ghost"}
+                variant={data.period === period ? "default" : "ghost"}
                 size="sm"
                 aria-pressed={data.period === period}
-                className={
-                  data.period === period
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground"
-                }
+                className={data.period === period ? "shadow-sm" : "text-muted-foreground"}
                 onClick={() => data.setPeriod(period)}
               >
                 {t(periodLabels[period])}

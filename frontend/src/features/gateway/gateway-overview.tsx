@@ -37,14 +37,15 @@ export function GatewayOverview({ data, active }: { data: GatewayPreparation; ac
           <div
             role="group"
             aria-label={t("gateway.overview.range")}
-            className="bg-muted flex rounded-lg p-0.5"
+            className="bg-muted flex max-w-full flex-wrap gap-1 rounded-lg p-1"
           >
             {([1, 7, 30] as const).map((value) => (
               <Button
                 key={value}
                 size="sm"
-                variant={period === value ? "secondary" : "ghost"}
+                variant={period === value ? "default" : "ghost"}
                 aria-pressed={period === value}
+                className={period === value ? "shadow-sm" : "text-muted-foreground"}
                 onClick={() => setPeriod(value)}
               >
                 {t(periods[value])}
