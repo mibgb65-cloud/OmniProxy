@@ -8,11 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261018-015](../tasks/active/TASK-20261018-015-account-version-clock-isolation.md)：按账号持久化旧版本修复相同时钟／回拨下的快照隔离，先失败回归后实施；不修改真实账号或 Agent 配置，正在重复回归及完整质量门。
-- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：本地完整发布构建／575 项前端测试和隔离安装验收通过，main／Beta.3 标签已推送；CI 39128657083 在旧账号快照／额度隔离测试失败，Release 39129204984 已取消。用户已明确授权根因修复后以预期旧对象锁定移动未发布 Beta.3 标签，修复与验证由 TASK-015 接续；当前 Agent／生产应用未改动。
+- [TASK-20261018-014](../tasks/active/TASK-20261018-014-publish-v2-beta3.md)：本地完整发布构建／575 项前端测试和隔离安装验收通过，main／Beta.3 标签已推送；CI 39128657083 在旧账号快照／额度隔离测试失败，Release 39129204984 已取消。用户已明确授权根因修复后以预期旧对象锁定移动未发布 Beta.3 标签，TASK-015／CI `39130885754` 已完成，新标签仅使用精确旧值租约移动至 `60fb745`，Release `39131810901` 构建中；当前 Agent／生产应用未改动。
 
 ## Recently Completed
 
+- [TASK-20261018-015](../tasks/completed/2026-10/TASK-20261018-015-account-version-clock-isolation.md)：`60fb745` 修复账号修改的时钟重复／回拨版本复用，补齐乐观锁与越界保护。确定性回归先失败后通过、关键回归 20 轮、完整质量门／575 项前端测试、Windows 安装与实际离线 Codex 契约通过；远端 CI `39130885754` 成功，已接续 Beta.3 发布。
 - [TASK-20261018-013](../tasks/completed/2026-10/TASK-20261018-013-fix-codex-isolated-forwarding.md)：`ad79d6e` 修复 Codex WebSocket 预热误转发、错误状态／Retry-After 丢失及完成后等待 EOF，保护嵌套错误原文；隔离实际 CLI 0.163.0 连续三次、临时数据库状态回归、最终完整质量门／575 项前端测试与 Windows 构建通过。当前 Agent 配置哈希／生产进程不变，仅本地提交，未部署／发布；历史上游 400 的具体原因仍待真实账号独立验收。
 - [TASK-20261018-011](../tasks/completed/2026-10/TASK-20261018-011-publish-v2-beta2.md)：`5de94cf`／v2.0.0-beta.2 已推送并公开预发布；原生 Beta.2 安装／升级／重启／卸载、CI `39119451562` 与 Release `39119455141` 均成功。公开安装器 19,255,511 bytes／SHA256 `0b4f4e56dc7f1c8a781a1c13fa0913e6f0ea124f8de2c837858346b658e4ce97`，默认更新客户端确认 Beta.1 可发现并下载校验 Beta.2；正式 Latest v1.3.1 与 Beta.1 原资产保留。
 - [TASK-20261018-010](../tasks/completed/2026-10/TASK-20261018-010-fix-installed-startup-and-shortcuts.md)：历史统计库与迁移 008 冲突已定位，本机备份后隔离数据恢复；已实现只读布局识别／旧库保护／有效 v2 沿用／可见失败及日志落盘／独立快捷方式 ICO。最终完整质量门、575 项前端测试、用户级隔离安装／运行中升级／重启／卸载及错误提示通过；生产安装器原生资源校验通过。修复 `7085fe4` 已推送，公开 Beta.1 添加已知问题提示且资产未变，Beta.2 继续交付。

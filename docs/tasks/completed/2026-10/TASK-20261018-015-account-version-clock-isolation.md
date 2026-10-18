@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -50,7 +50,7 @@ CI 39128657083：TestStepOptionsLifecycleAndVersionIsolation 接受了旧凭据�
 
 # Implementation Result
 
-已实现兼容现有字段的单调版本生成，所有账号修改从持久化旧值推进；启停、订阅元数据和 Google 退出补齐 SQL 乐观锁，极值错误在写保护存储前返回。没有新增依赖／迁移或修改真实配置。确定性回归先失败后通过，关键回归重复 20 次通过，完整本地发布构建及隔离 Codex 契约通过；等待修复提交的远端 CI 确认。
+已实现兼容现有字段的单调版本生成，所有账号修改从持久化旧值推进；启停、订阅元数据和 Google 退出补齐 SQL 乐观锁，极值错误在写保护存储前返回。没有新增依赖／迁移或修改真实配置。确定性回归先失败后通过，关键回归重复 20 次通过，完整本地发布构建及隔离 Codex 契约通过；修复提交的远端 CI 39130885754 完整成功；已交接 TASK-014 使用用户授权的精确租约移动未发布 Beta.3 标签。
 
 # Verification
 
@@ -59,7 +59,9 @@ CI 39128657083：TestStepOptionsLifecycleAndVersionIsolation 接受了旧凭据�
 - PASS：纯时间边界测试在同一固定时钟下连续推进 100 次，并验证时区归一化、旧格式兼容及越界失败，不修改系统时间，不使用延时。
 - PASS：最终 scripts/build-release.ps1 -Version v2.0.0-beta.3，包含完整 task --force verify、104 文件／575 项前端测试、Go 全包、格式／静态／类型检查、Windows production 构建、NSIS 打包、原生版本资源及 SHA256 校验。日志 tmp/beta3-release-20261018/build-release-fixed.log。
 - PASS：修复后实际本机 Codex CLI 0.163.0 离线契约 -count=3，独立 CODEX_HOME／假凭据／loopback 模型均成功。
-- IN PROGRESS：修复提交的远端 CI；Beta.3 最终安装与发布由 TASK-014 跟踪。
+- PASS：远端 CI 39130885754，源码 60fb7457b2bc682d1daf66ce86a1af24e9e5a23d，完整 Verify 与 Windows 构建 artifact 成功，原失败测试与新确定性回归全部通过。
+- PASS：修复后再次独立用户级安装／启动／运行中覆盖／卸载和数据保留验收，TASK-014 的 fixed-isolated/result.json 全部为 true。当前 Agent 配置哈希／生产 PID 不变。
+- 既有非阻塞告警：GitHub Actions 的 Node 20 弃用提示；未改依赖／工作流或跳过验证。
 
 # Technical Notes
 
@@ -70,8 +72,14 @@ CI 39128657083：TestStepOptionsLifecycleAndVersionIsolation 接受了旧凭据�
 
 # Git
 
-待填写。
+60fb7457b2bc682d1daf66ce86a1af24e9e5a23d — fix(account): 保证账号修改版本严格前进。
+
+已普通推送 main；没有改写 main 历史。
 
 # Result
 
-待填写。
+根因修复及本地／远端验证完成，不用延时或重跑掩盖问题。Beta.3 公开发布与资产验收由 TASK-014 继续，本任务不宣称真实模型调用已验收。
+
+# Completed
+
+2026-10-18 21:32
