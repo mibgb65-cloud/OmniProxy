@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import {
   createProvider,
@@ -27,6 +27,8 @@ vi.mock("../../services/omniproxy", () => ({
   probeProvider: vi.fn(),
   deleteProvider: vi.fn(),
 }))
+
+afterEach(() => vi.useRealTimers())
 
 const kinds = [
   "openai",
@@ -164,13 +166,29 @@ describe("ProvidersView", () => {
     renderPage()
     await user.click((await screen.findAllByRole("button", { name: /查看全部预设模型/ }))[0])
     expect(screen.getByText("o3")).toBeInTheDocument()
-    await user.click(screen.getAllByRole("button", { name: "测试" })[0])
-    await waitFor(() => expect(probeProvider).toHaveBeenCalledWith("builtin_openai"))
-    const tip = await screen.findByText("地址可达 · 42 ms · HTTP 401")
-    expect(tip).toHaveAttribute("data-state", "open")
-    expect(screen.getAllByRole("button", { name: "测试" })[0].previousElementSibling).toBe(tip)
-    await waitFor(() => expect(tip).toHaveAttribute("data-state", "closed"), { timeout: 5_000 })
-    expect(tip).toHaveAttribute("aria-hidden", "true")
+    // 提示保持 4 秒，使用虚拟时钟避免 CI 的渲染负载挤占整项 5 秒期限。
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+    try {
+      fireEvent.click(screen.getAllByRole("button", { name: "测试" })[0])
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(probeProvider).toHaveBeenCalledWith("builtin_openai")
+      const tip = screen.getByText("地址可达 · 42 ms · HTTP 401")
+      expect(tip).toHaveAttribute("data-state", "open")
+      expect(screen.getAllByRole("button", { name: "测试" })[0].previousElementSibling).toBe(tip)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3_999)
+      })
+      expect(tip).toHaveAttribute("data-state", "open")
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1)
+      })
+      expect(tip).toHaveAttribute("data-state", "closed")
+      expect(tip).toHaveAttribute("aria-hidden", "true")
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("blocks repeated power toggles while a provider update is pending", async () => {

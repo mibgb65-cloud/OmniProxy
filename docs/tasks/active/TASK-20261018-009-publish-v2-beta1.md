@@ -46,19 +46,28 @@ GitHub Pre-release 包含 CI 构建的 Windows amd64 安装器及匹配 SHA256�
 
 第二次 CI `39109546758` 的 agentconfig／Codex 凭据／Claude 启动三组失败已在本机使用真实 Win32 8.3 临时目录别名复现，属于同一原因：测试夹具路径经解析后与短路径拼写不同，触发现有严格路径策略。保留应用路径安全规则，CI 与 Release 的验证步骤统一使用 GitHub runner.temp 作为 TEMP／TMP，让测试夹具位于规范目录；不跳过失败测试、不扩大应用可接受的路径范围。
 
+Release 原提交重跑后仍只有同一项提供商提示测试超过 5 秒。实际提示保持 4 秒，测试将渲染／交互和真实等待挤在同一期限内，已证实需要稳定化修复。改为虚拟时钟并断言 3999ms 仍展示、4000ms 收起，保留全部业务断言和原测试期限。标签已经共享，保持原标签不可变；手动发布恢复时只从工作流提交补入这一份修复后的测试文件，校验工作区除该测试外与标签完全一致，再执行原标签的完整发布脚本。应用源码和发布说明均使用原标签，不修改版本或运行时行为。
+
 ## Implementation Result
 
-待完成。
+已配置 origin 并正常推送独立 main。远端 CI 完整通过后，创建并推送注释标签 v2.0.0-beta.1，固定到 `18cd42f399ba05b3e4da8208b81f4049d03c2675`；没有改写旧分支或移动标签。
+
+Release 工作流 `39111414581` 两次执行均被同一项提供商提示交互测试的 5 秒超时拦住（其他 574 项前端测试通过）。改用虚拟时钟验证精确 4 秒边界，保留全部业务断言和原测试期限。手动恢复发布只补入这份确定性测试，先校验应用源码与既有标签无差异，保持原标签及发布应用代码不变；公开发布／下载验证待完成。
 
 ## Verification
 
 - 无 dist／node_modules 的隔离源码实际执行 `scripts/build-release.ps1 -Version v2.0.0-beta.1` 成功，退出码 0：完整 task verify、575 项前端测试／Go 测试、Windows production 构建、NSIS、原生版本资源及两项发布资产 SHA256 均通过。日志位于忽略目录 `tmp/release-beta1-20261018/clean-release-build.log`。
 - CI／Release 的 actionlint、git diff --check 通过；远端 CI 修复后重跑及公开发布验证待完成。
 - 通过真实 Win32 8.3 临时目录本机复现第二次 CI 的三组失败；改用规范 TEMP／TMP 后，agentconfig、Codex 凭据及 Wails 三个包完整测试（-count=1）全部通过。没有修改测试断言或应用安全策略。
+- main 远端完整 CI `39110496547` 成功，源码 `18cd42f`，生产二进制 artifact 已下载留存；发布工作流每次仍独立执行完整质量门。
+- 确定性计时测试修复后，提供商文件 8 项测试、完整 task verify（575 项前端测试／全部 Go／Windows 构建）通过，日志 `tmp/release-beta1-20261018/final-verify.log`。真实 Git 隔离夹具验证恢复守卫：允许测试文件变化、拒绝 main.go 应用变化。actionlint／差异检查通过。
 
 ## Git
 
-待记录。
+- `8ba415e923d6de01ceecd380ed146634391188b4`：首发准备记录，首次推送 main。
+- `14edf51e48b50af4fa0b6ab08d0ccd94b16b270d`：干净检出嵌入资源准备及统一质量门。
+- `18cd42f399ba05b3e4da8208b81f4049d03c2675`：Windows 测试规范临时目录。
+- `v2.0.0-beta.1` 注释标签对象 `a3b737552a7a83e35a7bfaefd0073eb98045b7a2`，指向 `18cd42f`。
 
 ## Result
 

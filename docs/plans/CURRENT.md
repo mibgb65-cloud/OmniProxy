@@ -8,7 +8,7 @@
 
 ## In Progress
 
-- [TASK-20261018-009](../tasks/active/TASK-20261018-009-publish-v2-beta1.md)：用户授权实际发布 v2.0.0-beta.1，准备推送独立 main、跟进远端 CI／Release 并验证资产，保留旧版 master 和 v1.3.1 Latest。
+- [TASK-20261018-009](../tasks/active/TASK-20261018-009-publish-v2-beta1.md)：main 远端完整 CI 通过，v2.0.0-beta.1 标签已固定到 `18cd42f`；跟进 Release 完整验收重跑及公开资产验证，保留旧版 master 和 v1.3.1 Latest。
 
 ## Recently Completed
 

@@ -58,6 +58,24 @@ jobs:
           choco install nsis -y --no-progress
           if ($LASTEXITCODE -ne 0) { throw 'NSIS setup failed' }
           "${env:ProgramFiles(x86)}\NSIS" >> $env:GITHUB_PATH
+      - name: Apply reviewed timing test correction for existing beta tag
+        if: github.event_name == 'workflow_dispatch' && inputs.tag == 'v2.0.0-beta.1'
+        env:
+          TEST_FIX_REF: ${{ github.workflow_sha }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          $fix = $env:TEST_FIX_REF
+          if ($fix -notmatch '^[0-9a-f]{40}$') { throw 'Invalid test correction ref' }
+          git fetch --no-tags --depth=1 origin $fix
+          if ($LASTEXITCODE -ne 0) { throw 'Test correction fetch failed' }
+          $test = 'frontend/src/features/providers/providers-view.test.tsx'
+          # 已共享标签保持不变；仅补入确定性测试，禁止控制提交改变应用源码。
+          $unexpected = @(git diff --name-only $env:RELEASE_TAG $fix -- . ':(exclude)docs/**' ':(exclude).github/workflows/**' ":(exclude)$test")
+          if ($LASTEXITCODE -ne 0 -or $unexpected.Count -ne 0) { throw 'Application source differs from release tag' }
+          git restore --source $fix --worktree -- $test
+          if ($LASTEXITCODE -ne 0) { throw 'Test correction restore failed' }
+          $changes = @(git diff --name-only)
+          if ($LASTEXITCODE -ne 0 -or @($changes | Where-Object { $_ -ne $test }).Count -ne 0) { throw 'Unexpected release workspace changes' }
       - name: Build and verify release
         env:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
