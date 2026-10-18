@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -60,7 +59,8 @@ func (c *Checker) Latest(ctx context.Context) (Release, error) {
 	if base == "" {
 		base = defaultBaseURL
 	}
-	endpoint := fmt.Sprintf("%s/repos/%s/releases/latest", strings.TrimRight(base, "/"), url.PathEscape(repo))
+	// repo 已逐段限制为 ASCII 名称；保留 owner/repo 的路由分隔符。
+	endpoint := fmt.Sprintf("%s/repos/%s/releases/latest", strings.TrimRight(base, "/"), repo)
 
 	client := c.Client
 	if client == nil {

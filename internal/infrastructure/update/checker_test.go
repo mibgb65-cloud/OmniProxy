@@ -10,8 +10,10 @@ import (
 
 func TestLatestReturnsRelease(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/repos/owner/name/releases/latest" {
-			t.Errorf("unexpected path: %s", r.URL.Path)
+		if r.URL.EscapedPath() != "/repos/owner/name/releases/latest" {
+			t.Errorf("unexpected escaped path: %s", r.URL.EscapedPath())
+			http.NotFound(w, r)
+			return
 		}
 		if got := r.Header.Get("Accept"); got != "application/vnd.github+json" {
 			t.Errorf("Accept header = %q", got)
