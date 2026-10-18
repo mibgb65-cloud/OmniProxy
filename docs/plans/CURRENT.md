@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-013](../tasks/active/TASK-20261018-013-fix-codex-isolated-forwarding.md)：隔离修复 Codex WebSocket 预热被误转发、上游错误状态丢失及完成事件等待 EOF；不修改真实 Agent 配置或生产运行状态，正在回归验证。
 
 ## Recently Completed
 

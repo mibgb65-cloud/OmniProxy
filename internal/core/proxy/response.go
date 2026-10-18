@@ -7,30 +7,17 @@ import (
 	"io"
 	"mime"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 )
 
 func copyResponse(w http.ResponseWriter, response Response, stream bool, committed *bool, protocol ...string) error {
 	if response.StatusCode != http.StatusOK {
-		status, code := response.StatusCode, "upstream_rejected_request"
-		switch status {
-		case 401, 403:
-			code = "upstream_authentication_failed"
-		case 402:
-			code = "upstream_insufficient_balance"
-		case 429:
-			code = "upstream_rate_limited"
-		default:
-			if status < 400 || status >= 500 {
-				status, code = 502, "upstream_unavailable"
-			}
+		failure := upstreamFailure(response)
+		if failure.RetryAfter != "" {
+			w.Header().Set("Retry-After", failure.RetryAfter)
 		}
-		if value, err := strconv.Atoi(response.RetryAfter); err == nil && value >= 0 && value <= 86400 {
-			w.Header().Set("Retry-After", strconv.Itoa(value))
-		}
-		return Failure(code, status)
+		return failure
 	}
 	contentType, _, err := mime.ParseMediaType(response.ContentType)
 	if err != nil || response.Body == nil || (!stream && contentType != "application/json") || (stream && contentType != "text/event-stream") {
@@ -133,10 +120,19 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
 
 func hasUpstreamError(data []byte) bool {
 	var envelope struct {
-		Error json.RawMessage `json:"error"`
+		Error    json.RawMessage `json:"error"`
+		Response json.RawMessage `json:"response"`
 	}
 	if json.Unmarshal(data, &envelope) != nil {
 		return true
 	}
-	return len(envelope.Error) > 0 && string(envelope.Error) != "null"
+	if len(envelope.Error) > 0 && string(envelope.Error) != "null" {
+		return true
+	}
+	// 只识别 Responses 的嵌套错误，不把其他协议的同名扩展字段误判为失败。
+	var response struct {
+		Error json.RawMessage `json:"error"`
+	}
+	return json.Unmarshal(envelope.Response, &response) == nil &&
+		len(response.Error) > 0 && string(response.Error) != "null"
 }

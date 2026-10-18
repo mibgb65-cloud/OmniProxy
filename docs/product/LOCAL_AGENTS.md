@@ -160,3 +160,21 @@ Gemini 当前只提供 Chat API，虽可在路由页同步官方模型和限制�
 - HTTP Responses 为无持久化请求，调用方需提供完整上下文；没有调度、静默重试或故障切换。
 
 其他提供商模型目录、跨平台配置及高级协议能力留到后续任务。
+
+
+## Codex WebSocket 预热与错误状态
+
+已通过本机 Codex CLI 0.163.0 的隔离 loopback 契约测试验证：客户端先发送
+`response.create` / `generate=false` 预热帧，再通过 `previous_response_id` 创建正式响应。
+网关在本地回复预热事件，只保存当前连接上下文，不发起模型调用、不产生模型请求或用量记录；
+正式请求合并上下文后移除 `generate` 等传输字段再转发。预热仍受鉴权、协议开关、请求大小及路由校验约束。
+
+HTTP 与 WebSocket 共用上游失败分类：400 请求拒绝、401／403 认证失败、402 余额不足、
+429 限流；5xx 统一为安全的 502 上游不可用。WebSocket 错误帧保留真实分类后的状态、稳定错误码及
+合法的 `retry-after`，不再把全部上游错误或路由错误改写为通用流失败。收到 `response.completed`
+即完成请求，不等待上游连接关闭。上游原始错误正文、凭据与提示词不会透传或记录。
+
+本地可选实机客户端契约测试：设置 `OMNIPROXY_CODEX_TEST_EXECUTABLE` 为已安装 Codex 的绝对路径，
+执行 `go test ./internal/core/proxy -run TestCodexCLIIsolatedWebSocket -count=1`。
+测试使用临时 `CODEX_HOME`、假密钥、独立工作目录和随机 loopback 端口，不修改用户真实配置或登录，
+只验证本机客户端与模拟上游，不代表真实账号权限或额度已通过验收。

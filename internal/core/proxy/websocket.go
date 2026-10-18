@@ -1,12 +1,10 @@
 package proxy
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"github.com/coder/websocket"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -40,7 +38,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		}
 		// 已建立连接也必须检查当前策略，关闭开关后不能继续通过旧连接创建响应。
 		if err := s.webSocketPolicy(r.Context()); err != nil {
-			socketError(r.Context(), socket, err.Code)
+			socketFailure(r.Context(), socket, err)
 			return
 		}
 		var fields map[string]json.RawMessage
@@ -48,10 +46,19 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			socketError(r.Context(), socket, "invalid_request")
 			return
 		}
+		generate := true
+		if raw, ok := fields["generate"]; ok && (string(raw) == "null" || json.Unmarshal(raw, &generate) != nil) {
+			socketError(r.Context(), socket, "invalid_request")
+			return
+		}
+		delete(fields, "generate")
 		delete(fields, "type")
 		fields["stream"] = json.RawMessage("true")
 		var previous string
-		json.Unmarshal(fields["previous_response_id"], &previous)
+		if raw, ok := fields["previous_response_id"]; ok && string(raw) != "null" && json.Unmarshal(raw, &previous) != nil {
+			socketError(r.Context(), socket, "invalid_request")
+			return
+		}
 		var input []json.RawMessage
 		if json.Unmarshal(fields["input"], &input) != nil {
 			socketError(r.Context(), socket, "invalid_messages")
@@ -79,6 +86,23 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			socketError(r.Context(), socket, "invalid_request")
 			return
 		}
+		if !generate {
+			ctx, cancel := context.WithTimeout(r.Context(), s.opts.RequestTimeout)
+			_, err = s.routeSocketRequest(ctx, request)
+			id := ""
+			if err == nil {
+				id, err = socketWarmup(ctx, socket)
+			}
+			if err != nil {
+				failure := safeFailure(ctx, err).(*Error)
+				cancel()
+				socketFailure(r.Context(), socket, failure)
+				return
+			}
+			cancel()
+			history, lastID = input, id
+			continue
+		}
 		select {
 		case s.slots <- struct{}{}:
 		default:
@@ -95,86 +119,46 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		}
 		request.Trace = trace
 		err = trace.Update(ctx, request, TargetSnapshot{})
-		if router, ok := s.opts.Upstream.(RequestRouter); ok && err == nil {
-			request, err = router.RouteRequest(ctx, request)
-		} else if !s.supportsModel(request.Model) {
-			err = Failure("unsupported_model", 400)
+		if err == nil {
+			request, err = s.routeSocketRequest(ctx, request)
 		}
 		completed := false
-		nextID := ""
-		var output []json.RawMessage
+		var result socketResult
 		if err == nil {
 			err = s.opts.Upstream.Forward(ctx, request, func(response Response) error {
-				if response.StatusCode != 200 {
-					return Failure("upstream_rejected_request", 502)
-				}
-				scanner := bufio.NewScanner(response.Body)
-				scanner.Buffer(make([]byte, 4096), 2<<20)
-				total := 0
-				for scanner.Scan() {
-					line := scanner.Text()
-					total += len(line) + 1
-					if total > maxStreamBytes {
-						return Failure("response_too_large", 502)
-					}
-					if !strings.HasPrefix(line, "data:") {
-						continue
-					}
-					data := []byte(strings.TrimSpace(strings.TrimPrefix(line, "data:")))
-					if string(data) == "[DONE]" {
-						continue
-					}
-					var event struct {
-						Type     string `json:"type"`
-						Response struct {
-							ID     string            `json:"id"`
-							Output []json.RawMessage `json:"output"`
-						} `json:"response"`
-					}
-					if json.Unmarshal(data, &event) != nil || hasUpstreamError(data) {
-						return Failure("upstream_stream_failed", 502)
-					}
-					if event.Type == "response.completed" {
-						completed = true
-						nextID = event.Response.ID
-						output = event.Response.Output
-					}
-					if err := socket.Write(ctx, websocket.MessageText, data); err != nil {
-						return err
-					}
-					if trace.hasFirstContent(data) {
-						trace.markFirstToken()
-					}
-				}
-				if err := scanner.Err(); err != nil {
-					return err
-				}
-				if !completed {
-					return Failure("upstream_stream_failed", 502)
-				}
-				return nil
+				var copyErr error
+				result, copyErr = copySocketResponse(ctx, socket, response, trace)
+				completed = copyErr == nil
+				return copyErr
 			})
 		}
 		code := ""
 		status := 200
+		var failure *Error
 		if err != nil {
-			failure := safeFailure(ctx, err).(*Error)
+			failure = safeFailure(ctx, err).(*Error)
 			code, status = failure.Code, failure.StatusCode
 		} else if !completed {
 			code, status = "upstream_stream_failed", 502
+			failure = &Error{Code: code, StatusCode: status}
 		}
 		trace.completeLogged(status, code, s.opts.Logger)
 		cancel()
 		<-s.slots
 		if err != nil || !completed {
-			socketError(r.Context(), socket, "upstream_stream_failed")
+			socketFailure(r.Context(), socket, failure)
 			return
 		}
-		history = append(input, output...)
-		lastID = nextID
+		history = append(input, result.Output...)
+		lastID = result.ID
 	}
 }
-func socketError(ctx context.Context, socket *websocket.Conn, code string) {
-	data, _ := json.Marshal(map[string]any{"type": "error", "error": map[string]string{"type": "invalid_request_error", "code": code, "message": code}})
-	_ = socket.Write(ctx, websocket.MessageText, data)
+func (s *Server) routeSocketRequest(ctx context.Context, request Request) (Request, error) {
+	if router, ok := s.opts.Upstream.(RequestRouter); ok {
+		return router.RouteRequest(ctx, request)
+	}
+	if !s.supportsModel(request.Model) {
+		return request, Failure("unsupported_model", 400)
+	}
+	return request, nil
 }
