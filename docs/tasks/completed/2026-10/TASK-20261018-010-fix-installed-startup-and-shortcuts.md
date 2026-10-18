@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -56,8 +56,14 @@ In Progress
 
 ## Git
 
-待记录。
+`7085fe47ddf37c772e27a0b3add4e3886e1ea636` fix(upgrade): 隔离历史统计库并修复安装快捷方式图标，已推送 origin/main。
+
+公开 Beta.1 说明已追加已知升级问题，回读确认 Release 416346929 仍为公开 Pre-release，资产 ID／名称／大小／摘要未变。源码 CI `39119075352` 已触发（归档时运行中）；本地最终完整质量门通过。
 
 ## Result
 
-待完成。
+本机已恢复，原库与备份保留；代码／图标／可见错误提示修复完成并推送。后续直接从桌面普通启动即可，无需重跑本机修复脚本。原 Beta.1 不换包，用户新要求的 Beta.2 构建与发布由 TASK-20261018-011 继续。
+
+## Completed
+
+2026-10-18（Asia/Singapore）
