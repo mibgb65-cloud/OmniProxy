@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -73,6 +73,7 @@ In Progress
 - PASS：完整 `task --force verify BIN_DIR=tmp/account-failover-20261018/verify-bin` 退出码 0；格式、Go vet／staticcheck／ESLint、TypeScript、全部 Go 测试、102 文件／567 项前端测试及 Windows 生产构建通过。首次质量门发现服务包装推断为 CancellablePromise 导致测试类型不兼容，按既有服务约定补齐 Promise 返回类型后重跑通过，未使用类型绕过。
 - PASS：最后复核收紧 Retry-After 数字格式并优化候选资格／冷却筛选后，网关与路由 Go vet／staticcheck、四个相关应用包测试及最终生产构建均再次通过。生成 102 个方法／95 个模型／5 个事件。
 - PASS：最终生产构建在隔离 test profile 实际读取／保存开关（数据库 1→0→1），1440／960 × 深浅主题共四组卡片和尝试详情验收；截图人工核对无越界。UI 的 A／B 样例只写入隔离数据库，实际切换行为由前述真实本机协议测试验证。正常 Quit 退出码 0，未使用真实账号或调用模型。
+- PASS：普通桌面开发版已恢复并保持运行，应用 PID 17672、窗口可见且响应；3891 development 健康接口及 9245 首页／HMR 均 HTTP 200，日志明确连接前端服务。共享配置实体路径无 Codex 包重定向，原生网关页实际读取到切换默认开启。开发网关保持停止，未发送模型请求，原有生产实例保留。
 - PASS：git diff --check；未新增依赖或修改用户五份未跟踪任务记录。日志、原生脚本、JSON 和截图位于忽略目录 `tmp/account-failover-20261018/`。
 
 ## Remaining Risks
@@ -89,8 +90,12 @@ In Progress
 
 ## Git
 
-待提交；五份既有未跟踪任务文件保留且不纳入本任务。
+实现提交：`6d6f8d0b0cfe1e3a046430ce33870d7839598ff2` — `feat(gateway): 实现同通道账号自动故障切换`。任务记录随后归档；五份既有未跟踪任务文件保留且不纳入提交，未推送。
 
 ## Result
 
-待完成。
+同服务商／认证／计费／地区内的自动账号切换已实现，默认启用、最多三次；具备冷却、凭据版本与重复保护、一次请求／多次尝试记录，以及原生开关和详情。完整质量门、最终定向检查／构建与隔离原生验收通过；真实厂商与付费账号回归范围仍需后续积累。
+
+## Completed
+
+2026-10-18（Asia/Singapore）
