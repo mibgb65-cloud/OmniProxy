@@ -23,6 +23,8 @@ go test . ./internal/...   # Go only
 cd frontend && pnpm test   # frontend only
 ```
 
+干净检出直接执行包含根包的 Go 测试前，先运行 `task prepare:assets`，因为 main 的 go:embed 需要真实前端资源。`task test`／`task lint` 已自动处理；仅测试 `./internal/...` 无需桌面资源。
+
 `go test -race` is not used on Windows because the race detector requires CGO
 there; CI runs the same commands as `task test`.
 

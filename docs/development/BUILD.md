@@ -44,6 +44,8 @@ needs `task dev`.
 
 ## Production build
 
+干净检出执行 `task verify` 时先安装前端依赖；`task lint`／`task test` 在 Go 分析前准备真实的 `frontend/dist`，避免 go:embed 因目录不存在而失败。准备阶段使用已提交的绑定，正式 build 仍重新生成绑定并构建前端。CI 与 Release 都运行同一个质量门，不依赖开发机残留产物。
+
 ```bash
 task build
 ```

@@ -30,11 +30,11 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install pnpm
-        run: npm install -g pnpm@latest
+        run: npm install -g pnpm@12.6.0
         shell: bash
 
       - name: Install Task
-        run: go install github.com/go-task/task/v3/cmd/task@latest
+        run: go install github.com/go-task/task/v3/cmd/task@v3.53.1
         shell: bash
 
       - name: Install Wails CLI
@@ -42,31 +42,11 @@ jobs:
         shell: bash
 
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+        run: go install honnef.co/go/tools/cmd/staticcheck@v0.8.1
         shell: bash
 
-      - name: Install frontend dependencies
-        run: task common:install:frontend:deps
-        shell: bash
-
-      - name: Format check
-        run: task format:check
-        shell: bash
-
-      - name: Lint
-        run: task lint
-        shell: bash
-
-      - name: Type check
-        run: task typecheck
-        shell: bash
-
-      - name: Test
-        run: task test
-        shell: bash
-
-      - name: Build
-        run: task build
+      - name: Verify
+        run: task --force verify
         shell: bash
 
       - name: Upload build artifact

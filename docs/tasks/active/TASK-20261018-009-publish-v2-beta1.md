@@ -36,13 +36,22 @@ GitHub Pre-release 包含 CI 构建的 Windows amd64 安装器及匹配 SHA256�
 3. 跟进 Release 全流程，下载最终资产并核对 SHA256／原生版本，检查预发布及 Latest／master 保留。
 4. 更新任务和状态文档，提交归档并同步 main。
 
+## Root Cause
+
+首次远端 CI `39108569384` 在 lint 的 go vet 失败：干净检出没有被忽略的 frontend/dist，而 main 的 go:embed 需要该目录。本地已有构建产物掩盖了顺序问题。Release 同样从干净环境执行 task verify，必须在格式检查前安装前端依赖、Go 分析／测试前准备真实前端资源。
+
+## Fix
+
+在共用 Task 入口补齐依赖和嵌入资源准备，CI 使用同一个 task verify；不提交编译产物，不使用空白占位文件或跳过任何检查。用无 dist／node_modules 的隔离源码完整运行发布脚本，再推送 main 重跑远端 CI。
+
 ## Implementation Result
 
 待完成。
 
 ## Verification
 
-待完成。
+- 无 dist／node_modules 的隔离源码实际执行 `scripts/build-release.ps1 -Version v2.0.0-beta.1` 成功，退出码 0：完整 task verify、575 项前端测试／Go 测试、Windows production 构建、NSIS、原生版本资源及两项发布资产 SHA256 均通过。日志位于忽略目录 `tmp/release-beta1-20261018/clean-release-build.log`。
+- CI／Release 的 actionlint、git diff --check 通过；远端 CI 修复后重跑及公开发布验证待完成。
 
 ## Git
 

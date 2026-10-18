@@ -104,6 +104,7 @@ tasks:
   lint:
     summary: Lints Go and frontend code (requires `task setup`)
     cmds:
+      - task: prepare:assets
       - go vet . ./internal/...
       - staticcheck . ./internal/...
       - task: frontend:lint
@@ -116,17 +117,33 @@ tasks:
   test:
     summary: Runs Go and frontend tests
     cmds:
+      - task: prepare:assets
       - go test . ./internal/...
       - task: frontend:test
 
   verify:
     summary: Full quality gate - format check, lint, typecheck, test, build
+    deps:
+      - task: common:install:frontend:deps
     cmds:
       - task: format:check
       - task: lint
       - task: typecheck
       - task: test
       - task: build
+
+  prepare:assets:
+    summary: Prepares real frontend assets required by Go embed analysis
+    run: once
+    deps:
+      - task: common:install:frontend:deps
+    status:
+      - test -f frontend/dist/index.html
+    cmds:
+      # 干净检出时 Go 分析也需要嵌入目录；使用已提交绑定构建真实资源。
+      - task: common:frontend:run
+        vars:
+          SCRIPT: build
 
   clean:
     summary: Removes build artifacts (keeps committed bindings and migrations)
