@@ -109,3 +109,13 @@ FunctionEnd
         WriteRegDWORD HKLM "${UNINST_KEY}" "NoRepair" 1
     !endif
 !macroend
+
+Function StartInstalledApp
+    nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-launch "$INSTDIR\${PRODUCT_EXECUTABLE}"'
+    Pop $0
+    Pop $1
+    ${If} $0 != 0
+        IfSilent +2
+            MessageBox MB_OK|MB_ICONEXCLAMATION "安装已完成，但无法以普通用户启动 OmniProxy。请从开始菜单打开。"
+    ${EndIf}
+FunctionEnd

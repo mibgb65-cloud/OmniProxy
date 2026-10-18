@@ -16,6 +16,8 @@ v2 已有版本发现，用户要求补齐安装、下载校验、静默重启�
 
 同一 Go 程序提供受限辅助模式，必须在 profile、数据库及桌面初始化前处理。安装器按完整可执行路径处理目标实例；正常退出事件依赖当前用户默认权限。独立更新辅助进程保留原用户令牌，等待安装结果并重启，不让提权 NSIS 进程直接承担新版应用的正常启动。旧版安装器调用保留静默更新后的启动兼容。
 
+首次安装完成页和旧版兼容启动函数获取交互 shell 的普通用户令牌，通过 [CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw) 创建界面进程，并构建对应用户的环境块；不依赖外部脚本或附加 NSIS 插件。没有普通用户桌面时提示手动打开，不继承安装器管理员身份作为后备。
+
 卸载不递归删除数据和未知文件。Release 作业先完成质量门和打包，在 draft 状态上传并核对资产，最后发布；不替换公开的同标签发布。
 
 ## Alternatives Considered

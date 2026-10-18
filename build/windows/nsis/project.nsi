@@ -15,6 +15,7 @@ ManifestDPIAware true
 !define MUI_ICON "..\icon.ico"
 !define MUI_UNICON "..\icon.ico"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_EXECUTABLE}"
+!define MUI_FINISHPAGE_RUN_FUNCTION StartInstalledApp
 !define MUI_FINISHPAGE_RUN_TEXT "立即启动 OmniProxy"
 !define MUI_ABORTWARNING
 !insertmacro MUI_PAGE_WELCOME
@@ -48,7 +49,7 @@ Section
     !insertmacro WriteInstallLocation
     ${If} $AutoUpdate == "1"
     ${AndIf} $NoRestart != "1"
-        Exec '"$INSTDIR\${PRODUCT_EXECUTABLE}"'
+        Call StartInstalledApp
     ${EndIf}
 SectionEnd
 

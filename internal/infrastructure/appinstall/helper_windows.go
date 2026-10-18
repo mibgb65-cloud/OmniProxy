@@ -22,6 +22,12 @@ import (
 
 // HandleMode 必须在 profile／数据库初始化前调用；参数不经过 shell。
 func HandleMode(args []string) (bool, int) {
+	if len(args) == 2 && args[0] == "--omniproxy-installer-launch" {
+		if startInstalled(args[1]) != nil {
+			return true, 3
+		}
+		return true, 0
+	}
 	if len(args) == 2 && args[0] == "--omniproxy-installer-stop" {
 		if stopInstalled(args[1]) != nil {
 			return true, 2
@@ -38,7 +44,7 @@ func HandleMode(args []string) (bool, int) {
 		}
 		return true, runUpdate(args[1:])
 	}
-	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup") {
+	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup" || args[0] == "--omniproxy-installer-launch") {
 		return true, 2
 	}
 	return false, 0
