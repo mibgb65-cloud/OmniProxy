@@ -64,6 +64,10 @@ func (s *Service) writeLocator(ctx context.Context, item Item, locator managedLo
 	if err != nil {
 		return Item{}, err
 	}
+	timestamp, err := nowAfter(item.UpdatedAt)
+	if err != nil {
+		return Item{}, err
+	}
 	data, err := json.Marshal(locator)
 	if err != nil {
 		return Item{}, ErrInvalidInput
@@ -73,7 +77,6 @@ func (s *Service) writeLocator(ctx context.Context, item Item, locator managedLo
 	if err != nil {
 		return Item{}, fmt.Errorf("account: protect subscription reference")
 	}
-	timestamp := now()
 	result, err := s.db.ExecContext(ctx, `UPDATE accounts SET credential_ref=?,auth_email=?,auth_plan=?,auth_state=?,auth_account_id=?,updated_at=? WHERE id=? AND credential_ref=? AND updated_at=?`, ref, meta.Email, meta.Plan, meta.State, meta.AccountID, timestamp, item.ID, oldRef, item.UpdatedAt)
 	if err == nil {
 		changed, rowErr := result.RowsAffected()

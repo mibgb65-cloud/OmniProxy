@@ -46,6 +46,10 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, err
 	}
+	timestamp, err := nowAfter(item.UpdatedAt)
+	if err != nil {
+		return result, err
+	}
 	options, err := s.prepareStep(ctx, item.ProviderID, input.StepFun, &item)
 	if err != nil {
 		return result, err
@@ -140,7 +144,6 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, fmt.Errorf("account: begin update: %w", err)
 	}
-	timestamp := now()
 	// 引用和时间戳共同检查，避免并发更新时覆盖其他修改或删除正在使用的密钥。
 	updated, err := tx.ExecContext(ctx, `UPDATE accounts SET name = ?, credential_ref = ?, updated_at = ?
 		WHERE id = ? AND credential_ref = ? AND updated_at = ?`, name, newRef, timestamp, item.ID, oldRef, item.UpdatedAt)

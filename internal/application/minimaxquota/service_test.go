@@ -8,7 +8,9 @@ import (
 	"omniproxy/internal/provider/minimax"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 )
 
 type testStore struct{}
@@ -24,7 +26,7 @@ func (f quotaClient) ReadQuota(ctx context.Context, o minimax.Options, k []byte)
 }
 
 func TestQueryCannotPublishResourcesAfterRegionOrKeyTypeChanges(t *testing.T) {
-	for _, field := range []string{"region", "billing", "key"} {
+	for _, field := range []string{"region", "billing", "key", "rollback-region", "rollback-billing", "rollback-key"} {
 		t.Run(field, func(t *testing.T) {
 			ctx := context.Background()
 			db, err := database.Open(database.Config{Path: filepath.Join(t.TempDir(), "minimax.db")})
@@ -40,6 +42,16 @@ func TestQueryCannotPublishResourcesAfterRegionOrKeyTypeChanges(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			rollback := strings.HasPrefix(field, "rollback-")
+			if rollback {
+				if _, err := db.Exec("UPDATE accounts SET updated_at=? WHERE id=?", "9000-01-01T00:00:00Z", a.ID); err != nil {
+					t.Fatal(err)
+				}
+				a, err = accounts.Metadata(ctx, a.ID)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 			calls := 0
 			client := quotaClient(func(ctx context.Context, o minimax.Options, key []byte) (minimax.Quota, error) {
 				calls++
@@ -48,7 +60,7 @@ func TestQueryCannotPublishResourcesAfterRegionOrKeyTypeChanges(t *testing.T) {
 				}
 				next := *a.MiniMax
 				replacement := ""
-				switch field {
+				switch strings.TrimPrefix(field, "rollback-") {
 				case "region":
 					next.Region = "global"
 				case "billing":
@@ -56,8 +68,16 @@ func TestQueryCannotPublishResourcesAfterRegionOrKeyTypeChanges(t *testing.T) {
 				case "key":
 					replacement = "placeholder-replacement"
 				}
-				if _, err := accounts.Update(ctx, account.UpdateInput{ID: a.ID, Name: a.Name, APIKey: replacement, MiniMax: &next}); err != nil {
+				updated, err := accounts.Update(ctx, account.UpdateInput{ID: a.ID, Name: a.Name, APIKey: replacement, MiniMax: &next})
+				if err != nil {
 					t.Fatal(err)
+				}
+				if rollback {
+					before, e1 := time.Parse(time.RFC3339Nano, a.UpdatedAt)
+					after, e2 := time.Parse(time.RFC3339Nano, updated.Account.UpdatedAt)
+					if e1 != nil || e2 != nil || !after.After(before) {
+						t.Fatal("rollback reused an older account version")
+					}
 				}
 				return minimax.Quota{FetchedAt: "old", Buckets: []minimax.QuotaBucket{}}, nil
 			})

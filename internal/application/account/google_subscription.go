@@ -103,6 +103,10 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 	if err != nil || current.UpdatedAt != item.UpdatedAt || current.AuthAccountID != cred.Subject {
 		return Item{}, ErrConflict
 	}
+	stamp, err := nowAfter(item.UpdatedAt)
+	if err != nil {
+		return Item{}, err
+	}
 	retired, err := s.googleRetired(oldRef)
 	if err != nil {
 		return Item{}, err
@@ -131,7 +135,6 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 	defer tx.Rollback()
 	var oldVersion, newVersion string
 	err = tx.QueryRowContext(ctx, "SELECT version FROM account_catalog_versions WHERE id=?", item.ID).Scan(&oldVersion)
-	stamp := now()
 	if err == nil {
 		result, e := tx.ExecContext(ctx, `UPDATE accounts SET credential_ref=?,auth_email=?,auth_plan=?,auth_state='authenticated',updated_at=? WHERE id=? AND credential_ref=? AND updated_at=? AND auth_method=?`, ref, cred.Email, cred.Plan, stamp, item.ID, oldRef, item.UpdatedAt, AuthSubscription)
 		err = e
@@ -161,32 +164,4 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 		}
 	}
 	return item, nil
-}
-
-// LogoutGoogleSubscription 先停用授权，再清理密文；清理失败保留引用以便重试。
-func (s *Service) LogoutGoogleSubscription(ctx context.Context, id string) (Item, error) {
-	if validateID(id) != nil {
-		return Item{}, ErrInvalidInput
-	}
-	item, ref, err := s.get(ctx, id)
-	if err != nil || item.AuthMethod != AuthSubscription || s.CheckGoogleProvider(ctx, item.ProviderID) != nil {
-		return Item{}, ErrInvalidInput
-	}
-	_, err = s.db.ExecContext(ctx, "UPDATE accounts SET auth_state='logged_out',updated_at=? WHERE id=? AND credential_ref=?", now(), id, ref)
-	if err != nil {
-		return Item{}, antigravity.Failure("operation_failed")
-	}
-	if ref != "" {
-		retired, e := s.googleRetired(ref)
-		if e != nil {
-			return Item{}, e
-		}
-		if err = s.cleanupGoogleReferences(append(retired, ref)); err != nil {
-			return Item{}, err
-		}
-		if _, err = s.db.ExecContext(ctx, "UPDATE accounts SET credential_ref='' WHERE id=? AND credential_ref=?", id, ref); err != nil {
-			return Item{}, antigravity.Failure("cleanup_failed")
-		}
-	}
-	return s.Metadata(ctx, id)
 }

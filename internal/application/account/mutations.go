@@ -120,7 +120,15 @@ func (s *Service) SetEnabled(ctx context.Context, id string, enabled bool) (Item
 	if err := validateID(id); err != nil {
 		return Item{}, err
 	}
-	result, err := s.db.ExecContext(ctx, `UPDATE accounts SET enabled = ?, updated_at = ? WHERE id = ?`, enabled, now(), id)
+	item, _, err := s.get(ctx, id)
+	if err != nil {
+		return Item{}, err
+	}
+	timestamp, err := nowAfter(item.UpdatedAt)
+	if err != nil {
+		return Item{}, err
+	}
+	result, err := s.db.ExecContext(ctx, `UPDATE accounts SET enabled = ?, updated_at = ? WHERE id = ? AND updated_at = ?`, enabled, timestamp, id, item.UpdatedAt)
 	if err != nil {
 		return Item{}, fmt.Errorf("account: set enabled: %w", err)
 	}
@@ -129,9 +137,9 @@ func (s *Service) SetEnabled(ctx context.Context, id string, enabled bool) (Item
 		return Item{}, fmt.Errorf("account: set enabled result: %w", err)
 	}
 	if changed == 0 {
-		return Item{}, ErrNotFound
+		return Item{}, ErrConflict
 	}
-	item, _, err := s.get(ctx, id)
+	item, _, err = s.get(ctx, id)
 	return item, err
 }
 
