@@ -178,3 +178,33 @@ HTTP 与 WebSocket 共用上游失败分类：400 请求拒绝、401／403 认�
 执行 `go test ./internal/core/proxy -run TestCodexCLIIsolatedWebSocket -count=1`。
 测试使用临时 `CODEX_HOME`、假密钥、独立工作目录和随机 loopback 端口，不修改用户真实配置或登录，
 只验证本机客户端与模拟上游，不代表真实账号权限或额度已通过验收。
+
+
+## Codex CLI／Desktop 的模型设置层次
+
+Codex CLI 与 Desktop 使用同一用户配置体系（实际根目录受 `CODEX_HOME` 控制），
+OmniProxy 继续共用 `codex` 接入入口，不另改 Desktop 的登录、会话或首选项存储。
+两者可能使用不同的内核版本，不能仅用 PATH 中 CLI 的结果声称 Desktop 界面已经生效。
+
+需要区分三个状态：
+
+1. 模型目录：`model_catalog_json`／远程发现决定可选模型；Desktop 后端通过 `model/list` 获取。
+2. 用户默认：配置中的 `model` 决定未显式指定模型的新会话默认值。
+3. 会话覆盖：CLI 的 `-m` 和 Desktop 后端新会话的显式 `model` 可以覆盖用户默认；已有会话保留原模型，不因默认文件改变而被强制切换。
+
+`model/list.isDefault` 是模型推荐标记，不是当前会话或用户配置中的已选模型。
+不要仅依据菜单推荐项判断一键配置失败，也不要将列表加载成功当作真实转发已经启用。
+模型目录与上游入口分别配置；列表存在并不代表内置 OpenAI 入口已指向本机网关。
+
+本机隔离验证覆盖 CLI 0.163.0 与 Desktop 0.163.0-alpha.10.2：使用真正的
+`Service.Apply` 生成临时配置，内置 OpenAI／自定义提供商均验证了目录、默认模型、新会话、
+显式覆盖及实际 loopback 请求中的模型；文件修改后新会话读取新默认，已有会话仍使用旧模型。
+这不是 Desktop 外壳界面的逐项验收，也不代表真实订阅权限或模型额度已验证。
+
+可选原生核心契约测试：同时设置 `OMNIPROXY_CODEX_CATALOG_QA=1` 与
+`OMNIPROXY_CODEX_TEST_EXECUTABLE`（目标 CLI 或 Desktop 内核的绝对路径），运行
+`go test ./internal/infrastructure/codex -run TestInstalledCodexLocalModelCatalog -count=1`。
+配置、认证与会话都在临时目录，不会切换正在运行的用户客户端。
+
+官方依据：[配置优先级](https://learn.chatgpt.com/docs/config-file/config-basic)、
+[App Server 模型目录与会话模型](https://learn.chatgpt.com/docs/app-server)。

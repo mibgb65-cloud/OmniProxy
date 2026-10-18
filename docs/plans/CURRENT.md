@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-016](../tasks/active/TASK-20261018-016-verify-codex-cli-desktop-model-settings.md)：隔离验证 CLI／Desktop 不同内核的模型目录、默认与会话覆盖，已通过四组真实配置／loopback 请求对照；不改当前 Agent 配置，正在验证回归及记录边界。
 
 ## Recently Completed
 
