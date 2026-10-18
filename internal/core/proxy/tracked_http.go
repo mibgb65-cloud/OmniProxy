@@ -45,6 +45,7 @@ func (t *Trace) completeLogged(status int, code string, log *slog.Logger) {
 		if t.event.FirstTokenMS != nil {
 			fields = append(fields, "first_token_ms", *t.event.FirstTokenMS)
 		}
+		fields = append(fields, t.responseHeaderLogFields()...)
 		log.Info("gateway request finished", fields...)
 	}
 }

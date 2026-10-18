@@ -59,5 +59,5 @@ func (c *Client) Forward(ctx context.Context, key []byte, accountID string, requ
 		return proxy.Failure("upstream_unavailable", 502)
 	}
 	defer resp.Body.Close()
-	return consume(proxy.Response{StatusCode: resp.StatusCode, ContentType: resp.Header.Get("Content-Type"), RetryAfter: resp.Header.Get("Retry-After"), Body: resp.Body})
+	return consume(inferResponseType(proxy.Response{StatusCode: resp.StatusCode, ContentType: resp.Header.Get("Content-Type"), RetryAfter: resp.Header.Get("Retry-After"), Body: resp.Body}))
 }

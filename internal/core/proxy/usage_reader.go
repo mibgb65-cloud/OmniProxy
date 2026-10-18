@@ -21,6 +21,7 @@ type usageReader struct {
 // ObserveResponse 挂在原上游读流，转换后的默认零值不会进入统计。
 func ObserveResponse(ctx context.Context, trace *Trace, response Response, protocol string) Response {
 	trace.observeStatus(response.StatusCode)
+	trace.observeResponseHeaders(response)
 	if trace == nil || response.StatusCode != 200 || response.Body == nil {
 		return response
 	}

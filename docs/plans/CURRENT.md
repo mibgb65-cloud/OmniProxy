@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-018](../tasks/active/TASK-20261018-018-fix-subscription-stream-response.md)：修复真实订阅 SSE 缺失 Content-Type 被误拒绝；已完成两个模型／两种传输及双 Codex 内核真实上游验证，最终完整质量门与 Windows 构建通过，待归档；当前生产进程未替换。
 
 ## Recently Completed
 

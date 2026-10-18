@@ -208,3 +208,20 @@ OmniProxy 继续共用 `codex` 接入入口，不另改 Desktop 的登录、会�
 
 官方依据：[配置优先级](https://learn.chatgpt.com/docs/config-file/config-basic)、
 [App Server 模型目录与会话模型](https://learn.chatgpt.com/docs/app-server)。
+
+
+## 订阅 Responses 缺失媒体类型的兼容边界
+
+真实官方订阅 Responses 端点可能返回 HTTP 200 和合法 SSE，却不带 `Content-Type`。
+只在固定订阅适配器内兼容：状态必须为 200、类型头缺失、首个完整事件必须是可识别的
+Responses 生命周期事件或错误事件。最多检查 512 KiB，不等待整流结束，所有预读字节原样回放。
+显式 JSON／HTML／其他类型头不被覆盖；未知事件、无效 JSON、空正文和不完整首事件不会被认可。
+通用网关的媒体类型校验、后续事件校验及流完整性检查保持不变，200 后不跨账号重放。
+
+网关日志仅记录 `upstream_media_type` 的固定分类与 `upstream_content_type_inferred` 布尔值，
+不记录原始响应头、正文、提示词或凭据。补头不会绕过用量观察和首字计时。
+
+2026-10-18 的修复构建已在独立临时数据库、随机 loopback 端口和只读隔离账号凭据下完成
+真实上游验收：gpt-5.6-luna 与 gpt-6.1-sol 的 HTTP／WebSocket，另有实际安装的
+Codex CLI 0.163.0 与 Desktop 内核 0.163.0-alpha.10.2 均完成请求；不是 Desktop GUI 外壳验收。
+测试没有替换生产软件、刷新账号登录或改写用户 Codex 配置；修复不会自动进入正在运行的旧进程。

@@ -35,10 +35,12 @@ type Request struct {
 
 // Response 只允许提供商返回有限的非敏感响应元数据。
 type Response struct {
-	StatusCode  int
-	ContentType string
-	RetryAfter  string
-	Body        io.Reader
+	// ContentTypeInferred 只标记提供商已验证并补全的缺失类型，不放宽 Core 校验。
+	ContentTypeInferred bool
+	StatusCode          int
+	ContentType         string
+	RetryAfter          string
+	Body                io.Reader
 }
 
 // Upstream 在 consume 完成前持有响应资源，不能向 Core 暴露凭证。
