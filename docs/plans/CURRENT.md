@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-019](../tasks/active/TASK-20261018-019-publish-v2-beta4.md)：准备 v2.0.0-beta.4，包含已完成真实订阅验收的缺失 SSE 类型头修复；本地完整质量门、Windows 资源／摘要和独立用户级安装验收通过，待远端 CI／Release；不替换当前生产进程。
 
 ## Recently Completed
 
