@@ -27,4 +27,4 @@
 
 比较满足 `beta.1 < beta.2 < beta.10 < rc.1 < 正式版`，忽略构建元数据；不会将 `v1.x` 当作新版 `2.0.0-beta.1` 的升级或提出降级。
 
-已补齐启动后自动检查、侧栏升级标记、浮窗下载／进度／取消、SHA256 校验和重启静默更新，下载与安装始终由用户点击触发。完整行为和缓存信任边界见 [UPDATE](UPDATE.md)，发布与实际安装验收见 `docs/development/RELEASE.md`。[v2.0.0-beta.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.1) 已公开预发布，默认 Beta 渠道和公开下载验证通过；Beta.1 的「仅正式版」查询存在请求编码问题，main 已修复、随下个测试版交付，当前保留默认 Beta 渠道。用户级及机器级安装验收分别记录，不能相互替代。
+已补齐启动后自动检查、侧栏升级标记、浮窗下载／进度／取消、SHA256 校验和重启静默更新，下载与安装始终由用户点击触发。完整行为和缓存信任边界见 [UPDATE](UPDATE.md)，发布与实际安装验收见 `docs/development/RELEASE.md`。[v2.0.0-beta.2](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.2) 已公开预发布，包含历史统计库启动防护、独立图标及正式渠道请求编码修复；Beta.1 可通过默认 Beta 渠道发现 Beta.2。公开更新渠道、下载、SHA256 与原生资源校验通过。用户级及机器级安装验收分别记录，不能相互替代。

@@ -4,14 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.2 — 构建／发布进行中。首发 [Beta.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.1) 已公开，历史统计库启动冲突和图标／正式渠道修复随 Beta.2 交付。应用／前端使用完整 SemVer，Windows 数字版本 2.0.0；详见 `product/UPGRADE.md`。
+2.0.0-beta.2 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.2)，包含历史统计库启动冲突、图标和正式渠道修复；CI／Release／公开下载及 SHA256 验证通过。应用／前端使用完整 SemVer，Windows 数字版本 2.0.0；详见 `product/UPGRADE.md`。
 
 ## In Progress
 
-- [TASK-20261018-011](../tasks/active/TASK-20261018-011-publish-v2-beta2.md)：用户要求构建并发布修复后的 Beta.2；同步版本、最终候选包／原生验收、推送新标签与自动 Release、公开更新链验证。
+暂无。
 
 ## Recently Completed
 
+- [TASK-20261018-011](../tasks/completed/2026-10/TASK-20261018-011-publish-v2-beta2.md)：`5de94cf`／v2.0.0-beta.2 已推送并公开预发布；原生 Beta.2 安装／升级／重启／卸载、CI `39119451562` 与 Release `39119455141` 均成功。公开安装器 19,255,511 bytes／SHA256 `0b4f4e56dc7f1c8a781a1c13fa0913e6f0ea124f8de2c837858346b658e4ce97`，默认更新客户端确认 Beta.1 可发现并下载校验 Beta.2；正式 Latest v1.3.1 与 Beta.1 原资产保留。
 - [TASK-20261018-010](../tasks/completed/2026-10/TASK-20261018-010-fix-installed-startup-and-shortcuts.md)：历史统计库与迁移 008 冲突已定位，本机备份后隔离数据恢复；已实现只读布局识别／旧库保护／有效 v2 沿用／可见失败及日志落盘／独立快捷方式 ICO。最终完整质量门、575 项前端测试、用户级隔离安装／运行中升级／重启／卸载及错误提示通过；生产安装器原生资源校验通过。修复 `7085fe4` 已推送，公开 Beta.1 添加已知问题提示且资产未变，Beta.2 继续交付。
 - [TASK-20261018-009](../tasks/completed/2026-10/TASK-20261018-009-publish-v2-beta1.md)：首个 v2.0.0-beta.1 已公开预发布，标签应用代码 `18cd42f`；干净环境质量门、远端 CI、源码一致性守卫、自动 NSIS／SHA256／发布及实际下载校验通过。旧 master／v1.3.1 Latest 保留。修复 `14edf51`／`18cd42f`／`ce89b68`；正式渠道编码问题在 Beta.1 说明中列出，main 修复 `38184e9` 通过定向／在线／完整验证，随后续测试版交付；默认 Beta 渠道正常。
 - [TASK-20261018-008](../tasks/completed/2026-10/TASK-20261018-008-installer-and-in-app-updates.md)：安装器／下载进度／SHA256／取消重试／静默重启、侧栏升级标记和版本浮窗、Beta Release 工作流完成。完整质量门／575 项前端测试、用户级和机器级安装／运行中升级／重启／卸载、v1 覆盖、首次完成页普通用户启动与原生深浅／960 验收通过，最终生产安装包资源／SHA256 校验通过。实现 `cae895f`，启动身份修复 `5107c8f`；未操作真实账号／正式安装或发布远端，代码签名尚未接入。
