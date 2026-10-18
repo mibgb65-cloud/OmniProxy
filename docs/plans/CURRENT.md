@@ -8,10 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261018-002](../tasks/active/TASK-20261018-002-add-four-agents.md)：接入 Kimi Code、Pi、Factory Droid 和 Goose，核对官方配置并扩展检测、受管模型与备份恢复。
+暂无。
 
 ## Recently Completed
 
+- [TASK-20261018-002](../tasks/completed/2026-10/TASK-20261018-002-add-four-agents.md)：接入 Kimi Code、Pi、Factory Droid、Goose CLI／Desktop，增加模型选择／默认值、独立 Key、双文件备份回滚和固定官方软件入口；兼容 Kimi 旧 Python 配置。完整质量门／564 项前端测试／Windows 构建通过，原生深浅／960 预览和同名冲突保护通过。实现提交 `8a8679e`；实际客户端调用待验收，Pi 既有同名配置保持受保护。
 - [TASK-20261018-001](../tasks/completed/2026-10/TASK-20261018-001-time-range-selection.md)：网关／仪表盘时间范围统一为高对比选中卡片，补齐间距、阴影和换行；559 项前端测试、完整质量门与 Windows 构建通过，正常原生深浅主题／三时段／960 窗口及可访问焦点共 14 项核对通过。实现提交 `c2b317e`。
 - [TASK-20261017-026](../tasks/completed/2026-10/TASK-20261017-026-gateway-request-metrics.md)：网关新增六项指标、趋势、最近记录筛选／详情、累计上游分布和接入信息；迁移 032 记录实际下游首字及独立聚合，旧数据／非流式未知、真实零有效。559 项前端测试、Go／转发集成、完整质量门和 Windows 构建通过；原生深浅主题、1920／960、时段和详情验收通过，未调用真实模型。实现提交 `8351157`。
 - [TASK-20261017-025](../tasks/completed/2026-10/TASK-20261017-025-fix-agent-update-failure.md)：定位更新前第二次查询失败，增加五分钟服务端目标复用和实际错误解析；保留 WinGet 退出码，真实重试确认商店无适用更新后提供固定官方下载入口。551 项前端测试、完整质量门及 Windows 构建通过，原生后备按钮 `101×32`；Claude 仍为 `2.37337.1.0`，未误报升级。实现提交 `dc169d7`。

@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -69,8 +69,12 @@ In Progress
 
 ## Git
 
-待提交。
+实现提交：`8a8679efa28f7fef28997a59f6fe532fb4e8b405` — `feat(gateway): 接入 Kimi Code、Pi、Factory Droid 和 Goose`。任务记录随后归档；未推送，无关用户任务文件保持原样。
 
 ## Result
 
 四个 Agent 的产品接入已实现并通过最终质量门；客户端重载／调用仍待实机验收，Pi 既有同名配置继续受保护。
+
+## Completed
+
+2026-10-18（Asia/Singapore）
