@@ -6,11 +6,31 @@
 import * as proxy$0 from "../../core/proxy/models.js";
 
 /**
+ * AccountHealth 独立于用户启用状态，仅描述短期失败及恢复中的账号。
+ */
+export interface AccountHealth {
+    "accountId": string;
+    "accountName": string;
+    "model": string;
+    "code": string;
+    "retryAt": string;
+    "recovering": boolean;
+}
+
+/**
  * CodexSettings 是当前 OmniProxy 网关的应用级 Codex 接入设置。
  */
 export interface CodexSettings {
     "webSocketEnabled": boolean;
     "autoQuotaActivation": boolean;
+}
+
+/**
+ * FailoverSettings 是持久化的同池切换策略；次数与成功边界由服务端固定。
+ */
+export interface FailoverSettings {
+    "enabled": boolean;
+    "maxAttempts": number;
 }
 
 /**

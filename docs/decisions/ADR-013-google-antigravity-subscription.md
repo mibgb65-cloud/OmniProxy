@@ -4,6 +4,8 @@
 
 Accepted
 
+失败重试条款局部由 [ADR-015](ADR-015-account-failover.md) 取代（Partially superseded）；原跨计费／地区及共享额度限制保持。
+
 ## Context
 
 Google AI 订阅与 Gemini API Key 独立计费。用户要求参考 CLIProxyAPI 接入 Google

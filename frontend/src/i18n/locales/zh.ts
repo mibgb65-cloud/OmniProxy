@@ -1,4 +1,5 @@
 import { mimoZh } from "./mimo-zh"
+import { failoverZh } from "./failover-zh"
 import { kimiSettingsZh } from "./kimi-settings-zh"
 import { stepfunSettingsZh } from "./stepfun-settings-zh"
 import { subscriptionZh } from "./subscription-zh"
@@ -18,6 +19,7 @@ import { googleZh } from "./google-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...failoverZh,
   ...mimoZh,
   ...kimiSettingsZh,
   ...stepfunSettingsZh,

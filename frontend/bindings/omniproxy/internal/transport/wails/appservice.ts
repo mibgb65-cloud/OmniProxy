@@ -282,10 +282,31 @@ export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> 
 }
 
 /**
+ * GatewayFailoverHealth 只读当前运行状态，不修改账号启用或授权状态。
+ */
+export function GatewayFailoverHealth(): $CancellablePromise<gateway$0.AccountHealth[] | null> {
+    return $Call.ByID(793083181);
+}
+
+/**
+ * GatewayFailoverSettings 读取同池切换开关，不触发上游请求。
+ */
+export function GatewayFailoverSettings(): $CancellablePromise<gateway$0.FailoverSettings> {
+    return $Call.ByID(2802904054);
+}
+
+/**
  * GatewayInfo 返回真实运行状态和本版支持的协议，不读取密钥或调用模型。
  */
 export function GatewayInfo(): $CancellablePromise<gateway$0.Info> {
     return $Call.ByID(4242772873);
+}
+
+/**
+ * GatewaySetFailoverEnabled 保存后对后续请求生效，不改变已在途请求的策略。
+ */
+export function GatewaySetFailoverEnabled(enabled: boolean): $CancellablePromise<gateway$0.FailoverSettings> {
+    return $Call.ByID(1168795882, enabled);
 }
 
 /**

@@ -63,6 +63,13 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 			t.Fatal(err)
 		}
 		observer := activity.New(db)
+		failoverSQL, err := os.ReadFile("../../../migrations/033_account_failover.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(failoverSQL)); err != nil {
+			t.Fatal(err)
+		}
 		server := proxy.New(proxy.Options{Port: 0, Upstream: service, Models: []string{"deepseek-flash"}, Observer: observer})
 		if _, err = server.Start(); err != nil {
 			t.Fatal(err)

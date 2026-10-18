@@ -3,7 +3,6 @@ package gateway
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"time"
 
@@ -44,6 +43,8 @@ type Info struct {
 
 // Service 复用账号与提供商服务，不持有或缓存明文密钥。
 type Service struct {
+	failover        *failoverState
+	failoverEnabled func(context.Context) (bool, error)
 	server          *proxy.Server
 	providers       ProviderReader
 	accounts        AccountAccess
@@ -74,6 +75,8 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 		opts.RequestTimeout = 120 * time.Second
 	}
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
+	s.failover = newFailoverState()
+	s.failoverEnabled = opts.FailoverEnabled
 	s.atria = atria.New(nil)
 	s.river = river.New(nil)
 	s.google = google.New(nil)
@@ -111,30 +114,9 @@ func (s *Service) Stop(ctx context.Context) (Info, error) {
 // OnStatus 将核心状态变更交给桌面适配层，不让 Core 依赖 Wails。
 func (s *Service) OnStatus(listener func(proxy.Status)) { s.server.OnStatus(listener) }
 
-// Forward 每次重新检查启用状态，只选择一个账号；不进行隐式重试或故障切换。
+// Forward 在响应被接受前按同池计划有限切换；每次调用结束后才进入下一账号。
 func (s *Service) Forward(ctx context.Context, request proxy.Request, consume func(proxy.Response) error) error {
-	var target target
-	var err error
-	if request.ProviderID != "" {
-		target, err = s.selectRoutedTarget(ctx, request)
-	} else {
-		target, err = s.selectTarget(ctx)
-	}
-	if err != nil {
-		return err
-	}
-	if err := request.Trace.Update(ctx, request, target.snapshot); err != nil {
-		return err
-	}
-	err = s.forwardAgent(ctx, target, request, consume)
-	if err == nil || ctx.Err() != nil {
-		return err
-	}
-	var failure *proxy.Error
-	if errors.As(err, &failure) {
-		return failure
-	}
-	return proxy.Failure("credential_unavailable", 503)
+	return s.forwardWithFailover(ctx, request, consume)
 }
 
 type target struct {

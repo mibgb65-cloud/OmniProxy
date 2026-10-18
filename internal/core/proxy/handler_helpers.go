@@ -54,6 +54,9 @@ func writeFailure(w http.ResponseWriter, err error) {
 		tracked.code = failure.Code
 	}
 	w.Header().Set("Content-Type", "application/json")
+	if seconds, err := strconv.Atoi(failure.RetryAfter); err == nil && seconds >= 0 && seconds <= 86400 {
+		w.Header().Set("Retry-After", strconv.Itoa(seconds))
+	}
 	w.WriteHeader(failure.StatusCode)
 	// 错误只返回稳定代码，禁止携带上游正文、账号名称、URL 或底层错误文本。
 	if _, err := io.WriteString(w, `{"error":{"message":"`+failure.Code+`","type":"gateway_error","code":"`+failure.Code+`"}}`); err != nil {

@@ -27,7 +27,7 @@ func (s *Service) forwardRiver(ctx context.Context, target target, request proxy
 		}
 		upstream.Protocol, upstream.Stream, kinds = "chat", false, toolKinds
 	}
-	return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+	return s.useAPIKey(ctx, target, func(key []byte) error {
 		return s.river.Forward(ctx, target.baseURL, key, upstream, func(response proxy.Response) error {
 			response = proxy.ObserveResponse(ctx, request.Trace, response, upstream.Protocol)
 			if request.Protocol != "messages" || response.StatusCode != 200 {

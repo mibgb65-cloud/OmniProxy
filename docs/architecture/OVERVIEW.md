@@ -1,5 +1,11 @@
 # Architecture Overview
 
+## 同通道账号故障切换（2026-10-18）
+
+`application/routing.ResolvePlan` 复用既有 evaluate，并区分手工固定和兼容别名；`application/gateway` 在冻结服务商／认证／计费／地区及逐次版本检查后执行最多三次顺序尝试。明确拒绝在前一个响应关闭及凭据回调退出后才换账号，200 后不重放。短期健康状态使用有界内存、失败代次及单恢复资格；单请求内存凭据摘要排除重复 Key，无后台探测或新增依赖。
+
+迁移 033 保存开关与请求子尝试；`proxy.Trace` 延迟父账号绑定到最终消费／原上游 usage，`application/activity` 保留原 subject 保护、一次逻辑计数及累计，并提供可选详情／幂等恢复／级联清理。订阅读取在等待锁后复核配置版本。Wails 只提供设置／运行快照，UI 沿用现有查询和详情。范围及取舍见 ADR-015、`product/FAILOVER.md`。
+
 ## Kimi Code、Pi、Factory Droid 与 Goose（2026-10-18）
 
 `application/agentconfig` 增加四个精确客户端 ID，沿用 Chat 目录、独立接入 Key、模型选择持久化及加密备份；Kimi 根据当前／旧 Python 配置选择协议。Pi／Goose 使用固定关联路径的有界双文件快照，逐文件版本校验和失败回滚，不引入 SDK、运行时或数据库迁移。`infrastructure/agentinstall` 增加固定官方入口、CLI 版本与 Goose 桌面检测；前端复用产品分组及详情。实现边界见 `product/KIMI_PI_DROID_GOOSE.md`。

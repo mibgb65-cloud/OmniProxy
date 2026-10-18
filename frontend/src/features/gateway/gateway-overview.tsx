@@ -8,6 +8,7 @@ import { GatewayRequestTrend } from "./gateway-request-trend"
 import { GatewayRecentRequests } from "./gateway-recent-requests"
 import { GatewayProviderDistribution } from "./gateway-provider-distribution"
 import { GatewayConfigCard } from "./gateway-config-card"
+import { GatewayFailoverCard } from "./gateway-failover-card"
 import { GatewayRelatedLinks } from "./gateway-related-links"
 import { withGatewayFeedback } from "./gateway-action-feedback"
 import { requestTime } from "../activity/activity-format"
@@ -81,6 +82,7 @@ export function GatewayOverview({ data, active }: { data: GatewayPreparation; ac
         <div className="min-w-0 space-y-4">
           <GatewayProviderDistribution data={info} loading={statistics.isPending} />
           <GatewayConfigCard data={data} />
+          <GatewayFailoverCard active={active} running={data.gateway.isRunning} />
         </div>
       </div>
       <GatewayRelatedLinks />

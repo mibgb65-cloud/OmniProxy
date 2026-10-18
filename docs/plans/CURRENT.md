@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-005](../tasks/active/TASK-20261018-005-account-failover.md)：实施同服务商同计费通道账号切换，候选／尝试记账／冷却／界面已接通；定向测试通过，正在执行完整质量门与原生验收。
 
 ## Recently Completed
 

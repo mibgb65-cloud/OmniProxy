@@ -51,7 +51,22 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 	if s.router == nil {
 		return request, nil
 	}
-	decision, err := s.router.Resolve(ctx, request.Model)
+	var decision routes.Preview
+	var err error
+	if source, ok := s.router.(interface {
+		ResolvePlan(context.Context, string) (routes.Plan, error)
+	}); ok {
+		var plan routes.Plan
+		plan, err = source.ResolvePlan(ctx, request.Model)
+		decision = plan.Decision
+		request.FixedAccount = plan.Fixed
+		for _, candidate := range plan.Candidates {
+			request.Candidates = append(request.Candidates, proxy.AccountCandidate{AccountID: candidate.AccountID, UpdatedAt: candidate.AccountUpdatedAt})
+		}
+	} else {
+		decision, err = s.router.Resolve(ctx, request.Model)
+		request.FixedAccount = true
+	}
 	if err != nil {
 		return request, proxy.Failure("routing_configuration_unavailable", 503)
 	}
@@ -133,7 +148,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		}
 		for _, account := range accounts {
 			if account.ID == request.AccountID && account.ProviderID == provider.ID && account.Enabled {
-				if (provider.Kind == "stepfun" || provider.Kind == "kimi" || provider.Kind == "minimax" || provider.Kind == "mimo") && request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
+				if request.AccountUpdatedAt != "" && account.UpdatedAt != request.AccountUpdatedAt {
 					return target{}, proxy.Failure("route_configuration_changed", 503)
 				}
 				if provider.Kind == "mimo" && (account.MiMo == nil || !account.MiMo.Valid()) {

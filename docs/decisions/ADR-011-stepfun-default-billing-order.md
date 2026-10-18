@@ -4,6 +4,8 @@
 
 Accepted — 2026-10-16
 
+失败重试条款局部由 [ADR-015](ADR-015-account-failover.md) 取代（Partially superseded）；原跨计费／地区及共享额度限制保持。
+
 ## Context
 
 用户要求 StepFun 沿用 MiMo 的默认通道顺序与模型列表去重，替代此前多平台／计费池并存时要求显式通道的默认行为。

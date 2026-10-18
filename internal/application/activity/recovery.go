@@ -15,6 +15,9 @@ func (s *Service) Recover(ctx context.Context) error {
 		return ErrUnavailable
 	}
 	defer tx.Rollback()
+	if _, err = tx.ExecContext(ctx, `UPDATE request_attempts SET state='cancelled',finished_at=?,status_code=499,error_code='process_interrupted' WHERE state='pending' AND request_id IN (SELECT id FROM request_records WHERE state!='pending' OR started_at<?)`, timeText(time.Now()), threshold); err != nil {
+		return ErrUnavailable
+	}
 	_, err = tx.ExecContext(ctx, `UPDATE dashboard_buckets SET cancelled=cancelled+(SELECT COUNT(*) FROM request_records r WHERE r.state='pending' AND r.started_at<? AND (CAST(strftime('%s',r.started_at) AS INTEGER)/900)*900=dashboard_buckets.bucket) WHERE bucket IN (SELECT (CAST(strftime('%s',started_at) AS INTEGER)/900)*900 FROM request_records WHERE state='pending' AND started_at<?)`, threshold, threshold)
 	if err != nil {
 		return ErrUnavailable

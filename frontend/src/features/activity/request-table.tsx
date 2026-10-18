@@ -80,6 +80,11 @@ export function RequestTable({
                 >
                   {t(stateLabel(item.state))}
                 </span>
+                {(item.attemptCount ?? 0) > 1 ? (
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {t("failover.switched", { count: (item.attemptCount ?? 1) - 1 })}
+                  </p>
+                ) : null}
                 {!item.usageComplete ? (
                   <p className="text-muted-foreground mt-1 text-[10px]">
                     {t(

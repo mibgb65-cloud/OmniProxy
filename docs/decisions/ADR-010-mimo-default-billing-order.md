@@ -4,6 +4,8 @@
 
 Accepted — 2026-10-16
 
+失败重试条款局部由 [ADR-015](ADR-015-account-failover.md) 取代（Partially superseded）；原跨计费／地区及共享额度限制保持。
+
 ## Context
 
 MiMo 普通按量与三个 Token Plan 集群支持重叠模型。此前同时存在多个通道时，裸模型名报歧义，自动发布通道别名使客户端列表出现大量同名选项。用户要求在 MiMo 设置中选择默认使用顺序并简化模型列表。

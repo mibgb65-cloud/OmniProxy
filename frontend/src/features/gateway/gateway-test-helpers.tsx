@@ -17,6 +17,11 @@ import { Route as GatewayRoute } from "../../app/routes/gateway"
 import { SidebarGatewayStatus } from "./sidebar-gateway-status"
 import type { GatewayTab } from "./gateway-tabs"
 const listAgentClientsMock = vi.hoisted(() => vi.fn().mockResolvedValue([]))
+vi.mock("../../services/failover", () => ({
+  getFailoverSettings: vi.fn().mockResolvedValue({ enabled: true, maxAttempts: 3 }),
+  setFailoverEnabled: vi.fn(async (enabled: boolean) => ({ enabled, maxAttempts: 3 })),
+  getFailoverHealth: vi.fn().mockResolvedValue([]),
+}))
 const readDashboardMock = vi.hoisted(() => vi.fn())
 const getConfiguredAgentModelsMock = vi.hoisted(() =>
   vi.fn().mockResolvedValue({ models: [], defaultModel: "" }),

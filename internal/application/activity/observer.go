@@ -110,6 +110,9 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	if err := updateDashboard(ctx, tx, start, input-oldInput, output-oldOutput, completeDelta); err != nil {
 		return ErrUnavailable
 	}
+	if err := updateAttemptUsage(ctx, tx, event); err != nil {
+		return ErrUnavailable
+	}
 	return s.commitActivity(tx)
 }
 func (s *Service) Finish(ctx context.Context, event proxy.RequestEvent) error {

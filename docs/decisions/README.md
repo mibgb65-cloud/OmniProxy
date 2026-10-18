@@ -46,6 +46,8 @@ rather than editing history.
 
 ## Index
 
+同通道账号故障切换、冷却与一次请求／多次尝试记账见 [ADR-015](ADR-015-account-failover.md)。
+
 首字耗时与网关真实请求统计见 [ADR-014](ADR-014-first-token-latency.md)。
 
 MiMo 默认通道选择与目录去重见 [ADR-010](ADR-010-mimo-default-billing-order.md)。

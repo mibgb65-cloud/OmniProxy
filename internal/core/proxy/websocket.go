@@ -146,7 +146,13 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 						trace.markFirstToken()
 					}
 				}
-				return scanner.Err()
+				if err := scanner.Err(); err != nil {
+					return err
+				}
+				if !completed {
+					return Failure("upstream_stream_failed", 502)
+				}
+				return nil
 			})
 		}
 		code := ""

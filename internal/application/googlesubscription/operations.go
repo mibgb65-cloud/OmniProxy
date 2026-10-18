@@ -40,7 +40,19 @@ func (s *Service) credentials(ctx context.Context, id string, force bool) (antig
 
 // Use 在受控回调获取短暂 token 快照，推理不占用全局刷新锁。
 func (s *Service) Use(ctx context.Context, id string, consume func(antigravity.Credentials) error) error {
+	return s.UseAt(ctx, id, "", consume)
+}
+
+// UseAt 在刷新互斥门内复核配置，普通 token 轮换不改变账号池身份。
+func (s *Service) UseAt(ctx context.Context, id, expectedAt string, consume func(antigravity.Credentials) error) error {
 	s.ops.Lock()
+	if expectedAt != "" {
+		item, err := s.accounts.Metadata(ctx, id)
+		if err != nil || item.UpdatedAt != expectedAt {
+			s.ops.Unlock()
+			return antigravity.Failure("configuration_changed")
+		}
+	}
 	cred, err := s.credentials(ctx, id, false)
 	s.ops.Unlock()
 	if err != nil {

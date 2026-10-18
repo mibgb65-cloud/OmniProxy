@@ -4,6 +4,8 @@
 
 Accepted — 2026-10-16
 
+失败重试条款局部由 [ADR-015](ADR-015-account-failover.md) 取代（Partially superseded）；原跨计费／地区及共享额度限制保持。
+
 ## Context
 
 用户要求 Kimi 同样去重、设置默认顺序，并明确确认包含 Kimi Code 订阅 Key。普通 API 与订阅服务的域名、Messages 路径、模型 ID 和权限并不完全相同，不能只改标签或全局地址。

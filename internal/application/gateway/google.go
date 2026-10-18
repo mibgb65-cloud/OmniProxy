@@ -30,7 +30,7 @@ func (s *Service) forwardGoogle(ctx context.Context, target target, request prox
 		if s.googleAuth == nil {
 			return proxy.Failure("adapter_unavailable", 503)
 		}
-		return s.googleAuth.Use(ctx, target.accountID, func(cred antigravity.Credentials) error {
+		return s.useGoogleToken(ctx, target, func(cred antigravity.Credentials) error {
 			return s.forwardGoogleAgent(ctx, cred, request, consume)
 		})
 	}
@@ -40,7 +40,7 @@ func (s *Service) forwardGoogle(ctx context.Context, target target, request prox
 	if err := s.googleOutputLimit(ctx, target, request); err != nil {
 		return err
 	}
-	return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+	return s.useAPIKey(ctx, target, func(key []byte) error {
 		return s.google.Forward(ctx, target.baseURL, key, request, func(failure google.Failure) error {
 			if s.googleResources == nil {
 				return nil

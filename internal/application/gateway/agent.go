@@ -24,7 +24,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 		return s.forwardStep(ctx, target, request, consume)
 	}
 	if target.kind == "openai" && s.subscription != nil {
-		return s.subscription.UseToken(ctx, target.accountID, func(key []byte, accountID string) error {
+		return s.useToken(ctx, target, func(key []byte, accountID string) error {
 			upstream := request
 			if request.Protocol != "responses" {
 				chat, _, err := agentprotocol.ToChat(request.Body, request.Protocol)
@@ -58,7 +58,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 		return s.forwardRiver(ctx, target, request, consume)
 	}
 	if target.kind == "atria" {
-		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+		return s.useAPIKey(ctx, target, func(key []byte) error {
 			return s.atria.Forward(ctx, target.baseURL, key, request, func(response proxy.Response) error {
 				return consume(proxy.ObserveResponse(ctx, request.Trace, response, request.Protocol))
 			})
@@ -74,7 +74,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 		return proxy.Failure("adapter_unavailable", 503)
 	}
 	if request.Protocol == "" || request.Protocol == "chat" {
-		return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error { return s.forwardDeepseek(ctx, target, key, request, consume) })
+		return s.useAPIKey(ctx, target, func(key []byte) error { return s.forwardDeepseek(ctx, target, key, request, consume) })
 	}
 	body, kinds, err := agentprotocol.ToChat(request.Body, request.Protocol)
 	if err != nil {
@@ -83,7 +83,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	upstream := request
 	upstream.Body = body
 	upstream.Stream = false
-	return s.accounts.UseAPIKey(ctx, target.accountID, func(key []byte) error {
+	return s.useAPIKey(ctx, target, func(key []byte) error {
 		return s.forwardDeepseek(ctx, target, key, upstream, func(response proxy.Response) error {
 			if response.StatusCode != 200 {
 				return consume(response)

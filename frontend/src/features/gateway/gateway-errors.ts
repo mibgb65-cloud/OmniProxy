@@ -1,6 +1,7 @@
 import type { TranslationKey } from "../../i18n/translation"
 
 const errorKeys = new Map<string, TranslationKey>([
+  ["duplicate_credential", "failover.duplicate"],
   ["port_unavailable", "gateway.error.port"],
   ["invalid_configuration", "gateway.error.configuration"],
   ["configuration_unavailable", "gateway.error.configuration"],
@@ -11,6 +12,9 @@ const errorKeys = new Map<string, TranslationKey>([
   ["upstream_authentication_failed", "gateway.error.authentication"],
   ["upstream_insufficient_balance", "gateway.error.balance"],
   ["upstream_rate_limited", "gateway.error.rateLimit"],
+  ["account_pool_cooling", "gateway.error.rateLimit"],
+  ["route_configuration_changed", "gateway.error.configuration"],
+  ["accounting_unavailable", "gateway.error.configuration"],
   ["request_timeout", "gateway.error.timeout"],
   ["request_cancelled", "gateway.error.cancelled"],
   ["gateway_busy", "gateway.error.busy"],

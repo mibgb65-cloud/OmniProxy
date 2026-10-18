@@ -1,4 +1,5 @@
 import { mimoEn } from "./mimo-en"
+import { failoverEn } from "./failover-en"
 import { kimiSettingsEn } from "./kimi-settings-en"
 import { stepfunSettingsEn } from "./stepfun-settings-en"
 import { subscriptionEn } from "./subscription-en"
@@ -18,6 +19,7 @@ import { googleEn } from "./google-en"
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...failoverEn,
   ...mimoEn,
   ...kimiSettingsEn,
   ...stepfunSettingsEn,

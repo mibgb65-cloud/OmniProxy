@@ -18,6 +18,8 @@ const (
 
 // Request 保留协议正文；只解析代理需要的模型和流式标志。
 type Request struct {
+	Candidates   []AccountCandidate
+	FixedAccount bool
 	// 仅有界保留真实客户端标识供要求工具身份的上游使用，不包含认证头或进入日志。
 	ClientUserAgent  string
 	AccountUpdatedAt string
@@ -65,6 +67,7 @@ type Status struct {
 
 // Options 配置代理的资源边界；Port 为 0 时由系统分配，供隔离测试使用。
 type Options struct {
+	FailoverEnabled  func(context.Context) (bool, error)
 	WebSocketAllowed func(context.Context) (bool, error)
 	Observer         RequestObserver
 	Authorize        func(context.Context, string) bool
@@ -78,6 +81,7 @@ type Options struct {
 
 // Error 的 Code 可用于 UI 和协议错误；禁止放入原始上游正文、凭证或请求内容。
 type Error struct {
+	RetryAfter string
 	Code       string
 	StatusCode int
 }

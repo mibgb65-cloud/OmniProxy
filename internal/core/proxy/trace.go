@@ -15,6 +15,7 @@ type UsageSnapshot struct {
 	InputKnown, OutputKnown, Complete bool
 }
 type RequestEvent struct {
+	AttemptIndex                           int
 	ID                                     string
 	StartedAt, FinishedAt                  time.Time
 	InputModel, Model, Protocol, Transport string
@@ -34,6 +35,7 @@ type RequestObserver interface {
 	Finish(context.Context, RequestEvent) error
 }
 type Trace struct {
+	attempt   *AttemptEvent
 	mu        sync.Mutex
 	event     RequestEvent
 	observer  RequestObserver
@@ -88,6 +90,11 @@ func (t *Trace) Report(_ context.Context, usage UsageSnapshot) error {
 	defer cancel()
 	t.mu.Lock()
 	defer t.mu.Unlock()
+	// 协议转换可能先读取上游用量再调用下游消费；此时才将唯一成功尝试绑定到父记录。
+	if t.event.Target.AccountID == "" && t.attempt != nil {
+		t.event.Target = t.attempt.Target
+		t.event.Model = t.attempt.Model
+	}
 	if usage.InputKnown && (!t.event.Usage.InputKnown || usage.Input >= t.event.Usage.Input) {
 		t.event.Usage.Input = usage.Input
 		t.event.Usage.InputKnown = true

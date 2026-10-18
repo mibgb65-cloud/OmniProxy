@@ -1,0 +1,18 @@
+export const failoverZh = {
+  "failover.duplicate": "该账号使用了已尝试的凭据，已跳过。",
+  "failover.title": "账号故障切换",
+  "failover.description": "仅在同服务商、同计费方式和地区内尝试其他账号。固定账号不切换。",
+  "failover.boundary": "最多尝试 {{count}} 个账号；收到成功响应后不再重试。",
+  "failover.saving": "正在保存…",
+  "failover.failed": "读取或保存失败，请重试。",
+  "failover.retry": "重试读取切换设置",
+  "failover.cooling": "{{count}} 项账号资源暂时不可用",
+  "failover.healthy": "暂无冷却中的账号资源",
+  "failover.until": "可恢复时间：{{time}}",
+  "failover.recovering": "正在通过当前请求确认恢复",
+  "failover.account": "已保存账号",
+  "failover.more": "另有 {{count}} 项",
+  "failover.attempts": "账号尝试记录",
+  "failover.attempt": "第 {{index}} 次 · {{account}}",
+  "failover.switched": "已切换 {{count}} 次",
+} as const

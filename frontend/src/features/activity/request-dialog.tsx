@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
 import { formatTokens, readRequest } from "../../services/activity"
 import { stateLabel, requestTime } from "./activity-format"
+import { RequestAttempts } from "./request-attempts"
 
 export function RequestDialog({
   id,
@@ -135,6 +136,7 @@ export function RequestDialog({
                 ))}
               </dl>
             ) : null}
+            {data.isSuccess && item ? <RequestAttempts item={item} /> : null}
             <p className="text-muted-foreground text-xs leading-5">{t("activity.logHint")}</p>
           </div>
           <div className="flex shrink-0 justify-end gap-3 border-t pt-4">
