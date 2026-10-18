@@ -50,6 +50,7 @@ accounts need one local place to:
 
 ## Core Features
 
+- v2 Beta 提供用户主动预览／确认的 v1 API Key 账号导入，保留旧文件及已有新版账号，明确订阅重新登录和不兼容范围；检查更新支持正式／Beta 渠道、持久选择及完整预发布排序，当前由发布页手动下载安装。详见 `docs/product/UPGRADE.md`。
 - 侧栏底部“折叠”下方提供“设置与关于”统一入口，以带背景模糊的悬浮窗口展示左侧分类和右侧独立滚动内容；分类为通用设置、请求与日志、数据存储、检查更新、关于。通用设置紧凑展示启动／关闭行为与字号。检查更新独立为一级分类，仅点击按钮时查询；关于页展示官网、开源仓库、免责协议、使用协议、隐私协议入口，当前按用户要求均标记待配置，不提供跳转或未确认正文。内容视口延伸至底部边框，底部留白随内容滚动，避免卡片提前截断。打开时保留当前工作页面，切换分类保留未保存输入，支持上下键选择分类、键盘关闭和焦点返回。旧 `/settings`、`/about` 链接继续打开对应分类。
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,

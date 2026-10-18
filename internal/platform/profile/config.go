@@ -31,8 +31,10 @@ type Config struct {
 	// persisting the new location and moving the data) and revert.
 	PreviousDataDir string `json:"previousDataDir,omitempty"`
 	// UpdateRepo is the "owner/repo" checked for new releases on GitHub.
-	// Empty means update checks are not configured yet.
+	// 留空时使用项目正式发布仓库。
 	UpdateRepo string `json:"updateRepo,omitempty"`
+	// UpdateChannel 留空时依据应用版本选择；明确选择不会在升级后被覆盖。
+	UpdateChannel string `json:"updateChannel,omitempty"`
 	// CloseBehavior controls what closing the main window does. Empty keeps
 	// the historical default of exiting the application.
 	CloseBehavior string `json:"closeBehavior,omitempty"`

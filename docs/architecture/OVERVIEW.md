@@ -1,5 +1,11 @@
 # Architecture Overview
 
+## v1 导入与更新渠道（2026-10-18）
+
+`infrastructure/legacy` 只读、有界解析固定旧文件并兼容 Windows v1 DPAPI entropy；`application/legacyimport` 预览脱敏结果、复核文件快照并逐账号调用既有创建事务。`account.ImportLegacyKey` 复用校验／密文保存／事务失败清理，确定性旧身份及目标 Key 检查提供幂等性。Wails 串行化导入操作，不自动扫描、不迁移订阅登录或改写客户端；无需数据库迁移。
+
+`version.Compare` 保留预发布优先级；`infrastructure/update` 对 Beta 使用有界分页，稳定渠道使用正式端点，校验标签并构造可信发布链接。渠道配置复用 profile 原子文件和设置锁，未明确选择时跟随应用版本；前端仅按需联网并在渠道切换后清除旧结果。边界见 ADR-016、`product/UPGRADE.md`。
+
 ## 同通道账号故障切换（2026-10-18）
 
 `application/routing.ResolvePlan` 复用既有 evaluate，并区分手工固定和兼容别名；`application/gateway` 在冻结服务商／认证／计费／地区及逐次版本检查后执行最多三次顺序尝试。明确拒绝在前一个响应关闭及凭据回调退出后才换账号，200 后不重放。短期健康状态使用有界内存、失败代次及单恢复资格；单请求内存凭据摘要排除重复 Key，无后台探测或新增依赖。

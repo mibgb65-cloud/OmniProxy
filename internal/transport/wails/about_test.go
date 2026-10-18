@@ -51,18 +51,11 @@ func TestRuntimeInfo(t *testing.T) {
 	}
 }
 
-func TestCheckForUpdateUnconfigured(t *testing.T) {
+func TestDefaultUpdatePreferences(t *testing.T) {
 	svc, _ := newTestService(t)
-
-	status := svc.CheckForUpdate()
-	if status.State != updateStateUnconfigured {
-		t.Fatalf("State = %q, want %q", status.State, updateStateUnconfigured)
-	}
-	if status.CurrentVersion != version.Version {
-		t.Errorf("CurrentVersion = %q, want %q", status.CurrentVersion, version.Version)
-	}
-	if status.Message == "" {
-		t.Error("unconfigured state must explain why")
+	prefs, err := svc.GetUpdatePreferences()
+	if err != nil || prefs.Repo != update.DefaultRepo || prefs.Channel != "beta" {
+		t.Fatalf("preferences = %+v, %v", prefs, err)
 	}
 }
 
@@ -80,7 +73,7 @@ func TestCheckForUpdateAvailable(t *testing.T) {
 	}
 	defer func() { newUpdateChecker = original }()
 
-	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name"}); err != nil {
+	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name", UpdateChannel: "stable"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -91,7 +84,7 @@ func TestCheckForUpdateAvailable(t *testing.T) {
 	if status.LatestVersion != "v99.0.0" {
 		t.Errorf("LatestVersion = %q, want v99.0.0", status.LatestVersion)
 	}
-	if status.ReleaseURL != "https://example.com/release" {
+	if status.ReleaseURL != "https://github.com/owner/name/releases/tag/v99.0.0" {
 		t.Errorf("ReleaseURL = %q", status.ReleaseURL)
 	}
 }
@@ -110,7 +103,7 @@ func TestCheckForUpdateUpToDate(t *testing.T) {
 	}
 	defer func() { newUpdateChecker = original }()
 
-	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name"}); err != nil {
+	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name", UpdateChannel: "stable"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -129,7 +122,7 @@ func TestCheckForUpdateNetworkError(t *testing.T) {
 	}
 	defer func() { newUpdateChecker = original }()
 
-	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name"}); err != nil {
+	if err := profile.SaveConfig(profile.Test, profile.Config{UpdateRepo: "owner/name", UpdateChannel: "stable"}); err != nil {
 		t.Fatal(err)
 	}
 

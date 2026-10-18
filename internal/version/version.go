@@ -1,8 +1,7 @@
 // Package version exposes the application version.
 //
-// The version follows Semantic Versioning (MAJOR.MINOR.PATCH). Keep it in sync
-// with build/config.yml, which drives the packaged application metadata.
+// 应用使用完整 SemVer；Windows 数字版本映射见 build/config.yml 和 docs/product/UPGRADE.md。
 package version
 
 // Version is the current application version.
-const Version = "0.1.0"
+const Version = "2.0.0-beta.1"

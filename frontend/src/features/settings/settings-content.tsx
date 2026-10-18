@@ -3,6 +3,7 @@ import { DataDirForm } from "./data-dir-form"
 import { DesktopBehavior } from "./desktop-behavior"
 import { RequestRetentionSettings } from "./request-retention"
 import { StorageOverview } from "./storage-overview"
+import { LegacyImportCard } from "./legacy-import-card"
 import type { AppPreferencesTab } from "./app-preferences-state"
 
 export function SettingsContent({
@@ -22,6 +23,7 @@ export function SettingsContent({
       {section === "storage" ? (
         <>
           <DataDirForm />
+          <LegacyImportCard />
           <StorageOverview />
         </>
       ) : null}

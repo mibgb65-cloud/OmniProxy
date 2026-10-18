@@ -106,6 +106,14 @@ export interface SubscriptionNotice {
 }
 
 /**
+ * UpdatePreferences 是已解析的渠道与仓库，不触发联网。
+ */
+export interface UpdatePreferences {
+    "channel": string;
+    "repo": string;
+}
+
+/**
  * UpdateStatus reports the result of an update check.
  */
 export interface UpdateStatus {

@@ -8,6 +8,12 @@ import { useUIStore } from "../../stores/ui-store"
 import { checkForUpdate, getRuntimeInfo, type RuntimeInfo } from "../../services/omniproxy"
 import { AboutView } from "./about-view"
 import { UpdateCard } from "./update-card"
+import { getUpdatePreferences, setUpdateChannel } from "../../services/updates"
+
+vi.mock("../../services/updates", () => ({
+  getUpdatePreferences: vi.fn(),
+  setUpdateChannel: vi.fn(),
+}))
 
 vi.mock("../../services/omniproxy", () => ({
   getAppInfo: vi.fn(),
@@ -54,6 +60,14 @@ beforeEach(() => {
   localStorage.clear()
   useUIStore.setState({ language: "zh" })
   vi.mocked(getRuntimeInfo).mockResolvedValue(runtimeInfo)
+  vi.mocked(getUpdatePreferences).mockResolvedValue({
+    channel: "stable",
+    repo: "mibgb65-cloud/OmniProxy",
+  })
+  vi.mocked(setUpdateChannel).mockResolvedValue({
+    channel: "beta",
+    repo: "mibgb65-cloud/OmniProxy",
+  })
 })
 
 describe("AboutView", () => {
@@ -99,6 +113,25 @@ describe("AboutView", () => {
 })
 
 describe("UpdateCard", () => {
+  it("保存 Beta 渠道后清除旧渠道结果，不自动联网检查", async () => {
+    const user = userEvent.setup()
+    vi.mocked(checkForUpdate).mockResolvedValue({
+      state: "up-to-date",
+      currentVersion: "2.0.0-beta.1",
+      latestVersion: "v1.3.1",
+      releaseUrl: "",
+      publishedAt: "",
+      message: "",
+    })
+    renderView(<UpdateCard />)
+    await user.click(await screen.findByRole("button", { name: "检查更新" }))
+    expect(await screen.findByText("已是最新版本。")).toBeInTheDocument()
+    await user.click(screen.getByRole("combobox", { name: "更新渠道" }))
+    await user.click(await screen.findByRole("option", { name: "正式版与 Beta 测试版" }))
+    await waitFor(() => expect(setUpdateChannel).toHaveBeenCalledWith("beta", expect.anything()))
+    await waitFor(() => expect(screen.queryByText("已是最新版本。")).not.toBeInTheDocument())
+    expect(checkForUpdate).toHaveBeenCalledTimes(1)
+  })
   it("reports an available update", async () => {
     const user = userEvent.setup()
     vi.mocked(checkForUpdate).mockResolvedValue({

@@ -14,7 +14,13 @@ func TestCompare(t *testing.T) {
 		{"1.1.0", "1.0.9", 1},
 		{"2.0.0", "1.9.9", 1},
 		{"1.2", "1.2.0", 0},
-		{"1.2.3-beta.1", "1.2.3", 0},
+		{"1.2.3-beta.1", "1.2.3", -1},
+		{"2.0.0-beta.2", "2.0.0-beta.1", 1},
+		{"2.0.0-beta.10", "2.0.0-beta.2", 1},
+		{"2.0.0-rc.1", "2.0.0-beta.9", 1},
+		{"2.0.0-alpha", "2.0.0-alpha.1", -1},
+		{"2.0.0-beta.1+build.2", "2.0.0-beta.1+build.1", 0},
+		{"2.0.0-beta.999999999999999999999", "2.0.0-beta.999999999999999999998", 1},
 		{"0.1.0", "0.1.0", 0},
 		{"0.10.0", "0.9.0", 1},
 	}
@@ -25,6 +31,19 @@ func TestCompare(t *testing.T) {
 		// The comparison must be antisymmetric for parseable versions.
 		if got := Compare(tt.b, tt.a); got != -tt.want {
 			t.Errorf("Compare(%q, %q) = %d, want %d", tt.b, tt.a, got, -tt.want)
+		}
+	}
+}
+
+func TestValidVersions(t *testing.T) {
+	for _, v := range []string{"v2.0.0-beta.1", "2.0.0", "2.0.0+ci.01"} {
+		if !Valid(v) {
+			t.Errorf("valid version rejected: %q", v)
+		}
+	}
+	for _, v := range []string{"1.2", "2.0.0-beta.01", "2.0.0-", "2.0.0+", "02.0.0", "2.0.0-hello_world", "2.0.0+one+two"} {
+		if Valid(v) {
+			t.Errorf("invalid version accepted: %q", v)
 		}
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -18,8 +19,13 @@ import (
 // defaultBaseURL is the public GitHub API root.
 const defaultBaseURL = "https://api.github.com"
 
+// DefaultRepo 是本项目正式发布仓库；本地无须额外配置即可检查更新。
+const DefaultRepo = "mibgb65-cloud/OmniProxy"
+
 // Release is the subset of the GitHub release payload we need.
 type Release struct {
+	Draft       bool      `json:"draft"`
+	Prerelease  bool      `json:"prerelease"`
 	TagName     string    `json:"tag_name"`
 	HTMLURL     string    `json:"html_url"`
 	PublishedAt time.Time `json:"published_at"`
@@ -28,6 +34,7 @@ type Release struct {
 
 // Checker queries the latest release of a GitHub repository.
 type Checker struct {
+	IncludePrereleases bool
 	// Repo is "owner/name", e.g. "mimanchi/OmniProxy".
 	Repo string
 	// BaseURL overrides the API root (tests inject a local server).
@@ -41,13 +48,14 @@ func NewChecker(repo string) *Checker {
 	return &Checker{Repo: repo}
 }
 
-// Latest returns the latest published release. Prereleases and drafts are
-// reported by the API's /releases/latest endpoint only when they are marked
-// as the latest release; no extra filtering is applied here.
+// Latest 按所选渠道查询；Beta 使用列表而不是只含正式版的 latest 端点。
 func (c *Checker) Latest(ctx context.Context) (Release, error) {
+	if c.IncludePrereleases {
+		return c.latestCandidate(ctx)
+	}
 	repo := strings.TrimSpace(c.Repo)
-	if repo == "" {
-		return Release{}, fmt.Errorf("update: repository is not configured")
+	if !validRepo(repo) {
+		return Release{}, fmt.Errorf("update: invalid repository")
 	}
 	base := c.BaseURL
 	if base == "" {
@@ -59,6 +67,8 @@ func (c *Checker) Latest(ctx context.Context) (Release, error) {
 	if client == nil {
 		client = &http.Client{Timeout: 10 * time.Second}
 	}
+	copyClient := *client
+	copyClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return Release{}, fmt.Errorf("update: build request: %w", err)
@@ -66,7 +76,7 @@ func (c *Checker) Latest(ctx context.Context) (Release, error) {
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", "OmniProxy")
 
-	resp, err := client.Do(req)
+	resp, err := copyClient.Do(req)
 	if err != nil {
 		return Release{}, fmt.Errorf("update: request %s: %w", endpoint, err)
 	}
@@ -79,12 +89,17 @@ func (c *Checker) Latest(ctx context.Context) (Release, error) {
 		return Release{}, fmt.Errorf("update: github api returned %s", resp.Status)
 	}
 
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
+	if err != nil || len(data) > maxResponseBytes {
+		return Release{}, fmt.Errorf("update: invalid release response")
+	}
 	var release Release
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return Release{}, fmt.Errorf("update: decode release: %w", err)
+	if err := json.Unmarshal(data, &release); err != nil {
+		return Release{}, fmt.Errorf("update: invalid release response")
 	}
-	if release.TagName == "" {
-		return Release{}, fmt.Errorf("update: release for %s has no tag", repo)
+	if !candidate(release, false) {
+		return Release{}, fmt.Errorf("update: invalid stable release")
 	}
+	release.HTMLURL = releaseURL(repo, release.TagName)
 	return release, nil
 }

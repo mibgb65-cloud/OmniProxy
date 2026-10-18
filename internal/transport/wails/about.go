@@ -14,14 +14,13 @@ import (
 
 // Update check states returned by AppService.CheckForUpdate.
 const (
-	updateStateUpToDate     = "up-to-date"
-	updateStateAvailable    = "available"
-	updateStateUnconfigured = "unconfigured"
-	updateStateError        = "error"
-	updateCheckTimeout      = 15 * time.Second
-	appName                 = "OmniProxy"
-	appDescription          = "Local AI API gateway and multi-account management tool"
-	wailsModulePath         = "github.com/wailsapp/wails/v3"
+	updateStateUpToDate  = "up-to-date"
+	updateStateAvailable = "available"
+	updateStateError     = "error"
+	updateCheckTimeout   = 15 * time.Second
+	appName              = "OmniProxy"
+	appDescription       = "Local AI API gateway and multi-account management tool"
+	wailsModulePath      = "github.com/wailsapp/wails/v3"
 )
 
 // newUpdateChecker builds the release checker for a repository. It is a
@@ -78,9 +77,7 @@ type UpdateStatus struct {
 	Message        string `json:"message"`
 }
 
-// CheckForUpdate compares the running version against the latest GitHub
-// release of the configured repository. When no repository is configured it
-// returns the "unconfigured" state instead of pretending to check.
+// CheckForUpdate 按用户选择的渠道查询正式仓库；配置为空时采用项目默认值。
 func (s *AppService) CheckForUpdate() UpdateStatus {
 	cfg, err := profile.LoadConfig(s.prof.Kind)
 	if err != nil {
@@ -91,18 +88,19 @@ func (s *AppService) CheckForUpdate() UpdateStatus {
 		}
 	}
 
-	checker := newUpdateChecker(cfg.UpdateRepo)
+	prefs := updatePreferences(cfg, version.Version)
+	if prefs.Channel != "stable" && prefs.Channel != "beta" {
+		return UpdateStatus{State: updateStateError, CurrentVersion: version.Version, Message: "update: invalid channel"}
+	}
+	checker := newUpdateChecker(prefs.Repo)
+	checker.IncludePrereleases = prefs.Channel == "beta"
 	ctx, cancel := context.WithTimeout(context.Background(), updateCheckTimeout)
 	defer cancel()
 
 	release, err := checker.Latest(ctx)
 	if err != nil {
-		state := updateStateError
-		if cfg.UpdateRepo == "" {
-			state = updateStateUnconfigured
-		}
 		return UpdateStatus{
-			State:          state,
+			State:          updateStateError,
 			CurrentVersion: version.Version,
 			Message:        err.Error(),
 		}

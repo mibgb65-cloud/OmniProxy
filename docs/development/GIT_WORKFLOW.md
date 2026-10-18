@@ -81,5 +81,4 @@ If the working tree contains changes that do not belong to the current task:
 
 ## Versioning
 
-Semantic Versioning (`MAJOR.MINOR.PATCH`). The current version lives in
-`internal/version` and `build/config.yml`; keep them in sync.
+应用和前端包遵循 Semantic Versioning，完整预发布版本保存在 `internal/version` 与 `frontend/package.json`。Windows `build/config.yml`／NSIS 使用数字基础版本，PE 数字资源采用四段数字，`build/windows/info.json` 的 ProductVersion 保留完整预发布字符串。发布时统一这些版本映射，不能将 Beta 后缀写入数字版本字段；详见 `docs/product/UPGRADE.md`。

@@ -17,5 +17,6 @@ export type {
     StorageInfo,
     StorageItem,
     SubscriptionNotice,
+    UpdatePreferences,
     UpdateStatus
 } from "./models.js";

@@ -4,11 +4,11 @@
 
 ## Current Version
 
-0.1.0 — see `internal/version` and `build/config.yml`.
+2.0.0-beta.1 — 应用／前端使用完整 SemVer，Windows 安装器数字版本为 2.0.0；详见 `product/UPGRADE.md`。
 
 ## In Progress
 
-暂无。
+- [TASK-20261018-007](../tasks/active/TASK-20261018-007-v1-import-and-beta-updates.md)：旧版只读 API Key 导入、快照复核／幂等重试及正式／Beta 更新渠道已完成。完整质量门／571 项前端测试、Windows 构建、隔离原生与安装器编译通过，待提交归档；应用版本已同步 2.0.0-beta.1。
 
 ## Recently Completed
 

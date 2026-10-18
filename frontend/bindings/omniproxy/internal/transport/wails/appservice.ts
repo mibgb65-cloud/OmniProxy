@@ -35,6 +35,9 @@ import * as gateway$0 from "../../application/gateway/models.js";
 import * as googlequota$0 from "../../application/googlequota/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as legacyimport$0 from "../../application/legacyimport/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as modelcatalog$0 from "../../application/modelcatalog/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -194,9 +197,7 @@ export function AppInfo(): $CancellablePromise<$models.AppInfo> {
 }
 
 /**
- * CheckForUpdate compares the running version against the latest GitHub
- * release of the configured repository. When no repository is configured it
- * returns the "unconfigured" state instead of pretending to check.
+ * CheckForUpdate 按用户选择的渠道查询正式仓库；配置为空时采用项目默认值。
  */
 export function CheckForUpdate(): $CancellablePromise<$models.UpdateStatus> {
     return $Call.ByID(649689971);
@@ -359,6 +360,13 @@ export function GetStepFunSettings(): $CancellablePromise<routing$0.StepFunSetti
 }
 
 /**
+ * GetUpdatePreferences 返回更新选择；Beta 安装默认继续接收 Beta，明确选择始终优先。
+ */
+export function GetUpdatePreferences(): $CancellablePromise<$models.UpdatePreferences> {
+    return $Call.ByID(3434552180);
+}
+
+/**
  * GoogleResources 仅读取项目绑定与本机观察，不调用推理或冒充官方剩余查询。
  */
 export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
@@ -377,6 +385,13 @@ export function GoogleSubscriptionModels(id: string): $CancellablePromise<antigr
  */
 export function GoogleSubscriptionQuota(id: string): $CancellablePromise<antigravity$0.Quota> {
     return $Call.ByID(1926496089, id);
+}
+
+/**
+ * ImportLegacyData 必须携带刚预览的源快照，避免导入用户没有确认的变化。
+ */
+export function ImportLegacyData(directory: string, snapshot: string): $CancellablePromise<legacyimport$0.Result> {
+    return $Call.ByID(3236443243, directory, snapshot);
 }
 
 /**
@@ -490,6 +505,13 @@ export function OpenStepConsole(id: string): $CancellablePromise<void> {
  */
 export function Ping(): $CancellablePromise<string> {
     return $Call.ByID(77535937);
+}
+
+/**
+ * PreviewLegacyImport 仅按用户点击读取旧版固定文件，返回无凭据的预览。
+ */
+export function PreviewLegacyImport(directory: string): $CancellablePromise<legacyimport$0.Preview> {
+    return $Call.ByID(2554308181, directory);
 }
 
 /**
@@ -649,6 +671,13 @@ export function SetRouteEnabled(id: string, enabled: boolean): $CancellablePromi
  */
 export function SetStepFunPreferredBillingMode(mode: string): $CancellablePromise<routing$0.StepFunSettings> {
     return $Call.ByID(1619912929, mode);
+}
+
+/**
+ * SetUpdateChannel 保存用户选择，复用设置锁避免覆盖目录／关闭行为配置。
+ */
+export function SetUpdateChannel(channel: string): $CancellablePromise<$models.UpdatePreferences> {
+    return $Call.ByID(3850489597, channel);
 }
 
 /**

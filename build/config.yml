@@ -11,7 +11,7 @@ info:
   description: "Local AI API gateway and multi-account management tool"
   copyright: "(c) 2026, OmniProxy"
   comments: "OmniProxy - Local First AI Gateway"
-  version: "0.1.0"
+  version: "2.0.0"
 
 # Dev mode configuration
 dev_mode:

@@ -33,6 +33,16 @@ vi.mock("../../services/omniproxy", () => ({
   checkForUpdate: vi.fn(),
 }))
 vi.mock("@wailsio/runtime", () => ({ Clipboard: { SetText: vi.fn() } }))
+vi.mock("../../services/updates", () => ({
+  getUpdatePreferences: vi
+    .fn()
+    .mockResolvedValue({ channel: "stable", repo: "mibgb65-cloud/OmniProxy" }),
+  setUpdateChannel: vi.fn(),
+}))
+vi.mock("../../services/legacy-import", () => ({
+  previewLegacyImport: vi.fn(),
+  importLegacyData: vi.fn(),
+}))
 
 export function resetPreferences() {
   vi.clearAllMocks()

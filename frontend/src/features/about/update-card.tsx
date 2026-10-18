@@ -3,11 +3,14 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import type { UpdateStatus } from "../../services/omniproxy"
 import { useCheckForUpdate, useRuntimeInfo } from "./use-about"
+import { SelectField } from "../../components/ui/select-field"
+import { useUpdateChannel } from "./use-update-channel"
 
 export function UpdateCard() {
   const { t } = useTranslation()
   const { data: info } = useRuntimeInfo()
   const check = useCheckForUpdate()
+  const { preferences, save } = useUpdateChannel(() => check.reset())
 
   const status: UpdateStatus | undefined = check.data
 
@@ -18,6 +21,30 @@ export function UpdateCard() {
         <CardDescription>{t("about.update.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 px-5 text-sm">
+        <div className="space-y-2">
+          <label htmlFor="update-channel" className="font-medium">
+            {t("updates.channel")}
+          </label>
+          <SelectField
+            id="update-channel"
+            className="max-w-xs"
+            value={preferences.data?.channel ?? "stable"}
+            disabled={
+              preferences.isPending || preferences.isError || save.isPending || check.isPending
+            }
+            onValueChange={(value) => save.mutate(value)}
+            options={[
+              { value: "stable", label: t("updates.stable") },
+              { value: "beta", label: t("updates.beta") },
+            ]}
+          />
+          <p className="text-muted-foreground">{t("updates.manual")}</p>
+          {preferences.isError || save.isError ? (
+            <p role="alert" className="text-destructive">
+              {t("updates.settingsFailed")}
+            </p>
+          ) : null}
+        </div>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-muted-foreground">
             {t("about.update.currentVersion", { version: info?.version ?? "…" })}
@@ -25,7 +52,9 @@ export function UpdateCard() {
           <Button
             size="sm"
             variant="outline"
-            disabled={check.isPending}
+            disabled={
+              check.isPending || preferences.isPending || preferences.isError || save.isPending
+            }
             onClick={() => check.mutate()}
           >
             {check.isPending ? t("about.update.checking") : t("about.update.check")}

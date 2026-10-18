@@ -9,6 +9,10 @@ import (
 
 // Create saves an API Key in protected storage and only its reference in SQLite.
 func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
+	return s.create(ctx, input, "", true)
+}
+
+func (s *Service) create(ctx context.Context, input CreateInput, importedID string, enabled bool) (Item, error) {
 	if err := validateID(input.ProviderID); err != nil {
 		return Item{}, err
 	}
@@ -56,12 +60,15 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Item, error) {
 	if err != nil {
 		return Item{}, fmt.Errorf("account: generate ID: %w", err)
 	}
+	if importedID != "" {
+		id = importedID
+	}
 	ref, err := s.store.Put(key)
 	if err != nil {
 		return Item{}, fmt.Errorf("account: protect API Key: %w", err)
 	}
 	timestamp := now()
-	item := Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: true, CreatedAt: timestamp, UpdatedAt: timestamp, AuthMethod: AuthAPIKey}
+	item := Item{ID: id, ProviderID: input.ProviderID, Name: name, Enabled: enabled, CreatedAt: timestamp, UpdatedAt: timestamp, AuthMethod: AuthAPIKey}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return Item{}, errors.Join(err, s.store.Delete(ref))
