@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -48,7 +48,7 @@ In Progress
 
 ## Documentation
 
-完成时更新 CURRENT；无产品、架构或接口变更。
+已更新 CURRENT；无产品、架构或接口变更。
 
 ## Deviations
 
@@ -56,8 +56,12 @@ In Progress
 
 ## Git
 
-待提交。
+实现提交：`c2b317e2257fc0e50687b2df2befdc0b8b8b26ee` — `fix(frontend): 增强时间范围选择器的选中态`。任务记录随后归档，未推送。
 
 ## Result
 
 两个时间选择器的当前范围已清晰显示，正常开发窗口已生效，深浅主题、窄窗口和完整质量门验证通过。
+
+## Completed
+
+2026-10-18（Asia/Singapore）
