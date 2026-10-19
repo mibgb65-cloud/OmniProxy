@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -38,7 +39,7 @@ type Quotas interface {
 
 // Sender 固定使用指定账号发送一次最小请求。
 type Sender interface {
-	Send(context.Context, account.Item) error
+	Send(context.Context, account.Item, SendPlan) error
 }
 
 // Status 只返回检测计数和安全错误，不暴露身份、凭据、提示词或原始响应。
@@ -55,6 +56,7 @@ type Status struct {
 
 // Service 将串行检测、持久去重和生命周期统一在后台，前端只负责保存授权。
 type Service struct {
+	log          *slog.Logger
 	db           *sql.DB
 	accounts     Accounts
 	providers    Providers
@@ -86,8 +88,14 @@ var ErrAlreadyActive = errors.New("activation: already_active")
 // ErrNotSent 表示失败发生在 HTTP 发送之前，可安全释放本次登记供后续检查。
 var ErrNotSent = errors.New("activation: not_sent")
 
+// ErrAwaitingQuota 表示发送前时序证据不足，只复查而非报告网络／授权失败。
+var ErrAwaitingQuota = errors.New("activation: awaiting_quota")
+
 // Status 返回线程安全的最近检测结果。
 func (s *Service) Status() Status { s.mu.Lock(); defer s.mu.Unlock(); return s.status }
 
 // OnChange 设置只包含变更信号的通知，避免将账号身份写入事件。
 func (s *Service) OnChange(callback func()) { s.mu.Lock(); defer s.mu.Unlock(); s.onChange = callback }
+
+// SetLogger 安装统一脱敏日志器；通常在后台启动前调用。
+func (s *Service) SetLogger(log *slog.Logger) { s.mu.Lock(); defer s.mu.Unlock(); s.log = log }

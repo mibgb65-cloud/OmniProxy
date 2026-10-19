@@ -38,12 +38,19 @@ func NewMessageSender(accounts Accounts, providers Providers, access Access, cli
 }
 
 // Send 发送前复查额度与身份，只请求当前账号官方目录中的模型。
-func (s *MessageSender) Send(ctx context.Context, expected account.Item) error {
+func (s *MessageSender) Send(ctx context.Context, expected account.Item, plan SendPlan) error {
+	if err := waitForPreflight(ctx, plan); err != nil {
+		return err
+	}
 	fresh, err := s.access.ReadQuota(ctx, expected.ID)
 	if err != nil {
 		return errors.Join(ErrNotSent, failure("quota_unavailable"))
 	}
-	if !NeedsActivation(fresh) {
+	needed, err := plannedNeed(fresh, plan)
+	if err != nil {
+		return err
+	}
+	if !needed {
 		return ErrAlreadyActive
 	}
 	models, err := s.access.Models(ctx, expected.ID)

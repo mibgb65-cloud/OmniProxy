@@ -4,11 +4,11 @@
 
 ## Current Version
 
-2.0.0-beta.4 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.4)，修复真实订阅 SSE 缺失 Content-Type 导致的误拒绝。两模型／两种传输及双 Codex 内核六次真实请求成功；CI／Release／安装生命周期／真实更新发现与公开下载 SHA256 均通过。Windows 数字版本继续为 2.0.0.0，用户已升级运行 Beta.4；本地图片接入修复另见 TASK-020，尚未发布。
+2.0.0-beta.4 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.4)，修复真实订阅 SSE 缺失 Content-Type 导致的误拒绝。两模型／两种传输及双 Codex 内核六次真实请求成功；CI／Release／安装生命周期／真实更新发现与公开下载 SHA256 均通过。Windows 数字版本继续为 2.0.0.0，用户已升级运行 Beta.4；本地图片接入（TASK-020）与额度自动激活（TASK-20261019-001）修复尚未发布。
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-001](../tasks/active/TASK-20261019-001-fix-codex-quota-auto-activation.md)：修复滑动占位重置目标被当成已激活。指定账号只读采样已确认，补充双观测、迁移 034 与原账号发送前复查；既有发送登记保留，回归十轮、前端 6 项及完整质量门／576 测试与 Windows 构建通过；待归档，尚未触发真实激活。
 
 ## Recently Completed
 

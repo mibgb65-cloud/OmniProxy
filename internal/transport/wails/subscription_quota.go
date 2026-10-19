@@ -14,7 +14,7 @@ func (s *AppService) SubscriptionQuota(id string) (subscription.Quota, error) {
 	ctx, cancel := subscriptionContext()
 	defer cancel()
 	quota, err := service.ReadQuota(ctx, id)
-	if err == nil && s.quotaActivation != nil && quotaactivation.NeedsActivation(quota) {
+	if err == nil && s.quotaActivation != nil && quotaactivation.NeedsObservation(quota) {
 		s.quotaActivation.Wake(false)
 	}
 	return quota, err

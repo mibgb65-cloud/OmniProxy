@@ -13,7 +13,7 @@ func TestLifecycleStartsOnceAndDisableCancelsCurrentBatch(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
 	started := make(chan struct{})
-	f.service.sender = sendFunc(func(ctx context.Context, _ account.Item) error {
+	f.service.sender = sendFunc(func(ctx context.Context, _ account.Item, _ SendPlan) error {
 		f.sends.Add(1)
 		close(started)
 		<-ctx.Done()

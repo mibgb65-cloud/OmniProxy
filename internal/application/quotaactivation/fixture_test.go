@@ -53,9 +53,11 @@ func (q *testQuotas) ReadQuota(context.Context, string) (subscription.Quota, err
 }
 func (q *testQuotas) set(quota subscription.Quota) { q.mu.Lock(); defer q.mu.Unlock(); q.quota = quota }
 
-type sendFunc func(context.Context, account.Item) error
+type sendFunc func(context.Context, account.Item, SendPlan) error
 
-func (f sendFunc) Send(ctx context.Context, item account.Item) error { return f(ctx, item) }
+func (f sendFunc) Send(ctx context.Context, item account.Item, plan SendPlan) error {
+	return f(ctx, item, plan)
+}
 
 type activationFixture struct {
 	db        *sql.DB
@@ -88,7 +90,7 @@ func newFixture(t *testing.T) *activationFixture {
 		t.Fatal(err)
 	}
 	f := &activationFixture{db: db, accounts: &testAccounts{item: account.Item{ID: "account-one", ProviderID: "builtin_openai", Enabled: true, AuthMethod: account.AuthSubscription, AuthState: "authenticated", AuthAccountID: "official-one", AuthEmail: "one@example.test"}}, providers: &testProviders{true}, quotas: &testQuotas{quota: unstartedQuota()}}
-	f.service = New(db, f.accounts, f.providers, f.quotas, sendFunc(func(_ context.Context, item account.Item) error {
+	f.service = New(db, f.accounts, f.providers, f.quotas, sendFunc(func(_ context.Context, item account.Item, _ SendPlan) error {
 		if item.ID != "account-one" || item.AuthAccountID != "official-one" {
 			t.Error("wrong account")
 		}

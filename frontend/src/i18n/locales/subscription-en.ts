@@ -67,9 +67,9 @@ export const subscriptionEn = {
     "Automatic activation settings were not saved. Your previous settings remain active. Try again.",
   "subscription.activation.checking": "Checking and rechecking quota windows…",
   "subscription.activation.summary":
-    "Last check: {{checked}} accounts, {{sent}} messages sent, {{activated}} accounts confirmed active.",
+    "Last check: {{checked}} accounts, {{sent}} messages sent, {{activated}} accounts confirmed with timers running.",
   "subscription.activation.pending":
-    "Some windows await official confirmation. They will be rechecked without resending.",
+    "Some windows are still being observed or await confirmation. Requests already sent are only rechecked, never resent automatically.",
   "subscription.activation.failed":
     "Some checks or activations could not finish. Check account authorization and network.",
   "subscription.activation.statusFailed": "Automatic activation status is temporarily unavailable.",

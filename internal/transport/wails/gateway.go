@@ -57,6 +57,7 @@ func (s *AppService) initGateway() {
 		accounts := account.NewService(s.db, store)
 		providers := provider.NewService(s.db)
 		s.quotaActivation = quotaactivation.New(s.db, accounts, providers, subscription, quotaactivation.NewMessageSender(accounts, providers, subscription, nil))
+		s.quotaActivation.SetLogger(s.log)
 		s.quotaActivation.OnChange(func() {
 			s.subscription.mu.Lock()
 			emit := s.subscription.emitQuota

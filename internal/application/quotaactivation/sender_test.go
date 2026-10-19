@@ -18,6 +18,7 @@ import (
 
 type testAccess struct {
 	quota      subscription.Quota
+	readHook   func() subscription.Quota
 	expectedID string
 	officialID string
 	token      []byte
@@ -25,6 +26,9 @@ type testAccess struct {
 }
 
 func (a *testAccess) ReadQuota(context.Context, string) (subscription.Quota, error) {
+	if a.readHook != nil {
+		return a.readHook(), nil
+	}
 	return a.quota, nil
 }
 func (a *testAccess) Models(_ context.Context, id string) ([]codex.Model, error) {
@@ -74,7 +78,7 @@ func TestMinimalMessageUsesOriginalAccountAndNoTools(t *testing.T) {
 		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/event-stream"}}, Body: io.NopCloser(strings.NewReader("data: {\"type\":\"response.completed\",\"response\":{\"status\":\"completed\"}}\n\n"))}, nil
 	}))
 	sender := NewMessageSender(f.accounts, f.providers, access, client)
-	if err := sender.Send(context.Background(), f.accounts.item); err != nil {
+	if err := sender.Send(context.Background(), f.accounts.item, SendPlan{Claimed: []string{"five_hour", "weekly"}}); err != nil {
 		t.Fatal(err)
 	}
 	if calls != 1 || access.tokenCalls != 1 {
@@ -86,7 +90,7 @@ func TestMinimalMessageUsesOriginalAccountAndNoTools(t *testing.T) {
 		}
 	}
 	access.quota = activeQuota()
-	if err := sender.Send(context.Background(), f.accounts.item); !errors.Is(err, ErrAlreadyActive) {
+	if err := sender.Send(context.Background(), f.accounts.item, SendPlan{Claimed: []string{"five_hour", "weekly"}}); !errors.Is(err, ErrAlreadyActive) {
 		t.Fatal("active account not skipped")
 	}
 	if calls != 1 || access.tokenCalls != 1 {
@@ -94,7 +98,7 @@ func TestMinimalMessageUsesOriginalAccountAndNoTools(t *testing.T) {
 	}
 	access.quota = unstartedQuota()
 	access.officialID = "other"
-	if err := sender.Send(context.Background(), f.accounts.item); err == nil || calls != 1 {
+	if err := sender.Send(context.Background(), f.accounts.item, SendPlan{Claimed: []string{"five_hour", "weekly"}}); err == nil || calls != 1 {
 		t.Fatal("mismatched official identity used")
 	}
 }

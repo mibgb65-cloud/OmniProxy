@@ -58,8 +58,9 @@ export const subscriptionZh = {
   "subscription.activation.saveFailed": "自动激活设置未保存，原设置仍生效，请重试。",
   "subscription.activation.checking": "正在检测并复查额度窗口…",
   "subscription.activation.summary":
-    "最近检查 {{checked}} 个账号，发送 {{sent}} 条消息，确认激活 {{activated}} 个账号。",
-  "subscription.activation.pending": "部分窗口尚待官方确认，后续只复查，不重复发送。",
+    "最近检查 {{checked}} 个账号，发送 {{sent}} 条消息，确认 {{activated}} 个账号窗口已开始计时。",
+  "subscription.activation.pending":
+    "部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。",
   "subscription.activation.failed": "部分账号检测或激活未完成，请检查账号授权与网络。",
   "subscription.activation.statusFailed": "暂时无法读取自动激活状态。",
   "subscription.quota.title": "额度 / 余额",

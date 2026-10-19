@@ -66,7 +66,7 @@ it("默认关闭，切换开关直接保存并显示检测状态，无需二次�
   await waitFor(() => expect(vi.mocked(setCodexQuotaAutoActivation).mock.calls[0]?.[0]).toBe(true))
   expect(setCodexQuotaAutoActivation).toHaveBeenCalledTimes(1)
   expect(
-    await screen.findByText("最近检查 2 个账号，发送 1 条消息，确认激活 1 个账号。"),
+    await screen.findByText("最近检查 2 个账号，发送 1 条消息，确认 1 个账号窗口已开始计时。"),
   ).toBeInTheDocument()
   expect(toggle).toBeChecked()
   expect(screen.queryByRole("button")).not.toBeInTheDocument()
@@ -108,7 +108,7 @@ it("读取已保存授权，明确显示待复查与失败，不宣称未知窗�
   })
   renderSettings()
   expect(
-    await screen.findByText("部分窗口尚待官方确认，后续只复查，不重复发送。"),
+    await screen.findByText("部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。"),
   ).toBeInTheDocument()
   expect(screen.getByText("部分账号检测或激活未完成，请检查账号授权与网络。")).toBeInTheDocument()
   act(() => useUIStore.setState({ language: "en" }))
@@ -162,4 +162,31 @@ it("保存期间显示进度，拒绝重复切换且保留已确认值", async (
   finish()
   await waitFor(() => expect(toggle).toBeChecked())
   await waitFor(() => expect(toggle).toBeEnabled())
+})
+
+it("首次占位观测显示待确认，不把零发送显示成已激活", async () => {
+  vi.mocked(getCodexSettings).mockResolvedValue({
+    webSocketEnabled: true,
+    autoQuotaActivation: true,
+  })
+  vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
+    running: false,
+    checked: 1,
+    sent: 0,
+    activated: 0,
+    failed: 0,
+    pending: 1,
+    updatedAt: "now",
+    errorCode: "",
+  })
+  renderSettings()
+  expect(
+    await screen.findByText("最近检查 1 个账号，发送 0 条消息，确认 0 个账号窗口已开始计时。"),
+  ).toBeInTheDocument()
+  expect(
+    screen.getByText("部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。"),
+  ).toBeInTheDocument()
+  expect(
+    screen.queryByText("部分账号检测或激活未完成，请检查账号授权与网络。"),
+  ).not.toBeInTheDocument()
 })

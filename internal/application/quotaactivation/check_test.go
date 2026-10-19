@@ -98,7 +98,10 @@ func ptr(value string) *string { return &value }
 func TestUncertainResultSurvivesRestartAndConcurrentChecksDoNotResend(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
-	sender := sendFunc(func(context.Context, account.Item) error { f.sends.Add(1); return errors.New("private request error") })
+	sender := sendFunc(func(context.Context, account.Item, SendPlan) error {
+		f.sends.Add(1)
+		return errors.New("private request error")
+	})
 	f.service.sender = sender
 	var wg sync.WaitGroup
 	for range 5 {
@@ -126,9 +129,21 @@ func TestUncertainResultSurvivesRestartAndConcurrentChecksDoNotResend(t *testing
 func TestNewObservedQuotaCycleCanBeActivatedOnce(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
+	now := time.Now().UTC().Truncate(time.Second)
+	f.service.now = func() time.Time { return now }
+	f.service.sender = sendFunc(func(context.Context, account.Item, SendPlan) error {
+		f.sends.Add(1)
+		fresh := activeQuota()
+		fresh.FiveHour.ResetsAt = now.Add(5 * time.Hour).Format(time.RFC3339)
+		fresh.Weekly.ResetsAt = now.Add(7 * 24 * time.Hour).Format(time.RFC3339)
+		f.quotas.set(fresh)
+		return nil
+	})
 	f.service.Check(context.Background())
 	active := activeQuota()
-	active.FiveHour.ResetsAt = time.Now().Add(-time.Second).UTC().Format(time.RFC3339)
+	active.FiveHour.ResetsAt = now.Add(5 * time.Hour).Format(time.RFC3339)
+	// 推进真实周期时钟，而不是将已确认目标倒改成更早的过期快照。
+	now = now.Add(5*time.Hour + time.Second)
 	f.quotas.set(active)
 	f.service.Check(context.Background())
 	pending := unstartedQuota()
@@ -160,7 +175,7 @@ func TestKnownPreparationFailureCanRetryWithoutDuplicateMessages(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
 	sender := f.service.sender
-	f.service.sender = sendFunc(func(context.Context, account.Item) error { return ErrNotSent })
+	f.service.sender = sendFunc(func(context.Context, account.Item, SendPlan) error { return ErrNotSent })
 	f.service.Check(context.Background())
 	if f.sends.Load() != 0 {
 		t.Fatal("preparation failure sent a message")
@@ -191,7 +206,7 @@ func TestIdentityChangeBeforeSendIsRejected(t *testing.T) {
 func TestDelayedQuotaConfirmationUpdatesWithoutResending(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
-	f.service.sender = sendFunc(func(context.Context, account.Item) error { f.sends.Add(1); return nil })
+	f.service.sender = sendFunc(func(context.Context, account.Item, SendPlan) error { f.sends.Add(1); return nil })
 	notifications := 0
 	f.service.OnChange(func() { notifications++ })
 	f.service.Check(context.Background())
