@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-002](../tasks/active/TASK-20261019-002-publish-v2-beta5.md)：汇总 main 中已完成的图片输入与额度自动激活修复，准备 v2.0.0-beta.5；完整质量门、隔离安装、CI／Release 与公开更新验收待完成。不自动安装或重启当前软件。
 
 ## Recently Completed
 
