@@ -15,7 +15,24 @@ import (
 
 // Start 仅使用后台已经确认的目标；旧浮窗不能下载另一个新版本。
 func (s *Service) Start(expected string) (Snapshot, error) {
+	return s.start(expected, false)
+}
+
+// StartAutomatic 只启动可安装的新候选；同版本取消、失败或已缓存后不自动重试。
+func (s *Service) StartAutomatic() (Snapshot, error) {
+	return s.start("", true)
+}
+
+func (s *Service) start(expected string, automatic bool) (Snapshot, error) {
 	s.mu.Lock()
+	if automatic {
+		if !s.opts.CanInstall || s.state.CheckState != "available" || s.selected == nil ||
+			(s.state.Download.Version == s.selected.Version && s.state.Download.State != "idle") {
+			s.mu.Unlock()
+			return s.Snapshot(), nil
+		}
+		expected = s.selected.Version
+	}
 	if s.closed || s.busyLocked() || s.selected == nil || s.selected.Version != expected || version.Compare(expected, s.opts.Version) <= 0 {
 		s.mu.Unlock()
 		return s.Snapshot(), errors.New("update: target_changed")

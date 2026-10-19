@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/application/updater"
 	"omniproxy/internal/infrastructure/appinstall"
 	"omniproxy/internal/infrastructure/update"
+	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/version"
 )
 
@@ -104,11 +105,41 @@ func (s *AppService) startUpdateChecks() {
 				if err == nil && prefs.AutoCheck {
 					service, serviceErr := s.applicationUpdater()
 					if serviceErr == nil && !service.Busy() {
-						service.Check(ctx)
+						s.checkApplicationUpdate(ctx, service)
 					}
 				}
 				timer.Reset(6 * time.Hour)
 			}
 		}
 	}()
+}
+
+// 检查后重新读取用户选择，关闭开关不会被检查开始时的旧配置覆盖。
+func (s *AppService) checkApplicationUpdate(ctx context.Context, service *updater.Service) (updater.Snapshot, error) {
+	state, err := service.Check(ctx)
+	if err != nil || !s.prof.IsProduction() {
+		return state, err
+	}
+	// 与偏好写入共用锁，关闭开关或切换渠道不能夹在复核与启动之间。
+	s.settingsMu.Lock()
+	defer s.settingsMu.Unlock()
+	cfg, err := profile.LoadConfig(s.prof.Kind)
+	if err != nil {
+		s.log.Warn("automatic update download settings unavailable", "module", "updater", "code", "settings_failed")
+		return state, nil
+	}
+	prefs := updatePreferences(cfg, version.Version)
+	if !prefs.AutoDownload {
+		return state, nil
+	}
+	if (prefs.Channel != "stable" && prefs.Channel != "beta") || service.Configure(prefs.Repo, prefs.Channel == "beta") != nil {
+		s.log.Warn("automatic update download configuration changed", "module", "updater", "code", "configuration_changed")
+		return state, nil
+	}
+	state, err = service.StartAutomatic()
+	if err != nil {
+		// 下载错误留在共享快照中展示，不把成功的版本检查误报为检查失败。
+		s.log.Warn("automatic update download not started", "module", "updater", "code", "download_start_failed")
+	}
+	return state, nil
 }

@@ -53,6 +53,7 @@ function PreferencesWindow() {
   const tab = useAppPreferences((state) => state.tab)
   const setTab = useAppPreferences((state) => state.setTab)
   const activeTab = useRef<HTMLButtonElement>(null)
+  const [toastContainer, setToastContainer] = useState<HTMLDivElement | null>(null)
   const [visited, setVisited] = useState<AppPreferencesTab[]>([tab])
   const currentSection = SECTIONS.find((section) => section.value === tab)!
   // 已访问页签保留表单和异步反馈，打开窗口时才挂载，关闭后释放内容。
@@ -61,6 +62,7 @@ function PreferencesWindow() {
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
       <Dialog.Content
+        ref={setToastContainer}
         className="bg-background text-foreground fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none"
         onOpenAutoFocus={(event) => {
           event.preventDefault()
@@ -131,7 +133,7 @@ function PreferencesWindow() {
                   {value === "about" ? (
                     <AboutView embedded />
                   ) : value === "updates" ? (
-                    <UpdateCard />
+                    <UpdateCard toastContainer={toastContainer} />
                   ) : (
                     <SettingsContent section={value} />
                   )}

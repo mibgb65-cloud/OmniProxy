@@ -89,7 +89,7 @@ func (s *AppService) CheckForUpdate() UpdateStatus {
 
 	ctx, cancel := context.WithTimeout(context.Background(), updateCheckTimeout)
 	defer cancel()
-	state, err := service.Check(ctx)
+	state, err := s.checkApplicationUpdate(ctx, service)
 	if err != nil {
 		return UpdateStatus{
 			State:          updateStateError,

@@ -3,6 +3,7 @@ import {
   getUpdatePreferences,
   setUpdateChannel,
   setAutomaticUpdateCheck,
+  setAutomaticUpdateDownload,
 } from "../../services/updates"
 
 export function useUpdateChannel(onChanged: () => void) {
@@ -20,5 +21,9 @@ export function useUpdateChannel(onChanged: () => void) {
     mutationFn: setAutomaticUpdateCheck,
     onSuccess: (data) => client.setQueryData(["update-preferences"], data),
   })
-  return { preferences, save, automatic }
+  const download = useMutation({
+    mutationFn: setAutomaticUpdateDownload,
+    onSuccess: (data) => client.setQueryData(["update-preferences"], data),
+  })
+  return { preferences, save, automatic, download }
 }

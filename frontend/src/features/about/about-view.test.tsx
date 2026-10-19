@@ -14,6 +14,7 @@ vi.mock("../../services/updates", () => ({
   getUpdatePreferences: vi.fn(),
   setUpdateChannel: vi.fn(),
   setAutomaticUpdateCheck: vi.fn(),
+  setAutomaticUpdateDownload: vi.fn(),
   getApplicationUpdate: vi.fn().mockResolvedValue({
     currentVersion: "2.0.0-beta.1",
     checkState: "idle",
@@ -76,11 +77,13 @@ beforeEach(() => {
     channel: "stable",
     repo: "mibgb65-cloud/OmniProxy",
     autoCheck: true,
+    autoDownload: false,
   })
   vi.mocked(setUpdateChannel).mockResolvedValue({
     channel: "beta",
     repo: "mibgb65-cloud/OmniProxy",
     autoCheck: true,
+    autoDownload: false,
   })
 })
 
@@ -203,5 +206,10 @@ describe("UpdateCard", () => {
     await user.click(await screen.findByRole("button", { name: "检查更新" }))
 
     expect(await screen.findByText("已是最新版本。")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "关闭更新提示" }))
+    expect(screen.queryByRole("button", { name: "关闭更新提示" })).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "检查更新" }))
+    expect(await screen.findByRole("button", { name: "关闭更新提示" })).toBeInTheDocument()
+    expect(checkForUpdate).toHaveBeenCalledTimes(2)
   })
 })

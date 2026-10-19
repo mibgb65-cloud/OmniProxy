@@ -25,3 +25,7 @@ export function installApplicationUpdate(version: string) {
 export function setAutomaticUpdateCheck(enabled: boolean) {
   return AppService.SetAutomaticUpdateCheck(enabled)
 }
+
+export async function setAutomaticUpdateDownload(enabled: boolean) {
+  return AppService.SetAutomaticUpdateDownload(enabled)
+}

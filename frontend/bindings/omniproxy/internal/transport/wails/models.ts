@@ -110,6 +110,7 @@ export interface SubscriptionNotice {
  */
 export interface UpdatePreferences {
     "autoCheck": boolean;
+    "autoDownload": boolean;
     "channel": string;
     "repo": string;
 }

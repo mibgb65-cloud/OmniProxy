@@ -39,6 +39,7 @@ vi.mock("../../services/updates", () => ({
     .mockResolvedValue({ channel: "stable", repo: "mibgb65-cloud/OmniProxy" }),
   setUpdateChannel: vi.fn(),
   setAutomaticUpdateCheck: vi.fn(),
+  setAutomaticUpdateDownload: vi.fn(),
   getApplicationUpdate: vi.fn().mockResolvedValue({
     currentVersion: "2.0.0-beta.1",
     checkState: "idle",

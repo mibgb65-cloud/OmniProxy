@@ -24,6 +24,13 @@ export default defineConfig({
     host: "127.0.0.1",
     port: Number(process.env.WAILS_VITE_PORT) || 9245,
     strictPort: true,
+    // 仅额外开放已审阅的发行说明目录，避免为离线日志暴露整个仓库文件。
+    fs: {
+      allow: [
+        fileURLToPath(new URL(".", import.meta.url)),
+        fileURLToPath(new URL("../docs/releases", import.meta.url)),
+      ],
+    },
   },
   test: {
     environment: "jsdom",

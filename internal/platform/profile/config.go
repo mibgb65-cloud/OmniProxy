@@ -35,8 +35,10 @@ type Config struct {
 	UpdateRepo string `json:"updateRepo,omitempty"`
 	// UpdateChannel 留空时依据应用版本选择；明确选择不会在升级后被覆盖。
 	UpdateChannel string `json:"updateChannel,omitempty"`
-	// AutoCheckUpdates 未设置时正式安装版自动检查，但不自动下载。
+	// AutoCheckUpdates 未设置时正式运行环境自动检查版本。
 	AutoCheckUpdates *bool `json:"autoCheckUpdates,omitempty"`
+	// AutoDownloadUpdates 默认关闭，仅用户明确开启后下载；安装仍需确认。
+	AutoDownloadUpdates bool `json:"autoDownloadUpdates,omitempty"`
 	// CloseBehavior controls what closing the main window does. Empty keeps
 	// the historical default of exiting the application.
 	CloseBehavior string `json:"closeBehavior,omitempty"`

@@ -10,9 +10,10 @@ import (
 
 // UpdatePreferences 是已解析的渠道与仓库，不触发联网。
 type UpdatePreferences struct {
-	AutoCheck bool   `json:"autoCheck"`
-	Channel   string `json:"channel"`
-	Repo      string `json:"repo"`
+	AutoCheck    bool   `json:"autoCheck"`
+	AutoDownload bool   `json:"autoDownload"`
+	Channel      string `json:"channel"`
+	Repo         string `json:"repo"`
 }
 
 func updatePreferences(cfg profile.Config, current string) UpdatePreferences {
@@ -31,7 +32,7 @@ func updatePreferences(cfg profile.Config, current string) UpdatePreferences {
 	if cfg.AutoCheckUpdates != nil {
 		auto = *cfg.AutoCheckUpdates
 	}
-	return UpdatePreferences{Channel: channel, Repo: repo, AutoCheck: auto}
+	return UpdatePreferences{Channel: channel, Repo: repo, AutoCheck: auto, AutoDownload: cfg.AutoDownloadUpdates}
 }
 
 // GetUpdatePreferences 返回更新选择；Beta 安装默认继续接收 Beta，明确选择始终优先。
@@ -69,7 +70,7 @@ func (s *AppService) SetUpdateChannel(channel string) (UpdatePreferences, error)
 	return updatePreferences(cfg, version.Version), nil
 }
 
-// SetAutomaticUpdateCheck 只控制版本检查，下载和安装始终需要用户点击。
+// SetAutomaticUpdateCheck 只控制版本检查，不修改用户独立选择的下载策略。
 func (s *AppService) SetAutomaticUpdateCheck(enabled bool) (UpdatePreferences, error) {
 	s.settingsMu.Lock()
 	defer s.settingsMu.Unlock()
@@ -78,6 +79,21 @@ func (s *AppService) SetAutomaticUpdateCheck(enabled bool) (UpdatePreferences, e
 		return UpdatePreferences{}, err
 	}
 	cfg.AutoCheckUpdates = &enabled
+	if err := profile.SaveConfig(s.prof.Kind, cfg); err != nil {
+		return UpdatePreferences{}, err
+	}
+	return updatePreferences(cfg, version.Version), nil
+}
+
+// SetAutomaticUpdateDownload 保存显式选择，不立即联网、下载或安装。
+func (s *AppService) SetAutomaticUpdateDownload(enabled bool) (UpdatePreferences, error) {
+	s.settingsMu.Lock()
+	defer s.settingsMu.Unlock()
+	cfg, err := profile.LoadConfig(s.prof.Kind)
+	if err != nil {
+		return UpdatePreferences{}, err
+	}
+	cfg.AutoDownloadUpdates = enabled
 	if err := profile.SaveConfig(s.prof.Kind, cfg); err != nil {
 		return UpdatePreferences{}, err
 	}

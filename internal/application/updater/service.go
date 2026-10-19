@@ -108,8 +108,12 @@ func (s *Service) Snapshot() Snapshot {
 	return result
 }
 
-// Busy 用于阻止下载／安装期间切换更新渠道。
-func (s *Service) Busy() bool { s.mu.Lock(); defer s.mu.Unlock(); return s.busyLocked() }
+// Busy 用于阻止检查、下载／安装期间切换更新渠道。
+func (s *Service) Busy() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.busyLocked() || s.state.CheckState == "checking"
+}
 func (s *Service) busyLocked() bool {
 	switch s.state.Download.State {
 	case "downloading", "verifying", "installing":

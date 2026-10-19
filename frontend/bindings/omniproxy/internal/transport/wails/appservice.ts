@@ -606,10 +606,17 @@ export function SetAutoStart(enabled: boolean): $CancellablePromise<boolean> {
 }
 
 /**
- * SetAutomaticUpdateCheck 只控制版本检查，下载和安装始终需要用户点击。
+ * SetAutomaticUpdateCheck 只控制版本检查，不修改用户独立选择的下载策略。
  */
 export function SetAutomaticUpdateCheck(enabled: boolean): $CancellablePromise<$models.UpdatePreferences> {
     return $Call.ByID(1192137729, enabled);
+}
+
+/**
+ * SetAutomaticUpdateDownload 保存显式选择，不立即联网、下载或安装。
+ */
+export function SetAutomaticUpdateDownload(enabled: boolean): $CancellablePromise<$models.UpdatePreferences> {
+    return $Call.ByID(3763060571, enabled);
 }
 
 /**

@@ -30,3 +30,26 @@ func TestUpdateChannelDefaultsAndUserChoice(t *testing.T) {
 		t.Fatalf("lost existing config: %+v %v", stored, err)
 	}
 }
+
+func TestAutomaticDownloadPreferenceIsOptInAndPreservesConfig(t *testing.T) {
+	svc, _ := newTestService(t)
+	initial, err := svc.GetUpdatePreferences()
+	if err != nil || initial.AutoDownload {
+		t.Fatalf("automatic download must default to off: %+v %v", initial, err)
+	}
+	check := false
+	original := profile.Config{DataDir: "C:/retained", CloseBehavior: "tray", UpdateChannel: "stable", AutoCheckUpdates: &check}
+	if err := profile.SaveConfig(profile.Test, original); err != nil {
+		t.Fatal(err)
+	}
+	for _, enabled := range []bool{true, false} {
+		prefs, err := svc.SetAutomaticUpdateDownload(enabled)
+		if err != nil || prefs.AutoDownload != enabled || prefs.AutoCheck {
+			t.Fatalf("preferences=%+v err=%v", prefs, err)
+		}
+		stored, err := profile.LoadConfig(profile.Test)
+		if err != nil || stored.AutoDownloadUpdates != enabled || stored.DataDir != original.DataDir || stored.CloseBehavior != original.CloseBehavior || stored.UpdateChannel != original.UpdateChannel {
+			t.Fatalf("unrelated config changed: %+v %v", stored, err)
+		}
+	}
+}

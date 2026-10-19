@@ -9,7 +9,7 @@
 
 ## 应用内更新与安装（2026-10-18）
 
-`infrastructure/update` 增加平台资产精确配对、有界下载和受限重定向；`application/updater` 冻结候选、共享检查／下载／安装快照、持久缓存及安装前远端摘要复验。Wails 绑定只接收预期版本，正式运行环境可自动检查，所有下载／安装由用户发起。前端侧栏、浮窗和设置页共用 Query 本地快照，无正文 HTML 渲染。
+`infrastructure/update` 增加平台资产精确配对、有界下载和受限重定向；`application/updater` 冻结候选、共享检查／下载／安装快照、持久缓存及安装前远端摘要复验。Wails 绑定只接收预期版本，正式运行环境可自动检查，下载默认由用户发起；用户可独立开启正式安装环境检查后的自动下载，安装仍必须手动确认。前端侧栏、浮窗和设置页共用 Query 本地快照，无正文 HTML 渲染。当前版本日志通过 Vite 静态收录 `docs/releases/v*.md` 并按 RuntimeInfo.version 匹配，不新增联网读取接口；开发服务仅额外开放该发行说明目录。
 
 `infrastructure/appinstall` 在 main 初始化 profile 前分流受限辅助模式，按完整程序路径请求正常退出或超时终止；NSIS 沿用旧登记目录并保留数据。独立更新辅助进程等待提权安装结果，再以原用户令牌重新启动。Release 先 build／verify／package，再在 draft 上传完整资产并最终发布。无需新依赖或迁移，见 ADR-017、`product/UPDATE.md`、`development/RELEASE.md`。
 
