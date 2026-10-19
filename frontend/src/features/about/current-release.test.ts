@@ -20,6 +20,16 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("真实历史失败本次未复现")
     },
   )
+  it.each(["2.0.0-beta.9", "v2.0.0-beta.9", "2.0.0-beta.9+local.123"])(
+    "Beta.9 按运行版本 %s 提供 Codex 兼容修复与安装边界",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## 文件变更摘要")
+      expect(notes).toContain("## 上下文压缩")
+      expect(notes).toContain("刷新受管模型目录")
+      expect(notes).toContain("真实长会话自动压缩与 Desktop 界面仍需安装后验收")
+    },
+  )
   it.each([undefined, "", "9.9.9", "../../product/PRD", "a".repeat(129)])(
     "未知或无效版本 %s 不替换为最新版本或读取任意文件",
     (version) => expect(getCurrentReleaseNotes(version)).toBeUndefined(),

@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-013](../tasks/active/TASK-20261019-013-build-local-beta9-installer.md)：构建包含 Codex 原生变更摘要与上下文压缩修复的本地 Beta.9 生产安装包；隔离源码执行完整质量门及 NSIS 打包，不自动安装或发布。
 
 ## Recently Completed
 
