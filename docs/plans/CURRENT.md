@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.9 — 本地 Windows amd64 production 安装版，未发布、未自动安装。源码 `d00dc59`，包含 Codex 原生文件变更摘要与 V2／legacy 上下文压缩修复，以及 Beta.8 既有修复。隔离源码完整质量门／616 项前端测试、NSIS、Windows 版本与 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.9/`，未签名。真实安装／升级、GUI 和超长会话验收由用户后续执行；现有生产与真实配置未替换。
+2.0.0-beta.10 — 本地 Windows amd64 production 安装版，未发布、未自动安装。源码 `21b5e2a`，包含额度查询取消多余强刷、模型长响应占锁及排队取消修复，继承 Beta.9 既有修复。隔离完整质量门／620 项前端测试、NSIS、Windows 版本与 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.10/`，未签名。真实安装／升级、过期授权、上游网络及自动激活验收由用户后续执行；生产程序与真实配置未替换。
 
 ## In Progress
 
-- [TASK-20261019-015](../tasks/active/TASK-20261019-015-build-local-beta10-installer.md)：构建包含额度查询超时修复的 Beta.10 本地 production 安装包；隔离执行完整门禁、NSIS 打包和资产校验，不发布或自动安装。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-015](../tasks/completed/2026-10/TASK-20261019-015-build-local-beta10-installer.md)：`21b5e2a`，Beta.10 本地 production 安装包 19370853 bytes／SHA256 `d91f4459a9cd641b7f2f4e30a17e6d2f1dbb24d85476e18385e2ee5586a41025`；隔离完整门禁／620 前端测试、NSIS、原生元数据、源码与文件基线校验通过。未签名、未发布或自动安装，交付用户自行本地更新。
 
 - [TASK-20261019-014](../tasks/completed/2026-10/TASK-20261019-014-fix-quota-refresh-timeouts.md)：`ab6f5a6`，取消额度查询前无条件强制续期，缩小模型请求的凭据锁范围、支持操作排队取消并区分繁忙提示。关键回归连续 10 轮及完整门禁／617 项前端测试、Windows 隔离构建通过；未替换生产程序或发布，真实过期授权与上游网络验收仍需后续执行。
 
