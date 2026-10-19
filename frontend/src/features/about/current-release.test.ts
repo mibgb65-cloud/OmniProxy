@@ -11,6 +11,15 @@ describe("当前版本发行说明", () => {
       expect(notes).not.toContain("## 5h／一周额度耗尽后轮换")
     },
   )
+  it.each(["2.0.0-beta.8", "v2.0.0-beta.8", "2.0.0-beta.8+local.123"])(
+    "Beta.8 按运行版本 %s 提供额度续期与更新说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## 额度查询与授权续期")
+      expect(notes).toContain("## 更新页面")
+      expect(notes).toContain("真实历史失败本次未复现")
+    },
+  )
   it.each([undefined, "", "9.9.9", "../../product/PRD", "a".repeat(129)])(
     "未知或无效版本 %s 不替换为最新版本或读取任意文件",
     (version) => expect(getCurrentReleaseNotes(version)).toBeUndefined(),

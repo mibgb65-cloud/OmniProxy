@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-011](../tasks/active/TASK-20261019-011-build-local-beta8-installer.md)：按用户要求生成 Beta.8 本地生产安装版，包含额度查询续期／诊断和更新页改进；隔离源码构建，完整质量门、NSIS 打包及资产校验待完成，不自动安装或发布。
 
 ## Recently Completed
 
