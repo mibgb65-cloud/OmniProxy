@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.7 — 本地测试构建，未发布 GitHub。源码 `9d001ec`，修复混合 Google 订阅导致 ChatGPT 授权开始前失败、通用错误提示和 GUI 缺失 stderr 时日志丢失；保留 Beta.6 的 5h／周轮换及 Desktop 兼容。完整质量门、577 前端测试、混合账号模拟授权、官方组件独立初始化、真实无 stderr GUI 日志及 Windows 版本／摘要校验通过。本地安装包位于 `release-assets/v2.0.0-beta.7/`，本轮未自动替换生产 beta.6 或改共享登录配置。
+2.0.0-beta.8 — 本地生产安装版，未发布 GitHub、未自动安装。源码 `427bc33`，包含额度查询前官方续期、30 秒预算与安全阶段诊断，以及更新页／可选自动下载改进；保留 Beta.7 登录和 GUI 日志修复。隔离源码完整质量门、613 项前端测试、NSIS 打包、Windows 原生版本和 SHA256 校验通过。安装包位于 `release-assets/v2.0.0-beta.8/`，未签名；真实安装／新二进制 GUI 运行验收未执行，原生产 PID 30124 仍为 Beta.7。
 
 ## In Progress
 
-- [TASK-20261019-011](../tasks/active/TASK-20261019-011-build-local-beta8-installer.md)：按用户要求生成 Beta.8 本地生产安装版，包含额度查询续期／诊断和更新页改进；隔离源码构建，完整质量门、NSIS 打包及资产校验待完成，不自动安装或发布。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-011](../tasks/completed/2026-10/TASK-20261019-011-build-local-beta8-installer.md)：`427bc33`，Beta.8 本地 production 安装包 19,351,559 bytes／SHA256 `730f7fce13674312953fca7386b1af4e002bc066bc229041a20a8dfae175a765`。完整质量门／613 前端测试、NSIS 和原生版本／资产校验通过；未签名、未自动安装或发布，原生产 Beta.7 保持运行。
 
 - [TASK-20261019-010](../tasks/completed/2026-10/TASK-20261019-010-investigate-codex-quota-token-refresh.md)：`2616efe`，额度读取前官方续期、30 秒预算及安全阶段诊断；完整质量门、610 项前端测试及 Windows 构建通过。原生产两个账号本次查询成功，历史失败未复现；未替换生产程序。
 
