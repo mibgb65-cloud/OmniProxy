@@ -66,6 +66,14 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 		if !sameTargetPool(initial, t) {
 			return proxy.Failure("route_configuration_changed", 503)
 		}
+		if enabled && !request.FixedAccount {
+			if delay := s.subscriptionQuotaWait(t, s.failover.now()); delay > 0 {
+				if wait == 0 || delay < wait {
+					wait = delay
+				}
+				continue
+			}
+		}
 		lease := healthLease{}
 		if enabled && !request.FixedAccount {
 			var available bool
@@ -98,13 +106,14 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 			}
 			if rejected != nil {
 				lastTarget = t
-				last = &proxy.Response{StatusCode: response.StatusCode, RetryAfter: response.RetryAfter}
+				last = &proxy.Response{StatusCode: response.StatusCode, RetryAfter: response.RetryAfter, PreExecutionQuotaRejected: response.PreExecutionQuotaRejected, QuotaResetAt: response.QuotaResetAt}
+				s.rememberQuotaRejection(t, rejected)
 				if delay, ok := retryDelay(response.RetryAfter, s.failover.now()); ok {
 					last.RetryAfter = strconv.Itoa(int((delay + time.Second - 1) / time.Second))
 				}
 				return errSwitchAccount
 			}
-			accepted = response.StatusCode == 200
+			accepted = response.StatusCode == 200 && !response.PreExecutionQuotaRejected
 			if err := request.Trace.Update(ctx, current, t.snapshot); err != nil {
 				return err
 			}
@@ -119,6 +128,12 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 		cooldown := rejected
 		if cooldown != nil && cooldown.code == "duplicate_credential" {
 			cooldown = nil
+		}
+		// 已有版本化共享额度观察时，以其窗口重置／新快照恢复为准，避免另存模型冷却阻止重置卡生效。
+		if cooldown != nil && cooldown.code == "upstream_quota_exhausted" {
+			if _, ok := s.subscription.(subscriptionQuotaAvailability); ok {
+				cooldown = nil
+			}
 		}
 		s.failover.finish(lease, cooldown, accepted)
 		released = true

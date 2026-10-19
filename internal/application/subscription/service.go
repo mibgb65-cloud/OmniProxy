@@ -52,15 +52,16 @@ type Factory func(context.Context, string) (codex.Client, error)
 
 // Service 一次只允许一个授权会话，避免官方回调端口及重复提交冲突。
 type Service struct {
-	mu         sync.Mutex
-	operations sync.Mutex
-	accounts   *account.Service
-	root       string
-	factory    Factory
-	current    *session
-	history    map[string]State
-	onChange   func()
-	closed     bool
+	mu                sync.Mutex
+	operations        sync.Mutex
+	accounts          *account.Service
+	root              string
+	factory           Factory
+	current           *session
+	history           map[string]State
+	onChange          func()
+	closed            bool
+	quotaObservations map[string]quotaObservation
 }
 
 // New 使用按运行环境隔离的固定授权配置根目录。

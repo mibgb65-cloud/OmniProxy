@@ -39,7 +39,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 			}
 			return s.chatgpt.Forward(ctx, key, accountID, upstream, func(response proxy.Response) error {
 				response = proxy.ObserveResponse(ctx, request.Trace, response, "responses")
-				if response.StatusCode != 200 || request.Protocol == "responses" && request.Stream {
+				if response.PreExecutionQuotaRejected || response.StatusCode != 200 || request.Protocol == "responses" && request.Stream {
 					return consume(response)
 				}
 				result, err := agentprotocol.ReadResponses(response.Body)

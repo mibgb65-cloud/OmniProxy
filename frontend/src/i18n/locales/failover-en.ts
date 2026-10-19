@@ -1,4 +1,5 @@
 export const failoverEn = {
+  "failover.quotaExhausted": "Subscription quota exhausted; waiting for the window to reset",
   "failover.duplicate": "This account uses credentials already tried and was skipped.",
   "failover.title": "Account failover",
   "failover.description":

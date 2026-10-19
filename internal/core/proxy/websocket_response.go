@@ -16,7 +16,7 @@ type socketResult struct {
 }
 
 func copySocketResponse(ctx context.Context, socket *websocket.Conn, response Response, trace *Trace) (socketResult, error) {
-	if response.StatusCode != 200 {
+	if response.PreExecutionQuotaRejected || response.StatusCode != 200 {
 		return socketResult{}, upstreamFailure(response)
 	}
 	contentType, _, err := mime.ParseMediaType(response.ContentType)
@@ -24,7 +24,7 @@ func copySocketResponse(ctx context.Context, socket *websocket.Conn, response Re
 		return socketResult{}, Failure("invalid_upstream_response", 502)
 	}
 	scanner := bufio.NewScanner(response.Body)
-	scanner.Buffer(make([]byte, 4096), 2<<20)
+	scanner.Buffer(make([]byte, 4096), MaxResponsesEventBytes)
 	total := 0
 	for scanner.Scan() {
 		line := scanner.Text()

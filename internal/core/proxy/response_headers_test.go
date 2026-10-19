@@ -39,3 +39,29 @@ func TestResponseHeaderDiagnosticsAreEnumerated(t *testing.T) {
 		t.Fatal("inferred header provenance lost")
 	}
 }
+
+func TestInferenceDiagnosticsReachDiskAndUIWithoutDynamicValues(t *testing.T) {
+	var out bytes.Buffer
+	log, files, err := logger.Setup(logger.Options{Profile: profile.Test, LogDir: t.TempDir(), Console: &out})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer files.Close()
+	trace := &Trace{}
+	ObserveResponse(context.Background(), trace, Response{StatusCode: 200, ContentTypeInferenceReason: "prefix_limit", ContentTypeInferenceBytes: 512 << 10}, "responses")
+	trace.completeLogged(502, "invalid_upstream_response", log)
+	snapshot, err := files.Buffer().Read(logger.Query{Limit: 10})
+	if err != nil || len(snapshot.Entries) != 1 {
+		t.Fatal("UI diagnostics unavailable", err)
+	}
+	fields := snapshot.Entries[0].Fields
+	if fields["upstream_inference_reason"] != "prefix_limit" || fields["upstream_prefix_bytes"] != "524288" || fields["upstream_media_type"] != "missing" {
+		t.Fatal("UI lost safe response diagnostics", fields)
+	}
+	out.Reset()
+	ObserveResponse(context.Background(), trace, Response{StatusCode: 200, ContentTypeInferenceReason: "private-dynamic-marker", ContentTypeInferenceBytes: -1}, "responses")
+	trace.completeLogged(502, "invalid_upstream_response", log)
+	if strings.Contains(out.String(), "private-dynamic-marker") || !strings.Contains(out.String(), "upstream_inference_reason=unknown") || !strings.Contains(out.String(), "upstream_prefix_bytes=0") {
+		t.Fatal("dynamic diagnostic data leaked")
+	}
+}

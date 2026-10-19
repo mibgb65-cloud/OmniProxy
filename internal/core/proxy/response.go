@@ -12,7 +12,7 @@ import (
 )
 
 func copyResponse(w http.ResponseWriter, response Response, stream bool, committed *bool, protocol ...string) error {
-	if response.StatusCode != http.StatusOK {
+	if response.PreExecutionQuotaRejected || response.StatusCode != http.StatusOK {
 		failure := upstreamFailure(response)
 		if failure.RetryAfter != "" {
 			w.Header().Set("Retry-After", failure.RetryAfter)
@@ -24,7 +24,7 @@ func copyResponse(w http.ResponseWriter, response Response, stream bool, committ
 		return Failure("invalid_upstream_response", 502)
 	}
 	if stream {
-		return copyStream(w, response.Body, committed)
+		return copyStream(w, response.Body, committed, protocol...)
 	}
 	body, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
 	if err != nil || len(body) > maxResponseBytes || !json.Valid(body) {
@@ -57,7 +57,7 @@ func copyResponse(w http.ResponseWriter, response Response, stream bool, committ
 	return err
 }
 
-func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
+func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol ...string) error {
 	var trace *Trace
 	if tracked, ok := w.(*trackedWriter); ok {
 		trace = tracked.trace
@@ -67,7 +67,11 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool) error {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("X-Accel-Buffering", "no")
 	scanner := bufio.NewScanner(io.LimitReader(body, maxStreamBytes+1))
-	scanner.Buffer(make([]byte, 4096), 512<<10)
+	lineLimit := 512 << 10
+	if len(protocol) > 0 && protocol[0] == "responses" {
+		lineLimit = MaxResponsesEventBytes
+	}
+	scanner.Buffer(make([]byte, 4096), lineLimit)
 	var total int
 	for scanner.Scan() {
 		line := scanner.Text()

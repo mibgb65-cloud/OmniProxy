@@ -69,7 +69,7 @@ func (s *Service) ResolvePlan(ctx context.Context, model string) (Plan, error) {
 		if selected.AuthMethod == account.AuthSubscription && a.AuthAccountID == selected.AuthAccountID && strings.EqualFold(strings.TrimSpace(a.AuthEmail), strings.TrimSpace(selected.AuthEmail)) {
 			continue
 		}
-		if !a.Enabled || !eligible(data, a, logical) {
+		if !a.Enabled || !eligible(data, a, logical) && !uncataloguedSubscriptionBackup(data, a, logical) {
 			continue
 		}
 		// 服务商和通道已冻结；复用资格校验，不为每个备用账号重复解析整张路由表。
@@ -98,4 +98,27 @@ func SameAccountPool(a, b account.Item) bool {
 		return false
 	}
 	return a.MiniMax == nil || a.MiniMax.SamePool(*b.MiniMax)
+}
+
+// 新登录订阅尚未同步目录时，仅作为已知模型的备用尝试；有明确目录却不支持的账号仍排除。
+// 不扩大模型发现或主路由，实际模型权限仍由备用账号的官方响应确认。
+func uncataloguedSubscriptionBackup(data snapshot, a account.Item, model string) bool {
+	if a.AuthMethod != account.AuthSubscription || a.AuthState != "authenticated" {
+		return false
+	}
+	openai := false
+	for _, p := range data.providers {
+		if p.ID == a.ProviderID && p.Enabled && p.Kind == "openai" {
+			openai = true
+		}
+	}
+	if !openai || !targetSupports(data, a.ProviderID, "", model) {
+		return false
+	}
+	for _, m := range data.models {
+		if m.accountID == a.ID {
+			return false
+		}
+	}
+	return true
 }

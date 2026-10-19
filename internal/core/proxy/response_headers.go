@@ -33,6 +33,11 @@ func (t *Trace) observeResponseHeaders(response Response) {
 	defer t.mu.Unlock()
 	t.upstreamMediaType = responseMediaType(response.ContentType)
 	t.contentTypeInferred = response.ContentTypeInferred
+	t.contentTypeInferenceReason = safeInferenceReason(response.ContentTypeInferenceReason)
+	t.contentTypeInferenceBytes = 0
+	if response.ContentTypeInferenceBytes >= 0 && response.ContentTypeInferenceBytes <= MaxResponsesRequestBytes {
+		t.contentTypeInferenceBytes = response.ContentTypeInferenceBytes
+	}
 	if response.ContentTypeInferred {
 		t.upstreamMediaType = "missing"
 	}
@@ -47,5 +52,23 @@ func (t *Trace) responseHeaderLogFields() []any {
 	if t.upstreamMediaType == "" {
 		return nil
 	}
-	return []any{"upstream_media_type", t.upstreamMediaType, "upstream_content_type_inferred", t.contentTypeInferred}
+	fields := []any{"upstream_media_type", t.upstreamMediaType, "upstream_content_type_inferred", t.contentTypeInferred}
+	if t.contentTypeInferenceReason != "" {
+		fields = append(fields, "upstream_inference_reason", t.contentTypeInferenceReason, "upstream_prefix_bytes", t.contentTypeInferenceBytes)
+	}
+	return fields
+}
+
+// 提供商诊断也经过白名单；以后新增适配器不能把动态上游错误误写入日志。
+func safeInferenceReason(reason string) string {
+	switch reason {
+	case "verified", "missing_body", "empty", "incomplete_event", "prefix_limit", "read_error",
+		"unexpected_field", "multiple_data", "invalid_json", "event_mismatch", "unexpected_event",
+		"invalid_response_id", "invalid_error", "non_sse_json", "non_sse_html", "quota_rejected":
+		return reason
+	case "":
+		return ""
+	default:
+		return "unknown"
+	}
 }

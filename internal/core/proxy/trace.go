@@ -35,13 +35,15 @@ type RequestObserver interface {
 	Finish(context.Context, RequestEvent) error
 }
 type Trace struct {
-	upstreamMediaType   string
-	contentTypeInferred bool
-	attempt             *AttemptEvent
-	mu                  sync.Mutex
-	event               RequestEvent
-	observer            RequestObserver
-	startedAt           time.Time
+	upstreamMediaType          string
+	contentTypeInferred        bool
+	contentTypeInferenceReason string
+	contentTypeInferenceBytes  int
+	attempt                    *AttemptEvent
+	mu                         sync.Mutex
+	event                      RequestEvent
+	observer                   RequestObserver
+	startedAt                  time.Time
 }
 
 func (s *Server) beginTrace(ctx context.Context, protocol, transport string) (*Trace, error) {

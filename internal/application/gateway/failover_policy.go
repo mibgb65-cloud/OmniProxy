@@ -19,6 +19,13 @@ type retryReason struct {
 
 // 只依据明确拒绝分类；服务商整体过载、403 和泛化 5xx 不遍历同入口的账号。
 func rejectedAccount(t target, response proxy.Response, now time.Time) *retryReason {
+	if t.kind == "openai" && response.PreExecutionQuotaRejected {
+		delay := 30 * time.Second
+		if response.QuotaResetAt.After(now) && response.QuotaResetAt.Sub(now) <= 8*24*time.Hour {
+			delay = response.QuotaResetAt.Sub(now)
+		}
+		return &retryReason{code: "upstream_quota_exhausted", delay: delay}
+	}
 	code := ""
 	switch response.StatusCode {
 	case 401:

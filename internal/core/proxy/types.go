@@ -12,6 +12,8 @@ const (
 	MaxRequestBytes = 2 << 20
 	// Responses 图片以 Base64 内嵌；使用独立有界容量，不放大普通 Chat Completions。
 	MaxResponsesRequestBytes = 16 << 20
+	// 首事件会回显工具定义；订阅推断和 Responses 两种传输使用一致的有界容量。
+	MaxResponsesEventBytes = 2 << 20
 	// 百万上下文的文本及 JSON 编码可能超过 2 MiB，Messages 使用独立的有界容量。
 	MaxMessagesRequestBytes = 16 << 20
 	maxResponseBytes        = 8 << 20
@@ -37,12 +39,18 @@ type Request struct {
 
 // Response 只允许提供商返回有限的非敏感响应元数据。
 type Response struct {
+	// 仅固定提供商确认首个完整事件明确拒绝执行时设置，不用于一般流中错误。
+	PreExecutionQuotaRejected bool
+	QuotaResetAt              time.Time
 	// ContentTypeInferred 只标记提供商已验证并补全的缺失类型，不放宽 Core 校验。
 	ContentTypeInferred bool
-	StatusCode          int
-	ContentType         string
-	RetryAfter          string
-	Body                io.Reader
+	// 类型推断仅携带固定原因和有界预读大小，禁止携带响应正文或动态错误消息。
+	ContentTypeInferenceReason string
+	ContentTypeInferenceBytes  int
+	StatusCode                 int
+	ContentType                string
+	RetryAfter                 string
+	Body                       io.Reader
 }
 
 // Upstream 在 consume 完成前持有响应资源，不能向 Core 暴露凭证。

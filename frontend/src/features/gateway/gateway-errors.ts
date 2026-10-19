@@ -12,6 +12,7 @@ const errorKeys = new Map<string, TranslationKey>([
   ["upstream_authentication_failed", "gateway.error.authentication"],
   ["upstream_insufficient_balance", "gateway.error.balance"],
   ["upstream_rate_limited", "gateway.error.rateLimit"],
+  ["upstream_quota_exhausted", "failover.quotaExhausted"],
   ["account_pool_cooling", "gateway.error.rateLimit"],
   ["route_configuration_changed", "gateway.error.configuration"],
   ["accounting_unavailable", "gateway.error.configuration"],

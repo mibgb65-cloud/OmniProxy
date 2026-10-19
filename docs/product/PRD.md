@@ -71,6 +71,7 @@ accounts need one local place to:
 - 自动名称有意展示 Key 前缀，短于 8 个字符时使用实际长度；名称不写入日志。删除账号必须经过应用内、随主题切换的确认弹窗。
 - 提供商账号详情支持卡片／列表切换并保存展示偏好；展示真实密钥的脱敏片段，用户可主动复制密钥。新的密钥读取接口只返回脱敏文本，复制在桌面端直接写入系统剪贴板。
 - 账号支持编辑名称与替换 API Key；编辑弹窗不回填当前完整密钥，Key 留空时保留原凭证，名称清空继续自动命名。
+- OpenAI 订阅支持 5h／一周任一窗口耗尽后自动跳过，使用同池其他启用账号；依据已校验额度快照和执行前明确额度拒绝，不跨服务商或计费通道，不重放已开始生成的请求，固定账号仍保留。
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
   concurrency and retry.
 - Model routing rules.

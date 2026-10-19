@@ -54,5 +54,9 @@ func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
 	if err := verifyMember(readCtx, client, item); err != nil {
 		return Quota{}, err
 	}
-	return normalizeQuota(result, item.AuthPlan)
+	quota, err := normalizeQuota(result, item.AuthPlan)
+	if err == nil {
+		s.rememberQuota(item.ID, item.UpdatedAt, quota)
+	}
+	return quota, err
 }

@@ -22,7 +22,7 @@ type usageReader struct {
 func ObserveResponse(ctx context.Context, trace *Trace, response Response, protocol string) Response {
 	trace.observeStatus(response.StatusCode)
 	trace.observeResponseHeaders(response)
-	if trace == nil || response.StatusCode != 200 || response.Body == nil {
+	if trace == nil || response.PreExecutionQuotaRejected || response.StatusCode != 200 || response.Body == nil {
 		return response
 	}
 	kind, _, err := mime.ParseMediaType(response.ContentType)

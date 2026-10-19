@@ -114,3 +114,70 @@ func TestInferenceHandlesFragmentedEvents(t *testing.T) {
 		}
 	}
 }
+
+func TestInferenceDiagnosticsPreserveRejectedBodies(t *testing.T) {
+	for _, tt := range []struct{ name, body, reason string }{
+		{"empty", "", "empty"},
+		{"json", `{"error":{"message":"private diagnostic marker"}}`, "non_sse_json"},
+		{"html", "<html>private diagnostic marker</html>", "non_sse_html"},
+		{"truncated", "data: {}\n", "incomplete_event"},
+		{"unknown-field", "private-field: private diagnostic marker\n", "unexpected_field"},
+		{"multi-data", "data: {}\ndata: {}\n\n", "multiple_data"},
+		{"invalid-json", "data: broken\n\n", "invalid_json"},
+		{"event-mismatch", "event: error\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"one\"}}\n\n", "event_mismatch"},
+		{"unknown-event", "data: {\"type\":\"private diagnostic marker\"}\n\n", "unexpected_event"},
+		{"missing-id", "data: {\"type\":\"response.created\",\"response\":{}}\n\n", "invalid_response_id"},
+		{"invalid-error", "data: {\"type\":\"error\",\"error\":null}\n\n", "invalid_error"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			response := inferResponseType(proxy.Response{StatusCode: 200, Body: strings.NewReader(tt.body)})
+			if response.ContentTypeInferred || response.ContentTypeInferenceReason != tt.reason {
+				t.Fatalf("unexpected classification: inferred=%t reason=%s", response.ContentTypeInferred, response.ContentTypeInferenceReason)
+			}
+			if response.ContentTypeInferenceBytes != len(tt.body) {
+				t.Fatal("unexpected prefix size")
+			}
+			raw, err := io.ReadAll(response.Body)
+			if err != nil || string(raw) != tt.body {
+				t.Fatal("diagnostics changed response bytes")
+			}
+		})
+	}
+}
+
+func TestInferenceDiagnosticsDistinguishLargeFirstEventAndReadFailure(t *testing.T) {
+	// response.created 会携带工具定义；边界诊断必须区分完整大事件和截断前缀。
+	start := "data: {\"type\":\"response.created\",\"response\":{\"id\":\"one\",\"tools\":[{\"description\":\""
+	end := "\"}]}}\n\n"
+	for _, size := range []int{maxSSEPrefixBytes, maxSSEPrefixBytes + 1} {
+		body := start + strings.Repeat("x", size-len(start)-len(end)) + end
+		response := inferResponseType(proxy.Response{StatusCode: 200, Body: strings.NewReader(body)})
+		reason := "verified"
+		if size > maxSSEPrefixBytes {
+			reason = "prefix_limit"
+		}
+		if response.ContentTypeInferenceReason != reason || response.ContentTypeInferred != (reason == "verified") {
+			t.Fatal("first event bound misclassified", response.ContentTypeInferenceReason)
+		}
+		if response.ContentTypeInferenceBytes != maxSSEPrefixBytes {
+			t.Fatal("unbounded diagnostic prefix")
+		}
+		raw, err := io.ReadAll(response.Body)
+		if err != nil || string(raw) != body {
+			t.Fatal("large body changed")
+		}
+	}
+	broken := &gatedReader{first: strings.NewReader("data: {}"), tail: strings.NewReader("")}
+	response := inferResponseType(proxy.Response{StatusCode: 200, Body: broken})
+	if response.ContentTypeInferenceReason != "read_error" || response.ContentTypeInferred {
+		t.Fatal("read error misclassified")
+	}
+	if inferResponseType(proxy.Response{StatusCode: 200}).ContentTypeInferenceReason != "missing_body" {
+		t.Fatal("missing body misclassified")
+	}
+	for _, response := range []proxy.Response{{StatusCode: 429}, {StatusCode: 200, ContentType: "application/json"}} {
+		if inferResponseType(response).ContentTypeInferenceReason != "" {
+			t.Fatal("explicit response was inferred")
+		}
+	}
+}

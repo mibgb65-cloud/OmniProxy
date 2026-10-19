@@ -112,6 +112,7 @@ func (s *Service) ConsumeReset(ctx context.Context, input ResetInput) (ResetResu
 		quota, normalizeErr := normalizeQuota(fresh, item.AuthPlan)
 		if normalizeErr == nil {
 			result.Quota = &quota
+			s.rememberQuota(item.ID, item.UpdatedAt, quota)
 		} else {
 			result.RefreshFailed = true
 		}

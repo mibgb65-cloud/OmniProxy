@@ -1,4 +1,5 @@
 export const failoverZh = {
+  "failover.quotaExhausted": "订阅额度已用尽，等待额度窗口重置",
   "failover.duplicate": "该账号使用了已尝试的凭据，已跳过。",
   "failover.title": "账号故障切换",
   "failover.description": "仅在同服务商、同计费方式和地区内尝试其他账号。固定账号不切换。",
