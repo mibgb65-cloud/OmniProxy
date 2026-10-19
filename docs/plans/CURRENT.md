@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261019-016](../tasks/active/TASK-20261019-016-improve-oauth-progress-account-deletion.md)：订阅登录真实进度、复制链接与本地删除／官方退出解耦，正在实现与回归验证。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-016](../tasks/completed/2026-10/TASK-20261019-016-improve-oauth-progress-account-deletion.md)：`4d0e76c`，登录弹窗展示真实处理阶段、支持复制链接和轮询恢复；ChatGPT 删除仅清理本地授权，不启动官方组件或调用 Logout。完整门禁／625 项前端测试、关键回归 10 轮及隔离 SQLite／DPAPI／Win32 删除验收通过；原生 UIA 验收未取得可靠结果，真实 OAuth 仍待人工验收，未发布或替换生产程序。
 
 - [TASK-20261019-015](../tasks/completed/2026-10/TASK-20261019-015-build-local-beta10-installer.md)：`21b5e2a`，Beta.10 本地 production 安装包 19370853 bytes／SHA256 `d91f4459a9cd641b7f2f4e30a17e6d2f1dbb24d85476e18385e2ee5586a41025`；隔离完整门禁／620 前端测试、NSIS、原生元数据、源码与文件基线校验通过。未签名、未发布或自动安装，交付用户自行本地更新。
 
