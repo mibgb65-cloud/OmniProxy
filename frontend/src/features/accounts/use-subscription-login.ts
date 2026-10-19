@@ -8,6 +8,7 @@ import {
   readSubscription,
   currentSubscription,
   subscriptionError,
+  subscriptionInProgress,
   type SubscriptionInput,
   type SubscriptionSession,
 } from "../../services/subscription"
@@ -30,7 +31,11 @@ export function useSubscriptionLogin(scope: { providerId: string; accountId?: st
   const query = useQuery({
     queryKey: ["subscription-session", active?.id],
     queryFn: () => readSubscription(active!.id),
-    enabled: !!active?.id && active.state === "waiting",
+    enabled: !!active?.id && subscriptionInProgress(active.state),
+    // 原生事件可能在弹窗关闭或窗口切换时丢失，轮询以后台真实状态为准。
+    refetchInterval: (query) =>
+      subscriptionInProgress(query.state.data?.state ?? active?.state) ? 1000 : false,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: false,
     retry: false,
     gcTime: 0,

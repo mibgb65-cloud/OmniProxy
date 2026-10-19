@@ -83,7 +83,7 @@ func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
 	return s.accounts.UpdateSubscription(ctx, id, account.SubscriptionMetadata{Email: item.AuthEmail, Plan: item.AuthPlan, State: "logged_out", AccountID: item.AuthAccountID})
 }
 
-// Delete 先完成系统凭证注销，再移除元数据、DPAPI 引用和受控隔离目录。
+// Delete 仅清理本地凭据和账号，不启动官方组件或执行官方退出登录。
 func (s *Service) Delete(ctx context.Context, id string) error {
 	if err := s.operations.Lock(ctx); err != nil {
 		return failure("operation_cancelled")
@@ -97,14 +97,13 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 		return failure("invalid_account")
 	}
 	for _, profile := range profiles {
-		client, err := s.open(ctx, profile)
+		path, err := s.profilePath(profile)
 		if err != nil {
 			return err
 		}
-		err = client.Logout(ctx)
-		client.Close()
-		if err != nil {
-			return err
+		// 本地清理失败时保留账号和定位信息，以便重试，不能遗失系统凭据引用。
+		if err := s.removeCredentials(path); err != nil {
+			return failure("cleanup_failed")
 		}
 	}
 	if err := s.accounts.DeleteManaged(ctx, id); err != nil {

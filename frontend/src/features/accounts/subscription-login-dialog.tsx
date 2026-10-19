@@ -10,6 +10,7 @@ import { useSubscriptionLogin } from "./use-subscription-login"
 import { SubscriptionLoginStatus } from "./subscription-login-status"
 import { SubscriptionLoginMethod } from "./subscription-login-method"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
+import { subscriptionInProgress } from "../../services/subscription"
 
 export function SubscriptionLoginDialog({
   providerId,
@@ -58,9 +59,9 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
   const [mode, setMode] = useState("browser")
   const login = useSubscriptionLogin({ providerId, accountId })
   const google = providerId === "builtin_google"
-  const waiting = login.view?.state === "waiting"
+  const inProgress = subscriptionInProgress(login.view?.state)
   const complete = login.view?.state === "completed"
-  const busy = waiting || login.starting
+  const busy = inProgress || login.starting
   const invalid = !validAccountName(name)
   return (
     <Dialog.Portal>
@@ -150,7 +151,7 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
                 {t(complete ? "subscription.done" : "subscription.close")}
               </Button>
             </Dialog.Close>
-            {!waiting && !complete ? (
+            {!inProgress && !complete ? (
               <Button
                 type="submit"
                 disabled={login.starting || invalid}
@@ -166,7 +167,7 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
                 {!login.starting ? <ArrowUpRight className="size-4" aria-hidden="true" /> : null}
               </Button>
             ) : null}
-            {waiting ? (
+            {inProgress ? (
               <Button
                 type="button"
                 variant="outline"

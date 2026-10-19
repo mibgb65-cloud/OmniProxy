@@ -32,6 +32,10 @@ export const openSubscription = async (id: string) => AppService.SubscriptionOpe
 export const refreshSubscription = async (id: string) => AppService.SubscriptionRefresh(id)
 export const logoutSubscription = async (id: string) => AppService.SubscriptionLogout(id)
 
+export function subscriptionInProgress(state?: string) {
+  return !!state && ["starting", "waiting", "exchanging", "verifying", "saving"].includes(state)
+}
+
 // 只识别稳定错误码，原始错误可能包含提供商信息，不渲染到界面。
 export function subscriptionError(error: unknown) {
   const text = error instanceof Error ? error.message : String(error)

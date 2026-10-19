@@ -61,6 +61,7 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		s.finish(job, state, code, nil)
 		return
 	}
+	s.progress(job, "verifying")
 	readCtx, cancel := context.WithTimeout(context.Background(), operationTimeout)
 	// 完成通知之后强制同步官方授权缓存；不能依赖登录前的账号快照。
 	identity, err := job.client.Account(readCtx, true)
@@ -75,7 +76,7 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		return
 	}
 	// 身份读取超时后仍需独立保存成功授权，不能复用已经取消的读取 context。
-	saveCtx, stopSave := context.WithTimeout(context.Background(), operationTimeout)
+	saveCtx, stopSave := context.WithTimeout(ctx, operationTimeout)
 	defer stopSave()
 	meta := account.SubscriptionMetadata{State: "unknown"}
 	var accountIDErr error
@@ -83,12 +84,17 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		meta = account.SubscriptionMetadata{Email: identity.Email, Plan: identity.Plan, State: "authenticated"}
 		meta.AccountID, accountIDErr = readAccountID(ctx, job.client)
 	}
+	s.progress(job, "saving")
 	if err := s.operations.Lock(saveCtx); err != nil {
+		state := "failed"
 		code := "operation_cancelled"
+		if ctx.Err() != nil {
+			state, code = "cancelled", ""
+		}
 		if cleanupErr := s.cleanCancelled(job); cleanupErr != nil {
 			code = "cleanup_failed"
 		}
-		s.finish(job, "failed", code, nil)
+		s.finish(job, state, code, nil)
 		return
 	}
 	defer s.operations.Unlock()
@@ -102,6 +108,9 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		s.finish(job, "cancelled", code, nil)
 		return
 	}
+	// 操作门已串行保护账号变更；数据库／凭据 IO 不持有状态锁，
+	// 否则 Read 会随保存一起阻塞，前端无法显示 saving 或及时取消。
+	s.mu.Unlock()
 	var item account.Item
 	if job.input.AccountID != "" {
 		previous, readErr := s.accounts.Metadata(saveCtx, job.input.AccountID)
@@ -113,13 +122,16 @@ func (s *Service) complete(ctx context.Context, job *session) {
 	} else {
 		item, err = s.accounts.CreateSubscription(saveCtx, job.input.ProviderID, job.input.Name, job.profile, meta)
 	}
-	s.mu.Unlock()
 	if err != nil && item.ID == "" {
+		state := "failed"
 		code := safeCode(err)
+		if ctx.Err() != nil {
+			state, code = "cancelled", ""
+		}
 		if cleanupErr := s.cleanCancelled(job); cleanupErr != nil {
 			code = "cleanup_failed"
 		}
-		s.finish(job, "failed", code, nil)
+		s.finish(job, state, code, nil)
 		return
 	}
 	warning := err != nil

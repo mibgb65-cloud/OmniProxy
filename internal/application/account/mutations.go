@@ -148,7 +148,7 @@ func (s *Service) Delete(ctx context.Context, id string) error {
 	return s.deleteAccount(ctx, id, false)
 }
 
-// DeleteManaged 由订阅生命周期服务完成系统凭证注销后调用。
+// DeleteManaged 由订阅生命周期服务完成本地授权清理后调用；不要求官方退出登录。
 func (s *Service) DeleteManaged(ctx context.Context, id string) error {
 	return s.deleteAccount(ctx, id, true)
 }

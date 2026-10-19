@@ -125,7 +125,7 @@ export const subscriptionEn = {
   "subscription.close": "Close",
   "subscription.closeLabel": "Close subscription sign-in dialog",
   "subscription.deleteNotice":
-    "Signs out this account and removes its local authorization credentials and record.",
+    "Removes only this account's local record and credentials. Official websites and other clients stay signed in. Use Sign out separately when needed.",
   "subscription.add": "Sign in with ChatGPT",
   "subscription.title": "Sign in to ChatGPT",
   "subscription.type": "ChatGPT / Codex",
@@ -141,8 +141,19 @@ export const subscriptionEn = {
   "subscription.waiting": "Waiting for authorization on the official page",
   "subscription.code": "One-time device code",
   "subscription.waitHint":
-    "Sign in with a ChatGPT account that has Codex access. This session waits up to 10 minutes.",
+    "Complete authorization in your browser. The official component may still be exchanging tokens; closing the page does not interrupt it. Account details are fetched after the completion notice. This session waits up to 10 minutes.",
   "subscription.open": "Open official authorization page",
+  "subscription.copyLink": "Copy sign-in link",
+  "subscription.linkCopied": "Sign-in link copied",
+  "subscription.copyLinkHint":
+    "Paste this link into another browser or browser profile on this computer. Do not share it.",
+  "subscription.copyLinkFailed": "Could not copy the link. Try again.",
+  "subscription.exchanging":
+    "Authorization received. Exchanging tokens and fetching account details…",
+  "subscription.verifying": "Official authorization complete. Fetching account details…",
+  "subscription.saving": "Saving local credentials and account…",
+  "subscription.processingHint":
+    "You can close the page or this window; processing continues in the background. Do not restart authorization.",
   "subscription.completed": "Authorization complete. Account saved.",
   "subscription.cancelled": "Authorization cancelled.",
   "subscription.starting": "Starting sign-in…",

@@ -72,13 +72,13 @@ func (s *Service) Current(providerID, id string) (subscription.State, error) {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.current == nil || s.current.input.ProviderID != providerID || s.current.input.AccountID != id || s.current.view.State != "waiting" {
+	if s.current == nil || s.current.input.ProviderID != providerID || s.current.input.AccountID != id || !subscription.InProgress(s.current.view.State) {
 		return subscription.State{}, nil
 	}
 	return s.current.view, nil
 }
 
-// Cancel 结束仍在等待的授权，完成后的账号不会被取消删除。
+// Cancel 结束仍在进行中的授权，完成后的账号不会被取消删除。
 func (s *Service) Cancel(id string) (subscription.State, error) {
 	s.mu.Lock()
 	if s.current == nil || s.current.view.ID != id {
@@ -86,7 +86,7 @@ func (s *Service) Cancel(id string) (subscription.State, error) {
 		return subscription.State{}, antigravity.Failure("invalid_input")
 	}
 	job := s.current
-	if job.view.State == "waiting" {
+	if subscription.InProgress(job.view.State) {
 		job.cancel()
 	}
 	s.mu.Unlock()
@@ -115,5 +115,5 @@ func (s *Service) Close() {
 func (s *Service) busy(id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.closed || s.current != nil && s.current.view.State == "waiting" && s.current.input.AccountID == id
+	return s.closed || s.current != nil && subscription.InProgress(s.current.view.State) && s.current.input.AccountID == id
 }

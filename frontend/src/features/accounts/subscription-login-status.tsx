@@ -1,7 +1,8 @@
-import { AlertCircle, Check, ExternalLink, LoaderCircle } from "lucide-react"
+import { AlertCircle, Check, LoaderCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "../../components/ui/button"
 import type { useSubscriptionLogin } from "./use-subscription-login"
+import { subscriptionInProgress } from "../../services/subscription"
+import { SubscriptionLoginLink } from "./subscription-login-link"
 
 export function SubscriptionLoginStatus({
   login,
@@ -10,10 +11,20 @@ export function SubscriptionLoginStatus({
 }) {
   const { t } = useTranslation()
   const waiting = login.view?.state === "waiting"
+  const inProgress = subscriptionInProgress(login.view?.state)
+  const phase = login.view?.state
+  const title =
+    phase === "verifying"
+      ? "subscription.verifying"
+      : phase === "saving"
+        ? "subscription.saving"
+        : phase === "exchanging"
+          ? "subscription.exchanging"
+          : "subscription.waiting"
   const complete = login.view?.state === "completed"
   return (
     <>
-      {login.starting && !waiting ? (
+      {login.starting && !inProgress ? (
         <div
           role="status"
           className="text-muted-foreground flex items-center gap-3 rounded-xl border p-4 text-sm"
@@ -25,7 +36,7 @@ export function SubscriptionLoginStatus({
           {t("subscription.starting")}
         </div>
       ) : null}
-      {waiting ? (
+      {inProgress ? (
         <div
           role="status"
           aria-atomic="true"
@@ -39,13 +50,13 @@ export function SubscriptionLoginStatus({
               />
             </span>
             <div className="space-y-1">
-              <p className="text-sm font-medium">{t("subscription.waiting")}</p>
+              <p className="text-sm font-medium">{t(title)}</p>
               <p className="text-muted-foreground text-xs leading-5">
-                {t("subscription.waitHint")}
+                {t(waiting ? "subscription.waitHint" : "subscription.processingHint")}
               </p>
             </div>
           </div>
-          {login.view?.userCode ? (
+          {waiting && login.view?.userCode ? (
             <div className="bg-background space-y-2 rounded-lg border border-dashed px-4 py-3 text-center">
               <p className="text-muted-foreground text-xs">{t("subscription.code")}</p>
               <code className="block font-mono text-2xl font-semibold tracking-[0.16em] break-all select-text">
@@ -53,16 +64,9 @@ export function SubscriptionLoginStatus({
               </code>
             </div>
           ) : null}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void login.open()}
-            className="w-full cursor-pointer"
-          >
-            <ExternalLink className="size-3.5" aria-hidden="true" />
-            {t("subscription.open")}
-          </Button>
+          {waiting && login.view?.url ? (
+            <SubscriptionLoginLink key={login.view.id} url={login.view.url} open={login.open} />
+          ) : null}
           <p className="text-muted-foreground border-t pt-3 text-xs leading-5">
             {t("subscription.backgroundHint")}
           </p>

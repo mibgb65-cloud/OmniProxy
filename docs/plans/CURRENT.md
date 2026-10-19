@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-016](../tasks/active/TASK-20261019-016-improve-oauth-progress-account-deletion.md)：订阅登录真实进度、复制链接与本地删除／官方退出解耦，正在实现与回归验证。
 
 ## Recently Completed
 

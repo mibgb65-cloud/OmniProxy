@@ -41,7 +41,7 @@ func (s *Service) Begin(ctx context.Context, input subscription.Input) (subscrip
 		}
 	}
 	s.mu.Lock()
-	busy := s.closed || s.current != nil && s.current.view.State == "waiting"
+	busy := s.closed || s.current != nil && subscription.InProgress(s.current.view.State)
 	s.mu.Unlock()
 	if busy {
 		return subscription.State{}, antigravity.Failure("busy")
@@ -139,10 +139,12 @@ func (s *Service) complete(ctx context.Context, job *session, server *http.Serve
 			err = antigravity.Failure("access_denied")
 			break
 		}
+		s.progress(job, "exchanging")
 		operation, cancel := context.WithTimeout(ctx, 30*time.Second)
 		cred, e := s.client.Exchange(operation, config, code, verifier, redirect)
 		err = e
 		if err == nil {
+			s.progress(job, "saving")
 			s.ops.Lock()
 			if operation.Err() != nil {
 				err = antigravity.Failure("cancelled")
@@ -165,6 +167,13 @@ func (s *Service) complete(ctx context.Context, job *session, server *http.Serve
 	if item.ID != "" {
 		job.view.Account = &item
 	}
+	s.mu.Unlock()
+	s.notify()
+}
+
+func (s *Service) progress(job *session, state string) {
+	s.mu.Lock()
+	job.view.State, job.view.URL = state, ""
 	s.mu.Unlock()
 	s.notify()
 }

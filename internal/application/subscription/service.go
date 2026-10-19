@@ -57,6 +57,7 @@ type Service struct {
 	root              string
 	factory           Factory
 	readToken         func(string, string, func([]byte, string) error) error
+	removeCredentials func(string) error
 	current           *session
 	history           map[string]State
 	onChange          func()
@@ -69,7 +70,7 @@ func New(accounts *account.Service, root string, factory Factory) *Service {
 	if factory == nil {
 		factory = codex.Open
 	}
-	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseToken, history: map[string]State{}}
+	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseToken, removeCredentials: codex.DeleteCredentials, history: map[string]State{}}
 }
 func failure(code string) error { return errors.New("subscription: " + code) }
 func randomID() (string, error) {

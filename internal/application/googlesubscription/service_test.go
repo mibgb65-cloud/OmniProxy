@@ -80,6 +80,13 @@ func setupService(t *testing.T) (*Service, *atomic.Int32) {
 
 func TestBrowserLoginRejectsInvalidStateAndPreservesSession(t *testing.T) {
 	manager, _ := setupService(t)
+	stages := make(chan string, 4)
+	manager.OnChange(func() {
+		manager.mu.Lock()
+		state := manager.current.view.State
+		manager.mu.Unlock()
+		stages <- state
+	})
 	view, err := manager.Begin(context.Background(), subscription.Input{ProviderID: "builtin_google", Mode: "browser"})
 	if err != nil {
 		t.Fatal(err)
@@ -114,6 +121,13 @@ func TestBrowserLoginRejectsInvalidStateAndPreservesSession(t *testing.T) {
 	completed, err := manager.Read(view.ID)
 	if err != nil || completed.State != "completed" || completed.URL != "" || completed.Account == nil || completed.Account.AuthAccountID != "1001" {
 		t.Fatal("successful login was not saved safely")
+	}
+	var observed []string
+	for len(stages) > 0 {
+		observed = append(observed, <-stages)
+	}
+	if strings.Join(observed, ",") != "exchanging,saving,completed" {
+		t.Fatalf("missing real Google authorization stages: %v", observed)
 	}
 	models, version, err := manager.Models(context.Background(), completed.Account.ID)
 	if err != nil || len(models) != 1 || version == "" {

@@ -162,6 +162,7 @@ func newFixture(t *testing.T) *fixture {
 		f.last, f.lastHome = client, home
 		return client, nil
 	})
+	f.manager.removeCredentials = func(string) error { return nil }
 	t.Cleanup(f.manager.Close)
 	return f
 }
