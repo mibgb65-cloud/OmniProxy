@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261019-012](../tasks/active/TASK-20261019-012-investigate-desktop-diff-compaction.md)：确认受管 GPT 目录禁用原生补丁工具、网关丢失 Compaction V2 标记且缺少 legacy compact 端点；已补显式补丁能力／有界 V2 透传／原生 JSON 压缩路径，CLI 与 Desktop 内核离线验证结构化变更和 contextCompaction 完成，双核心各三轮离线契约、定向回归和完整质量门／613 项前端测试通过，待提交归档。未改真实 Codex 配置或替换生产，未重新打包。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-012](../tasks/completed/2026-10/TASK-20261019-012-investigate-desktop-diff-compaction.md)：`697942b`，修复受管原生补丁工具能力、Compaction V2 标记丢失与 legacy compact 端点；CLI／Desktop 内核各三轮离线契约、HTTP／WebSocket 边界、压缩用量及完整质量门／613 项前端测试通过。真实 Codex 配置与生产二进制保持不变；尚未重新打包／发布／安装，真实上游、自动长上下文与 GUI 外壳验收不由离线契约替代。
 
 - [TASK-20261019-011](../tasks/completed/2026-10/TASK-20261019-011-build-local-beta8-installer.md)：`427bc33`，Beta.8 本地 production 安装包 19,351,559 bytes／SHA256 `730f7fce13674312953fca7386b1af4e002bc066bc229041a20a8dfae175a765`。完整质量门／613 前端测试、NSIS 和原生版本／资产校验通过；未签名、未自动安装或发布，原生产 Beta.7 保持运行。
 
