@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-017](../tasks/active/TASK-20261019-017-openai-account-rotation-settings.md)：精简 OpenAI 设置说明、全局检测提示及真实队列／平衡轮换，正在进行最终回归与质量门验证。
 
 ## Recently Completed
 

@@ -1,16 +1,22 @@
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
+import { useEffect } from "react"
 import {
   getCodexSettings,
   getCodexQuotaActivationStatus,
   setCodexQuotaAutoActivation,
+  type CodexActivationStatus,
 } from "../../services/codex-settings"
 import { ProviderSwitch } from "../providers/provider-switch"
 
-export function CodexQuotaActivationSettings() {
+export function CodexQuotaActivationSettings({
+  onResult,
+}: {
+  onResult: (status: CodexActivationStatus) => void
+}) {
   const { t } = useTranslation()
   const client = useQueryClient()
-  // 两个开关返回完整设置，保存期间共享锁，避免响应乱序覆盖另一开关。
+  // 各项设置返回完整对象，保存期间共享锁，避免响应乱序覆盖另一设置。
   const saving = useIsMutating({ mutationKey: ["codex-settings"] }) > 0
   const settings = useQuery({ queryKey: ["codex-settings"], queryFn: getCodexSettings })
   const save = useMutation({
@@ -31,6 +37,11 @@ export function CodexQuotaActivationSettings() {
   })
   const checked = settings.data?.autoQuotaActivation ?? false
   const disabled = !settings.isSuccess || settings.isFetching || saving
+  useEffect(() => {
+    if (checked && status.data && !status.data.running && status.data.updatedAt) {
+      onResult(status.data)
+    }
+  }, [checked, status.data, onResult])
   return (
     <section className="mt-4 space-y-3">
       <div className="space-y-2 rounded-lg border p-3">
@@ -49,12 +60,6 @@ export function CodexQuotaActivationSettings() {
         <p className="text-muted-foreground text-sm leading-6">
           {t("subscription.activation.description")}
         </p>
-        <p className="text-muted-foreground text-xs leading-5">
-          {t("subscription.activation.cost")}
-        </p>
-        <p className="text-muted-foreground text-xs leading-5">
-          {t("subscription.activation.saveHint")}
-        </p>
       </div>
       {save.isError ? (
         <p role="alert" className="text-destructive text-sm">
@@ -66,25 +71,10 @@ export function CodexQuotaActivationSettings() {
           {t(save.isPending ? "subscription.settings.saving" : "subscription.activation.saved")}
         </p>
       ) : null}
-      {settings.data?.autoQuotaActivation && status.data ? (
-        <div role="status" className="text-muted-foreground space-y-1 text-xs">
-          <p>
-            {t(
-              status.data.running
-                ? "subscription.activation.checking"
-                : "subscription.activation.summary",
-              {
-                checked: status.data.checked,
-                sent: status.data.sent,
-                activated: status.data.activated,
-              },
-            )}
-          </p>
-          {status.data.pending > 0 ? <p>{t("subscription.activation.pending")}</p> : null}
-          {status.data.failed > 0 || status.data.errorCode ? (
-            <p>{t("subscription.activation.failed")}</p>
-          ) : null}
-        </div>
+      {checked && status.data?.running ? (
+        <p role="status" className="text-muted-foreground text-xs">
+          {t("subscription.activation.checking")}
+        </p>
       ) : null}
       {status.isError && settings.data?.autoQuotaActivation ? (
         <p role="alert" className="text-destructive text-sm">

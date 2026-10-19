@@ -33,6 +33,10 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 	if len(request.Candidates) == 0 {
 		request.Candidates = []proxy.AccountCandidate{{AccountID: initial.accountID, UpdatedAt: initial.updatedAt}}
 	}
+	request.Candidates, err = s.rotateAccounts(ctx, initial, request)
+	if err != nil {
+		return err
+	}
 	if !enabled {
 		request.Candidates = request.Candidates[:1]
 	}

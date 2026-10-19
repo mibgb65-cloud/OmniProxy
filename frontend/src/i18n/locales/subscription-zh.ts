@@ -45,26 +45,27 @@ export const subscriptionZh = {
   "subscription.settings.websocket": "Codex WebSocket",
   "subscription.settings.websocketDescription":
     "允许 Codex CLI 和桌面端通过当前 OmniProxy 网关使用 WebSocket。关闭后拒绝 WebSocket 请求，普通 HTTP/SSE 仍可使用。",
-  "subscription.settings.websocketScope":
-    "此设置对所有 OpenAI 账号共用，只控制当前网关；不修改 Codex 认证或会话。修改后无需重启网关，已连接会话的下一次请求也会检查开关。",
   "subscription.settings.loading": "正在读取接入设置…",
   "subscription.settings.loadFailed": "无法读取接入设置，请重试。",
   "subscription.settings.retry": "重新读取",
   "subscription.settings.saveFailed": "保存失败，原有开关状态已保留，请重试。",
   "subscription.settings.saving": "正在保存…",
   "subscription.settings.saved": "设置已保存并生效。",
+  "subscription.rotation.title": "账号轮换方式",
+  "subscription.rotation.queue": "队列轮换",
+  "subscription.rotation.balanced": "平衡切换",
+  "subscription.rotation.queueDescription": "优先使用当前账号，额度耗尽后切换下一个可用账号。",
+  "subscription.rotation.balancedDescription":
+    "在可用账号间均衡分配请求；有最新额度时，剩余更多的账号分配更多请求。",
   "subscription.activation.title": "自动激活 Codex 额度窗口",
   "subscription.activation.description":
     "开启后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。",
-  "subscription.activation.cost":
-    "仅检测启用且已授权的 OpenAI 订阅账号。发送会消耗少量额度；同一窗口的发送结果不确定时只复查，不自动重发。",
-  "subscription.activation.saveHint":
-    "切换开关自动保存并生效；开启后立即检测，应用运行期间每 5 分钟检查。",
   "subscription.activation.saved": "自动激活设置已保存。",
   "subscription.activation.saveFailed": "自动激活设置未保存，原设置仍生效，请重试。",
   "subscription.activation.checking": "正在检测并复查额度窗口…",
   "subscription.activation.summary":
     "最近检查 {{checked}} 个账号，发送 {{sent}} 条消息，确认 {{activated}} 个账号窗口已开始计时。",
+  "subscription.activation.dismissNotice": "关闭额度检测提示",
   "subscription.activation.pending":
     "部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。",
   "subscription.activation.failed": "部分账号检测或激活未完成，请检查账号授权与网络。",

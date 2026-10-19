@@ -23,6 +23,7 @@ export interface AccountHealth {
 export interface CodexSettings {
     "webSocketEnabled": boolean;
     "autoQuotaActivation": boolean;
+    "accountRotationMode": string;
 }
 
 /**

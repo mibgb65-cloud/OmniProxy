@@ -45,6 +45,8 @@ type Info struct {
 type Service struct {
 	failover        *failoverState
 	failoverEnabled func(context.Context) (bool, error)
+	rotationMode    func(context.Context) (string, error)
+	rotation        rotationState
 	server          *proxy.Server
 	providers       ProviderReader
 	accounts        AccountAccess

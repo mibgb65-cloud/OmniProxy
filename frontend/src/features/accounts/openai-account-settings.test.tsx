@@ -18,6 +18,7 @@ vi.mock("../../services/codex-settings", () => ({
   setCodexWebSocketEnabled: vi.fn(),
   setCodexQuotaAutoActivation: vi.fn(),
   getCodexQuotaActivationStatus: vi.fn(),
+  setCodexAccountRotationMode: vi.fn(),
 }))
 
 function renderSettings() {
@@ -38,10 +39,12 @@ describe("OpenAI account settings", () => {
     useUIStore.setState({ language: "zh" })
     vi.mocked(getCodexSettings).mockResolvedValue({
       webSocketEnabled: true,
+      accountRotationMode: "queue",
       autoQuotaActivation: false,
     })
     vi.mocked(setCodexWebSocketEnabled).mockResolvedValue({
       webSocketEnabled: false,
+      accountRotationMode: "queue",
       autoQuotaActivation: false,
     })
     vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
@@ -96,6 +99,7 @@ describe("OpenAI account settings", () => {
     await user.keyboard("{Escape}")
     vi.mocked(getCodexSettings).mockResolvedValue({
       webSocketEnabled: false,
+      accountRotationMode: "queue",
       autoQuotaActivation: false,
     })
     await user.click(screen.getByRole("button", { name: "OpenAI 账号设置" }))
@@ -131,7 +135,11 @@ describe("OpenAI account settings", () => {
     "locks both switches during %s save across reopen and ignores an old read",
     async (setting) => {
       const activation = setting === "activation"
-      const next = { webSocketEnabled: activation, autoQuotaActivation: activation }
+      const next = {
+        webSocketEnabled: activation,
+        accountRotationMode: "queue",
+        autoQuotaActivation: activation,
+      }
       let finishSave!: () => void
       let finishRead!: () => void
       const setter = activation ? setCodexQuotaAutoActivation : setCodexWebSocketEnabled
@@ -151,11 +159,17 @@ describe("OpenAI account settings", () => {
       await user.click(toggle)
       expect(screen.getAllByRole("switch")).toHaveLength(2)
       screen.getAllByRole("switch").forEach((item) => expect(item).toBeDisabled())
+      screen.getAllByRole("radio").forEach((item) => expect(item).toBeDisabled())
       await user.click(screen.getByRole("button", { name: "关闭账号设置" }))
       vi.mocked(getCodexSettings).mockImplementationOnce(
         () =>
           new CancellablePromise((resolve) => {
-            finishRead = () => resolve({ webSocketEnabled: true, autoQuotaActivation: false })
+            finishRead = () =>
+              resolve({
+                webSocketEnabled: true,
+                accountRotationMode: "queue",
+                autoQuotaActivation: false,
+              })
           }),
       )
       await user.click(trigger)

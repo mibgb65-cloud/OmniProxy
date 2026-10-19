@@ -1,5 +1,12 @@
 # Architecture Overview
 
+## OpenAI 账号轮换（2026-10-20）
+
+迁移 035 在已有 Codex 设置表保存 queue／balanced，默认 queue 保留兼容。
+`application/gateway` 在既有同池计划上做有界、并发安全的平滑加权首次选号，实际转发仍走原有状态／版本核验和不可重放边界；
+额度权重只从 `application/subscription` 已验证的同版本、一分钟内完整观察读取，无新探测请求。
+缺少可比快照时等权分配，固定账号与其他提供商不变；Core 无新增依赖或调度接口。见 ADR-018。
+
 ## Codex 自动激活的滑动目标观测（2026-10-19）
 
 `quotaactivation` 将“未来日期”与“已开始”分开：以同身份的独立时间观测确认完整周期目标是否滑动，
@@ -256,7 +263,7 @@ Pure Go business logic: the proxy server, request parsing, model routing,
 account scheduling, quota tracking and usage collection. No HTTP framework
 types, no Wails types, no database types in its public API.
 
-当前 `internal/core/proxy` 使用标准库 `net/http` 实现 loopback 监听、启停串行化、请求校验、资源边界和普通／SSE 响应。`Upstream` 只使用 context、字节和 io.Reader 等 Go 类型，不携带凭证。`internal/application/gateway` 每次重新检查提供商与账号启用状态，在已有 UseAPIKey 回调内调用 `internal/provider/deepseek`。精确路由已接入，健康／负载调度仍未实现。
+当前 `internal/core/proxy` 使用标准库 `net/http` 实现 loopback 监听、启停串行化、请求校验、资源边界和普通／SSE 响应。`Upstream` 只使用 context、字节和 io.Reader 等 Go 类型，不携带凭证。`internal/application/gateway` 每次重新检查提供商与账号启用状态，在已有 UseAPIKey 回调内调用 `internal/provider/deepseek`。精确路由、同池故障切换与 OpenAI 订阅队列／平衡轮换已接入；更广泛的负载调度尚未实现。
 
 `internal/core/routing` 提供模型名校验、精确规则匹配、顶层 model 改写和纯元数据账号选择；`internal/application/routing` 通过迁移 003 的 model_routes 表保存规则，校验具体提供商与固定账号归属，并生成同源的列表诊断和只读匹配预览。网关使用可选 RequestRouter／ModelCatalog 接口解析后检查实际模型，并在 /v1/models 动态公布可解析别名。规则保存后即时生效，异常规则不静默回退。目标标识有意保留而不设置删除外键，资源删除后显示异常，保持既有删除 API 行为。详见 `docs/product/ROUTING.md`。
 

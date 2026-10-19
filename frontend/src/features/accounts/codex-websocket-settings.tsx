@@ -35,9 +35,6 @@ export function CodexWebSocketSettings() {
         <p className="text-muted-foreground text-sm leading-6">
           {t("subscription.settings.websocketDescription")}
         </p>
-        <p className="text-muted-foreground text-xs leading-5">
-          {t("subscription.settings.websocketScope")}
-        </p>
       </div>
       {settings.isPending ? (
         <p role="status" className="text-muted-foreground text-sm">

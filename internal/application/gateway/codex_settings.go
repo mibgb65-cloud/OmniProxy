@@ -8,8 +8,9 @@ import (
 
 // CodexSettings 是当前 OmniProxy 网关的应用级 Codex 接入设置。
 type CodexSettings struct {
-	WebSocketEnabled    bool `json:"webSocketEnabled"`
-	AutoQuotaActivation bool `json:"autoQuotaActivation"`
+	WebSocketEnabled    bool   `json:"webSocketEnabled"`
+	AutoQuotaActivation bool   `json:"autoQuotaActivation"`
+	AccountRotationMode string `json:"accountRotationMode"`
 }
 
 // CodexSettingsService 持久化非敏感开关，不读取或修改客户端身份、认证和会话。
@@ -21,10 +22,37 @@ func NewCodexSettingsService(db *sql.DB) *CodexSettingsService { return &CodexSe
 // Read 读取唯一设置记录；缺失或损坏必须报错，不能静默改变网关策略。
 func (s *CodexSettingsService) Read(ctx context.Context) (CodexSettings, error) {
 	var enabled, activation int
-	if s.db == nil || s.db.QueryRowContext(ctx, `SELECT websocket_enabled,auto_quota_activation FROM codex_settings WHERE id=1`).Scan(&enabled, &activation) != nil || (enabled != 0 && enabled != 1) || (activation != 0 && activation != 1) {
+	var mode string
+	if s.db == nil || s.db.QueryRowContext(ctx, `SELECT websocket_enabled,auto_quota_activation,account_rotation_mode FROM codex_settings WHERE id=1`).Scan(&enabled, &activation, &mode) != nil || (enabled != 0 && enabled != 1) || (activation != 0 && activation != 1) || !validRotationMode(mode) {
 		return CodexSettings{}, errors.New("gateway: configuration_unavailable")
 	}
-	return CodexSettings{WebSocketEnabled: enabled == 1, AutoQuotaActivation: activation == 1}, nil
+	return CodexSettings{WebSocketEnabled: enabled == 1, AutoQuotaActivation: activation == 1, AccountRotationMode: mode}, nil
+}
+
+func validRotationMode(mode string) bool { return mode == "queue" || mode == "balanced" }
+
+// SetAccountRotationMode 只更新轮换方式，拒绝未知值，不改变其他开关。
+func (s *CodexSettingsService) SetAccountRotationMode(ctx context.Context, mode string) (CodexSettings, error) {
+	if !validRotationMode(mode) {
+		return CodexSettings{}, errors.New("gateway: invalid_rotation_mode")
+	}
+	if s.db == nil {
+		return CodexSettings{}, errors.New("gateway: configuration_unavailable")
+	}
+	result, err := s.db.ExecContext(ctx, `UPDATE codex_settings SET account_rotation_mode=? WHERE id=1`, mode)
+	if err != nil {
+		return CodexSettings{}, errors.New("gateway: settings_save_failed")
+	}
+	count, err := result.RowsAffected()
+	if err != nil || count != 1 {
+		return CodexSettings{}, errors.New("gateway: settings_save_failed")
+	}
+	return s.Read(ctx)
+}
+
+func (s *CodexSettingsService) AccountRotationMode(ctx context.Context) (string, error) {
+	settings, err := s.Read(ctx)
+	return settings.AccountRotationMode, err
 }
 
 // SetWebSocketEnabled 原子保存网关 WebSocket 开关，立即影响新握手和后续会话请求。

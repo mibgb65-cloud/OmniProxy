@@ -55,8 +55,6 @@ export const subscriptionEn = {
   "subscription.settings.websocket": "Codex WebSocket",
   "subscription.settings.websocketDescription":
     "Allow Codex CLI and the desktop app to use WebSocket through this OmniProxy gateway. Disabling rejects WebSocket requests; HTTP/SSE remains available.",
-  "subscription.settings.websocketScope":
-    "Shared by all OpenAI accounts and applies to this gateway only. Codex authentication and sessions are preserved. Changes need no gateway restart and are checked on the next request of existing connections.",
   "subscription.settings.loading": "Loading connection settings…",
   "subscription.settings.loadFailed": "Could not load connection settings. Try again.",
   "subscription.settings.retry": "Reload settings",
@@ -64,19 +62,23 @@ export const subscriptionEn = {
     "Could not save. The previous switch state is kept. Try again.",
   "subscription.settings.saving": "Saving…",
   "subscription.settings.saved": "Settings saved and applied.",
+  "subscription.rotation.title": "Account rotation",
+  "subscription.rotation.queue": "Sequential",
+  "subscription.rotation.balanced": "Balanced",
+  "subscription.rotation.queueDescription":
+    "Use the current account until its quota is exhausted, then switch to the next available account.",
+  "subscription.rotation.balancedDescription":
+    "Distribute requests across available accounts. With fresh quota data, accounts with more remaining quota receive more requests.",
   "subscription.activation.title": "Automatically activate Codex quota windows",
   "subscription.activation.description":
     "When enabled, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped.",
-  "subscription.activation.cost":
-    "Only enabled, authorized OpenAI subscription accounts are checked. Messages consume a small amount of quota. Uncertain requests are rechecked without being resent in the same window.",
-  "subscription.activation.saveHint":
-    "Changes are saved and applied automatically. Checks immediately when enabled and every 5 minutes while the app runs.",
   "subscription.activation.saved": "Automatic activation settings saved.",
   "subscription.activation.saveFailed":
     "Automatic activation settings were not saved. Your previous settings remain active. Try again.",
   "subscription.activation.checking": "Checking and rechecking quota windows…",
   "subscription.activation.summary":
     "Last check: {{checked}} accounts, {{sent}} messages sent, {{activated}} accounts confirmed with timers running.",
+  "subscription.activation.dismissNotice": "Dismiss quota check notice",
   "subscription.activation.pending":
     "Some windows are still being observed or await confirmation. Requests already sent are only rechecked, never resent automatically.",
   "subscription.activation.failed":

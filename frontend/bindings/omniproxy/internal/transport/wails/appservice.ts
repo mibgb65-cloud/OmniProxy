@@ -627,6 +627,13 @@ export function SetCloseBehavior(value: string): $CancellablePromise<string> {
 }
 
 /**
+ * SetCodexAccountRotationMode 保存 OpenAI 同池账号轮换方式。
+ */
+export function SetCodexAccountRotationMode(mode: string): $CancellablePromise<gateway$0.CodexSettings> {
+    return $Call.ByID(4115012492, mode);
+}
+
+/**
  * SetCodexQuotaAutoActivation 保存明确授权的自动激活开关，开启后唤醒后台检测。
  */
 export function SetCodexQuotaAutoActivation(enabled: boolean): $CancellablePromise<gateway$0.CodexSettings> {

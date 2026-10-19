@@ -14,3 +14,8 @@ func (s *AppService) GetCodexSettings() (gateway.CodexSettings, error) {
 func (s *AppService) SetCodexWebSocketEnabled(enabled bool) (gateway.CodexSettings, error) {
 	return gateway.NewCodexSettingsService(s.db).SetWebSocketEnabled(context.Background(), enabled)
 }
+
+// SetCodexAccountRotationMode 保存 OpenAI 同池账号轮换方式。
+func (s *AppService) SetCodexAccountRotationMode(mode string) (gateway.CodexSettings, error) {
+	return gateway.NewCodexSettingsService(s.db).SetAccountRotationMode(context.Background(), mode)
+}
