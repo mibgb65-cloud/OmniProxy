@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261019-017](../tasks/active/TASK-20261019-017-openai-account-rotation-settings.md)：精简 OpenAI 设置说明、全局检测提示及真实队列／平衡轮换，正在进行最终回归与质量门验证。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-017](../tasks/completed/2026-10/TASK-20261019-017-openai-account-rotation-settings.md)：`58521d1`，OpenAI 设置精简三段补充说明，新增持久队列／平衡模式，真实同池请求按新鲜额度加权或等权轮换；检测摘要采用去重的 5 秒全局提示。迁移 035、固定／耗尽／不重放／并发／容量边界及完整门禁／629 项前端测试、Windows 构建通过；原生 UIA 未取得可靠结果，真实额度效果仍待人工验收，未发布或替换生产程序。
 
 - [TASK-20261019-016](../tasks/completed/2026-10/TASK-20261019-016-improve-oauth-progress-account-deletion.md)：`4d0e76c`，登录弹窗展示真实处理阶段、支持复制链接和轮询恢复；ChatGPT 删除仅清理本地授权，不启动官方组件或调用 Logout。完整门禁／625 项前端测试、关键回归 10 轮及隔离 SQLite／DPAPI／Win32 删除验收通过；原生 UIA 验收未取得可靠结果，真实 OAuth 仍待人工验收，未发布或替换生产程序。
 
