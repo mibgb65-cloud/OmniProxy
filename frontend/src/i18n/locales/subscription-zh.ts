@@ -87,6 +87,9 @@ export const subscriptionZh = {
   "subscription.quota.resetAt": "重置时间：{{time}}",
   "subscription.quota.created": "创建:",
   "subscription.quota.updated": "更新:",
+  "subscription.error.quota_timeout": "额度查询超时，请检查网络后刷新。",
+  "subscription.error.quota_refresh_failed":
+    "授权刷新失败，请检查网络后重试；若仍失败，请刷新账号状态。",
   "subscription.error.quota_unavailable": "额度查询失败，请稍后刷新。",
   "subscription.error.quota_not_authenticated": "请重新登录后查询额度。",
   "subscription.accountIdUnknown": "待获取",

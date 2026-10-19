@@ -100,6 +100,9 @@ export const subscriptionEn = {
   "subscription.quota.resetAt": "Reset: {{time}}",
   "subscription.quota.created": "Created:",
   "subscription.quota.updated": "Updated:",
+  "subscription.error.quota_timeout": "Quota query timed out. Check your connection and refresh.",
+  "subscription.error.quota_refresh_failed":
+    "Authorization refresh failed. Check your connection and retry; if it persists, refresh the account status.",
   "subscription.error.quota_unavailable": "Quota could not be loaded. Please refresh later.",
   "subscription.error.quota_not_authenticated": "Sign in again to check quota.",
   "subscription.accountIdUnknown": "Pending",

@@ -94,6 +94,18 @@ describe("subscription quota", () => {
     expect(await screen.findByText("部分额度窗口暂未返回。")).toBeInTheDocument()
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
+  it.each([
+    ["quota_timeout", "额度查询超时，请检查网络后刷新。"],
+    ["quota_refresh_failed", "授权刷新失败，请检查网络后重试；若仍失败，请刷新账号状态。"],
+  ])("explains %s without exposing upstream details", async (code, message) => {
+    vi.mocked(readSubscriptionQuota).mockRejectedValue(
+      new Error(`subscription: ${code} private-quota-marker`),
+    )
+    setup()
+    expect(await screen.findByRole("alert")).toHaveTextContent(message)
+    expect(screen.queryByText(/private-quota-marker/)).not.toBeInTheDocument()
+    expect(readSubscriptionQuota).toHaveBeenCalledTimes(1)
+  })
   it("shows a safe failure and supports an explicit retry", async () => {
     vi.mocked(readSubscriptionQuota).mockRejectedValue(
       new Error("subscription: quota_unavailable private-quota-value"),

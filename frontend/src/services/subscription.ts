@@ -60,6 +60,8 @@ export function subscriptionError(error: unknown) {
     "reset_unavailable",
     "reset_no_credit",
     "reset_not_usable",
+    "quota_timeout",
+    "quota_refresh_failed",
     "quota_unavailable",
     "quota_not_authenticated",
     "account_id_pending",
