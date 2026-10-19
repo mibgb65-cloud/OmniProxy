@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -53,7 +53,7 @@ In Progress
 
 ## Documentation
 
-已同步 PRD、UPDATE、架构概览及 ADR-017 的显式自动下载补充。当前概览将在任务归档时更新。
+已同步 PRD、UPDATE、架构概览及 ADR-017 的显式自动下载补充。当前概览已更新并链接本任务归档。
 
 ## Remaining Risks
 
@@ -69,8 +69,12 @@ In Progress
 
 ## Git
 
-实现与验证完成，准备提交；无推送。
+实现提交：`cc59582f2e3ee865a6e257aea22f487852df79df` — `feat(updates): 优化更新页面并支持可选自动下载与悬浮提示`。任务归档另作独立文档提交；未推送。
 
 ## Result
 
 三项界面与交互需求已实现，完整质量门和原生窗口验收通过，开发版保持运行。
+
+## Completed
+
+2026-10-19 17:16（Asia/Singapore）
