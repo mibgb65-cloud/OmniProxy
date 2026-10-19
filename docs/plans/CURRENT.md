@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-012](../tasks/active/TASK-20261019-012-investigate-desktop-diff-compaction.md)：确认受管 GPT 目录禁用原生补丁工具、网关丢失 Compaction V2 标记且缺少 legacy compact 端点；已补显式补丁能力／有界 V2 透传／原生 JSON 压缩路径，CLI 与 Desktop 内核离线验证结构化变更和 contextCompaction 完成，双核心各三轮离线契约、定向回归和完整质量门／613 项前端测试通过，待提交归档。未改真实 Codex 配置或替换生产，未重新打包。
 
 ## Recently Completed
 

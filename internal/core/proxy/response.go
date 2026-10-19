@@ -43,6 +43,9 @@ func copyResponse(w http.ResponseWriter, response Response, stream bool, committ
 	if len(protocol) > 0 && protocol[0] == "messages" {
 		valid = json.Unmarshal(body, &envelope) == nil && envelope.Content != nil
 	}
+	if len(protocol) > 0 && protocol[0] == "responses/compact" {
+		valid = validCompactionResult(body)
+	}
 	if !valid || hasUpstreamError(body) {
 		return Failure("invalid_upstream_response", 502)
 	}

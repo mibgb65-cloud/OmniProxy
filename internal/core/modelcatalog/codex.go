@@ -31,7 +31,7 @@ type codexModel struct {
 	DefaultReasoningSummary  string         `json:"default_reasoning_summary"`
 	SupportVerbosity         bool           `json:"support_verbosity"`
 	DefaultVerbosity         any            `json:"default_verbosity"`
-	ApplyPatchToolType       any            `json:"apply_patch_tool_type"`
+	ApplyPatchToolType       *string        `json:"apply_patch_tool_type"`
 	TruncationPolicy         truncation     `json:"truncation_policy"`
 	ContextWindow            *int64         `json:"context_window,omitempty"`
 	ExperimentalTools        []string       `json:"experimental_supported_tools"`
@@ -61,11 +61,19 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 			value := entry.Metadata.DefaultEffort
 			defaultEffort = &value
 		}
+		instructions := codingInstructions
+		var patchType *string
+		if entry.ProviderKind == "openai" {
+			// 原生订阅支持自定义工具；缺失此能力会让核心不注册补丁工具，文件写入无法形成结构化变更项。
+			instructions += " Prefer the native apply_patch tool for manual file edits when available, so the client can track structured file changes."
+			value := "freeform"
+			patchType = &value
+		}
 		models = append(models, codexModel{
 			Slug: entry.ID, DisplayName: entry.Name, Description: entry.Metadata.Description,
 			DefaultReasoningLevel: defaultEffort, ReasoningLevels: efforts,
-			ShellType: "unified_exec", Visibility: "list", SupportedInAPI: true, Priority: index,
-			BaseInstructions: codingInstructions, ModelMessages: map[string]any{"instructions_template": codingInstructions},
+			ApplyPatchToolType: patchType, ShellType: "unified_exec", Visibility: "list", SupportedInAPI: true, Priority: index,
+			BaseInstructions: instructions, ModelMessages: map[string]any{"instructions_template": instructions},
 			SupportsReasoningSummary: false, DefaultReasoningSummary: "none",
 			TruncationPolicy: truncation{"bytes", 10000}, ContextWindow: entry.Metadata.ContextWindow,
 			ExperimentalTools: []string{}, InputModalities: codexInputModalities(entry),

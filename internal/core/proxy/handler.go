@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// ServeHTTP 只开放模型列表和 Chat Completions，不提供通用 URL 转发能力。
+// ServeHTTP 只开放固定模型／推理／压缩端点，不提供通用 URL 转发能力。
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Cache-Control", "no-store")
@@ -43,12 +43,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	var metadata CodexMetadata
+	if path == "/v1/responses" || path == "/v1/responses/compact" {
+		var err error
+		metadata, err = readCodexMetadata(r.Header)
+		if err != nil {
+			writeFailure(w, err)
+			return
+		}
+	}
 	if path == "/v1/responses" && r.Method == http.MethodGet && strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
 		if err := s.webSocketPolicy(r.Context()); err != nil {
 			writeFailure(w, err)
 			return
 		}
-		s.serveResponsesSocket(w, r, key)
+		s.serveResponsesSocket(w, r, key, metadata)
 		return
 	}
 	if path == "/v1/models" && r.Method == http.MethodGet {
@@ -59,7 +68,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.writeModelCatalog(w, r, true)
 		return
 	}
-	if path != "/v1/chat/completions" && path != "/v1/responses" && path != "/v1/messages" {
+	if path != "/v1/chat/completions" && path != "/v1/responses" && path != "/v1/messages" && path != "/v1/responses/compact" {
 		writeFailure(w, Failure("not_found", 404))
 		return
 	}
@@ -69,6 +78,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	protocol := strings.TrimPrefix(path, "/v1/")
+	if protocol == "responses/compact" {
+		protocol = "responses"
+	}
 	if protocol == "chat/completions" {
 		protocol = "chat"
 	}
@@ -129,6 +141,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	request.Trace = trace
 	request.ClientUserAgent = r.UserAgent()
+	request.CodexMetadata = metadata
 	if err := trace.Update(r.Context(), request, TargetSnapshot{}); err != nil {
 		writeFailure(w, err)
 		return
@@ -152,7 +165,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	committed := false
 	err = s.opts.Upstream.Forward(ctx, request, func(response Response) error {
-		return copyResponse(w, response, request.Stream, &committed, request.Protocol)
+		return copyResponse(w, response, request.Stream, &committed, responseProtocol(request))
 	})
 	if err != nil && !committed {
 		writeFailure(w, safeFailure(ctx, err))

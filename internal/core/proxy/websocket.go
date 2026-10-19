@@ -9,7 +9,7 @@ import (
 )
 
 // serveResponsesSocket 支持内置 Codex 的 WebSocket，连接上下文仅在内存中保存。
-func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, key string) {
+func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, key string, metadata CodexMetadata) {
 	select {
 	case s.socketSlots <- struct{}{}:
 		defer func() { <-s.socketSlots }()
@@ -102,6 +102,12 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			cancel()
 			history, lastID = input, id
 			continue
+		}
+		request.CodexMetadata, err = frameCodexMetadata(metadata, fields["client_metadata"])
+		metadata.TurnMetadata = ""
+		if err != nil {
+			socketError(r.Context(), socket, "invalid_request")
+			return
 		}
 		select {
 		case s.slots <- struct{}{}:

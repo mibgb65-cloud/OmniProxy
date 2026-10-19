@@ -248,3 +248,17 @@ JSON 嵌套／重复字段、鉴权、并发、读取超时和只监听 loopback
 HTTP／WebSocket，并由实际 CLI 0.163.0／Desktop 内核 0.163.0-alpha.10.2 附件请求识别
 正确颜色与形状，共四次完整图片请求，用量及首字均记录。不是 Desktop GUI 外壳逐项验收；
 测试使用独立数据库／端口／客户端目录，只读使用应用隔离凭据，没有改动用户真实配置或图片。
+
+## Codex Desktop 文件变更与上下文压缩
+
+Codex 的对话变更摘要依赖客户端核心生成的 `fileChange`／`turn/diff/updated`，不是网关从回答文本或 Git 日志推算。受管 Codex 模型目录为原生 OpenAI Responses 条目声明 `apply_patch_tool_type=freeform` 并提示优先用原生补丁工具进行手工编辑；其他提供商不推断该能力。仅通过脚本、格式化器或外部程序写文件，不保证形成相同的原生补丁事件。
+
+目录修复需要刷新受管模型目录并重启／重新加载 Codex 后才能进入新工具列表；旧会话已发生的终端写入不会因此补生成历史变更摘要。新核心的回环契约覆盖新增／修改／删除三种文件操作，不能将此等同于所有 Desktop 外壳版本的视觉验收。
+
+当前 Codex 0.163 核心的独立压缩采用 Compaction V2，经普通 Responses 请求携带 `remote_compaction_v2` 与回合压缩元数据，返回 SSE 中的加密 compaction 项。网关通过长度、JSON／重复字段和功能白名单校验保留这两项协议头，仅发送给固定 ChatGPT 端点且不记入日志；WebSocket 使用当前帧元数据，避免沿用旧压缩回合标记。真实本机 CLI／Desktop 核心的离线契约覆盖完整压缩生命周期；不将此当作真实大上下文或外壳 UI 已验收。
+
+网关支持固定的 `POST /v1/responses/compact` 和带独立接入 Key 的 Codex 等价路径。压缩复用账号路由、授权、既有网关请求期限、并发／请求大小限制和用量记账；它不是普通的流式 Responses 推理。仅原生 ChatGPT 订阅适配器访问固定官方 `responses/compact` 端点，完整保留不透明压缩项和历史输入，不修改成 `stream=true`。其他适配器返回 `compaction_not_supported`，不通过 Chat／Messages 转换伪造摘要。
+
+自动压缩触发阈值由 Codex 的 `model_auto_compact_token_limit` 与模型实际能力决定，独立于请求传输压缩 `enable_request_compression`。用户原有全局上下文窗口／压缩阈值不会被本轮修复改写；配置较大窗口不等于官方已确认该模型可承载同样容量。接口修复不会自动修复既有失败会话或证明真实大上下文压缩已成功。
+
+协议对照：[官方 App Server 文档](https://learn.chatgpt.com/docs/app-server)、[Codex 配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)、[Responses 压缩说明](https://developers.openai.com/api/docs/guides/compaction)。实际桌面内核的 V2 路径以本机离线契约确认，不根据公共 API 的 legacy 示例推断。

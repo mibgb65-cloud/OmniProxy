@@ -42,16 +42,36 @@ func (c *Client) Forward(ctx context.Context, key []byte, accountID string, requ
 		return proxy.Failure("invalid_request", 400)
 	}
 	defer clear(raw)
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://chatgpt.com/backend-api/codex/responses", bytes.NewReader(raw))
+	return c.send(ctx, key, accountID, raw, false, request.CodexMetadata, consume)
+}
+
+func (c *Client) send(ctx context.Context, key []byte, accountID string, raw []byte, compact bool, metadata proxy.CodexMetadata, consume func(proxy.Response) error) error {
+	if !proxy.ValidCodexMetadata(metadata) {
+		return proxy.Failure("invalid_request", 400)
+	}
+	endpoint := "https://chatgpt.com/backend-api/codex/responses"
+	accept := "text/event-stream"
+	if compact {
+		endpoint += "/compact"
+		accept = "application/json"
+	}
+	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewReader(raw))
 	if err != nil {
 		return proxy.Failure("upstream_unavailable", 502)
 	}
 	req.Header.Set("Authorization", "Bearer "+string(key))
 	req.Header.Set("ChatGPT-Account-ID", accountID)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Accept", accept)
 	req.Header.Set("OpenAI-Beta", "responses=experimental")
 	req.Header.Set("Originator", "codex_cli_rs")
+	// V2 压缩走普通 Responses；丢弃这些标记会使客户端收不到所需的 compaction 项。
+	if metadata.BetaFeatures != "" {
+		req.Header.Set("X-Codex-Beta-Features", metadata.BetaFeatures)
+	}
+	if metadata.TurnMetadata != "" {
+		req.Header.Set("X-Codex-Turn-Metadata", metadata.TurnMetadata)
+	}
 	defer req.Header.Del("Authorization")
 	defer req.Header.Del("ChatGPT-Account-ID")
 	resp, err := c.http.Do(req)
@@ -59,5 +79,9 @@ func (c *Client) Forward(ctx context.Context, key []byte, accountID string, requ
 		return proxy.Failure("upstream_unavailable", 502)
 	}
 	defer resp.Body.Close()
-	return consume(inferResponseType(proxy.Response{StatusCode: resp.StatusCode, ContentType: resp.Header.Get("Content-Type"), RetryAfter: resp.Header.Get("Retry-After"), Body: resp.Body}))
+	result := proxy.Response{StatusCode: resp.StatusCode, ContentType: resp.Header.Get("Content-Type"), RetryAfter: resp.Header.Get("Retry-After"), Body: resp.Body}
+	if !compact {
+		result = inferResponseType(result)
+	}
+	return consume(result)
 }

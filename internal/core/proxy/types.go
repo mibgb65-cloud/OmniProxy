@@ -22,6 +22,9 @@ const (
 
 // Request 保留协议正文；只解析代理需要的模型和流式标志。
 type Request struct {
+	CodexMetadata CodexMetadata
+	// Compaction 仅由固定 HTTP 端点设置，不接受正文声明或跨协议伪造。
+	Compaction   bool
 	Candidates   []AccountCandidate
 	FixedAccount bool
 	// 仅有界保留真实客户端标识供要求工具身份的上游使用，不包含认证头或进入日志。

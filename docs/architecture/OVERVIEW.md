@@ -145,7 +145,7 @@ Gemini Chat JSON／增量 SSE 转换；只接受固定官方 HTTPS 主机并保�
 
 2026-10-10：`application/routing` 从目录派生默认同名映射，迁移 012 独立保存模型服务商偏好，读取默认列表不创建手工规则。精确规则保持强制目标语义；未命中时由独立核心账号选择函数将优先服务商排在原创建时间／ID 顺序之前。无可用优先候选时回落到其他同名模型候选，网关、预览和客户端目录共享此决策，不引入请求失败重试。
 
-`core/agentprotocol` 负责文本和工具的协议转换；`core/proxy` 负责鉴权、HTTP/SSE 与 WebSocket 生命周期，不读取凭据。`application/gateway` 协调 DeepSeek API Key 和隔离 ChatGPT 订阅回调。`infrastructure/codex` 在内存兼容官方 keyring／age 授权；`provider/chatgpt` 只转发到固定官方端点。原始 Responses 保留流式能力，跨协议有界收集完整结果后输出目标格式。
+`core/agentprotocol` 负责文本和工具的协议转换；`core/proxy` 负责鉴权、HTTP/SSE 与 WebSocket 生命周期，不读取凭据。`application/gateway` 协调 DeepSeek API Key 和隔离 ChatGPT 订阅回调。`infrastructure/codex` 在内存兼容官方 keyring／age 授权；`provider/chatgpt` 只转发到固定官方端点。原始 Responses 保留流式能力，跨协议有界收集完整结果后输出目标格式。 Codex Compaction V2 通过普通 Responses 保留经校验的功能标记和回合元数据；legacy 独立 Compaction 使用受信请求标志，经固定原生订阅端点返回 JSON。两者均不进入跨协议转换、不修改加密上下文。受管原生 Codex 目录显式声明 freeform 补丁能力，文件变更事件由客户端核心产生。
 
 2026-10-13：迁移 015 在既有模型偏好记录增加有界服务商顺序，将旧首选迁移为单项列表，保留旧字段和首选接口。核心账号选择先按服务商顺序，再按创建时间／ID；不可用的服务商跳过，未排序候选沿用自动选择。Wails 增加顺序保存接口，默认映射返回可用性与完整顺序，预览返回实际优先级；网关与客户端目录继续复用同一解析，无请求失败重试。
 

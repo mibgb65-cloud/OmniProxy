@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"encoding/json"
 	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/core/routing"
@@ -20,7 +21,7 @@ func ParseProtocolRequest(body []byte, path string) (Request, error) {
 	if json.Unmarshal(body, &fields) != nil || fields == nil {
 		return Request{}, Failure("invalid_request", 400)
 	}
-	request := Request{Body: body, Protocol: "responses"}
+	request := Request{Body: body, Protocol: "responses", Compaction: path == "/v1/responses/compact"}
 	validModel := routing.ValidModel
 	if path == "/v1/messages" {
 		validModel = catalog.ValidClaudeModel
@@ -31,7 +32,13 @@ func ParseProtocolRequest(body []byte, path string) (Request, error) {
 	if raw, ok := fields["stream"]; ok && json.Unmarshal(raw, &request.Stream) != nil {
 		return Request{}, Failure("invalid_request", 400)
 	}
-	input := fields["input"]
+	if request.Compaction && request.Stream {
+		return Request{}, Failure("invalid_request", 400)
+	}
+	input := bytes.TrimSpace(fields["input"])
+	if request.Compaction && (len(input) == 0 || input[0] != '[') {
+		return Request{}, Failure("invalid_messages", 400)
+	}
 	if path == "/v1/messages" {
 		request.Protocol = "messages"
 		input = fields["messages"]
@@ -56,7 +63,7 @@ func requestBodyLimit(path string) int {
 	if path == "/v1/messages" {
 		return MaxMessagesRequestBytes
 	}
-	if path == "/v1/responses" {
+	if path == "/v1/responses" || path == "/v1/responses/compact" {
 		return MaxResponsesRequestBytes
 	}
 	return MaxRequestBytes
