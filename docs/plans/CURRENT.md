@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.8 — 本地生产安装版，未发布 GitHub、未自动安装。源码 `427bc33`，包含额度查询前官方续期、30 秒预算与安全阶段诊断，以及更新页／可选自动下载改进；保留 Beta.7 登录和 GUI 日志修复。隔离源码完整质量门、613 项前端测试、NSIS 打包、Windows 原生版本和 SHA256 校验通过。安装包位于 `release-assets/v2.0.0-beta.8/`，未签名；真实安装／新二进制 GUI 运行验收未执行，原生产 PID 30124 仍为 Beta.7。
+2.0.0-beta.9 — 本地 Windows amd64 production 安装版，未发布、未自动安装。源码 `d00dc59`，包含 Codex 原生文件变更摘要与 V2／legacy 上下文压缩修复，以及 Beta.8 既有修复。隔离源码完整质量门／616 项前端测试、NSIS、Windows 版本与 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.9/`，未签名。真实安装／升级、GUI 和超长会话验收由用户后续执行；现有生产与真实配置未替换。
 
 ## In Progress
 
-- [TASK-20261019-013](../tasks/active/TASK-20261019-013-build-local-beta9-installer.md)：构建包含 Codex 原生变更摘要与上下文压缩修复的本地 Beta.9 生产安装包；隔离源码执行完整质量门及 NSIS 打包，不自动安装或发布。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-013](../tasks/completed/2026-10/TASK-20261019-013-build-local-beta9-installer.md)：`d00dc59`，Beta.9 本地 production 安装包 19360936 bytes／SHA256 `ce6b5ba081878ea6ff5c49bdbe91c7d587a8f51d9ec0dcc76f9c2ed74fb0957b`；隔离源码完整质量门／616 前端测试、NSIS、原生版本、production 标签及资产校验通过。未签名、未自动安装或发布，交付用户自行安装测试。
 
 - [TASK-20261019-012](../tasks/completed/2026-10/TASK-20261019-012-investigate-desktop-diff-compaction.md)：`697942b`，修复受管原生补丁工具能力、Compaction V2 标记丢失与 legacy compact 端点；CLI／Desktop 内核各三轮离线契约、HTTP／WebSocket 边界、压缩用量及完整质量门／613 项前端测试通过。真实 Codex 配置与生产二进制保持不变；尚未重新打包／发布／安装，真实上游、自动长上下文与 GUI 外壳验收不由离线契约替代。
 
