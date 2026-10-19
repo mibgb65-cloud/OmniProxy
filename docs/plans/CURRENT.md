@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.6 — 本地测试构建，未发布 GitHub。源码 `f31918d`，包含 Codex Desktop 大首事件兼容／安全诊断及订阅 5h／周额度耗尽轮换；完整质量门、576 前端测试、两种实际原生内核的隔离契约、Windows 版本资源和安装器 SHA256 校验通过。本地包位于 `release-assets/v2.0.0-beta.6/`。本轮不自动安装、重启或改共享客户端配置，真实 ChatGPT.exe 新会话由用户安装后复测。
+2.0.0-beta.7 — 本地测试构建，未发布 GitHub。源码 `9d001ec`，修复混合 Google 订阅导致 ChatGPT 授权开始前失败、通用错误提示和 GUI 缺失 stderr 时日志丢失；保留 Beta.6 的 5h／周轮换及 Desktop 兼容。完整质量门、577 前端测试、混合账号模拟授权、官方组件独立初始化、真实无 stderr GUI 日志及 Windows 版本／摘要校验通过。本地安装包位于 `release-assets/v2.0.0-beta.7/`，本轮未自动替换生产 beta.6 或改共享登录配置。
 
 ## In Progress
 
 暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-007](../tasks/completed/2026-10/TASK-20261019-007-investigate-subscription-login-failure.md)：`9d001ec`，Codex 授权清理只读取自己的提供商引用，补充稳定错误提示与开始前日志；日志出口失败不阻断其他出口。先失败后通过的回归、官方组件初始化、真实 GUI 无 stderr 日志和完整门禁／577 前端测试通过。本地 Beta.7 安装器 19305220 bytes／SHA256 `0d56116d6137b6bfc857b355131bd7535f859a323561f9e4cb4727ff92c5c9fa`，未发布或自动安装。
 
 - [TASK-20261019-006](../tasks/completed/2026-10/TASK-20261019-006-optimize-quota-failover-local-beta6.md)：`f31918d`，5h／周任一窗口耗尽后选择同池可用账号，覆盖重置、版本／陈旧快照、执行前明确拒绝、未同步备用及不重放边界；本地 Beta.6 安装包 19,300,902 bytes／SHA256 `fd60945e3373727c5b5fe2847e00ba3226207ab516590516dfde04b76844e638`。完整质量门、双原生内核契约和版本／资产校验通过，未发布或自动安装。
 - [TASK-20261019-005](../tasks/completed/2026-10/TASK-20261019-005-investigate-desktop-cli-difference.md)：区分 CLI 成功与 Desktop 新会话失败；交付 2 MiB Responses 首事件兼容与固定安全诊断，合入本地 Beta.6。历史真实首事件未保存，不将开关差异或隔离测试冒充唯一根因与 GUI 验收。
