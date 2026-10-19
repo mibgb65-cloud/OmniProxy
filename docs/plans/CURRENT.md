@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-015](../tasks/active/TASK-20261019-015-build-local-beta10-installer.md)：构建包含额度查询超时修复的 Beta.10 本地 production 安装包；隔离执行完整门禁、NSIS 打包和资产校验，不发布或自动安装。
 
 ## Recently Completed
 

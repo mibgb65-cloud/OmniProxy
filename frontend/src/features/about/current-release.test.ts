@@ -34,6 +34,16 @@ describe("当前版本发行说明", () => {
     "未知或无效版本 %s 不替换为最新版本或读取任意文件",
     (version) => expect(getCurrentReleaseNotes(version)).toBeUndefined(),
   )
+  it.each(["2.0.0-beta.10", "v2.0.0-beta.10", "2.0.0-beta.10+local.123"])(
+    "Beta.10 按运行版本 %s 提供额度修复与本地更新说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## 额度查询超时修复")
+      expect(notes).toContain("## 自动激活与安全边界")
+      expect(notes).toContain("真实过期授权、上游网络及自动激活效果仍需安装后验收")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
