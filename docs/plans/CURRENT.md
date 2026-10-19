@@ -4,13 +4,16 @@
 
 ## Current Version
 
-2.0.0-beta.5 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.5)，包含原生 OpenAI 图片输入与 Codex 滑动占位额度窗口自动激活修复，继承 Beta.4 订阅流式兼容。发布源 `1310382`，CI／Release、576 前端测试与完整质量门、独立用户级安装生命周期、033→034 登记保留、真实更新发现与公开资产 SHA256 均通过。用户生产仍为 Beta.4，未自动升级、重启或改共享配置；图片需升级后受控重新应用目录／重载客户端，真实账号自动激活仍待升级后核验。
+2.0.0-beta.6 — 本地测试构建，未发布 GitHub。源码 `f31918d`，包含 Codex Desktop 大首事件兼容／安全诊断及订阅 5h／周额度耗尽轮换；完整质量门、576 前端测试、两种实际原生内核的隔离契约、Windows 版本资源和安装器 SHA256 校验通过。本地包位于 `release-assets/v2.0.0-beta.6/`。本轮不自动安装、重启或改共享客户端配置，真实 ChatGPT.exe 新会话由用户安装后复测。
 
 ## In Progress
 
 暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-006](../tasks/completed/2026-10/TASK-20261019-006-optimize-quota-failover-local-beta6.md)：`f31918d`，5h／周任一窗口耗尽后选择同池可用账号，覆盖重置、版本／陈旧快照、执行前明确拒绝、未同步备用及不重放边界；本地 Beta.6 安装包 19,300,902 bytes／SHA256 `fd60945e3373727c5b5fe2847e00ba3226207ab516590516dfde04b76844e638`。完整质量门、双原生内核契约和版本／资产校验通过，未发布或自动安装。
+- [TASK-20261019-005](../tasks/completed/2026-10/TASK-20261019-005-investigate-desktop-cli-difference.md)：区分 CLI 成功与 Desktop 新会话失败；交付 2 MiB Responses 首事件兼容与固定安全诊断，合入本地 Beta.6。历史真实首事件未保存，不将开关差异或隔离测试冒充唯一根因与 GUI 验收。
 
 - [TASK-20261019-002](../tasks/completed/2026-10/TASK-20261019-002-publish-v2-beta5.md)：已完成修复全部纳入并推送 main，发布源 `1310382`／新标签 v2.0.0-beta.5。CI `39189311494`、Release `39190351905` 成功；公开安装器 19,299,192 bytes／SHA256 `a12b4a554051a0e60d6bd7ebfbce9184f660c39a0d523eed9186fb913b894adb`，实际更新器、原生资源与两资产 digest 核对通过。迁移 034 保留旧发送登记，11 项隔离生命周期通过；旧发行、标签、稳定 Latest、生产进程与 Codex 配置保持不变。
 
