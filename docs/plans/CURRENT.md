@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261019-001](../tasks/active/TASK-20261019-001-fix-codex-quota-auto-activation.md)：修复滑动占位重置目标被当成已激活。指定账号只读采样已确认，补充双观测、迁移 034 与原账号发送前复查；既有发送登记保留，回归十轮、前端 6 项及完整质量门／576 测试与 Windows 构建通过；待归档，尚未触发真实激活。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-001](../tasks/completed/2026-10/TASK-20261019-001-fix-codex-quota-auto-activation.md)：`d51455e` 修复未来滑动占位目标被误判为已激活。指定账号只读采样确认；双观测、迁移 034、原账号已登记窗口的发送前复核、秒级等待及未知结果不重发全部覆盖。关键安全回归十轮、补充边界五轮、前端 6 项与两轮完整质量门／576 前端测试及 Windows 构建通过。未触发真实激活、未改生产或真实登记；仅本地修复，尚未发布。
 
 - [TASK-20261018-020](../tasks/completed/2026-10/TASK-20261018-020-fix-openai-image-input.md)：`b2eb0a1` 修复已确认原生 OpenAI 图片能力被降为仅文本，Responses HTTP／WebSocket 改为独立 16 MiB，保留跨协议限制与最后边界。真实 gpt-6.1-sol HTTP／WebSocket、CLI／Desktop 内核共四次图片识别成功；双内核目录、回归五轮及完整质量门／575 前端测试与 Windows 构建通过。仅本地修复，用户配置及目录均未改动；当前存在外部配置差异，升级后需受控重新应用目录并重新加载客户端。
 
