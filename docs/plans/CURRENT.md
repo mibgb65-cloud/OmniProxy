@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261019-014](../tasks/active/TASK-20261019-014-fix-quota-refresh-timeouts.md)：对比 1.0 额度查询／自动激活，修复 2.0 网关长响应占用全局凭据准备锁、额度排队不可取消及繁忙误报网络超时；正在验证。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261019-014](../tasks/completed/2026-10/TASK-20261019-014-fix-quota-refresh-timeouts.md)：`ab6f5a6`，取消额度查询前无条件强制续期，缩小模型请求的凭据锁范围、支持操作排队取消并区分繁忙提示。关键回归连续 10 轮及完整门禁／617 项前端测试、Windows 隔离构建通过；未替换生产程序或发布，真实过期授权与上游网络验收仍需后续执行。
 
 - [TASK-20261019-013](../tasks/completed/2026-10/TASK-20261019-013-build-local-beta9-installer.md)：`d00dc59`，Beta.9 本地 production 安装包 19360936 bytes／SHA256 `ce6b5ba081878ea6ff5c49bdbe91c7d587a8f51d9ec0dcc76f9c2ed74fb0957b`；隔离源码完整质量门／616 前端测试、NSIS、原生版本、production 标签及资产校验通过。未签名、未自动安装或发布，交付用户自行安装测试。
 
