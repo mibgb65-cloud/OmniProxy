@@ -175,6 +175,17 @@ describe("ChatGPT subscription sign-in", () => {
     await waitFor(() => expect(cancelSubscription).toHaveBeenCalledWith("test-session"))
     expect(await screen.findByText("授权已取消。")).toBeInTheDocument()
   })
+  it("登录前的账号读取错误显示具体分类且不暴露原始消息", async () => {
+    vi.mocked(beginSubscription).mockRejectedValue(
+      new Error("subscription: account_unavailable; private-authorization-value"),
+    )
+    const { user } = setup()
+    await user.click(screen.getByRole("button", { name: "登录 ChatGPT" }))
+    await user.click(screen.getByRole("button", { name: "开始授权" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent("读取已有账号或授权信息失败")
+    expect(screen.queryByText(/private-authorization-value/)).not.toBeInTheDocument()
+    expect(openSubscription).not.toHaveBeenCalled()
+  })
   it("shows safe errors without exposing raw authorization messages", async () => {
     vi.mocked(beginSubscription).mockRejectedValue(new Error("private-authorization-value"))
     const { user } = setup()

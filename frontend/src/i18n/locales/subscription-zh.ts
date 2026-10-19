@@ -1,4 +1,10 @@
 export const subscriptionZh = {
+  "subscription.error.initialization_failed":
+    "登录组件或授权目录初始化失败，请检查组件安装和目录访问权限。",
+  "subscription.error.request_failed": "官方登录组件请求失败，请稍后重试。",
+  "subscription.error.operation_cancelled": "授权操作已取消，请重新开始。",
+  "subscription.error.invalid_account": "账号状态已变化，请重新打开登录窗口后重试。",
+  "subscription.error.invalid_provider": "此提供商不支持 ChatGPT 订阅登录。",
   "subscription.reset.title": "重置卡",
   "subscription.reset.receipt": "最近一次使用结果",
   "subscription.reset.close": "关闭重置卡窗口",
@@ -89,8 +95,7 @@ export const subscriptionZh = {
   "subscription.error.account_metadata_pending":
     "授权凭证和账号已保存，身份与套餐暂时未能读取。请在账号详情点击“刷新状态”。",
   "subscription.error.protocol_failed": "官方登录组件连接中断，请重新开始授权。",
-  "subscription.error.account_unavailable":
-    "授权结果已返回，但读取账号信息失败。请查看日志中的订阅授权状态。",
+  "subscription.error.account_unavailable": "读取已有账号或授权信息失败，请查看订阅授权日志。",
   "subscription.error.login_failed": "官方登录未完成，请重新开始授权。",
   "subscription.backgroundHint":
     "关闭此窗口后授权会在后台继续。再次打开可恢复；点击“取消”才会终止授权。",

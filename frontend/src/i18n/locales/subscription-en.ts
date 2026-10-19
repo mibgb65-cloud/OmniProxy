@@ -1,4 +1,13 @@
 export const subscriptionEn = {
+  "subscription.error.initialization_failed":
+    "The login component or authorization directory could not be initialized. Check the component installation and directory access.",
+  "subscription.error.request_failed":
+    "The official login component request failed. Try again later.",
+  "subscription.error.operation_cancelled": "Authorization was cancelled. Start again.",
+  "subscription.error.invalid_account":
+    "The account state changed. Reopen the login dialog and try again.",
+  "subscription.error.invalid_provider":
+    "This provider does not support ChatGPT subscription sign-in.",
   "subscription.reset.title": "Reset credits",
   "subscription.reset.receipt": "Most recent result",
   "subscription.reset.close": "Close reset credits",
@@ -103,7 +112,7 @@ export const subscriptionEn = {
   "subscription.error.protocol_failed":
     "The official login component disconnected. Start authorization again.",
   "subscription.error.account_unavailable":
-    "Authorization returned, but account details could not be read. Check subscription authorization status in the logs.",
+    "Existing account or authorization details could not be read. Check the subscription authorization logs.",
   "subscription.error.login_failed":
     "Official sign-in did not complete. Start authorization again.",
   "subscription.backgroundHint":

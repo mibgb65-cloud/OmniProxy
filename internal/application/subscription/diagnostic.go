@@ -1,5 +1,7 @@
 package subscription
 
+import "strings"
+
 // Diagnostic 只包含有限状态和稳定错误码，不携带身份、会话 ID 或授权信息。
 type Diagnostic struct {
 	State string
@@ -20,4 +22,18 @@ func (s *Service) DiagnosticState() Diagnostic {
 		}
 	}
 	return Diagnostic{State: latest.State, Code: latest.ErrorCode}
+}
+
+// ErrorCode 只提取本模块完整的稳定错误码，原始消息和其他提供商正文不进入诊断。
+func ErrorCode(err error) string {
+	if err == nil {
+		return ""
+	}
+	value := strings.TrimPrefix(err.Error(), "subscription: ")
+	switch value {
+	case "codex_unavailable", "login_expired", "operation_cancelled", "login_failed", "request_failed", "protocol_failed", "identity_changed", "cleanup_failed", "busy",
+		"account_unavailable", "initialization_failed", "invalid_input", "invalid_provider", "invalid_account":
+		return value
+	}
+	return "operation_failed"
 }

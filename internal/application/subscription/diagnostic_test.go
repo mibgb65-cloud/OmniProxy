@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -23,5 +24,16 @@ func TestDiagnosticContainsOnlyLatestStateAndErrorCode(t *testing.T) {
 	data, err := json.Marshal(info)
 	if err != nil || strings.Contains(string(data), "private") {
 		t.Fatal("diagnostic exposed authorization data")
+	}
+}
+
+func TestDiagnosticErrorCodeDoesNotExposeRawMessages(t *testing.T) {
+	for _, code := range []string{"account_unavailable", "initialization_failed", "request_failed", "protocol_failed", "login_failed", "operation_cancelled"} {
+		if got := ErrorCode(errors.New("subscription: " + code)); got != code {
+			t.Fatal("known failure lost", got)
+		}
+	}
+	if ErrorCode(nil) != "" || ErrorCode(errors.New("private-authorization-value")) != "operation_failed" || ErrorCode(errors.New("private prefix: subscription: account_unavailable")) != "operation_failed" {
+		t.Fatal("dynamic error accepted")
 	}
 }

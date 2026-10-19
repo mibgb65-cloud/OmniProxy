@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -16,9 +17,10 @@ import (
 )
 
 type testStore struct {
-	mu   sync.Mutex
-	refs map[string][]byte
-	next int
+	mu    sync.Mutex
+	refs  map[string][]byte
+	next  int
+	reads []string
 }
 
 func (s *testStore) Put(data []byte) (string, error) {
@@ -32,6 +34,7 @@ func (s *testStore) Put(data []byte) (string, error) {
 func (s *testStore) Get(ref string) ([]byte, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.reads = append(s.reads, ref)
 	data, ok := s.refs[ref]
 	if !ok {
 		return nil, errors.New("missing")
@@ -126,6 +129,8 @@ func (c *testClient) authorize(email string) {
 }
 
 type fixture struct {
+	db       *sql.DB
+	store    *testStore
 	manager  *Service
 	accounts *account.Service
 	mu       sync.Mutex
@@ -144,7 +149,8 @@ func newFixture(t *testing.T) *fixture {
 	if err := database.Migrate(context.Background(), db, os.DirFS("../../../migrations")); err != nil {
 		t.Fatal(err)
 	}
-	f := &fixture{accounts: account.NewService(db, &testStore{refs: map[string][]byte{}}), clients: map[string]*testClient{}}
+	store := &testStore{refs: map[string][]byte{}}
+	f := &fixture{db: db, store: store, accounts: account.NewService(db, store), clients: map[string]*testClient{}}
 	f.manager = New(f.accounts, filepath.Join(t.TempDir(), "profiles"), func(_ context.Context, home string) (codex.Client, error) {
 		f.mu.Lock()
 		defer f.mu.Unlock()

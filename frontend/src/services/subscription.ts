@@ -36,6 +36,14 @@ export const logoutSubscription = async (id: string) => AppService.SubscriptionL
 export function subscriptionError(error: unknown) {
   const text = error instanceof Error ? error.message : String(error)
   const known = [
+    "account_unavailable",
+    "initialization_failed",
+    "request_failed",
+    "protocol_failed",
+    "login_failed",
+    "operation_cancelled",
+    "invalid_account",
+    "invalid_provider",
     "quota_changed",
     "agy_unavailable",
     "client_incompatible",

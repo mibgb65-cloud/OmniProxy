@@ -27,20 +27,29 @@ type managedLocator struct {
 
 // CheckSubscriptionProvider 限定到 OpenAI 配置，客户端不能为其他提供商保存订阅账号。
 func (s *Service) CheckSubscriptionProvider(ctx context.Context, id string) error {
-	if err := validateID(id); err != nil {
+	supported, err := s.IsCodexSubscriptionProvider(ctx, id)
+	if err != nil {
 		return err
+	}
+	if !supported {
+		return ErrInvalidInput
+	}
+	return nil
+}
+
+// IsCodexSubscriptionProvider 仅查询提供商类型，不读取凭据；无效配置与其他提供商须明确区分。
+func (s *Service) IsCodexSubscriptionProvider(ctx context.Context, id string) (bool, error) {
+	if err := validateID(id); err != nil {
+		return false, err
 	}
 	var kind string
 	if err := s.db.QueryRowContext(ctx, "SELECT kind FROM providers WHERE id = ?", id).Scan(&kind); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNotFound
+			return false, ErrNotFound
 		}
-		return fmt.Errorf("account: subscription provider unavailable")
+		return false, fmt.Errorf("account: subscription provider unavailable")
 	}
-	if kind != "openai" {
-		return ErrInvalidInput
-	}
-	return nil
+	return kind == "openai", nil
 }
 
 // Metadata 获取安全账号信息。

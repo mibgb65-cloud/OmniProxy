@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 )
 
@@ -20,12 +21,14 @@ func (h fanoutHandler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (h fanoutHandler) Handle(ctx context.Context, r slog.Record) error {
+	var failures []error
+	// Windows GUI 进程可能没有有效 stderr；单个出口失败不能阻断文件和界面诊断。
 	for _, sub := range h.handlers {
 		if err := sub.Handle(ctx, r); err != nil {
-			return err
+			failures = append(failures, err)
 		}
 	}
-	return nil
+	return errors.Join(failures...)
 }
 
 func (h fanoutHandler) WithAttrs(attrs []slog.Attr) slog.Handler {

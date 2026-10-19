@@ -66,3 +66,9 @@ OpenAI 账号设置提供「自动激活 Codex 额度窗口」，默认关闭。
 - 旧版 `auth.openai.com/oauth/authorize` 浏览器入口采用参考项目已可登录的流程来源 `codex_vscode`，映射仅作用于此端点的 originator。client_id、scope、state、PKCE 与 redirect_uri 保留官方组件原值；app-server 初始化和请求归属仍标识 OmniProxy，设备码及其他授权端点不改变。
 
 协议来源：[官方认证说明](https://learn.chatgpt.com/docs/auth)、[官方 app-server 文档](https://learn.chatgpt.com/docs/app-server)。具体实现决策见 [ADR-003](../decisions/ADR-003-official-codex-subscription-auth.md)。
+
+## 混合提供商账号与登录诊断
+
+ChatGPT 登录前的待清理授权扫描，只读取 OpenAI／Codex 提供商的订阅引用；Google／Antigravity 等其他提供商即使同为 subscription_login，也使用各自独立的凭据格式和生命周期。扫描不读取、退出或清理其他提供商凭据；无法确认自身提供商或自身引用的情况仍保守报错，避免误清理已有授权。
+
+登录开始前的失败也记录固定的 begin 操作与稳定错误码；前端区分账号信息不可读、组件／目录初始化、官方组件协议及请求失败，不把这些情况一律归因于网络。所有提示和日志都不携带原始错误正文、授权链接、令牌或用户码。详见 TASK-20261019-007。

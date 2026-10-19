@@ -83,11 +83,20 @@ func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.S
 	}
 	service, err := s.subscriptionService()
 	if err != nil {
+		s.logSubscriptionBeginError(err)
 		return subscription.State{}, err
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return service.Begin(ctx, input)
+	view, err := service.Begin(ctx, input)
+	s.logSubscriptionBeginError(err)
+	return view, err
+}
+
+func (s *AppService) logSubscriptionBeginError(err error) {
+	if err != nil && s.log != nil {
+		s.log.Warn("subscription authorization request failed", "module", "subscription", "operation", "begin", "code", subscription.ErrorCode(err))
+	}
 }
 
 // SubscriptionRead 读取当前会话，不返回任何令牌。

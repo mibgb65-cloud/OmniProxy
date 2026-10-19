@@ -8,7 +8,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -140,11 +139,4 @@ func (s *Service) Read(id string) (State, error) {
 	return State{}, failure("session_not_found")
 }
 
-func safeCode(err error) string {
-	value := strings.TrimPrefix(err.Error(), "subscription: ")
-	switch value {
-	case "codex_unavailable", "login_expired", "operation_cancelled", "login_failed", "request_failed", "protocol_failed", "identity_changed", "cleanup_failed", "busy":
-		return value
-	}
-	return "operation_failed"
-}
+func safeCode(err error) string { return ErrorCode(err) }

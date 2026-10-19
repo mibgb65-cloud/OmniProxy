@@ -79,6 +79,14 @@ func (s *Service) recoverPending(ctx context.Context) error {
 		if item.AuthMethod != account.AuthSubscription {
 			continue
 		}
+		// Google 等订阅使用独立凭据格式；清理 Codex 命名空间前不能读取其他提供商的引用。
+		supported, err := s.accounts.IsCodexSubscriptionProvider(ctx, item.ProviderID)
+		if err != nil {
+			return failure("account_unavailable")
+		}
+		if !supported {
+			continue
+		}
 		_, profiles, err := s.accounts.SubscriptionProfiles(ctx, item.ID)
 		if err != nil {
 			return failure("account_unavailable")
