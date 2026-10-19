@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -54,7 +54,9 @@ In Progress
 
 ## Git
 
-Not committed by Agent.
+2616efee603681ee19351731cd8034db8c4a7f79 fix(subscription): 补齐额度查询续期与失败阶段诊断
+
+仅本地提交，未推送。
 
 ## Result
 

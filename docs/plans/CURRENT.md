@@ -12,6 +12,8 @@
 
 ## Recently Completed
 
+- [TASK-20261019-010](../tasks/completed/2026-10/TASK-20261019-010-investigate-codex-quota-token-refresh.md)：`2616efe`，额度读取前官方续期、30 秒预算及安全阶段诊断；完整质量门、610 项前端测试及 Windows 构建通过。原生产两个账号本次查询成功，历史失败未复现；未替换生产程序。
+
 - [TASK-20261019-009](../tasks/completed/2026-10/TASK-20261019-009-refine-update-page-changelog.md)：`cc59582`，按参考图重排更新页并展示离线当前版本日志；自动下载独立开关默认关闭，正式安装环境显式开启后才下载／校验，安装仍需确认；“已是最新版本”改为 5 秒悬浮提示。并发渠道保护、完整质量门／608 前端测试、原生双主题／960×600／140% 字号和提示自动消失通过，开发版已重建，生产版未改动或发布。
 
 - [TASK-20261019-007](../tasks/completed/2026-10/TASK-20261019-007-investigate-subscription-login-failure.md)：`9d001ec`，Codex 授权清理只读取自己的提供商引用，补充稳定错误提示与开始前日志；日志出口失败不阻断其他出口。先失败后通过的回归、官方组件初始化、真实 GUI 无 stderr 日志和完整门禁／577 前端测试通过。本地 Beta.7 安装器 19305220 bytes／SHA256 `0d56116d6137b6bfc857b355131bd7535f859a323561f9e4cb4727ff92c5c9fa`，未发布或自动安装。
