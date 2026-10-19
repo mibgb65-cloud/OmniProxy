@@ -31,4 +31,4 @@ Beta.5 启动时执行迁移 034，为 Codex 自动激活窗口新增独立观�
 
 比较满足 `beta.1 < beta.2 < beta.10 < rc.1 < 正式版`，忽略构建元数据；不会将 `v1.x` 当作新版 `2.0.0-beta.1` 的升级或提出降级。
 
-已补齐启动后自动检查、侧栏升级标记、浮窗下载／进度／取消、SHA256 校验和重启静默更新，下载与安装始终由用户点击触发。完整行为和缓存信任边界见 [UPDATE](UPDATE.md)，发布与实际安装验收见 `docs/development/RELEASE.md`。[v2.0.0-beta.3](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.3) 已公开 Windows amd64 预发布，包含 Codex 预热、转发错误状态及账号版本时钟隔离修复，并保留 Beta.2 的历史库／图标／正式渠道保护。Beta.1／Beta.2 可通过 Beta 渠道发现并校验下载 Beta.3，正式 Latest 仍为 v1.3.1。公开更新渠道、下载、SHA256 与原生资源校验通过，发布不会自动升级本机或切换客户端配置。安装包尚未签名，真实模型调用仍需独立验收；用户级和机器级安装验收不能相互替代。
+已补齐启动后自动检查、侧栏升级标记、浮窗下载／进度／取消、SHA256 校验和重启静默更新，下载与安装始终由用户点击触发。完整行为和缓存信任边界见 [UPDATE](UPDATE.md)，发布与实际安装验收见 `docs/development/RELEASE.md`。[v2.0.0-beta.5](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.5) 已公开 Windows amd64 预发布，包含图片能力／请求容量、额度滑动窗口漏判修复，继承此前 Codex 转发及历史库／图标保护。Beta.1–4 可通过 Beta 渠道发现并校验下载 Beta.5，正式 Latest 仍为 v1.3.1。公开更新渠道、实际下载、SHA256、原生资源与独立用户级安装升级卸载验收通过，发布不会自动升级本机或切换客户端配置。安装包尚未签名；图片的 CLI／Desktop 内核真实调用有独立验收，Desktop 外壳与真实账号自动激活不能由此推定。用户级和机器级安装验收不能相互替代。

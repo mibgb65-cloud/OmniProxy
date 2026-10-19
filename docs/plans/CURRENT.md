@@ -4,17 +4,19 @@
 
 ## Current Version
 
-2.0.0-beta.4 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.4)，修复真实订阅 SSE 缺失 Content-Type 导致的误拒绝。两模型／两种传输及双 Codex 内核六次真实请求成功；CI／Release／安装生命周期／真实更新发现与公开下载 SHA256 均通过。Windows 数字版本继续为 2.0.0.0，用户已升级运行 Beta.4；本地图片接入（TASK-020）与额度自动激活（TASK-20261019-001）修复尚未发布。
+2.0.0-beta.5 — 已公开 Windows amd64 [Pre-release](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.5)，包含原生 OpenAI 图片输入与 Codex 滑动占位额度窗口自动激活修复，继承 Beta.4 订阅流式兼容。发布源 `1310382`，CI／Release、576 前端测试与完整质量门、独立用户级安装生命周期、033→034 登记保留、真实更新发现与公开资产 SHA256 均通过。用户生产仍为 Beta.4，未自动升级、重启或改共享配置；图片需升级后受控重新应用目录／重载客户端，真实账号自动激活仍待升级后核验。
 
 ## In Progress
 
-- [TASK-20261019-002](../tasks/active/TASK-20261019-002-publish-v2-beta5.md)：汇总 main 中已完成的图片输入与额度自动激活修复，准备 v2.0.0-beta.5；完整质量门、隔离安装、CI／Release 与公开更新验收待完成。不自动安装或重启当前软件。
+暂无。
 
 ## Recently Completed
 
-- [TASK-20261019-001](../tasks/completed/2026-10/TASK-20261019-001-fix-codex-quota-auto-activation.md)：`d51455e` 修复未来滑动占位目标被误判为已激活。指定账号只读采样确认；双观测、迁移 034、原账号已登记窗口的发送前复核、秒级等待及未知结果不重发全部覆盖。关键安全回归十轮、补充边界五轮、前端 6 项与两轮完整质量门／576 前端测试及 Windows 构建通过。未触发真实激活、未改生产或真实登记；仅本地修复，尚未发布。
+- [TASK-20261019-002](../tasks/completed/2026-10/TASK-20261019-002-publish-v2-beta5.md)：已完成修复全部纳入并推送 main，发布源 `1310382`／新标签 v2.0.0-beta.5。CI `39189311494`、Release `39190351905` 成功；公开安装器 19,299,192 bytes／SHA256 `a12b4a554051a0e60d6bd7ebfbce9184f660c39a0d523eed9186fb913b894adb`，实际更新器、原生资源与两资产 digest 核对通过。迁移 034 保留旧发送登记，11 项隔离生命周期通过；旧发行、标签、稳定 Latest、生产进程与 Codex 配置保持不变。
 
-- [TASK-20261018-020](../tasks/completed/2026-10/TASK-20261018-020-fix-openai-image-input.md)：`b2eb0a1` 修复已确认原生 OpenAI 图片能力被降为仅文本，Responses HTTP／WebSocket 改为独立 16 MiB，保留跨协议限制与最后边界。真实 gpt-6.1-sol HTTP／WebSocket、CLI／Desktop 内核共四次图片识别成功；双内核目录、回归五轮及完整质量门／575 前端测试与 Windows 构建通过。仅本地修复，用户配置及目录均未改动；当前存在外部配置差异，升级后需受控重新应用目录并重新加载客户端。
+- [TASK-20261019-001](../tasks/completed/2026-10/TASK-20261019-001-fix-codex-quota-auto-activation.md)：`d51455e` 修复未来滑动占位目标被误判为已激活。指定账号只读采样确认；双观测、迁移 034、原账号已登记窗口的发送前复核、秒级等待及未知结果不重发全部覆盖。关键安全回归十轮、补充边界五轮、前端 6 项与两轮完整质量门／576 前端测试及 Windows 构建通过。未触发真实激活、未改生产或真实登记；修复已随 Beta.5 推送／发布，真实激活仍待升级后核验。
+
+- [TASK-20261018-020](../tasks/completed/2026-10/TASK-20261018-020-fix-openai-image-input.md)：`b2eb0a1` 修复已确认原生 OpenAI 图片能力被降为仅文本，Responses HTTP／WebSocket 改为独立 16 MiB，保留跨协议限制与最后边界。真实 gpt-6.1-sol HTTP／WebSocket、CLI／Desktop 内核共四次图片识别成功；双内核目录、回归五轮及完整质量门／575 前端测试与 Windows 构建通过。修复已随 Beta.5 推送／发布，用户配置及目录均未改动；当前存在外部配置差异，升级后需受控重新应用目录并重新加载客户端。
 
 - [TASK-20261018-019](../tasks/completed/2026-10/TASK-20261018-019-publish-v2-beta4.md)：发布源 `6c0bd72`／新标签 v2.0.0-beta.4。CI `39139227077` 与 Release `39139988913` 成功；公开安装器 19,271,304 bytes／SHA256 `56df132691e7e9b561b183a6e3eb421ce1c9940a24494beeb7127518f62935ff`，默认实际更新发现／下载及两项资产验证通过。旧 Beta.1–3 和 stable Latest 保持不变，未自动安装或更改 Agent。
 

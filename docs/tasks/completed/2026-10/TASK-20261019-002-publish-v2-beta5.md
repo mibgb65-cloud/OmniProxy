@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -62,7 +62,7 @@ internal/version/version.go、frontend/package.json、build/windows/info.json、
 
 - 统一应用／前端／Windows ProductVersion 为 2.0.0-beta.5，数字版本保持 2.0.0.0，不修改技术栈或发布工作流。
 - 新发行说明明确图片能力、独立 16 MiB、额度滑动观测与未知结果保护、迁移 034 及重新应用配置的边界。
-- 本地完整发布构建与独立用户级安装／升级／卸载通过；远程推送／CI／发布与公开资产验证待完成。
+- 本地完整发布构建与独立用户级安装／升级／卸载通过；main 正常快进推送、精确提交 CI、新标签 Release 和公开资产验证均已完成。
 
 # Verification
 
@@ -71,11 +71,17 @@ internal/version/version.go、frontend/package.json、build/windows/info.json、
 - PASS：独立产品名／登记键、目录及 15105／15895 端口的用户级静默安装、图标、旧统计库保留、真实应用启动与重启、运行中覆盖升级／卸载、尊重已删除桌面入口、保留未知文件与新版数据，共 11 项全部通过。
 - PASS：隔离构造 schema 033、禁用合成账号和旧发送登记；实际 Beta.5 启动迁移至 034，原目标／周期／发送时间原样保留，新增观测与确认字段为空，未自动开启激活。
 - 机器级 UAC／真实 Desktop 外壳／真实账号自动激活本轮不冒充已验证。历史图片真实验收沿用 TASK-20261018-020，不重复付费请求。
-- 待完成：精确提交 CI、Release、公开更新器及资产／旧版本保留验证。
+- PASS：CI 39189311494 与 Release 39190351905 的 headSha 均为 1310382cb02c5e3ba8ed014b32e030e812f6bab3，最终全部 success。只推送新标签，无强制推送、无重写历史。
+- PASS：Release ID 416854522，2026-10-19T02:47:39Z（新加坡 10:47:39）公开，draft=false／prerelease=true；注解标签对象 5ad0e93364b101500717e0c9d3439a590ab3fa29 指向上述源提交。
+- PASS：真实默认更新器稳定渠道仍为 v1.3.1，Beta 渠道为 v2.0.0-beta.5；Beta.1–4 均判定其为更新版本。默认下载客户端实际经合法 GitHub 重定向下载安装器及校验文件，并运行 VerifyFile，无网络替代或模拟公开响应。
+- PASS：公开安装器 19,299,192 bytes，SHA256 a12b4a554051a0e60d6bd7ebfbce9184f660c39a0d523eed9186fb913b894adb；114-byte 校验文件 SHA256 0d3eff1285eefb8c023d58ac6352e0845ee954972bffe990f6c134647fffdc8e。两文件大小及实际内容与 GitHub digest 一致，发布资产脚本及 Windows 原生版本校验通过。
+- PASS：Beta.1–4／v1.3.1 的发行 ID、正文哈希、资产 ID／大小／digest 及旧标签对象与发布前一致；正式 Latest 保持 v1.3.1。
+- PASS：共享 Codex 配置哈希、生产健康及 PID 9440／启动时间与发布前一致，仍运行 Beta.4；未自动安装或重启。
+- 安装器 Authenticode 为 NotSigned，已在发行说明披露。
 
 # Documentation
 
-计划更新发行说明与 CURRENT；已有功能修复任务归档保留历史验收边界。
+已更新发行说明、UPGRADE 与 CURRENT；已有功能修复任务归档保留历史验收边界，不把当时“仅本地”的历史事实覆盖成伪造验收。
 
 # Deviations
 
@@ -83,8 +89,21 @@ None.
 
 # Git
 
-待提交。
+- b2eb0a187969663552eda944e396c5ef01a54a20：原生图片能力与请求容量修复。
+- d51455e66f99331be940741466b0c66d2a5a74cc：额度滑动占位窗口自动激活修复。
+- 1310382cb02c5e3ba8ed014b32e030e812f6bab3 chore(release): 准备 v2.0.0-beta.5；包含此前四个待推送提交，已正常推送 main，为唯一 Beta.5 发布源。
+- 发布验收归档另作 docs-only 提交推送 main，不移动发行标签。
+
+## Remote Evidence
+
+- https://github.com/mibgb65-cloud/OmniProxy/actions/runs/39189311494
+- https://github.com/mibgb65-cloud/OmniProxy/actions/runs/39190351905
+- https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0-beta.5
 
 # Result
 
-待完成。
+已完成的修复全部在 main 并已推送，v2.0.0-beta.5 已公开且实际下载校验成功。历史版本和当前软件／Agent 保持原状；需要用户自行升级，图片配置须预览确认后重新应用，真实自动激活效果需升级后核验。
+
+# Completed
+
+2026-10-19 10:50
