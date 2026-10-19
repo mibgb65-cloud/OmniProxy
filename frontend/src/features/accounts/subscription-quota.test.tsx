@@ -96,6 +96,7 @@ describe("subscription quota", () => {
   })
   it.each([
     ["quota_timeout", "额度查询超时，请检查网络后刷新。"],
+    ["quota_busy", "账号操作繁忙，额度查询等待超时，请稍后刷新。"],
     ["quota_refresh_failed", "授权刷新失败，请检查网络后重试；若仍失败，请刷新账号状态。"],
   ])("explains %s without exposing upstream details", async (code, message) => {
     vi.mocked(readSubscriptionQuota).mockRejectedValue(

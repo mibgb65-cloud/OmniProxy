@@ -101,6 +101,8 @@ export const subscriptionEn = {
   "subscription.quota.created": "Created:",
   "subscription.quota.updated": "Updated:",
   "subscription.error.quota_timeout": "Quota query timed out. Check your connection and refresh.",
+  "subscription.error.quota_busy":
+    "Account operations are busy. Quota query wait timed out. Refresh shortly.",
   "subscription.error.quota_refresh_failed":
     "Authorization refresh failed. Check your connection and retry; if it persists, refresh the account status.",
   "subscription.error.quota_unavailable": "Quota could not be loaded. Please refresh later.",

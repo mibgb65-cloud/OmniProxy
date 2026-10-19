@@ -8,7 +8,9 @@ import (
 
 // Refresh 由官方组件刷新系统凭证，并更新身份与需要重新授权的状态。
 func (s *Service) Refresh(ctx context.Context, id string) (account.Item, error) {
-	s.operations.Lock()
+	if err := s.operations.Lock(ctx); err != nil {
+		return account.Item{}, failure("operation_cancelled")
+	}
 	defer s.operations.Unlock()
 	if s.accountBusy(id) {
 		return account.Item{}, failure("busy")
@@ -57,7 +59,9 @@ func (s *Service) Refresh(ctx context.Context, id string) (account.Item, error) 
 
 // Logout 清除该账号系统凭证，保留元数据供重新授权。
 func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
-	s.operations.Lock()
+	if err := s.operations.Lock(ctx); err != nil {
+		return account.Item{}, failure("operation_cancelled")
+	}
 	defer s.operations.Unlock()
 	if s.accountBusy(id) {
 		return account.Item{}, failure("busy")
@@ -81,7 +85,9 @@ func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
 
 // Delete 先完成系统凭证注销，再移除元数据、DPAPI 引用和受控隔离目录。
 func (s *Service) Delete(ctx context.Context, id string) error {
-	s.operations.Lock()
+	if err := s.operations.Lock(ctx); err != nil {
+		return failure("operation_cancelled")
+	}
 	defer s.operations.Unlock()
 	if s.accountBusy(id) {
 		return failure("busy")

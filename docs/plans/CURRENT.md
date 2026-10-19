@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261019-014](../tasks/active/TASK-20261019-014-fix-quota-refresh-timeouts.md)：对比 1.0 额度查询／自动激活，修复 2.0 网关长响应占用全局凭据准备锁、额度排队不可取消及繁忙误报网络超时；正在验证。
 
 ## Recently Completed
 

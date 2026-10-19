@@ -9,7 +9,9 @@ import (
 
 // Begin 启动官方授权，返回浏览器地址或一次性设备码。
 func (s *Service) Begin(ctx context.Context, input Input) (State, error) {
-	s.operations.Lock()
+	if err := s.operations.Lock(ctx); err != nil {
+		return State{}, failure("operation_cancelled")
+	}
 	defer s.operations.Unlock()
 	if input.Mode != "browser" && input.Mode != "device" || len(input.Name) > 256 || !utf8Name(input.Name) {
 		return State{}, failure("invalid_input")

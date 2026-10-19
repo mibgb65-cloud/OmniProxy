@@ -21,6 +21,9 @@ func quotaFailure(ctx context.Context, stage, code string, cause error) error {
 	switch {
 	case errors.Is(ctx.Err(), context.DeadlineExceeded) || errors.Is(cause, context.DeadlineExceeded):
 		code, causeCode = "quota_timeout", "quota_timeout"
+		if stage == "queue" {
+			code = "quota_busy"
+		}
 	case errors.Is(ctx.Err(), context.Canceled) || errors.Is(cause, context.Canceled):
 		code, causeCode = "operation_cancelled", "operation_cancelled"
 	}

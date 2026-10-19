@@ -52,10 +52,11 @@ type Factory func(context.Context, string) (codex.Client, error)
 // Service 一次只允许一个授权会话，避免官方回调端口及重复提交冲突。
 type Service struct {
 	mu                sync.Mutex
-	operations        sync.Mutex
+	operations        operationGate
 	accounts          *account.Service
 	root              string
 	factory           Factory
+	readToken         func(string, string, func([]byte, string) error) error
 	current           *session
 	history           map[string]State
 	onChange          func()
@@ -68,7 +69,7 @@ func New(accounts *account.Service, root string, factory Factory) *Service {
 	if factory == nil {
 		factory = codex.Open
 	}
-	return &Service{accounts: accounts, root: root, factory: factory, history: map[string]State{}}
+	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseToken, history: map[string]State{}}
 }
 func failure(code string) error { return errors.New("subscription: " + code) }
 func randomID() (string, error) {

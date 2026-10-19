@@ -23,14 +23,11 @@ func (c quotaProbeClient) RateLimits(ctx context.Context) (codex.RateLimits, err
 	return c.limits(ctx)
 }
 
-func TestQuotaRefreshesBeforeReadWithinOperationBudget(t *testing.T) {
+func TestQuotaDoesNotForceRefreshBeforeReadWithinOperationBudget(t *testing.T) {
 	f := newFixture(t)
 	view, client, _ := f.begin(t, "")
 	client.authorize("quota@example.test")
 	item := awaitState(t, f.manager, view.ID, "completed").Account
-	client.mu.Lock()
-	client.requireRefresh = true
-	client.mu.Unlock()
 	var calls []string
 	f.manager.factory = func(ctx context.Context, _ string) (codex.Client, error) {
 		deadline, ok := ctx.Deadline()
@@ -38,10 +35,11 @@ func TestQuotaRefreshesBeforeReadWithinOperationBudget(t *testing.T) {
 			t.Fatal("quota startup and requests must share the bounded 30-second operation budget")
 		}
 		return quotaProbeClient{Client: client, account: func(ctx context.Context, refresh bool) (*codex.Account, error) {
-			if !refresh {
-				t.Fatal("quota did not request managed token refresh")
+			if refresh {
+				// 托管模式 true 会强制访问认证服务；认证服务不可达不应阻断仍有效的额度查询。
+				return nil, context.DeadlineExceeded
 			}
-			calls = append(calls, "refresh")
+			calls = append(calls, "account")
 			return client.Account(ctx, refresh)
 		}, limits: func(ctx context.Context) (codex.RateLimits, error) {
 			calls = append(calls, "rate_limits")
@@ -49,22 +47,22 @@ func TestQuotaRefreshesBeforeReadWithinOperationBudget(t *testing.T) {
 		}}, nil
 	}
 	if _, err := f.manager.ReadQuota(context.Background(), item.ID); err != nil {
-		t.Fatal("refreshed quota query failed")
+		t.Fatal("quota query forced an unnecessary authentication request")
 	}
-	if !reflect.DeepEqual(calls, []string{"refresh", "rate_limits"}) {
-		t.Fatal("quota read was not preceded by exactly one authorization refresh")
+	if !reflect.DeepEqual(calls, []string{"account", "rate_limits"}) {
+		t.Fatal("quota read did not verify managed identity before reading limits")
 	}
 }
 
 func TestQuotaFailuresIdentifyStageWithoutDamagingAuthorization(t *testing.T) {
 	for _, test := range []struct {
 		name, stage, code, cause     string
-		refreshErr, limitsErr        error
+		accountErr, limitsErr        error
 		missingIdentity, wrongMember bool
 	}{
-		{name: "refresh error", stage: "refresh", code: "quota_refresh_failed", cause: "operation_failed", refreshErr: errors.New("private-refresh-marker")},
-		{name: "refresh timeout", stage: "refresh", code: "quota_timeout", cause: "quota_timeout", refreshErr: context.DeadlineExceeded},
-		{name: "missing authorization", stage: "refresh", code: "quota_not_authenticated", cause: "quota_not_authenticated", missingIdentity: true},
+		{name: "account error", stage: "account", code: "quota_unavailable", cause: "operation_failed", accountErr: errors.New("private-account-marker")},
+		{name: "account timeout", stage: "account", code: "quota_timeout", cause: "quota_timeout", accountErr: context.DeadlineExceeded},
+		{name: "missing authorization", stage: "account", code: "quota_not_authenticated", cause: "quota_not_authenticated", missingIdentity: true},
 		{name: "other Team member", stage: "identity", code: "identity_changed", cause: "identity_changed", wrongMember: true},
 		{name: "quota request error", stage: "rate_limits", code: "quota_unavailable", cause: "request_failed", limitsErr: failure("request_failed")},
 		{name: "missing quota snapshot", stage: "normalize", code: "quota_unavailable", cause: "quota_unavailable"},
@@ -80,8 +78,8 @@ func TestQuotaFailuresIdentifyStageWithoutDamagingAuthorization(t *testing.T) {
 			reads := 0
 			f.manager.factory = func(context.Context, string) (codex.Client, error) {
 				return quotaProbeClient{Client: client, account: func(ctx context.Context, refresh bool) (*codex.Account, error) {
-					if test.refreshErr != nil || test.missingIdentity {
-						return nil, test.refreshErr
+					if test.accountErr != nil || test.missingIdentity {
+						return nil, test.accountErr
 					}
 					identity, err := client.Account(ctx, refresh)
 					if test.wrongMember {
@@ -98,9 +96,9 @@ func TestQuotaFailuresIdentifyStageWithoutDamagingAuthorization(t *testing.T) {
 			if err == nil || err.Error() != "subscription: "+test.code || info.Stage != test.stage || info.Code != test.code || info.CauseCode != test.cause {
 				t.Fatal("quota failure lost its safe stage or classification")
 			}
-			canRead := test.refreshErr == nil && !test.missingIdentity && !test.wrongMember
+			canRead := test.accountErr == nil && !test.missingIdentity && !test.wrongMember
 			if (reads == 1) != canRead {
-				t.Fatal("quota read continued after failed refresh or changed membership")
+				t.Fatal("quota read continued after failed account read or changed membership")
 			}
 			saved, saveErr := f.accounts.Metadata(context.Background(), item.ID)
 			if saveErr != nil || saved.AuthState != item.AuthState || saved.UpdatedAt != item.UpdatedAt || client.logoutCount != 0 {
@@ -120,7 +118,7 @@ func TestQuotaExpiredContextDoesNotOpenOfficialComponent(t *testing.T) {
 		if timeout {
 			cancel()
 			ctx, cancel = context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
-			want = "quota_timeout"
+			want = "quota_busy"
 		}
 		cancel()
 		_, err := f.manager.ReadQuota(ctx, "unused")

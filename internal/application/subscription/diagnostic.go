@@ -31,7 +31,7 @@ func ErrorCode(err error) string {
 	}
 	value := strings.TrimPrefix(err.Error(), "subscription: ")
 	switch value {
-	case "quota_unavailable", "quota_timeout", "quota_refresh_failed", "quota_not_authenticated", "identity_unavailable", "codex_unavailable", "login_expired", "operation_cancelled", "login_failed", "request_failed", "protocol_failed", "identity_changed", "cleanup_failed", "busy",
+	case "quota_unavailable", "quota_timeout", "quota_busy", "quota_refresh_failed", "quota_not_authenticated", "identity_unavailable", "codex_unavailable", "login_expired", "operation_cancelled", "login_failed", "request_failed", "protocol_failed", "identity_changed", "cleanup_failed", "busy",
 		"account_unavailable", "initialization_failed", "invalid_input", "invalid_provider", "invalid_account":
 		return value
 	}

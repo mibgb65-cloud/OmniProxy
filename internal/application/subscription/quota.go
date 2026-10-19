@@ -17,37 +17,38 @@ type QuotaWindow struct {
 	ResetsAt         string `json:"resetsAt,omitempty"`
 }
 
-// ReadQuota 由官方组件续期后读取本应用管理的订阅额度，不改变账号状态或注销凭据。
+// ReadQuota 使用官方组件的托管授权读取额度，不强制续期或改变账号状态。
 func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
-	s.operations.Lock()
-	defer s.operations.Unlock()
-	if ctx.Err() != nil {
-		return Quota{}, quotaFailure(ctx, "queue", "quota_unavailable", ctx.Err())
-	}
-	if s.accountBusy(id) {
-		return Quota{}, quotaFailure(ctx, "account", "busy", failure("busy"))
-	}
-	item, profile, err := s.accounts.SubscriptionProfile(ctx, id)
-	if err != nil {
-		return Quota{}, quotaFailure(ctx, "account", "invalid_account", failure("invalid_account"))
-	}
-	if item.AuthState == "logged_out" || item.AuthState == "reauth_required" {
-		return Quota{}, quotaFailure(ctx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
-	}
+	// 后台激活也使用此入口；总预算必须从排队前开始，而非仅依赖 Wails 的外层超时。
 	readCtx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
+	if err := s.operations.Lock(readCtx); err != nil {
+		return Quota{}, quotaFailure(readCtx, "queue", "quota_unavailable", err)
+	}
+	defer s.operations.Unlock()
+	if s.accountBusy(id) {
+		return Quota{}, quotaFailure(readCtx, "account", "busy", failure("busy"))
+	}
+	item, profile, err := s.accounts.SubscriptionProfile(readCtx, id)
+	if err != nil {
+		return Quota{}, quotaFailure(readCtx, "account", "invalid_account", failure("invalid_account"))
+	}
+	if item.AuthState == "logged_out" || item.AuthState == "reauth_required" {
+		return Quota{}, quotaFailure(readCtx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
+	}
 	client, err := s.open(readCtx, profile)
 	if err != nil {
 		return Quota{}, quotaFailure(readCtx, "open", ErrorCode(err), err)
 	}
 	defer client.Close()
-	// 额度读取同样需要可用授权；先由官方组件续期并验证成员，避免将过期令牌直接用于查询。
-	identity, err := client.Account(readCtx, true)
+	// true 在托管模式下会强制续期，每次查额度都访问认证服务会额外放大网络失败。
+	// 先读取并核验当前成员，正常授权续期交给官方额度读取链路，不绕过身份隔离。
+	identity, err := client.Account(readCtx, false)
 	if err != nil {
-		return Quota{}, quotaFailure(readCtx, "refresh", "quota_refresh_failed", err)
+		return Quota{}, quotaFailure(readCtx, "account", "quota_unavailable", err)
 	}
 	if identity == nil {
-		return Quota{}, quotaFailure(readCtx, "refresh", "quota_not_authenticated", failure("quota_not_authenticated"))
+		return Quota{}, quotaFailure(readCtx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
 	}
 	if !sameEmail(item.AuthEmail, identity.Email) {
 		return Quota{}, quotaFailure(readCtx, "identity", "identity_changed", failure("identity_changed"))

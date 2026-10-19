@@ -83,7 +83,14 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		meta = account.SubscriptionMetadata{Email: identity.Email, Plan: identity.Plan, State: "authenticated"}
 		meta.AccountID, accountIDErr = readAccountID(ctx, job.client)
 	}
-	s.operations.Lock()
+	if err := s.operations.Lock(saveCtx); err != nil {
+		code := "operation_cancelled"
+		if cleanupErr := s.cleanCancelled(job); cleanupErr != nil {
+			code = "cleanup_failed"
+		}
+		s.finish(job, "failed", code, nil)
+		return
+	}
 	defer s.operations.Unlock()
 	s.mu.Lock()
 	if s.current != job || ctx.Err() != nil {
