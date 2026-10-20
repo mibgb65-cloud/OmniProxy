@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.10 — 本地 Windows amd64 production 安装版，未发布、未自动安装。源码 `21b5e2a`，包含额度查询取消多余强刷、模型长响应占锁及排队取消修复，继承 Beta.9 既有修复。隔离完整质量门／620 项前端测试、NSIS、Windows 版本与 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.10/`，未签名。真实安装／升级、过期授权、上游网络及自动激活验收由用户后续执行；生产程序与真实配置未替换。
+2.0.0-beta.11 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `6fd860c`，包含 Responses 长会话重连修复及 Beta.10 后的授权进度／账号删除、OpenAI 轮换设置优化。隔离完整质量门／632 项前端测试、NSIS、Windows 原生版本、来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.11/`，未签名。真实覆盖升级、长会话网络、OAuth 和轮换效果由用户本地验收；已安装生产程序与真实配置未替换。
 
 ## In Progress
 
-- [TASK-20261020-004](../tasks/active/TASK-20261020-004-build-local-beta11-installer.md)：准备 Beta.11 本地 production 安装包，包含 Responses 长会话恢复及 Beta.10 后已提交优化；隔离构建，不自动安装或发布。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-004](../tasks/completed/2026-10/TASK-20261020-004-build-local-beta11-installer.md)：`6fd860c`，Beta.11 本地 production 安装包 19,403,318 bytes／SHA256 `600c476645798deb415f47e0cd6ee01b192f7a61b74ff8c1d4400afb14cc37a8`；隔离完整门禁／632 项前端测试、NSIS、原生版本、24 项源码与 11 项文件基线校验通过。未签名、未自动安装或发布，交付用户自行本地更新。
 
 - [TASK-20261020-003](../tasks/completed/2026-10/TASK-20261020-003-fix-responses-long-session-recovery.md)：`a467ffe`，解除 Responses／compact 的 512 项误限制，保留有界 JSON 和具体 WebSocket 校验码，区分流读写／超长事件错误；部分输出后长历史重连及网关记账／不重放回归、关键用例 10 轮、完整门禁／629 项前端测试与 Windows production 构建通过。仅本地提交，未替换运行程序或发布。
 
