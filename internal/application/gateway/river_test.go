@@ -18,16 +18,26 @@ import (
 	routes "omniproxy/internal/application/routing"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/infrastructure/database"
+	"omniproxy/internal/provider/river"
 )
 
 func TestRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T) {
+	for _, model := range []string{river.DeepSeekFlash, river.DeepSeekFlash1017} {
+		t.Run(model, func(t *testing.T) {
+			testRiverNativeGatewayStreamingRoutingAndUsage(t, model)
+		})
+	}
+}
+
+func testRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T, model string) {
+	publicModel := river.PublicModel(model)
 	for _, protocol := range []string{"chat", "responses", "messages"} {
 		for _, stream := range []bool{false, true} {
 			t.Run(fmt.Sprintf("%s/%t", protocol, stream), func(t *testing.T) {
 				release := make(chan struct{})
 				upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					body, _ := io.ReadAll(r.Body)
-					if !strings.Contains(string(body), `"model":"deepseek-ai/DeepSeek-V4.1-Flash"`) {
+					if !strings.Contains(string(body), fmt.Sprintf(`"model":%q`, model)) {
 						t.Error("alias not rewritten")
 					}
 					path := "/v1/chat/completions"
@@ -80,10 +90,10 @@ func TestRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T) {
 				observer := activity.New(db)
 				service := New(proxy.Options{Observer: observer}, providers, accounts, nil)
 				router := routes.New(db, providers, accounts)
-				if _, err := router.Create(context.Background(), routes.Input{Alias: "research", ProviderID: "builtin_river", Model: "deepseek-ai/DeepSeek-V4.1-Flash", Enabled: true}); err != nil {
+				if _, err := router.Create(context.Background(), routes.Input{Alias: "research", ProviderID: "builtin_river", Model: model, Enabled: true}); err != nil {
 					t.Fatal(err)
 				}
-				if err := router.SetProviderOrder(context.Background(), "deepseek-flash", []string{"builtin_river"}); err != nil {
+				if err := router.SetProviderOrder(context.Background(), publicModel, []string{"builtin_river"}); err != nil {
 					t.Fatal(err)
 				}
 				service.SetRouter(router)
@@ -92,9 +102,9 @@ func TestRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T) {
 				}
 				defer service.Stop(context.Background())
 				path, body := atriaInput(protocol, stream)
-				body = strings.ReplaceAll(body, `"research"`, `"deepseek-flash"`)
+				body = strings.ReplaceAll(body, `"research"`, fmt.Sprintf("%q", publicModel))
 				if protocol == "messages" {
-					body = fmt.Sprintf(`{"model":"deepseek-flash[1m]","stream":%t,"max_tokens":16,"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, stream)
+					body = fmt.Sprintf(`{"model":%q,"stream":%t,"max_tokens":16,"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, publicModel+"[1m]", stream)
 				}
 				response, err := http.Post(service.Info().Runtime.Address+"/v1/"+path, "application/json", strings.NewReader(body))
 				if err != nil {
@@ -124,7 +134,7 @@ func TestRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T) {
 					t.Fatal("gateway rejected request", response.StatusCode)
 				}
 				item, err := observer.Request(context.Background(), response.Header.Get("X-Request-ID"))
-				if err != nil || item.InputTokens != "12" || item.OutputTokens != "4" || !item.UsageComplete {
+				if err != nil || item.Model != model || item.InputTokens != "12" || item.OutputTokens != "4" || !item.UsageComplete {
 					t.Fatal("usage lost", item, err)
 				}
 				for _, value := range store.last {

@@ -41,7 +41,7 @@ func TestRiverPresetRoutingAliasesAndEligibility(t *testing.T) {
 			}
 		}
 	}
-	if found != 4 {
+	if found != len(river.Models())+1 {
 		t.Fatal("model and alias missing")
 	}
 	defaults, err := s.DefaultRoutes(ctx)

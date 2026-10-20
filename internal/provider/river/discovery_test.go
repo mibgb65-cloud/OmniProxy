@@ -2,9 +2,11 @@ package river
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -22,11 +24,17 @@ func TestDiscoveryBoundsAndCredentialValidation(t *testing.T) {
 		if r.URL.Path != "/v1/models" || r.Method != "GET" || r.Header.Get("Authorization") != "Bearer test-key" {
 			t.Error("invalid discovery contract")
 		}
-		io.WriteString(w, `{"data":[{"id":"`+DeepSeekFlash+`"},{"id":"`+DeepSeekFlash+`"},{"id":"unverified-model"}]}`)
+		var data []map[string]string
+		for _, id := range append(Models(), DeepSeekFlash1017, "unverified-model") {
+			data = append(data, map[string]string{"id": id})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]any{"data": data}); err != nil {
+			t.Error(err)
+		}
 	}))
 	defer upstream.Close()
 	models, err := New(nil).DiscoverModels(context.Background(), upstream.URL+"/v1", []byte("test-key"))
-	if err != nil || len(models) != 1 || models[0] != DeepSeekFlash {
+	if err != nil || !reflect.DeepEqual(models, Models()) {
 		t.Fatal("discovery lost exact ID", models, err)
 	}
 	for _, key := range [][]byte{nil, []byte("bad\nkey"), []byte(strings.Repeat("x", 8193))} {

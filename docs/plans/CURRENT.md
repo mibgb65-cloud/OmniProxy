@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-005](../tasks/active/TASK-20261020-005-river-model-display-request-pagination.md)：优化 River 两款 DeepSeek 型号显示，补齐独立 1017 版本，并修正请求历史总页数文案；保留旧路由兼容性。
 
 ## Recently Completed
 

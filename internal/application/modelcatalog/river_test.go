@@ -41,7 +41,7 @@ func TestRiverPresetDiscoveryFailureAndCredentialRotation(t *testing.T) {
 			fmt.Fprint(w, `{"error":{"message":"private-key-detail"}}`)
 			return
 		}
-		fmt.Fprint(w, `{"data":[{"id":"deepseek-ai/DeepSeek-V4.1-Flash"},{"id":"unsupported-model"}]}`)
+		fmt.Fprint(w, `{"data":[{"id":"deepseek-ai/DeepSeek-V4.1-Flash"},{"id":"deepseek-ai/DeepSeek-V4.1-Flash-1017"},{"id":"unsupported-model"}]}`)
 	}))
 	defer upstream.Close()
 	db, err := database.Open(database.Config{Path: filepath.Join(t.TempDir(), "models.db")})
@@ -70,13 +70,21 @@ func TestRiverPresetDiscoveryFailureAndCredentialRotation(t *testing.T) {
 		}
 	}
 	items, err = s.Sync(ctx, "a")
-	if err != nil || len(items) != 1 || items[0].Model != "deepseek-flash" || items[0].Source == "preset" || items[0].FetchedAt == "" {
+	if err != nil || len(items) != 2 || items[0].Model != "deepseek-flash" || items[0].Name != "DeepSeek-V4.1-Flash" || items[0].Source == "preset" || items[0].FetchedAt == "" {
 		t.Fatal("discovered models not authoritative", items, err)
+	}
+	if items[1].Model != "DeepSeek-V4.1-Flash-1017" || items[1].Name != items[1].Model || items[1].Source == "preset" || items[1].FetchedAt == "" {
+		t.Fatal("versioned discovered model was merged or hidden", items[1])
 	}
 	router := routes.New(db, s.providers, s.accounts)
 	entries, err := router.Catalog(ctx)
-	if err != nil || len(entries) != 1 || entries[0].ID != river.PublicModel(river.DeepSeekFlash) {
+	if err != nil || len(entries) != 2 || entries[0].ID == entries[1].ID {
 		t.Fatal("routing disagrees with discovered account catalog", entries, err)
+	}
+	for _, entry := range entries {
+		if entry.TargetModel != river.UpstreamModel(entry.ID) || entry.Name != river.ModelName(entry.ID) {
+			t.Fatal("persisted discovery lost model identity", entry)
+		}
 	}
 	for _, value := range store.last {
 		if value != 0 {
@@ -88,7 +96,7 @@ func TestRiverPresetDiscoveryFailureAndCredentialRotation(t *testing.T) {
 		t.Fatal("discovery failure exposed upstream details", err)
 	}
 	items, err = s.List(ctx)
-	if err != nil || len(items) != 1 {
+	if err != nil || len(items) != 2 {
 		t.Fatal("last good discovery snapshot lost")
 	}
 	if _, err := db.Exec(`UPDATE accounts SET credential_ref='rotated-ref' WHERE id='a'`); err != nil {

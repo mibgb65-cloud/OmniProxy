@@ -56,7 +56,7 @@ export const activityEn = {
   "activity.retained": "{{count}} records, limit {{limit}}",
   "activity.previous": "Previous",
   "activity.next": "Next",
-  "activity.page": "Page {{page}} / {{count}} records",
+  "activity.page": "Page {{page}} / {{totalPages}} pages",
   "activity.detailGone": "Details expired or do not exist. Lifetime usage is retained.",
   "activity.retentionTitle": "Request and log records",
   "activity.retentionDescription":

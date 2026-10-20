@@ -9,6 +9,8 @@ import { readRequests } from "../../services/activity"
 import { RequestTable } from "./request-table"
 import { RequestDialog } from "./request-dialog"
 
+const REQUEST_PAGE_SIZE = 50
+
 export function RequestsView({
   requestId = "",
   onOpenLogs,
@@ -24,7 +26,7 @@ export function RequestsView({
   const deferred = useDeferredValue(search)
   const data = useQuery({
     queryKey: ["requests", deferred, state, offset],
-    queryFn: () => readRequests({ search: deferred, state, offset, limit: 50 }),
+    queryFn: () => readRequests({ search: deferred, state, offset, limit: REQUEST_PAGE_SIZE }),
     placeholderData: keepPreviousData,
     refetchInterval: 5000,
   })
@@ -100,21 +102,21 @@ export function RequestsView({
             variant="outline"
             size="sm"
             disabled={offset === 0 || data.isFetching}
-            onClick={() => setOffset(Math.max(0, offset - 50))}
+            onClick={() => setOffset(Math.max(0, offset - REQUEST_PAGE_SIZE))}
           >
             {t("activity.previous")}
           </Button>
           <span>
             {t("activity.page", {
-              page: Math.floor(offset / 50) + 1,
-              count: data.data?.total ?? 0,
+              page: Math.floor(offset / REQUEST_PAGE_SIZE) + 1,
+              totalPages: Math.max(1, Math.ceil((data.data?.total ?? 0) / REQUEST_PAGE_SIZE)),
             })}
           </span>
           <Button
             variant="outline"
             size="sm"
-            disabled={offset + 50 >= (data.data?.total ?? 0) || data.isFetching}
-            onClick={() => setOffset(offset + 50)}
+            disabled={offset + REQUEST_PAGE_SIZE >= (data.data?.total ?? 0) || data.isFetching}
+            onClick={() => setOffset(offset + REQUEST_PAGE_SIZE)}
           >
             {t("activity.next")}
           </Button>

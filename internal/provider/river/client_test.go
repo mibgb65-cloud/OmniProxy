@@ -65,6 +65,8 @@ func TestNativeProtocolsPreserveToolsReasoningAndUsage(t *testing.T) {
 func TestInvalidRequestsNeverReachUpstream(t *testing.T) {
 	for _, tc := range []struct{ protocol, model, extra string }{
 		{"chat", DeepSeekFlash, `"max_tokens":384001`},
+		{"chat", DeepSeekFlash1017, `"max_tokens":384001`},
+		{"responses", DeepSeekFlash1017, `"max_output_tokens":384001`},
 		{"chat", GLMFlash, `"max_tokens":131073`},
 		{"chat", GLMFlash, `"reasoning_effort":"none"`},
 		{"chat", NemotronVL, `"reasoning_effort":"high"`},

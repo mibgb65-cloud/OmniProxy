@@ -56,7 +56,7 @@ export const activityZh = {
   "activity.retained": "保留 {{count}} 条，上限 {{limit}} 条",
   "activity.previous": "上一页",
   "activity.next": "下一页",
-  "activity.page": "第 {{page}} 页 / {{count}} 条",
+  "activity.page": "第 {{page}} 页 / 共 {{totalPages}} 页",
   "activity.detailGone": "该请求明细已过期或不存在，累计用量仍保留。",
   "activity.retentionTitle": "请求与日志记录",
   "activity.retentionDescription": "调整请求明细的保留数量，累计 Token 和每日汇总独立保存。",

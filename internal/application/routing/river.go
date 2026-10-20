@@ -24,6 +24,12 @@ func (s *Service) withRiverPresets(ctx context.Context, models []discoveredModel
 		if p.Kind != river.Kind {
 			continue
 		}
+		// 旧快照保留实际可用型号，但显示名随官方映射更新，不必改写持久化目录。
+		for i := range models {
+			if models[i].providerID == p.ID && river.SupportsModel(models[i].model) {
+				models[i].name = river.ModelName(models[i].model)
+			}
+		}
 		for _, a := range accounts {
 			if a.ProviderID != p.ID || a.AuthMethod != account.AuthAPIKey || synced[a.ID] {
 				continue

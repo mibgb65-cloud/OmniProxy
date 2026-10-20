@@ -25,7 +25,7 @@ func TestRiverLogicalModelsSharePriorityAndKeepLegacyRoutes(t *testing.T) {
 	}
 	count := 0
 	for _, item := range items {
-		if item.Model == river.DeepSeekFlash || item.Model == river.GLMFlash || item.Model == river.NemotronVL {
+		if item.Model != river.PublicModel(item.Model) {
 			t.Fatal("raw River ID published twice", item.Model)
 		}
 		if item.Model != "deepseek-flash" {
@@ -57,12 +57,15 @@ func TestRiverLogicalModelsSharePriorityAndKeepLegacyRoutes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"deepseek-flash", "deepseek-v4-pro", "NVIDIA-Nemotron-3.5", "GLM-5.3-Flash"} {
+	for _, id := range []string{"deepseek-flash", "DeepSeek-V4.1-Flash-1017", "deepseek-v4-pro", "NVIDIA-Nemotron-3.5", "GLM-5.3-Flash"} {
 		for _, suffix := range []string{"", "[1m]"} {
 			found := false
 			for _, item := range variants {
 				if item.ID == id+suffix {
 					found = true
+					if id == "deepseek-flash" && item.Name != "DeepSeek-V4.1-Flash"+suffix {
+						t.Fatal("River Flash version is not visible", item)
+					}
 					if item.ID != item.Name && id != "deepseek-flash" {
 						t.Fatal("short display name lost", item)
 					}
@@ -91,6 +94,10 @@ func TestRiverLogicalModelsSharePriorityAndKeepLegacyRoutes(t *testing.T) {
 	if err != nil || !p.Routable || p.ProviderID != "builtin_deepseek" || p.Model != "deepseek-flash" || p.ProviderPriority != 2 {
 		t.Fatal("disabled River did not select direct DeepSeek", p, err)
 	}
+	p, err = s.Resolve(ctx, river.PublicModel(river.DeepSeekFlash1017))
+	if err != nil || p.Routable {
+		t.Fatal("versioned Flash fell back to the original model", p, err)
+	}
 	if _, err := db.Exec(`UPDATE accounts SET enabled=1 WHERE id='river'`); err != nil {
 		t.Fatal(err)
 	}
@@ -110,5 +117,38 @@ func TestRiverLogicalModelsSharePriorityAndKeepLegacyRoutes(t *testing.T) {
 	prefs, err := s.preferences(ctx)
 	if err != nil || !slices.Equal(prefs["deepseek-flash"], order) || prefs[river.DeepSeekFlash] != nil {
 		t.Fatal("legacy priority created a duplicate", prefs, err)
+	}
+}
+
+func TestRiverOldSnapshotUpdatesDisplayWithoutAddingModels(t *testing.T) {
+	s, db := fixture(t)
+	ctx := context.Background()
+	if _, err := db.Exec(`
+INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at)
+VALUES('river','builtin_river','River','unused','2026-10-17T00:00:00Z','now');
+INSERT INTO account_models(account_id,model,name,fetched_at,account_version)
+SELECT id,'deepseek-ai/DeepSeek-V4.1-Flash','DeepSeek-Flash','now',version
+FROM account_catalog_versions WHERE id='river'`); err != nil {
+		t.Fatal(err)
+	}
+	items, err := s.DefaultRoutes(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, item := range items {
+		if item.Model == "deepseek-flash" {
+			found = true
+			if item.Name != "DeepSeek-V4.1-Flash" {
+				t.Fatal("old snapshot kept the obsolete display", item)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("original Flash disappeared")
+	}
+	preview, err := s.Resolve(ctx, river.PublicModel(river.DeepSeekFlash1017))
+	if err != nil || preview.Routable {
+		t.Fatal("old discovery snapshot silently gained a new model", preview, err)
 	}
 }

@@ -10,6 +10,8 @@ const (
 	DefaultBaseURL = "https://api.river.ai/v1"
 	// DeepSeekFlash 保留官方仓库前缀和大小写，避免与直连 DeepSeek 混淆。
 	DeepSeekFlash = "deepseek-ai/DeepSeek-V4.1-Flash"
+	// DeepSeekFlash1017 是独立发布的固定版本，不能折叠到原版模型。
+	DeepSeekFlash1017 = "deepseek-ai/DeepSeek-V4.1-Flash-1017"
 	// NemotronVL 是官方多模态 Nemotron 模型。
 	NemotronVL = "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4"
 	// GLMFlash 是官方 GLM 模型。
@@ -17,11 +19,11 @@ const (
 )
 
 // Models 返回官方预设，不代表 Key 已通过认证。
-func Models() []string { return []string{DeepSeekFlash, NemotronVL, GLMFlash} }
+func Models() []string { return []string{DeepSeekFlash, DeepSeekFlash1017, NemotronVL, GLMFlash} }
 
 // SupportsModel 仅开放已经核对协议的官方模型。
 func SupportsModel(model string) bool {
-	return model == DeepSeekFlash || model == NemotronVL || model == GLMFlash
+	return model == DeepSeekFlash || model == DeepSeekFlash1017 || model == NemotronVL || model == GLMFlash
 }
 
 // ModelMetadata 记录官方上下文和能力，不推断未公布的 Nemotron 推理档位。
@@ -31,10 +33,11 @@ func ModelMetadata(model string) catalog.Metadata {
 		return catalog.Metadata{}
 	}
 	window, output, tools := int64(1048576), int64(131072), true
-	if model == DeepSeekFlash {
+	if model == DeepSeekFlash || model == DeepSeekFlash1017 {
 		output = 384000
 	}
 	m := catalog.Metadata{ContextWindow: &window, OutputTokenLimit: &output, InputModalities: []string{"text"}, ToolUse: &tools}
+	// 官方控制参数表尚未单列 1017 的档位，不将原版枚举推断为固定版本契约。
 	if model == DeepSeekFlash {
 		m.ReasoningEfforts = []catalog.Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}
 	}

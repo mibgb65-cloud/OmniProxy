@@ -5,6 +5,8 @@ func PublicModel(model string) string {
 	switch model {
 	case DeepSeekFlash:
 		return "deepseek-flash"
+	case DeepSeekFlash1017:
+		return "DeepSeek-V4.1-Flash-1017"
 	case NemotronVL:
 		return "NVIDIA-Nemotron-3.5"
 	case GLMFlash:
@@ -28,7 +30,7 @@ func UpstreamModel(model string) string {
 func ModelName(model string) string {
 	model = PublicModel(model)
 	if model == "deepseek-flash" {
-		return "DeepSeek-Flash"
+		return "DeepSeek-V4.1-Flash"
 	}
 	return model
 }
