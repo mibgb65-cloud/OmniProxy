@@ -8,11 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261020-014](../tasks/active/TASK-20261020-014-quota-estimate-token-summary.md)：将 Codex 额度美元估算改为单值双列，移除折叠说明并新增输入／输出／缓存 Token 块；官方价格已核对，正在进行回归与完整质量门验证。
-
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261020-014](../tasks/completed/2026-10/TASK-20261020-014-quota-estimate-token-summary.md)：`5691979`，Codex 5h／周美元估算改为单值双列，移除折叠说明，下方三列展示本机留存的输入／输出／缓存 Token，区分未知与零并自动更新。已核对主要型号官方价格；完整质量门／693 项前端测试、Windows 隔离构建及深浅主题 1200×800／960×720 原生合成验收通过。未打包安装程序、安装或发布。
 
 - [TASK-20261020-013](../tasks/completed/2026-10/TASK-20261020-013-build-local-beta14-installer.md)：`1c5c44f`，Beta.14 本地 production 安装包 19,491,252 bytes／SHA256 `76d2f353b0d8442b3c22be4d58f39af2719de949d953cdfabaf9925031b07400`；隔离完整门禁／684 项前端测试、命令工具单测／vet、NSIS、原生版本和 1693 项来源验证通过。16 个旧发布资产未变；安装目录／进程在核对时已更新，已如实记录差异并确认应用与本次构建一致，未由本任务执行安装或发布。
 
