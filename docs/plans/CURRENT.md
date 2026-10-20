@@ -12,6 +12,8 @@
 
 ## Recently Completed
 
+- [TASK-20261020-009](../tasks/completed/2026-10/TASK-20261020-009-google-agent-auto-integration.md)：`161fb82`，Google 受支持订阅模型在启动／授权／刷新后自动同步到受管 Agent，保留限选、默认模型及外部改动保护，卡片区分协议支持和实际接入。13 种客户端回归、完整质量门／673 项前端测试、Windows 隔离构建及原生开发窗口核对通过；未替换生产安装，运行中的 Agent 仍可能需要重载菜单。
+
 - [TASK-20261020-007](../tasks/completed/2026-10/TASK-20261020-007-build-local-beta12-installer.md)：`adb1e5f`，Beta.12 本地 production 安装包 19,434,522 bytes／SHA256 `df50c4bed9b0f80960c5edc428b083c0181399fef166782273169400001af8ef`；完整门禁／669 项前端测试、NSIS、原生版本／生产标签、1282 项源码及 15 项旧资产／安装文件基线校验通过。未签名、未自动安装或发布，交付用户自行本地更新。
 
 - [TASK-20261020-006](../tasks/completed/2026-10/TASK-20261020-006-fix-subscription-refresh-error-state.md)：`ac9d5a7`，普通订阅刷新取消强制 OAuth／已知标识重复查询，超时与取消分开，临时失败保留原授权状态；临时反馈 5 秒自动消失，真实身份错误继续可见，账号更新不继承旧红字。关键回归三轮及完整门禁／666 项前端测试、Windows 构建通过；原生 UIA／真实网络待验收，未发布或替换生产版。
