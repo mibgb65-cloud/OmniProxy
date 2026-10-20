@@ -210,8 +210,13 @@ In Progress
 
 # Git
 
-用户已授权将当前改动提交到本地 main，正在按功能整理；实际提交哈希随后回填。
-不推送远端，Desktop 发送验收仍未完成，任务保持 In Progress。
+用户已授权提交，以下代码已直接提交在本地 main，无需重复 merge：
+
+- `b6f33987f1abd3d3910c9dddd9b90adbccf7b0f8 feat(settings): 支持启动软件时自动开启网关`
+- `3b7e7392030fa98b394d4ce8ae5d65ce4af4aecb feat(codex): 增加带加密备份和恢复的旧版登录试验`
+- `dced0551e016ca814f9f28cc0bf33513f7d25252 test(river): 明确图片历史兼容边界并补充回归验证`
+
+不推送远端，Desktop 发送验收仍未完成，任务保持 In Progress。分支整理见 TASK-20261020-011。
 
 # Result
 

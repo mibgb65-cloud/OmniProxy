@@ -8,9 +8,11 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261020-011](../tasks/completed/2026-10/TASK-20261020-011-consolidate-local-main.md)：当前启动设置／旧版登录试验／River 兼容边界分别提交至本地 main（`b6f3398`／`3b7e739`／`dced055`）；九包回归与暂存检查通过。19 个已覆盖分支清理，先前源提交完整保存在本地 `.git/local-backups` bundle，未重复合并、未更新远端。既有 Completed 记录补入版本控制；重复 Atria Planned 草稿保留未动，TASK-008 仍待产品验收。
 
 - [TASK-20261020-010](../tasks/completed/2026-10/TASK-20261020-010-build-local-beta13-installer.md)：`3b7ab62`，Beta.13 本地 production 安装包 19,448,349 bytes／SHA256 `86eaa6c00ce058578c36e0c0a48510ebea4d27f84722b9cd730798774d7d9adb`；隔离完整门禁／674 项前端测试、NSIS、原生版本、1290 项来源及 15 项保护基线验证通过。包含 Google 自动同步，未签名、未自动安装或发布，供用户自行本地更新。
 
