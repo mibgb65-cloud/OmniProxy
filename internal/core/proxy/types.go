@@ -96,9 +96,10 @@ type Options struct {
 
 // Error 的 Code 可用于 UI 和协议错误；禁止放入原始上游正文、凭证或请求内容。
 type Error struct {
-	RetryAfter string
-	Code       string
-	StatusCode int
+	RetryAfter   string
+	Code         string
+	StatusCode   int
+	imageContent bool
 }
 
 func (e *Error) Error() string { return "gateway: " + e.Code }

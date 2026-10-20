@@ -32,7 +32,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 			if request.Protocol != "responses" {
 				chat, _, err := agentprotocol.ToChat(request.Body, request.Protocol)
 				if err != nil {
-					return proxy.Failure("unsupported_content", 400)
+					return protocolContentFailure(err)
 				}
 				body, err := agentprotocol.ChatToResponses(chat)
 				if err != nil {
@@ -81,7 +81,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	}
 	body, kinds, err := agentprotocol.ToChat(request.Body, request.Protocol)
 	if err != nil {
-		return proxy.Failure("unsupported_content", 400)
+		return protocolContentFailure(err)
 	}
 	upstream := request
 	upstream.Body = body

@@ -1,4 +1,6 @@
 export const gatewayZh = {
+  "gateway.error.content":
+    "请求或历史包含当前模型不支持的图片／工具内容。请切换支持该内容的模型，或新建纯文本会话并避免截图／图片工具。",
   "gateway.overview.range": "统计范围",
   "gateway.overview.refresh": "刷新统计",
   "gateway.overview.unavailable": "统计暂不可用",

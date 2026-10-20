@@ -21,6 +21,7 @@ const errorKeys = new Map<string, TranslationKey>([
   ["gateway_busy", "gateway.error.busy"],
   ["gateway_not_running", "gateway.error.stopped"],
   ["unsupported_model", "gateway.error.model"],
+  ["unsupported_content", "gateway.error.content"],
   ["invalid_upstream_response", "gateway.error.response"],
   ["upstream_rejected_request", "gateway.error.response"],
   ["upstream_unavailable", "gateway.error.upstream"],

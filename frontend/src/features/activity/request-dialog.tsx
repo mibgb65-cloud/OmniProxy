@@ -136,6 +136,9 @@ export function RequestDialog({
                 ))}
               </dl>
             ) : null}
+            {item?.errorCode === "unsupported_content" ? (
+              <p className="text-muted-foreground mt-3 text-sm">{t("gateway.error.content")}</p>
+            ) : null}
             {data.isSuccess && item ? <RequestAttempts item={item} /> : null}
             <p className="text-muted-foreground text-xs leading-5">{t("activity.logHint")}</p>
           </div>

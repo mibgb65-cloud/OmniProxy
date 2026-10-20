@@ -13,7 +13,7 @@ func (s *Service) forwardRiver(ctx context.Context, target target, request proxy
 	if request.Protocol == "messages" {
 		body, toolKinds, err := agentprotocol.ToChat(request.Body, "messages")
 		if err != nil {
-			return proxy.Failure("unsupported_content", 400)
+			return protocolContentFailure(err)
 		}
 		var fields map[string]json.RawMessage
 		if json.Unmarshal(body, &fields) != nil {

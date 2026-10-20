@@ -4,9 +4,11 @@ package agentprotocol
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 var ErrUnsupported = errors.New("protocol: unsupported_content")
+var ErrUnsupportedImage = fmt.Errorf("%w: image_content", ErrUnsupported)
 
 type Object = map[string]any
 type Call struct{ ID, Name, Arguments, Kind string }
@@ -30,6 +32,8 @@ func content(v any) (string, error) {
 		switch text(part["type"]) {
 		case "text", "input_text", "output_text":
 			output += text(part["text"])
+		case "image", "input_image", "image_url":
+			return "", ErrUnsupportedImage
 		default:
 			return "", ErrUnsupported
 		}

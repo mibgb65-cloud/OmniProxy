@@ -2,8 +2,8 @@ package proxy
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -58,8 +58,10 @@ func writeFailure(w http.ResponseWriter, err error) {
 		w.Header().Set("Retry-After", strconv.Itoa(seconds))
 	}
 	w.WriteHeader(failure.StatusCode)
-	// 错误只返回稳定代码，禁止携带上游正文、账号名称、URL 或底层错误文本。
-	if _, err := io.WriteString(w, `{"error":{"message":"`+failure.Code+`","type":"gateway_error","code":"`+failure.Code+`"}}`); err != nil {
+	// 只返回稳定代码及内置诊断文案，禁止携带上游正文、账号名称、URL 或底层错误文本。
+	if err := json.NewEncoder(w).Encode(map[string]any{"error": map[string]string{
+		"message": failure.clientMessage(), "type": "gateway_error", "code": failure.Code,
+	}}); err != nil {
 		slog.Debug("gateway error response write failed", "code", "client_write_failed")
 	}
 }

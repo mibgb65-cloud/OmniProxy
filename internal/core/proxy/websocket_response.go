@@ -86,7 +86,7 @@ func (s *Server) rejectSocketRequest(ctx context.Context, socket *websocket.Conn
 }
 
 func socketFailure(ctx context.Context, socket *websocket.Conn, failure *Error) {
-	event := map[string]any{"type": "error", "status": failure.StatusCode, "error": map[string]string{"type": "gateway_error", "code": failure.Code, "message": failure.Code}}
+	event := map[string]any{"type": "error", "status": failure.StatusCode, "error": map[string]string{"type": "gateway_error", "code": failure.Code, "message": failure.clientMessage()}}
 	if seconds := validatedRetryAfter(failure.RetryAfter); seconds != "" {
 		event["headers"] = map[string]string{"retry-after": seconds}
 	}

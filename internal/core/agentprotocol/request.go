@@ -65,6 +65,8 @@ func ToChat(body []byte, protocol string) ([]byte, map[string]string, error) {
 					}
 					messages = append(messages, Object{"role": "tool", "tool_call_id": part["tool_use_id"], "content": s})
 				case "thinking", "redacted_thinking": // 其他提供商不能验证 Anthropic 的推理签名，保留可见对话和工具链。
+				case "image", "input_image", "image_url":
+					return nil, nil, ErrUnsupportedImage
 				default:
 					return nil, nil, ErrUnsupported
 				}

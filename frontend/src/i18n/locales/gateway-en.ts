@@ -1,6 +1,8 @@
 import type { gatewayZh } from "./gateway-zh"
 
 export const gatewayEn: Record<keyof typeof gatewayZh, string> = {
+  "gateway.error.content":
+    "The request or conversation history contains image/tool content this model route cannot process. Switch to a compatible model, or start a text-only conversation and avoid screenshot/image tools.",
   "gateway.overview.range": "Statistics range",
   "gateway.overview.refresh": "Refresh statistics",
   "gateway.overview.unavailable": "Statistics unavailable",
