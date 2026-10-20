@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-003](../tasks/active/TASK-20261020-003-fix-responses-long-session-recovery.md)：修复 Responses 长会话重连后的 512 项误拒绝，保留具体 WebSocket 校验错误并区分流读写失败；正在验证，不替换生产程序。
 
 ## Recently Completed
 

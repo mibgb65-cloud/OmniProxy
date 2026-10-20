@@ -57,7 +57,10 @@ func copyResponse(w http.ResponseWriter, response Response, stream bool, committ
 	w.WriteHeader(http.StatusOK)
 	*committed = true
 	_, err = w.Write(body)
-	return err
+	if err != nil {
+		return Failure("client_write_failed", 502)
+	}
+	return nil
 }
 
 func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol ...string) error {
@@ -108,10 +111,10 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol
 			frame += "\n"
 		}
 		if _, err := io.WriteString(w, frame); err != nil {
-			return err
+			return Failure("client_write_failed", 502)
 		}
 		if err := controller.Flush(); err != nil {
-			return err
+			return Failure("client_write_failed", 502)
 		}
 		// 客户端在空行后才能解析完整 SSE 事件；不能在 data 行或响应头处提前计时。
 		if firstContent && (line == "" || done) {
@@ -121,6 +124,14 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol
 		if done {
 			return nil
 		}
+	}
+	return streamReadFailure(scanner.Err())
+}
+
+// 不把读流的底层错误传出 Core，否则凭据回调外层会将其误分类；仅返回固定安全码。
+func streamReadFailure(err error) error {
+	if errors.Is(err, bufio.ErrTooLong) {
+		return Failure("response_too_large", 502)
 	}
 	return Failure("upstream_stream_failed", 502)
 }

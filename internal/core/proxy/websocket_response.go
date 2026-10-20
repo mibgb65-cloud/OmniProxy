@@ -47,7 +47,7 @@ func copySocketResponse(ctx context.Context, socket *websocket.Conn, response Re
 			return socketResult{}, Failure("upstream_stream_failed", 502)
 		}
 		if err := socket.Write(ctx, websocket.MessageText, data); err != nil {
-			return socketResult{}, err
+			return socketResult{}, Failure("client_write_failed", 502)
 		}
 		if trace.hasFirstContent(data) {
 			trace.markFirstToken()
@@ -57,10 +57,7 @@ func copySocketResponse(ctx context.Context, socket *websocket.Conn, response Re
 			return event.Response, nil
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		return socketResult{}, err
-	}
-	return socketResult{}, Failure("upstream_stream_failed", 502)
+	return socketResult{}, streamReadFailure(scanner.Err())
 }
 
 func socketError(ctx context.Context, socket *websocket.Conn, code string) {
@@ -78,6 +75,14 @@ func socketError(ctx context.Context, socket *websocket.Conn, code string) {
 		status = 503
 	}
 	socketFailure(ctx, socket, &Error{Code: code, StatusCode: status})
+}
+
+func (s *Server) rejectSocketRequest(ctx context.Context, socket *websocket.Conn, err error) {
+	failure := safeFailure(ctx, err).(*Error)
+	if s.opts.Logger != nil {
+		s.opts.Logger.Warn("gateway request rejected", "protocol", "responses", "transport", "websocket", "status_code", failure.StatusCode, "code", failure.Code)
+	}
+	socketFailure(ctx, socket, failure)
 }
 
 func socketFailure(ctx context.Context, socket *websocket.Conn, failure *Error) {

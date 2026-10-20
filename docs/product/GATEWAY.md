@@ -59,7 +59,11 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求、任意 URL 转发和上游重定向。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。
 
-请求体上限 2 MiB，消息最多 512，JSON 嵌套最多 32；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB。WebSocket 空闲读超时 60 秒，连接内缓存上下文，禁止跨连接引用未知 response ID。
+Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。
+
+WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
+
+流读取失败返回 `upstream_stream_failed`，单行超限返回 `response_too_large`，客户端写入／刷新失败返回 `client_write_failed`；这些错误不会被误标为凭据不可用。取消及超时仍按既有分类处理。HTTP 已提交 SSE 响应头后保留实际状态码，通过请求失败状态与错误码记录中断；WebSocket 使用错误事件表达失败。开始生成后的中断不触发账号切换或自动重放。
 
 ChatGPT Responses 原生流式转发；跨协议支持文本和工具关联，收齐结果后返回 JSON 或 SSE。DeepSeek 跨协议关闭思考，多模态及不支持的托管工具显式报错。已支持最多三次的同服务商、同认证／计费／地区账号故障切换，固定账号和成功响应后不重放；完整健康／负载调度仍待实现。开关、触发条件、Google 配额边界和尝试统计见 [账号故障切换](FAILOVER.md)。
 

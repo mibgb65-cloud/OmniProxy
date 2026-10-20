@@ -41,6 +41,10 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			socketFailure(r.Context(), socket, err)
 			return
 		}
+		if err := validateJSONSize(body, MaxResponsesRequestBytes); err != nil {
+			s.rejectSocketRequest(r.Context(), socket, err)
+			return
+		}
 		var fields map[string]json.RawMessage
 		if json.Unmarshal(body, &fields) != nil || string(fields["type"]) != `"response.create"` {
 			socketError(r.Context(), socket, "invalid_request")
@@ -83,7 +87,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		}
 		request, err := ParseProtocolRequest(body, "/v1/responses")
 		if err != nil {
-			socketError(r.Context(), socket, "invalid_request")
+			s.rejectSocketRequest(r.Context(), socket, err)
 			return
 		}
 		if !generate {
