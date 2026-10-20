@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-004](../tasks/active/TASK-20261020-004-build-local-beta11-installer.md)：准备 Beta.11 本地 production 安装包，包含 Responses 长会话恢复及 Beta.10 后已提交优化；隔离构建，不自动安装或发布。
 
 ## Recently Completed
 

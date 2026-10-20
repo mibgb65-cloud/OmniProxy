@@ -44,6 +44,17 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("本地安装包未签名")
     },
   )
+  it.each(["2.0.0-beta.11", "v2.0.0-beta.11", "2.0.0-beta.11+local.123"])(
+    "Beta.11 按运行版本 %s 提供长会话恢复与本地更新说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## Codex 长会话恢复")
+      expect(notes).toContain("## 授权进度与账号管理")
+      expect(notes).toContain("## OpenAI 账号轮换设置")
+      expect(notes).toContain("本版未包含额度与重置时间跨重启快照持久化")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
