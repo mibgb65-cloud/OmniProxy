@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.13 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `3b7ab62`，加入 Google 订阅模型启动／授权／刷新后的自动同步和受管 Agent 配置保护，保留 Beta.12 既有功能；不纳入其他任务未提交的试验。隔离完整质量门／674 项前端测试、NSIS、Windows 原生版本、1290 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.13/`，未签名。真实覆盖升级、Agent 重载／推理和安装版重启由用户本地验收；15 个旧资产／已安装程序文件与原生产进程保持不变。
+2.0.0-beta.14 — 本地 Windows amd64 production 安装包，未公开发布。源码 `1c5c44f`，加入 Codex 5h／周美元总额与剩余参考估算、图片工具历史安全诊断及启动网关偏好，保留 Beta.13 的 Google 自动同步。隔离完整质量门／684 项前端测试、NSIS、原生版本、1693 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.14/`，未签名。16 个旧发布资产未变。最终核对时安装目录及生产进程已更新为与本次构建摘要一致的 Beta.14，本构建任务未执行安装；不能将原安装状态未变记为通过，真实使用和账号数据仍需用户验收。
 
 ## In Progress
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261020-013](../tasks/completed/2026-10/TASK-20261020-013-build-local-beta14-installer.md)：`1c5c44f`，Beta.14 本地 production 安装包 19,491,252 bytes／SHA256 `76d2f353b0d8442b3c22be4d58f39af2719de949d953cdfabaf9925031b07400`；隔离完整门禁／684 项前端测试、命令工具单测／vet、NSIS、原生版本和 1693 项来源验证通过。16 个旧发布资产未变；安装目录／进程在核对时已更新，已如实记录差异并确认应用与本次构建一致，未由本任务执行安装或发布。
 
 - [TASK-20261020-012](../tasks/completed/2026-10/TASK-20261020-012-claude-deepseek-quota-usd.md)：`d743e2d`／`458e13d`，定位 Claude Code → River DeepSeek 的工具图片历史拒绝，补充固定安全诊断；沿用旧版当前窗口成本／已用比例公式，加入 Codex 5h／周美元总额与剩余粗估，支持实际模型价、缓存区间及独立重置／观察时刻。两轮完整门禁／681 项前端测试、Windows 构建和合成账号原生 1200×800／960×720 验收通过。估值不是官方余额，未安装或发布。
 
