@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261020-005](../tasks/active/TASK-20261020-005-river-model-display-request-pagination.md)：优化 River 两款 DeepSeek 型号显示，补齐独立 1017 版本，并修正请求历史总页数文案；保留旧路由兼容性。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-005](../tasks/completed/2026-10/TASK-20261020-005-river-model-display-request-pagination.md)：`3dd7426`，River 原版 Flash 显示补全 V4.1，增加独立 1017 版本并保留原路由兼容；请求分页改为实际总页数。完整门禁／646 项前端测试、Windows 构建及原生请求页／模型预览核对通过；未发布或替换生产版，已同步账号需手动重新同步目录。
 
 - [TASK-20261020-001](../tasks/completed/2026-10/TASK-20261020-001-persist-subscription-quota-snapshots.md)：`f5de7ca`，迁移 036 持久保存公开额度／重置时间，换页与重启后先恢复再刷新，失败或暂缺字段保留原显示；留存值不作为实时调度／激活依据。数据库重开、身份／错误／删除边界和完整门禁／639 项前端测试、Windows 构建通过；真实 GUI／安装版重启待人工验收，尚未将此变更打入安装包或替换生产程序。
 
