@@ -68,6 +68,17 @@ describe("当前版本发行说明", () => {
       expect(notes).not.toContain("本版未包含额度与重置时间跨重启快照持久化")
     },
   )
+  it.each(["2.0.0-beta.13", "v2.0.0-beta.13", "2.0.0-beta.13+local.123"])(
+    "Beta.13 按运行版本 %s 提供 Google 自动同步及安全接入说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## Google 模型自动同步")
+      expect(notes).toContain("## Agent 接入与配置保护")
+      expect(notes).toContain("不会自动扩展")
+      expect(notes).toContain("不自动启动网关")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
