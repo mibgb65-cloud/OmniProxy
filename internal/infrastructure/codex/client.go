@@ -93,6 +93,9 @@ func Open(ctx context.Context, home string) (Client, error) {
 }
 
 func (c *rpcClient) call(ctx context.Context, method string, params any, result any) error {
+	if err := ctx.Err(); err != nil {
+		return &rpcContextError{cause: err}
+	}
 	c.mu.Lock()
 	c.sequence++
 	id := c.sequence
@@ -113,7 +116,7 @@ func (c *rpcClient) call(ctx context.Context, method string, params any, result 
 		}
 		return nil
 	case <-ctx.Done():
-		return errors.New("subscription: operation_cancelled")
+		return &rpcContextError{cause: ctx.Err()}
 	case <-c.done:
 		return ErrProtocol
 	}

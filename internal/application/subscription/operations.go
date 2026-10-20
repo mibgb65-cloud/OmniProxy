@@ -6,57 +6,6 @@ import (
 	"os"
 )
 
-// Refresh 由官方组件刷新系统凭证，并更新身份与需要重新授权的状态。
-func (s *Service) Refresh(ctx context.Context, id string) (account.Item, error) {
-	if err := s.operations.Lock(ctx); err != nil {
-		return account.Item{}, failure("operation_cancelled")
-	}
-	defer s.operations.Unlock()
-	if s.accountBusy(id) {
-		return account.Item{}, failure("busy")
-	}
-	item, profile, err := s.accounts.SubscriptionProfile(ctx, id)
-	if err != nil {
-		return account.Item{}, failure("invalid_account")
-	}
-	client, err := s.open(ctx, profile)
-	if err != nil {
-		return item, err
-	}
-	defer client.Close()
-	identity, err := client.Account(ctx, true)
-	state := "authenticated"
-	email, plan := item.AuthEmail, item.AuthPlan
-	authAccountID := item.AuthAccountID
-	var accountIDErr error
-	if err != nil {
-		state = "unknown"
-	} else if identity == nil {
-		state = "reauth_required"
-	} else {
-		if item.AuthEmail != "" && !sameEmail(item.AuthEmail, identity.Email) {
-			return item, failure("identity_changed")
-		}
-		email, plan = identity.Email, identity.Plan
-		var currentID string
-		currentID, accountIDErr = readAccountID(ctx, client)
-		if accountIDErr == nil {
-			authAccountID = currentID
-		}
-	}
-	updated, updateErr := s.accounts.UpdateSubscription(ctx, id, account.SubscriptionMetadata{Email: email, Plan: plan, State: state, AccountID: authAccountID})
-	if updateErr != nil {
-		return account.Item{}, failure("account_update_failed")
-	}
-	if err != nil {
-		return updated, err
-	}
-	if accountIDErr != nil {
-		return updated, accountIDErr
-	}
-	return updated, nil
-}
-
 // Logout 清除该账号系统凭证，保留元数据供重新授权。
 func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
 	if err := s.operations.Lock(ctx); err != nil {

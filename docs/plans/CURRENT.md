@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-006](../tasks/active/TASK-20261020-006-fix-subscription-refresh-error-state.md)：修复普通订阅刷新强制续期、超时误报授权取消、临时失败改写授权状态与过时卡片红字；对照 v1，保留实际认证和身份隔离边界。
 
 ## Recently Completed
 

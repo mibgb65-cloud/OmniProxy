@@ -98,7 +98,11 @@ func TestQueuedSubscriptionOperationsCanBeCancelled(t *testing.T) {
 			go func() { done <- operation(s, ctx) }()
 			select {
 			case err := <-done:
-				if ErrorCode(err) != "operation_cancelled" {
+				want := "operation_cancelled"
+				if name == "refresh" {
+					want = "refresh_busy"
+				}
+				if ErrorCode(err) != want {
 					t.Fatal("queued operation did not return a stable cancellation")
 				}
 			case <-time.After(time.Second):

@@ -31,11 +31,8 @@ func TestMissingAccountIDPreservesAuthorizationAndRefreshRecoversIt(t *testing.T
 	client.accountIDUnavailable = true
 	client.mu.Unlock()
 	retained, err := f.manager.Refresh(context.Background(), result.Account.ID)
-	if err != nil && err.Error() != "subscription: account_id_pending" {
-		t.Fatal("unsafe account ID read error returned")
-	}
-	if err == nil || retained.AuthAccountID != updated.AuthAccountID || retained.AuthState != "authenticated" {
-		t.Fatal("failed account ID refresh erased saved identity")
+	if err != nil || retained.AuthAccountID != updated.AuthAccountID || retained.AuthState != "authenticated" {
+		t.Fatal("known account ID unnecessarily depended on the optional network read")
 	}
 }
 

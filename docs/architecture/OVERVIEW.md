@@ -263,6 +263,8 @@ duplicates business logic.
 
 `internal/application/subscription` 管理 OpenAI 的 ChatGPT 订阅授权生命周期；`internal/infrastructure/codex` 通过本机官方 app-server 的 stdio 协议实现浏览器／设备码登录、取消、刷新和退出。每个账号使用固定缓存根目录下的随机 CODEX_HOME，强制 keyring，实际令牌由官方组件管理；DPAPI 引用只保存隔离配置定位。迁移 004 保留 API Key 默认值并增加安全身份元数据。重新授权先暂存新配置，成功切换后清理旧配置，失败清理保留引用／标记以便重试。Wails 事件只携带变更信号，前端订阅后补读会话状态；不会读取用户默认 Codex 登录。详见 `docs/product/SUBSCRIPTION.md` 和 ADR-003。
 
+普通状态刷新使用托管身份只读路径，不强制 OAuth；只有缺少工作区标识时补读附加元数据。RPC 保留截止时间／取消的类型原因，状态刷新失败不改写已保存授权。前端临时反馈沿用 5 秒 StatusToast，错误关联提交时账号版本，真实身份／存储故障仍内联展示。实际额度与模型请求的身份校验、登录完成同步和凭据消费边界不变，无新增迁移或依赖。
+
 ### Core (`internal/core/…`)
 
 Pure Go business logic: the proxy server, request parsing, model routing,

@@ -4,6 +4,16 @@ export const subscriptionEn = {
   "subscription.error.request_failed":
     "The official login component request failed. Try again later.",
   "subscription.error.operation_cancelled": "Authorization was cancelled. Start again.",
+  "subscription.error.operation_timeout": "The login component timed out. Try again later.",
+  "subscription.error.refresh_timeout":
+    "Account status refresh timed out. The previous state was kept; try again later.",
+  "subscription.error.refresh_busy": "Another account operation is still running. Refresh later.",
+  "subscription.error.refresh_unavailable":
+    "Account status could not be refreshed. The previous state was kept; try again later.",
+  "subscription.error.refresh_cancelled": "This refresh stopped. You can try again later.",
+  "subscription.error.account_update_failed":
+    "Account status could not be saved. Check the local data directory and try again.",
+  "subscription.refreshDismiss": "Dismiss refresh notice",
   "subscription.error.invalid_account":
     "The account state changed. Reopen the login dialog and try again.",
   "subscription.error.invalid_provider":

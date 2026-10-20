@@ -48,6 +48,12 @@ export function subscriptionError(error: unknown) {
     "protocol_failed",
     "login_failed",
     "operation_cancelled",
+    "operation_timeout",
+    "refresh_timeout",
+    "refresh_busy",
+    "refresh_unavailable",
+    "refresh_cancelled",
+    "account_update_failed",
     "invalid_account",
     "invalid_provider",
     "quota_changed",
@@ -81,4 +87,36 @@ export function subscriptionError(error: unknown) {
     "browser_failed",
   ] as const
   return known.find((code) => text.includes(`subscription: ${code}`)) ?? "operation_failed"
+}
+
+// 普通刷新失败不是取消登录；兼容旧后端错误时也不引导用户无谓地重新授权。
+export function subscriptionRefreshError(error: unknown) {
+  const code = subscriptionError(error)
+  switch (code) {
+    case "operation_timeout":
+      return "refresh_timeout"
+    case "operation_cancelled":
+    case "cancelled":
+      return "refresh_cancelled"
+    case "operation_failed":
+    case "request_failed":
+    case "protocol_failed":
+    case "upstream_unavailable":
+      return "refresh_unavailable"
+    default:
+      return code
+  }
+}
+
+export function transientSubscriptionRefreshError(
+  code: ReturnType<typeof subscriptionError> | ReturnType<typeof subscriptionRefreshError>,
+) {
+  return [
+    "refresh_timeout",
+    "refresh_busy",
+    "refresh_unavailable",
+    "refresh_cancelled",
+    "account_id_pending",
+    "busy",
+  ].includes(code)
 }
