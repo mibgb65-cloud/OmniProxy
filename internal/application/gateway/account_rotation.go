@@ -29,6 +29,9 @@ func (s *Service) SetAccountRotationMode(read func(context.Context) (string, err
 
 // rotateAccounts 只重排已经解析的同池候选，不新增重试，也不改变显式固定账号。
 func (s *Service) rotateAccounts(ctx context.Context, initial target, request proxy.Request) ([]proxy.AccountCandidate, error) {
+	if initial.kind == "river" {
+		return s.rotateRiverAccounts(ctx, initial, request)
+	}
 	candidates := request.Candidates
 	if initial.kind != "openai" || initial.authMethod != account.AuthSubscription || request.FixedAccount || s.rotationMode == nil {
 		return candidates, nil

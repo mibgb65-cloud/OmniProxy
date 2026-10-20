@@ -43,3 +43,7 @@ export interface Info {
     "protocol": string;
     "requestTimeoutSeconds": number;
 }
+
+export interface RiverSettings {
+    "accountRotationMode": string;
+}

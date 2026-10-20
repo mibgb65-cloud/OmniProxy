@@ -1,5 +1,12 @@
 # Architecture Overview
 
+## Google 额度显示与 River 轮换（2026-10-20）
+
+迁移 038／039 分别增加 Google 公开额度快照和 River 非敏感使用方式。Google 本地恢复采用
+身份／授权版本联查，不争用联网刷新锁，普通令牌轮换在事务内重绑定快照；保留数据只服务显示。
+River 复用同池候选、平滑轮询和有界健康状态，连续失败冷却不引入不确定请求重放。
+无新依赖、凭据格式或 Core 到 Wails／React 的依赖，见 ADR-018／019。
+
 ## Google 模型自动接入（2026-10-20）
 
 `application/modelcatalog.GoogleAutoSync` 合并启动／Google 授权变更／模型读取完成的通知，

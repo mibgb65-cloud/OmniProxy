@@ -20,6 +20,7 @@ import {
 vi.mock("../../services/google-subscription", () => ({
   readGoogleSubscriptionModels: vi.fn(),
   readGoogleSubscriptionQuota: vi.fn(),
+  readCachedGoogleSubscriptionQuota: vi.fn(async () => null),
 }))
 vi.mock("../../services/models", () => ({ syncAccountModels: vi.fn() }))
 

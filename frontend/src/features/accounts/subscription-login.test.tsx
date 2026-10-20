@@ -25,6 +25,7 @@ import {
 } from "../../services/google-subscription"
 vi.mock("../../services/google-subscription", () => ({
   readGoogleSubscriptionQuota: vi.fn(),
+  readCachedGoogleSubscriptionQuota: vi.fn(async () => null),
   readGoogleSubscriptionModels: vi.fn(),
 }))
 

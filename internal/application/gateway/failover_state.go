@@ -24,6 +24,8 @@ type healthEntry struct {
 	code         string
 	epoch, probe uint64
 	active       int
+	failures     int
+	failedAt     time.Time
 }
 type healthLease struct {
 	key       healthKey
@@ -61,7 +63,8 @@ func (s *failoverState) acquire(t target, model string) (healthLease, bool, time
 	if e == nil {
 		// 仅淘汰无在途请求的条目，保证恢复资格和失败代次不会被并发成功错误清除。
 		for k, v := range s.entries {
-			if v.active == 0 && (v.until.Before(now) || k.account == key.account && k.version != key.version) {
+			expired := v.code != "" && v.until.Before(now) || v.code == "" && (v.failures == 0 || now.Sub(v.failedAt) > time.Minute)
+			if v.active == 0 && (expired || k.account == key.account && k.version != key.version) {
 				delete(s.entries, k)
 			}
 		}
@@ -89,6 +92,10 @@ func (s *failoverState) acquire(t target, model string) (healthLease, bool, time
 }
 
 func (s *failoverState) finish(lease healthLease, rejected *retryReason, healthy bool) {
+	s.finishResult(lease, rejected, healthy, false)
+}
+
+func (s *failoverState) finishResult(lease healthLease, rejected *retryReason, healthy, riverFailure bool) {
 	if lease.id == 0 {
 		return
 	}
@@ -102,6 +109,17 @@ func (s *failoverState) finish(lease healthLease, rejected *retryReason, healthy
 	if e.probe == lease.id {
 		e.probe = 0
 	}
+	if riverFailure && rejected == nil && e.epoch == lease.epoch {
+		if s.now().Sub(e.failedAt) > time.Minute {
+			e.failures = 0
+		}
+		e.failures++
+		e.failedAt = s.now()
+		if e.failures >= 2 {
+			// 只冷却后续请求；不能把可能已执行的当前请求当成明确拒绝重放。
+			rejected = &retryReason{code: "upstream_unavailable", delay: 30 * time.Second}
+		}
+	}
 	if rejected != nil {
 		e.epoch++
 		e.code = rejected.code
@@ -109,8 +127,9 @@ func (s *failoverState) finish(lease healthLease, rejected *retryReason, healthy
 	} else if healthy && e.epoch == lease.epoch {
 		e.code = ""
 		e.until = time.Time{}
+		e.failures = 0
 	}
-	if e.active == 0 && e.code == "" {
+	if e.active == 0 && e.code == "" && e.failures == 0 {
 		delete(s.entries, lease.key)
 	}
 }

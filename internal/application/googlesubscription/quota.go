@@ -4,20 +4,21 @@ import (
 	"context"
 	"time"
 
+	"omniproxy/internal/application/account"
 	"omniproxy/internal/provider/antigravity"
 )
 
 // ReadQuota 读取独立 Google 额度；在途重新授权／退出后不得发布旧结果。
 func (s *Service) ReadQuota(ctx context.Context, id string) (antigravity.Quota, error) {
-	return readGoogleResource(s, ctx, id, s.client.ReadQuota)
+	return readGoogleResource(s, ctx, id, s.client.ReadQuota, s.persistQuota)
 }
 
 // ReadAccountModels 独立读取可选模型，失败不会覆盖已成功的额度快照。
 func (s *Service) ReadAccountModels(ctx context.Context, id string) ([]antigravity.AccountModel, error) {
-	return readGoogleResource(s, ctx, id, s.client.AccountModels)
+	return readGoogleResource(s, ctx, id, s.client.AccountModels, nil)
 }
 
-func readGoogleResource[T any](s *Service, ctx context.Context, id string, read func(context.Context, antigravity.Credentials) (T, error)) (T, error) {
+func readGoogleResource[T any](s *Service, ctx context.Context, id string, read func(context.Context, antigravity.Credentials) (T, error), publish func(context.Context, account.Item, string, T) (T, error)) (T, error) {
 	var empty T
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -44,6 +45,9 @@ func readGoogleResource[T any](s *Service, ctx context.Context, id string, read 
 	latest, versionError := s.accounts.CatalogVersion(ctx, id)
 	if currentError != nil || versionError != nil || version != latest || current.AuthState != "authenticated" || current.AuthAccountID != cred.Subject || s.busy(id) {
 		return empty, antigravity.Failure("quota_changed")
+	}
+	if publish != nil {
+		return publish(ctx, current, latest, value)
 	}
 	return value, nil
 }

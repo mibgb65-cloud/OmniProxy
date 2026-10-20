@@ -1,0 +1,15 @@
+import type { riverSettingsZh } from "./river-settings-zh"
+
+export const riverSettingsEn: Record<keyof typeof riverSettingsZh, string> = {
+  "river.settings.title": "River account settings",
+  "river.settings.close": "Close River account settings",
+  "river.settings.loadFailed": "Cannot read River settings. Close and try again.",
+  "river.rotation.queue": "Queue",
+  "river.rotation.balanced": "Balanced",
+  "river.rotation.queueDescription":
+    "Use accounts in order, switching to another eligible key in the same pool when unavailable.",
+  "river.rotation.balancedDescription":
+    "Distribute new requests across eligible keys in the same pool. Balances request counts, not exact token usage.",
+  "river.rotation.failureHint":
+    "Uses the gateway failover switch. Temporarily skips a key after two consecutive network or server failures. Uncertain requests are not replayed; fixed accounts never switch.",
+}

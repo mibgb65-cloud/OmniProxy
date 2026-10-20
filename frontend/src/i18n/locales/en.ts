@@ -1,4 +1,5 @@
 import { mimoEn } from "./mimo-en"
+import { riverSettingsEn } from "./river-settings-en"
 import { failoverEn } from "./failover-en"
 import { kimiSettingsEn } from "./kimi-settings-en"
 import { stepfunSettingsEn } from "./stepfun-settings-en"
@@ -20,6 +21,7 @@ import { quotaUsdEn } from "./quota-usd-en"
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...riverSettingsEn,
   ...quotaUsdEn,
   ...failoverEn,
   ...mimoEn,

@@ -5,5 +5,6 @@ export type {
     AccountHealth,
     CodexSettings,
     FailoverSettings,
-    Info
+    Info,
+    RiverSettings
 } from "./models.js";

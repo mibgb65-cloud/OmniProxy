@@ -368,6 +368,10 @@ export function GetMiMoSettings(): $CancellablePromise<routing$0.MiMoSettings> {
     return $Call.ByID(2277291200);
 }
 
+export function GetRiverSettings(): $CancellablePromise<gateway$0.RiverSettings> {
+    return $Call.ByID(3282623806);
+}
+
 /**
  * GetStepFunSettings 读取 StepFun 默认计费顺序，不访问凭据或上游模型。
  */
@@ -387,6 +391,13 @@ export function GetUpdatePreferences(): $CancellablePromise<$models.UpdatePrefer
  */
 export function GoogleResources(): $CancellablePromise<googlequota$0.Resource[] | null> {
     return $Call.ByID(3772564351);
+}
+
+/**
+ * GoogleSubscriptionCachedQuota 恢复当前身份公开快照，不调用上游。
+ */
+export function GoogleSubscriptionCachedQuota(id: string): $CancellablePromise<antigravity$0.Quota | null> {
+    return $Call.ByID(2890941471, id);
 }
 
 /**
@@ -708,6 +719,10 @@ export function SetModelProviderOrder(model: string, providerIDs: string[] | nul
  */
 export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePromise<provider$0.Configuration> {
     return $Call.ByID(3123769335, id, enabled);
+}
+
+export function SetRiverAccountRotationMode(mode: string): $CancellablePromise<gateway$0.RiverSettings> {
+    return $Call.ByID(1061042611, mode);
 }
 
 /**

@@ -15,6 +15,7 @@ import { googleQuotaAccount, googleQuotaFixture } from "./google-quota-test-help
 
 vi.mock("../../services/google-subscription", () => ({
   readGoogleSubscriptionQuota: vi.fn(),
+  readCachedGoogleSubscriptionQuota: vi.fn(async () => null),
   readGoogleSubscriptionModels: vi.fn(),
 }))
 

@@ -23,6 +23,13 @@ describe("quota overview model", () => {
     const entry = makeQuotaEntry(google!, { ...base, googleQuota: googleQuotaFixture }, now)
     expect(entry).toMatchObject({ status: "normal", fetchedAt: googleQuotaFixture.fetchedAt })
     expect(quotaSummary([entry])).toMatchObject({ monitored: 1, known: 1 })
+    const retained = makeQuotaEntry(
+      google!,
+      { ...base, googleQuota: { ...googleQuotaFixture, fromCache: true } },
+      now,
+    )
+    expect(retained.status).toBe("stale")
+    expect(quotaSummary([retained])).toMatchObject({ known: 0, uncertain: 1 })
     expect(
       makeQuotaEntry(
         { ...google!, canQuery: false },

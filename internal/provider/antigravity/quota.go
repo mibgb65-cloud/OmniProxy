@@ -12,6 +12,7 @@ import (
 type Quota struct {
 	Groups    []QuotaGroup `json:"groups"`
 	FetchedAt string       `json:"fetchedAt"`
+	FromCache bool         `json:"fromCache,omitempty"`
 }
 
 // QuotaGroup 是官方返回的独立模型共享额度组。

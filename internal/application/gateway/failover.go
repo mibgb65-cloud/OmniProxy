@@ -139,9 +139,19 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 				cooldown = nil
 			}
 		}
-		s.failover.finish(lease, cooldown, accepted)
+		if t.kind == "river" {
+			s.failover.finishResult(lease, cooldown, accepted && err == nil, rejected == nil && riverTransientFailure(ctx, responseStatus, err))
+		} else {
+			s.failover.finish(lease, cooldown, accepted)
+		}
 		released = true
 		status, code := attemptFailure(ctx, err)
+		if t.kind == "river" && rejected == nil && responseStatus >= 400 {
+			status, code = responseStatus, "upstream_rejected_request"
+			if responseStatus >= 500 {
+				code = "upstream_unavailable"
+			}
+		}
 		if rejected != nil {
 			status, code = responseStatus, rejected.code
 		}

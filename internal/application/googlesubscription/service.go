@@ -13,14 +13,15 @@ import (
 
 // Service 持有有限后台授权会话；长期凭证仅保存在受保护账号存储。
 type Service struct {
-	mu       sync.Mutex
-	ops      sync.Mutex
-	accounts *account.Service
-	client   *antigravity.Client
-	config   func() (antigravity.OAuthConfig, error)
-	current  *session
-	onChange func()
-	closed   bool
+	mu         sync.Mutex
+	ops        sync.Mutex
+	accounts   *account.Service
+	client     *antigravity.Client
+	quotaCache *QuotaCache
+	config     func() (antigravity.OAuthConfig, error)
+	current    *session
+	onChange   func()
+	closed     bool
 }
 
 type session struct {

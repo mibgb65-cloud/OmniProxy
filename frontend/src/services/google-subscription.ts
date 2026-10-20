@@ -10,5 +10,8 @@ export type {
 export const readGoogleSubscriptionQuota = async (id: string) =>
   AppService.GoogleSubscriptionQuota(id)
 
+export const readCachedGoogleSubscriptionQuota = async (id: string) =>
+  AppService.GoogleSubscriptionCachedQuota(id)
+
 export const readGoogleSubscriptionModels = async (id: string) =>
   AppService.GoogleSubscriptionModels(id)

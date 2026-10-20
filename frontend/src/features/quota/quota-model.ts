@@ -122,6 +122,8 @@ export function quotaEntryStatus(
     if (!item.canQuery) return "unauthenticated"
     if (snapshot.error) return "error"
     if (!snapshot.googleQuota) return snapshot.pending ? "pending" : "unknown"
+    // 本机留存只表示待确认；不能让额度组件误报“已达到官方重置时间”。
+    if (snapshot.googleQuota.fromCache) return "stale"
     return googleQuotaState(snapshot.googleQuota, now)
   }
   if (item.kind === "minimax_plan") {

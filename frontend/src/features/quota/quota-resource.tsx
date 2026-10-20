@@ -28,6 +28,9 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
           </p>
         ) : null}
         <p className="text-muted-foreground text-[10px] leading-5">{t("google.quota.hint")}</p>
+        {entry.canQuery && entry.googleQuota?.fromCache ? (
+          <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
+        ) : null}
       </div>
     )
   if (entry.kind === "kimi_coding") return <KimiCodeResource account={entry.account} />

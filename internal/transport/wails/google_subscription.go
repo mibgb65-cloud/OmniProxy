@@ -31,6 +31,7 @@ func (s *AppService) googleSubscriptionService() (*googlesubscription.Service, e
 			return nil, antigravity.Failure("credential_unavailable")
 		}
 		manager := googlesubscription.New(accounts, nil)
+		manager.SetQuotaCache(googlesubscription.NewQuotaCache(s.db))
 		manager.OnChange(func() {
 			s.subscription.mu.Lock()
 			emit := s.subscription.emit
@@ -84,6 +85,17 @@ func (s *AppService) GoogleSubscriptionQuota(id string) (antigravity.Quota, erro
 	ctx, cancel := subscriptionContext()
 	defer cancel()
 	return manager.ReadQuota(ctx, id)
+}
+
+// GoogleSubscriptionCachedQuota 恢复当前身份公开快照，不调用上游。
+func (s *AppService) GoogleSubscriptionCachedQuota(id string) (*antigravity.Quota, error) {
+	manager, err := s.googleSubscriptionService()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := subscriptionContext()
+	defer cancel()
+	return manager.CachedQuota(ctx, id)
 }
 
 // GoogleSubscriptionModels 返回当前账号官方选择器模型与本机适配状态。

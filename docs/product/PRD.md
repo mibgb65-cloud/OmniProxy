@@ -66,7 +66,7 @@ accounts need one local place to:
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。
-- Google 增加 Antigravity 独立订阅登录，提供浏览器授权、身份校验、刷新／退出、真实账号 Gemini／已适配 Claude／GPT-OSS 模型发现及文本／工具三协议 JSON／SSE；账号提供“同步到 AI Agent”，凭证走 DPAPI，不混用普通 API Key。账号详情／配额总览支持官方模型组额度、剩余百分比及重置时间；普通 API Key 项目资源内嵌对应账号卡片／列表。模型和额度共享身份隔离缓存与手动刷新；实际订阅权限及验证边界见 `docs/product/GOOGLE_SUBSCRIPTION.md`。
+- Google 增加 Antigravity 独立订阅登录，提供浏览器授权、身份校验、刷新／退出、真实账号 Gemini／已适配 Claude／GPT-OSS 模型发现及文本／工具三协议 JSON／SSE；账号提供“同步到 AI Agent”，凭证走 DPAPI，不混用普通 API Key。账号详情／配额总览支持官方模型组额度、剩余百分比及重置时间；普通 API Key 项目资源内嵌对应账号卡片／列表。公开额度快照在 SQLite 按身份／授权版本保存，换页和重启先恢复再刷新，读取失败保留上次显示，不作实时调度依据；模型目录仍独立缓存。实际订阅权限及验证边界见 `docs/product/GOOGLE_SUBSCRIPTION.md`。
 - OpenAI 支持通过本机官方 Codex 组件登录 ChatGPT 订阅账号，提供浏览器／设备码授权、多账号隔离、身份与套餐、刷新、退出和重新登录。系统凭证库与官方加密命名空间保存授权，已支持订阅 Responses 转发；详见 `docs/product/SUBSCRIPTION.md`、`docs/product/LOCAL_AGENTS.md`。
 - OpenAI 账号设置提供应用级 Codex WebSocket 开关，默认开启、持久保存，控制当前网关的握手和连接内后续请求，不改写 Codex CLI／桌面端的提供商身份、认证或会话，HTTP/SSE 保持可用。
 - OpenAI 账号设置在入口旁局部展开，自动激活 Codex 额度窗口默认关闭，切换开关直接持久保存并生效；对未开始的 5h／周窗口发送原账号最小消息并复查，持久去重防止重复消耗，已激活窗口不发送。
@@ -81,7 +81,7 @@ accounts need one local place to:
 - 模型路由首版支持精确别名映射、具体提供商配置与可选固定账号；规则持久化并动态生效，提供不读取密钥的匹配预览，模型发现接口同步可解析别名。
 - 路由页依据已有模型目录自动展示同名初步映射，无需逐条新增规则；同名模型可保存多个服务商的优先级顺序。精确规则优先，默认映射按顺序选择可用服务商，跳过不可用配置，其余候选沿用自动选择；预览／网关／客户端目录保持一致。本次覆盖现有 DeepSeek 和 ChatGPT/Codex 适配器。
 - 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE。已支持默认开启、最多三次的同服务商／认证／计费／地区账号切换，保留固定账号、200 后不重放及一次请求统计；OpenAI 订阅另支持默认队列／平衡轮换，平衡只重排同池请求，不增加生成后重试。具体拒绝类型和 Google 配额限制见 `docs/product/FAILOVER.md`。更广泛的健康／负载调度仍待实现。
-- River 支持 API Key、四款官方预设与账号模型同步，原生 Chat／Responses JSON 和 SSE、思考与函数工具调用，Messages 通过既有文本／工具转换接入。NVIDIA／GLM 使用短名称，原版 Flash 与直连 DeepSeek 共用服务商优先级，1017 版本独立显示及路由；DeepSeek Flash／Pro 保留普通和 1M 客户端选项。目录、路由、客户端配置与用量统计共用；首版仅文本，不承诺图片、余额或 1M 真实长输入验收。详见 `docs/product/RIVER.md`。
+- River 支持 API Key、四款官方预设与账号模型同步，原生 Chat／Responses JSON 和 SSE、思考与函数工具调用，Messages 通过既有文本／工具转换接入。NVIDIA／GLM 使用短名称，原版 Flash 与直连 DeepSeek 共用服务商优先级，1017 版本独立显示及路由；DeepSeek Flash／Pro 保留普通和 1M 客户端选项。账号页提供持久化的队列／均衡使用设置，同池持续失败 Key 暂时冷却并供后续请求切换，不重放结果不确定的当前请求。目录、路由、客户端配置与用量统计共用；首版仅文本，不承诺图片、余额或 1M 真实长输入验收。详见 `docs/product/RIVER.md`。
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
 - 小米 MiMo 支持普通按量及 Token Plan 个人／团队 Key、套餐中国／新加坡／欧洲集群，按账号选择计费通道和区域。账号设置可保存 Token Plan／API Key 默认顺序，同名模型统一发布；无合格首选账号时选下一通道，固定账号／旧显式通道继续优先，请求失败不跨通道重试。普通三个 V2.6 对话模型、套餐 Pro／Flash，官方模型同步、路由和客户端目录共用；原生三协议保留文本、思考、函数调用及 JSON／SSE，并记录当次区域／计费归属。预设与账号发现区分，套餐官方剩余未知并提供平台入口；余额、多模态及语音接口未接入，真实 Key／长窗口待验证。详见 `docs/product/MIMO.md`。
 - 阶跃星辰支持账号级国内／海外和按量 API／Step Plan 四组合，账号设置可保存 Step Plan／普通 API Key 默认顺序，同名模型统一发布，固定账号和旧显式通道继续优先；原生文本协议按模型开放，请求失败不跨通道重试。支持普通模型同步、官方普通余额和本机用量，Step Plan 官方剩余保持未知。详见 `docs/product/STEPFUN.md`；真实 Key 与长窗口验收待完成。

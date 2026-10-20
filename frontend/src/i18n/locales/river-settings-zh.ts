@@ -1,0 +1,12 @@
+export const riverSettingsZh = {
+  "river.settings.title": "River 账号设置",
+  "river.settings.close": "关闭 River 账号设置",
+  "river.settings.loadFailed": "无法读取 River 设置，请关闭后重试。",
+  "river.rotation.queue": "队列使用",
+  "river.rotation.balanced": "均衡使用",
+  "river.rotation.queueDescription": "按账号顺序使用，当前 Key 不可用时切换到同池的其他可用 Key。",
+  "river.rotation.balancedDescription":
+    "在同池可用 Key 间轮流分配新请求；均衡请求数，不保证 Token 消耗完全相同。",
+  "river.rotation.failureHint":
+    "沿用网关故障切换开关。连续两次网络或服务端失败后暂时跳过该 Key；结果不确定的请求不会重放，固定账号不切换。",
+} as const

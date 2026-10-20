@@ -73,6 +73,7 @@ func setupService(t *testing.T) (*Service, *atomic.Int32) {
 		return &http.Response{StatusCode: 200, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(body))}, nil
 	}))
 	manager := New(account.NewService(db, &memoryStore{values: map[string][]byte{}}), client)
+	manager.SetQuotaCache(NewQuotaCache(db))
 	manager.config = func() (antigravity.OAuthConfig, error) { return clientConfig(), nil }
 	t.Cleanup(manager.Close)
 	return manager, refreshes

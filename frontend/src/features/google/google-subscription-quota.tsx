@@ -65,6 +65,9 @@ export function GoogleSubscriptionQuota({ account }: { account: AccountItem }) {
         </p>
       ) : null}
       <p className="text-muted-foreground text-[10px] leading-5">{t("google.quota.hint")}</p>
+      {authenticated && query.data?.fromCache ? (
+        <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
+      ) : null}
     </section>
   )
 }

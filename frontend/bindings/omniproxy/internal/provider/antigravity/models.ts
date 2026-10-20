@@ -16,6 +16,7 @@ export interface AccountModel {
 export interface Quota {
     "groups": QuotaGroup[] | null;
     "fetchedAt": string;
+    "fromCache"?: boolean;
 }
 
 /**

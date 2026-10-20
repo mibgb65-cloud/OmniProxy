@@ -31,7 +31,7 @@ func rejectedAccount(t target, response proxy.Response, now time.Time) *retryRea
 	case 401:
 		code = "upstream_authentication_failed"
 	case 402:
-		if t.kind == "deepseek" || t.kind == "" {
+		if t.kind == "deepseek" || t.kind == "river" || t.kind == "" {
 			code = "upstream_insufficient_balance"
 		}
 	case 429:
@@ -66,6 +66,17 @@ func retryDelay(value string, now time.Time) (time.Duration, bool) {
 		return 0, false
 	}
 	return date.Sub(now), true
+}
+
+func riverTransientFailure(ctx context.Context, status int, err error) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+	if status >= 500 && status <= 599 {
+		return true
+	}
+	var failure *proxy.Error
+	return errors.As(err, &failure) && failure.StatusCode >= 500 && strings.HasPrefix(failure.Code, "upstream_")
 }
 
 func attemptFailure(ctx context.Context, err error) (int, string) {

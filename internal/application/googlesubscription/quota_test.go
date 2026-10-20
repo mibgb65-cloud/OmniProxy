@@ -47,6 +47,9 @@ func TestQuotaRejectsLogoutOrNewAuthorizationDuringRequest(t *testing.T) {
 				if err != nil || len(quota.Groups) != 1 || *quota.Groups[0].Buckets[0].RemainingPercent != 75 {
 					t.Fatal("quota was not read")
 				}
+				if saved, err := manager.CachedQuota(context.Background(), item.ID); err != nil || saved == nil || !saved.FromCache {
+					t.Fatal("successful read was not persisted", saved, err)
+				}
 			} else if antigravity.ErrorCode(err) != "quota_changed" {
 				t.Fatal("old authorization published quota into a new scope")
 			}

@@ -150,6 +150,10 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 		if err == nil {
 			_, err = tx.ExecContext(ctx, "UPDATE account_models SET account_version=? WHERE account_id=? AND account_version=?", newVersion, item.ID, oldVersion)
 		}
+		if err == nil {
+			// 普通令牌轮换保留同身份显示快照；重新登录不重绑定旧授权快照。
+			_, err = tx.ExecContext(ctx, "UPDATE google_subscription_quota_snapshots SET account_version=? WHERE account_id=? AND account_version=?", newVersion, item.ID, oldVersion)
+		}
 	}
 	if err == nil {
 		err = tx.Commit()

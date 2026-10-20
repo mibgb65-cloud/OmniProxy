@@ -1,4 +1,5 @@
 import { mimoZh } from "./mimo-zh"
+import { riverSettingsZh } from "./river-settings-zh"
 import { failoverZh } from "./failover-zh"
 import { kimiSettingsZh } from "./kimi-settings-zh"
 import { stepfunSettingsZh } from "./stepfun-settings-zh"
@@ -20,6 +21,7 @@ import { quotaUsdZh } from "./quota-usd-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...riverSettingsZh,
   ...quotaUsdZh,
   ...failoverZh,
   ...mimoZh,

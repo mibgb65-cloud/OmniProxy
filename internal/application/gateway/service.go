@@ -43,29 +43,30 @@ type Info struct {
 
 // Service 复用账号与提供商服务，不持有或缓存明文密钥。
 type Service struct {
-	failover        *failoverState
-	failoverEnabled func(context.Context) (bool, error)
-	rotationMode    func(context.Context) (string, error)
-	rotation        rotationState
-	server          *proxy.Server
-	providers       ProviderReader
-	accounts        AccountAccess
-	client          *deepseek.Client
-	log             *slog.Logger
-	timeout         time.Duration
-	router          Router
-	subscription    SubscriptionAccess
-	chatgpt         *chatgpt.Client
-	atria           *atria.Client
-	river           *river.Client
-	google          *google.Client
-	mimo            *mimo.Client
-	stepfun         *stepfun.Client
-	kimi            *kimi.Client
-	minimax         *minimax.Client
-	googleResources GoogleResourceObserver
-	googleAuth      GoogleSubscriptionAccess
-	antigravity     *antigravity.Client
+	failover          *failoverState
+	failoverEnabled   func(context.Context) (bool, error)
+	rotationMode      func(context.Context) (string, error)
+	riverRotationMode func(context.Context) (string, error)
+	rotation          rotationState
+	server            *proxy.Server
+	providers         ProviderReader
+	accounts          AccountAccess
+	client            *deepseek.Client
+	log               *slog.Logger
+	timeout           time.Duration
+	router            Router
+	subscription      SubscriptionAccess
+	chatgpt           *chatgpt.Client
+	atria             *atria.Client
+	river             *river.Client
+	google            *google.Client
+	mimo              *mimo.Client
+	stepfun           *stepfun.Client
+	kimi              *kimi.Client
+	minimax           *minimax.Client
+	googleResources   GoogleResourceObserver
+	googleAuth        GoogleSubscriptionAccess
+	antigravity       *antigravity.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
