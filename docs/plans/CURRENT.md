@@ -4,13 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.12 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `adb1e5f`，包含订阅刷新误报、额度快照持久留存、River 两款 DeepSeek 型号及请求分页修复，并保留 Beta.11 既有功能。隔离完整质量门／669 项前端测试、NSIS、Windows 原生版本、1282 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.12/`，未签名。真实覆盖升级、OAuth／网络恢复、原生交互和安装版重启由用户本地验收；已安装生产程序与真实配置未替换。
+2.0.0-beta.13 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `3b7ab62`，加入 Google 订阅模型启动／授权／刷新后的自动同步和受管 Agent 配置保护，保留 Beta.12 既有功能；不纳入其他任务未提交的试验。隔离完整质量门／674 项前端测试、NSIS、Windows 原生版本、1290 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.13/`，未签名。真实覆盖升级、Agent 重载／推理和安装版重启由用户本地验收；15 个旧资产／已安装程序文件与原生产进程保持不变。
 
 ## In Progress
 
 暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-010](../tasks/completed/2026-10/TASK-20261020-010-build-local-beta13-installer.md)：`3b7ab62`，Beta.13 本地 production 安装包 19,448,349 bytes／SHA256 `86eaa6c00ce058578c36e0c0a48510ebea4d27f84722b9cd730798774d7d9adb`；隔离完整门禁／674 项前端测试、NSIS、原生版本、1290 项来源及 15 项保护基线验证通过。包含 Google 自动同步，未签名、未自动安装或发布，供用户自行本地更新。
 
 - [TASK-20261020-009](../tasks/completed/2026-10/TASK-20261020-009-google-agent-auto-integration.md)：`161fb82`，Google 受支持订阅模型在启动／授权／刷新后自动同步到受管 Agent，保留限选、默认模型及外部改动保护，卡片区分协议支持和实际接入。13 种客户端回归、完整质量门／673 项前端测试、Windows 隔离构建及原生开发窗口核对通过；未替换生产安装，运行中的 Agent 仍可能需要重载菜单。
 
