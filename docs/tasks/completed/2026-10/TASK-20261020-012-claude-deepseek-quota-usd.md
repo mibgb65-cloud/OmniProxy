@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -108,7 +108,7 @@ In Progress
 
 # Documentation
 
-- 已更新 PRD、GATEWAY、SUBSCRIPTION；CURRENT 在提交收尾时同步。
+- 已更新 PRD、GATEWAY、SUBSCRIPTION、CURRENT。
 - 技术栈／架构边界未改变，无需 ADR。
 
 # Deviations
@@ -120,8 +120,13 @@ In Progress
 # Git
 
 - `d743e2df8bdbd3be65f1e988fc1d166bd4c37313` — `fix(gateway): 明确图片工具历史不受支持的原因与恢复方式`
-- 额度估算待最终构建完成后单独提交。
+- `458e13d9c64c8524ee3f40487898bc0c9d81bbc3` — `feat(quota): 迁移旧版算法显示五小时与每周美元估算`
+- 已审查差异，只提交本任务改动；原有未跟踪 Atria 草稿保持未跟踪。未推送远端。
 
 # Result
 
-实现、两轮完整质量门、关键回归及原生合成账号验收完成，待 Git 记录收尾。真实订阅美元余额不在官方百分比接口的返回范围内，界面显示的是明确标注局限的本机样本估值。
+实现、两轮完整质量门、关键回归、原生合成账号验收及本地实现提交完成。真实订阅美元余额不在官方百分比接口的返回范围内，界面显示的是明确标注局限的本机样本估值。源码已更新，未替换已安装的生产版本、未发布。
+
+# Completed
+
+2026-10-20
