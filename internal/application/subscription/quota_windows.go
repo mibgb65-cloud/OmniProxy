@@ -25,7 +25,8 @@ func normalizeQuota(result codex.RateLimits, fallbackPlan string) (Quota, error)
 		if window == nil || window.DurationMins == nil || window.UsedPercent == nil {
 			continue
 		}
-		value := &QuotaWindow{RemainingPercent: max(0, 100-int(*window.UsedPercent))}
+		used := min(100, float64(*window.UsedPercent))
+		value := &QuotaWindow{RemainingPercent: max(0, 100-int(used)), UsedPercent: &used, ObservedAt: quota.FetchedAt}
 		if window.ResetsAt != nil {
 			value.ResetsAt = time.Unix(*window.ResetsAt, 0).UTC().Format(time.RFC3339)
 		}

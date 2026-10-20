@@ -802,6 +802,13 @@ export function SubscriptionQuota(id: string): $CancellablePromise<subscription$
 }
 
 /**
+ * SubscriptionQuotaEstimate 仅组合公开缓存快照与同身份的本机用量，不额外请求官方额度。
+ */
+export function SubscriptionQuotaEstimate(id: string): $CancellablePromise<activity$0.QuotaEstimate> {
+    return $Call.ByID(3985445346, id);
+}
+
+/**
  * SubscriptionRead 读取当前会话，不返回任何令牌。
  */
 export function SubscriptionRead(id: string): $CancellablePromise<subscription$0.State> {

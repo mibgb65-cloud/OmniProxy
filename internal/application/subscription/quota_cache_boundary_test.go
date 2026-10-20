@@ -55,6 +55,9 @@ func TestQuotaCacheRejectsInvalidOrStaleWritesWithoutClearingHistory(t *testing.
 	older := previous
 	older.FetchedAt = time.Now().Add(-time.Hour).UTC().Format(time.RFC3339)
 	older.FiveHour = &QuotaWindow{RemainingPercent: 1}
+	weekly := *older.Weekly
+	weekly.ObservedAt = older.FetchedAt
+	older.Weekly = &weekly
 	if kept, err := f.manager.quotaCache.Save(ctx, item, profile, older); err != nil || kept.FiveHour.RemainingPercent != 75 {
 		t.Fatal("older response overwrote current snapshot")
 	}

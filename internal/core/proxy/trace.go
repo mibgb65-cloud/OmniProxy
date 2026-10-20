@@ -13,6 +13,7 @@ type TargetSnapshot struct{ ProviderID, ProviderName, ProviderKind, AccountID, A
 type UsageSnapshot struct {
 	Input, Output                     int64
 	InputKnown, OutputKnown, Complete bool
+	CachedInput                       *int64
 }
 type RequestEvent struct {
 	AttemptIndex                           int
@@ -100,6 +101,9 @@ func (t *Trace) Report(_ context.Context, usage UsageSnapshot) error {
 		t.event.Model = t.attempt.Model
 	}
 	if usage.InputKnown && (!t.event.Usage.InputKnown || usage.Input >= t.event.Usage.Input) {
+		if usage.CachedInput != nil || usage.Input > t.event.Usage.Input {
+			t.event.Usage.CachedInput = usage.CachedInput
+		}
 		t.event.Usage.Input = usage.Input
 		t.event.Usage.InputKnown = true
 	}

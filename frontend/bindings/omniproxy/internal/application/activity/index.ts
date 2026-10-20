@@ -10,6 +10,8 @@ export type {
     DashboardQuery,
     DashboardSummary,
     ProviderModel,
+    QuotaEstimate,
+    QuotaWindowEstimate,
     RequestItem,
     RequestPage,
     RequestQuery,

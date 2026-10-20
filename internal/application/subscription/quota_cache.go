@@ -65,6 +65,10 @@ func (s *QuotaCache) Save(ctx context.Context, item account.Item, profile string
 	if err != nil {
 		return Quota{}, err
 	}
+	// 先比较真实新窗口，再合并用于显示的旧窗口，不能把缓存合并当成重置证据。
+	if err := saveEstimateBaselines(ctx, tx, item.ID, previous, value); err != nil {
+		return Quota{}, failure("quota_cache_unavailable")
+	}
 	if previous != nil {
 		oldTime, _ := time.Parse(time.RFC3339, previous.FetchedAt)
 		newTime, _ := time.Parse(time.RFC3339, value.FetchedAt)

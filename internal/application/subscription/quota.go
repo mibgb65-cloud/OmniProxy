@@ -14,8 +14,10 @@ type Quota struct {
 }
 
 type QuotaWindow struct {
-	RemainingPercent int    `json:"remainingPercent"`
-	ResetsAt         string `json:"resetsAt,omitempty"`
+	RemainingPercent int      `json:"remainingPercent"`
+	ResetsAt         string   `json:"resetsAt,omitempty"`
+	UsedPercent      *float64 `json:"usedPercent,omitempty"`
+	ObservedAt       string   `json:"observedAt,omitempty"`
 }
 
 // ReadQuota 使用官方组件的托管授权读取额度，不强制续期或改变账号状态。

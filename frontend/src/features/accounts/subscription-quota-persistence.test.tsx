@@ -15,6 +15,7 @@ vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
   readSubscriptionQuota: vi.fn(),
   readCachedSubscriptionQuota: vi.fn(),
+  readSubscriptionQuotaEstimate: vi.fn(async () => ({ fetchedAt: "" })),
 }))
 const account: AccountItem = {
   id: "acct_persistent",

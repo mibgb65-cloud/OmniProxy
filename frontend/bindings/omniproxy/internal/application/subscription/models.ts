@@ -31,6 +31,8 @@ export interface Quota {
 export interface QuotaWindow {
     "remainingPercent": number;
     "resetsAt"?: string;
+    "usedPercent"?: number | null;
+    "observedAt"?: string;
 }
 
 export interface ResetCredit {

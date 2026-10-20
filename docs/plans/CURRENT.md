@@ -8,6 +8,8 @@
 
 ## In Progress
 
+- [TASK-20261020-012](../tasks/active/TASK-20261020-012-claude-deepseek-quota-usd.md)：已定位 Claude Code → River DeepSeek 的嵌套工具图片历史拒绝，补充安全诊断；沿用旧版公式加入 Codex 5h／周美元总额与剩余估算，支持实际模型价、缓存和重置隔离。关键回归、首轮完整门禁／681 项前端测试及合成账号原生验收通过，最终门禁／Git 收尾中，未安装或发布。
+
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed

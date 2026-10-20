@@ -48,6 +48,9 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	if usage.Input < 0 || usage.Output < 0 || usage.Input > 1e12 || usage.Output > 1e12 {
 		return ErrInvalid
 	}
+	if usage.CachedInput != nil && (!usage.InputKnown || *usage.CachedInput < 0 || *usage.CachedInput > usage.Input) {
+		return ErrInvalid
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -102,6 +105,11 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	_, err = tx.ExecContext(ctx, `UPDATE request_records SET provider_region=?,billing_mode=?,input_model=?,model=?,stream=?,provider_id=?,provider_name=?,account_id=?,account_name=?,email=?,workspace_id=?,subject=?,input_tokens=?,output_tokens=?,input_known=MAX(input_known,?),output_known=MAX(output_known,?),usage_complete=? WHERE id=?`, event.Target.ProviderRegion, event.Target.BillingMode, event.InputModel, event.Model, event.Stream, event.Target.ProviderID, event.Target.ProviderName, event.Target.AccountID, event.Target.AccountName, event.Target.Email, event.Target.WorkspaceID, key, input, output, usage.InputKnown, usage.OutputKnown, complete, event.ID)
 	if err != nil {
 		return ErrUnavailable
+	}
+	if usage.InputKnown {
+		if _, err := tx.ExecContext(ctx, `UPDATE request_records SET cached_input_tokens=? WHERE id=?`, usage.CachedInput, event.ID); err != nil {
+			return ErrUnavailable
+		}
 	}
 	start, err := time.Parse(time.RFC3339Nano, startedAt)
 	if err != nil {

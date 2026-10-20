@@ -102,6 +102,28 @@ export interface ProviderModel {
     "summary": Summary;
 }
 
+/**
+ * QuotaEstimate 按旧版公式推算当前窗口，仅基于保留的本机代理样本和基础参考价。
+ */
+export interface QuotaEstimate {
+    "fetchedAt": string;
+    "fiveHour"?: QuotaWindowEstimate | null;
+    "weekly"?: QuotaWindowEstimate | null;
+}
+
+export interface QuotaWindowEstimate {
+    "status": string;
+    "totalMin": number;
+    "totalMax": number;
+    "remainingMin": number;
+    "remainingMax": number;
+    "usedMin": number;
+    "usedMax": number;
+    "requests": number;
+    "unpricedRequests": number;
+    "resetAdjusted": boolean;
+}
+
 export interface RequestItem {
     "attemptCount"?: number;
     "attempts"?: AttemptItem[] | null;

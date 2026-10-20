@@ -17,6 +17,8 @@ export type SubscriptionQuotaWindow = QuotaWindow
 export const readSubscriptionQuota = async (id: string) => AppService.SubscriptionQuota(id)
 export const readCachedSubscriptionQuota = async (id: string) =>
   AppService.SubscriptionCachedQuota(id)
+export const readSubscriptionQuotaEstimate = async (id: string) =>
+  AppService.SubscriptionQuotaEstimate(id)
 export type SubscriptionResetCredit = ResetCredit
 export type SubscriptionResetOperation = ResetOperation
 export type SubscriptionResetResult = ResetResult

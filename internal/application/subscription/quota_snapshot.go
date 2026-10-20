@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"math"
 	"strings"
 	"time"
 	"unicode"
@@ -69,6 +70,15 @@ func validateQuotaSnapshot(value Quota) error {
 		if window.RemainingPercent < 0 || window.RemainingPercent > 100 || len(window.ResetsAt) > 40 {
 			return failure("quota_cache_unavailable")
 		}
+		if window.UsedPercent != nil && (math.IsNaN(*window.UsedPercent) || math.IsInf(*window.UsedPercent, 0) || *window.UsedPercent < 0 || *window.UsedPercent > 100) {
+			return failure("quota_cache_unavailable")
+		}
+		if window.ObservedAt != "" {
+			observed, err := time.Parse(time.RFC3339, window.ObservedAt)
+			if err != nil || observed.After(fetched) {
+				return failure("quota_cache_unavailable")
+			}
+		}
 		if window.ResetsAt != "" {
 			if _, err := time.Parse(time.RFC3339, window.ResetsAt); err != nil {
 				return failure("quota_cache_unavailable")
@@ -92,6 +102,8 @@ func mergeQuotaSnapshot(previous, next Quota) Quota {
 		copy := *current
 		if copy.ResetsAt == "" && old != nil && old.ResetsAt != "" {
 			copy.ResetsAt, next.FromCache = old.ResetsAt, true
+			// 旧重置目标仅供显示；不能据此将新百分比与推断的窗口成本配对。
+			copy.ObservedAt = ""
 		}
 		return &copy
 	}

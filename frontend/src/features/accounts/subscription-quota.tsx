@@ -9,6 +9,7 @@ import { useSubscriptionQuota } from "./use-subscription-quota"
 import { QuotaResetTime } from "./quota-reset-time"
 import "./subscription-quota.css"
 import { GoogleSubscriptionQuota } from "../google/google-subscription-quota"
+import { SubscriptionQuotaUSD } from "./subscription-quota-usd"
 
 export function SubscriptionQuota({ account }: { account: AccountItem }) {
   return account.providerId === "builtin_google" ? (
@@ -50,6 +51,9 @@ function CodexSubscriptionQuota({ account }: { account: AccountItem }) {
         color="bg-emerald-500"
         loading={authenticated && query.isPending}
       />
+      {authenticated ? (
+        <SubscriptionQuotaUSD account={account} quota={query.data} fiveHour={fiveHour} now={now} />
+      ) : null}
       {!authenticated ? (
         <p className="text-muted-foreground text-xs">{t("subscription.quota.signIn")}</p>
       ) : query.isPending ? (

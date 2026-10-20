@@ -70,6 +70,7 @@ func ParseUsage(body []byte, protocol string, stream bool) UsageSnapshot {
 		}
 	}
 	result.Complete = terminal && result.InputKnown && result.OutputKnown
+	result.CachedInput = cachedInputUsage(fields, protocol, result)
 	// Messages delta 只有输出；Trace 会把已报告输入与累计输出合并。
 	if protocol == "messages" && stream && envelope.Type == "message_delta" {
 		result.Complete = terminal && result.OutputKnown

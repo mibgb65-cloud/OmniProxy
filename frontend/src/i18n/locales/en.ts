@@ -13,12 +13,14 @@ import { activityEn } from "./activity-en"
 import { quotaEn } from "./quota-en"
 import { dashboardEn } from "./dashboard-en"
 import { googleEn } from "./google-en"
+import { quotaUsdEn } from "./quota-usd-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...quotaUsdEn,
   ...failoverEn,
   ...mimoEn,
   ...kimiSettingsEn,

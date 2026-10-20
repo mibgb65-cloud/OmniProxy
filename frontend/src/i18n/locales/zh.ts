@@ -12,6 +12,7 @@ import { activityZh } from "./activity-zh"
 import { quotaZh } from "./quota-zh"
 import { dashboardZh } from "./dashboard-zh"
 import { googleZh } from "./google-zh"
+import { quotaUsdZh } from "./quota-usd-zh"
 
 /**
  * Chinese translations — the single source of truth for translation keys.
@@ -19,6 +20,7 @@ import { googleZh } from "./google-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...quotaUsdZh,
   ...failoverZh,
   ...mimoZh,
   ...kimiSettingsZh,

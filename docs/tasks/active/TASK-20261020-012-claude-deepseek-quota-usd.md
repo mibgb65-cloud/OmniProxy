@@ -95,7 +95,8 @@ In Progress
 - PASS：`go test ./internal/core/proxy ./internal/core/agentprotocol ./internal/core/tokenprice ./internal/application/subscription ./internal/application/activity ./internal/application/gateway ./internal/transport/wails`。
 - PASS：前端额度相关 4 文件／23 项定向回归，`tsc --noEmit`。
 - PASS：首轮 `task verify BIN_DIR=tmp/task-20261020-012-build`，全部 Go 包、115 个前端文件／681 项测试、Windows production 构建。
-- 补充独立窗口观察时刻回归后已再次运行完整质量门，最终结果待写入。
+- PASS：补充独立窗口观察时刻／缺失重置目标回归后，第二轮完整 `task verify BIN_DIR=tmp/task-20261020-012-build` 通过，退出码 0；全部 Go 包、格式、lint、类型检查、115 文件／681 项前端测试、自动生成绑定、前端打包及 Windows production 构建通过。
+- PASS：网关诊断文案归入原有 gateway 字典后，另行执行文案文件 Prettier 检查和 `tsc --noEmit`。门禁构建也包含该文案归属调整。
 
 ## Native Verification
 
@@ -118,8 +119,9 @@ In Progress
 
 # Git
 
-待审查后分别提交网关诊断和额度估算，记录实际提交哈希。
+- `d743e2df8bdbd3be65f1e988fc1d166bd4c37313` — `fix(gateway): 明确图片工具历史不受支持的原因与恢复方式`
+- 额度估算待最终构建完成后单独提交。
 
 # Result
 
-代码与关键验证完成，待最终完整质量门和 Git 收尾。真实订阅美元余额不在官方百分比接口的返回范围内，界面显示的是明确标注局限的本机样本估值。
+实现、两轮完整质量门、关键回归及原生合成账号验收完成，待 Git 记录收尾。真实订阅美元余额不在官方百分比接口的返回范围内，界面显示的是明确标注局限的本机样本估值。
