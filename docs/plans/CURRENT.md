@@ -4,19 +4,21 @@
 
 ## Current Version
 
-2.0.0-beta.11 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `6fd860c`，包含 Responses 长会话重连修复及 Beta.10 后的授权进度／账号删除、OpenAI 轮换设置优化。隔离完整质量门／632 项前端测试、NSIS、Windows 原生版本、来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.11/`，未签名。真实覆盖升级、长会话网络、OAuth 和轮换效果由用户本地验收；已安装生产程序与真实配置未替换。
+2.0.0-beta.12 — 本地 Windows amd64 production 安装包，未发布、未自动安装。源码 `adb1e5f`，包含订阅刷新误报、额度快照持久留存、River 两款 DeepSeek 型号及请求分页修复，并保留 Beta.11 既有功能。隔离完整质量门／669 项前端测试、NSIS、Windows 原生版本、1282 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.12/`，未签名。真实覆盖升级、OAuth／网络恢复、原生交互和安装版重启由用户本地验收；已安装生产程序与真实配置未替换。
 
 ## In Progress
 
-- [TASK-20261020-007](../tasks/active/TASK-20261020-007-build-local-beta12-installer.md)：准备 Beta.12 本地 production 安装包，包含刷新误报、额度留存、River 型号和分页修复；只构建校验，不自动安装或公开发布。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-007](../tasks/completed/2026-10/TASK-20261020-007-build-local-beta12-installer.md)：`adb1e5f`，Beta.12 本地 production 安装包 19,434,522 bytes／SHA256 `df50c4bed9b0f80960c5edc428b083c0181399fef166782273169400001af8ef`；完整门禁／669 项前端测试、NSIS、原生版本／生产标签、1282 项源码及 15 项旧资产／安装文件基线校验通过。未签名、未自动安装或发布，交付用户自行本地更新。
 
 - [TASK-20261020-006](../tasks/completed/2026-10/TASK-20261020-006-fix-subscription-refresh-error-state.md)：`ac9d5a7`，普通订阅刷新取消强制 OAuth／已知标识重复查询，超时与取消分开，临时失败保留原授权状态；临时反馈 5 秒自动消失，真实身份错误继续可见，账号更新不继承旧红字。关键回归三轮及完整门禁／666 项前端测试、Windows 构建通过；原生 UIA／真实网络待验收，未发布或替换生产版。
 
 - [TASK-20261020-005](../tasks/completed/2026-10/TASK-20261020-005-river-model-display-request-pagination.md)：`3dd7426`，River 原版 Flash 显示补全 V4.1，增加独立 1017 版本并保留原路由兼容；请求分页改为实际总页数。完整门禁／646 项前端测试、Windows 构建及原生请求页／模型预览核对通过；未发布或替换生产版，已同步账号需手动重新同步目录。
 
-- [TASK-20261020-001](../tasks/completed/2026-10/TASK-20261020-001-persist-subscription-quota-snapshots.md)：`f5de7ca`，迁移 036 持久保存公开额度／重置时间，换页与重启后先恢复再刷新，失败或暂缺字段保留原显示；留存值不作为实时调度／激活依据。数据库重开、身份／错误／删除边界和完整门禁／639 项前端测试、Windows 构建通过；真实 GUI／安装版重启待人工验收，尚未将此变更打入安装包或替换生产程序。
+- [TASK-20261020-001](../tasks/completed/2026-10/TASK-20261020-001-persist-subscription-quota-snapshots.md)：`f5de7ca`，迁移 036 持久保存公开额度／重置时间，换页与重启后先恢复再刷新，失败或暂缺字段保留原显示；留存值不作为实时调度／激活依据。数据库重开、身份／错误／删除边界和完整门禁／639 项前端测试、Windows 构建通过；已纳入 Beta.12 本地安装包，真实 GUI／安装版重启待人工验收，未替换生产程序。
 
 - [TASK-20261020-004](../tasks/completed/2026-10/TASK-20261020-004-build-local-beta11-installer.md)：`6fd860c`，Beta.11 本地 production 安装包 19,403,318 bytes／SHA256 `600c476645798deb415f47e0cd6ee01b192f7a61b74ff8c1d4400afb14cc37a8`；隔离完整门禁／632 项前端测试、NSIS、原生版本、24 项源码与 11 项文件基线校验通过。未签名、未自动安装或发布，交付用户自行本地更新。
 
