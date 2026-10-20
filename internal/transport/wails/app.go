@@ -129,6 +129,7 @@ func (s *AppService) Ping() string { return "pong" }
 // terminate the whole application.
 func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOptions) error {
 	s.startUpdateChecks()
+	s.startGoogleModelSync()
 	if s.quotaActivation != nil {
 		s.quotaActivation.Start(context.Background())
 	}

@@ -10,14 +10,19 @@ export function GoogleModelSync({ accountId, disabled }: { accountId: string; di
     mutationFn: () => syncAccountModels(accountId),
     onSuccess: async () => {
       await Promise.all(
-        ["model-catalog", "default-routes", "routes", "agent-clients"].map((key) =>
-          client.invalidateQueries({ queryKey: [key] }),
-        ),
+        [
+          "model-catalog",
+          "default-routes",
+          "routes",
+          "agent-clients",
+          "agent-configured-models",
+        ].map((key) => client.invalidateQueries({ queryKey: [key] })),
       )
     },
   })
   return (
     <div className="space-y-2">
+      <p className="text-muted-foreground text-xs">{t("google.models.autoSync")}</p>
       <Button
         type="button"
         variant="outline"

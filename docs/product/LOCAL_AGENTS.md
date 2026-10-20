@@ -1,7 +1,11 @@
 # 本地 Agent 接入与模型同步
 
 Google / Antigravity 订阅账号支持将实际发现的 Gemini、Claude Opus／Sonnet 4.6 及
-GPT-OSS 文本型号同步到 Agent 目录，入口为账号卡片“同步到 AI Agent”或路由模型同步。
+GPT-OSS 文本型号同步到 Agent 目录。启动应用、Google 授权状态变化或成功刷新账号
+模型列表后会自动同步，无需逐账号点击按钮；账号卡片“重新同步到 AI Agent”及路由同步
+仍可手动重试。后台串行处理，失败保留上次成功快照，不启动网关或发送推理请求。
+只更新已经确认接入且未被外部改动的客户端；用户明确限定的模型范围不会自动扩张。
+首次使用仍需在“网关 → 客户端接入”预览并确认一次配置。
 Responses／Messages 通过既有文本和工具转换接入，支持 JSON／有界 SSE；运行中的
 客户端需重新加载模型菜单。普通 Gemini API Key 仍仅支持 Chat，不进入不兼容的
 Agent 协议目录。详情见 [Google 订阅](GOOGLE_SUBSCRIPTION.md)。

@@ -4,6 +4,7 @@ import { I18nProvider } from "../i18n/provider"
 import { ThemeProvider } from "./theme-provider"
 import { TooltipProvider } from "../components/ui/tooltip"
 import { TypographyProvider } from "./typography-provider"
+import { useModelCatalogEvents } from "../features/gateway/use-model-catalog-events"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,9 +15,15 @@ const queryClient = new QueryClient({
   },
 })
 
+function ModelCatalogEvents() {
+  useModelCatalogEvents()
+  return null
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <ModelCatalogEvents />
       <I18nProvider>
         <ThemeProvider>
           <TypographyProvider>

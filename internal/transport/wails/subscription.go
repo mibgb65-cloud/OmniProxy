@@ -210,6 +210,7 @@ func (s *AppService) SubscriptionLogout(id string) (account.Item, error) {
 }
 
 func (s *AppService) bindSubscriptionEvents(app *application.App) {
+	s.bindModelCatalogEvents(app)
 	s.subscription.openURL = app.Browser.OpenURL
 	s.subscription.emit = func() { app.Event.Emit("subscription:updated", SubscriptionNotice{Changed: true}) }
 	s.subscription.emitQuota = func() { app.Event.Emit("subscription:quota-updated", SubscriptionNotice{Changed: true}) }

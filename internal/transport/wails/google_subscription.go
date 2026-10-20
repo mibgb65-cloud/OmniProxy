@@ -7,13 +7,16 @@ import (
 	"sync"
 
 	"omniproxy/internal/application/googlesubscription"
+	"omniproxy/internal/application/modelcatalog"
 	"omniproxy/internal/provider/antigravity"
 )
 
 type googleSubscriptionState struct {
-	mu      sync.Mutex
-	service *googlesubscription.Service
-	closed  bool
+	mu         sync.Mutex
+	service    *googlesubscription.Service
+	auto       *modelcatalog.GoogleAutoSync
+	emitModels func()
+	closed     bool
 }
 
 func (s *AppService) googleSubscriptionService() (*googlesubscription.Service, error) {
@@ -35,7 +38,7 @@ func (s *AppService) googleSubscriptionService() (*googlesubscription.Service, e
 			if emit != nil {
 				emit()
 			}
-			s.refreshAgentCatalog()
+			s.requestGoogleModelSync()
 		})
 		s.googleAuth.service = manager
 	}
@@ -91,15 +94,23 @@ func (s *AppService) GoogleSubscriptionModels(id string) ([]antigravity.AccountM
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return manager.ReadAccountModels(ctx, id)
+	models, err := manager.ReadAccountModels(ctx, id)
+	if err == nil {
+		s.requestGoogleModelSync()
+	}
+	return models, err
 }
 
 func (s *AppService) shutdownGoogleSubscription() {
 	s.googleAuth.mu.Lock()
 	s.googleAuth.closed = true
 	manager := s.googleAuth.service
+	auto := s.googleAuth.auto
 	s.googleAuth.mu.Unlock()
 	if manager != nil {
 		manager.Close()
+	}
+	if auto != nil {
+		auto.Close()
 	}
 }

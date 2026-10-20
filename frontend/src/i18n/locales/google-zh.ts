@@ -11,12 +11,14 @@ export const googleZh = {
   "google.models.loading": "正在读取账号可选模型…",
   "google.models.show": "查看全部 {{count}} 个账号模型",
   "google.models.close": "关闭账号模型列表",
-  "google.models.count": "已接入 {{supported}} 个 · 上游可选 {{total}} 个",
-  "google.models.connected": "可接入 AI Agent · Chat / Responses / Messages",
+  "google.models.count": "网关支持 {{supported}} 个 · 上游可选 {{total}} 个",
+  "google.models.connected": "网关支持 · Chat / Responses / Messages",
   "google.models.pending": "上游可选 · 当前网关待接入",
   "google.models.hint":
     "同步后可在 AI Agent 中选择已接入模型，支持文本与工具调用。实际权限由 Google 决定。",
-  "google.models.sync": "同步到 AI Agent",
+  "google.models.autoSync":
+    "启动、登录或刷新模型后自动同步到已接入的 Agent。首次使用请在「网关 → 客户端接入」确认配置；手动限选不自动扩展。",
+  "google.models.sync": "重新同步到 AI Agent",
   "google.models.syncing": "正在同步模型…",
   "google.models.synced": "已同步，可在客户端接入中选择；运行中的 Agent 请重新加载模型菜单。",
   "google.models.syncFailed": "模型同步失败，请重试；已有客户端配置保持可用。",

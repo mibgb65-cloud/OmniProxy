@@ -13,12 +13,14 @@ export const googleEn: Record<keyof typeof googleZh, string> = {
   "google.models.loading": "Loading models available to this account…",
   "google.models.show": "View all {{count}} account models",
   "google.models.close": "Close account model list",
-  "google.models.count": "{{supported}} connected · {{total}} available upstream",
-  "google.models.connected": "Available to AI agents · Chat / Responses / Messages",
+  "google.models.count": "{{supported}} gateway-supported · {{total}} available upstream",
+  "google.models.connected": "Gateway-supported · Chat / Responses / Messages",
   "google.models.pending": "Available upstream · Gateway support pending",
   "google.models.hint":
     "Sync supported models to select them in AI agents for text and tool calls. Google determines access for each request.",
-  "google.models.sync": "Sync to AI agents",
+  "google.models.autoSync":
+    "Models sync to managed agents after startup, sign-in or model refresh. Confirm first-time setup under Gateway → Client integration. Explicit model selections are preserved.",
+  "google.models.sync": "Resync to AI agents",
   "google.models.syncing": "Syncing models…",
   "google.models.synced":
     "Synced. Select models in client integration; reload model menus in running agents.",

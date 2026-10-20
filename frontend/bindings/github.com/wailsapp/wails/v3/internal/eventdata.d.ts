@@ -18,6 +18,7 @@ declare module "@wailsio/runtime" {
             "activity:updated": string;
             "gateway:status": proxy$0.Status;
             "logs:updated": wails$0.LogNotice;
+            "modelcatalog:updated": wails$0.SubscriptionNotice;
             "subscription:quota-updated": wails$0.SubscriptionNotice;
             "subscription:updated": wails$0.SubscriptionNotice;
         }
