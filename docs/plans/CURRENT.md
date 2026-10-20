@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261020-006](../tasks/active/TASK-20261020-006-fix-subscription-refresh-error-state.md)：修复普通订阅刷新强制续期、超时误报授权取消、临时失败改写授权状态与过时卡片红字；对照 v1，保留实际认证和身份隔离边界。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-006](../tasks/completed/2026-10/TASK-20261020-006-fix-subscription-refresh-error-state.md)：`ac9d5a7`，普通订阅刷新取消强制 OAuth／已知标识重复查询，超时与取消分开，临时失败保留原授权状态；临时反馈 5 秒自动消失，真实身份错误继续可见，账号更新不继承旧红字。关键回归三轮及完整门禁／666 项前端测试、Windows 构建通过；原生 UIA／真实网络待验收，未发布或替换生产版。
 
 - [TASK-20261020-005](../tasks/completed/2026-10/TASK-20261020-005-river-model-display-request-pagination.md)：`3dd7426`，River 原版 Flash 显示补全 V4.1，增加独立 1017 版本并保留原路由兼容；请求分页改为实际总页数。完整门禁／646 项前端测试、Windows 构建及原生请求页／模型预览核对通过；未发布或替换生产版，已同步账号需手动重新同步目录。
 
