@@ -4,15 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.14 — 本地 Windows amd64 production 安装包，未公开发布。源码 `1c5c44f`，加入 Codex 5h／周美元总额与剩余参考估算、图片工具历史安全诊断及启动网关偏好，保留 Beta.13 的 Google 自动同步。隔离完整质量门／684 项前端测试、NSIS、原生版本、1693 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.14/`，未签名。16 个旧发布资产未变。最终核对时安装目录及生产进程已更新为与本次构建摘要一致的 Beta.14，本构建任务未执行安装；不能将原安装状态未变记为通过，真实使用和账号数据仍需用户验收。
+2.0.0-beta.15 — 本地 Windows amd64 production 安装包，未公开发布。源码 `e188d1c`，包含额度单值／Token 展示、Google 额度持久化、River 队列／均衡与失败冷却、Claude Messages 长会话校验修复。隔离完整质量门／703 项前端测试、NSIS、原生版本、1,725 项来源及 SHA256 校验通过；资产位于 `release-assets/v2.0.0-beta.15/`，未签名。18 个旧发布资产未变。中断后核对发现当前安装目录及进程已经是与本次产物一致的 Beta.15，本任务未执行安装；真实数据保留、业务使用和原聊天续接仍需用户验收。
 
 ## In Progress
-
-- [TASK-20261020-017](../tasks/active/TASK-20261020-017-build-local-beta15-installer.md)：准备 Beta.15 本地 Windows amd64 production 安装包，纳入额度／Token 展示、Google 额度留存、River 调度及 Claude 长会话修复；不自动安装或发布。
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261020-017](../tasks/completed/2026-10/TASK-20261020-017-build-local-beta15-installer.md)：`e188d1c`，Beta.15 安装包 19,533,652 bytes／SHA256 `99617167f1168f557eca05da61407eca45c5463ecf33f51e41de76fb69653d06`；完整门禁／703 项前端测试、命令工具测试／vet、NSIS、版本、来源和隔离启动通过。18 个旧资产未变；安装／进程已在中断期间变化，只读确认与本次构建一致，不将原安装未变记为通过。未由本任务安装或公开发布。
 
 - [TASK-20261020-016](../tasks/completed/2026-10/TASK-20261020-016-investigate-claude-invalid-messages.md)：`df49ed4`，关联 Claude → River 本地 `invalid_messages`，复现 342 条源消息展开为 513 后被旧阈值拒绝，修复条数及可信转换 16 MiB 容量；普通 Chat 保护不放宽，不裁剪／重放历史。关键协议回归、完整质量门／700 项前端测试及 Windows 构建通过。未保存原始失败请求体，不宣称精确现场条数或真实会话续接验收，未安装或发布。
 
