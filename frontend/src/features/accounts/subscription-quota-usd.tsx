@@ -1,10 +1,14 @@
+import { useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { Events } from "@wailsio/runtime"
 import { useTranslation } from "react-i18next"
+import { Tooltip } from "../../components/ui/tooltip"
 import type { AccountItem } from "../../services/omniproxy"
 import { readSubscriptionQuotaEstimate, type SubscriptionQuota } from "../../services/subscription"
 import type { QuotaWindowEstimate } from "../../../bindings/omniproxy/internal/application/activity"
 import type { TranslationKey } from "../../i18n/translation"
 import { subscriptionQuotaKey } from "./use-subscription-quota"
+import { AccountTokenSummary } from "./account-token-summary"
 
 const statusKeys: Record<string, TranslationKey> = {
   missing_window: "subscription.usd.missingWindow",
@@ -16,11 +20,8 @@ const statusKeys: Record<string, TranslationKey> = {
 }
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
 
-function usdRange(low: number, high: number) {
-  if (!Number.isFinite(low) || !Number.isFinite(high) || low < 0 || high < low) return null
-  const first = currency.format(low)
-  const last = currency.format(high)
-  return first === last ? first : `${first}–${last}`
+function usd(value?: number) {
+  return value !== undefined && Number.isFinite(value) && value >= 0 ? currency.format(value) : null
 }
 
 export function SubscriptionQuotaUSD({
@@ -46,38 +47,53 @@ export function SubscriptionQuotaUSD({
       quota?.weekly?.remainingPercent,
     ],
     queryFn: () => readSubscriptionQuotaEstimate(account.id),
-    enabled: !!quota && !!account.authEmail && !!account.authAccountId,
+    enabled: !!account.authEmail && !!account.authAccountId,
     retry: false,
     staleTime: 60_000,
   })
+  const refetch = query.refetch
+  useEffect(() => {
+    const refresh = () => {
+      if (account.authEmail && account.authAccountId && document.visibilityState !== "hidden")
+        void refetch({ cancelRefetch: false })
+    }
+    const off = Events.On("activity:updated", refresh)
+    // 应用全局关闭了焦点重读；后台跳过统计后，恢复可见时补读，避免停留在旧用量。
+    document.addEventListener("visibilitychange", refresh)
+    return () => {
+      off()
+      document.removeEventListener("visibilitychange", refresh)
+    }
+  }, [refetch, account.authEmail, account.authAccountId])
   // 若并发刷新已写入更新的快照，旧百分比不能搭配新估值；等待同一快照的下一次读取。
   const estimate = query.data?.fetchedAt === quota?.fetchedAt ? query.data : undefined
   return (
-    <section className="space-y-2 border-t pt-2.5" aria-label={t("subscription.usd.title")}>
-      <p className="text-xs font-medium">{t("subscription.usd.title")}</p>
-      <dl className="space-y-2 text-xs">
-        {fiveHour ? (
+    <>
+      <section className="space-y-2 border-t pt-2.5" aria-label={t("subscription.usd.title")}>
+        <Tooltip content={t("subscription.usd.explanation")}>
+          <p tabIndex={0} className="w-fit rounded-sm text-xs font-medium focus-visible:outline-2">
+            {t("subscription.usd.title")}
+          </p>
+        </Tooltip>
+        <dl className={`grid min-w-0 gap-3 text-xs ${fiveHour ? "grid-cols-2" : "grid-cols-1"}`}>
+          {fiveHour ? (
+            <EstimateRow
+              label={t("subscription.usd.fiveHour")}
+              estimate={estimate?.fiveHour}
+              expired={!!quota?.fiveHour?.resetsAt && Date.parse(quota.fiveHour.resetsAt) <= now}
+              error={query.isError}
+            />
+          ) : null}
           <EstimateRow
-            label={t("subscription.usd.fiveHour")}
-            estimate={estimate?.fiveHour}
-            expired={!!quota?.fiveHour?.resetsAt && Date.parse(quota.fiveHour.resetsAt) <= now}
+            label={t("subscription.usd.weekly")}
+            estimate={estimate?.weekly}
+            expired={!!quota?.weekly?.resetsAt && Date.parse(quota.weekly.resetsAt) <= now}
             error={query.isError}
           />
-        ) : null}
-        <EstimateRow
-          label={t("subscription.usd.weekly")}
-          estimate={estimate?.weekly}
-          expired={!!quota?.weekly?.resetsAt && Date.parse(quota.weekly.resetsAt) <= now}
-          error={query.isError}
-        />
-      </dl>
-      <details className="text-muted-foreground text-[11px]">
-        <summary className="cursor-pointer rounded-sm focus-visible:outline-2">
-          {t("subscription.usd.scope")}
-        </summary>
-        <p className="mt-1 leading-relaxed">{t("subscription.usd.explanation")}</p>
-      </details>
-    </section>
+        </dl>
+      </section>
+      <AccountTokenSummary usage={query.data?.usage} error={query.isError} />
+    </>
   )
 }
 
@@ -93,18 +109,17 @@ function EstimateRow({
   error: boolean
 }) {
   const { t } = useTranslation()
-  const total = estimate?.status === "ready" ? usdRange(estimate.totalMin, estimate.totalMax) : null
-  const remaining =
-    estimate?.status === "ready" ? usdRange(estimate.remainingMin, estimate.remainingMax) : null
+  const total = estimate?.status === "ready" ? usd(estimate.total) : null
+  const remaining = estimate?.status === "ready" ? usd(estimate.remaining) : null
   const key = expired
     ? "subscription.usd.expired"
     : error
       ? "subscription.usd.unavailable"
       : (statusKeys[estimate?.status ?? ""] ?? "subscription.usd.pending")
   return (
-    <div className="flex min-w-0 flex-wrap items-start justify-between gap-x-2 gap-y-1">
-      <dt className="shrink-0">{label}</dt>
-      <dd className="min-w-0 text-right">
+    <div className="min-w-0 space-y-1">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 space-y-0.5 break-words">
         {!expired && !error && total && remaining ? (
           <>
             <p className="font-mono tabular-nums">≈ {total}</p>

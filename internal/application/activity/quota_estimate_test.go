@@ -43,7 +43,7 @@ func TestQuotaEstimateUsesActualModelsCacheAndSeparateWindows(t *testing.T) {
 	// 当前周窗口之外的累计用量不能成为回退样本。
 	estimateEvent(t, s, 3, now.Add(-8*24*time.Hour), "gpt-6-astra", &cached)
 	got, err := s.EstimateQuota(context.Background(), item, quota, now)
-	if err != nil || got.FiveHour.Status != "ready" || !closeEnough(got.FiveHour.UsedMin, 1.48) || !closeEnough(got.FiveHour.TotalMax, 14.8) || !closeEnough(got.FiveHour.RemainingMax, 13.32) {
+	if err != nil || got.FiveHour.Status != "ready" || !closeEnough(got.FiveHour.UsedMin, 1.48) || !closeEnough(got.FiveHour.Total, 14.8) || !closeEnough(got.FiveHour.Remaining, 13.32) {
 		t.Fatal("5h cost or legacy scaling incorrect", got, err)
 	}
 	if got.Weekly.Requests != 2 || !closeEnough(got.Weekly.UsedMax, 3.37) || !closeEnough(got.Weekly.TotalMax, 16.85) {
@@ -63,12 +63,15 @@ func TestQuotaEstimateUsesActualModelsCacheAndSeparateWindows(t *testing.T) {
 	}
 }
 
-func TestQuotaEstimateHistoricalUnknownCacheProducesRange(t *testing.T) {
+func TestQuotaEstimateHistoricalUnknownCacheUsesUndiscountedPoint(t *testing.T) {
 	s, item, quota, now := estimateFixture(t)
 	estimateEvent(t, s, 1, now.Add(-time.Hour), "gpt-6.1-sol", nil)
 	got, err := s.EstimateQuota(context.Background(), item, quota, now)
 	if err != nil || !closeEnough(got.Weekly.TotalMin, 5.5) || !closeEnough(got.Weekly.TotalMax, 15) {
-		t.Fatal("unknown historical cache details were treated as zero", got, err)
+		t.Fatal("legacy bounds changed", got, err)
+	}
+	if !closeEnough(got.Weekly.Total, 15) || !closeEnough(got.Weekly.Remaining, 12) {
+		t.Fatal("point estimate invented a historical cache discount", got.Weekly)
 	}
 }
 

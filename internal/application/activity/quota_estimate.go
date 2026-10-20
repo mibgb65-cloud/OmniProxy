@@ -17,10 +17,13 @@ type QuotaEstimate struct {
 	FetchedAt string               `json:"fetchedAt"`
 	FiveHour  *QuotaWindowEstimate `json:"fiveHour,omitempty"`
 	Weekly    *QuotaWindowEstimate `json:"weekly,omitempty"`
+	Usage     *AccountTokenUsage   `json:"usage,omitempty"`
 }
 
 type QuotaWindowEstimate struct {
 	Status           string  `json:"status"`
+	Total            float64 `json:"total"`
+	Remaining        float64 `json:"remaining"`
 	TotalMin         float64 `json:"totalMin"`
 	TotalMax         float64 `json:"totalMax"`
 	RemainingMin     float64 `json:"remainingMin"`
@@ -39,6 +42,10 @@ func (s *Service) EstimateQuota(ctx context.Context, item account.Item, quota su
 		return result, ErrInvalid
 	}
 	var err error
+	result.Usage, err = s.accountTokenUsage(ctx, item)
+	if err != nil {
+		return result, err
+	}
 	if quota.FiveHourEnabled {
 		result.FiveHour, err = s.estimateWindow(ctx, item, quota, quota.FiveHour, "five_hour", 5*time.Hour, now)
 		if err != nil {
@@ -102,6 +109,8 @@ func (s *Service) estimateWindow(ctx context.Context, item account.Item, quota s
 	// 与旧版相同：窗口基础等值成本 / 上游已用比例，不用账号累计 Token 代替当前窗口。
 	result.TotalMin, result.TotalMax = result.UsedMin*100/used, result.UsedMax*100/used
 	result.RemainingMin, result.RemainingMax = result.TotalMin*(100-used)/100, result.TotalMax*(100-used)/100
+	// 单值参考不凭空假设历史缓存命中率；未知缓存不计折扣，旧区间字段保留给已有调用方。
+	result.Total, result.Remaining = result.TotalMax, result.RemainingMax
 	return result, nil
 }
 

@@ -1,0 +1,56 @@
+package activity
+
+import (
+	"context"
+	"strconv"
+	"strings"
+
+	"omniproxy/internal/application/account"
+	"omniproxy/internal/core/proxy"
+)
+
+// AccountTokenUsage 仅统计当前身份的留存代理记录；输入包含缓存，不能把三项相加。
+// 空字符串代表该项明细未知，区别于上游明确返回的零。
+type AccountTokenUsage struct {
+	InputTokens          string `json:"inputTokens"`
+	OutputTokens         string `json:"outputTokens"`
+	CachedInputTokens    string `json:"cachedInputTokens"`
+	Requests             int64  `json:"requests"`
+	UnknownCacheRequests int64  `json:"unknownCacheRequests"`
+	IncompleteRequests   int64  `json:"incompleteRequests"`
+}
+
+func (s *Service) accountTokenUsage(ctx context.Context, item account.Item) (*AccountTokenUsage, error) {
+	// 当前入口仅允许 Codex 订阅；复用成员身份索引，避免每次更新扫描所有账号的留存记录。
+	key, err := subject(proxy.TargetSnapshot{ProviderKind: "openai", AccountID: item.ID,
+		AuthMethod: item.AuthMethod, Email: item.AuthEmail, WorkspaceID: item.AuthAccountID})
+	if err != nil {
+		return nil, err
+	}
+	result := &AccountTokenUsage{}
+	var input, output, cached, inputKnown, outputKnown, cacheKnown int64
+	err = s.db.QueryRowContext(ctx, `SELECT
+		COALESCE(SUM(input_tokens),0),COALESCE(SUM(output_tokens),0),COALESCE(SUM(cached_input_tokens),0),
+		COALESCE(SUM(input_known),0),COALESCE(SUM(output_known),0),
+		COUNT(cached_input_tokens),COUNT(*),
+		COALESCE(SUM(CASE WHEN cached_input_tokens IS NULL AND (input_known=0 OR input_tokens>0) THEN 1 ELSE 0 END),0),
+		COALESCE(SUM(CASE WHEN usage_complete=0 OR state='pending' THEN 1 ELSE 0 END),0)
+		FROM request_records WHERE subject=? AND provider_id=? AND account_id=? AND lower(trim(email))=? AND workspace_id=?
+		AND (state IN ('success','pending') OR input_known=1 OR output_known=1)`,
+		key, item.ProviderID, item.ID, strings.ToLower(strings.TrimSpace(item.AuthEmail)), item.AuthAccountID,
+	).Scan(&input, &output, &cached, &inputKnown, &outputKnown, &cacheKnown,
+		&result.Requests, &result.UnknownCacheRequests, &result.IncompleteRequests)
+	if err != nil {
+		return nil, ErrUnavailable
+	}
+	if inputKnown > 0 || result.Requests == 0 {
+		result.InputTokens = strconv.FormatInt(input, 10)
+	}
+	if outputKnown > 0 || result.Requests == 0 {
+		result.OutputTokens = strconv.FormatInt(output, 10)
+	}
+	if cacheKnown > 0 || result.Requests == 0 || (inputKnown == result.Requests && input == 0) {
+		result.CachedInputTokens = strconv.FormatInt(cached, 10)
+	}
+	return result, nil
+}

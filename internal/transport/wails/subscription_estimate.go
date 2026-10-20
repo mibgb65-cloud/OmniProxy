@@ -6,6 +6,7 @@ import (
 	"unicode"
 
 	"omniproxy/internal/application/activity"
+	"omniproxy/internal/application/subscription"
 )
 
 // SubscriptionQuotaEstimate 仅组合公开缓存快照与同身份的本机用量，不额外请求官方额度。
@@ -30,9 +31,16 @@ func (s *AppService) SubscriptionQuotaEstimate(id string) (activity.QuotaEstimat
 	if err != nil {
 		return activity.QuotaEstimate{}, err
 	}
+	if item.AuthState == "logged_out" || item.AuthState == "reauth_required" {
+		return activity.QuotaEstimate{}, nil
+	}
 	quota, err := manager.CachedQuota(ctx, id)
-	if err != nil || quota == nil {
+	if err != nil {
 		return activity.QuotaEstimate{}, err
+	}
+	if quota == nil {
+		// 本机 Token 统计不依赖首次官方额度读取成功。
+		quota = &subscription.Quota{}
 	}
 	current, err := accounts.Metadata(ctx, id)
 	if err != nil {

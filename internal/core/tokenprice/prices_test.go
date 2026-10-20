@@ -22,3 +22,18 @@ func TestPriceLookupAndCacheAwareCost(t *testing.T) {
 		}
 	}
 }
+
+// 2026-10-20 核对 https://developers.openai.com/api/docs/pricing 的标准短上下文价。
+func TestCodexOfficialReferencePrices(t *testing.T) {
+	for model, want := range map[string]Price{
+		"gpt-6-astra":   {10, 1, 50},
+		"gpt-6.1-sol":   {2, 0.1, 10},
+		"gpt-6-luna":    {0.1, 0.01, 0.5},
+		"gpt-5.6-sol":   {4, 0.4, 20},
+		"gpt-5.3-codex": {1.75, 0.175, 14},
+	} {
+		if got, ok := Lookup(model); !ok || got != want {
+			t.Errorf("%s: got %+v, want %+v", model, got, want)
+		}
+	}
+}
