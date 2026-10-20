@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261020-003](../tasks/active/TASK-20261020-003-fix-responses-long-session-recovery.md)：修复 Responses 长会话重连后的 512 项误拒绝，保留具体 WebSocket 校验错误并区分流读写失败；正在验证，不替换生产程序。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-003](../tasks/completed/2026-10/TASK-20261020-003-fix-responses-long-session-recovery.md)：`a467ffe`，解除 Responses／compact 的 512 项误限制，保留有界 JSON 和具体 WebSocket 校验码，区分流读写／超长事件错误；部分输出后长历史重连及网关记账／不重放回归、关键用例 10 轮、完整门禁／629 项前端测试与 Windows production 构建通过。仅本地提交，未替换运行程序或发布。
 
 - [TASK-20261019-017](../tasks/completed/2026-10/TASK-20261019-017-openai-account-rotation-settings.md)：`58521d1`，OpenAI 设置精简三段补充说明，新增持久队列／平衡模式，真实同池请求按新鲜额度加权或等权轮换；检测摘要采用去重的 5 秒全局提示。迁移 035、固定／耗尽／不重放／并发／容量边界及完整门禁／629 项前端测试、Windows 构建通过；原生 UIA 未取得可靠结果，真实额度效果仍待人工验收，未发布或替换生产程序。
 
