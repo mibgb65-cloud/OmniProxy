@@ -21,4 +21,15 @@ Messages 使用现有文本／函数工具协议转换，经 Chat 接入。工�
 
 首版沿用本项目文本输入链路，目录只标记文本。River 官方四款模型具有图片能力，但本次未接入图片、音频或文件输入。现有本地请求体限制、超时与并发继续生效；1M 官方上下文元数据不代表完成长输入或最大输出实测。没有余额／套餐查询，不显示推算剩余额度；不增加自动重试、故障切换或官方上游 WebSocket。
 
+## `unsupported_content` 排查
+
+该错误不一定是账号额度不足。当前 River Responses 适配器会在本地拒绝图片、非函数
+工具及不支持的服务端会话引用。尤其是在同一聊天里从 GPT 切换到 River 时，客户端可能
+继续发送之前上传的图片；即使最新一条消息只有文字，历史中的 `input_image` 仍会触发
+400 / `unsupported_content`。这是当前 OmniProxy 适配范围，不代表 River 官方模型没有视觉能力。
+
+可先新建不含图片的纯文本聊天，使用受支持的函数工具和完整历史配置。仅重发文字或继续
+原聊天不能保证移除旧图片；如仍失败，需要继续核对工具和会话参数，而不是反复换账号。
+网关不会通过静默删除图片、工具或历史来伪装请求成功。
+
 核对日期：初版 2026-10-17，四款模型及 1017 独立版本于 2026-10-20 再次核对。依据 [官方模型与限制](https://docs.river.ai/guides/inference-models/)、[推理接入](https://docs.river.ai/guides/inference/)、[API 控制参数](https://docs.river.ai/guides/inference-controls/)、[函数工具](https://docs.river.ai/guides/inference-tools/) 与 [超时及错误](https://docs.river.ai/guides/inference-limits/)。尚未使用真实 River Key 验证账号权限、计费、客户端或长窗口。
