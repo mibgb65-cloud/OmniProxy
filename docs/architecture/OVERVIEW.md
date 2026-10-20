@@ -1,5 +1,12 @@
 # Architecture Overview
 
+## Claude Messages 长会话（2026-10-20）
+
+Messages 与共享 Chat 校验不再使用 512 条旧阈值，采用 100,000 条及现有字节／深度／字段边界。
+River 的可信 Messages 转换通过仅由网关设置的内部标记沿用 16 MiB 容量；普通外部 Chat
+仍为 2 MiB／单条 1 MiB，客户端 JSON 不能扩大权限。转换保留完整工具链，不截断或重放真实请求。
+这是既有协议边界修复，无依赖、迁移或桌面／Core 依赖方向变化；详见 TASK-20261020-016。
+
 ## Google 额度显示与 River 轮换（2026-10-20）
 
 迁移 038／039 分别增加 Google 公开额度快照和 River 非敏感使用方式。Google 本地恢复采用

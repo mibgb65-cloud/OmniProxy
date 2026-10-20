@@ -8,6 +8,8 @@
 
 ## In Progress
 
+- [TASK-20261020-016](../tasks/active/TASK-20261020-016-investigate-claude-invalid-messages.md)：已关联 Claude Code → River 的本地 `invalid_messages`，合成复现源消息未达 512、转换后 513 被拒绝；修复旧条数阈值及可信转换容量，正在运行回归和质量门。原请求体未保存，不宣称精确现场条数或真实线上验收。
+
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed

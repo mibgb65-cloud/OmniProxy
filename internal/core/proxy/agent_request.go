@@ -57,7 +57,7 @@ func ParseProtocolRequest(body []byte, path string) (Request, error) {
 		if request.Protocol != "responses" || json.Unmarshal(input, &text) != nil {
 			return Request{}, Failure("invalid_messages", 400)
 		}
-	} else if len(items) > 512 {
+	} else if request.Protocol == "messages" && (len(items) == 0 || len(items) > MaxConversationMessages) {
 		return Request{}, Failure("invalid_messages", 400)
 	}
 	return request, nil

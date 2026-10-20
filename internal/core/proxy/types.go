@@ -16,6 +16,8 @@ const (
 	MaxResponsesEventBytes = 2 << 20
 	// 百万上下文的文本及 JSON 编码可能超过 2 MiB，Messages 使用独立的有界容量。
 	MaxMessagesRequestBytes = 16 << 20
+	// 对齐 Messages 官方的单请求消息上限；工具结果转换后也不能无限膨胀。
+	MaxConversationMessages = 100000
 	maxResponseBytes        = 8 << 20
 	maxStreamBytes          = 32 << 20
 )
@@ -32,9 +34,11 @@ type Request struct {
 	AccountUpdatedAt string
 	Trace            *Trace
 	Protocol         string
-	Body             []byte
-	Model            string
-	Stream           bool
+	// 只由网关完成 Messages → Chat 转换后设置，不能从客户端 JSON 赋值。
+	ConvertedFromMessages bool
+	Body                  []byte
+	Model                 string
+	Stream                bool
 	// 路由目标由受信解析器填入，HTTP 正文不能指定这些字段。
 	ProviderID string
 	AccountID  string

@@ -7,11 +7,7 @@ import (
 	"unicode/utf8"
 )
 
-// validateJSON 拒绝重复字段和过深嵌套，避免代理与上游对同一正文产生不同解释。
-func validateJSON(body []byte) error {
-	return validateJSONSize(body, MaxRequestBytes)
-}
-
+// validateJSONSize 拒绝超限正文、重复字段和过深嵌套，避免代理与上游产生不同解释。
 func validateJSONSize(body []byte, limit int) error {
 	if len(body) == 0 || len(body) > limit || !utf8.Valid(body) {
 		return Failure("invalid_request", 400)

@@ -8,9 +8,9 @@ import (
 
 // 编码客户端可将一条文本拆成多个 text 部分；上游文本 API 仍按字符串接收。
 // 这里只归一化有界纯文本，不把图片或未知部分当作文本静默丢弃。
-func normalizeChatText(raw json.RawMessage) (json.RawMessage, bool, error) {
+func normalizeChatText(raw json.RawMessage, maxMessageBytes int) (json.RawMessage, bool, error) {
 	var messages []map[string]json.RawMessage
-	if json.Unmarshal(raw, &messages) != nil || len(messages) == 0 || len(messages) > 512 {
+	if json.Unmarshal(raw, &messages) != nil || len(messages) == 0 || len(messages) > MaxConversationMessages {
 		return nil, false, Failure("invalid_messages", 400)
 	}
 	changed := false
@@ -37,7 +37,7 @@ func normalizeChatText(raw json.RawMessage) (json.RawMessage, bool, error) {
 			if len(texts) > 0 {
 				length++
 			}
-			if length > 1<<20 {
+			if length > maxMessageBytes {
 				return nil, false, Failure("invalid_messages", 400)
 			}
 			texts = append(texts, text)

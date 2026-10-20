@@ -96,14 +96,15 @@ func TestResponsesHistoryStillValidatesJSONAndInputShape(t *testing.T) {
 	}
 }
 
-func TestMessageProtocolsRetainItemLimit(t *testing.T) {
-	for _, count := range []int{512, 513} {
+func TestMessageProtocolsPreserveLongHistoryWithinByteBounds(t *testing.T) {
+	for _, count := range []int{512, 513, 2048} {
 		messages := `[` + strings.Repeat(`{"role":"user","content":"text"},`, count-1) + `{"role":"user","content":"text"}]`
 		body := []byte(`{"model":"gpt-test","max_tokens":1,"messages":` + messages + `}`)
 		for _, path := range []string{"/v1/messages", "/v1/chat/completions"} {
-			_, err := ParseProtocolRequest(body, path)
-			if (err == nil) != (count == 512) {
-				t.Fatalf("message limit changed: path=%s count=%d err=%v", path, count, err)
+			request, err := ParseProtocolRequest(body, path)
+			var parsed struct{ Messages []json.RawMessage }
+			if err != nil || json.Unmarshal(request.Body, &parsed) != nil || len(parsed.Messages) != count {
+				t.Fatalf("long messages were rejected or truncated: path=%s count=%d err=%v", path, count, err)
 			}
 		}
 	}

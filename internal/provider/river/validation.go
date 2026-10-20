@@ -7,7 +7,16 @@ import (
 )
 
 func validatedBody(request proxy.Request, path string) ([]byte, error) {
-	parsed, err := proxy.ParseProtocolRequest(request.Body, "/v1"+path)
+	chatLimit := proxy.MaxRequestBytes
+	var parsed proxy.Request
+	var err error
+	if request.Protocol == "chat" && request.ConvertedFromMessages {
+		// 普通 Chat 仍为 2 MiB；只有服务端可信转换沿用 Messages 的 16 MiB 容量。
+		chatLimit = proxy.MaxMessagesRequestBytes
+		parsed, err = proxy.ParseConvertedChatRequest(request.Body)
+	} else {
+		parsed, err = proxy.ParseProtocolRequest(request.Body, "/v1"+path)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +59,7 @@ func validatedBody(request proxy.Request, path string) ([]byte, error) {
 		}
 		fields["stream_options"] = encoded
 		body, err := json.Marshal(fields)
-		if err != nil || len(body) > proxy.MaxRequestBytes {
+		if err != nil || len(body) > chatLimit {
 			return nil, proxy.Failure("request_too_large", 413)
 		}
 		return body, nil

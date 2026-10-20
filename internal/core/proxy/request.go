@@ -8,7 +8,16 @@ import (
 
 // ParseRequest 验证路由字段、文本消息和常用参数；其他 JSON 字段受整体大小与嵌套限制并由上游校验。
 func ParseRequest(body []byte) (Request, error) {
-	if err := validateJSON(body); err != nil {
+	return parseChatRequest(body, MaxRequestBytes, 1<<20)
+}
+
+// ParseConvertedChatRequest 保留可信 Messages 转换的原始容量，不放宽外部 Chat 接口。
+func ParseConvertedChatRequest(body []byte) (Request, error) {
+	return parseChatRequest(body, MaxMessagesRequestBytes, MaxMessagesRequestBytes)
+}
+
+func parseChatRequest(body []byte, maxBodyBytes, maxMessageBytes int) (Request, error) {
+	if err := validateJSONSize(body, maxBodyBytes); err != nil {
 		return Request{}, err
 	}
 	var fields map[string]json.RawMessage
@@ -24,17 +33,17 @@ func ParseRequest(body []byte) (Request, error) {
 			return Request{}, Failure("invalid_request", 400)
 		}
 	}
-	if normalized, changed, err := normalizeChatText(fields["messages"]); err != nil {
+	if normalized, changed, err := normalizeChatText(fields["messages"], maxMessageBytes); err != nil {
 		return Request{}, err
 	} else if changed {
 		fields["messages"] = normalized
 		normalizedBody, err := json.Marshal(fields)
-		if err != nil {
+		if err != nil || len(normalizedBody) > maxBodyBytes {
 			return Request{}, Failure("invalid_messages", 400)
 		}
 		body = normalizedBody
 	}
-	if err := validateMessages(fields["messages"]); err != nil {
+	if err := validateMessages(fields["messages"], maxMessageBytes); err != nil {
 		return Request{}, err
 	}
 	if err := validateParameters(fields); err != nil {
@@ -44,7 +53,7 @@ func ParseRequest(body []byte) (Request, error) {
 	return request, nil
 }
 
-func validateMessages(raw json.RawMessage) error {
+func validateMessages(raw json.RawMessage, maxMessageBytes int) error {
 	var messages []struct {
 		Role       string            `json:"role"`
 		Content    json.RawMessage   `json:"content"`
@@ -52,7 +61,7 @@ func validateMessages(raw json.RawMessage) error {
 		ToolCallID string            `json:"tool_call_id"`
 		Name       string            `json:"name"`
 	}
-	if err := json.Unmarshal(raw, &messages); err != nil || len(messages) == 0 || len(messages) > 512 {
+	if err := json.Unmarshal(raw, &messages); err != nil || len(messages) == 0 || len(messages) > MaxConversationMessages {
 		return Failure("invalid_messages", 400)
 	}
 	for _, message := range messages {
@@ -69,7 +78,7 @@ func validateMessages(raw json.RawMessage) error {
 			continue
 		}
 		var content string
-		if len(message.Content) == 0 || string(message.Content) == "null" || json.Unmarshal(message.Content, &content) != nil || len(content) > 1<<20 {
+		if len(message.Content) == 0 || string(message.Content) == "null" || json.Unmarshal(message.Content, &content) != nil || len(content) > maxMessageBytes {
 			return Failure("invalid_messages", 400)
 		}
 	}
