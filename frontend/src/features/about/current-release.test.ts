@@ -79,6 +79,19 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("本地安装包未签名")
     },
   )
+  it.each(["2.0.0-beta.14", "v2.0.0-beta.14", "2.0.0-beta.14+local.123"])(
+    "Beta.14 按运行版本 %s 提供美元估算及图片能力边界说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## 额度美元参考估算")
+      expect(notes).toContain("## 图片工具兼容性提示")
+      expect(notes).toContain("## 启动网关偏好")
+      expect(notes).toContain("不是官方美元余额")
+      expect(notes).toContain("没有为文本通道新增视觉能力")
+      expect(notes).toContain("数据库迁移 037")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
