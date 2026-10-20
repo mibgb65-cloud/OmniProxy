@@ -53,6 +53,15 @@ type rpcClient struct {
 
 // Open 只使用独立 CODEX_HOME 与系统凭证库；不读取用户默认登录或把令牌写入文件。
 func Open(ctx context.Context, home string) (Client, error) {
+	return openWithStore(ctx, home, "keyring")
+}
+
+// OpenFile 使用显式文件登录验证旧版接入，不改变默认订阅授权的 keyring 策略。
+func OpenFile(ctx context.Context, home string) (Client, error) {
+	return openWithStore(ctx, home, "file")
+}
+
+func openWithStore(ctx context.Context, home, store string) (Client, error) {
 	if !filepath.IsAbs(home) {
 		return nil, ErrProtocol
 	}
@@ -60,7 +69,7 @@ func Open(ctx context.Context, home string) (Client, error) {
 	if err != nil {
 		return nil, ErrUnavailable
 	}
-	cmd := exec.Command(path, "app-server", "--listen", "stdio://", "-c", `cli_auth_credentials_store="keyring"`, "-c", `forced_login_method="chatgpt"`, "-c", `model_provider="openai"`)
+	cmd := exec.Command(path, "app-server", "--listen", "stdio://", "-c", `cli_auth_credentials_store="`+store+`"`, "-c", `forced_login_method="chatgpt"`, "-c", `model_provider="openai"`)
 	hideWindow(cmd)
 	cmd.Env = isolatedEnvironment(home)
 	cmd.Stderr = io.Discard // 官方进程输出可能包含授权信息，不送入应用日志。

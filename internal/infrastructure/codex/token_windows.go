@@ -24,6 +24,32 @@ type windowsCredential struct {
 
 // UseToken 只定位受控隔离授权；兼容官方旧 keyring 和新 age 加密存储。
 func UseToken(home, expectedID string, consume func([]byte, string) error) error {
+	if consume == nil {
+		return ErrProtocol
+	}
+	return useStoredAuth(home, func(data []byte) error {
+		var auth struct {
+			Tokens struct {
+				Access    string `json:"access_token"`
+				AccountID string `json:"account_id"`
+			} `json:"tokens"`
+		}
+		if json.Unmarshal(data, &auth) != nil || len(auth.Tokens.Access) < 1 || len(auth.Tokens.Access) > 32768 || auth.Tokens.AccountID == "" || expectedID != "" && expectedID != auth.Tokens.AccountID {
+			return ErrProtocol
+		}
+		key := []byte(auth.Tokens.Access)
+		auth.Tokens.Access = ""
+		defer clear(key)
+		for _, ch := range key {
+			if ch < 33 || ch > 126 {
+				return ErrProtocol
+			}
+		}
+		return consume(key, auth.Tokens.AccountID)
+	})
+}
+
+func useStoredAuth(home string, consume func([]byte) error) error {
 	if !filepath.IsAbs(home) || consume == nil {
 		return ErrProtocol
 	}
@@ -51,24 +77,7 @@ func UseToken(home, expectedID string, consume func([]byte, string) error) error
 			}
 		}
 		defer clear(data)
-		var auth struct {
-			Tokens struct {
-				Access    string `json:"access_token"`
-				AccountID string `json:"account_id"`
-			} `json:"tokens"`
-		}
-		if json.Unmarshal(data, &auth) != nil || len(auth.Tokens.Access) < 1 || len(auth.Tokens.Access) > 32768 || auth.Tokens.AccountID == "" || expectedID != "" && expectedID != auth.Tokens.AccountID {
-			return ErrProtocol
-		}
-		key := []byte(auth.Tokens.Access)
-		auth.Tokens.Access = ""
-		defer clear(key)
-		for _, ch := range key {
-			if ch < 33 || ch > 126 {
-				return ErrProtocol
-			}
-		}
-		return consume(key, auth.Tokens.AccountID)
+		return consume(data)
 	}
 	return ErrUnavailable
 }
