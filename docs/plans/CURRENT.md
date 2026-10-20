@@ -8,9 +8,11 @@
 
 ## In Progress
 
-- [TASK-20261020-001](../tasks/active/TASK-20261020-001-persist-subscription-quota-snapshots.md)：持久保留额度／重置时间，先恢复显示再刷新；正在执行重启、失败、身份隔离和实时业务边界回归。
+暂无。
 
 ## Recently Completed
+
+- [TASK-20261020-001](../tasks/completed/2026-10/TASK-20261020-001-persist-subscription-quota-snapshots.md)：`f5de7ca`，迁移 036 持久保存公开额度／重置时间，换页与重启后先恢复再刷新，失败或暂缺字段保留原显示；留存值不作为实时调度／激活依据。数据库重开、身份／错误／删除边界和完整门禁／639 项前端测试、Windows 构建通过；真实 GUI／安装版重启待人工验收，尚未将此变更打入安装包或替换生产程序。
 
 - [TASK-20261020-004](../tasks/completed/2026-10/TASK-20261020-004-build-local-beta11-installer.md)：`6fd860c`，Beta.11 本地 production 安装包 19,403,318 bytes／SHA256 `600c476645798deb415f47e0cd6ee01b192f7a61b74ff8c1d4400afb14cc37a8`；隔离完整门禁／632 项前端测试、NSIS、原生版本、24 项源码与 11 项文件基线校验通过。未签名、未自动安装或发布，交付用户自行本地更新。
 
