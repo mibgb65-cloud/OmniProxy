@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-007](../tasks/active/TASK-20261020-007-build-local-beta12-installer.md)：准备 Beta.12 本地 production 安装包，包含刷新误报、额度留存、River 型号和分页修复；只构建校验，不自动安装或公开发布。
 
 ## Recently Completed
 

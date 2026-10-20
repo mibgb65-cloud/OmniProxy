@@ -55,6 +55,19 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("本地安装包未签名")
     },
   )
+  it.each(["2.0.0-beta.12", "v2.0.0-beta.12", "2.0.0-beta.12+local.123"])(
+    "Beta.12 按运行版本 %s 提供刷新、留存及模型分页更新说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## 订阅账号刷新体验")
+      expect(notes).toContain("## 额度与重置时间留存")
+      expect(notes).toContain("## River 模型与请求分页")
+      expect(notes).toContain("DeepSeek-V4.1-Flash-1017")
+      expect(notes).toContain("数据库迁移 036")
+      expect(notes).toContain("本地安装包未签名")
+      expect(notes).not.toContain("本版未包含额度与重置时间跨重启快照持久化")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
