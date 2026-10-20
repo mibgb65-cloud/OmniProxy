@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { GatewayStartupSetting } from "./gateway-startup-setting"
 import {
   useDesktopSettings,
   useSetAutoStart,
@@ -85,6 +86,7 @@ export function DesktopBehavior() {
               </p>
             ) : null}
 
+            <GatewayStartupSetting enabled={data.gatewayAutoStart} />
             <fieldset
               className="min-w-0 space-y-2 border-t pt-4 disabled:opacity-60"
               disabled={closeBehavior.isPending}

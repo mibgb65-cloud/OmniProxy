@@ -41,7 +41,8 @@ type Config struct {
 	AutoDownloadUpdates bool `json:"autoDownloadUpdates,omitempty"`
 	// CloseBehavior controls what closing the main window does. Empty keeps
 	// the historical default of exiting the application.
-	CloseBehavior string `json:"closeBehavior,omitempty"`
+	CloseBehavior    string `json:"closeBehavior,omitempty"`
+	GatewayAutoStart bool   `json:"gatewayAutoStart,omitempty"`
 }
 
 // ConfigFilePath returns the fixed path of the persisted configuration for

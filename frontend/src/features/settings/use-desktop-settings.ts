@@ -3,6 +3,7 @@ import {
   getDesktopSettings,
   setAutoStart,
   setCloseBehavior,
+  setGatewayAutoStart,
   type DesktopSettings,
 } from "../../services/omniproxy"
 
@@ -38,6 +39,19 @@ export function useSetCloseBehavior() {
     onSuccess: (value) => {
       queryClient.setQueryData<DesktopSettings>(desktopSettingsQuery.queryKey, (old) =>
         old ? { ...old, closeBehavior: value } : old,
+      )
+      void queryClient.invalidateQueries({ queryKey: desktopSettingsQuery.queryKey })
+    },
+  })
+}
+
+export function useSetGatewayAutoStart() {
+  const queryClient = useQueryClient()
+  return useMutation<boolean, Error, boolean>({
+    mutationFn: (enabled) => setGatewayAutoStart(enabled),
+    onSuccess: (enabled) => {
+      queryClient.setQueryData<DesktopSettings>(desktopSettingsQuery.queryKey, (old) =>
+        old ? { ...old, gatewayAutoStart: enabled } : old,
       )
       void queryClient.invalidateQueries({ queryKey: desktopSettingsQuery.queryKey })
     },

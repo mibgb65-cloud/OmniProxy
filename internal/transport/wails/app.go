@@ -137,6 +137,10 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 		s.log.Error("control API failed to start; external clients cannot connect",
 			"error", err, "control_port", s.prof.ControlPort)
 	}
+	if err := s.startGatewayOnStartup(); err != nil {
+		s.log.Error("gateway failed to start automatically; manual retry is available",
+			"module", "gateway", "error", err)
+	}
 	return nil
 }
 

@@ -28,6 +28,7 @@ vi.mock("../../services/omniproxy", () => ({
   cleanStorage: vi.fn(),
   getDesktopSettings: vi.fn(),
   setAutoStart: vi.fn(),
+  setGatewayAutoStart: vi.fn(),
   setCloseBehavior: vi.fn(),
   getRuntimeInfo: vi.fn(),
   checkForUpdate: vi.fn(),
@@ -73,6 +74,7 @@ export function resetPreferences() {
   vi.mocked(getDesktopSettings).mockResolvedValue({
     autoStart: false,
     autoStartAvailable: false,
+    gatewayAutoStart: false,
     closeBehavior: "exit",
   })
   vi.mocked(readRetention).mockResolvedValue({

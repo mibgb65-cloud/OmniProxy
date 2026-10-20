@@ -205,6 +205,10 @@ export const zh = {
   "settings.desktop.title": "桌面行为",
   "settings.desktop.description": "设置开机启动和关闭主窗口时的操作。",
   "settings.desktop.autoStart": "开机自启动",
+  "settings.desktop.gatewayAutoStart": "启动软件时自动启动网关",
+  "settings.desktop.gatewayAutoStartDescription":
+    "下次启动 OmniProxy 时自动开启网关；关闭后需手动开启，不影响当前网关状态。",
+  "settings.desktop.gatewayAutoStartFailed": "更改网关启动设置失败：{{error}}",
   "settings.desktop.autoStartDescription": "登录 Windows 后自动启动 OmniProxy，下次登录生效。",
   "settings.desktop.autoStartUnavailable":
     "开发环境不会注册 Windows 启动项；正式版中可设置开机启动。",

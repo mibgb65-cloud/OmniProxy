@@ -90,6 +90,10 @@ export function setAutoStart(enabled: boolean): Promise<boolean> {
   return AppService.SetAutoStart(enabled)
 }
 
+export function setGatewayAutoStart(enabled: boolean): Promise<boolean> {
+  return AppService.SetGatewayAutoStart(enabled)
+}
+
 /** setCloseBehavior persists how closing the main window should behave. */
 export function setCloseBehavior(value: "exit" | "tray"): Promise<string> {
   return AppService.SetCloseBehavior(value)

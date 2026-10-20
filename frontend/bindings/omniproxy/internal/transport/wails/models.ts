@@ -23,11 +23,12 @@ export interface CleanResult {
 }
 
 /**
- * DesktopSettings describes the current OS autostart status and close behavior.
+ * DesktopSettings 包含系统开机启动状态、软件启动时的网关偏好与窗口关闭行为。
  */
 export interface DesktopSettings {
     "autoStart": boolean;
     "autoStartAvailable": boolean;
+    "gatewayAutoStart": boolean;
     "closeBehavior": string;
 }
 

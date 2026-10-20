@@ -212,6 +212,10 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.desktop.title": "Desktop behavior",
   "settings.desktop.description": "Choose login startup and what closing the main window does.",
   "settings.desktop.autoStart": "Start at login",
+  "settings.desktop.gatewayAutoStart": "Start gateway when OmniProxy launches",
+  "settings.desktop.gatewayAutoStartDescription":
+    "Automatically start the gateway next time OmniProxy launches. Otherwise, start it manually. Does not change its current state.",
+  "settings.desktop.gatewayAutoStartFailed": "Could not change gateway startup setting: {{error}}",
   "settings.desktop.autoStartDescription":
     "Launch OmniProxy after you sign in to Windows; takes effect at the next login.",
   "settings.desktop.autoStartUnavailable":

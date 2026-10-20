@@ -33,3 +33,13 @@ func SetCloseBehavior(kind Kind, value string) error {
 	cfg.CloseBehavior = value
 	return SaveConfig(kind, cfg)
 }
+
+// SetGatewayAutoStart 保存应用启动时是否自动开启网关，未设置时保持手动启动。
+func SetGatewayAutoStart(kind Kind, enabled bool) error {
+	cfg, err := LoadConfig(kind)
+	if err != nil {
+		return err
+	}
+	cfg.GatewayAutoStart = enabled
+	return SaveConfig(kind, cfg)
+}

@@ -8,6 +8,7 @@ import {
   getDesktopSettings,
   setAutoStart,
   setCloseBehavior,
+  setGatewayAutoStart,
   type DesktopSettings,
 } from "../../services/omniproxy"
 import { useUIStore } from "../../stores/ui-store"
@@ -17,6 +18,7 @@ vi.mock("../../services/omniproxy", () => ({
   getDesktopSettings: vi.fn(),
   setAutoStart: vi.fn(),
   setCloseBehavior: vi.fn(),
+  setGatewayAutoStart: vi.fn(),
 }))
 
 let current: DesktopSettings
@@ -38,7 +40,12 @@ describe("DesktopBehavior", () => {
     vi.clearAllMocks()
     localStorage.clear()
     useUIStore.setState({ language: "zh" })
-    current = { autoStart: false, autoStartAvailable: true, closeBehavior: "exit" }
+    current = {
+      autoStart: false,
+      autoStartAvailable: true,
+      closeBehavior: "exit",
+      gatewayAutoStart: false,
+    }
     vi.mocked(getDesktopSettings).mockImplementation(async () => ({ ...current }))
     vi.mocked(setAutoStart).mockImplementation(async (enabled) => {
       current.autoStart = enabled
@@ -47,6 +54,10 @@ describe("DesktopBehavior", () => {
     vi.mocked(setCloseBehavior).mockImplementation(async (mode) => {
       current.closeBehavior = mode
       return mode
+    })
+    vi.mocked(setGatewayAutoStart).mockImplementation(async (enabled) => {
+      current.gatewayAutoStart = enabled
+      return enabled
     })
   })
 
@@ -88,5 +99,33 @@ describe("DesktopBehavior", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("更改开机启动失败：registry denied")
     expect(screen.getByRole("switch", { name: /开机自启动/ })).not.toBeChecked()
+  })
+
+  it("saves gateway startup independently of Windows autostart", async () => {
+    current.autoStartAvailable = false
+    const user = userEvent.setup()
+    renderBehavior()
+    const toggle = await screen.findByRole("switch", { name: /启动软件时自动启动网关/ })
+    expect(toggle).not.toBeChecked()
+    expect(toggle).toBeEnabled()
+    await user.click(toggle)
+    await waitFor(() => expect(toggle).toBeChecked())
+    expect(setGatewayAutoStart).toHaveBeenCalledWith(true)
+    expect(setAutoStart).not.toHaveBeenCalled()
+    await user.click(toggle)
+    await waitFor(() => expect(toggle).not.toBeChecked())
+    expect(setGatewayAutoStart).toHaveBeenLastCalledWith(false)
+  })
+
+  it("keeps gateway startup unchanged when saving fails", async () => {
+    vi.mocked(setGatewayAutoStart).mockRejectedValue(new Error("config unavailable"))
+    const user = userEvent.setup()
+    renderBehavior()
+    const toggle = await screen.findByRole("switch", { name: /启动软件时自动启动网关/ })
+    await user.click(toggle)
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "更改网关启动设置失败：config unavailable",
+    )
+    expect(toggle).not.toBeChecked()
   })
 })

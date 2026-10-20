@@ -292,8 +292,7 @@ export function DeleteRoute(id: string): $CancellablePromise<void> {
 }
 
 /**
- * DesktopSettings reads autostart from the OS and close behavior from the
- * profile config, so external OS changes are reflected on refresh.
+ * DesktopSettings 从系统读取开机启动状态，从 profile 配置读取网关启动和窗口关闭偏好。
  */
 export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> {
     return $Call.ByID(721192358);
@@ -653,6 +652,13 @@ export function SetCodexWebSocketEnabled(enabled: boolean): $CancellablePromise<
  */
 export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDirResult> {
     return $Call.ByID(3348807762, path);
+}
+
+/**
+ * SetGatewayAutoStart 保存下次启动应用时的网关偏好，不立即启停网关。
+ */
+export function SetGatewayAutoStart(enabled: boolean): $CancellablePromise<boolean> {
+    return $Call.ByID(3937825228, enabled);
 }
 
 /**
