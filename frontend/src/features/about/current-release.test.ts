@@ -92,6 +92,20 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("本地安装包未签名")
     },
   )
+  it.each(["2.0.0-beta.15", "v2.0.0-beta.15", "2.0.0-beta.15+local.123"])(
+    "Beta.15 按运行版本 %s 提供长会话、Google 留存和 River 设置说明",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## Claude 长会话修复")
+      expect(notes).toContain("## 额度展示与 Token 用量")
+      expect(notes).toContain("## Google 额度留存")
+      expect(notes).toContain("## River 使用方式与失败切换")
+      expect(notes).toContain("数据库迁移 038／039")
+      expect(notes).toContain("不是官方美元余额")
+      expect(notes).toContain("原失败请求未保存")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it("只组织文本结构，不解释 HTML、链接或脚本", () => {
     expect(
       parseReleaseNotes(
