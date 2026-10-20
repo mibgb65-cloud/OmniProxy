@@ -50,6 +50,7 @@ func (s *AppService) subscriptionService() (*subscription.Service, error) {
 	// 系统 keyring 按 CODEX_HOME 定位；不跟随可迁移的数据目录，开发与生产分开。
 	root := filepath.Join(cache, "OmniProxy-CodexAuth", string(s.prof.Kind))
 	manager := subscription.New(accounts, root, nil)
+	manager.SetQuotaCache(subscription.NewQuotaCache(s.db))
 	manager.OnChange(func() {
 		diagnostic := manager.DiagnosticState()
 		if s.log != nil {

@@ -14,12 +14,25 @@ func (s *AppService) SubscriptionQuota(id string) (subscription.Quota, error) {
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	quota, err := service.ReadQuota(ctx, id)
+	quota, err := service.ReadDisplayQuota(ctx, id)
 	s.logSubscriptionQuotaError(err)
-	if err == nil && s.quotaActivation != nil && quotaactivation.NeedsObservation(quota) {
+	if err == nil && !quota.FromCache && s.quotaActivation != nil && quotaactivation.NeedsObservation(quota) {
 		s.quotaActivation.Wake(false)
 	}
 	return quota, err
+}
+
+// SubscriptionCachedQuota 恢复上次显示快照，不依赖官方 CLI 或网络。
+func (s *AppService) SubscriptionCachedQuota(id string) (*subscription.Quota, error) {
+	service, err := s.subscriptionService()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := subscriptionContext()
+	defer cancel()
+	value, err := service.CachedQuota(ctx, id)
+	s.logSubscriptionQuotaError(err)
+	return value, err
 }
 
 func (s *AppService) logSubscriptionQuotaError(err error) {

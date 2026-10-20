@@ -163,6 +163,7 @@ func newFixture(t *testing.T) *fixture {
 		return client, nil
 	})
 	f.manager.removeCredentials = func(string) error { return nil }
+	f.manager.SetQuotaCache(NewQuotaCache(db))
 	t.Cleanup(f.manager.Close)
 	return f
 }

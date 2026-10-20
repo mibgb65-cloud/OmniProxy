@@ -747,6 +747,13 @@ export function SubscriptionBegin(input: subscription$0.Input): $CancellableProm
 }
 
 /**
+ * SubscriptionCachedQuota 恢复上次显示快照，不依赖官方 CLI 或网络。
+ */
+export function SubscriptionCachedQuota(id: string): $CancellablePromise<subscription$0.Quota | null> {
+    return $Call.ByID(3773167902, id);
+}
+
+/**
  * SubscriptionCancel 取消隔离授权并清理临时系统凭证。
  */
 export function SubscriptionCancel(id: string): $CancellablePromise<subscription$0.State> {

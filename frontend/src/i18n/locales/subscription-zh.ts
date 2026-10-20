@@ -71,6 +71,9 @@ export const subscriptionZh = {
   "subscription.activation.failed": "部分账号检测或激活未完成，请检查账号授权与网络。",
   "subscription.activation.statusFailed": "暂时无法读取自动激活状态。",
   "subscription.quota.title": "额度 / 余额",
+  "subscription.quota.retained": "已保留上次获取的信息",
+  "subscription.error.quota_cache_unavailable":
+    "额度快照暂时无法保存或读取，已保留原数据，请重试。",
   "subscription.quota.fiveHour": "5h 额度",
   "subscription.quota.weekly": "一周额度",
   "subscription.quota.remainingLabel": "{{label}}剩余额度",

@@ -11,6 +11,7 @@ import { useSubscriptionQuota } from "./use-subscription-quota"
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
   readSubscriptionQuota: vi.fn(),
+  readCachedSubscriptionQuota: vi.fn(async () => null),
 }))
 const account: AccountItem = {
   id: "acct_transition",

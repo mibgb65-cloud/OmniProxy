@@ -15,6 +15,8 @@ export type SubscriptionSession = State
 export type SubscriptionQuota = Quota
 export type SubscriptionQuotaWindow = QuotaWindow
 export const readSubscriptionQuota = async (id: string) => AppService.SubscriptionQuota(id)
+export const readCachedSubscriptionQuota = async (id: string) =>
+  AppService.SubscriptionCachedQuota(id)
 export type SubscriptionResetCredit = ResetCredit
 export type SubscriptionResetOperation = ResetOperation
 export type SubscriptionResetResult = ResetResult
@@ -69,6 +71,7 @@ export function subscriptionError(error: unknown) {
     "quota_refresh_failed",
     "quota_unavailable",
     "quota_not_authenticated",
+    "quota_cache_unavailable",
     "account_id_pending",
     "codex_unavailable",
     "login_expired",

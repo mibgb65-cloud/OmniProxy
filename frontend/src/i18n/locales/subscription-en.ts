@@ -85,6 +85,9 @@ export const subscriptionEn = {
     "Some checks or activations could not finish. Check account authorization and network.",
   "subscription.activation.statusFailed": "Automatic activation status is temporarily unavailable.",
   "subscription.quota.title": "Quota / balance",
+  "subscription.quota.retained": "Showing last recorded information",
+  "subscription.error.quota_cache_unavailable":
+    "Could not save or restore the quota snapshot. Previous data is retained. Please retry.",
   "subscription.quota.fiveHour": "5h quota",
   "subscription.quota.weekly": "Weekly quota",
   "subscription.quota.remainingLabel": "{{label}} remaining",

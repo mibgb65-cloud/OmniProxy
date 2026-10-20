@@ -63,6 +63,7 @@ type Service struct {
 	onChange          func()
 	closed            bool
 	quotaObservations map[string]quotaObservation
+	quotaCache        *QuotaCache
 }
 
 // New 使用按运行环境隔离的固定授权配置根目录。

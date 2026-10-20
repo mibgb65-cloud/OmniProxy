@@ -15,6 +15,7 @@ import { ResetCreditsPopover } from "./reset-credits-popover"
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
   readSubscriptionQuota: vi.fn(),
+  readCachedSubscriptionQuota: vi.fn(async () => null),
   readSubscriptionResetStatus: vi.fn(),
   consumeSubscriptionReset: vi.fn(),
 }))

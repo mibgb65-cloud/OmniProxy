@@ -152,6 +152,7 @@ export function quotaEntryStatus(
     if (!snapshot.balance?.entries?.length) return "unknown"
     return snapshot.balance.available ? "normal" : "exhausted"
   }
+  if (snapshot.quota?.fromCache) return "stale"
   const windows = quotaWindows(item.account, snapshot.quota).map((item) => item.window)
   if (
     windows.some(

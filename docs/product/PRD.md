@@ -72,6 +72,7 @@ accounts need one local place to:
 - 提供商账号详情支持卡片／列表切换并保存展示偏好；展示真实密钥的脱敏片段，用户可主动复制密钥。新的密钥读取接口只返回脱敏文本，复制在桌面端直接写入系统剪贴板。
 - 账号支持编辑名称与替换 API Key；编辑弹窗不回填当前完整密钥，Key 留空时保留原凭证，名称清空继续自动命名。
 - OpenAI 订阅支持 5h／一周任一窗口耗尽后自动跳过，使用同池其他启用账号；依据已校验额度快照和执行前明确额度拒绝，不跨服务商或计费通道，不重放已开始生成的请求，固定账号仍保留。
+- OpenAI 订阅成功获取的额度和绝对重置时间按账号身份持久留存，换页／重启后先恢复，后续查询成功更新，失败或暂缺字段不清空旧显示；留存值标为待刷新，不作为调度或自动激活的新鲜依据。
 - Account scheduling: eligibility, health, priority, load, quota, cooldown,
   concurrency and retry.
 - Model routing rules.

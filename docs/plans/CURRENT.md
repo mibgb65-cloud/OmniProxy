@@ -8,7 +8,7 @@
 
 ## In Progress
 
-暂无。
+- [TASK-20261020-001](../tasks/active/TASK-20261020-001-persist-subscription-quota-snapshots.md)：持久保留额度／重置时间，先恢复显示再刷新；正在执行重启、失败、身份隔离和实时业务边界回归。
 
 ## Recently Completed
 

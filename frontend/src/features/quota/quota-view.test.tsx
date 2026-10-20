@@ -21,6 +21,7 @@ vi.mock("../../services/omniproxy", async (original) => ({
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
   readSubscriptionQuota: vi.fn(),
+  readCachedSubscriptionQuota: vi.fn(async () => null),
 }))
 vi.mock("../../services/balance", async (original) => ({
   ...(await original<typeof import("../../services/balance")>()),

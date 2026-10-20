@@ -39,6 +39,7 @@ vi.mock("../../services/subscription", async (original) => ({
   refreshSubscription: vi.fn(),
   logoutSubscription: vi.fn(),
   readSubscriptionQuota: vi.fn(),
+  readCachedSubscriptionQuota: vi.fn(async () => null),
 }))
 vi.mock("../../services/omniproxy", () => ({
   getAccountKeyPreview: vi.fn(),

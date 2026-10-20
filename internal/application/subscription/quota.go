@@ -10,6 +10,7 @@ type Quota struct {
 	Weekly          *QuotaWindow        `json:"weekly,omitempty"`
 	FetchedAt       string              `json:"fetchedAt"`
 	ResetCredits    *ResetCreditSummary `json:"resetCredits,omitempty"`
+	FromCache       bool                `json:"fromCache,omitempty"`
 }
 
 type QuotaWindow struct {
@@ -19,6 +20,15 @@ type QuotaWindow struct {
 
 // ReadQuota 使用官方组件的托管授权读取额度，不强制续期或改变账号状态。
 func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
+	return s.readQuota(ctx, id, false)
+}
+
+// ReadDisplayQuota 只供界面使用，可保留官方暂缺的旧窗口；不能用来驱动调度或自动激活。
+func (s *Service) ReadDisplayQuota(ctx context.Context, id string) (Quota, error) {
+	return s.readQuota(ctx, id, true)
+}
+
+func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota, error) {
 	// 后台激活也使用此入口；总预算必须从排队前开始，而非仅依赖 Wails 的外层超时。
 	readCtx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
@@ -65,5 +75,15 @@ func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
 		return Quota{}, quotaFailure(readCtx, "normalize", "quota_unavailable", err)
 	}
 	s.rememberQuota(item.ID, item.UpdatedAt, quota)
+	if s.quotaCache != nil {
+		snapshot, err := s.quotaCache.Save(readCtx, item, profile, quota)
+		if err != nil {
+			return Quota{}, quotaFailure(readCtx, "cache", "quota_cache_unavailable", err)
+		}
+		if display {
+			snapshot.ResetCredits = quota.ResetCredits
+			return snapshot, nil
+		}
+	}
 	return quota, nil
 }

@@ -65,6 +65,12 @@ describe("quota overview model", () => {
     expect(failed).toMatchObject({ status: "error", quota, fetchedAt: quota.fetchedAt })
     expect(makeQuotaEntry(items[2]!, { ...base, quota }, now).status).toBe("unauthenticated")
   })
+  it("keeps retained display values but does not count them as confirmed current quota", () => {
+    const retained = { ...quota, fromCache: true }
+    const entry = makeQuotaEntry(items[0]!, { ...base, quota: retained }, now)
+    expect(entry).toMatchObject({ status: "stale", quota: retained })
+    expect(quotaSummary([entry])).toMatchObject({ known: 0, exhausted: null, uncertain: 1 })
+  })
   it("preserves official balances and distinguishes empty/null details from zero", () => {
     expect(makeQuotaEntry(items[3]!, { ...base, balance }, now).status).toBe("normal")
     expect(

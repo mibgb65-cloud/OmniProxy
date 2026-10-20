@@ -25,6 +25,7 @@ export interface Quota {
     "weekly"?: QuotaWindow | null;
     "fetchedAt": string;
     "resetCredits"?: ResetCreditSummary | null;
+    "fromCache"?: boolean;
 }
 
 export interface QuotaWindow {
