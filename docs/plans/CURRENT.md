@@ -8,6 +8,8 @@
 
 ## In Progress
 
+- [TASK-20261021-004](../tasks/active/TASK-20261021-004-build-local-beta17-installer.md)：准备包含 Gemini 工具 JSON Schema 修复的 Beta.17 本地 production 安装包；隔离构建和完整质量门待执行，不自动安装或公开发布。
+
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
