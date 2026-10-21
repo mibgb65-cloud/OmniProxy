@@ -86,18 +86,21 @@ func (s *Service) estimateWindow(ctx context.Context, item account.Item, quota s
 		return result, nil
 	}
 	start := reset.Add(-duration)
-	var baseline string
-	err = s.db.QueryRowContext(ctx, `SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type=? AND reset_at=?`, item.ID, name, window.ResetsAt).Scan(&baseline)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, ErrUnavailable
-	}
-	if err == nil {
-		cutoff, parseErr := time.Parse(time.RFC3339, baseline)
-		if parseErr != nil || cutoff.After(fetched) {
-			return result, nil
+	// 周窗口覆盖一周内全部消费，不能被短窗口刷新或旧的提前重置基线截断。
+	if name == "five_hour" {
+		var baseline string
+		err = s.db.QueryRowContext(ctx, `SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type=? AND reset_at=?`, item.ID, name, window.ResetsAt).Scan(&baseline)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, ErrUnavailable
 		}
-		if cutoff.After(start) {
-			start, result.ResetAdjusted = cutoff, true
+		if err == nil {
+			cutoff, parseErr := time.Parse(time.RFC3339, baseline)
+			if parseErr != nil || cutoff.After(fetched) {
+				return result, nil
+			}
+			if cutoff.After(start) {
+				start, result.ResetAdjusted = cutoff, true
+			}
 		}
 	}
 	if err := s.windowCost(ctx, item, start, fetched, result); err != nil {

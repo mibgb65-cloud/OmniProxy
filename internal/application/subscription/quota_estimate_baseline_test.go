@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestEstimateBaselineTracksOnlyChangedActiveWindowAndPersists(t *testing.T) {
+func TestEstimateBaselineTracksOnlyFiveHourWindowAndPersists(t *testing.T) {
 	f, item, profile, initial := savedQuotaFixture(t)
 	now := time.Now().UTC().Truncate(time.Second)
 	initial.FiveHour = &QuotaWindow{RemainingPercent: 70, ResetsAt: now.Add(3 * time.Hour).Format(time.RFC3339)}
@@ -28,22 +28,25 @@ func TestEstimateBaselineTracksOnlyChangedActiveWindowAndPersists(t *testing.T) 
 	if err := f.db.QueryRow(`SELECT COUNT(*) FROM subscription_quota_estimate_baselines WHERE window_type='weekly'`).Scan(&count); err != nil || count != 0 {
 		t.Fatal("5h-only reset changed the weekly baseline", err)
 	}
+	var start string
+	if err := f.db.QueryRow(`SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type='five_hour'`, item.ID).Scan(&start); err != nil || start != next.FetchedAt {
+		t.Fatal("5h early-reset baseline was not persisted", err)
+	}
 	next.Weekly = &QuotaWindow{RemainingPercent: 100, ResetsAt: initial.Weekly.ResetsAt}
 	if _, err := f.manager.quotaCache.Save(ctx, item, profile, next); err != nil {
 		t.Fatal(err)
 	}
-	var start string
-	if err := f.db.QueryRow(`SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type='weekly'`, item.ID).Scan(&start); err != nil || start != next.FetchedAt {
-		t.Fatal("weekly early-reset baseline was not persisted", err)
+	if err := f.db.QueryRow(`SELECT COUNT(*) FROM subscription_quota_estimate_baselines WHERE window_type='weekly'`).Scan(&count); err != nil || count != 0 {
+		t.Fatal("weekly percentage correction created a partial-window baseline", err)
 	}
 	// 旧响应不能通过基线表绕过快照的时间保护。
 	stale := next
 	stale.FetchedAt = now.Add(-time.Hour).Format(time.RFC3339)
-	stale.Weekly = &QuotaWindow{RemainingPercent: 100, ResetsAt: now.Add(6 * 24 * time.Hour).Format(time.RFC3339)}
+	stale.FiveHour = &QuotaWindow{RemainingPercent: 100, ResetsAt: now.Add(4 * time.Hour).Format(time.RFC3339)}
 	if _, err := f.manager.quotaCache.Save(ctx, item, profile, stale); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.db.QueryRow(`SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type='weekly'`, item.ID).Scan(&start); err != nil || start != next.FetchedAt {
+	if err := f.db.QueryRow(`SELECT start_at FROM subscription_quota_estimate_baselines WHERE account_id=? AND window_type='five_hour'`, item.ID).Scan(&start); err != nil || start != next.FetchedAt {
 		t.Fatal("stale response changed the reset baseline", err)
 	}
 }

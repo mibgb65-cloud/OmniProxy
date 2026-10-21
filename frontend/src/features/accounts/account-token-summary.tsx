@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next"
 import type { AccountTokenUsage } from "../../../bindings/omniproxy/internal/application/activity"
-import { Tooltip } from "../../components/ui/tooltip"
 import { formatTokens } from "../../services/activity"
 
 function compactTokens(value: string) {
@@ -32,14 +31,7 @@ export function AccountTokenSummary({
   ]
   return (
     <section className="space-y-2 border-t pt-2.5" aria-label={t("subscription.tokens.title")}>
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <p className="font-medium">{t("subscription.tokens.title")}</p>
-        <Tooltip content={t("subscription.tokens.scopeExplanation")}>
-          <span tabIndex={0} className="text-muted-foreground rounded-sm focus-visible:outline-2">
-            {t("subscription.tokens.scope")}
-          </span>
-        </Tooltip>
-      </div>
+      <p className="text-xs font-medium">{t("subscription.tokens.title")}</p>
       <dl className="grid min-w-0 grid-cols-3 gap-2 text-xs">
         {fields.map(({ label, value, partial }) => (
           <div key={label} className="bg-muted/40 min-w-0 space-y-1 rounded-lg px-2 py-1.5">
@@ -53,15 +45,6 @@ export function AccountTokenSummary({
           </div>
         ))}
       </dl>
-      <p className="text-muted-foreground text-[11px] leading-relaxed">
-        {error
-          ? t("subscription.tokens.unavailable")
-          : !usage
-            ? t("subscription.tokens.loading")
-            : t("subscription.tokens.cacheIncluded")}
-        {!error && usage?.unknownCacheRequests ? ` ${t("subscription.tokens.partialCache")}` : ""}
-        {!error && usage?.incompleteRequests ? ` ${t("subscription.tokens.incomplete")}` : ""}
-      </p>
     </section>
   )
 }

@@ -121,18 +121,26 @@ func TestQuotaEstimateUnknownModelThresholdExpiryAndIncompleteUsage(t *testing.T
 	}
 }
 
-func TestQuotaEstimateEarlyResetCutoffDoesNotAffectOtherWindow(t *testing.T) {
+func TestQuotaEstimateFiveHourEarlyResetPreservesFullWeeklyUsage(t *testing.T) {
 	s, item, quota, now := estimateFixture(t)
 	if _, err := s.db.Exec(`INSERT INTO accounts(id,provider_id,name,created_at,updated_at) VALUES('a','builtin_openai','test','now','now')`); err != nil {
 		t.Fatal(err)
 	}
 	estimateEvent(t, s, 1, now.Add(-time.Hour), "gpt-6.1-sol", nil)
 	estimateEvent(t, s, 2, now.Add(-10*time.Minute), "gpt-6.1-sol", nil)
-	if _, err := s.db.Exec(`INSERT INTO subscription_quota_estimate_baselines VALUES(?,?,?,?)`, item.ID, "weekly", quota.Weekly.ResetsAt, now.Add(-30*time.Minute).Format(time.RFC3339)); err != nil {
-		t.Fatal(err)
+	for name, reset := range map[string]string{"five_hour": quota.FiveHour.ResetsAt, "weekly": quota.Weekly.ResetsAt} {
+		if _, err := s.db.Exec(`INSERT INTO subscription_quota_estimate_baselines VALUES(?,?,?,?)`, item.ID, name, reset, now.Add(-30*time.Minute).Format(time.RFC3339)); err != nil {
+			t.Fatal(err)
+		}
 	}
 	got, err := s.EstimateQuota(context.Background(), item, quota, now)
-	if err != nil || !got.Weekly.ResetAdjusted || got.Weekly.Requests != 1 || got.FiveHour.ResetAdjusted || got.FiveHour.Requests != 2 {
-		t.Fatal("early reset mixed old usage or affected the unrelated window", got, err)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.FiveHour.ResetAdjusted || got.FiveHour.Requests != 1 {
+		t.Fatal("5h early-reset protection lost", got.FiveHour)
+	}
+	if got.Weekly.ResetAdjusted || got.Weekly.Requests != 2 || !closeEnough(got.Weekly.Total, 30) || !closeEnough(got.Weekly.Remaining, 24) {
+		t.Fatal("legacy reset baseline truncated weekly usage", got.Weekly)
 	}
 }

@@ -12,20 +12,26 @@ const usage = {
   incompleteRequests: 0,
 }
 
-it("distinguishes unknown cache from zero and labels partial cache as a lower bound", () => {
+it("distinguishes unknown cache from zero and keeps partial lower bounds without notices", () => {
   const view = render(
     <I18nProvider>
       <AccountTokenSummary usage={usage} error={false} />
     </I18nProvider>,
   )
   expect(screen.getByText("—")).toBeInTheDocument()
-  expect(screen.getByText(/部分请求无缓存明细/)).toBeInTheDocument()
+  expect(
+    screen.queryByText(/部分请求无缓存明细|缓存已包含在输入中|本机留存/),
+  ).not.toBeInTheDocument()
   view.rerender(
     <I18nProvider>
-      <AccountTokenSummary usage={{ ...usage, cachedInputTokens: "800000" }} error={false} />
+      <AccountTokenSummary
+        usage={{ ...usage, cachedInputTokens: "800000", incompleteRequests: 1 }}
+        error={false}
+      />
     </I18nProvider>,
   )
   expect(screen.getByText("≥ 800K")).toBeInTheDocument()
+  expect(screen.queryByText(/部分请求用量不完整|部分请求无缓存明细/)).not.toBeInTheDocument()
   view.rerender(
     <I18nProvider>
       <AccountTokenSummary
@@ -50,6 +56,6 @@ it("keeps exact large token counts and hides stale values on errors", () => {
     </I18nProvider>,
   )
   expect(screen.getAllByText("—")).toHaveLength(3)
-  expect(screen.getByText("用量暂不可用")).toBeInTheDocument()
+  expect(screen.queryByText("用量暂不可用")).not.toBeInTheDocument()
   expect(screen.queryByText("1M")).not.toBeInTheDocument()
 })

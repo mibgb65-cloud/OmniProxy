@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import { Events } from "@wailsio/runtime"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
@@ -58,11 +57,10 @@ const usage = {
 }
 
 function setup(value: SubscriptionQuota | null = quota, fiveHour = true) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <I18nProvider>
-      <QueryClientProvider
-        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-      >
+      <QueryClientProvider client={client}>
         <SubscriptionQuotaUSD
           account={account}
           quota={value ?? undefined}
@@ -72,6 +70,7 @@ function setup(value: SubscriptionQuota | null = quota, fiveHour = true) {
       </QueryClientProvider>
     </I18nProvider>,
   )
+  return client
 }
 beforeEach(() => {
   vi.clearAllMocks()
@@ -84,48 +83,64 @@ beforeEach(() => {
   })
 })
 
-it("shows single-value 5h and weekly estimates side by side without the removed disclosure", async () => {
+it("shows compact total and remaining columns without extra headings or reset notices", async () => {
+  vi.mocked(readSubscriptionQuotaEstimate).mockResolvedValue({
+    fetchedAt: quota.fetchedAt,
+    fiveHour: { ...ready, resetAdjusted: true },
+    weekly: { ...ready, total: 30, resetAdjusted: true },
+    usage,
+  })
   setup()
   const section = screen.getByRole("region", { name: "额度美元估算" })
   expect(await within(section).findByText("≈ $20.00")).toBeInTheDocument()
   expect(within(section).getByText("≈ $30.00")).toBeInTheDocument()
-  expect(within(section).getAllByText("预计剩余 ≈ $16.00")).toHaveLength(2)
-  expect(section.querySelector("dl")).toHaveClass("grid-cols-2")
-  expect(section.querySelector("details")).toBeNull()
+  expect(within(section).getAllByText("≈ $16.00")).toHaveLength(2)
+  expect(within(section).getAllByRole("row")).toHaveLength(3)
+  expect(within(section).getByRole("columnheader", { name: "预计总额" })).toBeInTheDocument()
+  expect(within(section).getByRole("columnheader", { name: "预计剩余" })).toBeInTheDocument()
+  expect(within(section).queryByText("额度美元估算")).not.toBeInTheDocument()
+  expect(within(section).queryByText("仅统计提前重置后的用量")).not.toBeInTheDocument()
+  expect(section.querySelector("details, [tabindex]")).toBeNull()
   expect(screen.queryByText("本机样本参考，非官方余额")).not.toBeInTheDocument()
-  await userEvent.tab()
-  expect(await screen.findByRole("tooltip")).toHaveTextContent("缓存明细未知时不计缓存折扣")
 })
 
 it("does not invent a five-hour quota for weekly-only plans", async () => {
   setup(quota, false)
   expect(await screen.findByText("≈ $30.00")).toBeInTheDocument()
-  expect(screen.queryByText("5h 预计总额")).not.toBeInTheDocument()
+  expect(screen.queryByRole("rowheader", { name: "5h" })).not.toBeInTheDocument()
 })
 
-it("explains missing model prices instead of extrapolating a partial cost", async () => {
+it("uses placeholders for missing prices and insufficient usage without extra notices", async () => {
   vi.mocked(readSubscriptionQuotaEstimate).mockResolvedValue({
     fetchedAt: quota.fetchedAt,
     weekly: { ...ready, status: "unknown_price", unpricedRequests: 2 },
     fiveHour: { ...ready, status: "insufficient_usage" },
+    usage,
   })
   setup()
-  expect(await screen.findByText("2 条请求价格未知")).toBeInTheDocument()
-  expect(screen.getByText("已用不足 5%，待估算")).toBeInTheDocument()
+  await screen.findByText("1.23M")
+  const section = screen.getByRole("region", { name: "额度美元估算" })
+  expect(within(section).getAllByText("—")).toHaveLength(4)
+  expect(screen.queryByText(/价格未知|待估算/)).not.toBeInTheDocument()
   expect(screen.queryByText(/≈ \$/)).not.toBeInTheDocument()
 })
 
 it("does not show estimates from another snapshot or after a reset", async () => {
   setup({ ...quota, weekly: { remainingPercent: 80, resetsAt: "2026-10-20T09:00:00Z" } })
   expect(await screen.findByText("≈ $20.00")).toBeInTheDocument()
-  expect(screen.getByText("窗口已重置，待刷新")).toBeInTheDocument()
+  expect(
+    within(screen.getByRole("region", { name: "额度美元估算" })).getAllByText("—"),
+  ).toHaveLength(2)
   expect(screen.queryByText("≈ $30.00")).not.toBeInTheDocument()
 })
 
 it("does not render NaN or upstream errors as monetary values", async () => {
   vi.mocked(readSubscriptionQuotaEstimate).mockRejectedValue(new Error("private-estimate-marker"))
-  setup()
-  expect(await screen.findAllByText("估算暂不可用")).toHaveLength(2)
+  const client = setup()
+  await waitFor(() => expect(client.getQueryCache().getAll()[0]?.state.status).toBe("error"))
+  expect(
+    within(screen.getByRole("region", { name: "额度美元估算" })).getAllByText("—"),
+  ).toHaveLength(4)
   expect(screen.queryByText(/private-estimate-marker|NaN/)).not.toBeInTheDocument()
 })
 
@@ -135,8 +150,8 @@ it("shows retained input, output, and cache tokens without adding cache twice", 
   expect(await within(section).findByText("1.23M")).toHaveAttribute("title", "1,234,567")
   expect(within(section).getByText("12.35K")).toBeInTheDocument()
   expect(within(section).getByText("800K")).toBeInTheDocument()
-  expect(within(section).getByText("缓存已包含在输入中")).toBeInTheDocument()
-  expect(within(section).getByText("本机留存")).toBeInTheDocument()
+  expect(within(section).queryByText("缓存已包含在输入中")).not.toBeInTheDocument()
+  expect(within(section).queryByText("本机留存")).not.toBeInTheDocument()
 })
 
 it("reads tokens before any upstream quota is available and refreshes on local activity", async () => {
@@ -186,6 +201,8 @@ it.each([NaN, Infinity, -1])("does not display invalid monetary value %s", async
   })
   setup(quota, false)
   expect(await screen.findByText("1.23M")).toBeInTheDocument()
-  expect(screen.getByText("待估算")).toBeInTheDocument()
+  expect(
+    within(screen.getByRole("region", { name: "额度美元估算" })).getAllByText("—"),
+  ).toHaveLength(2)
   expect(screen.queryByText(/≈ \$|NaN|Infinity/)).not.toBeInTheDocument()
 })
