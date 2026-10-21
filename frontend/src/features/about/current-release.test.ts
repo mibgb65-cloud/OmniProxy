@@ -2,6 +2,18 @@ import { describe, expect, it } from "vitest"
 import { getCurrentReleaseNotes, parseReleaseNotes, versionChannel } from "./current-release"
 
 describe("当前版本发行说明", () => {
+  it.each(["2.0.0-beta.18", "v2.0.0-beta.18", "2.0.0-beta.18+local.123"])(
+    "Beta.18 按运行版本 %s 提供内存优化、周额度与本地更新边界",
+    (version) => {
+      const notes = getCurrentReleaseNotes(version)
+      expect(notes).toContain("## Codex 中转内存优化")
+      expect(notes).toContain("## 独立周额度估算与卡片精简")
+      expect(notes).toContain("仍可能短暂需要约 1 GiB")
+      expect(notes).toContain("不是官方美元余额")
+      expect(notes).toContain("不宣称解除限流")
+      expect(notes).toContain("本地安装包未签名")
+    },
+  )
   it.each(["2.0.0-beta.7", "v2.0.0-beta.7", "2.0.0-beta.7+local.123"])(
     "按运行版本 %s 读取随包日志",
     (version) => {
