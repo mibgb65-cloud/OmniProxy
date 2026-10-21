@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -62,7 +62,9 @@ In Progress
 - 针对性前端测试：2 个文件／14 项通过。
 - 回归覆盖周起点边界、多个旧 5h 周期、5h 自然／提前重置、旧周基线／无效基线、金额／状态隐藏及 Token 未知／部分缓存语义。
 - `task --force verify BIN_DIR=tmp/quota-weekly-verify-20261021`：完整通过格式、lint、类型检查、Go 测试、118 个前端文件／703 项测试以及 Windows production 构建。
-- 隔离合成账号原生验收：进行中。
+- UTF-8 无 BOM／LF、`git diff --check`：通过。自动生成绑定和图标无额外差异。
+- 隔离合成账号原生验收：已成功启动本任务独立构建，使用 test profile、独立数据／配置／WebView 目录和端口；两笔合成消费加一条旧周基线，无真实授权或推理调用。但 UI Automation 未能可靠调用“账号”导航，原生页面视觉验收未完成，不能记作布局通过。已按精确 PID／路径关闭全部本任务验收进程，原生产进程 PID 34484／`E:\codexproxy\OmniProxy\OmniProxy.exe` 保留。
+- 已知非阻断提示：既有 jsdom `scrollTo` 未实现及 Vite 大 chunk 警告。
 
 # Deviations
 
@@ -74,8 +76,14 @@ In Progress
 
 # Git
 
-待检查差异，不覆盖或提交其他任务的未提交改动。
+`007563df3500c52681176bf8d52023abe2baf701` — `fix(quota): 修正独立周窗口估算并精简额度卡片`
+
+实现提交只包含本任务源码、测试、产品文档和任务记录。CURRENT 只暂存本任务新增概览，既有 Gemini 调查修改和 Atria 草稿保留，不覆盖或提交。未推送远端。
 
 # Result
 
-待完成。
+代码修复、必要回归、完整质量门和产品文档已完成。未打包安装程序、安装或发布，未读取真实账号凭证或修改生产数据库。原生卡片的深浅主题／最小窗口人工验收仍待完成，不能将构建通过等同于安装版已更新或视觉验收通过。
+
+# Completed
+
+2026-10-21

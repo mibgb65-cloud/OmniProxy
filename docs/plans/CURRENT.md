@@ -14,6 +14,8 @@
 
 ## Recently Completed
 
+- [TASK-20261021-007](../tasks/completed/2026-10/TASK-20261021-007-independent-weekly-quota-estimate.md)：`007563d`，周美元估算使用完整独立周窗口，忽略历史周裁剪基线；卡片精简为总额／剩余两列，移除指定额度／Token 提示。针对性回归、完整质量门／703 项前端测试及 Windows 隔离构建通过；原生自动导航未成功，视觉验收待人工确认。未修改生产数据、安装或发布。
+
 - [TASK-20261021-005](../tasks/completed/2026-10/TASK-20261021-005-investigate-gemini-client-retry.md)：确认 Beta.17 下 13:05 Gemini 连续 429 是 Claude 客户端重试，每条网关请求只有一次尝试且始终同账号；当前 Google 429 策略也不自动切换订阅账号。13:12 官方周／5h 余额约 99.9956%／99.9882%，同账号单次短合成请求 200。未补得原始 429 细分原因，不宣称原会话恢复；仅更新诊断说明，不改生产代码、配置或安装版本。
 
 - [TASK-20261021-004](../tasks/completed/2026-10/TASK-20261021-004-build-local-beta17-installer.md)：`0bd390a`，Beta.17 本地 production 安装包 19,537,034 bytes／SHA256 `22d4459d340ebcabf43e7f5f8aa9cf569d3d3cfe2a2f2e6f7a4644b8cb271f0e`，包含 Gemini Schema 修复。完整质量门／703 项前端测试、命令工具测试／vet、NSIS、原生版本、来源、隔离启动及 25 项保护文件基线通过。未签名、未自动安装或公开发布，供用户自行更新；真实 Gemini 调用和 429 限制仍需实际验收。
