@@ -8,6 +8,8 @@
 
 ## In Progress
 
+- [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：非 bare Claude Code 2.1.299 的 21 工具／约 79 KB 合成请求已真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，上游无细分配额明细。完整 Desktop 路径尚未修复；当前 1 个 Google 账号启用、2 个禁用，未擅自启用或使用备用账号，等待独立授权或官方客户端对照。无生产代码变更或新安装包。
+
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
