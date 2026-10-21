@@ -118,7 +118,9 @@ Completed
 
 # Git
 
-实现提交后填写实际提交哈希；仅提交本任务文件，保留初始无关未跟踪记录。
+`f4ae7859cb17fc24b2931dbd87b84352b0b134c5 fix(google): 修复 Gemini 工具 JSON Schema 方言适配`
+
+仅提交本任务文件；初始无关未跟踪任务记录保持原样，未推送。
 
 # Result
 

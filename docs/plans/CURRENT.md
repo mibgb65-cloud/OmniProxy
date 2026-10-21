@@ -12,7 +12,7 @@
 
 ## Recently Completed
 
-- [TASK-20261021-003](../tasks/completed/2026-10/TASK-20261021-003-claude-desktop-gemini-failure.md)：修复 Claude Code 自带工具完整 JSON Schema 被误放入 Gemini `parameters` 导致 400，改用 `parametersJsonSchema` 且不删约束；非 Gemini 通道不变。真实合成 A/B 400→200、三协议 JSON／SSE 回归及完整质量门／703 项前端测试／Windows 构建通过。进一步隔离 Desktop 内核遇 429，未宣称完整调用恢复；未替换生产程序、客户端配置或安装发布。
+- [TASK-20261021-003](../tasks/completed/2026-10/TASK-20261021-003-claude-desktop-gemini-failure.md)：`f4ae785`，修复 Claude Code 自带工具完整 JSON Schema 被误放入 Gemini `parameters` 导致 400，改用 `parametersJsonSchema` 且不删约束；非 Gemini 通道不变。真实合成 A/B 400→200、三协议 JSON／SSE 回归及完整质量门／703 项前端测试／Windows 构建通过。进一步隔离 Desktop 内核遇 429，未宣称完整调用恢复；未替换生产程序、客户端配置或安装发布。
 
 - [TASK-20261021-002](../tasks/completed/2026-10/TASK-20261021-002-build-local-beta16-installer.md)：`eeb7188`，Beta.16 本地 production 安装包 19,536,016 bytes／SHA256 `0e91ae41849e072bd79b92c71805349c2a3d6fa6ba78cd582ae30aff949fca0d`；完整质量门／703 项前端测试、命令工具测试／vet、NSIS、原生版本、来源、隔离启动和 23 项保护文件基线通过。未签名、未自动安装或公开发布，供用户自行更新。
 - [TASK-20261021-001](../tasks/completed/2026-10/TASK-20261021-001-google-subscription-error-classification.md)：`f214c79`，修复 Google 非令牌端点 HTTP 400 被误报为 401，保留 OAuth 令牌拒绝、真实认证／权限／限流语义和脱敏。12 组分类回归、三协议网关／记账、完整质量门（118 文件／703 项前端测试）及 Windows production 构建通过；未安装或发布。历史 401 原因与实际 429 限制来源未确认，不宣称真实推理已恢复。
