@@ -4,15 +4,15 @@
 
 ## Current Version
 
-2.0.0-beta.16 — 本地 Windows amd64 production 安装包，未公开发布。源码 `eeb7188`，修复 Google 普通端点 HTTP 400 被误报为 401，保留真实认证／权限／限流语义，延续 Beta.15 既有能力。隔离完整质量门／703 项前端测试、NSIS、原生版本、1,729 项来源、SHA256 与 test profile 运行时版本校验通过；资产位于 `release-assets/v2.0.0-beta.16/`，未签名。20 个旧发布资产、3 个安装文件及原生产进程未变；未自动安装。真实覆盖更新、数据保留及 Google 实际推理仍需用户验收。
+2.0.0-beta.17 — 本地 Windows amd64 production 安装包，未公开发布。源码 `0bd390a`，包含 Gemini 工具 JSON Schema 方言修复，保留全部参数约束及既有认证／权限／限流语义。隔离完整质量门／703 项前端测试、NSIS、原生版本、1,734 项来源、SHA256 与 test profile 运行时版本校验通过；资产位于 `release-assets/v2.0.0-beta.17/`，未签名。22 个旧发布资产、3 个安装文件及原生产进程未变；未自动安装。真实覆盖更新、数据保留及 Gemini 桌面调用仍需用户验收，独立 429 限制未宣称解决。
 
 ## In Progress
-
-- [TASK-20261021-004](../tasks/active/TASK-20261021-004-build-local-beta17-installer.md)：准备包含 Gemini 工具 JSON Schema 修复的 Beta.17 本地 production 安装包；隔离构建和完整质量门待执行，不自动安装或公开发布。
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261021-004](../tasks/completed/2026-10/TASK-20261021-004-build-local-beta17-installer.md)：`0bd390a`，Beta.17 本地 production 安装包 19,537,034 bytes／SHA256 `22d4459d340ebcabf43e7f5f8aa9cf569d3d3cfe2a2f2e6f7a4644b8cb271f0e`，包含 Gemini Schema 修复。完整质量门／703 项前端测试、命令工具测试／vet、NSIS、原生版本、来源、隔离启动及 25 项保护文件基线通过。未签名、未自动安装或公开发布，供用户自行更新；真实 Gemini 调用和 429 限制仍需实际验收。
 
 - [TASK-20261021-003](../tasks/completed/2026-10/TASK-20261021-003-claude-desktop-gemini-failure.md)：`f4ae785`，修复 Claude Code 自带工具完整 JSON Schema 被误放入 Gemini `parameters` 导致 400，改用 `parametersJsonSchema` 且不删约束；非 Gemini 通道不变。真实合成 A/B 400→200、三协议 JSON／SSE 回归及完整质量门／703 项前端测试／Windows 构建通过。进一步隔离 Desktop 内核遇 429，未宣称完整调用恢复；未替换生产程序、客户端配置或安装发布。
 
