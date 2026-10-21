@@ -12,6 +12,7 @@
 
 ## Recently Completed
 
+- [TASK-20261021-001](../tasks/completed/2026-10/TASK-20261021-001-google-subscription-error-classification.md)：`f214c79`，修复 Google 非令牌端点 HTTP 400 被误报为 401，保留 OAuth 令牌拒绝、真实认证／权限／限流语义和脱敏。12 组分类回归、三协议网关／记账、完整质量门（118 文件／703 项前端测试）及 Windows production 构建通过；未安装或发布。历史 401 原因与实际 429 限制来源未确认，不宣称真实推理已恢复。
 - [TASK-20261020-017](../tasks/completed/2026-10/TASK-20261020-017-build-local-beta15-installer.md)：`e188d1c`，Beta.15 安装包 19,533,652 bytes／SHA256 `99617167f1168f557eca05da61407eca45c5463ecf33f51e41de76fb69653d06`；完整门禁／703 项前端测试、命令工具测试／vet、NSIS、版本、来源和隔离启动通过。18 个旧资产未变；安装／进程已在中断期间变化，只读确认与本次构建一致，不将原安装未变记为通过。未由本任务安装或公开发布。
 
 - [TASK-20261020-016](../tasks/completed/2026-10/TASK-20261020-016-investigate-claude-invalid-messages.md)：`df49ed4`，关联 Claude → River 本地 `invalid_messages`，复现 342 条源消息展开为 513 后被旧阈值拒绝，修复条数及可信转换 16 MiB 容量；普通 Chat 保护不放宽，不裁剪／重放历史。关键协议回归、完整质量门／700 项前端测试及 Windows 构建通过。未保存原始失败请求体，不宣称精确现场条数或真实会话续接验收，未安装或发布。
