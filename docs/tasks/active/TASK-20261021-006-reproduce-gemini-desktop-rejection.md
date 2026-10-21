@@ -78,7 +78,7 @@ In Progress
 - 真实生成请求总计 2 次，均单次且禁止额外网络请求；随后停止额外推理。
 - 官方模型选择器只读查询：HTTP 200，该型号存在；未将目录查询作为生成成功。
 - 本轮生产代码未变；诊断辅助程序已编译执行，交付仅含诊断文档，不重复运行完整质量门。
-- 文档 UTF-8 无 BOM、链接和 `git diff --check`：提交前核对。
+- 文档 UTF-8 无 BOM、链接和 `git diff --check`：PASS。
 
 # Documentation
 
@@ -94,7 +94,9 @@ In Progress
 
 # Git
 
-诊断文档提交后记录实际哈希；生产代码未变，无新安装包。
+`ae16ef2b1eb300b703205c43b459e327f6ff4252 docs(google): 记录完整 Desktop 工具请求拒绝的复现证据`
+
+生产代码未变，无新安装包；任务保留 In Progress，未推送，未改无关 Atria 草稿。
 
 # Result
 
