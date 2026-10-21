@@ -36,4 +36,4 @@ Accepted
 
 ## Verification
 
-Task Record：`docs/tasks/active/TASK-20261021-008-investigate-v2-memory-usage.md`。
+Task Record：`docs/tasks/completed/2026-10/TASK-20261021-008-investigate-v2-memory-usage.md`。

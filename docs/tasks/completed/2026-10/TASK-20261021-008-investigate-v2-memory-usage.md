@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -171,8 +171,14 @@ In Progress
 
 # Git
 
-Not committed by Agent.
+`d59ba99bda1500df21545282c5bb92a33949a3bd` — `fix(codex): 复用受保护授权并回收 scrypt 大工作区`
+
+实现提交只包含本任务源码、测试、架构／测试文档、ADR 和任务记录。CURRENT 仅补充本任务概览，既有 Gemini 调查改动和 Atria 草稿保留，不覆盖或提交；未推送远端。
 
 # Result
 
 已通过假数据精确复现官方 scrypt 单次 1 GiB 与重复解密后约 2 GiB 的保留量，并实现受系统保护的有界缓存和真实高成本工作区回收。针对性回归、官方因子专项和完整质量门通过；冷读取完成后独立测试进程私有提交约 50 MiB，缓存读取分配约 10.6 KiB。不降低安全强度，不修改已安装应用或生产数据，不宣称当前旧进程已生效。
+
+# Completed
+
+2026-10-21（Asia/Singapore）
