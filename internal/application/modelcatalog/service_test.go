@@ -25,7 +25,11 @@ func (s *fakeSubscription) Models(context.Context, string) ([]codex.Model, error
 	if s.fail {
 		return nil, errors.New("upstream-private-data")
 	}
-	return []codex.Model{{ID: "gpt-test", Name: "GPT Test", Metadata: core.Metadata{Description: "Official model", IsDefault: true, DefaultEffort: "high", ReasoningEfforts: []core.Effort{{Value: "high"}}}}}, nil
+	return []codex.Model{{ID: "gpt-test", Name: "GPT Test", Metadata: core.Metadata{
+		Description: "Official model", IsDefault: true, DefaultEffort: "high",
+		ReasoningEfforts: []core.Effort{{Value: "high"}},
+		ServiceTiers:     []core.ServiceTier{{ID: "priority", Name: "Fast", Description: "Official usage"}},
+	}}}, nil
 }
 func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T) {
 	ctx := context.Background()
@@ -47,7 +51,7 @@ func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T)
 	if err != nil || len(models) != 1 {
 		t.Fatal("sync failed", err)
 	}
-	if models[0].Metadata.Description != "Official model" || len(models[0].Metadata.ReasoningEfforts) != 1 || !models[0].Metadata.IsDefault {
+	if models[0].Metadata.Description != "Official model" || len(models[0].Metadata.ReasoningEfforts) != 1 || !models[0].Metadata.IsDefault || len(models[0].Metadata.ServiceTiers) != 1 || models[0].Metadata.ServiceTiers[0].ID != "priority" {
 		t.Fatal("official metadata was not persisted")
 	}
 	upstream.fail = true
@@ -57,6 +61,9 @@ func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T)
 	models, err = s.List(ctx)
 	if err != nil || len(models) != 1 {
 		t.Fatal("last snapshot lost")
+	}
+	if len(models[0].Metadata.ServiceTiers) != 1 || models[0].Metadata.ServiceTiers[0].Description != "Official usage" {
+		t.Fatal("last Fast capability snapshot lost")
 	}
 	db.Exec(`UPDATE accounts SET name='renamed',updated_at='later' WHERE id='a'`)
 	models, err = s.List(ctx)

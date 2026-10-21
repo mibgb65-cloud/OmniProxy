@@ -19,6 +19,7 @@ type codexModel struct {
 	Description              string         `json:"description"`
 	DefaultReasoningLevel    *string        `json:"default_reasoning_level"`
 	ReasoningLevels          []codexEffort  `json:"supported_reasoning_levels"`
+	ServiceTiers             []ServiceTier  `json:"service_tiers,omitempty"`
 	ShellType                string         `json:"shell_type"`
 	Visibility               string         `json:"visibility"`
 	SupportedInAPI           bool           `json:"supported_in_api"`
@@ -63,7 +64,10 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 		}
 		instructions := codingInstructions
 		var patchType *string
+		var serviceTiers []ServiceTier
 		if entry.ProviderKind == "openai" {
+			// Fast 入口依赖此能力声明；只保留原生线路已确认的档位，不为兼容适配器推断支持。
+			serviceTiers = entry.Metadata.ServiceTiers
 			// 原生订阅支持自定义工具；缺失此能力会让核心不注册补丁工具，文件写入无法形成结构化变更项。
 			instructions += " Prefer the native apply_patch tool for manual file edits when available, so the client can track structured file changes."
 			value := "freeform"
@@ -72,6 +76,7 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 		models = append(models, codexModel{
 			Slug: entry.ID, DisplayName: entry.Name, Description: entry.Metadata.Description,
 			DefaultReasoningLevel: defaultEffort, ReasoningLevels: efforts,
+			ServiceTiers:       serviceTiers,
 			ApplyPatchToolType: patchType, ShellType: "unified_exec", Visibility: "list", SupportedInAPI: true, Priority: index,
 			BaseInstructions: instructions, ModelMessages: map[string]any{"instructions_template": instructions},
 			SupportsReasoningSummary: false, DefaultReasoningSummary: "none",

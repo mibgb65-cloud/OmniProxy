@@ -37,8 +37,18 @@ export interface Metadata {
      */
     "contextVerified"?: boolean;
     "reasoningEfforts"?: Effort[] | null;
+    "serviceTiers"?: ServiceTier[] | null;
     "defaultEffort"?: string;
     "inputModalities"?: string[] | null;
     "toolUse"?: boolean | null;
     "isDefault"?: boolean;
+}
+
+/**
+ * ServiceTier 只描述上游明确公布的服务档位，不代表用户已经选择该计费模式。
+ */
+export interface ServiceTier {
+    "id": string;
+    "name": string;
+    "description": string;
 }

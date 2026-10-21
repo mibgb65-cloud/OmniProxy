@@ -4,5 +4,6 @@
 export type {
     Effort,
     Entry,
-    Metadata
+    Metadata,
+    ServiceTier
 } from "./models.js";

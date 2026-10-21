@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -30,7 +31,8 @@ func TestInstalledCodexLocalModelCatalog(t *testing.T) {
 		t.Fatal("Codex core path must be absolute")
 	}
 	home := t.TempDir()
-	body, err := catalog.CodexJSON([]catalog.Entry{{ID: "qa-first", Name: "First QA Model", ProviderKind: "openai", Metadata: catalog.Metadata{InputModalities: []string{"text", "image"}}}, {ID: "qa-second", Name: "Second QA Model"}})
+	tiers := []catalog.ServiceTier{{ID: "priority", Name: "Fast", Description: "Official usage description"}}
+	body, err := catalog.CodexJSON([]catalog.Entry{{ID: "qa-first", Name: "First QA Model", ProviderKind: "openai", Metadata: catalog.Metadata{InputModalities: []string{"text", "image"}, ServiceTiers: tiers}}, {ID: "qa-second", Name: "Second QA Model"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,6 +92,10 @@ func TestInstalledCodexLocalModelCatalog(t *testing.T) {
 	}
 	if len(response.Data[0].InputModalities) != 2 || response.Data[0].InputModalities[1] != "image" || len(response.Data[1].InputModalities) != 1 || response.Data[1].InputModalities[0] != "text" {
 		t.Fatal("installed core did not preserve model image capability")
+	}
+	models, err := client.Models(ctx)
+	if err != nil || len(models) != 2 || !reflect.DeepEqual(models[0].Metadata.ServiceTiers, tiers) || len(models[1].Metadata.ServiceTiers) != 0 {
+		t.Fatal("installed core did not round-trip confirmed Fast capability", err)
 	}
 	var effective struct {
 		Config struct {

@@ -25,12 +25,13 @@ type Metadata struct {
 	InputTokenLimit  *int64 `json:"inputTokenLimit,omitempty"`
 	OutputTokenLimit *int64 `json:"outputTokenLimit,omitempty"`
 	// ContextVerified 表示当前授权版本的订阅线路已完成长输入验证，不是客户端的默认值。
-	ContextVerified  bool     `json:"contextVerified,omitempty"`
-	ReasoningEfforts []Effort `json:"reasoningEfforts,omitempty"`
-	DefaultEffort    string   `json:"defaultEffort,omitempty"`
-	InputModalities  []string `json:"inputModalities,omitempty"`
-	ToolUse          *bool    `json:"toolUse,omitempty"`
-	IsDefault        bool     `json:"isDefault,omitempty"`
+	ContextVerified  bool          `json:"contextVerified,omitempty"`
+	ReasoningEfforts []Effort      `json:"reasoningEfforts,omitempty"`
+	ServiceTiers     []ServiceTier `json:"serviceTiers,omitempty"`
+	DefaultEffort    string        `json:"defaultEffort,omitempty"`
+	InputModalities  []string      `json:"inputModalities,omitempty"`
+	ToolUse          *bool         `json:"toolUse,omitempty"`
+	IsDefault        bool          `json:"isDefault,omitempty"`
 }
 
 // Entry 代表网关实际可解析的模型；别名继承其当前目标的元数据。
@@ -53,6 +54,9 @@ func textValid(value string, limit int) bool {
 
 // ValidateMetadata 校验持久快照和客户端目录的共同边界。
 func ValidateMetadata(value Metadata) error {
+	if err := validateServiceTiers(value.ServiceTiers); err != nil {
+		return err
+	}
 	for _, limit := range []*int64{value.InputTokenLimit, value.OutputTokenLimit} {
 		if limit != nil && (*limit < 1 || *limit > 10000000) {
 			return ErrInvalid

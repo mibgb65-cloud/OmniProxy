@@ -28,10 +28,11 @@ func (c *rpcClient) Models(ctx context.Context) ([]Model, error) {
 					Value       string `json:"reasoningEffort"`
 					Description string `json:"description"`
 				} `json:"supportedReasoningEfforts"`
-				ContextWindow   *int64   `json:"contextWindow"`
-				InputModalities []string `json:"inputModalities"`
-				ToolUse         *bool    `json:"supportsToolUse"`
-				IsDefault       bool     `json:"isDefault"`
+				ContextWindow   *int64                `json:"contextWindow"`
+				InputModalities []string              `json:"inputModalities"`
+				ToolUse         *bool                 `json:"supportsToolUse"`
+				IsDefault       bool                  `json:"isDefault"`
+				ServiceTiers    []catalog.ServiceTier `json:"serviceTiers"`
 			} `json:"data"`
 			Next *string `json:"nextCursor"`
 		}
@@ -51,6 +52,7 @@ func (c *rpcClient) Models(ctx context.Context) ([]Model, error) {
 			}
 			if !seen[item.Model] {
 				metadata := catalog.Metadata{Description: item.Description, ContextWindow: item.ContextWindow, DefaultEffort: item.DefaultEffort, InputModalities: item.InputModalities, ToolUse: item.ToolUse, IsDefault: item.IsDefault}
+				metadata.ServiceTiers = item.ServiceTiers
 				for _, effort := range item.Efforts {
 					metadata.ReasoningEfforts = append(metadata.ReasoningEfforts, catalog.Effort{Value: effort.Value, Description: effort.Description})
 				}
