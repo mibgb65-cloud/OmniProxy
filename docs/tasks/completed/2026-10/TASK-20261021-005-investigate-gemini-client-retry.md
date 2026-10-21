@@ -73,7 +73,7 @@ Completed
 - 当前官方 Gemini 额度查询：PASS，读取时间与比例明确记录，不保存成历史事实。
 - 单次受控合成请求：HTTP 200，`synthetic_request_count=1`，适配器成功，无额外重试。
 - 本轮仅诊断和文档变更，无生产代码变更；不重复执行完整 `task verify`。
-- 文档 UTF-8 无 BOM、链接和 `git diff --check`：最终归档时核对。
+- 文档 UTF-8 无 BOM、链接和 `git diff --check`：PASS。
 
 # Documentation
 
@@ -87,7 +87,9 @@ Completed
 
 # Git
 
-诊断和文档提交后记录哈希；不提交无关文件。
+`f8dca2be6ff6b3cfeb030a625ed7ee20b20906e6 docs(google): 记录 Beta.17 客户端重试诊断与账号切换边界`
+
+未提交无关文件，未推送；Atria 未跟踪草稿保持原样。
 
 # Result
 
