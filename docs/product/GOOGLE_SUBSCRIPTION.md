@@ -52,6 +52,21 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 - 不请求付费积分回退，不切换普通 Gemini API Key 重试；上游限流返回 429。
 - 本实现使用 Antigravity 客户端内部协议，接口兼容性与真实账号权限需持续验证。
 
+## 失败排查
+
+- 客户端出现 “API key was rejected” 不足以证明 Google API Key 失效。先查看网关
+  请求详情中的账号通道、HTTP 状态和错误码：订阅登录使用 OAuth，与普通 API Key 独立。
+- 普通推理／控制端点的上游 HTTP 400 返回 `400 / invalid_request`，应排查请求参数、
+  工具上下文及接口兼容性，不要求用户重置密钥。旧版曾将其误报成 `401 / reauth_required`；
+  旧请求记录未保存原始上游状态，不能据此反推每次历史认证错误的真实原因。
+- 真实上游 HTTP 401，以及 OAuth 令牌端点 HTTP 400，仍返回 `401 / reauth_required`。
+  在 OmniProxy 对应 Google 账号中先刷新授权；持续失败时使用同一身份重新登录。
+  不要把 Google OAuth 令牌或 Google API Key 填入客户端的本地网关 Key。
+- `403 / access_denied` 表示权限拒绝；`429 / rate_limited` 表示限流或资源限制。
+  429 时停止连续重试，在账号／配额页手动刷新对应模型分组，参考实际重置时间后重试；
+  剩余额度快照不能证明推理一定可用，也不能仅凭 429 判定是短时限流还是额度耗尽。
+- 错误分类修复不会恢复已失效的授权、补充额度或自动修复不兼容的请求。
+
 ## 安全
 
 首次登录有界读取本机官方 agy 内的公开桌面 OAuth 配置，校验已知客户端 ID 与

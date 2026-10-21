@@ -57,14 +57,15 @@ func TestGoogleSubscriptionRoutesWithoutAPIKeyAndRecordsUsage(t *testing.T) {
 	access := &googleAccess{}
 	service.SetGoogleSubscription(access)
 	upstreamCalls := 0
+	status := 200
 	service.antigravity = antigravity.New(googleTransport(func(r *http.Request) (*http.Response, error) {
 		upstreamCalls++
 		if r.URL.Host != "daily-cloudcode-pa.googleapis.com" || r.Header.Get("Authorization") != "Bearer fake-google-token" {
 			t.Error("subscription used an incorrect endpoint or credential")
 		}
-		status, body := 200, `{"response":{"candidates":[{"content":{"parts":[{"text":"ok"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":4,"candidatesTokenCount":1,"totalTokenCount":5}}}`
-		if upstreamCalls == 2 {
-			status, body = 429, `{"error":"fake-sensitive-upstream"}`
+		body := `{"response":{"candidates":[{"content":{"parts":[{"text":"ok"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":4,"candidatesTokenCount":1,"totalTokenCount":5}}}`
+		if status != 200 {
+			body = `{"error":"fake-sensitive-upstream"}`
 		}
 		return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
 	}))
@@ -77,26 +78,42 @@ func TestGoogleSubscriptionRoutesWithoutAPIKeyAndRecordsUsage(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer service.Stop(ctx)
-	endpoint := fmt.Sprintf("http://127.0.0.1:%d/v1/chat/completions", service.Info().Runtime.Port)
-	for _, expected := range []int{200, 429} {
-		response, err := http.Post(endpoint, "application/json", strings.NewReader(`{"model":"google-sub-alias","messages":[{"role":"user","content":"hi"}]}`))
-		if err != nil {
-			t.Fatal(err)
-		}
-		data, _ := io.ReadAll(response.Body)
-		response.Body.Close()
-		if response.StatusCode != expected || strings.Contains(string(data), "fake-sensitive-upstream") {
+	for _, protocol := range []string{"chat", "responses", "messages"} {
+		for _, expected := range []struct {
+			status int
+			code   string
+		}{{200, ""}, {400, "invalid_request"}, {401, "reauth_required"}, {403, "access_denied"}, {429, "rate_limited"}} {
+			status = expected.status
+			body, path := googleAgentRequest("google-sub-alias", protocol, false, false)
+			endpoint := fmt.Sprintf("http://127.0.0.1:%d/v1/%s", service.Info().Runtime.Port, path)
+			response, err := http.Post(endpoint, "application/json", strings.NewReader(body))
+			if err != nil {
+				t.Fatal(err)
+			}
+			data, err := io.ReadAll(response.Body)
+			response.Body.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
 			var failure struct {
 				Error struct {
 					Code string `json:"code"`
 					Type string `json:"type"`
 				} `json:"error"`
 			}
-			json.Unmarshal(data, &failure)
-			t.Fatalf("gateway status or redaction failed: got %d, expected %d, code=%s type=%s", response.StatusCode, expected, failure.Error.Code, failure.Error.Type)
+			if err := json.Unmarshal(data, &failure); err != nil {
+				t.Fatal(err)
+			}
+			if response.StatusCode != expected.status || failure.Error.Code != expected.code || strings.Contains(string(data), "fake-sensitive-upstream") {
+				t.Fatalf("%s status or redaction failed: got %d, expected %d, code=%s type=%s", protocol, response.StatusCode, expected.status, failure.Error.Code, failure.Error.Type)
+			}
+			var recorded int
+			if err := db.QueryRow(`SELECT COUNT(*) FROM request_records WHERE account_id='google-sub' AND protocol=? AND status_code=? AND error_code=?`, protocol, expected.status, expected.code).Scan(&recorded); err != nil || recorded != 1 {
+				t.Fatalf("%s request error not recorded correctly: count=%d error=%v", protocol, recorded, err)
+			}
 		}
 	}
-	if access.calls != 2 || upstreamCalls != 2 {
+	if access.calls != 15 || upstreamCalls != 15 {
 		t.Fatal("subscription retried or used an API Key")
 	}
 	var input, output int64

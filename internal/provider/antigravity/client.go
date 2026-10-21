@@ -44,6 +44,8 @@ func Failure(code string) error { return errors.New("google_subscription: " + co
 func ProxyError(err error) error {
 	code, status := ErrorCode(err), 502
 	switch code {
+	case "invalid_request":
+		status = 400
 	case "reauth_required":
 		status = 401
 	case "access_denied":
@@ -91,7 +93,14 @@ func (c *Client) request(ctx context.Context, endpoint string, body []byte, toke
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		resp.Body.Close()
 		switch resp.StatusCode {
-		case 400, 401:
+		case 400:
+			// OAuth 令牌拒绝通常用 400；推理／控制端点的 400 不是凭据失效，
+			// 否则下游会把请求参数或工具上下文错误误报成 API Key 被撤销。
+			if endpoint == tokenURL {
+				return nil, Failure("reauth_required")
+			}
+			return nil, Failure("invalid_request")
+		case 401:
 			return nil, Failure("reauth_required")
 		case 403:
 			return nil, Failure("access_denied")
@@ -129,7 +138,7 @@ func (c *Client) post(ctx context.Context, endpoint, token string, payload, resu
 
 // ErrorCode 只允许已知错误进入 UI，不返回动态正文。
 func ErrorCode(err error) string {
-	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed", "quota_changed", "quota_cache_unavailable"} {
+	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "invalid_request", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed", "quota_changed", "quota_cache_unavailable"} {
 		if err != nil && strings.Contains(err.Error(), "google_subscription: "+code) {
 			return code
 		}
