@@ -12,6 +12,8 @@
 
 ## Recently Completed
 
+- [TASK-20261021-005](../tasks/completed/2026-10/TASK-20261021-005-investigate-gemini-client-retry.md)：确认 Beta.17 下 13:05 Gemini 连续 429 是 Claude 客户端重试，每条网关请求只有一次尝试且始终同账号；当前 Google 429 策略也不自动切换订阅账号。13:12 官方周／5h 余额约 99.9956%／99.9882%，同账号单次短合成请求 200。未补得原始 429 细分原因，不宣称原会话恢复；仅更新诊断说明，不改生产代码、配置或安装版本。
+
 - [TASK-20261021-004](../tasks/completed/2026-10/TASK-20261021-004-build-local-beta17-installer.md)：`0bd390a`，Beta.17 本地 production 安装包 19,537,034 bytes／SHA256 `22d4459d340ebcabf43e7f5f8aa9cf569d3d3cfe2a2f2e6f7a4644b8cb271f0e`，包含 Gemini Schema 修复。完整质量门／703 项前端测试、命令工具测试／vet、NSIS、原生版本、来源、隔离启动及 25 项保护文件基线通过。未签名、未自动安装或公开发布，供用户自行更新；真实 Gemini 调用和 429 限制仍需实际验收。
 
 - [TASK-20261021-003](../tasks/completed/2026-10/TASK-20261021-003-claude-desktop-gemini-failure.md)：`f4ae785`，修复 Claude Code 自带工具完整 JSON Schema 被误放入 Gemini `parameters` 导致 400，改用 `parametersJsonSchema` 且不删约束；非 Gemini 通道不变。真实合成 A/B 400→200、三协议 JSON／SSE 回归及完整质量门／703 项前端测试／Windows 构建通过。进一步隔离 Desktop 内核遇 429，未宣称完整调用恢复；未替换生产程序、客户端配置或安装发布。
