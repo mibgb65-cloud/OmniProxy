@@ -87,7 +87,8 @@ v2 的统一模型目录重建丢失了原生 GPT 模型的 Fast 服务档位信
 
 # Git
 
-Not committed by Agent.
+`4420c051f45c3ecbbcd43f0b4c1189ff771e02a7`：排查记录随
+TASK-20261022-002 的修复一同归档；本排查任务本身未修改产品代码。
 
 # Result
 

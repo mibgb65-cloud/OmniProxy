@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -54,7 +54,7 @@ Responses 目录输出确认的服务档位。验证档位数量、ID、展示�
 ## Changes
 
 - 增加有界 `ServiceTier` 元数据，校验最多 8 档、唯一的 ASCII ID
-  （32 字节）、名称（80 字节）和描述（500 字节），拒绝非法类型及控制字符。
+  （32 字节）、名称（80 字节）和描述（500 字节），拒绝非法类型及不安全控制字符。
 - 官方 RPC 解析 `serviceTiers`，复用账号版本校验和 `metadata_json` 快照；
   同步失败保留旧能力，无迁移、依赖或默认缓存读取。
 - 原生 OpenAI Codex 目录输出 `service_tiers`，第三方和未知能力不声明 Fast；
@@ -103,7 +103,7 @@ Responses 目录输出确认的服务档位。验证档位数量、ID、展示�
 # Documentation
 
 - 更新 `docs/product/LOCAL_AGENTS.md` 的 Fast 能力来源、兼容边界和升级后同步步骤。
-- CURRENT 待归档时添加摘要；现有其他任务状态不覆盖。
+- CURRENT 已添加完成摘要；现有其他任务状态不覆盖。
 - 无技术栈、架构边界或依赖变化，不新增 ADR。
 
 # Deviations
@@ -113,9 +113,16 @@ Responses 目录输出确认的服务档位。验证档位数量、ID、展示�
 
 # Git
 
-待本地提交后记录。
+`4420c051f45c3ecbbcd43f0b4c1189ff771e02a7`
+`fix(codex): 恢复原生模型 Fast 服务档位`
+
+本地提交只包含本任务的 16 个文件；既有其他任务改动未暂存或提交。未推送。
 
 # Result
 
 Fast 能力采集与导出链路已修复，专项回归和两种官方内核契约通过。
 运行中的旧程序和真实受管目录未自动更新；使用修复版本后重新同步官方模型。
+
+# Completed
+
+2026-10-22

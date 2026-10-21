@@ -14,6 +14,8 @@
 
 ## Recently Completed
 
+- [TASK-20261022-002](../tasks/completed/2026-10/TASK-20261022-002-restore-codex-fast-mode.md)：`4420c05`，恢复官方 GPT 模型 Fast 服务档位的采集、持久快照与 Codex 目录输出，别名按实际账号继承；不伪造第三方能力、不强制开启 Fast。专项回归 10 轮、CLI／Desktop 真实内核隔离契约及干净副本完整门禁／706 项前端测试／Windows production 构建通过；当前工作区门禁仍受既有关于页测试类型错误阻断。真实配置、运行程序和其他任务改动未变，未安装或发布。
+
 - [TASK-20261021-009](../tasks/completed/2026-10/TASK-20261021-009-build-local-beta18-installer.md)：`c8df0c0`，确认全部功能代码已在 main，完成 Beta.18 production 安装包及 SHA256；完整质量门／706 项前端测试、NSIS、1,753 项来源、原生版本／隔离启动和保护基线校验通过。包含内存优化、周额度及卡片精简；未自动安装、推送或公开发布。
 
 - [TASK-20261021-008](../tasks/completed/2026-10/TASK-20261021-008-investigate-v2-memory-usage.md)：`d59ba99`，复现 Codex 官方 scrypt 因子 20 的单次 1 GiB 和重复解密后的约 2 GiB 保留；增加 DPAPI 保护的有界缓存、源／凭据变更失效、注销清理及大工作区回收，不降低官方强度。相关回归、官方因子专项及完整质量门／703 项前端测试通过；缓存读取分配约 10.6 KiB，独立测试进程完成后私有提交约 50 MiB。验证构建位于 `tmp/codex-memory-verify-20261021/`，未打包安装、替换生产进程或发布。
