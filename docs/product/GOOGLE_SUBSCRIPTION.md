@@ -32,6 +32,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   显示名中的 Thinking 不代表模型 ID 含此后缀；未知第三方型号仍显示待接入。
 - 订阅支持 Responses／Messages 的文本／函数工具转换，先读取完整上游结果再编码
   JSON／SSE；Chat 保留原生增量输出。图片／语音、多模态及不支持选项明确失败。
+- Gemini 函数工具通过 `parametersJsonSchema` 传递完整 JSON Schema，保留 Claude Code
+  自带工具的 `$schema`、`exclusiveMinimum`、`additionalProperties` 等定义与约束；
+  不再误放进受限的 `parameters` OpenAPI Schema，也不通过删除约束规避错误。
+  Google 订阅内 Claude／GPT-OSS 通道维持原 Schema 字段，不扩展未经验证的能力。
 - 跨协议客户端不携带 Google 扩展签名时，复用按授权／项目／模型／工具完整内容摘要
   隔离的内存签名缓存（最多 256 条、1 小时），不持久化消息正文或签名；重启／淘汰后
   不伪造签名，可能需重新开始工具轮次。Claude 工具调用的 `OTHER` 终态只在存在完整
@@ -59,6 +63,9 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 - 普通推理／控制端点的上游 HTTP 400 返回 `400 / invalid_request`，应排查请求参数、
   工具上下文及接口兼容性，不要求用户重置密钥。旧版曾将其误报成 `401 / reauth_required`；
   旧请求记录未保存原始上游状态，不能据此反推每次历史认证错误的真实原因。
+- Claude Code 自带工具调用 Gemini 的一种已复现 400 原因是 Schema 方言不匹配；
+  需要包含 `parametersJsonSchema` 修复的新网关构建，只有错误分类修复的旧构建仍会失败。
+  该修复不等同于解决所有历史 400；工具签名缓存失效及其他高级选项仍遵守上述边界。
 - 真实上游 HTTP 401，以及 OAuth 令牌端点 HTTP 400，仍返回 `401 / reauth_required`。
   在 OmniProxy 对应 Google 账号中先刷新授权；持续失败时使用同一身份重新登录。
   不要把 Google OAuth 令牌或 Google API Key 填入客户端的本地网关 Key。

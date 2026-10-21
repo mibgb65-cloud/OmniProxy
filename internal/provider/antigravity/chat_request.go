@@ -149,7 +149,7 @@ func chatPayload(request proxy.Request, cred Credentials) ([]byte, error) {
 		native["systemInstruction"] = object{"parts": systems}
 	}
 	if len(input.Tools) > 0 {
-		declarations, err := toolDeclarations(input.Tools)
+		declarations, err := toolDeclarations(input.Tools, request.Model)
 		if err != nil {
 			return nil, err
 		}

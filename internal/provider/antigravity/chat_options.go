@@ -2,12 +2,13 @@ package antigravity
 
 import (
 	"encoding/json"
+	"strings"
 	"unicode/utf8"
 
 	"omniproxy/internal/core/proxy"
 )
 
-func toolDeclarations(tools []chatTool) ([]object, error) {
+func toolDeclarations(tools []chatTool, model string) ([]object, error) {
 	output := []object{}
 	seen := map[string]bool{}
 	for _, tool := range tools {
@@ -26,7 +27,14 @@ func toolDeclarations(tools []chatTool) ([]object, error) {
 			declaration["description"] = function.Description
 		}
 		if function.Parameters != nil {
-			declaration["parameters"] = function.Parameters
+			field := "parameters"
+			// Gemini 的 parameters 是受限 OpenAPI Schema，无法承载 Claude Code 的
+			// $schema／exclusiveMinimum 等约束；使用 JSON Schema 字段而非删减语义。
+			// 第三方模型维持原协议，避免将 Gemini 已验证能力扩展到未验证的通道。
+			if strings.HasPrefix(model, "gemini-") {
+				field = "parametersJsonSchema"
+			}
+			declaration[field] = function.Parameters
 		}
 		output = append(output, declaration)
 	}
