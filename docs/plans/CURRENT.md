@@ -4,7 +4,7 @@
 
 ## Current Version
 
-2.0.0-beta.17 — 本地 Windows amd64 production 安装包，未公开发布。源码 `0bd390a`，包含 Gemini 工具 JSON Schema 方言修复，保留全部参数约束及既有认证／权限／限流语义。隔离完整质量门／703 项前端测试、NSIS、原生版本、1,734 项来源、SHA256 与 test profile 运行时版本校验通过；资产位于 `release-assets/v2.0.0-beta.17/`，未签名。22 个旧发布资产、3 个安装文件及原生产进程未变；未自动安装。真实覆盖更新、数据保留及 Gemini 桌面调用仍需用户验收，独立 429 限制未宣称解决。
+2.0.0-beta.18 — 本地 Windows amd64 production 安装包，未公开发布。源码 `c8df0c0`，汇总 main 上的 Codex 授权解密内存优化、独立周额度估算及卡片精简，保留此前功能。隔离完整质量门／706 项前端测试、NSIS、原生版本、1,753 项来源、SHA256、官方因子内存专项与 test profile 运行时版本校验通过；资产位于 `release-assets/v2.0.0-beta.18/`，未签名。24 个旧发布资产、3 个安装文件及原生产进程未变；未自动安装。冷读取仍可能出现约 1 GiB 瞬时峰值；真实覆盖更新、数据保留和模型调用由用户验收，Google 429 限制未宣称解决。
 
 ## In Progress
 
@@ -13,6 +13,8 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261021-009](../tasks/completed/2026-10/TASK-20261021-009-build-local-beta18-installer.md)：`c8df0c0`，确认全部功能代码已在 main，完成 Beta.18 production 安装包及 SHA256；完整质量门／706 项前端测试、NSIS、1,753 项来源、原生版本／隔离启动和保护基线校验通过。包含内存优化、周额度及卡片精简；未自动安装、推送或公开发布。
 
 - [TASK-20261021-008](../tasks/completed/2026-10/TASK-20261021-008-investigate-v2-memory-usage.md)：`d59ba99`，复现 Codex 官方 scrypt 因子 20 的单次 1 GiB 和重复解密后的约 2 GiB 保留；增加 DPAPI 保护的有界缓存、源／凭据变更失效、注销清理及大工作区回收，不降低官方强度。相关回归、官方因子专项及完整质量门／703 项前端测试通过；缓存读取分配约 10.6 KiB，独立测试进程完成后私有提交约 50 MiB。验证构建位于 `tmp/codex-memory-verify-20261021/`，未打包安装、替换生产进程或发布。
 
