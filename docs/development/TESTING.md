@@ -30,6 +30,18 @@ Windows 的配置及凭据测试使用规范绝对路径作为夹具，8.3 短�
 `go test -race` is not used on Windows because the race detector requires CGO
 there; CI runs the same commands as `task test`.
 
+### Codex 解密内存专项
+
+默认单测使用低成本的假 age 密文，覆盖受保护缓存的命中、内容／passphrase 变化、删除／注销、
+固定到期、容量与并发边界。验证官方 work factor 20 的分配与完成后保留量，使用独立专项：
+
+```bash
+go test ./internal/infrastructure/codex -run '^$' -bench '^BenchmarkEncryptedAuthOfficialFactor20$' -benchtime=1x -count=1
+```
+
+此专项只读写随机临时目录的假授权，但冷读取会短暂需要约 1 GiB 空闲内存。输出 cold／cached
+分配量及完成后 Go 活跃堆／进程私有提交，不能将独立测试进程的内存等同于完整桌面应用。
+
 ## What must be tested
 
 Every new feature ships with tests for:

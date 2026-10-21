@@ -1,5 +1,13 @@
 # Architecture Overview
 
+## Codex 官方授权解密内存（2026-10-21）
+
+`infrastructure/codex` 对官方 age 授权采用最多 16 条、固定 5 分钟的进程内解密快照，
+复用 `infrastructure/credential` 的 Windows DPAPI，仅缓存系统保护后的内容。每次仍读取
+完整有界密文及当前系统 passphrase，内容／凭据变化、删除或注销使缓存失效；不绕过官方刷新、
+账号版本／身份检查。真实大工作因子 KDF 串行，结束后归还临时工作区，不降低官方强度，
+不新增明文文件、迁移、依赖或公开端点。冷读取仍有算法必需峰值，详见 ADR-020。
+
 ## Claude Messages 长会话（2026-10-20）
 
 Messages 与共享 Chat 校验不再使用 512 条旧阈值，采用 100,000 条及现有字节／深度／字段边界。

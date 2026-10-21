@@ -46,6 +46,8 @@ rather than editing history.
 
 ## Index
 
+Codex 官方高成本解密的受保护进程内缓存与工作区回收见 [ADR-020](ADR-020-protected-codex-auth-cache.md)。
+
 安装器、完整路径进程管理与应用内升级见 [ADR-017](ADR-017-installation-and-self-update.md)。
 
 旧版只读导入、凭据转换与更新渠道见 [ADR-016](ADR-016-v1-import-and-update-channels.md)。

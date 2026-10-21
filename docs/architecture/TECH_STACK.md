@@ -80,8 +80,10 @@ dependency list lives in `go.mod` / `go.sum` and `frontend/package.json` /
 - 迁移 `029_builtin_river.sql` 增加第十一家 River；标准库原生 Chat／Responses、既有 Messages 转换与账号目录缓存，不新增 SDK 或依赖。
 
 - ChatGPT / Codex 订阅授权复用本机官方 Codex CLI 的 stdio app-server，
-  不新增 SDK 依赖；授权令牌由官方组件的强制 keyring 管理，DPAPI 仅保存
-  隔离配置定位。SQLite 仍只保存元数据和 credential_ref（ADR-003）。
+  不新增 SDK 依赖；授权令牌由官方组件的强制 keyring 管理，持久 DPAPI 凭据仅保存
+  隔离配置定位。Windows 另有最多 16 条／固定 5 分钟的 DPAPI 保护进程内解密快照，
+  按完整官方密文与当前系统 passphrase 校验，注销／更新失效，不存明文或新增磁盘授权副本；
+  高成本 KDF 串行且完成后归还工作区。SQLite 仍只保存元数据和 credential_ref（ADR-003／020）。
 
 ## Networking
 

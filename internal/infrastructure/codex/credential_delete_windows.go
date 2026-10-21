@@ -21,6 +21,7 @@ func DeleteCredentials(home string) error {
 	if err != nil {
 		return err
 	}
+	defer officialAuthCache.clearHome(home)
 	return deleteCredentialTargets(targets, deleteWindowsCredential)
 }
 
