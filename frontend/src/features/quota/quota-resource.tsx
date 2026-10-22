@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { balanceError } from "../../services/balance"
 import { subscriptionError } from "../../services/subscription"
 import { SubscriptionQuotaRow } from "../accounts/subscription-quota"
+import { AccountUsagePanel } from "../accounts/account-usage-panel"
 import { quotaWindows, type QuotaEntry } from "./quota-model"
 import { GoogleQuotaValues } from "../google/google-quota-values"
 import { GoogleSubscriptionModels } from "../google/google-subscription-models"
@@ -38,12 +39,19 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
     return <MiniMaxResource account={entry.account} />
   if (entry.kind === "mimo_plan") return <MiMoPlanResource account={entry.account} />
   if (entry.kind === "step_plan") return <StepFunPlanResource account={entry.account} />
-  if (entry.kind === "unsupported" || !entry.canQuery) {
+  if (entry.kind === "unsupported") {
     return (
-      <p className="text-muted-foreground text-xs leading-5">
-        {t(entry.kind === "unsupported" ? "quota.unsupportedHint" : "quota.signInHint")}
-      </p>
+      <div className="bg-muted/20 space-y-3 rounded-xl border p-3">
+        <p className="text-muted-foreground text-xs leading-5">{t("quota.unsupportedHint")}</p>
+        <AccountUsagePanel account={entry.account} />
+        <p className="text-muted-foreground text-[10px] leading-5">
+          {t("quota.unsupportedUsageNote")}
+        </p>
+      </div>
     )
+  }
+  if (!entry.canQuery) {
+    return <p className="text-muted-foreground text-xs leading-5">{t("quota.signInHint")}</p>
   }
   return (
     <div className="bg-muted/20 space-y-3 rounded-xl border p-3" aria-busy={entry.fetching}>

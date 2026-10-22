@@ -39,7 +39,9 @@ export const quotaEn: Record<keyof typeof quotaZh, string> = {
   "quota.noMatches": "No accounts match your filters.",
   "quota.addAccounts": "Manage accounts",
   "quota.unknownProvider": "Provider configuration unavailable",
-  "quota.unsupportedHint": "Quota or balance queries are not supported for this account yet.",
+  "quota.unsupportedHint":
+    "Quota or balance queries are not supported yet; locally recorded used tokens are shown instead.",
+  "quota.unsupportedUsageNote": "Local usage is not the official remaining quota or bill.",
   "quota.signInHint": "Open account details and sign in again to read quota.",
   "quota.missingHint": "The provider has not returned complete resource data.",
   "quota.staleHint": "The official reset time has passed. Refresh to confirm the latest quota.",

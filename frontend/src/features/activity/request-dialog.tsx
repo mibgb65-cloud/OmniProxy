@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
 import { formatTokens, readRequest } from "../../services/activity"
 import { stateLabel, requestTime } from "./activity-format"
+import { agentTitleKey } from "../gateway/agent-clients"
 import { RequestAttempts } from "./request-attempts"
 
 export function RequestDialog({
@@ -28,6 +29,7 @@ export function RequestDialog({
   })
   const copy = useMutation({ mutationFn: () => Clipboard.SetText(id || "") })
   const item = data.data
+  const agentKey = agentTitleKey(item?.client)
   return (
     <Dialog.Root
       open={!!id}
@@ -83,6 +85,7 @@ export function RequestDialog({
                     ["activity.time", requestTime(item.startedAt)],
                     ["activity.protocol", `${item.protocol} / ${item.transport}`],
                     ["activity.model", item.model || item.inputModel || "—"],
+                    ["activity.agent", agentKey ? t(agentKey) : "—"],
                     ["activity.provider", item.providerName || "—"],
                     ...(item.providerRegion
                       ? ([

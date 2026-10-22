@@ -147,7 +147,7 @@ it("does not render NaN or upstream errors as monetary values", async () => {
 it("shows retained input, output, and cache tokens without adding cache twice", async () => {
   setup()
   const section = screen.getByRole("region", { name: "Token 用量" })
-  expect(await within(section).findByText("1.23M")).toHaveAttribute("title", "1,234,567")
+  expect(await within(section).findByLabelText("1,234,567")).toHaveTextContent("1.23M")
   expect(within(section).getByText("12.35K")).toBeInTheDocument()
   expect(within(section).getByText("800K")).toBeInTheDocument()
   expect(within(section).queryByText("缓存已包含在输入中")).not.toBeInTheDocument()

@@ -145,6 +145,11 @@ export interface RequestItem {
     "attempts"?: AttemptItem[] | null;
     "providerRegion"?: string;
     "billingMode"?: string;
+
+    /**
+     * Client 是发起请求的受管 Agent 标识；直接调用或历史记录为空。
+     */
+    "client"?: string;
     "id": string;
     "startedAt": string;
     "finishedAt": string;

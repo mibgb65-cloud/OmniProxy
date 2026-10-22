@@ -4,15 +4,15 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
-import { readRiverTokenUsage } from "../../services/activity"
+import { readAccountTokenUsage } from "../../services/activity"
 import type { AccountItem } from "../../services/omniproxy"
 import { AccountDetailsCard } from "./account-details-card"
 import { AccountDetailsList } from "./account-details-list"
-import { RiverTokenUsage } from "./river-token-usage"
+import { AccountUsagePanel } from "./account-usage-panel"
 
 vi.mock("../../services/activity", async (original) => ({
   ...(await original<typeof import("../../services/activity")>()),
-  readRiverTokenUsage: vi.fn(),
+  readAccountTokenUsage: vi.fn(),
 }))
 vi.mock("./account-key-preview", () => ({ AccountKeyPreview: () => null }))
 vi.mock("@wailsio/runtime", () => ({ Events: { On: vi.fn(() => () => {}) } }))
@@ -46,7 +46,7 @@ function setup(view: "resource" | "cards" | "list" = "resource") {
         ) : view === "list" ? (
           <AccountDetailsList accounts={[account]} {...actions} />
         ) : (
-          <RiverTokenUsage account={account} />
+          <AccountUsagePanel account={account} />
         )}
       </QueryClientProvider>
     </I18nProvider>,
@@ -56,7 +56,7 @@ function setup(view: "resource" | "cards" | "list" = "resource") {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.mocked(readRiverTokenUsage).mockResolvedValue(usage)
+  vi.mocked(readAccountTokenUsage).mockResolvedValue(usage)
 })
 
 it.each(["cards", "list"] as const)("replaces River balance placeholders in %s", async (view) => {
@@ -64,14 +64,15 @@ it.each(["cards", "list"] as const)("replaces River balance placeholders in %s",
   expect(await screen.findByText("1.23M")).toBeInTheDocument()
   expect(screen.getByText("321")).toBeInTheDocument()
   expect(screen.getByText("≥ 800K")).toBeInTheDocument()
-  expect(screen.getByTitle("1,234,567")).toBeInTheDocument()
+  // 完整数字通过无障碍名称提供，不再使用系统原生标题提示。
+  expect(screen.getByLabelText("1,234,567")).toBeInTheDocument()
   expect(screen.queryByText("余额")).not.toBeInTheDocument()
   expect(screen.queryByText("待接入")).not.toBeInTheDocument()
-  expect(readRiverTokenUsage).toHaveBeenCalledWith(account.id)
+  expect(readAccountTokenUsage).toHaveBeenCalledWith(account.id)
 })
 
 it("distinguishes explicit zero, unknown details and incomplete requests", async () => {
-  vi.mocked(readRiverTokenUsage).mockResolvedValue({
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({
     ...usage,
     inputTokens: "0",
     outputTokens: "",
@@ -85,7 +86,7 @@ it("distinguishes explicit zero, unknown details and incomplete requests", async
 })
 
 it("hides raw errors and allows retrying local reads", async () => {
-  vi.mocked(readRiverTokenUsage).mockRejectedValueOnce(new Error("private-river-marker"))
+  vi.mocked(readAccountTokenUsage).mockRejectedValueOnce(new Error("private-river-marker"))
   setup()
   expect(await screen.findByRole("alert")).toHaveTextContent("无法读取本机用量")
   expect(screen.queryByText(/private-river-marker/)).not.toBeInTheDocument()
@@ -102,12 +103,12 @@ it("refreshes on activity and visibility and cleans up listeners", async () => {
     .mocked(Events.On)
     .mock.calls.find(([name]) => name === "activity:updated")?.[1]
   expect(listener).toBeDefined()
-  vi.mocked(readRiverTokenUsage).mockResolvedValue({ ...usage, inputTokens: "2000000" })
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({ ...usage, inputTokens: "2000000" })
   act(() => listener?.({ name: "activity:updated", data: [] }))
   expect(await screen.findByText("2M")).toBeInTheDocument()
-  const calls = vi.mocked(readRiverTokenUsage).mock.calls.length
+  const calls = vi.mocked(readAccountTokenUsage).mock.calls.length
   act(() => document.dispatchEvent(new Event("visibilitychange")))
-  await waitFor(() => expect(readRiverTokenUsage).toHaveBeenCalledTimes(calls + 1))
+  await waitFor(() => expect(readAccountTokenUsage).toHaveBeenCalledTimes(calls + 1))
   unmount()
   expect(off).toHaveBeenCalledOnce()
 })

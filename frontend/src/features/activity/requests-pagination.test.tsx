@@ -58,7 +58,10 @@ it("不满一页的末页禁用下一页，返回及搜索使用同一个分页�
   await user.click(screen.getByRole("button", { name: "上一页" }))
   expect(await screen.findByText("第 1 页 / 共 2 页")).toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "下一页" }))
-  await user.type(screen.getByRole("textbox", { name: "搜索请求 ID、模型、邮箱或账号" }), "flash")
+  await user.type(
+    screen.getByRole("textbox", { name: "搜索请求 ID、模型、Agent、邮箱或账号" }),
+    "flash",
+  )
   await waitFor(() =>
     expect(readRequests).toHaveBeenLastCalledWith({
       search: "flash",

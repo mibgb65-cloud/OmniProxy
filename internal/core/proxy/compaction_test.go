@@ -13,7 +13,7 @@ const compactResult = `{"id":"cmp_test","object":"response.compaction","output":
 func TestCompactionHTTPAndScopedPathsPreserveOpaqueResult(t *testing.T) {
 	key := "opk_" + strings.Repeat("a", 64)
 	calls := 0
-	server := New(Options{Port: 0, Models: []string{"gpt-test"}, Authorize: func(_ context.Context, k string) bool { return k == key }, Upstream: upstreamFunc(func(_ context.Context, r Request, c func(Response) error) error {
+	server := New(Options{Port: 0, Models: []string{"gpt-test"}, Authorize: func(_ context.Context, k string) (string, bool) { return "", k == key }, Upstream: upstreamFunc(func(_ context.Context, r Request, c func(Response) error) error {
 		calls++
 		if r.Protocol != "responses" || r.Stream || !r.Compaction {
 			t.Error("compaction must stay non-streaming Responses")
@@ -45,7 +45,7 @@ func TestCompactionHTTPAndScopedPathsPreserveOpaqueResult(t *testing.T) {
 
 func TestCompactionRejectsInvalidBoundariesBeforeUpstream(t *testing.T) {
 	key := "opk_" + strings.Repeat("a", 64)
-	server := New(Options{Port: 0, Models: []string{"gpt-test"}, Authorize: func(_ context.Context, k string) bool { return k == key }, Upstream: upstreamFunc(func(context.Context, Request, func(Response) error) error {
+	server := New(Options{Port: 0, Models: []string{"gpt-test"}, Authorize: func(_ context.Context, k string) (string, bool) { return "", k == key }, Upstream: upstreamFunc(func(context.Context, Request, func(Response) error) error {
 		t.Error("invalid compaction reached upstream")
 		return nil
 	})})

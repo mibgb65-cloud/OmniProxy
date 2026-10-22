@@ -20,14 +20,37 @@ type AccountTokenUsage struct {
 	IncompleteRequests   int64  `json:"incompleteRequests"`
 }
 
+// usageIdentity 只含公开身份字段，必须与网关记账时的快照取值一致。
+func usageIdentity(item account.Item, kind string) proxy.TargetSnapshot {
+	target := proxy.TargetSnapshot{ProviderKind: kind, AccountID: item.ID, AuthMethod: item.AuthMethod,
+		Email: item.AuthEmail, WorkspaceID: item.AuthAccountID}
+	target.ProviderRegion, target.BillingMode = item.ProviderScope()
+	return target
+}
+
+// AccountUsage 读取任意账号的本机留存用量，用于没有官方额度接口的账号展示已用 Token。
+// 提供商类型取自当前提供商配置，与记账身份同源；不访问凭据或官方接口。
+func (s *Service) AccountUsage(ctx context.Context, item account.Item) (*AccountTokenUsage, error) {
+	if item.ID == "" || item.ProviderID == "" {
+		return nil, ErrInvalid
+	}
+	var kind string
+	if s.db.QueryRowContext(ctx, `SELECT kind FROM providers WHERE id=?`, item.ProviderID).Scan(&kind) != nil {
+		return nil, ErrUnavailable
+	}
+	if kind == "" {
+		return nil, ErrInvalid
+	}
+	return s.tokenUsage(ctx, item, kind)
+}
+
 func (s *Service) accountTokenUsage(ctx context.Context, item account.Item) (*AccountTokenUsage, error) {
 	return s.tokenUsage(ctx, item, "openai")
 }
 
 func (s *Service) tokenUsage(ctx context.Context, item account.Item, kind string) (*AccountTokenUsage, error) {
 	// 按线路构造与记账一致的身份索引，避免混入其他提供商／账号以及扫描全部历史。
-	key, err := subject(proxy.TargetSnapshot{ProviderKind: kind, AccountID: item.ID,
-		AuthMethod: item.AuthMethod, Email: item.AuthEmail, WorkspaceID: item.AuthAccountID})
+	key, err := subject(usageIdentity(item, kind))
 	if err != nil {
 		return nil, err
 	}

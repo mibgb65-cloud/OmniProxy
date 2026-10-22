@@ -25,11 +25,11 @@ import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
 import { readAccountBalance } from "../../services/balance"
 import { readGoogleResources, openGoogleConsole } from "../../services/google"
-import { readRiverTokenUsage } from "../../services/activity"
+import { readAccountTokenUsage } from "../../services/activity"
 
 vi.mock("../../services/activity", async (original) => ({
   ...(await original<typeof import("../../services/activity")>()),
-  readRiverTokenUsage: vi.fn(),
+  readAccountTokenUsage: vi.fn(),
 }))
 
 vi.mock("../../services/google", () => ({
@@ -141,7 +141,7 @@ describe("ProviderAccountsView", () => {
     const river = { ...provider, id: "builtin_river", kind: "river", name: "River" }
     vi.mocked(listProviders).mockResolvedValue([river])
     vi.mocked(listAccounts).mockResolvedValue([{ ...account, providerId: river.id }])
-    vi.mocked(readRiverTokenUsage).mockResolvedValue({
+    vi.mocked(readAccountTokenUsage).mockResolvedValue({
       inputTokens: "1000",
       outputTokens: "20",
       cachedInputTokens: "0",

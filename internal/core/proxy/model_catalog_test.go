@@ -10,7 +10,7 @@ import (
 )
 
 func TestModelCatalogFormatsAuthenticationAndQueries(t *testing.T) {
-	server := New(Options{Models: []string{"a-model", "b-model"}, Authorize: func(_ context.Context, key string) bool { return key == "qa-key" }})
+	server := New(Options{Models: []string{"a-model", "b-model"}, Authorize: func(_ context.Context, key string) (string, bool) { return "", key == "qa-key" }})
 	for _, test := range []struct {
 		path, key string
 		status    int

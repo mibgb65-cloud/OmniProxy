@@ -51,38 +51,48 @@ func (s *Service) key(ctx context.Context, client string) ([]byte, error) {
 	return key, nil
 }
 
-// Authorize 只比较短期解密的本地接入 Key，调用方的头部不会成为上游凭据。
-func (s *Service) Authorize(ctx context.Context, key string) bool {
+// Client 返回接入 Key 所属的受管客户端；只返回客户端标识，不返回或记录密钥。
+// 无论命中位置如何都遍历全部引用，避免通过比较耗时推断 Key 归属。
+func (s *Service) Client(ctx context.Context, key string) (string, bool) {
 	if len(key) != 68 {
-		return false
+		return "", false
 	}
 	// 只接受当前受支持客户端的 Key，历史诊断凭据不能继续访问网关。
-	rows, err := s.db.QueryContext(ctx, `SELECT credential_ref FROM agent_connections WHERE enabled=1 AND client IN ('codex','claude','claude-desktop','opencode','harness-web','harness-desktop','kilocode','qwen-code','mimo-code','kimi-code','pi','factory-droid','goose') LIMIT 13`)
+	rows, err := s.db.QueryContext(ctx, `SELECT client, credential_ref FROM agent_connections WHERE enabled=1 AND client IN ('codex','claude','claude-desktop','opencode','harness-web','harness-desktop','kilocode','qwen-code','mimo-code','kimi-code','pi','factory-droid','goose') LIMIT 13`)
 	if err != nil {
-		return false
+		return "", false
 	}
 	defer rows.Close()
-	refs := []string{}
+	type connection struct{ client, ref string }
+	connections := []connection{}
 	for rows.Next() {
-		var ref string
-		if rows.Scan(&ref) != nil {
-			return false
+		var item connection
+		if rows.Scan(&item.client, &item.ref) != nil {
+			return "", false
 		}
-		refs = append(refs, ref)
+		connections = append(connections, item)
 	}
 	if rows.Err() != nil {
-		return false
+		return "", false
 	}
-	valid := 0
-	for _, ref := range refs {
-		secret, err := s.store.Get(ref)
+	matched := ""
+	for _, item := range connections {
+		secret, err := s.store.Get(item.ref)
 		if err != nil {
 			continue
 		}
-		valid |= subtle.ConstantTimeCompare(secret, []byte(key))
+		if subtle.ConstantTimeCompare(secret, []byte(key)) == 1 {
+			matched = item.client
+		}
 		clear(secret)
 	}
-	return valid == 1
+	return matched, matched != ""
+}
+
+// Authorize 只比较短期解密的本地接入 Key，调用方的头部不会成为上游凭据。
+func (s *Service) Authorize(ctx context.Context, key string) bool {
+	_, ok := s.Client(ctx, key)
+	return ok
 }
 func (s *Service) SetEnabled(ctx context.Context, client string, enabled bool) error {
 	if _, err := s.path(client); err != nil {

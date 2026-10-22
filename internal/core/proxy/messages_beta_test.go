@@ -10,7 +10,7 @@ import (
 
 func TestClaudeCodeBetaMessagesAndQueryBoundaries(t *testing.T) {
 	called := 0
-	server := New(Options{Models: []string{"deepseek-flash"}, Authorize: func(_ context.Context, key string) bool { return key == "test-key" },
+	server := New(Options{Models: []string{"deepseek-flash"}, Authorize: func(_ context.Context, key string) (string, bool) { return "", key == "test-key" },
 		Upstream: upstreamFunc(func(_ context.Context, request Request, consume func(Response) error) error {
 			called++
 			if request.Protocol != "messages" || request.Model != "deepseek-flash" {

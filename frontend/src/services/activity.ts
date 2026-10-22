@@ -9,7 +9,7 @@ import type {
 export type { RequestItem, UsageInfo, Breakdown }
 export type ProviderModelUsage = ProviderModel
 export const readUsage = () => AppService.UsageRead()
-export const readRiverTokenUsage = (id: string) => AppService.RiverAccountTokenUsage(id)
+export const readAccountTokenUsage = (id: string) => AppService.AccountTokenUsage(id)
 export const readRequests = (query: RequestQuery) => AppService.RequestsRead(query)
 export const readRequest = (id: string) => AppService.RequestRead(id)
 export const readRetention = () => AppService.RequestRetention()

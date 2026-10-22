@@ -69,6 +69,12 @@ export function isAgentClientId(value: unknown): value is AgentClientId {
   return typeof value === "string" && agentClientIds.some((id) => id === value)
 }
 
+// 请求归属展示用标题键；无法归属的请求（直接调用、历史记录、自定义客户端）返回 null。
+export type AgentTitleKey = (typeof agentClients)[AgentClientId]["title"]
+export function agentTitleKey(client?: string): AgentTitleKey | null {
+  return isAgentClientId(client) ? agentClients[client].title : null
+}
+
 export function agentStatusKey(item?: AgentClient) {
   if (!item) return "agents.unavailable"
   if (item.errorCode) return "agents.needsAttention"

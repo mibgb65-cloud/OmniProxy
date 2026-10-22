@@ -27,31 +27,33 @@ type RequestItem struct {
 	Attempts       []AttemptItem `json:"attempts,omitempty"`
 	ProviderRegion string        `json:"providerRegion,omitempty"`
 	BillingMode    string        `json:"billingMode,omitempty"`
-	ID             string        `json:"id"`
-	StartedAt      string        `json:"startedAt"`
-	FinishedAt     string        `json:"finishedAt"`
-	Protocol       string        `json:"protocol"`
-	Transport      string        `json:"transport"`
-	InputModel     string        `json:"inputModel"`
-	Model          string        `json:"model"`
-	Stream         bool          `json:"stream"`
-	ProviderID     string        `json:"providerId"`
-	ProviderName   string        `json:"providerName"`
-	AccountID      string        `json:"accountId"`
-	AccountName    string        `json:"accountName"`
-	Email          string        `json:"email"`
-	WorkspaceID    string        `json:"workspaceId"`
-	AccountDeleted bool          `json:"accountDeleted"`
-	State          string        `json:"state"`
-	StatusCode     int           `json:"statusCode"`
-	ErrorCode      string        `json:"errorCode"`
-	LatencyMS      int64         `json:"latencyMs"`
-	FirstTokenMS   *int64        `json:"firstTokenMs,omitempty"`
-	InputTokens    string        `json:"inputTokens"`
-	OutputTokens   string        `json:"outputTokens"`
-	InputKnown     bool          `json:"inputKnown"`
-	OutputKnown    bool          `json:"outputKnown"`
-	UsageComplete  bool          `json:"usageComplete"`
+	// Client 是发起请求的受管 Agent 标识；直接调用或历史记录为空。
+	Client         string `json:"client,omitempty"`
+	ID             string `json:"id"`
+	StartedAt      string `json:"startedAt"`
+	FinishedAt     string `json:"finishedAt"`
+	Protocol       string `json:"protocol"`
+	Transport      string `json:"transport"`
+	InputModel     string `json:"inputModel"`
+	Model          string `json:"model"`
+	Stream         bool   `json:"stream"`
+	ProviderID     string `json:"providerId"`
+	ProviderName   string `json:"providerName"`
+	AccountID      string `json:"accountId"`
+	AccountName    string `json:"accountName"`
+	Email          string `json:"email"`
+	WorkspaceID    string `json:"workspaceId"`
+	AccountDeleted bool   `json:"accountDeleted"`
+	State          string `json:"state"`
+	StatusCode     int    `json:"statusCode"`
+	ErrorCode      string `json:"errorCode"`
+	LatencyMS      int64  `json:"latencyMs"`
+	FirstTokenMS   *int64 `json:"firstTokenMs,omitempty"`
+	InputTokens    string `json:"inputTokens"`
+	OutputTokens   string `json:"outputTokens"`
+	InputKnown     bool   `json:"inputKnown"`
+	OutputKnown    bool   `json:"outputKnown"`
+	UsageComplete  bool   `json:"usageComplete"`
 }
 type RequestQuery struct {
 	Search string `json:"search"`

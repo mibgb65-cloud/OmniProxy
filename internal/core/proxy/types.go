@@ -89,13 +89,14 @@ type Options struct {
 	FailoverEnabled  func(context.Context) (bool, error)
 	WebSocketAllowed func(context.Context) (bool, error)
 	Observer         RequestObserver
-	Authorize        func(context.Context, string) bool
-	Port             int
-	RequestTimeout   time.Duration
-	MaxConcurrent    int
-	Upstream         Upstream
-	Models           []string
-	Logger           *slog.Logger
+	// Authorize 校验接入 Key，并在通过时返回受管客户端标识；空标识表示无法归属。
+	Authorize      func(context.Context, string) (string, bool)
+	Port           int
+	RequestTimeout time.Duration
+	MaxConcurrent  int
+	Upstream       Upstream
+	Models         []string
+	Logger         *slog.Logger
 }
 
 // Error 的 Code 可用于 UI 和协议错误；禁止放入原始上游正文、凭证或请求内容。

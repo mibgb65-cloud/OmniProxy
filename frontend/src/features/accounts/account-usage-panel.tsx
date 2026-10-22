@@ -2,16 +2,17 @@ import { useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Events } from "@wailsio/runtime"
 import { useTranslation } from "react-i18next"
-import { readRiverTokenUsage } from "../../services/activity"
+import { readAccountTokenUsage } from "../../services/activity"
 import type { AccountItem } from "../../services/omniproxy"
 import { Button } from "../../components/ui/button"
 import { AccountTokenSummary } from "./account-token-summary"
 
-export function RiverTokenUsage({ account }: { account: AccountItem }) {
+// 本机留存用量：没有官方额度／余额接口的账号（River、自定义提供商等）用它展示已用 Token。
+export function AccountUsagePanel({ account }: { account: AccountItem }) {
   const { t } = useTranslation()
   const query = useQuery({
-    queryKey: ["river-token-usage", account.id, account.updatedAt],
-    queryFn: () => readRiverTokenUsage(account.id),
+    queryKey: ["account-token-usage", account.id, account.updatedAt],
+    queryFn: () => readAccountTokenUsage(account.id),
     retry: false,
     staleTime: 30_000,
   })
@@ -33,22 +34,24 @@ export function RiverTokenUsage({ account }: { account: AccountItem }) {
       <AccountTokenSummary usage={query.data} error={query.isError} />
       {query.isPending ? (
         <p role="status" className="text-muted-foreground text-xs">
-          {t("river.usage.loading")}
+          {t("activity.accountUsageLoading")}
         </p>
       ) : query.isError ? (
         <div role="alert" className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-destructive">{t("river.usage.failed")}</span>
+          <span className="text-destructive">{t("activity.accountUsageFailed")}</span>
           <Button
             size="sm"
             variant="outline"
             disabled={query.isFetching}
             onClick={() => void refetch()}
           >
-            {t("river.usage.retry")}
+            {t("activity.accountUsageRetry")}
           </Button>
         </div>
       ) : query.data?.incompleteRequests ? (
-        <p className="text-muted-foreground text-xs leading-5">{t("river.usage.incomplete")}</p>
+        <p className="text-muted-foreground text-xs leading-5">
+          {t("activity.accountUsageIncomplete")}
+        </p>
       ) : null}
     </div>
   )

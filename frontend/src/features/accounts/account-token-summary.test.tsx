@@ -49,7 +49,7 @@ it("keeps exact large token counts and hides stale values on errors", () => {
       <AccountTokenSummary usage={{ ...usage, inputTokens: "9007199254740993" }} error={false} />
     </I18nProvider>,
   )
-  expect(screen.getByTitle("9,007,199,254,740,993")).toBeInTheDocument()
+  expect(screen.getByLabelText("9,007,199,254,740,993")).toBeInTheDocument()
   view.rerender(
     <I18nProvider>
       <AccountTokenSummary usage={usage} error />

@@ -67,7 +67,7 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 		}
 		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/event-stream"}}, Body: io.NopCloser(strings.NewReader(data.String()))}, nil
 	}))
-	server := proxy.New(proxy.Options{Port: 0, Models: []string{"gpt-qa"}, Authorize: func(_ context.Context, key string) bool { return key == "isolated-placeholder" }, Upstream: compactQAUpstream{adapter}})
+	server := proxy.New(proxy.Options{Port: 0, Models: []string{"gpt-qa"}, Authorize: func(_ context.Context, key string) (string, bool) { return "", key == "isolated-placeholder" }, Upstream: compactQAUpstream{adapter}})
 	if _, err := server.Start(); err != nil {
 		t.Fatal(err)
 	}

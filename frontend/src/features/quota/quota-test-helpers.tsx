@@ -18,6 +18,7 @@ import {
 } from "../../services/omniproxy"
 import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/subscription"
 import { readAccountBalance, type AccountBalanceInfo } from "../../services/balance"
+import { readAccountTokenUsage } from "../../services/activity"
 import { QuotaView } from "./quota-view"
 
 export const providers: ProviderConfiguration[] = [
@@ -91,6 +92,15 @@ export const balance: AccountBalanceInfo = {
 export function resetQuotaServices() {
   vi.mocked(listAccounts).mockResolvedValue(accounts)
   vi.mocked(listProviders).mockResolvedValue(providers)
+  // 未接入额度查询的账号改用本机留存用量，调用方需要在测试文件中 mock 该服务。
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({
+    inputTokens: "1200",
+    outputTokens: "300",
+    cachedInputTokens: "500",
+    requests: 2,
+    unknownCacheRequests: 0,
+    incompleteRequests: 0,
+  })
   vi.mocked(readSubscriptionQuota).mockImplementation(async (id) =>
     id === "sub-empty"
       ? {

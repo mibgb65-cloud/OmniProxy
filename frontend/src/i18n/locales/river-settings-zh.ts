@@ -1,10 +1,6 @@
 export const riverSettingsZh = {
   "river.usage.notice":
     "仅统计本机留存的代理请求，不代表 River 官方账单或余额。缓存已包含在输入中；“—”表示上游未返回明细，“≥”表示仅统计到部分已知用量。",
-  "river.usage.loading": "正在读取本机用量…",
-  "river.usage.failed": "无法读取本机用量。",
-  "river.usage.retry": "重试",
-  "river.usage.incomplete": "包含进行中或用量未完整返回的请求，当前数值仅为已记录用量。",
   "river.settings.title": "River 账号设置",
   "river.settings.close": "关闭 River 账号设置",
   "river.settings.loadFailed": "无法读取 River 设置，请关闭后重试。",

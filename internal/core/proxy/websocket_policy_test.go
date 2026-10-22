@@ -19,7 +19,7 @@ func TestWebSocketPolicyChangesWithoutRestartAndKeepsHTTP(t *testing.T) {
 	key := "opk_" + strings.Repeat("a", 64)
 	server := New(Options{
 		Port: 0, Models: []string{"deepseek-flash"},
-		Authorize:        func(_ context.Context, value string) bool { return value == key },
+		Authorize:        func(_ context.Context, value string) (string, bool) { return "", value == key },
 		WebSocketAllowed: func(context.Context) (bool, error) { return enabled.Load(), nil },
 		Upstream: upstreamFunc(func(_ context.Context, _ Request, consume func(Response) error) error {
 			calls.Add(1)
@@ -78,7 +78,7 @@ func TestWebSocketPolicyChangesWithoutRestartAndKeepsHTTP(t *testing.T) {
 
 func TestWebSocketPolicyReadFailureFailsClosedAfterAuthorization(t *testing.T) {
 	server := New(Options{Port: 0, WebSocketAllowed: func(context.Context) (bool, error) { return false, errors.New("private database error") },
-		Authorize: func(_ context.Context, key string) bool { return key == "test-key" },
+		Authorize: func(_ context.Context, key string) (string, bool) { return "", key == "test-key" },
 		Upstream:  upstreamFunc(func(context.Context, Request, func(Response) error) error { t.Fatal("unexpected upstream"); return nil }),
 	})
 	if _, err := server.Start(); err != nil {

@@ -39,7 +39,7 @@ OmniProxy 时生效，关闭后恢复手动启动。此偏好独立于 Windows �
 
 网关和仪表盘复用统计缓存、范围生成和本地 `activity:updated` 事件。隐藏网关面板不继续读取统计；背景记账刷新不会启动手动刷新按钮动画。读取失败展示错误，未知值不伪装为零，页面不会调用模型或主动检查官方额度。
 
-River 原生转发 Chat／Responses JSON 与 SSE；Messages 文本／工具通过 Chat 转换，完整上游结果返回后才生成下游 SSE。添加 API Key 后提供三款官方预设，可同步实际目录；详细能力与限制见 [RIVER.md](RIVER.md)。
+River 原生转发 Chat／Responses JSON 与 SSE；Messages 文本／工具／图片通过 Chat 转换，完整上游结果返回后才生成下游 SSE。添加 API Key 后提供四款官方预设，可同步实际目录；详细能力与限制见 [RIVER.md](RIVER.md)。
 
 Atria 使用独立原生适配器，将 Chat Completions／Responses／Messages 转发到官方相应端点，保留 JSON、SSE 和工具调用正文。只接受文本内容与整数 1–65536 的输出上限；使用既有受控凭证、错误分类、Retry-After、取消及请求／用量统计。模型预设为 `Atria-Dawn-Preview`，不表示 Key 已验证，不新增隐式重试、自动调度、余额查询或上游 WebSocket。
 
@@ -60,7 +60,7 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 ## 运行边界
 
-只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求、任意 URL 转发和上游重定向。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。
+只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求、任意 URL 转发和上游重定向。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。接入 Key 同时决定请求归属的受管 Agent（`codex`、`claude-desktop`、`harness-web` 等），归属随首条记录写入请求明细，用于按 Agent 查看用量；Key 本身、原始 User-Agent 和请求头都不落库。
 
 Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。
 
@@ -70,10 +70,14 @@ WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整
 
 ChatGPT Responses 原生流式转发；跨协议支持文本和工具关联，收齐结果后返回 JSON 或 SSE。DeepSeek 跨协议关闭思考，多模态及不支持的托管工具显式报错。已支持最多三次的同服务商、同认证／计费／地区账号故障切换，固定账号和成功响应后不重放；完整健康／负载调度仍待实现。开关、触发条件、Google 配额边界和尝试统计见 [账号故障切换](FAILOVER.md)。
 
-DeepSeek／River 的文本跨协议通道不能解析图片，包括 Claude Code 截图工具返回的
-`tool_result.content[].image` 及随后每轮携带的图片历史。此类请求保持
-`400 / unsupported_content`，返回固定安全说明，提示切换支持图片的模型，或新建纯文本会话并避免
-截图／图片工具；不删除图片、不自动转送其他账号，也不将纯文本的后续提问误当作没有图片历史。
+River 已按上游官方契约接入图片输入：Messages 的 `image` 块（含
+`tool_result.content[].image`）与 Responses 的 `input_image` 都会转换为 Chat `image_url`
+块后转发，`detail` 保持不变。DeepSeek 直连通道仍按文本处理，图片显式报错；两者都是各
+适配器已核对的能力边界，不能互相推断。
+
+无法验证的图片形式（未知 `source.type`、`Files API` 文件引用、非 base64 数据、
+`input_file`／`input_audio`）继续返回 `400 / unsupported_content`，并带上固定的安全
+说明；不删除图片、不自动转送其他账号，也不将纯文本的后续提问误当作没有图片历史。
 请求详情页对历史 `unsupported_content` 记录也提供兼容性说明。
 
 原上游凭据保留在受保护存储中；客户端原认证头一律丢弃。错误只返回稳定代码和内置安全说明，

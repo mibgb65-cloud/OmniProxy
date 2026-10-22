@@ -12,7 +12,7 @@ import (
 	"omniproxy/internal/platform/profile"
 )
 
-func TestRiverAccountTokenUsageReadsOnlyLocalMetadata(t *testing.T) {
+func TestAccountTokenUsageReadsOnlyLocalMetadata(t *testing.T) {
 	prof, err := profile.New(profile.Test)
 	if err != nil {
 		t.Fatal(err)
@@ -33,23 +33,24 @@ func TestRiverAccountTokenUsageReadsOnlyLocalMetadata(t *testing.T) {
 	}
 	s := NewAppService(prof, nil, db, nil, nil)
 	s.activity = activity.New(db)
-	got, err := s.RiverAccountTokenUsage(id)
+	got, err := s.AccountTokenUsage(id)
 	if err != nil || got == nil || got.InputTokens != "0" || got.CachedInputTokens != "0" {
 		t.Fatal("disabled key or absent credential store blocked local statistics", got, err)
 	}
 	for _, invalid := range []string{"", strings.Repeat("a", 129), "acct_\n", "acct_' OR 1=1 --"} {
-		if _, err := s.RiverAccountTokenUsage(invalid); err == nil {
+		if _, err := s.AccountTokenUsage(invalid); err == nil {
 			t.Fatal("invalid binding input accepted")
 		}
 	}
+	// 换提供商后必须按新提供商类型查询身份，找不到记录时是已知零，而不是沿用旧线路用量。
 	if _, err := db.Exec(`UPDATE accounts SET provider_id='builtin_deepseek' WHERE id=?`, id); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.RiverAccountTokenUsage(id); !errors.Is(err, activity.ErrInvalid) {
-		t.Fatal("unsupported provider accepted", err)
+	if got, err := s.AccountTokenUsage(id); err != nil || got.InputTokens != "0" || got.Requests != 0 {
+		t.Fatal("provider change reused another provider usage", got, err)
 	}
 	s.activity = nil
-	if _, err := s.RiverAccountTokenUsage(id); !errors.Is(err, activity.ErrUnavailable) {
+	if _, err := s.AccountTokenUsage(id); !errors.Is(err, activity.ErrUnavailable) {
 		t.Fatal("unavailable service hidden", err)
 	}
 }

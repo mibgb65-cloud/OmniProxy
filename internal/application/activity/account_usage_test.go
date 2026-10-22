@@ -15,7 +15,7 @@ func riverUsageEvent(id int, accountID string) proxy.RequestEvent {
 	return e
 }
 
-func TestRiverTokenUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
+func TestAccountUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
 	s := fixture(t)
 	ctx := context.Background()
 	item := account.Item{ID: "river-a", ProviderID: "builtin_river", AuthMethod: "api_key"}
@@ -40,7 +40,7 @@ func TestRiverTokenUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
 		e.Usage = proxy.UsageSnapshot{Input: 1000, Output: 1000, InputKnown: true, OutputKnown: true, Complete: true}
 		record(t, s, e)
 	}
-	got, err := s.RiverTokenUsage(ctx, item)
+	got, err := s.AccountUsage(ctx, item)
 	if err != nil || got.InputTokens != "150" || got.OutputTokens != "25" ||
 		got.CachedInputTokens != "80" || got.Requests != 2 || got.UnknownCacheRequests != 1 {
 		t.Fatal("cross-account, duplicate or unknown usage", got, err)
@@ -48,17 +48,17 @@ func TestRiverTokenUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
 	if _, err := s.db.Exec(`DELETE FROM request_records WHERE id=?`, riverUsageEvent(1, "").ID); err != nil {
 		t.Fatal(err)
 	}
-	got, err = s.RiverTokenUsage(ctx, item)
+	got, err = s.AccountUsage(ctx, item)
 	if err != nil || got.InputTokens != "50" || got.CachedInputTokens != "" {
 		t.Fatal("retention boundary ignored", got, err)
 	}
 }
 
-func TestRiverTokenUsageEmptyPartialFailedAndInvalid(t *testing.T) {
+func TestAccountUsageEmptyPartialFailedAndInvalid(t *testing.T) {
 	s := fixture(t)
 	ctx := context.Background()
 	item := account.Item{ID: "river-a", ProviderID: "builtin_river", AuthMethod: "api_key"}
-	got, err := s.RiverTokenUsage(ctx, item)
+	got, err := s.AccountUsage(ctx, item)
 	if err != nil || got.InputTokens != "0" || got.OutputTokens != "0" || got.CachedInputTokens != "0" {
 		t.Fatal("empty history must be known zero", got, err)
 	}
@@ -73,20 +73,20 @@ func TestRiverTokenUsageEmptyPartialFailedAndInvalid(t *testing.T) {
 	if err := s.Update(ctx, pending); err != nil {
 		t.Fatal(err)
 	}
-	got, err = s.RiverTokenUsage(ctx, item)
+	got, err = s.AccountUsage(ctx, item)
 	if err != nil || got.InputTokens != "30" || got.OutputTokens != "" || got.CachedInputTokens != "" || got.IncompleteRequests != 2 {
 		t.Fatal("known partial failure usage discarded or fabricated", got, err)
 	}
-	for _, bad := range []account.Item{{}, {ID: item.ID, ProviderID: "builtin_openai", AuthMethod: "api_key"},
-		{ID: item.ID, ProviderID: item.ProviderID, AuthMethod: "subscription_login"}} {
-		if _, err := s.RiverTokenUsage(ctx, bad); !errors.Is(err, ErrInvalid) {
-			t.Fatal("unsupported account accepted", err)
+	// 无账号 ID、无提供商或提供商已不存在时无法构造记账身份，必须明确拒绝而不是返回零。
+	for _, bad := range []account.Item{{}, {ID: item.ID}, {ID: item.ID, ProviderID: "missing-provider"}} {
+		if _, err := s.AccountUsage(ctx, bad); !errors.Is(err, ErrInvalid) && !errors.Is(err, ErrUnavailable) {
+			t.Fatal("identity without provider kind accepted", err)
 		}
 	}
 	if err := s.db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.RiverTokenUsage(ctx, item); !errors.Is(err, ErrUnavailable) {
+	if _, err := s.AccountUsage(ctx, item); !errors.Is(err, ErrUnavailable) {
 		t.Fatal("database failure swallowed", err)
 	}
 }

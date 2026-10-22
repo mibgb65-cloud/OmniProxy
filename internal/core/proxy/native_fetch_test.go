@@ -13,7 +13,7 @@ func TestNativeFetchPreservesOriginAndKeyProtection(t *testing.T) {
 	const key = "placeholder-native-fetch-test-key"
 	server := New(Options{
 		Upstream: upstreamFunc(successfulUpstream), Models: []string{"deepseek-flash"},
-		Authorize: func(_ context.Context, value string) bool { return value == key },
+		Authorize: func(_ context.Context, value string) (string, bool) { return "", value == key },
 	})
 	if _, err := server.Start(); err != nil {
 		t.Fatal(err)

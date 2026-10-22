@@ -28,6 +28,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key := pathKey
+	client := ""
 	if s.opts.Authorize != nil {
 		if key == "" {
 			key = r.Header.Get("X-Api-Key")
@@ -38,7 +39,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if key == "" {
 			key = strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 		}
-		if len(key) > 512 || !s.opts.Authorize(r.Context(), key) {
+		var authorized bool
+		if len(key) > 512 {
+			writeFailure(w, Failure("unauthorized", 401))
+			return
+		}
+		client, authorized = s.opts.Authorize(r.Context(), key)
+		if !authorized {
 			writeFailure(w, Failure("unauthorized", 401))
 			return
 		}
@@ -57,7 +64,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeFailure(w, err)
 			return
 		}
-		s.serveResponsesSocket(w, r, key, metadata)
+		s.serveResponsesSocket(w, r, key, client, metadata)
 		return
 	}
 	if path == "/v1/models" && r.Method == http.MethodGet {
@@ -105,7 +112,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("gateway_busy", 429))
 		return
 	}
-	trace, err := s.beginTrace(r.Context(), protocol, "http")
+	trace, err := s.beginTrace(r.Context(), protocol, "http", client)
 	if err != nil {
 		writeFailure(w, err)
 		return

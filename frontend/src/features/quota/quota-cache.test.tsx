@@ -23,6 +23,10 @@ vi.mock("../../services/balance", async (original) => ({
   ...(await original<typeof import("../../services/balance")>()),
   readAccountBalance: vi.fn(),
 }))
+vi.mock("../../services/activity", async (original) => ({
+  ...(await original<typeof import("../../services/activity")>()),
+  readAccountTokenUsage: vi.fn(),
+}))
 vi.mock("@wailsio/runtime", async (original) => ({
   ...(await original<typeof import("@wailsio/runtime")>()),
   Events: { On: vi.fn(() => vi.fn()) },

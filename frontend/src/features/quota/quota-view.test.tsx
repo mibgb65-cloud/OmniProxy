@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { listAccounts, listProviders } from "../../services/omniproxy"
 import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/subscription"
 import { readAccountBalance } from "../../services/balance"
+import { readAccountTokenUsage } from "../../services/activity"
 import {
   readGoogleSubscriptionQuota,
   readGoogleSubscriptionModels,
@@ -31,6 +32,10 @@ vi.mock("../../services/google-subscription", () => ({
   readGoogleSubscriptionQuota: vi.fn(),
   readCachedGoogleSubscriptionQuota: vi.fn(async () => null),
   readGoogleSubscriptionModels: vi.fn(),
+}))
+vi.mock("../../services/activity", async (original) => ({
+  ...(await original<typeof import("../../services/activity")>()),
+  readAccountTokenUsage: vi.fn(),
 }))
 vi.mock("@wailsio/runtime", async (original) => ({
   ...(await original<typeof import("@wailsio/runtime")>()),
@@ -101,6 +106,17 @@ describe("quota overview", () => {
     expect(screen.getByRole("button", { name: "刷新当前列表" })).toBeDisabled()
     expect(readSubscriptionQuota).toHaveBeenCalledTimes(2)
     expect(readAccountBalance).toHaveBeenCalledTimes(2)
+  })
+
+  it("shows locally recorded token usage when quota queries are unavailable", async () => {
+    renderQuota()
+    await ready()
+    // Anthropic API Key 没有已确认的额度接口，卡片必须给出已用 Token，而不是只写一句「尚未接入」。
+    expect(await screen.findAllByText(/尚未接入/)).not.toHaveLength(0)
+    expect(screen.getByLabelText("1,200")).toHaveTextContent("1.2K")
+    expect(screen.getByLabelText("300")).toBeInTheDocument()
+    expect(screen.getByLabelText("500")).toBeInTheDocument()
+    expect(readAccountTokenUsage).toHaveBeenCalledWith("unsupported")
   })
 
   it("queries Kimi's regional balance, counts exhaustion and skips unconfirmed platforms", async () => {

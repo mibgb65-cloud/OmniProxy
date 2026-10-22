@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Service) Begin(ctx context.Context, event proxy.RequestEvent) error {
-	if len(event.ID) != 32 || event.StartedAt.IsZero() {
+	if len(event.ID) != 32 || event.StartedAt.IsZero() || len(event.Client) > 32 {
 		return ErrInvalid
 	}
 	s.mu.Lock()
@@ -18,7 +18,7 @@ func (s *Service) Begin(ctx context.Context, event proxy.RequestEvent) error {
 		return ErrUnavailable
 	}
 	defer tx.Rollback()
-	result, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO request_records(id,started_at,day,protocol,transport) VALUES(?,?,?,?,?)`, event.ID, timeText(event.StartedAt), event.StartedAt.In(time.Local).Format(time.DateOnly), event.Protocol, event.Transport)
+	result, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO request_records(id,started_at,day,protocol,transport,client_id) VALUES(?,?,?,?,?,?)`, event.ID, timeText(event.StartedAt), event.StartedAt.In(time.Local).Format(time.DateOnly), event.Protocol, event.Transport, event.Client)
 	if err != nil {
 		return ErrUnavailable
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 // serveResponsesSocket 支持内置 Codex 的 WebSocket，连接上下文仅在内存中保存。
-func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, key string, metadata CodexMetadata) {
+func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, key, client string, metadata CodexMetadata) {
 	select {
 	case s.socketSlots <- struct{}{}:
 		defer func() { <-s.socketSlots }()
@@ -32,9 +32,14 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		if err != nil {
 			return
 		}
-		if s.opts.Authorize != nil && !s.opts.Authorize(r.Context(), key) {
-			socketError(r.Context(), socket, "unauthorized")
-			return
+		// 连接期间 Key 仍可能被停用或替换，每帧都要复核并同步客户端归属。
+		if s.opts.Authorize != nil {
+			current, ok := s.opts.Authorize(r.Context(), key)
+			if !ok {
+				socketError(r.Context(), socket, "unauthorized")
+				return
+			}
+			client = current
 		}
 		// 已建立连接也必须检查当前策略，关闭开关后不能继续通过旧连接创建响应。
 		if err := s.webSocketPolicy(r.Context()); err != nil {
@@ -120,7 +125,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
-		trace, traceErr := s.beginTrace(ctx, "responses", "websocket")
+		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", client)
 		if traceErr != nil {
 			cancel()
 			<-s.slots

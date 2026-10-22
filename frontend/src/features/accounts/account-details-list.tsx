@@ -1,5 +1,5 @@
 import { MiMoBadge } from "./mimo-options"
-import { RiverTokenUsage } from "./river-token-usage"
+import { AccountUsagePanel } from "./account-usage-panel"
 import { KimiCodeResource } from "./kimi-code-resource"
 import { MiMoPlanResource } from "./mimo-resource"
 import { MiniMaxResource } from "./minimax-resource"
@@ -110,7 +110,7 @@ export function AccountDetailsList({
                   </div>
                 ) : account.providerId === "builtin_river" ? (
                   <div className="min-w-72">
-                    <RiverTokenUsage account={account} />
+                    <AccountUsagePanel account={account} />
                   </div>
                 ) : googleSupported || account.providerId === "builtin_google" ? (
                   <div className="max-w-md min-w-72">

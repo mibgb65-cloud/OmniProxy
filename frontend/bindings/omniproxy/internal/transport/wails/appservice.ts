@@ -88,6 +88,13 @@ export function AccountKeyPreview(id: string): $CancellablePromise<string> {
     return $Call.ByID(2889239957, id);
 }
 
+/**
+ * AccountTokenUsage 仅读取账号元数据和本地用量，不读取或查询 API Key。
+ */
+export function AccountTokenUsage(id: string): $CancellablePromise<activity$0.AccountTokenUsage | null> {
+    return $Call.ByID(458711972, id);
+}
+
 export function AgentApply(input: agentconfig$0.Input): $CancellablePromise<agentconfig$0.Item[] | null> {
     return $Call.ByID(1413500582, input);
 }
@@ -590,13 +597,6 @@ export function RequestRetentionSet(limit: number): $CancellablePromise<activity
 
 export function RequestsRead(query: activity$0.RequestQuery): $CancellablePromise<activity$0.RequestPage> {
     return $Call.ByID(1523608767, query);
-}
-
-/**
- * RiverAccountTokenUsage 仅读取账号元数据和本地用量，不读取或查询 API Key。
- */
-export function RiverAccountTokenUsage(id: string): $CancellablePromise<activity$0.AccountTokenUsage | null> {
-    return $Call.ByID(543969056, id);
 }
 
 /**

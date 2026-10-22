@@ -19,7 +19,7 @@ func TestScopedAgentKeyAndWebsocketConversation(t *testing.T) {
 		}
 		return consume(Response{StatusCode: 200, ContentType: "text/event-stream", Body: strings.NewReader("data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_test\",\"output\":[{\"type\":\"message\",\"role\":\"assistant\",\"content\":\"OK\"}]}}\n\n")})
 	})
-	server := New(Options{Port: 0, Upstream: upstream, Models: []string{"deepseek-flash"}, Authorize: func(_ context.Context, k string) bool { return k == key }})
+	server := New(Options{Port: 0, Upstream: upstream, Models: []string{"deepseek-flash"}, Authorize: func(_ context.Context, k string) (string, bool) { return "", k == key }})
 	if _, err := server.Start(); err != nil {
 		t.Fatal(err)
 	}

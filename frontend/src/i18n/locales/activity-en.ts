@@ -31,7 +31,7 @@ export const activityEn = {
   "activity.state": "Outcome",
   "activity.latency": "Latency",
   "activity.firstToken": "First-token latency",
-  "activity.search": "Search request ID, model, email or account",
+  "activity.search": "Search request ID, model, agent, email or account",
   "activity.all": "All outcomes",
   "activity.success": "Success",
   "activity.failedState": "Failed",
@@ -58,6 +58,14 @@ export const activityEn = {
   "activity.next": "Next",
   "activity.page": "Page {{page}} / {{totalPages}} pages",
   "activity.detailGone": "Details expired or do not exist. Lifetime usage is retained.",
+  "activity.agent": "Agent",
+  "activity.accountUsageLoading": "Reading local usage…",
+  "activity.accountUsageFailed": "Cannot read local usage.",
+  "activity.accountUsageRetry": "Retry",
+  "activity.accountUsageIncomplete":
+    "Includes requests in progress or with incomplete usage. Values reflect recorded usage only.",
+  "activity.accountUsageNote":
+    "Retained local proxy requests only; cached tokens are included in input. “—” means not reported and “≥” marks a partial known total.",
   "activity.retentionTitle": "Request and log records",
   "activity.retentionDescription":
     "Set the request detail retention limit. Lifetime token and daily totals are stored separately.",

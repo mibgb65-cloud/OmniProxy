@@ -33,7 +33,12 @@ func (s *AppService) initGateway() {
 	if err := s.activity.Recover(context.Background()); err != nil && s.log != nil {
 		s.log.Error("request recovery unavailable", "module", "gateway", "code", "accounting_unavailable")
 	}
-	s.gateway = gateway.New(proxy.Options{Port: s.prof.ProxyPort, Logger: s.log, Observer: s.activity, FailoverEnabled: gateway.NewFailoverSettingsService(s.db).Enabled, WebSocketAllowed: gateway.NewCodexSettingsService(s.db).WebSocketAllowed, Authorize: func(ctx context.Context, key string) bool { return s.agents != nil && s.agents.Authorize(ctx, key) }}, provider.NewService(s.db), account.NewService(s.db, store), nil)
+	s.gateway = gateway.New(proxy.Options{Port: s.prof.ProxyPort, Logger: s.log, Observer: s.activity, FailoverEnabled: gateway.NewFailoverSettingsService(s.db).Enabled, WebSocketAllowed: gateway.NewCodexSettingsService(s.db).WebSocketAllowed, Authorize: func(ctx context.Context, key string) (string, bool) {
+		if s.agents == nil {
+			return "", false
+		}
+		return s.agents.Client(ctx, key)
+	}}, provider.NewService(s.db), account.NewService(s.db, store), nil)
 	s.gateway.SetAccountRotationMode(gateway.NewCodexSettingsService(s.db).AccountRotationMode)
 	s.gateway.SetRiverAccountRotationMode(gateway.NewRiverSettingsService(s.db).AccountRotationMode)
 	s.agents = agentconfig.New(s.db, store, paths, s.prof.ProxyPort, s.gateway)

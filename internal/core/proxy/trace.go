@@ -16,8 +16,10 @@ type UsageSnapshot struct {
 	CachedInput                       *int64
 }
 type RequestEvent struct {
-	AttemptIndex                           int
-	ID                                     string
+	AttemptIndex int
+	ID           string
+	// Client 只保存受管客户端标识，不保存原始头部或凭据。
+	Client                                 string
 	StartedAt, FinishedAt                  time.Time
 	InputModel, Model, Protocol, Transport string
 	Stream                                 bool
@@ -47,13 +49,13 @@ type Trace struct {
 	startedAt                  time.Time
 }
 
-func (s *Server) beginTrace(ctx context.Context, protocol, transport string) (*Trace, error) {
+func (s *Server) beginTrace(ctx context.Context, protocol, transport, client string) (*Trace, error) {
 	value := make([]byte, 16)
 	if _, err := rand.Read(value); err != nil {
 		return nil, Failure("accounting_unavailable", 503)
 	}
 	now := time.Now()
-	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), StartedAt: now.UTC(), Protocol: protocol, Transport: transport, State: "pending"}, startedAt: now, observer: s.opts.Observer}
+	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), Client: client, StartedAt: now.UTC(), Protocol: protocol, Transport: transport, State: "pending"}, startedAt: now, observer: s.opts.Observer}
 	if trace.observer != nil {
 		if err := trace.observer.Begin(ctx, trace.event); err != nil {
 			return nil, Failure("accounting_unavailable", 503)

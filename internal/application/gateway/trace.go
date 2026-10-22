@@ -10,22 +10,7 @@ import (
 
 func snapshotTarget(p provider.Configuration, a account.Item) proxy.TargetSnapshot {
 	target := proxy.TargetSnapshot{ProviderID: p.ID, ProviderName: p.Name, ProviderKind: p.Kind, AccountID: a.ID, AccountName: a.Name, AuthMethod: a.AuthMethod, Email: a.AuthEmail, WorkspaceID: a.AuthAccountID}
-	if a.StepFun != nil {
-		target.ProviderRegion = a.StepFun.Region
-		target.BillingMode = a.StepFun.BillingMode
-	}
-	if a.MiniMax != nil {
-		target.ProviderRegion = a.MiniMax.Region
-		target.BillingMode = a.MiniMax.BillingMode
-	}
-	if a.MiMo != nil {
-		target.ProviderRegion = a.MiMo.Region
-		target.BillingMode = a.MiMo.BillingMode
-	}
-	if a.Kimi != nil {
-		target.ProviderRegion = a.Kimi.Region
-		target.BillingMode = a.Kimi.Mode()
-	}
+	target.ProviderRegion, target.BillingMode = a.ProviderScope()
 	return target
 }
 func (s *Service) forwardDeepseek(ctx context.Context, target target, key []byte, request proxy.Request, consume func(proxy.Response) error) error {
