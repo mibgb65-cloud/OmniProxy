@@ -78,6 +78,9 @@ func (t *Trace) Update(ctx context.Context, request Request, target TargetSnapsh
 	}
 	t.event.Model = request.Model
 	t.event.Stream = request.Stream
+	if request.IsCompaction() {
+		t.event.Protocol = "responses/compact"
+	}
 	if target.AccountID != "" {
 		t.event.Target = target
 	}

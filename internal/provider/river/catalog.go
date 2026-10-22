@@ -37,12 +37,14 @@ func ModelMetadata(model string) catalog.Metadata {
 		output = 384000
 	}
 	m := catalog.Metadata{ContextWindow: &window, OutputTokenLimit: &output, InputModalities: []string{"text"}, ToolUse: &tools}
-	// 官方控制参数表尚未单列 1017 的档位，不将原版枚举推断为固定版本契约。
-	if model == DeepSeekFlash {
-		m.ReasoningEfforts = []catalog.Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}
+	// 1017 于 2026-10-22 以有界合成请求确认三档接受、非法档位拒绝；不再沿用未知能力快照。
+	if model == DeepSeekFlash || model == DeepSeekFlash1017 {
+		m.ReasoningEfforts = []catalog.Effort{{Value: "none", Description: "关闭思考"}, {Value: "high", Description: "高强度推理"}, {Value: "max", Description: "最高强度推理"}}
+		m.DefaultEffort = "high"
 	}
 	if model == GLMFlash {
-		m.ReasoningEfforts = []catalog.Effort{{Value: "low"}, {Value: "high"}, {Value: "max"}}
+		m.ReasoningEfforts = []catalog.Effort{{Value: "low", Description: "低强度推理"}, {Value: "high", Description: "高强度推理"}, {Value: "max", Description: "最高强度推理"}}
+		m.DefaultEffort = "high"
 	}
 	return m
 }

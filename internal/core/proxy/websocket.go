@@ -119,7 +119,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			socketError(r.Context(), socket, "gateway_busy")
 			return
 		}
-		ctx, cancel := context.WithTimeout(r.Context(), s.opts.RequestTimeout)
+		ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
 		trace, traceErr := s.beginTrace(ctx, "responses", "websocket")
 		if traceErr != nil {
 			cancel()

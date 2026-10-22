@@ -17,7 +17,7 @@ type discoveredModel struct {
 }
 
 func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.metadata_json FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model,a.id LIMIT 10001`)
+	rows, err := s.db.QueryContext(ctx, `SELECT m.account_id,a.provider_id,m.model,m.name,m.metadata_json,p.kind FROM account_models m JOIN accounts a ON a.id=m.account_id JOIN providers p ON p.id=a.provider_id JOIN account_catalog_versions v ON v.id=a.id AND v.version=m.account_version ORDER BY a.provider_id,m.model,a.id LIMIT 10001`)
 	if err != nil {
 		return nil, err
 	}
@@ -25,12 +25,15 @@ func (s *Service) discovered(ctx context.Context) ([]discoveredModel, error) {
 	result := []discoveredModel{}
 	for rows.Next() {
 		var m discoveredModel
-		var metadata string
-		if err := rows.Scan(&m.accountID, &m.providerID, &m.model, &m.name, &metadata); err != nil {
+		var metadata, kind string
+		if err := rows.Scan(&m.accountID, &m.providerID, &m.model, &m.name, &metadata, &kind); err != nil {
 			return nil, err
 		}
 		if len(metadata) > 16384 || json.Unmarshal([]byte(metadata), &m.metadata) != nil || catalog.ValidateMetadata(m.metadata) != nil || len(result) >= 10000 {
 			return nil, catalog.ErrInvalid
+		}
+		if kind == river.Kind {
+			m.metadata = river.ModelMetadata(river.UpstreamModel(m.model))
 		}
 		result = append(result, m)
 	}

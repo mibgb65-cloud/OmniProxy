@@ -74,6 +74,7 @@ func (s *Service) List(ctx context.Context) ([]Item, error) {
 		}
 		if kind == river.Kind {
 			i.Model, i.Name = river.PublicModel(i.Model), river.ModelName(i.Model)
+			i.Metadata = river.ModelMetadata(river.UpstreamModel(i.Model))
 		}
 		items = append(items, i)
 	}

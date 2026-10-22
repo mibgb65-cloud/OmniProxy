@@ -61,6 +61,16 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 		if entry.Metadata.DefaultEffort != "" {
 			value := entry.Metadata.DefaultEffort
 			defaultEffort = &value
+		} else if len(efforts) > 0 {
+			// 客户端需要有效默认值才能展示档位；这是网关的选择策略，不冒充上游默认值。
+			value := efforts[0].Effort
+			for _, effort := range efforts {
+				if effort.Effort == "high" {
+					value = effort.Effort
+					break
+				}
+			}
+			defaultEffort = &value
 		}
 		instructions := codingInstructions
 		var patchType *string

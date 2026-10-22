@@ -22,12 +22,15 @@ func (s *Service) SetRouter(router Router) { s.router = router }
 
 // RouteRequest 解析规则后改写模型，路由异常不回退到其他提供商或账号。
 func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (proxy.Request, error) {
-	if request.Protocol == "messages" && (strings.HasPrefix(request.Model, catalog.DesktopAliasPrefix) || strings.HasSuffix(request.Model, catalog.ClaudeLongContextSuffix)) {
+	if request.Protocol == "messages" && (strings.HasPrefix(request.Model, catalog.DesktopAliasPrefix) || strings.HasPrefix(request.Model, catalog.ClaudeEffortPrefix) || strings.HasSuffix(request.Model, catalog.ClaudeLongContextSuffix)) {
 		entries, err := s.Catalog(ctx)
 		if err != nil {
 			return request, proxy.Failure("model_catalog_unavailable", 503)
 		}
-		model, found := catalog.ResolveClaudeModel(entries, request.Model)
+		model, effort, found := catalog.ResolveClaudeEffort(entries, request.Model)
+		if !found {
+			model, found = catalog.ResolveClaudeModel(entries, request.Model)
+		}
 		if !found {
 			if source, ok := s.router.(interface {
 				CompatibilityCatalog(context.Context) ([]catalog.Entry, error)
@@ -45,6 +48,12 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 		body, err := core.RewriteModel(request.Body, model)
 		if err != nil {
 			return request, proxy.Failure("invalid_request", 400)
+		}
+		if effort != "" {
+			body, err = withClaudeEffort(body, effort)
+			if err != nil {
+				return request, err
+			}
 		}
 		request.Body, request.Model = body, model
 	}

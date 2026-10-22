@@ -21,6 +21,13 @@ func (s *Service) forwardRiver(ctx context.Context, target target, request proxy
 		}
 		// 既有转换器的 thinking 是 DeepSeek 专有字段，River 使用自己的默认推理策略。
 		delete(fields, "thinking")
+		effort, err := riverMessagesEffort(request.Body, request.Model)
+		if err != nil {
+			return err
+		}
+		if effort != nil {
+			fields["reasoning_effort"] = effort
+		}
 		upstream.Body, err = json.Marshal(fields)
 		if err != nil {
 			return proxy.Failure("invalid_request", 400)

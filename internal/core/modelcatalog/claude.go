@@ -51,6 +51,7 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 		}
 		result = append(result, entry)
 	}
+	result = append(result, claudeEffortEntries(result)...)
 	return Normalize(result)
 }
 

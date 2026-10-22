@@ -6,15 +6,17 @@
 
 ## Current Version
 
-2.0.0-beta.19 — 本地 Windows amd64 production 安装包，未公开发布。源码 `36144ec`，新增 Codex Fast 服务档位保留与关于页正式入口，继承 Beta.18 既有功能。完整质量门／718 项前端测试、NSIS、原生版本、1,769 项来源、SHA256 及 test 运行时版本校验通过；安装器 19,561,308 bytes，位于 `release-assets/v2.0.0-beta.19/`，未签名。34 个保护文件及原生产进程未变，未自动安装。更新后需同步官方模型目录并重载 Codex 菜单；真实覆盖更新、数据保留、模型加速与调用由用户验收，Google 429 和旧聊天兼容性未宣称解决。
+2.0.0-beta.20 — 本地 Windows amd64 production 安装包，未公开发布。新增第三方模型推理档位链路（Codex 默认档位、Claude 显式档位选项、River Messages 档位透传）及压缩专用 10 分钟时限与独立记账。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,562,228 bytes，位于 `release-assets/v2.0.0-beta.20/`，SHA256 `53010dec…69da2`，未签名。生产进程未变、未自动安装；真实档位调用、覆盖更新与数据保留由用户验收，Codex 约 500k 提前压缩未宣称修复。
 
 ## In Progress
 
-- [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：非 bare Claude Code 2.1.299 的 21 工具／约 79 KB 合成请求已真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，上游无细分配额明细。完整 Desktop 路径尚未修复；当前 1 个 Google 账号启用、2 个禁用，未擅自启用或使用备用账号，等待独立授权或官方客户端对照。无生产代码变更或新安装包。
+- [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：21 工具／约 79 KB 合成请求真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，无细分配额信息。用户已同意备用对照，但两个禁用账号访问令牌均已过期且授权项目与原账号相同；只读预检后停止，备用生成和续期请求均为 0，启用状态／路由指纹未变。待确认正常续期后做跨登录身份对照，不能冒充独立项目测试。完整 Desktop 尚未修复，无生产代码变更或新安装包。
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261022-005](../tasks/completed/2026-10/TASK-20261022-005-reasoning-compaction-beta20.md)：补齐第三方模型推理档位（Codex 缺省档位、Claude 显式档位选项、River Messages→Chat 档位校验透传、River 能力目录刷新）与压缩请求专用 10 分钟时限／`responses/compact` 独立记账；专项回归、完整质量门／724 项前端测试、Windows production 打包、版本资源与资产校验通过。Beta.20 本地安装包 19,562,228 bytes／SHA256 `53010de584cbff6b915d345b525a1e906afbdb31aa27c62b44929e3d87169da2`，未签名、未自动安装、未推送或发布。Codex 约 500k 提前压缩根因仍未确认，不宣称已修复。
 
 - [TASK-20261022-003](../tasks/completed/2026-10/TASK-20261022-003-build-local-beta19-installer.md)：`36144ec`，Beta.19 production 本地安装包及 SHA256 已构建，包含 Fast 目录修复和关于页正式入口。强制完整门禁／718 项前端测试、NSIS、Windows 版本／生产标记、1,769 项源码来源、隔离运行时及 34 项保护文件基线验证通过；未签名、未自动安装、未创建发布标签或公开发布。
 
