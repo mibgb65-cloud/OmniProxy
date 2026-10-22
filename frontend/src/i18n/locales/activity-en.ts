@@ -31,6 +31,19 @@ export const activityEn = {
   "activity.state": "Outcome",
   "activity.latency": "Latency",
   "activity.firstToken": "First-token latency",
+  "activity.cached": "Cache hit",
+  "activity.cost": "Cost",
+  "activity.speed": "Speed",
+  "activity.columnHint": "About the {{column}} column",
+  "activity.cachedHint":
+    "Share of input tokens served from the upstream prompt cache. Input already includes cached tokens, so they are not counted twice.",
+  "activity.costHint":
+    "Estimated USD cost from base reference prices, not a bill. Unknown cache details show a range; incomplete usage or unpriced models show —.",
+  "activity.speedHint":
+    "Output tokens ÷ generation time. Streamed requests exclude the first-token wait; the value is rounded and approximate.",
+  "activity.firstTokenHint":
+    "Time from request start to the first valid streamed content; non-streamed requests, historical records and failures without content show —.",
+  "activity.cachedDetail": "Cached {{cached}} / input {{input}}",
   "activity.search": "Search request ID, model, agent, email or account",
   "activity.all": "All outcomes",
   "activity.success": "Success",

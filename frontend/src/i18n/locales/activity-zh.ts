@@ -31,6 +31,18 @@ export const activityZh = {
   "activity.state": "结果",
   "activity.latency": "耗时",
   "activity.firstToken": "首字耗时",
+  "activity.cached": "缓存命中",
+  "activity.cost": "成本",
+  "activity.speed": "速度",
+  "activity.columnHint": "{{column}}说明",
+  "activity.cachedHint":
+    "上游报告的前缀缓存命中量占输入 Token 的比例。输入 Token 已包含缓存部分，不重复计费。",
+  "activity.costHint":
+    "按基础参考价估算的美元成本，不是账单金额。缓存明细未知时显示区间；用量不完整或型号没有已确认价格时显示 —。",
+  "activity.speedHint": "输出 Token ÷ 生成耗时；流式请求扣除首字等待时间，结果为四舍五入的近似值。",
+  "activity.firstTokenHint":
+    "从请求开始到首次写出有效流式内容的耗时；非流式、历史记录和未产生内容的失败显示 —。",
+  "activity.cachedDetail": "缓存 {{cached}} / 输入 {{input}}",
   "activity.search": "搜索请求 ID、模型、Agent、邮箱或账号",
   "activity.all": "全部结果",
   "activity.success": "成功",

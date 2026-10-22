@@ -38,6 +38,11 @@ const item: RequestItem = {
   inputKnown: true,
   outputKnown: true,
   usageComplete: true,
+  cachedInputTokens: "",
+  cachedInputKnown: false,
+  costMin: 0,
+  costMax: 0,
+  costKnown: false,
 }
 
 function mount(items: RequestItem[]) {
@@ -75,6 +80,7 @@ it("按接入 Key 归属显示发起请求的 Agent", async () => {
 it("无法归属的请求显示破折号而不是猜测对应 Agent", async () => {
   mount([{ ...item }, { ...item, id: "c".repeat(32), client: "unknown-client" }])
   const rows = screen.getAllByRole("row").slice(1)
-  expect(within(rows[0]!).getByText("—")).toBeInTheDocument()
-  expect(within(rows[1]!).getByText("—")).toBeInTheDocument()
+  // Agent 列固定在时间、模型之后；其他列也有破折号，不能按整行取第一个匹配。
+  expect(within(rows[0]!).getAllByRole("cell")[2]).toHaveTextContent("—")
+  expect(within(rows[1]!).getAllByRole("cell")[2]).toHaveTextContent("—")
 })

@@ -54,6 +54,13 @@ type RequestItem struct {
 	InputKnown     bool   `json:"inputKnown"`
 	OutputKnown    bool   `json:"outputKnown"`
 	UsageComplete  bool   `json:"usageComplete"`
+	// CachedInputTokens 是上游报告的前缀缓存命中量，已包含在输入中；未知与真实的零分开表示。
+	CachedInputTokens string `json:"cachedInputTokens"`
+	CachedInputKnown  bool   `json:"cachedInputKnown"`
+	// CostMin／CostMax 是按基础参考价估算的美元成本，区间仅在缓存明细未知时出现。
+	CostMin   float64 `json:"costMin"`
+	CostMax   float64 `json:"costMax"`
+	CostKnown bool    `json:"costKnown"`
 }
 type RequestQuery struct {
 	Search string `json:"search"`

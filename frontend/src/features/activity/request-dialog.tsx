@@ -6,7 +6,14 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Tooltip } from "../../components/ui/tooltip"
 import { formatTokens, readRequest } from "../../services/activity"
-import { stateLabel, requestTime } from "./activity-format"
+import {
+  stateLabel,
+  requestTime,
+  formatCachedHit,
+  formatCost,
+  formatSpeed,
+  formatFirstToken,
+} from "./activity-format"
 import { agentTitleKey } from "../gateway/agent-clients"
 import { RequestAttempts } from "./request-attempts"
 
@@ -125,9 +132,19 @@ export function RequestDialog({
                       ),
                     ],
                     [
-                      "activity.firstToken",
-                      item.firstTokenMs == null ? "—" : `${item.firstTokenMs} ms`,
+                      "activity.cached",
+                      item.cachedInputKnown
+                        ? `${formatCachedHit(item.cachedInputTokens, true, item.inputTokens, item.inputKnown)} · ${t("activity.cachedDetail", { cached: formatTokens(item.cachedInputTokens, i18n.resolvedLanguage), input: formatTokens(item.inputTokens, i18n.resolvedLanguage) })}`
+                        : t("activity.unknown"),
                     ],
+                    [
+                      "activity.cost",
+                      item.costKnown
+                        ? formatCost(item.costMin, item.costMax, true)
+                        : t("activity.unknown"),
+                    ],
+                    ["activity.speed", formatSpeed(item)],
+                    ["activity.firstToken", formatFirstToken(item.firstTokenMs, item.state)],
                     ["activity.latency", item.state === "pending" ? "—" : `${item.latencyMs} ms`],
                     ["activity.errorCode", item.errorCode || "—"],
                   ] as const

@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [TASK-20261023-014](../tasks/active/TASK-20261023-014-request-page-cache-cost-speed.md)：请求列表与详情新增缓存命中、估算成本、速度 `tok/s` 和首字耗时。复用迁移 032／037 已保存数据，无新迁移；未知上游明细保持 `—`，成本为参考价估算而非账单。
+
 - [TASK-20261023-013](../tasks/active/TASK-20261023-013-build-local-beta26-installer.md)：Beta.26 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261023-012](../tasks/active/TASK-20261023-012-model-effort-pin.md)：应用内按模型固定思考档位（迁移 041 `model_effort_pins`）。Claude／Claude Desktop 的模型卡片新增「思考强度」选择，只列上游已确认档位；网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`，与配置版本同事务提交。实现提交 `7957edc`，完整质量门通过；真实会话待用户验收。

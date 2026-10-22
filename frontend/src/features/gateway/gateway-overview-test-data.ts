@@ -87,6 +87,11 @@ export function gatewayStatisticsFixture(query: DashboardQuery): DashboardInfo {
     accountDeleted: false,
     statusCode: item.state === "failed" ? 502 : 200,
     errorCode: "",
+    cachedInputTokens: "",
+    cachedInputKnown: false,
+    costMin: 0,
+    costMax: 0,
+    costKnown: false,
   }))
   return {
     summary: metricsSummary,

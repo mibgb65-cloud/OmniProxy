@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-const requestColumns = `r.id,r.started_at,r.finished_at,r.protocol,r.transport,r.input_model,r.model,r.stream,r.provider_id,r.provider_name,r.account_id,r.account_name,r.email,r.workspace_id,(r.account_id!='' AND a.id IS NULL),r.state,r.status_code,r.error_code,r.latency_ms,r.input_tokens,r.output_tokens,r.input_known,r.output_known,r.usage_complete,r.provider_region,r.billing_mode,r.first_token_ms,r.client_id,(SELECT COUNT(*) FROM request_attempts t WHERE t.request_id=r.id)`
+const requestColumns = `r.id,r.started_at,r.finished_at,r.protocol,r.transport,r.input_model,r.model,r.stream,r.provider_id,r.provider_name,r.account_id,r.account_name,r.email,r.workspace_id,(r.account_id!='' AND a.id IS NULL),r.state,r.status_code,r.error_code,r.latency_ms,r.input_tokens,r.output_tokens,r.input_known,r.output_known,r.usage_complete,r.provider_region,r.billing_mode,r.first_token_ms,r.client_id,(SELECT COUNT(*) FROM request_attempts t WHERE t.request_id=r.id),r.cached_input_tokens`
 
 func validateQuery(q RequestQuery) error {
 	if len(q.Search) > 128 || !utf8.ValidString(q.Search) || q.Offset < 0 || q.Offset > MaxRetention || q.Limit < 1 || q.Limit > 200 {
@@ -79,8 +79,14 @@ type scanner interface{ Scan(...any) error }
 func scanRequest(row scanner) (RequestItem, error) {
 	var item RequestItem
 	var input, output int64
-	err := row.Scan(&item.ID, &item.StartedAt, &item.FinishedAt, &item.Protocol, &item.Transport, &item.InputModel, &item.Model, &item.Stream, &item.ProviderID, &item.ProviderName, &item.AccountID, &item.AccountName, &item.Email, &item.WorkspaceID, &item.AccountDeleted, &item.State, &item.StatusCode, &item.ErrorCode, &item.LatencyMS, &input, &output, &item.InputKnown, &item.OutputKnown, &item.UsageComplete, &item.ProviderRegion, &item.BillingMode, &item.FirstTokenMS, &item.Client, &item.AttemptCount)
+	var cached sql.NullInt64
+	err := row.Scan(&item.ID, &item.StartedAt, &item.FinishedAt, &item.Protocol, &item.Transport, &item.InputModel, &item.Model, &item.Stream, &item.ProviderID, &item.ProviderName, &item.AccountID, &item.AccountName, &item.Email, &item.WorkspaceID, &item.AccountDeleted, &item.State, &item.StatusCode, &item.ErrorCode, &item.LatencyMS, &input, &output, &item.InputKnown, &item.OutputKnown, &item.UsageComplete, &item.ProviderRegion, &item.BillingMode, &item.FirstTokenMS, &item.Client, &item.AttemptCount, &cached)
 	item.InputTokens = strconv.FormatInt(input, 10)
 	item.OutputTokens = strconv.FormatInt(output, 10)
+	if cached.Valid {
+		item.CachedInputTokens = strconv.FormatInt(cached.Int64, 10)
+		item.CachedInputKnown = true
+	}
+	item.attachCost(input, output, cached)
 	return item, err
 }

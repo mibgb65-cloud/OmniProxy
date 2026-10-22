@@ -53,6 +53,11 @@ const item: RequestItem = {
   inputKnown: false,
   outputKnown: true,
   usageComplete: false,
+  cachedInputTokens: "",
+  cachedInputKnown: false,
+  costMin: 0,
+  costMax: 0,
+  costKnown: false,
 }
 beforeEach(() => {
   vi.clearAllMocks()

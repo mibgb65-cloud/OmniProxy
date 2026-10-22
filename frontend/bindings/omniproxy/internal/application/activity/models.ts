@@ -175,6 +175,19 @@ export interface RequestItem {
     "inputKnown": boolean;
     "outputKnown": boolean;
     "usageComplete": boolean;
+
+    /**
+     * CachedInputTokens 是上游报告的前缀缓存命中量，已包含在输入中；未知与真实的零分开表示。
+     */
+    "cachedInputTokens": string;
+    "cachedInputKnown": boolean;
+
+    /**
+     * CostMin／CostMax 是按基础参考价估算的美元成本，区间仅在缓存明细未知时出现。
+     */
+    "costMin": number;
+    "costMax": number;
+    "costKnown": boolean;
 }
 
 export interface RequestPage {
