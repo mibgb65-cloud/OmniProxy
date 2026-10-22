@@ -165,7 +165,9 @@ Claude 与 Harness 的档位取值域不同，这是本次的核心教训：
 
 ## Commit
 
-Not committed by Agent.
+```text
+c435ba50a04e2a55380796013d4500914395674d fix(reasoning): 修正 Claude 档位设置取值并为 Harness 声明推理档位
+```
 
 ---
 
