@@ -184,7 +184,7 @@ Go 全部包 ok；Windows production 构建 bin/omniproxy.exe 成功
 ## Commit
 
 ```text
-待填写
+ebf117e feat(activity): 请求页显示缓存命中、估算成本、速度与首字
 ```
 
 ---
