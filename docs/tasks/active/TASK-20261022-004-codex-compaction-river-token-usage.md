@@ -63,7 +63,9 @@ In Progress
 
 ## Git
 
-本任务提交待写入；不提交 `CURRENT.md` 内先前已有的其他任务说明、Gemini 活跃任务记录及 Atria 未跟踪任务。
+实现提交：`d196d3908626ec351c91a5d1594f8ac1e143f6ee` — `feat(account): 展示 River 账号本机 Token 用量`。
+
+`CURRENT.md` 仅暂存本任务新增的概览，先前已有的其他任务说明、Gemini 活跃任务记录及 Atria 未跟踪任务均保留且未提交。结束时原生产应用仍为 PID 49000／`E:\codexproxy\OmniProxy\OmniProxy.exe`，Codex 的 1.05M／900k 配置未变。
 
 ## Result
 
