@@ -6,11 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.25 — 本地 Windows amd64 production 安装包，未公开发布。包含请求 Agent 归属（迁移 040，按独立接入 Key 识别）、配额页对无官方额度接口的账号显示本机已用 Token、Token 用量统一悬浮提示，以及用量卡片细圆角滚动条与本地 Agent 分组「一键配置」。完整质量门／731 项前端测试、Windows 版本资源与资产校验通过；安装器 19,588,499 bytes，位于 `release-assets/v2.0.0-beta.25/`，SHA256 `639fbf77…277b8`，未签名。生产进程未变、未自动安装；升级后需重新应用客户端配置并完全重启。
+2.0.0-beta.26 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.25 基础上新增「思考强度」应用内入口（迁移 041 `model_effort_pins`；Claude／Claude Desktop 模型卡片按已确认档位固定，网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`），并为 Claude Desktop 目录补齐 `inferenceModels[].maxEffort` 与顶层 `defaultModelEffort`。完整质量门／734 项前端测试、Windows 版本资源与资产校验通过；安装器 19,613,101 bytes，位于 `release-assets/v2.0.0-beta.26/`，SHA256 `3b595828…bf9123`，未签名。生产进程未变、未自动安装；升级后需重新应用客户端配置并完全重启。
 
 ## In Progress
 
-- [TASK-20261023-012](../tasks/active/TASK-20261023-012-model-effort-pin.md)：应用内按模型固定思考档位（迁移 041 `model_effort_pins`）。Claude／Claude Desktop 的模型卡片新增「思考强度」选择，只列上游已确认档位；网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`，与配置版本同事务提交。定向 Go／前端回归通过，完整质量门见任务记录；真实会话待用户验收。
+- [TASK-20261023-013](../tasks/active/TASK-20261023-013-build-local-beta26-installer.md)：Beta.26 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261023-012](../tasks/active/TASK-20261023-012-model-effort-pin.md)：应用内按模型固定思考档位（迁移 041 `model_effort_pins`）。Claude／Claude Desktop 的模型卡片新增「思考强度」选择，只列上游已确认档位；网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`，与配置版本同事务提交。实现提交 `7957edc`，完整质量门通过；真实会话待用户验收。
 
 - [TASK-20261023-011](../tasks/active/TASK-20261023-011-claude-desktop-effort-entry.md)：取证 Claude Desktop 2.42304.2 只在客户端认识的模型 ID 上渲染 effort 控件（内置 8 个 Claude ID 表 + 签名模型目录），不透明 `claude-omniproxy-*` 路由名无入口且无法用配置注入；补齐 Desktop 目录的 `maxEffort` 与顶层 `defaultModelEffort`（只写已确认档位）。
 
