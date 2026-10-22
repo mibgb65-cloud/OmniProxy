@@ -106,7 +106,7 @@ task --force verify → exit 0
 
 # Git
 
-未提交：工作区同时存在多个在办任务的改动（`internal/core/agentprotocol`、`docs/product/RIVER.md` 等），按 Git 安全规则不混提交。本任务改动：
+`7957edc` — feat(effort): 应用内按模型固定思考档位并由网关覆盖 Messages 请求。工作区其余在办任务的改动未混入。本任务改动：
 `migrations/041_model_effort_pins.sql`、`internal/application/modeleffort/`、`internal/application/routing/effort.go`、
 `internal/application/agentconfig/{effort.go,types.go,plan.go,apply.go}`、`internal/application/gateway/{effort_pin.go,routing.go}`、
 `frontend/src/features/gateway/{agent-model-card.tsx,agent-catalog-preview.tsx,agent-config-editor.tsx,use-agent-config-form.ts}`、

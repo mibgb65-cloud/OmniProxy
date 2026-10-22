@@ -143,7 +143,7 @@ task --force verify   → exit 0
 
 # Git
 
-未提交：工作区同时存在多个在办任务的改动（如 `internal/core/agentprotocol`、`docs/product/RIVER.md` 等），按 Git 安全规则不混提交；本任务的改动为
+`bc258ba` — fix(claude): 确证 Desktop effort 控件条件并补齐目录档位声明。工作区其余在办任务的改动未混入；本任务改动为
 `internal/core/modelcatalog/claude_desktop.go`、`internal/core/modelcatalog/claude_desktop_effort_test.go`、
 `internal/application/agentconfig/desktop_effort.go`、`desktop_effort_test.go`、`catalog_patch.go`、`refresh.go`、
 `docs/product/LOCAL_AGENTS.md`、`docs/plans/CURRENT.md` 及本记录。
