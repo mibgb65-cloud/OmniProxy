@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-// ClaudeEffortPrefix 表示网关生成的明确档位选项，不伪装真实厂商型号。
+// ClaudeEffortPrefix 标识历史版本派生的档位模型 ID，仅用于兼容已保存的选择。
 const ClaudeEffortPrefix = "omniproxy-effort-"
 
+// claudeEffortID 只按历史上线时的算法复算，保证旧选择可被解码；不再用于生成菜单条目。
 func claudeEffortID(model, effort string) string {
 	base := strings.TrimSuffix(model, ClaudeLongContextSuffix)
 	digest := sha256.Sum256([]byte(base + "\x00" + effort))
@@ -19,61 +20,44 @@ func claudeEffortID(model, effort string) string {
 	return id
 }
 
-func claudeEffortEntries(entries []Entry) []Entry {
-	result := []Entry{}
-	seen := map[string]bool{}
-	for _, entry := range entries {
-		seen[entry.ID] = true
-	}
-	for _, entry := range entries {
-		// 目前只有 River 的 Messages 档位转换已实现；不替其他适配器猜测契约。
-		if entry.ProviderKind != "river" {
-			continue
-		}
-		for _, effort := range entry.Metadata.ReasoningEfforts {
-			id := claudeEffortID(entry.ID, effort.Value)
-			if seen[id] {
-				continue
-			}
-			variant := entry
-			variant.ID = id
-			label := effort.Description
-			if label == "" {
-				label = effort.Value
-			}
-			variant.Name = entry.Name + " · " + label
-			if !textValid(variant.Name, 200) {
-				variant.Name = id
-			}
-			variant.Metadata.IsDefault = false
-			variant.Metadata.ReasoningEfforts = nil
-			variant.Metadata.DefaultEffort = ""
-			result = append(result, variant)
-			seen[id] = true
+// ClaudeEffort 校验客户端原生 effort 是否属于该模型已确认的档位枚举。
+// 模型不再按档位派生出多行菜单：推理强度由客户端自己的 effort 控件选择。
+func ClaudeEffort(entry Entry, effort string) bool {
+	for _, candidate := range entry.Metadata.ReasoningEfforts {
+		if candidate.Value == effort {
+			return true
 		}
 	}
-	return result
+	return false
 }
 
-// ResolveClaudeEffort 只解析当前可用目录生成的选项，停用或删除目标后立即失效。
-func ResolveClaudeEffort(entries []Entry, model string) (string, string, bool) {
-	seen := map[string]bool{}
-	for _, entry := range entries {
-		seen[entry.ID] = true
-	}
+// archivedEffortMatch 解码历史 omniproxy-effort-* 选择，识别出基础模型与档位。
+// 该 ID 不再出现在菜单中，但用户此前保存的选择必须继续可用，不能退回 unsupported_model。
+// DesktopAlias 的摘要形式同样接受，避免老会话在客户端归一化后失效。
+func archivedEffortMatch(entries []Entry, model string) (Entry, string, bool) {
+	base, long := strings.CutSuffix(model, ClaudeLongContextSuffix)
 	for _, entry := range entries {
 		if entry.ProviderKind != "river" {
 			continue
 		}
+		if long && !supportsLongContext(entry) {
+			continue
+		}
 		for _, effort := range entry.Metadata.ReasoningEfforts {
 			id := claudeEffortID(entry.ID, effort.Value)
-			if seen[id] {
-				continue
-			}
-			if _, ok := ResolveClaudeModel([]Entry{{ID: id, Metadata: entry.Metadata}}, model); ok {
-				return entry.ID, effort.Value, true
+			if base == id || base == strings.TrimSuffix(DesktopAlias(id), ClaudeLongContextSuffix) {
+				return entry, effort.Value, true
 			}
 		}
 	}
-	return "", "", false
+	return Entry{}, "", false
+}
+
+// ResolveClaudeEffort 只解析历史派生 ID 中已确认的档位，停用或删除目标后立即失效。
+func ResolveClaudeEffort(entries []Entry, model string) (string, string, bool) {
+	entry, effort, ok := archivedEffortMatch(entries, model)
+	if !ok {
+		return "", "", false
+	}
+	return entry.ID, effort, true
 }

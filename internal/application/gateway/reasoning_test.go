@@ -2,8 +2,10 @@ package gateway
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
+	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/provider/river"
 )
 
@@ -30,6 +32,50 @@ func TestRiverMessagesEffortPreservedAndValidated(t *testing.T) {
 	}
 	if _, err := riverMessagesEffort([]byte(`{"output_config":{"effort":"high"}}`), river.NemotronVL); err == nil {
 		t.Fatal("unverified Nemotron effort accepted")
+	}
+}
+
+// 客户端原生 effort：模型 ID 只有一行，强度来自 output_config.effort，且必须属于该模型真实枚举。
+func TestClaudeSelectionUsesNativeEffortOnSingleModel(t *testing.T) {
+	window := int64(1048576)
+	confirmed := catalog.Entry{ID: river.DeepSeekFlash1017, Name: "Flash 1017", ProviderKind: "river",
+		Metadata: catalog.Metadata{ContextWindow: &window, ReasoningEfforts: []catalog.Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}, DefaultEffort: "high"}}
+	unknown := catalog.Entry{ID: river.NemotronVL, Name: "Nemotron", ProviderKind: "river", Metadata: catalog.Metadata{ContextWindow: &window}}
+	entries, err := catalog.ClaudeEntries([]catalog.Entry{confirmed, unknown})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, model := range []string{confirmed.ID, confirmed.ID + catalog.ClaudeLongContextSuffix, catalog.DesktopAlias(confirmed.ID)} {
+		want := confirmed.ID
+		if strings.HasSuffix(model, catalog.ClaudeLongContextSuffix) {
+			want += catalog.ClaudeLongContextSuffix
+		}
+		for _, effort := range []string{"none", "high", "max"} {
+			got, gotEffort, found := catalog.ResolveClaudeSelection(entries, model, effort)
+			if !found || got != want || gotEffort != effort {
+				t.Fatal("native effort not applied to the single model", model, effort, got, gotEffort)
+			}
+		}
+		// 未确认的档位不能被透传，解析结果为空档位，由 riverMessagesEffort 明确拒绝。
+		if got, gotEffort, found := catalog.ResolveClaudeSelection(entries, model, "medium"); !found || got != want || gotEffort != "" {
+			t.Fatal("unconfirmed effort accepted", model, gotEffort, got)
+		}
+		if got, gotEffort, found := catalog.ResolveClaudeSelection(entries, model, ""); !found || got != want || gotEffort != "" {
+			t.Fatal("missing effort invented a level", model, gotEffort, got)
+		}
+	}
+	// 未确认档位的模型：即使客户端继承别的模型的档位也不会显示或被接受。
+	if _, gotEffort, found := catalog.ResolveClaudeSelection(entries, unknown.ID, "high"); !found || gotEffort != "" {
+		t.Fatal("effort invented for unconfirmed model", gotEffort)
+	}
+	// 客户端原生 effort 解析必须读到字段本身，不猜测其他字段。
+	for _, body := range []string{`{}`, `{"output_config":null}`, `{"output_config":{}}`, `{"output_config":"high"}`} {
+		if effort := claudeRequestedEffort([]byte(body)); effort != "" {
+			t.Fatal("non-native effort source accepted", body, effort)
+		}
+	}
+	if effort := claudeRequestedEffort([]byte(`{"output_config":{"format":"kept","effort":"max"},"thinking":{"type":"disabled"}}`)); effort != "max" {
+		t.Fatal("native effort not read", effort)
 	}
 }
 

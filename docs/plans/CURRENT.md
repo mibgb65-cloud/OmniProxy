@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [TASK-20261023-001](../tasks/active/TASK-20261023-001-claude-effort-single-model-picker.md)：Claude 菜单回归「一个模型一行」，推理强度改用客户端原生 effort 控件（`behavesAs` + `effortLevel`／`maxEffortLevel`），历史 `omniproxy-effort-*` 选择仍可解码路由；完整质量门 exit 0 通过。待用户在实际 Claude 客户端完全重启后验收原生菜单与 effort 滑杆，并重新应用一次配置以替换本机旧档位行。
+
 - [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：21 工具／约 79 KB 合成请求真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，无细分配额信息。用户已同意备用对照，但两个禁用账号访问令牌均已过期且授权项目与原账号相同；只读预检后停止，备用生成和续期请求均为 0，启用状态／路由指纹未变。待确认正常续期后做跨登录身份对照，不能冒充独立项目测试。完整 Desktop 尚未修复，无生产代码变更或新安装包。
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。

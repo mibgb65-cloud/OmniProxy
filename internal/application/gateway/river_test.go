@@ -51,7 +51,10 @@ func testRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T, model string) 
 						t.Error("tool history lost or provider-specific thinking leaked")
 					}
 					if protocol == "messages" && !strings.Contains(string(body), `"reasoning_effort":"max"`) {
-						t.Error("explicit Messages effort was discarded")
+						t.Error("native Messages effort was discarded")
+					}
+					if protocol == "messages" && strings.Contains(string(body), "omniproxy-effort-") {
+						t.Error("derived effort model leaked upstream")
 					}
 					if stream && protocol != "messages" {
 						w.Header().Set("Content-Type", "text/event-stream")
@@ -107,7 +110,8 @@ func testRiverNativeGatewayStreamingRoutingAndUsage(t *testing.T, model string) 
 				path, body := atriaInput(protocol, stream)
 				body = strings.ReplaceAll(body, `"research"`, fmt.Sprintf("%q", publicModel))
 				if protocol == "messages" {
-					body = fmt.Sprintf(`{"model":%q,"stream":%t,"max_tokens":16,"output_config":{"effort":"max"},"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, publicModel+"[1m]", stream)
+					// 客户端只用原生 effort 控件选择强度，模型 ID 保持同一个。
+					body = fmt.Sprintf(`{"model":%q,"stream":%t,"max_tokens":16,"output_config":{"effort":"max"},"tools":[{"name":"lookup","input_schema":{"type":"object"}}],"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"call_previous","name":"lookup","input":{"value":0}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"call_previous","content":"done"}]}]}`, publicModel, stream)
 				}
 				response, err := http.Post(service.Info().Runtime.Address+"/v1/"+path, "application/json", strings.NewReader(body))
 				if err != nil {

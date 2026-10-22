@@ -7,6 +7,23 @@ import (
 	"omniproxy/internal/provider/river"
 )
 
+// claudeRequestedEffort 只读取客户端原生 effort 选择，不解析其他字段也不猜测默认值。
+func claudeRequestedEffort(body []byte) string {
+	var fields struct {
+		OutputConfig json.RawMessage `json:"output_config"`
+	}
+	if json.Unmarshal(body, &fields) != nil || fields.OutputConfig == nil {
+		return ""
+	}
+	var config struct {
+		Effort string `json:"effort"`
+	}
+	if json.Unmarshal(fields.OutputConfig, &config) != nil {
+		return ""
+	}
+	return config.Effort
+}
+
 func withClaudeEffort(body []byte, effort string) ([]byte, error) {
 	var fields map[string]json.RawMessage
 	if json.Unmarshal(body, &fields) != nil {

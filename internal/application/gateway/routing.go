@@ -27,10 +27,10 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 		if err != nil {
 			return request, proxy.Failure("model_catalog_unavailable", 503)
 		}
-		model, effort, found := catalog.ResolveClaudeEffort(entries, request.Model)
-		if !found {
-			model, found = catalog.ResolveClaudeModel(entries, request.Model)
-		}
+		// 推理强度来自客户端原生 effort 控件（output_config.effort），模型 ID 只承载模型本身；
+		// 历史 omniproxy-effort-* 选择仍可解码，保证已保存的旧选择继续可用。
+		effort := claudeRequestedEffort(request.Body)
+		model, effort, found := catalog.ResolveClaudeSelection(entries, request.Model, effort)
 		if !found {
 			if source, ok := s.router.(interface {
 				CompatibilityCatalog(context.Context) ([]catalog.Entry, error)
@@ -39,7 +39,7 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 				if err != nil {
 					return request, proxy.Failure("model_catalog_unavailable", 503)
 				}
-				model, found = catalog.ResolveClaudeModel(legacy, request.Model)
+				model, effort, found = catalog.ResolveClaudeSelection(legacy, request.Model, effort)
 			}
 		}
 		if !found {

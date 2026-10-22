@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"omniproxy/internal/core/agentprotocol"
 	"omniproxy/internal/core/proxy"
+	"omniproxy/internal/provider/river"
 )
 
 func (s *Service) forwardRiver(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
@@ -27,6 +28,12 @@ func (s *Service) forwardRiver(ctx context.Context, target target, request proxy
 		}
 		if effort != nil {
 			fields["reasoning_effort"] = effort
+		} else if _, exists := fields["reasoning_effort"]; !exists {
+			// 该模型已确认有档位枚举、但用户未显式选择时，使用 River 公布的默认档位，
+			// 避免客户端在原生 effort 控件下保留的旧选择或空值改变默认行为。
+			if defaultEffort := river.ModelMetadata(request.Model).DefaultEffort; defaultEffort != "" {
+				fields["reasoning_effort"], _ = json.Marshal(defaultEffort)
+			}
 		}
 		upstream.Body, err = json.Marshal(fields)
 		if err != nil {

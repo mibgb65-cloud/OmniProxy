@@ -77,6 +77,9 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 		if err := subscriptionCompactSettings(config, entries); err != nil {
 			return err
 		}
+		if err := claudeEffortSettings(config, entries); err != nil {
+			return err
+		}
 	} else {
 		selected := upgradeClaudeDefault(entries, existingModel(client, before.body))
 		config["inferenceModels"] = catalog.DesktopModels(entries, selected)

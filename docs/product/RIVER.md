@@ -19,6 +19,8 @@ Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函
 
 Messages 使用现有文本／函数工具协议转换，经 Chat 接入。工具调用 ID 和结果保持关联；跨协议先收完整响应，再生成下游 JSON／SSE，不提供原生首 Token 增量输出，也不保证保留跨协议的思考正文。不能将其当作 River 官方 Messages API。
 
+推理强度经客户端原生 effort 传递：Chat 用 `reasoning_effort`，Responses 用 `reasoning.effort`，Messages 用 `output_config.effort`。Messages → Chat 转换时只透传该模型已确认的档位，非法值返回 400 而不是静默丢弃；请求未带档位时使用上表公布的上游默认档位。Claude 菜单不再按档位派生模型条目，详见 `docs/product/LOCAL_AGENTS.md` 的「推理强度（Claude）」。
+
 首版沿用本项目文本输入链路，目录只标记文本。River 官方四款模型具有图片能力，但本次未接入图片、音频或文件输入。现有本地请求体限制、超时与并发继续生效；1M 官方上下文元数据不代表完成长输入或最大输出实测。没有余额／套餐查询，不显示推算剩余额度；不支持官方上游 WebSocket。同池故障切换与轮换方式见下文。
 
 ## 长会话与消息容量

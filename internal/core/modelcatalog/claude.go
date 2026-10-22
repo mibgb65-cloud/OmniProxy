@@ -51,8 +51,41 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 		}
 		result = append(result, entry)
 	}
-	result = append(result, claudeEffortEntries(result)...)
+	// 推理强度沿用客户端原生 effort 控件，不派生出 N×M 的档位模型条目。
 	return Normalize(result)
+}
+
+// ResolveClaudeSelection 解析客户端选择的模型与推理强度。
+// 模型 ID 只承载模型本身；effort 来自客户端 effort 控件（历史档位 ID 仍可解码）。
+func ResolveClaudeSelection(entries []Entry, model, requestedEffort string) (string, string, bool) {
+	resolved, found := ResolveClaudeModel(entries, model)
+	if !found {
+		return "", "", false
+	}
+	if effort, ok := decodeClaudeEffortID(entries, model); ok {
+		// 历史选择自带档位，不能被客户端沿用的旧档位覆盖。
+		return resolved, effort, true
+	}
+	if requestedEffort == "" {
+		return resolved, "", true
+	}
+	for _, entry := range entries {
+		if entry.ID == resolved {
+			if ClaudeEffort(entry, requestedEffort) {
+				return resolved, requestedEffort, true
+			}
+			break
+		}
+	}
+	return resolved, "", true
+}
+
+// decodeClaudeEffortID 解码历史 omniproxy-effort-* 选择，返回其中的档位。
+func decodeClaudeEffortID(entries []Entry, model string) (string, bool) {
+	if entry, effort, ok := archivedEffortMatch(entries, model); ok && entry.ID != "" {
+		return effort, true
+	}
+	return "", false
 }
 
 // ResolveClaudeModel 保留目录的精确 ID 优先级，只对已确认能力的目标去除后缀。

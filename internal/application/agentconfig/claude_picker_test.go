@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	catalog "omniproxy/internal/core/modelcatalog"
@@ -104,9 +105,56 @@ func checkClaudePicker(t *testing.T, path string, entries []catalog.Entry) map[s
 	}
 	for i, entry := range entries {
 		row := options[i].(map[string]any)
-		if row["model"] != entry.ID || row["label"] != entry.Name || row["behavesAs"] != nil {
-			t.Fatal("CLI picker model IDs, labels, order or capabilities changed")
+		if row["model"] != entry.ID || row["label"] != entry.Name {
+			t.Fatal("CLI picker model IDs, labels or order changed")
+		}
+		// 每个模型只占一行：推理强度由客户端原生 effort 控件选择，不再派生档位模型。
+		if strings.HasPrefix(entry.ID, catalog.ClaudeEffortPrefix) {
+			t.Fatal("CLI picker still lists a derived effort model", entry.ID)
+		}
+		// 只有已确认档位枚举与默认值的模型才继承 effort 能力。
+		wantBehaves := entry.ProviderKind == "river" && len(entry.Metadata.ReasoningEfforts) > 0 && entry.Metadata.DefaultEffort != ""
+		if wantBehaves != (row["behavesAs"] != nil) {
+			t.Fatal("effort capability grant does not match the confirmed metadata", entry.ID)
 		}
 	}
 	return config
+}
+
+// 已确认档位的模型必须在客户端显示原生 effort 控件，且默认与上限不超过真实枚举。
+func TestClaudePickerGrantsNativeEffortWithinConfirmedRange(t *testing.T) {
+	entries := []catalog.Entry{
+		{ID: "river-confirmed", Name: "River Confirmed", ProviderKind: "river", Metadata: catalog.Metadata{
+			ReasoningEfforts: []catalog.Effort{{Value: "low"}, {Value: "high"}, {Value: "max"}}, DefaultEffort: "high"}},
+		{ID: "river-unknown", Name: "River Unknown", ProviderKind: "river"},
+		{ID: "other-confirmed", Name: "Other", ProviderKind: "other", Metadata: catalog.Metadata{
+			ReasoningEfforts: []catalog.Effort{{Value: "high"}}, DefaultEffort: "high"}},
+	}
+	config := map[string]any{"modelSettings": map[string]any{"river-confirmed": map[string]any{"autoCompactWindow": 850000.0}}}
+	if err := claudeEffortSettings(config, entries); err != nil {
+		t.Fatal(err)
+	}
+	settings := config["modelSettings"].(map[string]any)
+	model := settings["river-confirmed"].(map[string]any)
+	// 用户保存的 autoCompactWindow 必须保留，同一条目只增补档位。
+	if model["autoCompactWindow"] != 850000.0 || model["effortLevel"] != "high" || model["maxEffortLevel"] != "max" {
+		t.Fatal("effort settings damaged or exceeded the confirmed range", model)
+	}
+	for _, id := range []string{"river-unknown", "other-confirmed"} {
+		if settings[id] != nil {
+			t.Fatal("settings written for a model without confirmed effort", id)
+		}
+	}
+	// 用户显式保存的档位与上限不被覆盖。
+	saved := map[string]any{"modelSettings": map[string]any{"river-confirmed": map[string]any{"effortLevel": "low", "maxEffortLevel": "high"}}}
+	if err := claudeEffortSettings(saved, entries); err != nil {
+		t.Fatal(err)
+	}
+	kept := saved["modelSettings"].(map[string]any)["river-confirmed"].(map[string]any)
+	if kept["effortLevel"] != "low" || kept["maxEffortLevel"] != "high" {
+		t.Fatal("explicit user effort overwritten", kept)
+	}
+	if err := claudeEffortSettings(map[string]any{"modelSettings": "broken"}, entries); err == nil {
+		t.Fatal("malformed modelSettings accepted")
+	}
 }

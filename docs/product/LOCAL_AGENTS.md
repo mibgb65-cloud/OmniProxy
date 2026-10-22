@@ -141,6 +141,16 @@ Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在�
 
 模型目录按账号和授权版本隔离，保存官方已确认的描述、推理档位和可选能力。路由别名继承实际目标账号的元数据；未知上下文／工具能力保持待确认，不借用其他模型的数值。客户端目录排除已确认不支持所需协议、文本或工具的模型。
 
+### 推理强度（Claude）
+
+Claude Code CLI／Desktop 的模型菜单每个模型只占一行（普通 + 可选 `[1m]`），推理强度由客户端原生 effort 控件选择（`/effort`、`/model` 的强度滑杆），不再按档位派生出「`模型 · 高强度推理`」这类伪模型条目。
+
+- `modelPicker.options` 对已确认档位枚举且公布默认档位的 River 模型附加 `behavesAs`，客户端据此显示 effort 控件并送出 `output_config.effort`；菜单标签和请求中的模型 ID 都不变，仍显示真实模型名。
+- 同时写入 `modelSettings.<模型ID>.effortLevel`（上游公布的默认档位）和 `maxEffortLevel`（该模型真实支持的最高档位）。`behavesAs` 只借用 effort／thinking 能力识别，不把第三方模型伪装成 Claude，也不改变身份、展示名或计费归属；未知档位的模型不写这两个值，继续使用上游默认。
+- 网关按模型真实枚举再次校验 effort：非法档位返回 `unsupported_reasoning_effort` 400，不静默丢弃、不降级、不猜测；客户端未显式选择时使用上游公布的默认档位。
+- 旧版本写入的 `omniproxy-effort-*` 选择仍可解码回「基础模型 + 档位」，已保存的旧会话不会变成 `unsupported_model`；这些 ID 不再出现在菜单中。
+- `behavesAs` 需要 Claude Code 2.1.257 或更高版本；更旧版本不显示 effort 控件，只能按模型默认档位调用。[官方模型菜单与能力字段](https://code.claude.com/docs/en/settings-reference#fields-for-modelpicker)。
+
 - Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
 - Claude Desktop 写入完整的 `inferenceModels`，支持从其模型选择器切换网关模型和别名，不依赖只识别 Claude ID 的自动发现。
 - Claude Code CLI 自动配置默认模型及完整 `/model` 菜单；也可通过完整模型 ID 切换，旧版客户端需支持 `modelPicker` 才会显示列表。
@@ -153,7 +163,7 @@ Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在�
 
 Codex 不改 model_provider，官方登录和会话根目录不变。内置 openai 通过专用本地接入路径；自定义提供商保留表名。认证助手／活跃配置 profile 冲突时拒绝自动修改。
 
-Claude CLI 合并接入 env、完整模型菜单及已确认的压缩设置，不退出原登录。`modelPicker.options` 使用预览中的模型 ID 和名称，`replaceBuiltInOptions=true` 替换重复档位和不可用的内置模型，保留 Default 行；不伪装模型身份，不覆盖已有 `availableModels` 限制。受管目录刷新同时更新 CLI 菜单，仍要求文件未被外部修改；原菜单随加密备份恢复。本机 Claude Code 2.1.292 已确认支持，旧版未显示时可更新或输入完整模型 ID。[官方模型菜单说明](https://code.claude.com/docs/en/model-config#add-a-custom-model-option)。
+Claude CLI 合并接入 env、完整模型菜单及已确认的压缩设置，不退出原登录。`modelPicker.options` 使用预览中的模型 ID 和名称，`replaceBuiltInOptions=true` 替换重复档位和不可用的内置模型，保留 Default 行；不覆盖已有 `availableModels` 限制。受管目录刷新同时更新 CLI 菜单，仍要求文件未被外部修改；原菜单随加密备份恢复。本机 Claude Code 2.1.292 已确认支持，旧版未显示时可更新或输入完整模型 ID。[官方模型菜单说明](https://code.claude.com/docs/en/model-config#add-a-custom-model-option)。
 
 Desktop 应用时添加并选中「OmniProxy · 本地网关」第三方推理配置条目，合并两份启动配置的 `deploymentMode=3p`。原模式和选择保存为可恢复的非敏感状态；官方登录和原会话文件不改写。组织托管策略仍优先。[官方 Desktop 接入说明](https://code.claude.com/docs/en/llm-gateway-connect#desktop-app)。
 

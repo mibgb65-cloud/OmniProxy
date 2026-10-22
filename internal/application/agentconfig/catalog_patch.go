@@ -79,6 +79,9 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 			if err := subscriptionCompactSettings(config, plan.Models); err != nil {
 				return nil, provider, err
 			}
+			if err := claudeEffortSettings(config, plan.Models); err != nil {
+				return nil, provider, err
+			}
 			result, err := json.MarshalIndent(config, "", "  ")
 			if err != nil {
 				return nil, provider, failure("invalid_config")
