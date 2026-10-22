@@ -8,13 +8,15 @@
 
 ## In Progress
 
+- [TASK-20261021-010](../tasks/active/TASK-20261021-010-about-project-legal-links.md)：`59644eb`，关于页五项固定 HTTPS 入口、错误重试和中英文／键盘测试已完成；官网三份协议已发布至现有正式域名，独立标题／正文和安全头验证通过。当前工作区完整门禁／715 项前端测试／Windows production 构建通过，解除之前关于页类型阻断。原生 UIA／屏幕外夹具未获得可靠结果，仍待可见隔离窗口或用户人工验收；没有重启实际客户端、安装桌面版本或推送。
+
 - [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：非 bare Claude Code 2.1.299 的 21 工具／约 79 KB 合成请求已真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，上游无细分配额明细。完整 Desktop 路径尚未修复；当前 1 个 Google 账号启用、2 个禁用，未擅自启用或使用备用账号，等待独立授权或官方客户端对照。无生产代码变更或新安装包。
 
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
 
-- [TASK-20261022-002](../tasks/completed/2026-10/TASK-20261022-002-restore-codex-fast-mode.md)：`4420c05`，恢复官方 GPT 模型 Fast 服务档位的采集、持久快照与 Codex 目录输出，别名按实际账号继承；不伪造第三方能力、不强制开启 Fast。专项回归 10 轮、CLI／Desktop 真实内核隔离契约及干净副本完整门禁／706 项前端测试／Windows production 构建通过；当前工作区门禁仍受既有关于页测试类型错误阻断。真实配置、运行程序和其他任务改动未变，未安装或发布。
+- [TASK-20261022-002](../tasks/completed/2026-10/TASK-20261022-002-restore-codex-fast-mode.md)：`4420c05`，恢复官方 GPT 模型 Fast 服务档位的采集、持久快照与 Codex 目录输出，别名按实际账号继承；不伪造第三方能力、不强制开启 Fast。专项回归 10 轮、CLI／Desktop 真实内核隔离契约及干净副本完整门禁／706 项前端测试／Windows production 构建通过；当时关于页类型错误造成的工作区阻断已由 TASK-20261021-010 解除。真实配置、运行程序和其他任务改动未变，未安装或发布。
 
 - [TASK-20261021-009](../tasks/completed/2026-10/TASK-20261021-009-build-local-beta18-installer.md)：`c8df0c0`，确认全部功能代码已在 main，完成 Beta.18 production 安装包及 SHA256；完整质量门／706 项前端测试、NSIS、1,753 项来源、原生版本／隔离启动和保护基线校验通过。包含内存优化、周额度及卡片精简；未自动安装、推送或公开发布。
 
