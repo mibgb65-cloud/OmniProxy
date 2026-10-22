@@ -6,11 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.20 — 本地 Windows amd64 production 安装包，未公开发布。新增第三方模型推理档位链路（Codex 默认档位、Claude 显式档位选项、River Messages 档位透传）及压缩专用 10 分钟时限与独立记账。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,562,228 bytes，位于 `release-assets/v2.0.0-beta.20/`，SHA256 `53010dec…69da2`，未签名。生产进程未变、未自动安装；真实档位调用、覆盖更新与数据保留由用户验收，Codex 约 500k 提前压缩未宣称修复。
+2.0.0-beta.21 — 本地 Windows amd64 production 安装包，未公开发布。修正 Claude 模型菜单把推理强度当成不同模型的问题：每个模型只保留一行，强度改回客户端原生 effort 控件，历史档位选择仍可解码路由。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,566,731 bytes，位于 `release-assets/v2.0.0-beta.21/`，SHA256 `4022e13e…5b92f7c`，未签名。生产进程未变、未自动安装；升级后需重新应用一次 Claude 配置并完全重启，原生菜单与强度滑杆由用户验收。
 
 ## In Progress
 
-- [TASK-20261023-001](../tasks/active/TASK-20261023-001-claude-effort-single-model-picker.md)：Claude 菜单回归「一个模型一行」，推理强度改用客户端原生 effort 控件（`behavesAs` + `effortLevel`／`maxEffortLevel`），历史 `omniproxy-effort-*` 选择仍可解码路由；完整质量门 exit 0 通过。待用户在实际 Claude 客户端完全重启后验收原生菜单与 effort 滑杆，并重新应用一次配置以替换本机旧档位行。
+- [TASK-20261023-002](../tasks/active/TASK-20261023-002-build-local-beta21-installer.md)：Beta.21 production 安装包已构建并通过版本资源、SHA256 与资产校验（16 个发布目录各 2 文件，历史资产未变）。待用户本地覆盖安装验收；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261023-001](../tasks/active/TASK-20261023-001-claude-effort-single-model-picker.md)：Claude 菜单回归「一个模型一行」，推理强度改用客户端原生 effort 控件（`behavesAs` + `effortLevel`／`maxEffortLevel`），历史 `omniproxy-effort-*` 选择仍可解码路由；实现提交 `e8e684e`，完整质量门 exit 0。待用户在实际 Claude 客户端完全重启后验收原生菜单与 effort 滑杆。
 
 - [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：21 工具／约 79 KB 合成请求真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，无细分配额信息。用户已同意备用对照，但两个禁用账号访问令牌均已过期且授权项目与原账号相同；只读预检后停止，备用生成和续期请求均为 0，启用状态／路由指纹未变。待确认正常续期后做跨登录身份对照，不能冒充独立项目测试。完整 Desktop 尚未修复，无生产代码变更或新安装包。
 
