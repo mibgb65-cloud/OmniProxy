@@ -70,6 +70,7 @@ export function LocalAgents({
                 group={group}
                 items={items}
                 pending={data.isPending}
+                models={models}
                 installations={installations.data.isError ? undefined : installations.data.data}
                 installationsUnavailable={installations.data.isError}
                 onOpen={(entry) => {

@@ -84,7 +84,7 @@ export function UsageBreakdown({
       </CardHeader>
       <CardContent>
         {items.length ? (
-          <div className="max-h-96 space-y-3 overflow-auto">
+          <div className="app-scroll max-h-96 space-y-3 overflow-auto">
             {items.map((item) => (
               <div
                 key={item.key}
