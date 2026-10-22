@@ -1,4 +1,5 @@
 import { MiMoBadge } from "./mimo-options"
+import { RiverTokenUsage } from "./river-token-usage"
 import { KimiCodeResource } from "./kimi-code-resource"
 import { MiMoPlanResource } from "./mimo-resource"
 import { MiniMaxResource } from "./minimax-resource"
@@ -54,7 +55,13 @@ export function AccountDetailsList({
               {t("accounts.detail.status")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
-              {t(hasSubscriptions ? "subscription.quota.title" : "accounts.detail.balance")}
+              {t(
+                hasSubscriptions
+                  ? "subscription.quota.title"
+                  : accounts.every((account) => account.providerId === "builtin_river")
+                    ? "subscription.tokens.title"
+                    : "accounts.detail.balance",
+              )}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
               {t("accounts.detail.created")}
@@ -100,6 +107,10 @@ export function AccountDetailsList({
                 {account.authMethod === "subscription_login" ? (
                   <div className="min-w-72">
                     <SubscriptionQuota account={account} />
+                  </div>
+                ) : account.providerId === "builtin_river" ? (
+                  <div className="min-w-72">
+                    <RiverTokenUsage account={account} />
                   </div>
                 ) : googleSupported || account.providerId === "builtin_google" ? (
                   <div className="max-w-md min-w-72">

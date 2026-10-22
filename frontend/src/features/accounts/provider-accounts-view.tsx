@@ -89,6 +89,7 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             <p className="text-muted-foreground text-sm">{t("accounts.providerDisabled")}</p>
           ) : null}
           {provider.kind !== "stepfun" &&
+            provider.kind !== "river" &&
             provider.kind !== "kimi" &&
             provider.kind !== "mimo" &&
             provider.kind !== "deepseek" &&
@@ -105,6 +106,9 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
           ) : null}
           {provider.kind === "kimi" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("kimi.routingHint")}</p>
+          ) : null}
+          {provider.kind === "river" ? (
+            <p className="text-muted-foreground text-sm leading-6">{t("river.usage.notice")}</p>
           ) : null}
           {actions.actionError ? (
             <p role="alert" className="text-destructive text-sm">

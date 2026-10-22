@@ -5,6 +5,23 @@ import (
 	"omniproxy/internal/application/activity"
 )
 
+// RiverAccountTokenUsage 仅读取账号元数据和本地用量，不读取或查询 API Key。
+func (s *AppService) RiverAccountTokenUsage(id string) (*activity.AccountTokenUsage, error) {
+	if s.activity == nil {
+		return nil, activity.ErrUnavailable
+	}
+	accounts, err := s.accountService()
+	if err != nil {
+		return nil, err
+	}
+	ctx := context.Background()
+	item, err := accounts.Metadata(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return s.activity.RiverTokenUsage(ctx, item)
+}
+
 func (s *AppService) UsageRead() (activity.UsageInfo, error) {
 	if s.activity == nil {
 		return activity.UsageInfo{}, activity.ErrUnavailable

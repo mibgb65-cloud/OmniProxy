@@ -593,6 +593,13 @@ export function RequestsRead(query: activity$0.RequestQuery): $CancellablePromis
 }
 
 /**
+ * RiverAccountTokenUsage 仅读取账号元数据和本地用量，不读取或查询 API Key。
+ */
+export function RiverAccountTokenUsage(id: string): $CancellablePromise<activity$0.AccountTokenUsage | null> {
+    return $Call.ByID(543969056, id);
+}
+
+/**
  * RuntimeInfo returns the current application runtime information.
  */
 export function RuntimeInfo(): $CancellablePromise<$models.RuntimeInfo> {

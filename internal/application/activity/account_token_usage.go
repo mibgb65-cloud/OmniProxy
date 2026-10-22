@@ -21,8 +21,12 @@ type AccountTokenUsage struct {
 }
 
 func (s *Service) accountTokenUsage(ctx context.Context, item account.Item) (*AccountTokenUsage, error) {
-	// 当前入口仅允许 Codex 订阅；复用成员身份索引，避免每次更新扫描所有账号的留存记录。
-	key, err := subject(proxy.TargetSnapshot{ProviderKind: "openai", AccountID: item.ID,
+	return s.tokenUsage(ctx, item, "openai")
+}
+
+func (s *Service) tokenUsage(ctx context.Context, item account.Item, kind string) (*AccountTokenUsage, error) {
+	// 按线路构造与记账一致的身份索引，避免混入其他提供商／账号以及扫描全部历史。
+	key, err := subject(proxy.TargetSnapshot{ProviderKind: kind, AccountID: item.ID,
 		AuthMethod: item.AuthMethod, Email: item.AuthEmail, WorkspaceID: item.AuthAccountID})
 	if err != nil {
 		return nil, err

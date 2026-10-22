@@ -25,6 +25,12 @@ import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
 import { readAccountBalance } from "../../services/balance"
 import { readGoogleResources, openGoogleConsole } from "../../services/google"
+import { readRiverTokenUsage } from "../../services/activity"
+
+vi.mock("../../services/activity", async (original) => ({
+  ...(await original<typeof import("../../services/activity")>()),
+  readRiverTokenUsage: vi.fn(),
+}))
 
 vi.mock("../../services/google", () => ({
   readGoogleResources: vi.fn(),
@@ -129,6 +135,25 @@ describe("ProviderAccountsView", () => {
     expect(deleteButton.textContent).toBe("")
     expect(deleteButton).not.toHaveAttribute("title")
     expect(screen.getByRole("link", { name: "返回账号" })).toHaveAttribute("href", "/accounts")
+  })
+
+  it("labels River usage as retained local tokens instead of an unavailable balance", async () => {
+    const river = { ...provider, id: "builtin_river", kind: "river", name: "River" }
+    vi.mocked(listProviders).mockResolvedValue([river])
+    vi.mocked(listAccounts).mockResolvedValue([{ ...account, providerId: river.id }])
+    vi.mocked(readRiverTokenUsage).mockResolvedValue({
+      inputTokens: "1000",
+      outputTokens: "20",
+      cachedInputTokens: "0",
+      requests: 1,
+      incompleteRequests: 0,
+      unknownCacheRequests: 0,
+    })
+    renderPage(river.id)
+    expect(await screen.findByText("1K")).toBeInTheDocument()
+    expect(screen.getByText(/仅统计本机留存的代理请求/)).toBeInTheDocument()
+    expect(screen.queryByText("待接入")).not.toBeInTheDocument()
+    expect(readAccountBalance).not.toHaveBeenCalled()
   })
 
   it("embeds shared Google resources in the matching key cards and list rows", async () => {

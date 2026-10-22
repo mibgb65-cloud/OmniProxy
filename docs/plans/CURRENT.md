@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261022-004](../tasks/active/TASK-20261022-004-codex-compaction-river-token-usage.md)，River 本机输入／输出／缓存 Token 统计已实现，干净副本完整质量门／724 项前端测试及 Windows 构建通过；隔离原生窗口空白，视觉验收未完成。Codex 约 500k 提前压缩仍未复现，已排除简单的全局阈值遗漏，保留用户既有 1.05M／900k 设置，不宣称已修复或扩大上游能力。
+
 ## Current Version
 
 2.0.0-beta.19 — 本地 Windows amd64 production 安装包，未公开发布。源码 `36144ec`，新增 Codex Fast 服务档位保留与关于页正式入口，继承 Beta.18 既有功能。完整质量门／718 项前端测试、NSIS、原生版本、1,769 项来源、SHA256 及 test 运行时版本校验通过；安装器 19,561,308 bytes，位于 `release-assets/v2.0.0-beta.19/`，未签名。34 个保护文件及原生产进程未变，未自动安装。更新后需同步官方模型目录并重载 Codex 菜单；真实覆盖更新、数据保留、模型加速与调用由用户验收，Google 429 和旧聊天兼容性未宣称解决。

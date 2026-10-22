@@ -19,6 +19,7 @@ import { AccountBalance } from "./account-balance"
 import { subscriptionTypeKey } from "../providers/provider-labels"
 import type { AccountItem } from "../../services/omniproxy"
 import { GoogleAccountResource } from "../google/google-account-resource"
+import { RiverTokenUsage } from "./river-token-usage"
 
 export function AccountDetailsCard({
   account,
@@ -80,6 +81,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.providerId === "builtin_river" ? (
+          <>
+            <RiverTokenUsage account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : googleSupported || account.providerId === "builtin_google" ? (
