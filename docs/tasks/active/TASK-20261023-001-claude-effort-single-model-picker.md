@@ -169,7 +169,11 @@ PASS（exit 0）
 
 ## Commit
 
-Not committed by Agent.
+```text
+e8e684e54d0146db9e2849b2ef53c07937cad516 fix(claude): 推理强度改用客户端原生 effort 控件
+```
+
+首次提交 `e99ed98` 的中文说明因 PowerShell 重定向写入 BOM 变成乱码，未推送，随即以 `--amend` 用 UTF-8 文件重写说明（内容与文件树不变）。
 
 ---
 
