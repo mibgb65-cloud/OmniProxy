@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.23 — 本地 Windows amd64 production 安装包，未公开发布。包含 Beta.22 的 River 图片输入转发，以及本地 Agent 客户端目录按已确认能力声明图片（Harness／Pi `input`、OpenCode 系 `modalities.input`、Goose `supports_vision`）。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,577,322 bytes，位于 `release-assets/v2.0.0-beta.23/`，SHA256 `4baa5763…f216d`，未签名。生产进程未变、未自动安装；升级后需重新同步 River 模型目录并重新应用各客户端配置再重启。
+2.0.0-beta.25 — 本地 Windows amd64 production 安装包，未公开发布。包含请求 Agent 归属（迁移 040，按独立接入 Key 识别）、配额页对无官方额度接口的账号显示本机已用 Token、Token 用量统一悬浮提示，以及用量卡片细圆角滚动条与本地 Agent 分组「一键配置」。完整质量门／731 项前端测试、Windows 版本资源与资产校验通过；安装器 19,588,499 bytes，位于 `release-assets/v2.0.0-beta.25/`，SHA256 `639fbf77…277b8`，未签名。生产进程未变、未自动安装；升级后需重新应用客户端配置并完全重启。
 
 ## In Progress
 
