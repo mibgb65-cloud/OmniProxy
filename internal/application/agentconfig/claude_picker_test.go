@@ -137,12 +137,41 @@ func TestClaudePickerGrantsNativeEffortWithinConfirmedRange(t *testing.T) {
 	settings := config["modelSettings"].(map[string]any)
 	model := settings["river-confirmed"].(map[string]any)
 	// 用户保存的 autoCompactWindow 必须保留，同一条目只增补档位。
-	if model["autoCompactWindow"] != 850000.0 || model["effortLevel"] != "high" || model["maxEffortLevel"] != "max" {
+	// 模型真实最高档位是 max，但客户端只接受 low／medium／high／xhigh：
+	// 写入 maxEffortLevel: "max" 会被忽略并把发送值压回 high（本机 2.1.292 实测）。
+	if model["autoCompactWindow"] != 850000.0 || model["effortLevel"] != "high" || model["maxEffortLevel"] != "high" {
 		t.Fatal("effort settings damaged or exceeded the confirmed range", model)
 	}
 	for _, id := range []string{"river-unknown", "other-confirmed"} {
 		if settings[id] != nil {
 			t.Fatal("settings written for a model without confirmed effort", id)
+		}
+	}
+	// 上游默认档位是 max 时，effortLevel 必须退到客户端接受的最高档，不能写 max。
+	maxDefault := []catalog.Entry{{ID: "river-max-default", Name: "Max Default", ProviderKind: "river", Metadata: catalog.Metadata{
+		ReasoningEfforts: []catalog.Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}, DefaultEffort: "max"}}}
+	maxConfig := map[string]any{}
+	if err := claudeEffortSettings(maxConfig, maxDefault); err != nil {
+		t.Fatal(err)
+	}
+	maxModel := maxConfig["modelSettings"].(map[string]any)["river-max-default"].(map[string]any)
+	if maxModel["effortLevel"] != "xhigh" || maxModel["maxEffortLevel"] != "high" {
+		t.Fatal("max default leaked an unsupported level into settings", maxModel)
+	}
+	// 只支持 max（无客户端合法档位）时不写上限，也不能写 max。
+	onlyMax := []catalog.Entry{{ID: "river-only-max", Name: "Only Max", ProviderKind: "river", Metadata: catalog.Metadata{
+		ReasoningEfforts: []catalog.Effort{{Value: "none"}, {Value: "max"}}, DefaultEffort: "high"}}}
+	onlyConfig := map[string]any{}
+	if err := claudeEffortSettings(onlyConfig, onlyMax); err != nil {
+		t.Fatal(err)
+	}
+	onlyModel := onlyConfig["modelSettings"].(map[string]any)["river-only-max"].(map[string]any)
+	if _, exists := onlyModel["maxEffortLevel"]; exists {
+		t.Fatal("unsupported ceiling written", onlyModel)
+	}
+	for _, value := range onlyModel {
+		if value == "max" {
+			t.Fatal("max written as a client level", onlyModel)
 		}
 	}
 	// 用户显式保存的档位与上限不被覆盖。

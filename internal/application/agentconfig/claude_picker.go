@@ -8,9 +8,10 @@ import (
 
 // claudePickerSettings 让模型菜单每个模型只占一行，推理强度交回客户端原生 effort 控件。
 //
-// behavesAs 把网关路由名映射到客户端已认识的基础模型，客户端据此显示 effort 控件并送出
-// output_config.effort；菜单标签仍是实际模型名，请求中的模型 ID 也不变。
-// 不把第三方模型伪装成 Claude：这里只借用 effort／thinking 能力识别，不改变身份与展示名。
+// behavesAs 让客户端把网关路由名当作它已认识的基础模型：用于上下文窗口、身份与默认档位解析。
+// 菜单标签仍是实际模型名，请求中的模型 ID 也不变，不改变身份、计费与展示归属。
+// 注意：官方文档只说明 behavesAs 应用「能力与 effort 默认值」，并未声明它能让 effort 控件
+// 出现在未被识别的模型上；不要据此断言控件一定出现。
 func claudePickerSettings(config map[string]any, entries []catalog.Entry) {
 	options := make([]map[string]string, 0, len(entries))
 	for _, entry := range entries {
@@ -34,15 +35,17 @@ func effortBehavesAs(entry catalog.Entry) string {
 	return claudeEffortBehavior
 }
 
-// claudeEffortBehavior 是客户端已知的 effort 能力来源模型；它的档位枚举
-// （low／medium／high／xhigh／max）由网关按各模型真实枚举再次校验，不会透传非法档位。
+// claudeEffortBehavior 是客户端已知的 effort 能力来源模型。
 const claudeEffortBehavior = "claude-opus-4-8"
 
-// claudeEffortRange 是客户端为 behavesAs 模型提供的档位序；网关只接受各模型真实枚举的子集。
-var claudeEffortRange = []string{"low", "medium", "high", "xhigh", "max"}
+// claudeEffortLevels 是客户端在 modelSettings 中接受的档位。
+// 官方文档明确 max 不是 effortLevel／maxEffortLevel 的合法取值，不能写入这两个键。
+var claudeEffortLevels = []string{"low", "medium", "high", "xhigh"}
 
-// claudeEffortSettings 为带 behavesAs 的模型写入客户端认识的收窄设置：
-// 默认档位取上游公布的默认值，上限不超过该模型真实支持的最高档位。
+// claudeEffortSettings 为带 behavesAs 的模型写入客户端接受的档位设置。
+//
+// 只写客户端真正接受的档位：max 既不能作为 effortLevel，也不能作为 maxEffortLevel，
+// 写入会让档位解析异常并把实际发送值压回 high（本机 2.1.292 实测）。
 func claudeEffortSettings(config map[string]any, entries []catalog.Entry) error {
 	settings, ok := config["modelSettings"].(map[string]any)
 	if config["modelSettings"] != nil && !ok {
@@ -55,6 +58,7 @@ func claudeEffortSettings(config map[string]any, entries []catalog.Entry) error 
 		if effortBehavesAs(entry) == "" {
 			continue
 		}
+		defaultLevel := effortDefaultLevel(entry)
 		ceiling := effortCeiling(entry)
 		for _, id := range []string{strings.TrimSuffix(entry.ID, catalog.ClaudeLongContextSuffix), strings.TrimSuffix(catalog.DesktopAlias(entry.ID), catalog.ClaudeLongContextSuffix)} {
 			model, ok := settings[id].(map[string]any)
@@ -65,10 +69,11 @@ func claudeEffortSettings(config map[string]any, entries []catalog.Entry) error 
 				model = map[string]any{}
 			}
 			// 用户已显式保存的档位优先，不覆盖。
-			if _, exists := model["effortLevel"]; !exists && effortSupported(entry, entry.Metadata.DefaultEffort) {
-				model["effortLevel"] = entry.Metadata.DefaultEffort
+			if _, exists := model["effortLevel"]; !exists && defaultLevel != "" {
+				model["effortLevel"] = defaultLevel
 			}
-			// 客户端会继承 behavesAs 模型的完整档位序，必须封顶到该模型真实支持的范围。
+			// 客户端会继承 behavesAs 模型的完整档位序，必须封顶到该模型真实支持的范围；
+			// 上限只写客户端接受的取值，写 max 会被忽略并导致档位解析异常。
 			if _, exists := model["maxEffortLevel"]; !exists && ceiling != "" {
 				model["maxEffortLevel"] = ceiling
 			}
@@ -79,14 +84,30 @@ func claudeEffortSettings(config map[string]any, entries []catalog.Entry) error 
 	return nil
 }
 
+// effortDefaultLevel 把上游默认档位映射到客户端接受的取值。
+// 上游默认 max 时退到客户端最高合法档位 xhigh；其余已确认档位原样使用。
+func effortDefaultLevel(entry catalog.Entry) string {
+	for _, level := range claudeEffortLevels {
+		if level == entry.Metadata.DefaultEffort && effortSupported(entry, level) {
+			return level
+		}
+	}
+	if effortSupported(entry, entry.Metadata.DefaultEffort) {
+		// 默认档位是客户端不接受的取值（如 max），用客户端最高合法档位表达。
+		return claudeEffortLevels[len(claudeEffortLevels)-1]
+	}
+	return ""
+}
+
 func effortSupported(entry catalog.Entry, effort string) bool {
 	return catalog.ClaudeEffort(entry, effort)
 }
 
 // effortCeiling 返回客户端档位序中该模型可用的最高档位。
+// 只考虑客户端接受的取值；模型只支持 max 时没有可写上限，返回空。
 func effortCeiling(entry catalog.Entry) string {
 	ceiling := ""
-	for _, level := range claudeEffortRange {
+	for _, level := range claudeEffortLevels {
 		if catalog.ClaudeEffort(entry, level) {
 			ceiling = level
 		}

@@ -24,7 +24,7 @@ OpenCode CLI／Desktop 共用一张接入卡片；DeepSeek Harness 的 Desktop�
 分别配置 profile。均支持本地 Chat 文本／函数工具目录、独立 Key、加密备份／恢复及目录
 刷新，安装检测和固定官方入口共用原流程。详情见 [HARNESS_OPENCODE.md](HARNESS_OPENCODE.md)。
 
-River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具接入；Messages 转换需要缓冲，不是原生增量流。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。
+River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具／图片接入；Messages 转换需要缓冲，不是原生增量流。图片（含截图工具结果）按官方 `image_url` 契约转发，目录标记 `text` + `image`。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。
 
 1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／River／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。
 2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。
@@ -145,11 +145,32 @@ Messages 正文上限为 16 MiB，以容纳长文本与 JSON 编码；继续在�
 
 Claude Code CLI／Desktop 的模型菜单每个模型只占一行（普通 + 可选 `[1m]`），推理强度由客户端原生 effort 控件选择（`/effort`、`/model` 的强度滑杆），不再按档位派生出「`模型 · 高强度推理`」这类伪模型条目。
 
-- `modelPicker.options` 对已确认档位枚举且公布默认档位的 River 模型附加 `behavesAs`，客户端据此显示 effort 控件并送出 `output_config.effort`；菜单标签和请求中的模型 ID 都不变，仍显示真实模型名。
-- 同时写入 `modelSettings.<模型ID>.effortLevel`（上游公布的默认档位）和 `maxEffortLevel`（该模型真实支持的最高档位）。`behavesAs` 只借用 effort／thinking 能力识别，不把第三方模型伪装成 Claude，也不改变身份、展示名或计费归属；未知档位的模型不写这两个值，继续使用上游默认。
+- `modelPicker.options` 对已确认档位枚举且公布默认档位的 River 模型附加 `behavesAs`，让客户端按已知模型解析上下文窗口、身份与默认档位；菜单标签和请求中的模型 ID 都不变，仍显示真实模型名，不改变计费归属。
+- 同时写入 `modelSettings.<模型ID>.effortLevel` 与 `maxEffortLevel`。**两个键只接受 `low`／`medium`／`high`／`xhigh`，`max` 不是合法取值**：上游默认档位为 `max` 时写 `xhigh`，模型只支持 `max` 时不写上限。写成 `max` 会被客户端忽略，并把实际发送值压回 `high`（本机 Claude Code 2.1.292 实测：`low`／`medium`／`xhigh` 原样送出，`max` 退化为 `high`）。
 - 网关按模型真实枚举再次校验 effort：非法档位返回 `unsupported_reasoning_effort` 400，不静默丢弃、不降级、不猜测；客户端未显式选择时使用上游公布的默认档位。
 - 旧版本写入的 `omniproxy-effort-*` 选择仍可解码回「基础模型 + 档位」，已保存的旧会话不会变成 `unsupported_model`；这些 ID 不再出现在菜单中。
-- `behavesAs` 需要 Claude Code 2.1.257 或更高版本；更旧版本不显示 effort 控件，只能按模型默认档位调用。[官方模型菜单与能力字段](https://code.claude.com/docs/en/settings-reference#fields-for-modelpicker)。
+- 强度控件是否出现由客户端按模型识别结果决定；`behavesAs` 需要 Claude Code 2.1.257 或更高版本。未识别为已知模型的网关 ID 会收到 `unrecognized_model` 提示，并按 200K 上下文处理。[官方模型菜单与能力字段](https://code.claude.com/docs/en/settings-reference#fields-for-modelpicker)、[模型配置与 effort](https://code.claude.com/docs/en/model-config#adjust-effort-level)。
+
+### 推理强度（DeepSeek Harness／Pi）
+
+Harness 只在模型**声明了 reasoning levels** 时，才在模型选择器里显示 **Effort** 菜单；未声明时菜单中没有该项，由端点自身默认值决定是否思考。
+
+- 目录按上游已确认枚举输出 `reasoningEfforts` 映射，键是菜单档位，值是线路上发送的 `reasoning_effort` 拼写；未确认档位的模型继续写 `reasoningEfforts: false`。
+- `off` 显式映射为 `none` 而不是留空：留空等于不发参数，而 River 的 DeepSeek／GLM 在不带参数时默认仍在思考，留空会让「关闭」无效。
+- 可关闭思考的 River 模型同时写模型级 `compat.thinkingFormat: deepseek`，使档位切换同步发送 `thinking: {type: enabled/disabled}`。GLM 没有关闭档位，因此不写该开关，也不伪造 `off`。
+- 网关仍按各模型真实枚举复核；声明只表示「允许客户端选择」，实际生效由上游决定。依据 [Harness 模型配置](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/providers.md#reasoning-effort)。
+
+### 图片输入（本地 Agent）
+
+客户端目录按上游已确认能力声明图片模态，未确认的模型保持纯文本：
+
+| 客户端 | 字段 |
+| --- | --- |
+| Harness Web／Desktop、Pi | 模型级 `input: [text, image]`（pi-ai） |
+| OpenCode、Kilo、Qwen、MiMo Code | `models.<id>.modalities.input` |
+| Goose | `models[].supports_vision` |
+
+pi-ai 的 `input` 一旦显式非空就优先于安装目录，因此必须如实输出；省略会回落到路由 `defaultInput`（默认 `[text]`），同样看不到图片。声明只表示「允许客户端发送」，模型是否真的能识别由上游决定，`system`／`assistant` 消息中的图片仍由上游按官方限制拒绝。依据 [Harness 模型配置](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/providers.md#image-input) 与 [OpenCode 自定义提供商](https://github.com/anomalyco/opencode/issues/8875)。
 
 - Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
 - Claude Desktop 写入完整的 `inferenceModels`，支持从其模型选择器切换网关模型和别名，不依赖只识别 Claude ID 的自动发现。

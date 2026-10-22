@@ -65,7 +65,19 @@ func buildHarness(client string, body, key []byte, port int, plan Plan) ([]byte,
 	}
 	models := []map[string]any{}
 	for _, entry := range plan.Models {
-		model := map[string]any{"id": entry.ID, "name": entry.Name, "input": []string{"text"}, "reasoningEfforts": false}
+		// pi-ai 的 input 显式非空即优先于安装目录；写死 [text] 会让上游能看图的路由
+		// 在 Harness 里无法附图，因此按已确认能力输出。
+		model := map[string]any{"id": entry.ID, "name": entry.Name, "input": clientInputModalities(entry)}
+		// Harness 只在模型声明 reasoning levels 时显示 Effort 菜单；未确认档位的模型写 false，
+		// 保持菜单不出现该项，由上游默认值决定是否思考。
+		if efforts := harnessReasoningEfforts(entry); efforts != nil {
+			model["reasoningEfforts"] = efforts
+			if compat := harnessThinkingFormat(entry, efforts); compat != "" {
+				model["compat"] = map[string]any{"thinkingFormat": compat}
+			}
+		} else {
+			model["reasoningEfforts"] = false
+		}
 		if entry.Metadata.ContextWindow != nil {
 			model["contextWindow"] = *entry.Metadata.ContextWindow
 		}
