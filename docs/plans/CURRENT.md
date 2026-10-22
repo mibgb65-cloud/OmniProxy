@@ -6,11 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.26 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.25 基础上新增「思考强度」应用内入口（迁移 041 `model_effort_pins`；Claude／Claude Desktop 模型卡片按已确认档位固定，网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`），并为 Claude Desktop 目录补齐 `inferenceModels[].maxEffort` 与顶层 `defaultModelEffort`。完整质量门／734 项前端测试、Windows 版本资源与资产校验通过；安装器 19,613,101 bytes，位于 `release-assets/v2.0.0-beta.26/`，SHA256 `3b595828…bf9123`，未签名。生产进程未变、未自动安装；升级后需重新应用客户端配置并完全重启。
+2.0.0-beta.27 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.26 基础上为请求列表与详情新增缓存命中、估算成本、速度 `tok/s` 与首字耗时四项（复用迁移 032／037 已保存数据，无新迁移；未知上游明细保持 `—`，成本为参考价估算而非账单）。完整质量门／740 项前端测试、Windows 版本资源与资产校验通过；安装器 19,618,795 bytes，位于 `release-assets/v2.0.0-beta.27/`，SHA256 `25d236fd…8ad12f`，未签名。生产进程未变、未自动安装；本版不改客户端目录，升级后无需重新应用配置。
 
 ## In Progress
 
-- [TASK-20261023-014](../tasks/active/TASK-20261023-014-request-page-cache-cost-speed.md)：请求列表与详情新增缓存命中、估算成本、速度 `tok/s` 和首字耗时。复用迁移 032／037 已保存数据，无新迁移；未知上游明细保持 `—`，成本为参考价估算而非账单。
+- [TASK-20261023-015](../tasks/active/TASK-20261023-015-build-local-beta27-installer.md)：Beta.27 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261023-014](../tasks/active/TASK-20261023-014-request-page-cache-cost-speed.md)：请求列表与详情新增缓存命中、估算成本、速度 `tok/s` 和首字耗时。复用迁移 032／037 已保存数据，无新迁移；未知上游明细保持 `—`，成本为参考价估算而非账单。实现提交 `ebf117e`；原生窗口视觉确认待人工复核。
 
 - [TASK-20261023-013](../tasks/active/TASK-20261023-013-build-local-beta26-installer.md)：Beta.26 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
 
