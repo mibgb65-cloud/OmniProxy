@@ -106,27 +106,21 @@ describe("AboutView", () => {
   })
 
   it.each([
-    ["zh", ["官网", "开源仓库", "免责协议", "使用协议", "隐私协议"], "待配置"],
+    ["zh", ["官网", "开源仓库", "免责声明", "使用协议", "隐私政策"]],
     [
       "en",
       ["Official website", "Source repository", "Disclaimer", "Terms of use", "Privacy policy"],
-      "Coming soon",
     ],
-  ] as const)(
-    "%s 展示五个待配置资源入口，不生成跳转或协议正文",
-    async (language, labels, pending) => {
-      useUIStore.setState({ language })
-      renderView()
-      for (const label of labels) {
-        expect(
-          screen.getByRole("button", { name: new RegExp(`^${label}\\s*${pending}$`) }),
-        ).toBeDisabled()
-      }
-      expect(screen.queryByRole("link")).not.toBeInTheDocument()
-      expect(checkForUpdate).not.toHaveBeenCalled()
-      expect(await screen.findByText("go1.26.2")).toBeInTheDocument()
-    },
-  )
+  ] as const)("%s 展示五个系统浏览器入口，不在应用内渲染协议", async (language, labels) => {
+    useUIStore.setState({ language })
+    renderView()
+    for (const label of labels) {
+      expect(screen.getByRole("button", { name: label })).toBeEnabled()
+    }
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+    expect(checkForUpdate).not.toHaveBeenCalled()
+    expect(await screen.findByText("go1.26.2")).toBeInTheDocument()
+  })
 })
 
 describe("UpdateCard", () => {

@@ -528,6 +528,13 @@ export function OpenMiniMaxConsole(id: string): $CancellablePromise<void> {
 }
 
 /**
+ * OpenProjectResource 仅允许固定项目入口，避免前端输入变成任意 URL 或本地协议。
+ */
+export function OpenProjectResource(resource: string): $CancellablePromise<void> {
+    return $Call.ByID(424259810, resource);
+}
+
+/**
  * OpenStepConsole 从账号公开区域解析固定官方页面，不接受用户 URL 或密钥。
  */
 export function OpenStepConsole(id: string): $CancellablePromise<void> {
