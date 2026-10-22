@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"omniproxy/internal/application/modeleffort"
 	catalog "omniproxy/internal/core/modelcatalog"
 )
 
@@ -82,7 +83,7 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 	if err := desktop.write(); err != nil {
 		return nil, errors.Join(err, s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
-	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{rebase: staged, desktop: desktop, saveSelection: true, modelIDs: input.ModelIDs}); err != nil {
+	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{rebase: staged, desktop: desktop, saveSelection: true, modelIDs: input.ModelIDs, saveEfforts: effortClient(input.Client) && input.Efforts != nil, efforts: input.Efforts}); err != nil {
 		return nil, errors.Join(err, desktop.rollback(3), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	committed = true
@@ -97,6 +98,8 @@ type fileVersionCommit struct {
 	desktop       *desktopChange
 	saveSelection bool
 	modelIDs      []string
+	saveEfforts   bool
+	efforts       map[string]string
 }
 
 func (s *Service) commitFileVersions(ctx context.Context, client, configHash string, catalogWritten bool, catalogHash string, options ...fileVersionCommit) error {
@@ -123,6 +126,12 @@ func (s *Service) commitFileVersions(ctx context.Context, client, configHash str
 			}
 			if _, err := tx.ExecContext(ctx, `UPDATE agent_backups SET model_ids=? WHERE client=?`, selection, client); err != nil {
 				return failure("backup_failed")
+			}
+		}
+		// 固定档位与配置版本一起提交：文件没写成功就不会留下只生效一半的档位。
+		if options[0].saveEfforts {
+			if err := modeleffort.Save(ctx, tx, options[0].efforts); err != nil {
+				return failure("effort_unavailable")
 			}
 		}
 	}

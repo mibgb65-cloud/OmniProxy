@@ -191,6 +191,11 @@ export const agentsZh = {
   "agents.choose": "选择模型或路由",
   "agents.defaultModel": "默认模型",
   "agents.catalogMode": "模型目录",
+  "agents.effort": "思考强度",
+  "agents.effortFor": "{{model}} 的思考强度",
+  "agents.effortFollowClient": "跟随客户端",
+  "agents.effortHint":
+    "只有上游公布过档位的模型可选。选定后网关按该档位覆盖此模型的 Messages 请求，客户端菜单不需要出现滑杆。",
   "agents.catalogCount": "将提供 {{count}} 个模型／路由",
   "agents.modelSelectionHint": "默认配置全部模型，也可以只勾选需要的模型。目录刷新会保留本次选择。",
   "agents.modelsSelected": "已选 {{count}} / {{total}} 个",

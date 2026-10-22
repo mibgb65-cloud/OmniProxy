@@ -26,6 +26,8 @@ export function useAgentConfigForm(
   defaultModel: string
   selectModels: (ids: string[]) => void
   selectDefault: (id: string) => void
+  efforts: Record<string, string>
+  selectEffort: (id: string, effort: string) => void
 } {
   const client = useQueryClient()
   const [preview, setPreview] = useState<AgentPlan | null>(null)
@@ -37,6 +39,7 @@ export function useAgentConfigForm(
   const [reloaded, setReloaded] = useState(reread)
   const [modelIds, setModelIds] = useState<string[] | null>(null)
   const [model, setModel] = useState("")
+  const [efforts, setEfforts] = useState<Record<string, string>>({})
   const selectedModels = (preview?.models ?? []).filter(
     (entry) => modelIds === null || modelIds.includes(entry.id),
   )
@@ -50,6 +53,16 @@ export function useAgentConfigForm(
   function resetSelection() {
     setModelIds(null)
     setModel("")
+    setEfforts({})
+  }
+  // 只有与已保存值不同的选择才进入输入，其余保持「跟随客户端」语义。
+  function selectEffort(id: string, effort: string) {
+    setEfforts((current) => {
+      const next = { ...current }
+      if (effort === (preview?.efforts?.[id] ?? "")) delete next[id]
+      else next[id] = effort
+      return next
+    })
   }
   async function reload() {
     setBusy(true)
@@ -79,6 +92,7 @@ export function useAgentConfigForm(
       ...(apply && preview ? { catalogRevision: preview.catalogRevision } : {}),
       ...(apply && modelIds !== null ? { modelIds } : {}),
       ...(apply && defaultModel && (model || modelIds !== null) ? { model: defaultModel } : {}),
+      ...(Object.keys(efforts).length > 0 ? { efforts } : {}),
     }
     try {
       if (apply) {
@@ -121,5 +135,7 @@ export function useAgentConfigForm(
     defaultModel,
     selectModels,
     selectDefault: setModel,
+    efforts,
+    selectEffort,
   }
 }

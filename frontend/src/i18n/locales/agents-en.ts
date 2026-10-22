@@ -201,6 +201,11 @@ export const agentsEn = {
   "agents.choose": "Choose a model or route",
   "agents.defaultModel": "Default model",
   "agents.catalogMode": "Model catalog",
+  "agents.effort": "Thinking effort",
+  "agents.effortFor": "Thinking effort for {{model}}",
+  "agents.effortFollowClient": "Follow the client",
+  "agents.effortHint":
+    "Only models with confirmed effort levels can be pinned. The gateway applies that level to this model's Messages requests, so the client menu needs no slider.",
   "agents.catalogCount": "Provides {{count}} models / routes",
   "agents.modelSelectionHint":
     "All models are included by default. Select only the models you need; catalog refreshes preserve your selection.",

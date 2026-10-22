@@ -10,6 +10,10 @@
 
 ## In Progress
 
+- [TASK-20261023-012](../tasks/active/TASK-20261023-012-model-effort-pin.md)：应用内按模型固定思考档位（迁移 041 `model_effort_pins`）。Claude／Claude Desktop 的模型卡片新增「思考强度」选择，只列上游已确认档位；网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`，与配置版本同事务提交。定向 Go／前端回归通过，完整质量门见任务记录；真实会话待用户验收。
+
+- [TASK-20261023-011](../tasks/active/TASK-20261023-011-claude-desktop-effort-entry.md)：取证 Claude Desktop 2.42304.2 只在客户端认识的模型 ID 上渲染 effort 控件（内置 8 个 Claude ID 表 + 签名模型目录），不透明 `claude-omniproxy-*` 路由名无入口且无法用配置注入；补齐 Desktop 目录的 `maxEffort` 与顶层 `defaultModelEffort`（只写已确认档位）。
+
 - [TASK-20261022-006](../tasks/active/TASK-20261022-006-agent-usage-scrollbar-and-group-one-click-config.md)：用量页账号／模型汇总改用细圆角滚动条；本地 Agent 分组卡片新增卡片级「一键配置」（完整默认目录、逐项结果）。实现与前端 728 项测试通过，原生窗口视觉待验收。
 
 - [TASK-20261023-002](../tasks/active/TASK-20261023-002-build-local-beta21-installer.md)：Beta.21 production 安装包已构建并通过版本资源、SHA256 与资产校验（当时 16 个发布目录各 2 文件，历史资产未变）。已被 Beta.22 取代；未签名、未自动安装、未推送或发布。

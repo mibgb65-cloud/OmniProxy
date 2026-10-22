@@ -36,21 +36,23 @@ type Item struct {
 	ErrorCode  string `json:"errorCode"`
 }
 type Input struct {
-	Client              string   `json:"client"`
-	Model               string   `json:"model,omitempty"`
-	ModelIDs            []string `json:"modelIds,omitempty"`
-	Revision            string   `json:"revision"`
-	CatalogRevision     string   `json:"catalogRevision,omitempty"`
-	AcceptCurrentConfig bool     `json:"acceptCurrentConfig,omitempty"`
+	Client              string            `json:"client"`
+	Model               string            `json:"model,omitempty"`
+	ModelIDs            []string          `json:"modelIds,omitempty"`
+	Efforts             map[string]string `json:"efforts,omitempty"`
+	Revision            string            `json:"revision"`
+	CatalogRevision     string            `json:"catalogRevision,omitempty"`
+	AcceptCurrentConfig bool              `json:"acceptCurrentConfig,omitempty"`
 }
 
 // Plan 只展示受管字段和公开模型信息，不包含原配置内容或接入密钥。
 type Plan struct {
-	Summary         string          `json:"summary"`
-	Mode            string          `json:"mode"`
-	DefaultModel    string          `json:"defaultModel"`
-	Models          []catalog.Entry `json:"models"`
-	CatalogRevision string          `json:"catalogRevision"`
+	Summary         string            `json:"summary"`
+	Mode            string            `json:"mode"`
+	DefaultModel    string            `json:"defaultModel"`
+	Models          []catalog.Entry   `json:"models"`
+	Efforts         map[string]string `json:"efforts,omitempty"`
+	CatalogRevision string            `json:"catalogRevision"`
 }
 type Service struct {
 	db           *sql.DB

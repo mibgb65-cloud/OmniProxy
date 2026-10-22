@@ -31,6 +31,8 @@ type ModelSelection = {
   disabled: boolean
   onChange: (ids: string[]) => void
   onDefaultChange: (id: string) => void
+  efforts?: Record<string, string>
+  onEffortChange?: (id: string, effort: string) => void
 }
 
 export function AgentCatalogPreview({
@@ -165,6 +167,15 @@ export function AgentCatalogPreview({
                 <AgentModelCard
                   model={model}
                   isDefault={model.id === (selection?.defaultModel ?? plan.defaultModel)}
+                  effort={
+                    selection?.onEffortChange
+                      ? {
+                          value: selection.efforts?.[model.id] ?? plan.efforts?.[model.id] ?? "",
+                          disabled: selection.disabled,
+                          onChange: (effort) => selection.onEffortChange?.(model.id, effort),
+                        }
+                      : undefined
+                  }
                   selection={
                     selection
                       ? {

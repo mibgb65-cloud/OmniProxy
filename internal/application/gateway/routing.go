@@ -22,6 +22,8 @@ func (s *Service) SetRouter(router Router) { s.router = router }
 
 // RouteRequest 解析规则后改写模型，路由异常不回退到其他提供商或账号。
 func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (proxy.Request, error) {
+	// selection 记录客户端选中的目录条目，用于把固定档位对应回用户选择的那一行。
+	selection := ""
 	if request.Protocol == "messages" && (strings.HasPrefix(request.Model, catalog.DesktopAliasPrefix) || strings.HasPrefix(request.Model, catalog.ClaudeEffortPrefix) || strings.HasSuffix(request.Model, catalog.ClaudeLongContextSuffix)) {
 		entries, err := s.Catalog(ctx)
 		if err != nil {
@@ -56,6 +58,7 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 			}
 		}
 		request.Body, request.Model = body, model
+		selection = model
 	}
 	if s.router == nil {
 		return request, nil
@@ -94,6 +97,21 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 	}
 	request.ProviderID, request.AccountID = decision.ProviderID, decision.AccountID
 	request.AccountUpdatedAt = decision.AccountUpdatedAt
+	// 模型固定档位是用户在应用内的明确选择，覆盖客户端自带或沿用的档位。
+	if request.Protocol == "messages" {
+		pins := s.effortPins(ctx)
+		pinned := pins[request.Model]
+		if pinned == "" && selection != "" && selection != request.Model {
+			pinned = pins[selection]
+		}
+		if pinned != "" {
+			body, err := withClaudeEffort(request.Body, pinned)
+			if err != nil {
+				return request, err
+			}
+			request.Body = body
+		}
+	}
 	return request, nil
 }
 

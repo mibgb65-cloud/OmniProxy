@@ -153,6 +153,33 @@ Claude Code CLI／Desktop 的模型菜单每个模型只占一行（普通 + 可
 - 旧版本写入的 `omniproxy-effort-*` 选择仍可解码回「基础模型 + 档位」，已保存的旧会话不会变成 `unsupported_model`；这些 ID 不再出现在菜单中。
 - 强度控件是否出现由客户端按模型识别结果决定；`behavesAs` 需要 Claude Code 2.1.257 或更高版本。未识别为已知模型的网关 ID 会收到 `unrecognized_model` 提示，并按 200K 上下文处理。[官方模型菜单与能力字段](https://code.claude.com/docs/en/settings-reference#fields-for-modelpicker)、[模型配置与 effort](https://code.claude.com/docs/en/model-config#adjust-effort-level)。
 
+### 推理强度（Claude Desktop 3p 模式）
+
+Claude Desktop 的 Code 标签页只在**客户端自己认识该模型**时渲染 effort 控件，判定来源只有两处（`Claude 2.42304.2` 打包代码实测）：
+
+- 内置模型能力表：只含 `claude-haiku-4-5`、`claude-sonnet-4-5`、`claude-sonnet-4-6`、`claude-sonnet-5`、`claude-opus-4-6`、`claude-opus-4-7`、`claude-opus-4-8`、`claude-opus-5`，另加 `claude-fable-*`／`claude-mythos-*` 前缀分支；ID 归一化只去掉 `[1m]`、`-YYYYMMDD`、`-vN` 和 Bedrock／`anthropic.` 前缀。
+- 签名模型目录（`downloads.claude.ai/model-catalog/v1/catalog.json`）中同 ID 或 `provider_ids` 命中的行，其 `thinking`／`behaves_as` 才提供档位。
+
+第三方配置里的 `inferenceModels` 条目**不能**声明 `thinking`、`runtime`、`provider_ids` 或 `behaves_as`；`modelCatalogUrl` 必须是签名文档。因此不透明路由名（本项目的 `claude-omniproxy-<digits>`）永远不会得到 effort 控件，UI 侧不会有入口 —— 这是客户端限制，不是配置遗漏。
+
+目录里能如实声明的只有两处，均已写入：
+
+- `inferenceModels[].maxEffort`：该模型已确认档位与客户端档位序（`low`／`medium`／`high`／`xhigh`／`max`）的交集最高档；未确认能力时不写。客户端据此隐藏更高档位，并把上限同步给 Code 会话（跳过 `max`，因为 Claude Code 的 `maxEffortLevel` 不接受它）。
+- 顶层 `defaultModelEffort`：默认模型已确认且客户端接受的默认档位；未确认时清除旧值，避免沿用上一个模型的档位。
+
+需要真正调整强度时使用客户端认识的通道：Claude Code 设置里的 `modelSettings.<路由名>.effortLevel`（本项目写入，按模型生效，优先级高于选择器默认值）、环境变量 `CLAUDE_CODE_EFFORT_LEVEL`，以及 Code 会话内的 `/effort`。不通过把第三方模型改名为 Claude 官方 ID 来换取控件。
+
+### 思考强度档位（应用内入口）
+
+客户端不会为不透明路由名渲染 effort 控件，因此档位选择放在本应用的模型配置里：
+
+- 位置：Claude Code／Claude Desktop 的「配置模型」卡片，每个**上游已公布档位**的模型带一个「思考强度」选择；未公布档位的模型没有该入口，也不显示伪造档位。
+- 取值只来自该模型已确认的推理档位枚举（含 `none` 关闭思考、`max` 最高强度）；「跟随客户端」表示不固定，等价于客户端自带或沿用的档位。非法取值返回 `invalid_effort`，未知模型返回 `invalid_model`。
+- 生效方式：网关在处理 Messages 请求时，对已固定档位的模型用该档位覆盖 `output_config.effort`，并同步 `thinking`（`none` → `disabled`，其余 `adaptive`）。其他协议（Chat／Responses）的档位仍由各自客户端字段决定，不受这里影响。
+- 存储：`model_effort_pins`（迁移 041）。写入与受管配置版本在同一事务提交：配置文件没写成功时不会留下只生效一半的档位；清除档位即删除该行。
+- 已知边界：这只改变网关侧实际发送的档位，不会让客户端菜单长出滑杆；客户端界面里的档位显示仍是它自己的判断，可能与这里不一致。
+
+
 ### 推理强度（DeepSeek Harness／Pi）
 
 Harness 只在模型**声明了 reasoning levels** 时，才在模型选择器里显示 **Effort** 菜单；未声明时菜单中没有该项，由端点自身默认值决定是否思考。

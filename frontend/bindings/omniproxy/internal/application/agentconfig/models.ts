@@ -17,6 +17,7 @@ export interface Input {
     "client": string;
     "model"?: string;
     "modelIds"?: string[] | null;
+    "efforts"?: { [_ in string]?: string } | null;
     "revision": string;
     "catalogRevision"?: string;
     "acceptCurrentConfig"?: boolean;
@@ -49,5 +50,6 @@ export interface Plan {
     "mode": string;
     "defaultModel": string;
     "models": modelcatalog$0.Entry[] | null;
+    "efforts"?: { [_ in string]?: string } | null;
     "catalogRevision": string;
 }

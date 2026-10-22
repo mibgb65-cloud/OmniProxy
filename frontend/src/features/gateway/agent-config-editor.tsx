@@ -37,6 +37,8 @@ export function AgentConfigEditor({
     defaultModel,
     selectModels,
     selectDefault,
+    efforts,
+    selectEffort,
   } = useAgentConfigForm(item, reread)
   const started = useRef(false)
   const title = useRef<HTMLHeadingElement>(null)
@@ -121,8 +123,17 @@ export function AgentConfigEditor({
                 disabled: busy || success,
                 onChange: selectModels,
                 onDefaultChange: selectDefault,
+                efforts,
+                // 档位由网关在 Messages 请求上覆盖，只对使用该协议的客户端开放。
+                onEffortChange:
+                  item.client === "claude" || item.client === "claude-desktop"
+                    ? selectEffort
+                    : undefined,
               }}
             />
+          ) : null}
+          {item.client === "claude" || item.client === "claude-desktop" ? (
+            <p className="text-muted-foreground text-xs">{t("agents.effortHint")}</p>
           ) : null}
           {reloaded ? (
             <p
