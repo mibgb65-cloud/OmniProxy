@@ -202,7 +202,7 @@ PASS（format:check → lint → typecheck → test → build，exit 0；前端 
 
 ## Commit
 
-Not committed by Agent.
+`a5bf9bc` — feat(gateway): 用量卡片细圆角滚动条与本地 Agent 分组一键配置（10 个文件；含 docs/product/LOCAL_AGENTS.md 与 docs/tasks/active/ 本记录）。同任务对 docs/product/ACTIVITY.md 的滚动条说明此前随 `211a98f` 一并提交，docs/plans/CURRENT.md 条目随 `65d81d3` 提交。验收状态保持 In Progress：原生窗口视觉与真实客户端写入待用户确认。
 
 ---
 
