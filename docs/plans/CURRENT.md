@@ -6,11 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.21 — 本地 Windows amd64 production 安装包，未公开发布。修正 Claude 模型菜单把推理强度当成不同模型的问题：每个模型只保留一行，强度改回客户端原生 effort 控件，历史档位选择仍可解码路由。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,566,731 bytes，位于 `release-assets/v2.0.0-beta.21/`，SHA256 `4022e13e…5b92f7c`，未签名。生产进程未变、未自动安装；升级后需重新应用一次 Claude 配置并完全重启，原生菜单与强度滑杆由用户验收。
+2.0.0-beta.23 — 本地 Windows amd64 production 安装包，未公开发布。包含 Beta.22 的 River 图片输入转发，以及本地 Agent 客户端目录按已确认能力声明图片（Harness／Pi `input`、OpenCode 系 `modalities.input`、Goose `supports_vision`）。完整质量门／724 项前端测试、Windows 版本资源与资产校验通过；安装器 19,577,322 bytes，位于 `release-assets/v2.0.0-beta.23/`，SHA256 `4baa5763…f216d`，未签名。生产进程未变、未自动安装；升级后需重新同步 River 模型目录并重新应用各客户端配置再重启。
 
 ## In Progress
 
-- [TASK-20261023-002](../tasks/active/TASK-20261023-002-build-local-beta21-installer.md)：Beta.21 production 安装包已构建并通过版本资源、SHA256 与资产校验（16 个发布目录各 2 文件，历史资产未变）。待用户本地覆盖安装验收；未签名、未自动安装、未推送或发布。
+- [TASK-20261022-006](../tasks/active/TASK-20261022-006-agent-usage-scrollbar-and-group-one-click-config.md)：用量页账号／模型汇总改用细圆角滚动条；本地 Agent 分组卡片新增卡片级「一键配置」（完整默认目录、逐项结果）。实现与前端 728 项测试通过，原生窗口视觉待验收。
+
+- [TASK-20261023-002](../tasks/active/TASK-20261023-002-build-local-beta21-installer.md)：Beta.21 production 安装包已构建并通过版本资源、SHA256 与资产校验（当时 16 个发布目录各 2 文件，历史资产未变）。已被 Beta.22 取代；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261023-001](../tasks/active/TASK-20261023-001-claude-effort-single-model-picker.md)：Claude 菜单回归「一个模型一行」，推理强度改用客户端原生 effort 控件（`behavesAs` + `effortLevel`／`maxEffortLevel`），历史 `omniproxy-effort-*` 选择仍可解码路由；实现提交 `e8e684e`，完整质量门 exit 0。待用户在实际 Claude 客户端完全重启后验收原生菜单与 effort 滑杆。
 
@@ -19,6 +21,16 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261023-009](../tasks/completed/2026-10/TASK-20261023-009-quota-usage-tooltip-request-agent.md)：`211a98f`，配额页对没有官方额度／余额接口的账号改显示本机已用 Token（输入／输出／缓存／请求数），账号详情与配额页共用同一用量面板；Token 用量悬浮改用产品统一 Tooltip；迁移 040 让请求明细记录受管 Agent 归属（按独立接入 Key 识别），请求列表／详情显示 Agent，未知来源显示「—」。完整质量门 exit 0／731 项前端测试、Go 全部包与 Windows production 构建通过；原生窗口 Tooltip 与真实客户端归属待用户验收。
+
+- [TASK-20261023-006](../tasks/completed/2026-10/TASK-20261023-006-build-local-beta23-installer.md)：Beta.23 production 本地安装包已构建并通过完整质量门、Windows 版本资源与发布资产校验（18 个发布目录各 2 文件，历史资产未变）。安装器 19,577,322 bytes／SHA256 `4baa576391909fdfbea3b826573621c48bf9a199d9fbd196f8d57a0eaacf216d`，未签名、未自动安装、未推送或发布，供用户本地覆盖更新。
+
+- [TASK-20261023-005](../tasks/completed/2026-10/TASK-20261023-005-client-catalog-image-modalities.md)：本地 Agent 客户端目录按上游已确认能力声明图片输入——Harness／Pi 写 `input`、OpenCode 系写 `modalities.input`、Goose 写 `supports_vision`；未确认能力的模型保持纯文本。此前四处写死纯文本，导致客户端在本地拦截附图。定向回归 + 完整质量门 exit 0／724 项前端测试通过；真实客户端发图未验收。
+
+- [TASK-20261023-004](../tasks/completed/2026-10/TASK-20261023-004-build-local-beta22-installer.md)：Beta.22 production 本地安装包已构建并通过完整质量门、Windows 版本资源与发布资产校验（17 个发布目录各 2 文件，历史资产未变）。安装器 19,574,954 bytes／SHA256 `6906f9b334aaa5f408b207658cf54418dee3e7fe59408c811ef2deb89ae78fb8`，未签名、未自动安装、未推送或发布，供用户本地覆盖更新。
+
+- [TASK-20261023-003](../tasks/completed/2026-10/TASK-20261023-003-river-claude-vision-input.md)：River 图片输入按官方契约接入。Claude Code／Desktop 的 Messages 与 Responses 图片（含截图工具结果）不再本地 400，而是转成 Chat `image_url`／保留 `input_image` 转发上游；目录标记 `text` + `image`。补齐 `core/proxy` 纯文本前置判定，仍拒绝未知图片源、`input_file`／`input_audio` 与越界数据。定向回归 + 完整质量门 exit 0／724 项前端测试／Windows production 构建通过。未用真实 River Key，未重启原生客户端。
 
 - [TASK-20261022-005](../tasks/completed/2026-10/TASK-20261022-005-reasoning-compaction-beta20.md)：补齐第三方模型推理档位（Codex 缺省档位、Claude 显式档位选项、River Messages→Chat 档位校验透传、River 能力目录刷新）与压缩请求专用 10 分钟时限／`responses/compact` 独立记账；专项回归、完整质量门／724 项前端测试、Windows production 打包、版本资源与资产校验通过。Beta.20 本地安装包 19,562,228 bytes／SHA256 `53010de584cbff6b915d345b525a1e906afbdb31aa27c62b44929e3d87169da2`，未签名、未自动安装、未推送或发布。Codex 约 500k 提前压缩根因仍未确认，不宣称已修复。
 
