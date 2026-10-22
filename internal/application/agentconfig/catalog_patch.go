@@ -97,6 +97,7 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 	}
 	config["inferenceModels"] = catalog.DesktopModels(plan.Models, plan.DefaultModel)
 	config["modelDiscoveryEnabled"] = false
+	desktopDefaultEffortSettings(config, plan.Models, plan.DefaultModel)
 	result, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return nil, provider, failure("invalid_config")

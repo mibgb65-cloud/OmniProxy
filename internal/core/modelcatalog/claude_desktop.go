@@ -25,12 +25,39 @@ func desktopDigest(modelID string) string {
 	return DesktopAliasPrefix + strings.Repeat("0", 78-len(value)) + value
 }
 
+// DesktopEffortLevels 是客户端 inferenceModels[].maxEffort 接受的档位，由低到高。
+// 取值域与 Claude Code 的 effortLevel／maxEffortLevel 不同：这里允许 max。
+var DesktopEffortLevels = []string{"low", "medium", "high", "xhigh", "max"}
+
+// DesktopMaxEffort 返回该模型在客户端档位序中已确认的最高档位。
+// 只做已确认枚举与客户端档位序的交集；未确认能力的模型返回空，不写上限。
+func DesktopMaxEffort(entry Entry) string {
+	ceiling := ""
+	for _, level := range DesktopEffortLevels {
+		if ClaudeEffort(entry, level) {
+			ceiling = level
+		}
+	}
+	return ceiling
+}
+
+// DesktopDefaultEffort 只返回客户端接受的、上游公布的默认档位。
+func DesktopDefaultEffort(entry Entry) string {
+	for _, level := range DesktopEffortLevels {
+		if level == entry.Metadata.DefaultEffort {
+			return level
+		}
+	}
+	return ""
+}
+
 // DesktopModel 使用客户端原生长上下文标志，Code 菜单和实际 CLI 模型选择保持一致。
 type DesktopModel struct {
 	Name          string `json:"name"`
 	LabelOverride string `json:"labelOverride"`
 	Supports1m    bool   `json:"supports1m,omitempty"`
 	Prefer1m      bool   `json:"prefer1m,omitempty"`
+	MaxEffort     string `json:"maxEffort,omitempty"`
 }
 
 // DesktopModels 为普通和长上下文生成独立选项，客户端归一化后仍可区分。
@@ -38,7 +65,7 @@ func DesktopModels(entries []Entry, defaultModel string) []DesktopModel {
 	models := make([]DesktopModel, 0, len(entries))
 	for _, entry := range entries {
 		long := strings.HasSuffix(entry.ID, ClaudeLongContextSuffix) && supportsLongContext(entry)
-		item := DesktopModel{Name: DesktopAlias(entry.ID), LabelOverride: entry.Name, Supports1m: long, Prefer1m: long}
+		item := DesktopModel{Name: DesktopAlias(entry.ID), LabelOverride: entry.Name, Supports1m: long, Prefer1m: long, MaxEffort: DesktopMaxEffort(entry)}
 		if entry.ID == defaultModel {
 			models = append([]DesktopModel{item}, models...)
 		} else {

@@ -83,6 +83,7 @@ func (s *Service) refreshClient(ctx context.Context, client, expected string, en
 	} else {
 		selected := upgradeClaudeDefault(entries, existingModel(client, before.body))
 		config["inferenceModels"] = catalog.DesktopModels(entries, selected)
+		desktopDefaultEffortSettings(config, entries, selected)
 	}
 	body, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
