@@ -29,6 +29,7 @@ export const dashboardEn: Record<keyof typeof dashboardZh, string> = {
   "dash.trendEmpty": "No recorded activity in this range.",
   "dash.trendUnavailable": "Statistics unavailable",
   "dash.trendUsageUnknown": "Token usage has not been reported for this range.",
+  "dash.trendTotal": "Total",
   "dash.issues": "Needs attention",
   "dash.issuesCount": "{{count}} issues",
   "dash.issuesEmpty": "No confirmed issues need attention.",

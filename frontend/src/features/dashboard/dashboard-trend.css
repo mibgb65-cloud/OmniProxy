@@ -1,0 +1,64 @@
+/*
+ * 调用趋势横向滚动：隐藏 WebView2 原生滚动条（灰色轨道 + 两端箭头），
+ * 改用与主滚动区一致的细圆角滑块；滑块只在需要滚动时占位，避免卡片无谓变高。
+ */
+.trend-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.trend-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.trend-scroll:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.trend-rail {
+  position: relative;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 9999px;
+  touch-action: none;
+  transition: opacity 160ms ease;
+}
+
+.trend-rail[data-scrollable="false"] {
+  height: 0;
+  margin-top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trend-rail__thumb {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted-foreground) 40%, transparent);
+  transition:
+    background-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.trend-rail:not([data-scrollable]) .trend-rail__thumb {
+  opacity: 0;
+}
+
+.trend-rail[data-scrollable="true"]:hover .trend-rail__thumb,
+.trend-rail[data-scrollable="true"][data-dragging="true"] .trend-rail__thumb {
+  background: color-mix(in oklab, var(--muted-foreground) 72%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trend-rail,
+  .trend-rail__thumb {
+    transition: none;
+  }
+}

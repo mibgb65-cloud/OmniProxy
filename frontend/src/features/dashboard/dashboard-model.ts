@@ -104,3 +104,28 @@ export function dashboardIssues(
 export function dashboardTokenRatio(value: string, maximum: bigint) {
   return maximum > 0n ? Number((BigInt(value) * 10000n) / maximum) / 100 : 0
 }
+
+/**
+ * 趋势图纵轴上限：留 5% 余量后按一位有效数字向上取整，
+ * 让刻度落在 0／400／800／1.2K 这类整数上。Token 合计会超出 Number 安全范围，全程使用 BigInt。
+ */
+export function dashboardAxisMaximum(maximum: bigint) {
+  if (maximum <= 0n) return 4n
+  const headroom = (maximum * 105n + 99n) / 100n
+  const quarter = (headroom + 3n) / 4n
+  if (quarter <= 1n) return 4n
+  const magnitude = 10n ** BigInt(quarter.toString().length - 1)
+  const step = quarter % magnitude === 0n ? quarter : (quarter / magnitude + 1n) * magnitude
+  return step * 4n
+}
+
+/** 纵轴从上到下的五个刻度值，首项为上限、末项为 0。 */
+export function dashboardAxisTicks(maximum: bigint) {
+  const axis = dashboardAxisMaximum(maximum)
+  return [axis, (axis * 3n) / 4n, axis / 2n, axis / 4n, 0n]
+}
+
+/** 横轴标签抽稀间隔：最多 6 个标签，末位标签始终显示。 */
+export function dashboardLabelStep(count: number) {
+  return count <= 1 ? 1 : Math.max(1, Math.ceil((count - 1) / 5))
+}

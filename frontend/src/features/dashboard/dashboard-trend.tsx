@@ -1,13 +1,28 @@
-import { useState } from "react"
+import { useCallback, useLayoutEffect, useRef, useState } from "react"
+import type { PointerEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { Tooltip } from "../../components/ui/tooltip"
 import { formatTokens } from "../../services/activity"
 import type { DashboardInfo, DashboardSummary } from "../../services/dashboard"
-import { dashboardPointLabel, dashboardTokenRatio, type DashboardPeriod } from "./dashboard-model"
+import {
+  dashboardAxisTicks,
+  dashboardLabelStep,
+  dashboardPointLabel,
+  dashboardTokenRatio,
+  type DashboardPeriod,
+} from "./dashboard-model"
+import "./dashboard-trend.css"
 
-function series(summary: DashboardSummary, mode: "requests" | "tokens") {
+type TrendMode = "requests" | "tokens"
+
+/** 自绘滑块的最短长度，保证极长的横轴仍能抓住滑块。 */
+const MIN_THUMB_WIDTH = 28
+/** 每列最小宽度（px）：低于此宽度柱形与横轴标签会挤在一起。 */
+const MIN_COLUMN_WIDTH = 22
+
+function series(summary: DashboardSummary, mode: TrendMode) {
   return mode === "tokens"
     ? ([
         { key: "activity.input", value: summary.inputTokens, color: "bg-blue-500" },
@@ -21,6 +36,133 @@ function series(summary: DashboardSummary, mode: "requests" | "tokens") {
       ] as const)
 }
 
+function compactFormatter(language: string) {
+  return new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  })
+}
+
+/**
+ * 横向滚动容器 + 自绘滑块。
+ * 原生滚动条在深色卡片里会带灰色轨道与两端箭头，这里隐藏原生滚动条，
+ * 只在需要滚动时于图区下方显示 8px 圆角滑块，支持拖动与点击轨道跳转。
+ */
+function TrendScroller({ label, children }: { label: string; children: ReactNode }) {
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const railRef = useRef<HTMLDivElement>(null)
+  const thumbRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{ pointerId: number; offset: number } | null>(null)
+
+  const syncThumb = useCallback(() => {
+    const viewport = viewportRef.current
+    const rail = railRef.current
+    const thumb = thumbRef.current
+    if (!viewport || !rail || !thumb) return
+
+    const maxScroll = viewport.scrollWidth - viewport.clientWidth
+    const railWidth = rail.clientWidth
+    const scrollable = maxScroll > 1 && railWidth > 0
+    rail.dataset.scrollable = String(scrollable)
+    if (!scrollable) return
+
+    const thumbWidth = Math.min(
+      railWidth,
+      Math.max(MIN_THUMB_WIDTH, (railWidth * viewport.clientWidth) / viewport.scrollWidth),
+    )
+    const thumbLeft = (viewport.scrollLeft / maxScroll) * (railWidth - thumbWidth)
+    thumb.style.width = `${thumbWidth}px`
+    thumb.style.transform = `translateX(${thumbLeft}px)`
+  }, [])
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    const content = contentRef.current
+    const rail = railRef.current
+    if (!viewport || !content || !rail) return
+
+    const observer = new ResizeObserver(syncThumb)
+    observer.observe(viewport)
+    observer.observe(content)
+    observer.observe(rail)
+    syncThumb()
+    return () => observer.disconnect()
+  }, [syncThumb])
+
+  const scrollToPointer = (clientX: number, offset: number) => {
+    const viewport = viewportRef.current
+    const rail = railRef.current
+    const thumb = thumbRef.current
+    if (!viewport || !rail || !thumb) return
+
+    const maxScroll = viewport.scrollWidth - viewport.clientWidth
+    const travel = rail.clientWidth - thumb.offsetWidth
+    if (maxScroll <= 0 || travel <= 0) return
+
+    const position = clientX - rail.getBoundingClientRect().left - offset
+    viewport.scrollLeft = (Math.max(0, Math.min(position, travel)) / travel) * maxScroll
+    syncThumb()
+  }
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const rail = railRef.current
+    const thumb = thumbRef.current
+    if (event.button !== 0 || !rail || !thumb || rail.dataset.scrollable !== "true") return
+
+    event.preventDefault()
+    // 点击轨道时让滑块中心跳到指针位置；拖动滑块时保留原有抓取点。
+    const offset =
+      event.target === thumb
+        ? event.clientX - thumb.getBoundingClientRect().left
+        : thumb.offsetWidth / 2
+    dragRef.current = { pointerId: event.pointerId, offset }
+    rail.dataset.dragging = "true"
+    rail.setPointerCapture(event.pointerId)
+    scrollToPointer(event.clientX, offset)
+  }
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId === event.pointerId) {
+      scrollToPointer(event.clientX, dragRef.current.offset)
+    }
+  }
+
+  const handlePointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    const rail = railRef.current
+    if (dragRef.current?.pointerId !== event.pointerId || !rail) return
+    dragRef.current = null
+    delete rail.dataset.dragging
+    if (rail.hasPointerCapture(event.pointerId)) rail.releasePointerCapture(event.pointerId)
+  }
+
+  return (
+    <div className="min-w-0 flex-1">
+      <div
+        ref={viewportRef}
+        role="group"
+        aria-label={label}
+        className="trend-scroll"
+        onScroll={syncThumb}
+      >
+        <div ref={contentRef}>{children}</div>
+      </div>
+      <div
+        ref={railRef}
+        aria-hidden="true"
+        className="trend-rail"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onLostPointerCapture={handlePointerEnd}
+      >
+        <div ref={thumbRef} className="trend-rail__thumb" />
+      </div>
+    </div>
+  )
+}
+
 export function DashboardTrend({
   data,
   period,
@@ -31,14 +173,22 @@ export function DashboardTrend({
   loading: boolean
 }) {
   const { t, i18n } = useTranslation()
-  const [mode, setMode] = useState<"requests" | "tokens">("requests")
+  const [mode, setMode] = useState<TrendMode>("requests")
   const language = i18n.resolvedLanguage ?? "zh"
   const points = data?.points ?? []
-  const totals = points.map((point) =>
-    series(point.summary, mode).reduce((sum, item) => sum + BigInt(item.value), 0n),
-  )
-  const maximum = totals.reduce((max, value) => (value > max ? value : max), 1n)
+  const columns = points.map((point) => {
+    const segments = series(point.summary, mode)
+    return {
+      point,
+      segments,
+      total: segments.reduce((sum, item) => sum + BigInt(item.value), 0n),
+    }
+  })
+  const maximum = columns.reduce((max, column) => (column.total > max ? column.total : max), 0n)
+  const ticks = dashboardAxisTicks(maximum)
   const legend = data ? series(data.summary, mode) : []
+  const compact = compactFormatter(language)
+  const labelStep = dashboardLabelStep(columns.length)
   return (
     <Card className="min-w-0 gap-3 py-4">
       <CardHeader className="space-y-3 px-4">
@@ -70,94 +220,158 @@ export function DashboardTrend({
         <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
           {legend.map((item) => (
             <span key={item.key} className="inline-flex items-center gap-1.5">
-              <span className={`size-2 rounded-sm ${item.color}`} aria-hidden="true" />
+              <span className={`size-2 rounded-full ${item.color}`} aria-hidden="true" />
               {t(item.key)}
+              <span className="text-foreground/70 tabular-nums">
+                {compact.format(BigInt(item.value))}
+              </span>
             </span>
           ))}
         </div>
       </CardHeader>
       <CardContent className="min-w-0 px-4">
-        {data && totals.some((value) => value > 0n) ? (
-          <div
-            role="group"
-            aria-label={t("dash.trend")}
-            className="min-w-0 overflow-x-auto pt-2 pb-2"
-          >
-            <div
-              className="relative h-52 px-3"
-              style={{ minWidth: Math.max(260, points.length * 26) }}
-            >
+        {data && maximum > 0n ? (
+          <div className="flex min-w-0 gap-2 pt-1">
+            <div aria-hidden="true" className="relative h-52 w-9 shrink-0 sm:w-10">
+              {ticks.map((value, index) => (
+                <span
+                  key={value.toString()}
+                  className="text-muted-foreground absolute right-0 text-[10px] tabular-nums"
+                  style={{
+                    top: `${(index * 100) / 4}%`,
+                    transform:
+                      index === 0
+                        ? undefined
+                        : index === 4
+                          ? "translateY(-100%)"
+                          : "translateY(-50%)",
+                  }}
+                >
+                  {compact.format(value)}
+                </span>
+              ))}
+            </div>
+            <TrendScroller label={t("dash.trend")}>
               <div
-                className="pointer-events-none absolute inset-x-3 top-0 bottom-6 flex flex-col justify-between"
-                aria-hidden="true"
+                className="relative"
+                style={{ minWidth: Math.max(260, columns.length * MIN_COLUMN_WIDTH) }}
               >
-                {[4, 3, 2, 1, 0].map((value) => (
-                  <div key={value} className="border-border/70 relative border-t border-dashed">
-                    <span className="bg-card text-muted-foreground absolute -top-2 right-0 pl-1 text-[10px]">
-                      {new Intl.NumberFormat(language, {
-                        notation: "compact",
-                        maximumFractionDigits: 1,
-                      }).format((maximum * BigInt(value)) / 4n)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div
-                className="relative grid h-full items-end gap-1"
-                style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0,1fr))` }}
-              >
-                {points.map((point, index) => {
-                  const bars = series(point.summary, mode)
-                  const title = dashboardPointLabel(point.start, period, language, true)
-                  const detail = (
-                    <div className="space-y-1">
-                      <p>{title}</p>
-                      {bars.map((item) => (
-                        <p key={item.key}>
-                          {t(item.key)}：{formatTokens(item.value, language)}
-                        </p>
-                      ))}
-                    </div>
-                  )
-                  return (
-                    <Tooltip key={point.start} content={detail}>
-                      <div
-                        tabIndex={0}
-                        aria-label={`${title} · ${t("dash.requests")} ${point.summary.requests} · ${t("dash.tokens")} ${point.summary.totalTokens}`}
-                        className="focus-visible:ring-ring/50 flex h-full min-w-0 flex-col justify-end rounded-sm outline-none focus-visible:ring-2"
-                      >
-                        <div className="flex h-full items-end pb-1">
-                          <div
-                            className="flex w-full flex-col-reverse overflow-hidden rounded-t-sm"
-                            style={{
-                              height: `${dashboardTokenRatio(totals[index]!.toString(), maximum)}%`,
-                            }}
-                          >
-                            {bars.map((item) => (
-                              <div
-                                key={item.key}
-                                className={item.color}
-                                style={{
-                                  height: `${dashboardTokenRatio(item.value, totals[index]!)}%`,
-                                  minHeight: BigInt(item.value) > 0n ? 1 : 0,
-                                }}
-                              />
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-52"
+                  aria-hidden="true"
+                >
+                  {ticks.slice(1, -1).map((value, index) => (
+                    <div
+                      key={value.toString()}
+                      className="border-border/70 absolute inset-x-0 border-t border-dashed"
+                      style={{ top: `${((index + 1) * 100) / 4}%` }}
+                    />
+                  ))}
+                  <div className="border-border absolute inset-x-0 border-t" />
+                  <div className="border-border absolute inset-x-0 bottom-0 border-t" />
+                </div>
+                <div
+                  className="relative grid h-52 items-end"
+                  style={{
+                    gridTemplateColumns: `repeat(${columns.length}, minmax(0,1fr))`,
+                  }}
+                >
+                  {columns.map(({ point, segments, total }) => {
+                    const title = dashboardPointLabel(point.start, period, language, true)
+                    return (
+                      <Tooltip
+                        key={point.start}
+                        content={
+                          <div className="min-w-40 space-y-1.5">
+                            <p className="font-medium">{title}</p>
+                            {segments.map((item) => (
+                              <p key={item.key} className="flex items-center justify-between gap-6">
+                                <span className="inline-flex items-center gap-1.5">
+                                  <span
+                                    className={`size-1.5 rounded-full ${item.color}`}
+                                    aria-hidden="true"
+                                  />
+                                  {t(item.key)}
+                                </span>
+                                <span className="tabular-nums">
+                                  {formatTokens(item.value, language)}
+                                </span>
+                              </p>
                             ))}
+                            {segments.length > 1 ? (
+                              <p className="flex items-center justify-between gap-6 border-t pt-1.5 font-medium">
+                                <span>{t("dash.trendTotal")}</span>
+                                <span className="tabular-nums">
+                                  {formatTokens(total.toString(), language)}
+                                </span>
+                              </p>
+                            ) : null}
+                          </div>
+                        }
+                      >
+                        <div
+                          tabIndex={0}
+                          aria-label={`${title} · ${t("dash.requests")} ${point.summary.requests} · ${t("dash.tokens")} ${point.summary.totalTokens}`}
+                          className="group focus-visible:ring-ring/50 relative flex h-full min-w-0 flex-col justify-end rounded-sm outline-none focus-visible:ring-2"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="group-hover:bg-foreground/5 group-focus-visible:bg-foreground/5 absolute inset-x-0.5 inset-y-0 rounded-sm transition-colors"
+                          />
+                          <div className="relative flex h-full w-full items-end justify-center">
+                            {total > 0n ? (
+                              <div
+                                className="flex w-[58%] max-w-[22px] min-w-[4px] flex-col-reverse overflow-hidden rounded-t-[3px]"
+                                style={{
+                                  height: `${dashboardTokenRatio(total.toString(), ticks[0]!)}%`,
+                                  minHeight: 2,
+                                }}
+                              >
+                                {segments.map((item) => (
+                                  <div
+                                    key={item.key}
+                                    className={item.color}
+                                    style={{
+                                      height: `${dashboardTokenRatio(item.value, total)}%`,
+                                      minHeight: BigInt(item.value) > 0n ? 1 : 0,
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
-                        <span className="text-muted-foreground h-6 shrink-0 text-center text-[10px] whitespace-nowrap">
-                          {index % Math.ceil(points.length / 8) === 0 || index === points.length - 1
-                            ? period === 1
-                              ? String(new Date(point.start * 1000).getHours()).padStart(2, "0")
-                              : dashboardPointLabel(point.start, period, language)
-                            : ""}
-                        </span>
-                      </div>
-                    </Tooltip>
-                  )
-                })}
+                      </Tooltip>
+                    )
+                  })}
+                </div>
+                <div
+                  className="text-muted-foreground mt-2 grid text-[10px] tabular-nums"
+                  style={{
+                    gridTemplateColumns: `repeat(${columns.length}, minmax(0,1fr))`,
+                  }}
+                >
+                  {columns.map(({ point }, index) => (
+                    <span
+                      key={point.start}
+                      className={
+                        index === 0
+                          ? "text-start whitespace-nowrap"
+                          : index === columns.length - 1
+                            ? "text-end whitespace-nowrap"
+                            : "text-center whitespace-nowrap"
+                      }
+                    >
+                      {index % labelStep === 0 || index === columns.length - 1
+                        ? period === 1
+                          ? String(new Date(point.start * 1000).getHours()).padStart(2, "0")
+                          : dashboardPointLabel(point.start, period, language)
+                        : ""}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            </TrendScroller>
           </div>
         ) : (
           <p

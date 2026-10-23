@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
+  dashboardAxisMaximum,
+  dashboardAxisTicks,
+  dashboardLabelStep,
   dashboardRange,
   dashboardTokenRatio,
   formatDashboardLatency,
@@ -51,5 +54,42 @@ describe("dashboard local ranges", () => {
     const issues = dashboardIssues(accounts, providers, [], [resource])
     expect(issues.map((item) => item.kind)).toEqual(["account"])
     expect(issues[0]?.name).toBe("out@example.invalid")
+  })
+})
+
+describe("dashboard trend axis", () => {
+  it("rounds the vertical axis to readable steps with headroom", () => {
+    expect(dashboardAxisMaximum(0n)).toBe(4n)
+    expect(dashboardAxisMaximum(1n)).toBe(4n)
+    expect(dashboardAxisMaximum(7n)).toBe(8n)
+    expect(dashboardAxisMaximum(588n)).toBe(800n)
+    expect(dashboardAxisMaximum(1184n)).toBe(1600n)
+    expect(dashboardAxisTicks(588n)).toEqual([800n, 600n, 400n, 200n, 0n])
+  })
+  it("keeps token axes exact beyond Number's safe integer range", () => {
+    const axis = dashboardAxisMaximum(900719925474099312345n)
+    expect(axis).toBe(1200000000000000000000n)
+    expect(dashboardAxisTicks(900719925474099312345n)).toEqual([
+      1200000000000000000000n,
+      900000000000000000000n,
+      600000000000000000000n,
+      300000000000000000000n,
+      0n,
+    ])
+  })
+  it("keeps at most six readable labels and always marks the last bucket", () => {
+    expect(dashboardLabelStep(0)).toBe(1)
+    expect(dashboardLabelStep(1)).toBe(1)
+    expect(dashboardLabelStep(7)).toBe(2)
+    expect(dashboardLabelStep(24)).toBe(5)
+    expect(dashboardLabelStep(30)).toBe(6)
+    for (const count of [7, 24, 30]) {
+      const step = dashboardLabelStep(count)
+      const labels = Array.from({ length: count }, (_, index) => index).filter(
+        (index) => index % step === 0 || index === count - 1,
+      )
+      expect(labels.length).toBeLessThanOrEqual(6)
+      expect(labels.at(-1)).toBe(count - 1)
+    }
   })
 })

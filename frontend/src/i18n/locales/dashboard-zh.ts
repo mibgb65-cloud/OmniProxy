@@ -27,6 +27,7 @@ export const dashboardZh = {
   "dash.trendEmpty": "所选时段暂无已记录的调用。",
   "dash.trendUnavailable": "暂无可用统计",
   "dash.trendUsageUnknown": "所选时段尚未收到 Token 用量报告。",
+  "dash.trendTotal": "合计",
   "dash.issues": "待处理问题",
   "dash.issuesCount": "{{count}} 项",
   "dash.issuesEmpty": "暂无已确认的待处理问题。",
