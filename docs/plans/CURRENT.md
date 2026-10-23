@@ -6,9 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.28 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.27 基础上重做仪表盘「调用趋势」（独立刻度轴、独立横轴标签行、居中柱形、自绘细滑块），并把「设置与关于 → 数据存储」的占用拆成数据库／运行日志／本地缓存／更新缓存／登录凭据／其他六类，只显示非零分类并按大小降序排列，新增「清理更新残留」删除安装辅助程序副本（实测约 84 MB）。完整质量门／126 文件 750 项前端测试、Windows 版本资源与资产校验通过；安装器 19,626,700 bytes，位于 `release-assets/v2.0.0-beta.28/`，SHA256 `8ef4cd32…0af269db`，未签名。生产进程未变、未自动安装；本版不改客户端目录与数据库结构，升级后无需重新应用配置。
+2.0.0-beta.29 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.28 基础上把每个受管 Agent 改为固定入口前缀（Codex 恢复 `…/codex/v1` 并保留官方 auth.json 登录、配置不再写入接入 Key；Claude 系 `…/claude`；其余 `…/<client>/v1`），前缀折叠回 `/v1/...` 后进入既有协议、上限与鉴权，跨客户端 Key 返回 `403 client_mismatch`；同时一并打包已完成未提交的 River 图片输入与受管客户端目录图片能力声明。完整质量门（126 文件 750 项前端测试）／Windows 版本资源与资产校验通过；安装器 19,636,234 bytes，位于 `release-assets/v2.0.0-beta.29/`，SHA256 `86652098…f7b9c3`，未签名。生产进程未变、未自动安装；已应用的客户端需重新「预览 → 应用」才会换用新地址，旧地址在本版继续可用。
 
 ## In Progress
+
+- [TASK-20261024-002](../tasks/active/TASK-20261024-002-build-local-beta29-installer.md)：Beta.29 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-001](../tasks/active/TASK-20261024-001-fixed-agent-entry-prefixes.md)：每个受管客户端改为固定入口前缀（Codex `…/codex/v1`、Claude `…/claude`、其余 `…/<client>/v1`）。前缀折叠成 `/v1/...` 后进入既有协议、上限与鉴权；带 Key 的请求与入口不符返回 `403 client_mismatch`，Codex 前缀在该接入启用时按前缀放行并保留官方 auth.json。旧 `/v1` 与 `/agent/codex/<Key>/v1` 保留兼容；Go 全部 internal 包与 gateway 前端 193 项测试通过，实机客户端未验收。
 
 - [TASK-20261023-018](../tasks/active/TASK-20261023-018-build-local-beta28-installer.md)：Beta.28 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
 
