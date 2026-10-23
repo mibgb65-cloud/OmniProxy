@@ -42,6 +42,12 @@ export interface Metadata {
     "inputModalities"?: string[] | null;
     "toolUse"?: boolean | null;
     "isDefault"?: boolean;
+
+    /**
+     * EffortModels 记录档位对应的上游变体模型 ID（例如 Google 的 “…-low”）。
+     * 只用于把客户端的原生 effort 选择换成实际存在的模型 ID，不发布给客户端。
+     */
+    "effortModels"?: { [_ in string]?: string } | null;
 }
 
 /**
