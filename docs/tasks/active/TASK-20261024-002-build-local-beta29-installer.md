@@ -146,7 +146,7 @@ Beta.29 production 本地安装包已构建，通过完整质量门、Windows �
 ## Commit
 
 ```text
-（版本准备提交，哈希见下方 Completed）
+8cc395c chore(release): 准备 Beta.29 本地生产安装包（版本同步、发布说明、状态看板与构建记录）
 ```
 
 ---
