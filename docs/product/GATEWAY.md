@@ -50,7 +50,8 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - 真实运行状态、启停，停止会取消在途请求。
 - Codex CLI／Desktop、Claude Code CLI、Claude Desktop Code 的配置入口；默认模型／路由选择、受控预览、应用、加密备份和恢复。
 - 客户端独立接入 Key，支持复制及启停。复制在桌面端完成，完整 Key 不通过 Wails 绑定返回。
-- Codex 保留 model_provider、官方认证文件与会话目录。内置 openai 使用专用本地接入路径，不重定义内置提供商表。
+- Codex 保留 model_provider、官方 auth.json 登录与会话目录。内置 openai 使用固定前缀 `…/codex/v1`，不重定义内置提供商表，配置中不再写入接入 Key。
+- 每个受管客户端有固定入口前缀（`…/codex/v1`、`…/claude`、`…/opencode/v1`、`…/goose/v1/chat/completions` 等），前缀只做路由分组；协议、上限与鉴权口径不变。见 [ADR 021](../decisions/ADR-021-fixed-agent-entry-prefixes.md)。
 - Claude Desktop 添加独立 3P 条目，保留官方当前配置。首次使用需在桌面配置选择器选择该条目；不会自动切换官方工作空间。
 - Chat Completions、Responses、Messages 和 Codex Responses WebSocket。
 - OpenAI 账号设置提供全局 Codex WebSocket 开关，默认开启且持久保存；每次握手及连接内创建响应检查当前开关。关闭时拒绝 WebSocket，HTTP/SSE 保持可用，修改无需重启网关。
@@ -61,6 +62,8 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 ## 运行边界
 
 只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求、任意 URL 转发和上游重定向。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。接入 Key 同时决定请求归属的受管 Agent（`codex`、`claude-desktop`、`harness-web` 等），归属随首条记录写入请求明细，用于按 Agent 查看用量；Key 本身、原始 User-Agent 和请求头都不落库。
+
+固定入口前缀与接入 Key 必须一致：带 Key 的请求走到别的 Agent 前缀时返回 `403 client_mismatch`。唯一例外是 Codex 前缀 `…/codex/v1`：Codex 在官方登录模式下发送的是 ChatGPT 令牌，网关无法用接入 Key 校验，因此该前缀在 Codex 接入启用时按前缀归属放行（仍受 loopback Host、协议校验与大小限制约束）。Claude CLI 与 Claude Desktop 共用 `…/claude`，归属仍由各自的接入 Key 区分。升级前写入的 `/v1/...` 与 `/agent/codex/<Key>/v1` 继续可用。
 
 Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。
 
@@ -88,4 +91,4 @@ River 已按上游官方契约接入图片输入：Messages 的 `image` 块（�
 
 先在账号页添加上游账号，ChatGPT／DeepSeek／Gemini 在路由页同步模型，Atria 与 MiMo 自动提供官方预设，MiMo 也可按账号同步实际目录，再启动网关并配置客户端。通过客户端发起实际请求，并在请求记录和运行日志中查看结果；真实请求会消耗账号额度。网关页面只检查已保存的配置，不提供请求验证功能。
 
-手动客户端可使用卡片上的「复制接入 Key」，无需使用上游 API Key。开发环境默认地址 http://127.0.0.1:3001/v1，正式环境默认端口 3000，以实际页面为准。Codex 一键配置会生成含独立 Key 的专用本地地址，请保持 model_provider 原值。
+手动客户端可使用卡片上的「复制接入 Key」，无需使用上游 API Key。通用地址为 http://127.0.0.1:3001/v1（开发环境，正式环境默认端口 3000），但每个 Agent 有自己的固定前缀地址，以「客户端接入」与「手动接入」卡片显示为准（例如 Codex `…/codex/v1`、Claude `…/claude`）。Codex 一键配置只写 `openai_base_url`，不写入接入 Key，请保持 model_provider 与官方 auth.json 原值。

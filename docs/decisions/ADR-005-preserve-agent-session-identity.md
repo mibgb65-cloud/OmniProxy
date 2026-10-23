@@ -11,7 +11,7 @@ Date: 2026-10-09
 ## 决策
 
 - 不修改 Codex `model_provider`、CODEX_HOME、官方登录文件、会话数据库或索引。
-- 内置 `openai` 使用 `openai_base_url` 指向 `/agent/codex/<本地接入Key>/v1`。保留官方认证头，但网关只校验独立接入 Key，并丢弃客户端原认证头。提供商表不会被重定义。
+- 内置 `openai` 使用 `openai_base_url` 指向 `/agent/codex/<本地接入Key>/v1`。保留官方认证头，但网关只校验独立接入 Key，并丢弃客户端原认证头。提供商表不会被重定义。（2026-10-24 起该传输细节被 [ADR-021](ADR-021-fixed-agent-entry-prefixes.md) 取代：改用固定前缀 `/codex/v1`，官方登录不变，接入 Key 不再进入路径。）
 - 已有自定义提供商保留其标识，只合并地址、协议和接入认证字段；认证助手或活跃 profile 存在冲突时明确拒绝。
 - 网关仅监听 loopback，禁止浏览器跨来源请求和任意地址转发。接入 Key、原配置备份存于 DPAPI；数据库只存随机凭据引用。配置文件含本地接入 Key，不含本应用的上游凭据。所有日志出口额外屏蔽 `opk_` 格式；前端预览不展示 Key 或原配置中的秘密。
 - Claude CLI 合并用户设置的 env，保留其余设置、官方登录和会话根目录。Claude Desktop 添加独立 3P 配置库条目；用户明确应用一键配置时，同步启用 `deploymentMode=3p` 并设置 `appliedId`。保留原模式与配置选择用于恢复，只合并受管字段，不改写官方登录、原有配置条目或会话文件。

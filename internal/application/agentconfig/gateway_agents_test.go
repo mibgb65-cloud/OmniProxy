@@ -103,7 +103,7 @@ func checkGatewayAgentWireConfig(t *testing.T, client, path string, key []byte) 
 			t.Fatal("Kimi defaults or permission settings incorrect")
 		}
 		provider := config["providers"].(map[string]any)["omniproxy"].(map[string]any)
-		if provider["type"] != "openai" || provider["api_key"] != string(key) || provider["base_url"] != "http://127.0.0.1:3001/v1" {
+		if provider["type"] != "openai" || provider["api_key"] != string(key) || provider["base_url"] != "http://127.0.0.1:3001/kimi-code/v1" {
 			t.Fatal("Kimi protocol or auth incorrect")
 		}
 	case "factory-droid":
@@ -132,7 +132,7 @@ func checkGatewayAgentWireConfig(t *testing.T, client, path string, key []byte) 
 			t.Fatal("Goose invalid provider file", err)
 		}
 		defer clear(providerBody)
-		if config["base_url"] != "http://127.0.0.1:3001/v1/chat/completions" || config["dynamic_models"] != false || config["headers"].(map[string]any)["Authorization"] != "Bearer "+string(key) || strings.Contains(string(body), string(key)) {
+		if config["base_url"] != "http://127.0.0.1:3001/goose/v1/chat/completions" || config["dynamic_models"] != false || config["headers"].(map[string]any)["Authorization"] != "Bearer "+string(key) || strings.Contains(string(body), string(key)) {
 			t.Fatal("Goose URL, selection boundary or isolated auth incorrect")
 		}
 	}

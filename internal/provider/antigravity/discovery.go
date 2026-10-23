@@ -115,7 +115,7 @@ func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) 
 	if value.Models == nil || len(value.Models) > 1000 {
 		return nil, Failure("invalid_response")
 	}
-	models := []Model{}
+	entries := []modelcatalog.Entry{}
 	selected := map[string]bool{}
 	if len(value.Sorts) > 32 {
 		return nil, Failure("invalid_response")
@@ -147,7 +147,15 @@ func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) 
 			return nil, Failure("invalid_response")
 		}
 		tools := true
-		models = append(models, Model{ID: id, Name: name, Metadata: modelcatalog.Metadata{InputModalities: []string{"text"}, ToolUse: &tools}})
+		entry.Metadata = modelcatalog.Metadata{InputModalities: []string{"text"}, ToolUse: &tools}
+		entries = append(entries, entry)
+	}
+	// 上游用 “(High)／(Low)／(Medium)” 等独立型号表达推理档位；折叠回基础模型，
+	// 档位改由客户端原生 effort 选择，网关请求时换成实际存在的变体 ID。
+	folded := modelcatalog.FoldEffortVariants(entries)
+	models := make([]Model, 0, len(folded))
+	for _, entry := range folded {
+		models = append(models, Model{ID: entry.ID, Name: entry.Name, Metadata: entry.Metadata})
 	}
 	sort.Slice(models, func(i, j int) bool { return models[i].ID < models[j].ID })
 	return models, nil

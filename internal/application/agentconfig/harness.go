@@ -2,8 +2,9 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
+
 	"gopkg.in/yaml.v3"
+	"omniproxy/internal/core/agentendpoint"
 )
 
 func harnessPlugin(root *yaml.Node) (*yaml.Node, error) {
@@ -86,7 +87,11 @@ func buildHarness(client string, body, key []byte, port int, plan Plan) ([]byte,
 		}
 		models = append(models, model)
 	}
-	route, err := yamlValue(map[string]any{"displayName": "OmniProxy", "api": "openai-completions", "apiKeyEnv": harnessRef(client), "baseURL": fmt.Sprintf("http://127.0.0.1:%d/v1", port), "compat": map[string]any{"supportsDeveloperRole": false, "maxTokensField": "max_tokens"}, "models": models})
+	base, ok := agentendpoint.BaseURL(client, port)
+	if !ok {
+		return nil, "", failure("invalid_client")
+	}
+	route, err := yamlValue(map[string]any{"displayName": "OmniProxy", "api": "openai-completions", "apiKeyEnv": harnessRef(client), "baseURL": base + "/v1", "compat": map[string]any{"supportsDeveloperRole": false, "maxTokensField": "max_tokens"}, "models": models})
 	if err != nil {
 		return nil, "", err
 	}

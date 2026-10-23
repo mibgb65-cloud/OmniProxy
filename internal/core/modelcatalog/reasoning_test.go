@@ -6,13 +6,15 @@ import (
 )
 
 func TestCodexReasoningAlwaysHasSupportedDefault(t *testing.T) {
+	// Codex 只接受 official catalog 的档位词汇：上游 none／max 就近映射为 minimal／xhigh，
+	// 因此默认档位也必须按映射后的值发布，否则选择器会拿到不认识的默认值。
 	for _, tc := range []struct {
 		name, explicit, want string
 		efforts              []Effort
 	}{
 		{"prefer_high", "", "high", []Effort{{Value: "low"}, {Value: "high"}, {Value: "max"}}},
-		{"first_supported", "", "none", []Effort{{Value: "none"}, {Value: "medium"}}},
-		{"preserve_explicit", "max", "max", []Effort{{Value: "high"}, {Value: "max"}}},
+		{"first_supported", "", "minimal", []Effort{{Value: "none"}, {Value: "medium"}}},
+		{"preserve_explicit", "max", "xhigh", []Effort{{Value: "high"}, {Value: "max"}}},
 		{"unknown", "", "", nil},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -3,6 +3,7 @@ package gateway
 import (
 	"encoding/json"
 
+	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/provider/river"
 )
@@ -65,10 +66,43 @@ func riverMessagesEffort(body []byte, model string) (json.RawMessage, error) {
 	if json.Unmarshal(raw, &effort) != nil {
 		return nil, proxy.Failure("invalid_request", 400)
 	}
-	for _, candidate := range river.ModelMetadata(model).ReasoningEfforts {
-		if candidate.Value == effort {
-			return raw, nil
-		}
+	upstream, ok := catalog.UpstreamEffort(river.ModelMetadata(model).ReasoningEfforts, effort)
+	if !ok {
+		return nil, proxy.Failure("unsupported_reasoning_effort", 400)
 	}
-	return nil, proxy.Failure("unsupported_reasoning_effort", 400)
+	return json.Marshal(upstream)
+}
+
+// withResponsesEffort 把客户端（Codex）选择的档位改写为该模型上游接受的值。
+//
+// Codex 目录发布的是就近映射后的档位（minimal／xhigh），上游只接受 none／max；
+// 未带档位或带的是本模型已确认的上游取值时保持原样。
+func withResponsesEffort(body []byte, efforts []catalog.Effort) ([]byte, error) {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(body, &fields) != nil {
+		return nil, proxy.Failure("invalid_request", 400)
+	}
+	raw, exists := fields["reasoning"]
+	if !exists || string(raw) == "null" {
+		return body, nil
+	}
+	var reasoning map[string]json.RawMessage
+	if json.Unmarshal(raw, &reasoning) != nil || reasoning == nil {
+		return nil, proxy.Failure("invalid_request", 400)
+	}
+	raw, exists = reasoning["effort"]
+	if !exists {
+		return body, nil
+	}
+	var level string
+	if json.Unmarshal(raw, &level) != nil {
+		return nil, proxy.Failure("invalid_request", 400)
+	}
+	upstream, ok := catalog.UpstreamEffort(efforts, level)
+	if !ok {
+		return nil, proxy.Failure("unsupported_reasoning_effort", 400)
+	}
+	reasoning["effort"], _ = json.Marshal(upstream)
+	fields["reasoning"], _ = json.Marshal(reasoning)
+	return json.Marshal(fields)
 }

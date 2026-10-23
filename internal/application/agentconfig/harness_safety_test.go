@@ -93,7 +93,7 @@ func TestOpenCodeManagedPortChangeKeepsUserProviderCollisionProtection(t *testin
 		t.Fatal("managed port update rejected", err)
 	}
 	body, err := os.ReadFile(s.paths.OpenCode)
-	if err != nil || !strings.Contains(string(body), "127.0.0.1:4001/v1") {
+	if err != nil || !strings.Contains(string(body), "127.0.0.1:4001/opencode/v1") {
 		t.Fatal("managed gateway URL not refreshed")
 	}
 	other, _ := gatewayClientFixture(t)

@@ -90,7 +90,10 @@ type Options struct {
 	WebSocketAllowed func(context.Context) (bool, error)
 	Observer         RequestObserver
 	// Authorize 校验接入 Key，并在通过时返回受管客户端标识；空标识表示无法归属。
-	Authorize      func(context.Context, string) (string, bool)
+	Authorize func(context.Context, string) (string, bool)
+	// PrefixAccess 在接入 Key 不可用时判定固定入口前缀是否放行，返回归属客户端。
+	// 仅用于无法携带接入 Key 的客户端（Codex 保留官方登录），nil 表示一律不放行。
+	PrefixAccess   func(context.Context, string) (string, bool)
 	Port           int
 	RequestTimeout time.Duration
 	MaxConcurrent  int

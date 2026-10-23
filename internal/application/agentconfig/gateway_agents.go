@@ -3,10 +3,16 @@ package agentconfig
 import (
 	"encoding/json"
 	"fmt"
+
+	"omniproxy/internal/core/agentendpoint"
 )
 
 func buildGatewayAgent(client string, body, key []byte, port int, plan Plan, owned, kimiLegacy bool) ([]byte, string, error) {
-	root := fmt.Sprintf("http://127.0.0.1:%d/v1", port)
+	root, ok := agentendpoint.BaseURL(client, port)
+	if !ok {
+		return nil, "omniproxy", failure("invalid_client")
+	}
+	root += "/v1"
 	var result []byte
 	var err error
 	switch client {

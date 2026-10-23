@@ -2,11 +2,20 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/pelletier/go-toml/v2"
+	"omniproxy/internal/core/agentendpoint"
 	catalog "omniproxy/internal/core/modelcatalog"
 )
+
+// codexCatalogURL 返回 Codex 专用目录地址；必须与 openai_base_url 使用同一个固定前缀。
+func codexCatalogURL(port int) string {
+	base, ok := agentendpoint.BaseURL("codex", port)
+	if !ok {
+		return ""
+	}
+	return base + "/v1/codex-models"
+}
 
 func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte, string, error) {
 	if isGatewayAgent(client) {
@@ -39,7 +48,7 @@ func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte,
 		if plan.Mode == "remote-catalog" {
 			updates["model_catalog_json"] = ""
 			updates["features.api_key_model_discovery"] = "true"
-			updates["model_providers."+provider+".model_catalog_url"] = quote(fmt.Sprintf("http://127.0.0.1:%d/v1/codex-models", s.port))
+			updates["model_providers."+provider+".model_catalog_url"] = quote(codexCatalogURL(s.port))
 		} else {
 			updates["model_catalog_json"] = quote(s.catalogPath())
 			updates["features.api_key_model_discovery"] = "false"

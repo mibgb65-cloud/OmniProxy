@@ -43,7 +43,7 @@ func fixture(t *testing.T) *Service {
 }
 func TestCodexPreservesIdentityAndUnrelatedConfig(t *testing.T) {
 	for _, original := range []string{"", "# original\nmodel_provider = \"openai\"\nmodel = \"old\"\n[projects.\"E:\\\\work\"]\ntrust_level=\"trusted\"\n", "model_provider='existing'\n[model_providers.existing]\nname='Existing'\nbase_url='https://old.invalid'\nenv_key='OLD_KEY'\n# retained\n[features]\nmulti_agent=true\n", "model_provider='existing'\n[model_providers.existing]\nbase_url = '''https://old.invalid\n/path'''\n[other]\nsecret = 'private-test-only'\n", "model_provider='openai'\n[features]\nmulti_agent=true\n"} {
-		result, provider, err := buildCodex([]byte(original), []byte("local-test-key"), "http://127.0.0.1:3001/v1", "gpt-test")
+		result, provider, err := buildCodex([]byte(original), []byte("local-test-key"), "http://127.0.0.1:3001/codex/v1", "gpt-test")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -56,13 +56,13 @@ func TestCodexPreservesIdentityAndUnrelatedConfig(t *testing.T) {
 			t.Fatal("provider identity changed")
 		}
 		if provider == "openai" {
-			if !strings.HasPrefix(after["openai_base_url"].(string), "http://127.0.0.1:3001/agent/codex/") {
+			if after["openai_base_url"] != "http://127.0.0.1:3001/codex/v1" {
 				t.Fatal("built-in provider endpoint missing")
 			}
 			continue
 		}
 		entry := after["model_providers"].(map[string]any)[provider].(map[string]any)
-		if entry["base_url"] != "http://127.0.0.1:3001/v1" || entry["requires_openai_auth"] != false {
+		if entry["base_url"] != "http://127.0.0.1:3001/codex/v1" || entry["requires_openai_auth"] != false {
 			t.Fatal("gateway not configured")
 		}
 		if before["features"] != nil && after["features"].(map[string]any)["multi_agent"] != true {

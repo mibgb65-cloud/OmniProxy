@@ -2,7 +2,8 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
+
+	"omniproxy/internal/core/agentendpoint"
 )
 
 const qwenCredentialRef = "OMNIPROXY_QWEN_CODE_KEY"
@@ -60,7 +61,11 @@ func buildQwenCode(body, key []byte, port int, plan Plan, owned bool) ([]byte, s
 		}
 		remaining = append(remaining, entry)
 	}
-	root := fmt.Sprintf("http://127.0.0.1:%d/v1", port)
+	root, ok := agentendpoint.BaseURL("qwen-code", port)
+	if !ok {
+		return nil, "", failure("invalid_client")
+	}
+	root += "/v1"
 	models := []any{}
 	for _, entry := range plan.Models {
 		model := map[string]any{"id": entry.ID, "name": "OmniProxy · " + entry.Name, "baseUrl": root, "envKey": qwenCredentialRef, "wireApi": "chat-completions"}

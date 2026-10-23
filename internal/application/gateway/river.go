@@ -42,6 +42,14 @@ func (s *Service) forwardRiver(ctx context.Context, target target, request proxy
 		upstream.Protocol, upstream.Stream, kinds = "chat", false, toolKinds
 		upstream.ConvertedFromMessages = true
 	}
+	if request.Protocol == "responses" {
+		// Codex 目录发布的是就近映射后的档位；上游只认自己的取值。
+		body, err := withResponsesEffort(upstream.Body, river.ModelMetadata(request.Model).ReasoningEfforts)
+		if err != nil {
+			return err
+		}
+		upstream.Body = body
+	}
 	return s.useAPIKey(ctx, target, func(key []byte) error {
 		return s.river.Forward(ctx, target.baseURL, key, upstream, func(response proxy.Response) error {
 			response = proxy.ObserveResponse(ctx, request.Trace, response, upstream.Protocol)

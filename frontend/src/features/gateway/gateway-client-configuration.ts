@@ -25,10 +25,11 @@ export function getGatewayClientConnection(client: GatewayClient, address: strin
   const root = getConfiguredProxyAddress(Number(match[1]))
   if (!root || `${root}/v1` !== address) return null
 
-  return {
-    baseUrl: client === "codex" ? address : root,
-    requestUrl: `${root}/v1/${client === "codex" ? "responses" : "messages"}`,
+  // 每个受管客户端有固定入口前缀；Codex 由客户端追加 /responses，Claude 追加 /v1/messages。
+  if (client === "codex") {
+    return { baseUrl: `${root}/codex/v1`, requestUrl: `${root}/codex/v1/responses` }
   }
+  return { baseUrl: `${root}/claude`, requestUrl: `${root}/claude/v1/messages` }
 }
 
 /** 手动接入摘要不含密钥；实际配置根据已有提供商身份由后端合并。 */
@@ -49,8 +50,8 @@ export function getGatewayClientConfig(client: GatewayClient, baseUrl: string) {
 
   return [
     'model = "<model-or-route-alias>"',
-    "# 保留原有 model_provider 和官方登录；内置 openai 不能重定义。",
-    `openai_base_url = ${JSON.stringify(baseUrl.replace(/\/v1$/, "/agent/codex/<gateway-api-key>/v1"))}`,
+    "# 保留原有 model_provider 和官方 auth.json 登录；内置 openai 不能重定义。",
+    `openai_base_url = ${JSON.stringify(baseUrl)}`,
     'web_search = "disabled"',
     "",
     "[features]",

@@ -28,7 +28,11 @@ func claudePickerSettings(config map[string]any, entries []catalog.Entry) {
 // effortBehavesAs 只对已确认 effort 枚举和默认档位的模型声明能力继承。
 // 未确认能力的模型保持未知，不借其他模型的能力凭空显示 effort 控件。
 func effortBehavesAs(entry catalog.Entry) string {
-	if entry.ProviderKind != "river" || len(entry.Metadata.ReasoningEfforts) == 0 || entry.Metadata.DefaultEffort == "" {
+	if len(entry.Metadata.ReasoningEfforts) == 0 || entry.Metadata.DefaultEffort == "" {
+		return ""
+	}
+	// River 的档位是上游原生枚举；折叠加固后的变体模型由网关换成具体型号。
+	if entry.ProviderKind != "river" && len(entry.Metadata.EffortModels) == 0 {
 		return ""
 	}
 	// 基础模型路由名是十进制摘要，不含厂商名，可安全映射到已知 Claude 模型。

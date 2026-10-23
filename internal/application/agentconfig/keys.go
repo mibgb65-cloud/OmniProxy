@@ -8,6 +8,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"time"
+
+	"omniproxy/internal/core/agentendpoint"
 )
 
 // Key 每个客户端独立接入密钥，数据库仅保存凭据引用。
@@ -93,6 +95,22 @@ func (s *Service) Client(ctx context.Context, key string) (string, bool) {
 func (s *Service) Authorize(ctx context.Context, key string) bool {
 	_, ok := s.Client(ctx, key)
 	return ok
+}
+
+// PrefixAccess 判定固定入口前缀能否在不带接入 Key 时放行。
+//
+// Codex 保留官方 auth.json 与其登录令牌，网关无法用接入 Key 校验，因此只有
+// 该前缀对应的受管连接处于启用状态时按前缀归属放行；其他前缀仍必须带 Key。
+func (s *Service) PrefixAccess(ctx context.Context, prefix string) (string, bool) {
+	clients := agentendpoint.Clients(prefix)
+	if len(clients) != 1 || clients[0] != "codex" {
+		return "", false
+	}
+	var enabled bool
+	if s.db.QueryRowContext(ctx, `SELECT enabled FROM agent_connections WHERE client='codex'`).Scan(&enabled) != nil || !enabled {
+		return "", false
+	}
+	return "codex", true
 }
 func (s *Service) SetEnabled(ctx context.Context, client string, enabled bool) error {
 	if _, err := s.path(client); err != nil {

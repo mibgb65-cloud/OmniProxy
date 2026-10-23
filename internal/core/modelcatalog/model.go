@@ -32,6 +32,9 @@ type Metadata struct {
 	InputModalities  []string      `json:"inputModalities,omitempty"`
 	ToolUse          *bool         `json:"toolUse,omitempty"`
 	IsDefault        bool          `json:"isDefault,omitempty"`
+	// EffortModels 记录档位对应的上游变体模型 ID（例如 Google 的 “…-low”）。
+	// 只用于把客户端的原生 effort 选择换成实际存在的模型 ID，不发布给客户端。
+	EffortModels map[string]string `json:"effortModels,omitempty"`
 }
 
 // Entry 代表网关实际可解析的模型；别名继承其当前目标的元数据。
@@ -85,6 +88,14 @@ func ValidateMetadata(value Metadata) error {
 	}
 	for _, modality := range value.InputModalities {
 		if modality != "text" && modality != "image" && modality != "audio" {
+			return ErrInvalid
+		}
+	}
+	if len(value.EffortModels) > 16 {
+		return ErrInvalid
+	}
+	for level, model := range value.EffortModels {
+		if variantRank(level) == len(variantEffortOrder) || !ValidClaudeModel(model) {
 			return ErrInvalid
 		}
 	}

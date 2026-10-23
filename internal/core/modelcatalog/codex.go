@@ -53,13 +53,16 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 	entries = ForProtocol(entries, "responses")
 	models := make([]codexModel, 0, len(entries))
 	for index, entry := range entries {
-		efforts := make([]codexEffort, 0, len(entry.Metadata.ReasoningEfforts))
-		for _, effort := range entry.Metadata.ReasoningEfforts {
+		// Codex 只认识 official catalog 的档位词汇；上游的 none／max 必须就近映射，
+		// 否则选择器只剩一个已认识的值，表现为无法选择推理强度。
+		supported := CodexEfforts(entry.Metadata.ReasoningEfforts)
+		efforts := make([]codexEffort, 0, len(supported))
+		for _, effort := range supported {
 			efforts = append(efforts, codexEffort{effort.Value, effort.Description})
 		}
 		var defaultEffort *string
-		if entry.Metadata.DefaultEffort != "" {
-			value := entry.Metadata.DefaultEffort
+		if mapped := codexEffortLevel(entry.Metadata.DefaultEffort); mapped != "" {
+			value := mapped
 			defaultEffort = &value
 		} else if len(efforts) > 0 {
 			// 客户端需要有效默认值才能展示档位；这是网关的选择策略，不冒充上游默认值。

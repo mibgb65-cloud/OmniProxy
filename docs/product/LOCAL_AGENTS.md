@@ -179,6 +179,12 @@ Claude Desktop 的 Code 标签页只在**客户端自己认识该模型**时渲�
 - 存储：`model_effort_pins`（迁移 041）。写入与受管配置版本在同一事务提交：配置文件没写成功时不会留下只生效一半的档位；清除档位即删除该行。
 - 已知边界：这只改变网关侧实际发送的档位，不会让客户端菜单长出滑杆；客户端界面里的档位显示仍是它自己的判断，可能与这里不一致。
 
+### 推理强度（Codex 与 Google 变体型号）
+
+Codex 目录只认 official catalog 的档位词汇（`minimal`／`low`／`medium`／`high`／`xhigh`）。上游用 `none`／`max` 表达两端时，目录按就近语义映射（`none → minimal`、`max → xhigh`）后再发布；否则 Codex 只看到一个已认识的值，表现成「无法选择推理强度」。网关接收 Responses 请求时按同一套映射还原上游取值（`minimal → none`、`xhigh → max`），未确认档位仍返回 `unsupported_reasoning_effort` 400。
+
+Google 系上游用**独立型号**表达 thinking level（`…-low`、`…-high`，显示名 `Gemini 3.8 Flash (Low)`）。目录把这些变体折叠回同名基础模型：菜单只留一行，档位由客户端 effort 控件选择，网关在请求时换成实际存在的变体型号并移除档位字段（订阅适配器的生成参数是白名单校验，多余的 `reasoning_effort` 会被拒绝）。折叠只在同名基础模型同时存在时发生；只有变体的孤立型号保持原样。目录刷新前保存的变体 ID（例如 `gemini-3.8-flash-low`）在路由失败时按反向映射还原为「基础模型 + 档位」，不会变成 `unsupported_model`。显示名相同但 ID 不同的型号（实测 `Gemini 3.5 Flash Lite` 有 4 个）不会合并，它们是不同的路由目标。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。
+
 
 ### 推理强度（DeepSeek Harness／Pi）
 
@@ -201,7 +207,7 @@ Harness 只在模型**声明了 reasoning levels** 时，才在模型选择器�
 
 pi-ai 的 `input` 一旦显式非空就优先于安装目录，因此必须如实输出；省略会回落到路由 `defaultInput`（默认 `[text]`），同样看不到图片。声明只表示「允许客户端发送」，模型是否真的能识别由上游决定，`system`／`assistant` 消息中的图片仍由上游按官方限制拒绝。依据 [Harness 模型配置](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/providers.md#image-input) 与 [OpenCode 自定义提供商](https://github.com/anomalyco/opencode/issues/8875)。
 
-- Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`。支持远程目录的自定义提供商使用独立的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
+- Codex 保留内置 `openai` 身份时使用应用管理的 `omniproxy-models.json`，入口为固定前缀 `…/codex/v1`。支持远程目录的自定义提供商使用同一前缀下的 `/v1/codex-models` 地址和模型发现开关；旧核心使用本地兼容目录，不自动升级。
 - Claude Desktop 写入完整的 `inferenceModels`，支持从其模型选择器切换网关模型和别名，不依赖只识别 Claude ID 的自动发现。
 - Claude Code CLI 自动配置默认模型及完整 `/model` 菜单；也可通过完整模型 ID 切换，旧版客户端需支持 `modelPicker` 才会显示列表。
 
@@ -211,7 +217,7 @@ pi-ai 的 `input` 一旦显式非空就优先于安装目录，因此必须如�
 
 ## 会话保留
 
-Codex 不改 model_provider，官方登录和会话根目录不变。内置 openai 通过专用本地接入路径；自定义提供商保留表名。认证助手／活跃配置 profile 冲突时拒绝自动修改。
+Codex 不改 model_provider，官方登录和会话根目录不变。内置 openai 通过固定前缀 `…/codex/v1` 接入，配置中不写接入 Key；自定义提供商保留表名。认证助手／活跃配置 profile 冲突时拒绝自动修改。
 
 Claude CLI 合并接入 env、完整模型菜单及已确认的压缩设置，不退出原登录。`modelPicker.options` 使用预览中的模型 ID 和名称，`replaceBuiltInOptions=true` 替换重复档位和不可用的内置模型，保留 Default 行；不覆盖已有 `availableModels` 限制。受管目录刷新同时更新 CLI 菜单，仍要求文件未被外部修改；原菜单随加密备份恢复。本机 Claude Code 2.1.292 已确认支持，旧版未显示时可更新或输入完整模型 ID。[官方模型菜单说明](https://code.claude.com/docs/en/model-config#add-a-custom-model-option)。
 
@@ -231,9 +237,10 @@ Gemini 当前只提供 Chat API，虽可在路由页同步官方模型和限制�
 
 - Windows 本地客户端配置；ChatGPT / Codex 官方 model/list 和 DeepSeek 官方 GET /models。
 - Atria 账号自动提供 `Atria-Dawn-Preview` 官方预设和 256000／仅文本元数据，目录注明预设来源，不查询尚未确认的 `/v1/models`。Codex 使用本地 Responses，Claude CLI／Desktop 使用本地 Messages；Atria 原生 SSE 保留增量与工具关联。真实 Key 和客户端专有扩展仍需实机验证，不为 Atria 生成 1M 变体。
-- GET /v1/models 动态合并可用原始模型与路由；所有请求校验本地接入 Key。
+- GET /v1/models 动态合并可用原始模型与路由；除 Codex 前缀外，所有请求校验本地接入 Key。
 - GET /v1/codex-models 提供 Codex 专用元数据；只接受有界 `client_version` 参数。普通模型列表支持有界 `limit`、`after_id`、`before_id`；Messages 支持 Claude Code 实际发送的单个 `beta=true` 查询参数，重复、异常或未知参数仍拒绝，其他推理协议不接受查询参数。
 - POST /v1/chat/completions、POST /v1/responses、POST /v1/messages。
+- 固定入口前缀：`…/codex/v1`、`…/claude`、`…/opencode/v1`、`…/kilocode/v1`、`…/mimo-code/v1`、`…/qwen-code/v1`、`…/harness-web/v1`、`…/harness-desktop/v1`、`…/kimi-code/v1`、`…/pi/v1`、`…/factory-droid/v1`、`…/goose/v1/chat/completions`。前缀折叠成 `/v1/...` 后进入同一套协议处理；带 Key 的请求与入口不符返回 `403 client_mismatch`，Codex 前缀在该接入启用时按前缀放行。见 [ADR 021](../decisions/ADR-021-fixed-agent-entry-prefixes.md)。
 - Codex Responses WebSocket，连接内上下文续接、会话和请求并发上限、空闲超时、重置 Key 状态检查。
 - ChatGPT Responses 保留原生文本、工具及流式事件；跨协议支持文本和工具调用，包括 Codex namespace／custom 工具及 Claude tool_use／tool_result。Claude Code 在 messages 中附加的 system 文本提醒保留角色、位置和正文，系统消息中的工具及其他不支持内容仍拒绝。
 - 跨协议返回完成后的 JSON 或 SSE；当前不会逐 token 翻译。DeepSeek 跨协议思考关闭，多模态及不支持的托管工具明确返回 unsupported_content。

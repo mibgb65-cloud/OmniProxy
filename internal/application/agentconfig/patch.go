@@ -2,14 +2,16 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pelletier/go-toml/v2"
+	"omniproxy/internal/core/agentendpoint"
 	catalog "omniproxy/internal/core/modelcatalog"
-	"strings"
 )
 
 func build(client string, body, key []byte, port int, model string) ([]byte, string, error) {
-	root := fmt.Sprintf("http://127.0.0.1:%d", port)
+	root, ok := agentendpoint.BaseURL(client, port)
+	if !ok {
+		return nil, "", failure("invalid_client")
+	}
 	if client == "codex" {
 		return buildCodex(body, key, root+"/v1", model)
 	}
@@ -77,9 +79,9 @@ func buildCodex(body, key []byte, baseURL, model string) ([]byte, string, error)
 		if entry != nil {
 			return nil, provider, failure("invalid_config")
 		}
-		// 新版 Codex 禁止覆盖内置 openai 表。独立接入 Key 使用本地专用路径，
-		// 原官方认证头在网关丢弃，保留认证文件、提供商身份和会话目录。
-		updates["openai_base_url"] = quote(strings.TrimSuffix(baseURL, "/v1") + "/agent/codex/" + string(key) + "/v1")
+		// 新版 Codex 禁止覆盖内置 openai 表。本地入口使用独立固定前缀，
+		// 官方 auth.json 与其登录令牌原样保留，网关按前缀归属而非接入 Key。
+		updates["openai_base_url"] = quote(baseURL)
 		updates["features.responses_websockets"] = "false"
 		updates["features.responses_websockets_v2"] = "false"
 		updates["features.enable_request_compression"] = "false"

@@ -71,7 +71,7 @@ func (c *Client) nativeModels(ctx context.Context, base string, key []byte) ([]M
 			seen[id] = true
 		}
 		if page.Next == "" {
-			return models, nil
+			return foldVariants(models), nil
 		}
 		if len(page.Next) > 1024 || page.Next == cursor {
 			return nil, proxy.Failure("invalid_upstream_response", 502)
@@ -79,6 +79,20 @@ func (c *Client) nativeModels(ctx context.Context, base string, key []byte) ([]M
 		cursor = page.Next
 	}
 	return nil, proxy.Failure("invalid_upstream_response", 502)
+}
+
+// foldVariants 折叠 “(High)／(Low)／(Medium)” 形式的档位变体，避免同一型号出现多行。
+func foldVariants(models []Model) []Model {
+	entries := make([]core.Entry, 0, len(models))
+	for _, model := range models {
+		entries = append(entries, core.Entry{ID: model.ID, Name: model.Name, Metadata: model.Metadata})
+	}
+	folded := core.FoldEffortVariants(entries)
+	result := make([]Model, 0, len(folded))
+	for _, entry := range folded {
+		result = append(result, Model{ID: entry.ID, Name: entry.Name, Metadata: entry.Metadata})
+	}
+	return result
 }
 
 type modelPage struct {

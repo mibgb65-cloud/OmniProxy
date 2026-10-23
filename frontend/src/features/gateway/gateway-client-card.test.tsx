@@ -48,11 +48,13 @@ describe("Codex 与 Claude 接入卡片", () => {
     const codex = within(screen.getByRole("region", { name: "Codex 接口" }))
     const claude = within(screen.getByRole("region", { name: "Claude 接口" }))
     expect(codex.getByRole("textbox", { name: "Base URL" })).toHaveValue(
-      "http://127.0.0.1:43210/v1",
+      "http://127.0.0.1:43210/codex/v1",
     )
-    expect(claude.getByRole("textbox", { name: "Base URL" })).toHaveValue("http://127.0.0.1:43210")
-    expect(codex.getByText("POST http://127.0.0.1:43210/v1/responses")).toBeInTheDocument()
-    expect(claude.getByText("POST http://127.0.0.1:43210/v1/messages")).toBeInTheDocument()
+    expect(claude.getByRole("textbox", { name: "Base URL" })).toHaveValue(
+      "http://127.0.0.1:43210/claude",
+    )
+    expect(codex.getByText("POST http://127.0.0.1:43210/codex/v1/responses")).toBeInTheDocument()
+    expect(claude.getByText("POST http://127.0.0.1:43210/claude/v1/messages")).toBeInTheDocument()
     expect(screen.getAllByText("协议已接入")).toHaveLength(2)
     expect(
       screen.queryByText("运行本地 DeepSeek 代理，检查接入并验证实际请求。"),
@@ -60,8 +62,8 @@ describe("Codex 与 Claude 接入卡片", () => {
   })
 
   it.each([
-    ["Codex", "http://127.0.0.1:43210/v1"],
-    ["Claude", "http://127.0.0.1:43210"],
+    ["Codex", "http://127.0.0.1:43210/codex/v1"],
+    ["Claude", "http://127.0.0.1:43210/claude"],
   ])("复制 %s 的正确 Base URL", async (client, address) => {
     const user = userEvent.setup()
     renderGateway("manual")
@@ -79,7 +81,7 @@ describe("Codex 与 Claude 接入卡片", () => {
     const card = within(screen.getByRole("region", { name: "Codex 接口" }))
     await user.click(card.getByRole("button", { name: "复制 Codex 配置" }))
     expect(Clipboard.SetText).toHaveBeenCalledWith(
-      getGatewayClientConfig("codex", "http://127.0.0.1:43210/v1"),
+      getGatewayClientConfig("codex", "http://127.0.0.1:43210/codex/v1"),
     )
     await user.click(card.getByRole("button", { name: "Desktop" }))
     expect(card.getByRole("button", { name: "Desktop" })).toHaveAttribute("aria-pressed", "true")
@@ -98,7 +100,7 @@ describe("Codex 与 Claude 接入卡片", () => {
     await user.click(card.getByRole("button", { name: "CLI" }))
     await user.click(card.getByRole("button", { name: "复制 Claude 配置" }))
     expect(Clipboard.SetText).toHaveBeenCalledWith(
-      getGatewayClientConfig("claude", "http://127.0.0.1:43210"),
+      getGatewayClientConfig("claude", "http://127.0.0.1:43210/claude"),
     )
   })
 
@@ -148,7 +150,9 @@ describe("Codex 与 Claude 接入卡片", () => {
     renderGateway("manual")
     await screen.findByText("运行中")
     const card = within(screen.getByRole("region", { name: "Claude 接口" }))
-    expect(card.getByRole("textbox", { name: "Base URL" })).toHaveValue("http://127.0.0.1:54321")
+    expect(card.getByRole("textbox", { name: "Base URL" })).toHaveValue(
+      "http://127.0.0.1:54321/claude",
+    )
     expect(screen.getAllByText("协议已接入")).toHaveLength(2)
   })
 

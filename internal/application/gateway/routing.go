@@ -63,25 +63,26 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 	if s.router == nil {
 		return request, nil
 	}
-	var decision routes.Preview
-	var err error
-	if source, ok := s.router.(interface {
-		ResolvePlan(context.Context, string) (routes.Plan, error)
-	}); ok {
-		var plan routes.Plan
-		plan, err = source.ResolvePlan(ctx, request.Model)
-		decision = plan.Decision
-		request.FixedAccount = plan.Fixed
-		for _, candidate := range plan.Candidates {
-			request.Candidates = append(request.Candidates, proxy.AccountCandidate{AccountID: candidate.AccountID, UpdatedAt: candidate.AccountUpdatedAt})
-		}
-	} else {
-		decision, err = s.router.Resolve(ctx, request.Model)
-		request.FixedAccount = true
-	}
+	decision, candidates, fixed, err := s.resolvePreview(ctx, request.Model)
 	if err != nil {
 		return request, proxy.Failure("routing_configuration_unavailable", 503)
 	}
+	if !decision.Routable && decision.ErrorCode == "unsupported_model" && !decision.Matched {
+		// 目录折叠后旧的档位变体 ID 不再单独发布；用户已保存的选择仍必须可用。
+		updated, applied, legacyErr := s.applyLegacyVariant(ctx, request)
+		if legacyErr != nil {
+			return request, legacyErr
+		}
+		if applied {
+			request = updated
+			decision, candidates, fixed, err = s.resolvePreview(ctx, request.Model)
+			if err != nil {
+				return request, proxy.Failure("routing_configuration_unavailable", 503)
+			}
+		}
+	}
+	request.Candidates = candidates
+	request.FixedAccount = fixed
 	if !decision.Routable {
 		if decision.ErrorCode == "unsupported_model" && !decision.Matched {
 			return request, proxy.Failure("unsupported_model", 400)
@@ -112,7 +113,35 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 			request.Body = body
 		}
 	}
+	// 档位变体（Google 的 “…-low” 等）在目录里已折叠成一行模型；请求时必须换回
+	// 实际存在的上游型号，适配器才不会收到它不认识的档位字段。
+	request, err = s.applyEffortVariant(ctx, request)
+	if err != nil {
+		return request, err
+	}
 	return request, nil
+}
+
+// resolvePreview 只解析一次路由决策；候选账号每次重新生成，重试时不叠加。
+func (s *Service) resolvePreview(ctx context.Context, model string) (routes.Preview, []proxy.AccountCandidate, bool, error) {
+	if source, ok := s.router.(interface {
+		ResolvePlan(context.Context, string) (routes.Plan, error)
+	}); ok {
+		plan, err := source.ResolvePlan(ctx, model)
+		if err != nil {
+			return routes.Preview{}, nil, false, err
+		}
+		candidates := make([]proxy.AccountCandidate, 0, len(plan.Candidates))
+		for _, candidate := range plan.Candidates {
+			candidates = append(candidates, proxy.AccountCandidate{AccountID: candidate.AccountID, UpdatedAt: candidate.AccountUpdatedAt})
+		}
+		return plan.Decision, candidates, plan.Fixed, nil
+	}
+	decision, err := s.router.Resolve(ctx, model)
+	if err != nil {
+		return routes.Preview{}, nil, false, err
+	}
+	return decision, nil, true, nil
 }
 
 // AvailableModels 合并原始模型和可用别名，保留已有发现协议并去重。

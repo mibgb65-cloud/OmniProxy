@@ -2,7 +2,8 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
+
+	"omniproxy/internal/core/agentendpoint"
 )
 
 // DesktopGatewayActive 确认启动模式、选中配置和网关配置均已就绪，避免按钮打开到官方登录页。
@@ -31,5 +32,9 @@ func (s *Service) DesktopGatewayActive() (bool, error) {
 	if !exists || json.Unmarshal(body, &profile) != nil {
 		return false, nil
 	}
-	return profile.Provider == "gateway" && profile.BaseURL == fmt.Sprintf("http://127.0.0.1:%d", s.port) && len(profile.Key) > 0, nil
+	baseURL, ok := agentendpoint.BaseURL("claude-desktop", s.port)
+	if !ok {
+		return false, nil
+	}
+	return profile.Provider == "gateway" && profile.BaseURL == baseURL && len(profile.Key) > 0, nil
 }

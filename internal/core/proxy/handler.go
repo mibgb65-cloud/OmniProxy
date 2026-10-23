@@ -18,7 +18,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("local_access_only", 403))
 		return
 	}
-	path, pathKey, valid := scopedAgentPath(r)
+	path, pathKey, prefix, allowed, valid := resolveAgentPath(r)
 	if !valid {
 		writeFailure(w, Failure("not_found", 404))
 		return
@@ -40,11 +40,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			key = strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 		}
 		var authorized bool
-		if len(key) > 512 {
-			writeFailure(w, Failure("unauthorized", 401))
+		// 超过上限的凭据绝不进入比较；Codex 官方登录令牌本身就超过该上限，
+		// 因此溢出时按"不是接入 Key"处理，交给固定前缀判定。
+		if len(key) <= 512 {
+			client, authorized = s.opts.Authorize(r.Context(), key)
+		}
+		if authorized && client != "" && len(allowed) > 0 && !clientAllowed(allowed, client) {
+			// 固定入口只接受本入口受管客户端的 Key，避免把别的 Agent 凭据写进本入口。
+			writeFailure(w, Failure("client_mismatch", 403))
 			return
 		}
-		client, authorized = s.opts.Authorize(r.Context(), key)
+		if !authorized && prefix != "" && s.opts.PrefixAccess != nil {
+			// Codex 保留官方 auth.json，网关无法用接入 Key 校验其登录令牌。
+			client, authorized = s.opts.PrefixAccess(r.Context(), prefix)
+		}
 		if !authorized {
 			writeFailure(w, Failure("unauthorized", 401))
 			return

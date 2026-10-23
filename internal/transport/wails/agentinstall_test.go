@@ -59,7 +59,7 @@ func TestClaudeCodeLauncherUsesOnlyOfficialCodeDeepLink(t *testing.T) {
 		filepath.Join(root, "Claude", "claude_desktop_config.json"):    `{"deploymentMode":"3p"}`,
 		filepath.Join(root, "Claude-3p", "claude_desktop_config.json"): `{"deploymentMode":"3p"}`,
 		filepath.Join(filepath.Dir(profilePath), "_meta.json"):         `{"appliedId":"` + agentconfig.DesktopProfileID + `"}`,
-		profilePath: `{"inferenceProvider":"gateway","inferenceGatewayBaseUrl":"http://127.0.0.1:3001","inferenceGatewayApiKey":"synthetic-local-key"}`,
+		profilePath: `{"inferenceProvider":"gateway","inferenceGatewayBaseUrl":"http://127.0.0.1:3001/claude","inferenceGatewayApiKey":"synthetic-local-key"}`,
 	} {
 		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
 			t.Fatal(err)

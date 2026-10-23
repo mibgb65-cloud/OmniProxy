@@ -50,7 +50,7 @@ func TestQwenModelProvidersLifecycle(t *testing.T) {
 	}
 	for _, raw := range models[:2] {
 		entry := raw.(map[string]any)
-		if entry["envKey"] != qwenCredentialRef || entry["baseUrl"] != "http://127.0.0.1:4099/v1" || entry["wireApi"] != "chat-completions" {
+		if entry["envKey"] != qwenCredentialRef || entry["baseUrl"] != "http://127.0.0.1:4099/qwen-code/v1" || entry["wireApi"] != "chat-completions" {
 			t.Fatal("managed models not refreshed")
 		}
 	}
