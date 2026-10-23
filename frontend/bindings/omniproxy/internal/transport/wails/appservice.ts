@@ -229,7 +229,9 @@ export function CheckForUpdate(): $CancellablePromise<$models.UpdateStatus> {
 
 /**
  * CleanStorage runs a cleanup operation: "logs" removes rotated log backups
- * and truncates the active log; "database" vacuums the SQLite database.
+ * and truncates the active log; "database" vacuums the SQLite database;
+ * "updates" removes the helper copies and temporary files left by install
+ * attempts without touching the downloaded installer cache.
  */
 export function CleanStorage(target: string): $CancellablePromise<$models.CleanResult> {
     return $Call.ByID(1327547443, target);

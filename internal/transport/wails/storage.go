@@ -8,6 +8,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
+	"omniproxy/internal/application/updater"
 	"omniproxy/internal/infrastructure/database"
 	"omniproxy/internal/infrastructure/storage"
 	"omniproxy/internal/platform/profile"
@@ -17,6 +18,7 @@ import (
 const (
 	cleanTargetLogs     = "logs"
 	cleanTargetDatabase = "database"
+	cleanTargetUpdates  = "updates"
 )
 
 // StorageItem describes one storage location and its size.
@@ -51,7 +53,9 @@ func (s *AppService) StorageInfo() StorageInfo {
 		Items: []StorageItem{
 			{Name: cleanTargetDatabase, Path: dbPath, Bytes: usage.Database},
 			{Name: cleanTargetLogs, Path: s.prof.LogDir, Bytes: usage.Logs},
-			{Name: "cache", Path: filepath.Join(s.prof.DataDir, "cache"), Bytes: usage.Cache},
+			{Name: storage.DirCache, Path: filepath.Join(s.prof.DataDir, storage.DirCache), Bytes: usage.Cache},
+			{Name: storage.DirUpdates, Path: filepath.Join(s.prof.DataDir, storage.DirUpdates), Bytes: usage.Updates},
+			{Name: storage.DirCredentials, Path: filepath.Join(s.prof.DataDir, storage.DirCredentials), Bytes: usage.Credentials},
 			{Name: "other", Path: s.prof.DataDir, Bytes: usage.Other},
 		},
 		TotalBytes: usage.Total(),
@@ -124,7 +128,9 @@ type CleanResult struct {
 }
 
 // CleanStorage runs a cleanup operation: "logs" removes rotated log backups
-// and truncates the active log; "database" vacuums the SQLite database.
+// and truncates the active log; "database" vacuums the SQLite database;
+// "updates" removes the helper copies and temporary files left by install
+// attempts without touching the downloaded installer cache.
 func (s *AppService) CleanStorage(target string) (CleanResult, error) {
 	switch target {
 	case cleanTargetLogs:
@@ -133,6 +139,13 @@ func (s *AppService) CleanStorage(target string) (CleanResult, error) {
 			return CleanResult{}, err
 		}
 		s.log.Info("cleaned log files", "freed_bytes", freed)
+		return CleanResult{Target: target, FreedBytes: freed}, nil
+	case cleanTargetUpdates:
+		freed, err := updater.CleanCache(filepath.Join(s.prof.DataDir, storage.DirUpdates))
+		if err != nil {
+			return CleanResult{}, err
+		}
+		s.log.Info("cleaned update leftovers", "freed_bytes", freed)
 		return CleanResult{Target: target, FreedBytes: freed}, nil
 	case cleanTargetDatabase:
 		before, err := storage.FileSize(s.prof.DatabasePath())

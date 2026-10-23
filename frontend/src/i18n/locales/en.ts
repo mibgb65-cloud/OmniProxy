@@ -181,9 +181,14 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.storage.databasePath": "Core database",
   "settings.storage.logs": "Runtime logs",
   "settings.storage.cache": "Local cache",
+  "settings.storage.updates": "Update cache",
+  "settings.storage.credentials": "Saved credentials",
   "settings.storage.other": "Other",
   "settings.storage.breakdown": "Storage breakdown",
   "settings.storage.chartLabel": "Data storage usage proportions",
+  "settings.storage.empty": "No files measured yet.",
+  "settings.storage.updatesNote":
+    "The update cache holds the downloaded installer plus a helper copy left by each install attempt. Helper copies can be removed at any time; the downloaded installer is kept so it is not fetched again.",
   "settings.storage.databaseNote":
     "Account metadata is included in the database; system credentials are outside this directory.",
   "settings.storage.total": "Current usage",
@@ -192,6 +197,7 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.storage.copiedPath": "Copied {{label}} path.",
   "settings.storage.copyFailed": "Could not copy {{label}} path. Please try again.",
   "settings.storage.cleanLogs": "Clean logs",
+  "settings.storage.cleanUpdates": "Clean update leftovers",
   "settings.storage.cleanDatabase": "Compact and organize database",
   "settings.storage.cleaning": "Working…",
   "settings.storage.cleaned": "Freed {{size}}.",

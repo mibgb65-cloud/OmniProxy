@@ -75,8 +75,12 @@ export function selectDirectory(title: string): Promise<string> {
   return AppService.SelectDirectory(title)
 }
 
-/** cleanStorage runs a cleanup operation ("logs" | "database"). */
-export function cleanStorage(target: "logs" | "database"): Promise<CleanResult> {
+/**
+ * cleanStorage runs a cleanup operation: "logs" removes rotated log backups,
+ * "updates" removes the helper copies left by install attempts, and "database"
+ * compacts the SQLite database.
+ */
+export function cleanStorage(target: "logs" | "updates" | "database"): Promise<CleanResult> {
   return AppService.CleanStorage(target)
 }
 

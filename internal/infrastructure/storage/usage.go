@@ -8,17 +8,26 @@ import (
 	"strings"
 )
 
+// 数据目录下由应用自己管理的固定子目录；统计与界面共用同一组名字，避免各写一份字符串。
+const (
+	DirCache       = "cache"
+	DirUpdates     = "updates"
+	DirCredentials = "credentials"
+)
+
 // Usage is a snapshot of regular-file sizes in the application data directory.
 type Usage struct {
-	Database int64
-	Logs     int64
-	Cache    int64
-	Other    int64
+	Database    int64
+	Logs        int64
+	Cache       int64
+	Updates     int64
+	Credentials int64
+	Other       int64
 }
 
 // Total returns the sum of all measured categories.
 func (u Usage) Total() int64 {
-	return u.Database + u.Logs + u.Cache + u.Other
+	return u.Database + u.Logs + u.Cache + u.Updates + u.Credentials + u.Other
 }
 
 // MeasureUsage groups files in one walk, so every counted file belongs to
@@ -55,8 +64,12 @@ func MeasureUsage(dataDir, databasePath, logDir string) (Usage, error) {
 		switch {
 		case inSubdir(rel, logName):
 			usage.Logs += size
-		case inSubdir(rel, "cache"):
+		case inSubdir(rel, DirCredentials):
+			usage.Credentials += size
+		case inSubdir(rel, DirCache):
 			usage.Cache += size
+		case inSubdir(rel, DirUpdates):
+			usage.Updates += size
 		case isDatabaseFile(rel, databaseName):
 			usage.Database += size
 		default:

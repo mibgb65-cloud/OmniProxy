@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Clipboard } from "@wailsio/runtime"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -26,6 +26,8 @@ const storageInfo: StorageInfo = {
     { name: "database", path: "…/omniproxy.db", bytes: 2048 },
     { name: "logs", path: "…/logs", bytes: 1024 },
     { name: "cache", path: "…/cache", bytes: 512 },
+    { name: "updates", path: "…/updates", bytes: 0 },
+    { name: "credentials", path: "…/credentials", bytes: 0 },
     { name: "other", path: "…", bytes: 512 },
   ],
   totalBytes: 4096,
@@ -70,14 +72,44 @@ describe("StorageOverview", () => {
     expect(screen.getByText("账号元数据计入数据库，系统凭据不在此目录。")).toBeInTheDocument()
   })
 
+  it("hides empty categories and orders the breakdown by size", async () => {
+    vi.mocked(getStorageInfo).mockResolvedValue({
+      ...storageInfo,
+      items: [
+        { name: "database", path: "…/omniproxy.db", bytes: 12_500_000 },
+        { name: "logs", path: "…/logs", bytes: 3_700_000 },
+        { name: "cache", path: "…/cache", bytes: 0 },
+        { name: "updates", path: "…/updates", bytes: 107_000_000 },
+        { name: "credentials", path: "…/credentials", bytes: 170_000 },
+        { name: "other", path: "…", bytes: 0 },
+      ],
+      totalBytes: 123_370_000,
+    })
+    renderOverview()
+
+    expect(await screen.findByText("更新缓存")).toBeInTheDocument()
+    expect(screen.getByText("登录凭据")).toBeInTheDocument()
+    expect(screen.queryByText("本地缓存")).not.toBeInTheDocument()
+    expect(screen.queryByText("其他")).not.toBeInTheDocument()
+    const figure = screen.getByRole("img", { name: "数据存储占用比例" }).closest("figure")!
+    expect(
+      within(figure)
+        .getAllByRole("term")
+        .map((node) => node.textContent),
+    ).toEqual(["更新缓存", "数据库", "运行日志", "登录凭据"])
+    expect(screen.getByText(/更新缓存是下载的安装包/)).toBeInTheDocument()
+  })
+
   it("shows zero usage without dividing by zero", async () => {
     vi.mocked(getStorageInfo).mockResolvedValue({ ...storageInfo, items: [], totalBytes: 0 })
     renderOverview()
 
     expect(await screen.findByText("占用分布")).toBeInTheDocument()
-    expect(screen.getAllByText("0 B")).toHaveLength(4)
+    expect(screen.getByText("暂无可统计的文件占用。")).toBeInTheDocument()
     expect(screen.getByText("0")).toBeInTheDocument()
-    expect(screen.getAllByText("0%")).toHaveLength(4)
+    expect(screen.getByText("B")).toBeInTheDocument()
+    const figure = screen.getByRole("img", { name: "数据存储占用比例" }).closest("figure")!
+    expect(within(figure).queryByRole("term")).not.toBeInTheDocument()
   })
 
   it("refreshes the storage snapshot on request", async () => {
@@ -133,6 +165,36 @@ describe("StorageOverview", () => {
     await waitFor(() => {
       expect(cleanStorage).toHaveBeenCalledWith("database")
     })
+  })
+
+  it("offers an update-leftover cleanup only when the update cache is present", async () => {
+    const user = userEvent.setup()
+    vi.mocked(getStorageInfo).mockResolvedValue({
+      ...storageInfo,
+      items: [
+        { name: "database", path: "…/omniproxy.db", bytes: 2048 },
+        { name: "logs", path: "…/logs", bytes: 1024 },
+        { name: "cache", path: "…/cache", bytes: 0 },
+        { name: "updates", path: "…/updates", bytes: 1024 },
+        { name: "credentials", path: "…/credentials", bytes: 0 },
+        { name: "other", path: "…", bytes: 0 },
+      ],
+      totalBytes: 4096,
+    })
+    vi.mocked(cleanStorage).mockResolvedValue({ target: "updates", freedBytes: 1024 })
+    renderOverview()
+
+    await user.click(await screen.findByRole("button", { name: "清理更新残留" }))
+
+    await waitFor(() => expect(cleanStorage).toHaveBeenCalledWith("updates"))
+    expect(await screen.findByText("已释放 1.0 KB。")).toBeInTheDocument()
+  })
+
+  it("hides the update-leftover cleanup when nothing is cached", async () => {
+    renderOverview()
+
+    await screen.findByText("占用分布")
+    expect(screen.queryByRole("button", { name: "清理更新残留" })).not.toBeInTheDocument()
   })
 
   it("shows a pending location when one is stored", async () => {

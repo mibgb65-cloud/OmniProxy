@@ -62,6 +62,8 @@ func TestStorageInfoReportsLocationsAndSizes(t *testing.T) {
 	svc, prof := newTestService(t)
 	svc.log.Info("a log line that occupies space")
 	writeFile(t, filepath.Join(prof.DataDir, "cache", "response.bin"), "cached")
+	writeFile(t, filepath.Join(prof.DataDir, "updates", "package-0123456789abcdef0123456789abcdef.exe"), "installer")
+	writeFile(t, filepath.Join(prof.DataDir, "credentials", "test", "ref.bin"), "secret")
 	writeFile(t, filepath.Join(prof.DataDir, "notes.txt"), "other")
 
 	info := svc.StorageInfo()
@@ -71,10 +73,10 @@ func TestStorageInfoReportsLocationsAndSizes(t *testing.T) {
 	if info.DatabasePath != prof.DatabasePath() {
 		t.Errorf("DatabasePath = %q, want %q", info.DatabasePath, prof.DatabasePath())
 	}
-	if len(info.Items) != 4 {
-		t.Fatalf("Items = %d, want 4", len(info.Items))
+	if len(info.Items) != 6 {
+		t.Fatalf("Items = %d, want 6", len(info.Items))
 	}
-	for i, name := range []string{"database", "logs", "cache", "other"} {
+	for i, name := range []string{"database", "logs", "cache", "updates", "credentials", "other"} {
 		if info.Items[i].Name != name {
 			t.Errorf("item %d name = %q, want %q", i, info.Items[i].Name, name)
 		}
@@ -82,14 +84,43 @@ func TestStorageInfoReportsLocationsAndSizes(t *testing.T) {
 	if info.Items[0].Bytes <= 0 {
 		t.Errorf("database size = %d, want > 0", info.Items[0].Bytes)
 	}
-	if info.Items[2].Bytes != 6 || info.Items[3].Bytes != 5 {
-		t.Errorf("cache/other = %d/%d, want 6/5", info.Items[2].Bytes, info.Items[3].Bytes)
+	sizes := map[string]int64{}
+	var sum int64
+	for _, item := range info.Items {
+		sizes[item.Name] = item.Bytes
+		sum += item.Bytes
 	}
-	if info.TotalBytes != info.Items[0].Bytes+info.Items[1].Bytes+info.Items[2].Bytes+info.Items[3].Bytes {
-		t.Errorf("TotalBytes = %d, want sum of items", info.TotalBytes)
+	if sizes["cache"] != 6 || sizes["updates"] != 9 || sizes["credentials"] != 6 || sizes["other"] != 5 {
+		t.Errorf("cache/updates/credentials/other = %d/%d/%d/%d, want 6/9/6/5",
+			sizes["cache"], sizes["updates"], sizes["credentials"], sizes["other"])
+	}
+	if info.TotalBytes != sum {
+		t.Errorf("TotalBytes = %d, want sum of items %d", info.TotalBytes, sum)
 	}
 	if info.PendingDataDir != "" {
 		t.Errorf("PendingDataDir = %q, want empty", info.PendingDataDir)
+	}
+}
+
+func TestCleanStorageUpdatesRemovesInstallLeftovers(t *testing.T) {
+	svc, prof := newTestService(t)
+	helper := filepath.Join(prof.DataDir, "updates", "runner-0123456789abcdef0123456789abcdef.exe")
+	writeFile(t, helper, "helper-copy")
+	packageFile := filepath.Join(prof.DataDir, "updates", "package-0123456789abcdef0123456789abcdef.exe")
+	writeFile(t, packageFile, "installer")
+
+	result, err := svc.CleanStorage("updates")
+	if err != nil {
+		t.Fatalf("CleanStorage error: %v", err)
+	}
+	if result.Target != "updates" || result.FreedBytes != int64(len("helper-copy")) {
+		t.Fatalf("result = %+v, want freed helper copy", result)
+	}
+	if _, err := os.Stat(helper); !os.IsNotExist(err) {
+		t.Error("helper copy should be removed")
+	}
+	if _, err := os.Stat(packageFile); err != nil {
+		t.Errorf("downloaded installer must be kept: %v", err)
 	}
 }
 

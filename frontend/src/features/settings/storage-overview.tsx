@@ -12,6 +12,7 @@ export function StorageOverview() {
   const { t } = useTranslation()
   const { data, isPending, isFetching, isError, error, refetch } = useStorageInfo()
   const clean = useCleanStorage()
+  const updatesBytes = data?.items?.find((item) => item.name === "updates")?.bytes ?? 0
 
   const runClean = (target: CleanTarget) => clean.mutate(target)
 
@@ -74,6 +75,18 @@ export function StorageOverview() {
                     ? t("settings.storage.cleaning")
                     : t("settings.storage.cleanLogs")}
                 </Button>
+                {updatesBytes > 0 ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={clean.isPending}
+                    onClick={() => runClean("updates")}
+                  >
+                    {clean.isPending && clean.variables === "updates"
+                      ? t("settings.storage.cleaning")
+                      : t("settings.storage.cleanUpdates")}
+                  </Button>
+                ) : null}
                 <Button
                   size="sm"
                   variant="outline"

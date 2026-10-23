@@ -8,7 +8,7 @@ import {
   type SetDataDirResult,
 } from "../../services/omniproxy"
 
-export type CleanTarget = "logs" | "database"
+export type CleanTarget = "logs" | "updates" | "database"
 
 export const storageInfoQuery = queryOptions({
   queryKey: ["storage-info"],

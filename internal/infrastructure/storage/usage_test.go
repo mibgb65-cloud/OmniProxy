@@ -24,6 +24,8 @@ func TestMeasureUsageGroupsAllDataFiles(t *testing.T) {
 	write("omniproxy.db-journal", "1")
 	write(filepath.Join("logs", "old", "app.log"), "12345")
 	write(filepath.Join("cache", "nested", "entry"), "123456")
+	write(filepath.Join("updates", "package-0123456789abcdef0123456789abcdef.exe"), "123456789")
+	write(filepath.Join("credentials", "production", "ref.bin"), "1234567890")
 	write("app.json", "1234567")
 	write(filepath.Join("logs-old", "archive"), "12345678")
 
@@ -31,11 +33,15 @@ func TestMeasureUsageGroupsAllDataFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if usage.Database != 10 || usage.Logs != 5 || usage.Cache != 6 || usage.Other != 15 {
-		t.Fatalf("usage = %+v, want database=10 logs=5 cache=6 other=15", usage)
+	if usage.Database != 10 || usage.Logs != 5 || usage.Cache != 6 ||
+		usage.Updates != 9 || usage.Credentials != 10 || usage.Other != 15 {
+		t.Fatalf(
+			"usage = %+v, want database=10 logs=5 cache=6 updates=9 credentials=10 other=15",
+			usage,
+		)
 	}
-	if usage.Total() != 36 {
-		t.Fatalf("total = %d, want 36", usage.Total())
+	if usage.Total() != 55 {
+		t.Fatalf("total = %d, want 55", usage.Total())
 	}
 }
 
