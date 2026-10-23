@@ -6,9 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.29 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.28 基础上把每个受管 Agent 改为固定入口前缀（Codex 恢复 `…/codex/v1` 并保留官方 auth.json 登录、配置不再写入接入 Key；Claude 系 `…/claude`；其余 `…/<client>/v1`），前缀折叠回 `/v1/...` 后进入既有协议、上限与鉴权，跨客户端 Key 返回 `403 client_mismatch`；同时一并打包已完成未提交的 River 图片输入与受管客户端目录图片能力声明。完整质量门（126 文件 750 项前端测试）／Windows 版本资源与资产校验通过；安装器 19,636,234 bytes，位于 `release-assets/v2.0.0-beta.29/`，SHA256 `86652098…f7b9c3`，未签名。生产进程未变、未自动安装；已应用的客户端需重新「预览 → 应用」才会换用新地址，旧地址在本版继续可用。
+2.0.0-beta.30 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.29 基础上修正推理档位链路：Codex 目录按它自己的档位词汇发布（`none→minimal`、`max→xhigh`，网关请求时还原），因此 River 的 DeepSeek 型号不再只能停在「高」；Google 系用独立型号表达的档位（`…-low`、`(High)`）折叠成一行模型 + 档位映射，请求时换成实际变体型号并移除档位字段，旧变体 ID 反向解析保兼容。完整质量门（126 文件 750 项前端测试）／Windows 版本资源与资产校验通过；安装器 19,656,610 bytes，SHA256 `46b41488…c89bd1`，未签名。生产进程未变、未自动安装；Codex 需重新应用配置、Google／River 需同步一次模型目录。
 
 ## In Progress
+
+- [TASK-20261024-004](../tasks/active/TASK-20261024-004-build-local-beta30-installer.md)：Beta.30 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,656,610 bytes，SHA256 `46b41488…c89bd1`）；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-003](../tasks/active/TASK-20261024-003-effort-vocabulary-and-google-variants.md)：推理档位按客户端词汇发布（Codex `none→minimal`、`max→xhigh`，网关请求时还原），Google 的 `(High)/(Low)/(Medium)` 变体型号折叠成一行模型 + 档位映射；旧变体 ID 反向解析保兼容。Go 全部包与新增用例通过，实机客户端菜单待验收。
 
 - [TASK-20261024-002](../tasks/active/TASK-20261024-002-build-local-beta29-installer.md)：Beta.29 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
 
