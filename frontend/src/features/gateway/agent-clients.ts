@@ -1,3 +1,4 @@
+import type { TranslationKey } from "../../i18n/translation"
 import type { AgentClient } from "../../services/agents"
 
 export const agentClientIds = [
@@ -73,6 +74,22 @@ export function isAgentClientId(value: unknown): value is AgentClientId {
 export type AgentTitleKey = (typeof agentClients)[AgentClientId]["title"]
 export function agentTitleKey(client?: string): AgentTitleKey | null {
   return isAgentClientId(client) ? agentClients[client].title : null
+}
+
+// Codex 的 CLI、桌面应用与 IDE 扩展共用同一入口前缀，网关只能按客户端自己声明的
+// 来源标识区分它们；请求记录里用这几项替代笼统的「Codex CLI / Desktop」。
+export const requestAgentTitleKeys = {
+  "codex-cli": "agents.codex-cli",
+  "codex-desktop": "agents.codex-desktop",
+  "codex-vscode": "agents.codex-vscode",
+} as const
+
+/** 请求归属的展示键：运行形态细化优先，其余沿用客户端目录。 */
+export function requestAgentTitleKey(client?: string): TranslationKey | null {
+  if (client && client in requestAgentTitleKeys) {
+    return requestAgentTitleKeys[client as keyof typeof requestAgentTitleKeys]
+  }
+  return agentTitleKey(client)
 }
 
 export function agentStatusKey(item?: AgentClient) {

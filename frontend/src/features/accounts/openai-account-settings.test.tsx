@@ -40,11 +40,13 @@ describe("OpenAI account settings", () => {
     vi.mocked(getCodexSettings).mockResolvedValue({
       webSocketEnabled: true,
       accountRotationMode: "queue",
+      upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
       autoQuotaActivation: false,
     })
     vi.mocked(setCodexWebSocketEnabled).mockResolvedValue({
       webSocketEnabled: false,
       accountRotationMode: "queue",
+      upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
       autoQuotaActivation: false,
     })
     vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
@@ -100,6 +102,7 @@ describe("OpenAI account settings", () => {
     vi.mocked(getCodexSettings).mockResolvedValue({
       webSocketEnabled: false,
       accountRotationMode: "queue",
+      upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
       autoQuotaActivation: false,
     })
     await user.click(screen.getByRole("button", { name: "OpenAI 账号设置" }))
@@ -138,6 +141,7 @@ describe("OpenAI account settings", () => {
       const next = {
         webSocketEnabled: activation,
         accountRotationMode: "queue",
+        upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
         autoQuotaActivation: activation,
       }
       let finishSave!: () => void
@@ -168,6 +172,7 @@ describe("OpenAI account settings", () => {
               resolve({
                 webSocketEnabled: true,
                 accountRotationMode: "queue",
+                upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
                 autoQuotaActivation: false,
               })
           }),

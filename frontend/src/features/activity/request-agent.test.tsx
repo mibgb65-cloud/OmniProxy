@@ -77,6 +77,18 @@ it("按接入 Key 归属显示发起请求的 Agent", async () => {
   expect(within(rows[1]!).getByText("DeepSeek Harness Web")).toBeInTheDocument()
 })
 
+it("Codex 的 CLI、桌面应用与 IDE 扩展分别显示各自的运行形态", async () => {
+  mount([
+    { ...item, client: "codex-cli" },
+    { ...item, id: "b".repeat(32), client: "codex-desktop" },
+    { ...item, id: "c".repeat(32), client: "codex-vscode" },
+  ])
+  const rows = screen.getAllByRole("row").slice(1)
+  expect(within(rows[0]!).getByText("Codex CLI")).toBeInTheDocument()
+  expect(within(rows[1]!).getByText("Codex Desktop")).toBeInTheDocument()
+  expect(within(rows[2]!).getByText("Codex（VS Code 扩展）")).toBeInTheDocument()
+})
+
 it("无法归属的请求显示破折号而不是猜测对应 Agent", async () => {
   mount([{ ...item }, { ...item, id: "c".repeat(32), client: "unknown-client" }])
   const rows = screen.getAllByRole("row").slice(1)

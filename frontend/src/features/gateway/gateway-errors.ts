@@ -17,6 +17,8 @@ const errorKeys = new Map<string, TranslationKey>([
   ["route_configuration_changed", "gateway.error.configuration"],
   ["accounting_unavailable", "gateway.error.configuration"],
   ["request_timeout", "gateway.error.timeout"],
+  ["credential_prepare_timeout", "gateway.error.timeout"],
+  ["upstream_socket_timeout", "gateway.error.timeout"],
   ["request_cancelled", "gateway.error.cancelled"],
   ["gateway_busy", "gateway.error.busy"],
   ["gateway_not_running", "gateway.error.stopped"],

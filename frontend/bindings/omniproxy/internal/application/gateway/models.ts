@@ -24,6 +24,11 @@ export interface CodexSettings {
     "webSocketEnabled": boolean;
     "autoQuotaActivation": boolean;
     "accountRotationMode": string;
+
+    /**
+     * UpstreamBaseURL 是透明转发的上游基址，默认官方订阅端点。
+     */
+    "upstreamBaseUrl": string;
 }
 
 /**

@@ -93,6 +93,20 @@ export const subscriptionEn = {
     "Some windows are still being observed or await confirmation. Requests already sent are only rechecked, never resent automatically.",
   "subscription.activation.failed":
     "Some checks or activations could not finish. Check account authorization and network.",
+  "subscription.activation.reason.models":
+    "An account's official model catalog is empty, so the activation message cannot pick a model. Sync that account's models first.",
+  "subscription.activation.reason.quota":
+    "Reading the account quota windows failed. It will be rechecked automatically.",
+  "subscription.activation.reason.prepare":
+    "The pre-send quota recheck did not pass, so no message was sent this round.",
+  "subscription.activation.reason.request": "The activation message did not complete.",
+  "subscription.activation.reason.record":
+    "The activation record could not be written, so no message was sent this round.",
+  "subscription.activation.reason.identity":
+    "The account identity changed. Authorize that account again.",
+  "subscription.activation.reason.timing":
+    "Not enough timing evidence for the quota window yet; waiting for the next recheck.",
+  "subscription.activation.reason.accounts": "Reading the account or provider list failed.",
   "subscription.activation.statusFailed": "Automatic activation status is temporarily unavailable.",
   "subscription.quota.title": "Quota / balance",
   "subscription.quota.retained": "Showing last recorded information",

@@ -26,11 +26,13 @@ beforeEach(() => {
   vi.mocked(getCodexSettings).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: false,
   })
   vi.mocked(setCodexQuotaAutoActivation).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: true,
   })
   vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
@@ -98,6 +100,7 @@ it("保存失败保留原开关状态，点击可重试且隐藏原始错误", a
   expect(client.getQueryData(["codex-settings"])).toEqual({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: false,
   })
   expect(getCodexQuotaActivationStatus).not.toHaveBeenCalled()
@@ -111,6 +114,7 @@ it("读取已保存授权，明确显示待复查与失败，不宣称未知窗�
   vi.mocked(getCodexSettings).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: true,
   })
   vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
@@ -127,22 +131,49 @@ it("读取已保存授权，明确显示待复查与失败，不宣称未知窗�
   expect(
     await screen.findByText("部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。"),
   ).toBeInTheDocument()
-  expect(screen.getByText("部分账号检测或激活未完成，请检查账号授权与网络。")).toBeInTheDocument()
+  expect(screen.getAllByText("部分账号检测或激活未完成，请检查账号授权与网络。")).toHaveLength(2)
   act(() => useUIStore.setState({ language: "en" }))
   expect(
     await screen.findByRole("heading", { name: "Automatically activate Codex quota windows" }),
   ).toBeInTheDocument()
 })
 
+it("检测失败时直接给出具体原因，不留在笼统提示上", async () => {
+  vi.mocked(getCodexSettings).mockResolvedValue({
+    webSocketEnabled: true,
+    accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
+    autoQuotaActivation: true,
+  })
+  vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({
+    running: false,
+    checked: 2,
+    sent: 0,
+    activated: 1,
+    failed: 1,
+    pending: 0,
+    updatedAt: "now",
+    errorCode: "models_unavailable",
+  })
+  renderSettings()
+  const reason = "有账号的官方模型目录为空，激活消息无法选择模型；请先同步该账号模型。"
+  expect(await screen.findByText(reason)).toBeInTheDocument()
+  // 具体原因同时出现在提示条与设置面板，面板不会只显示检测中。
+  await waitFor(() => expect(screen.getAllByText(reason)).toHaveLength(2))
+  expect(screen.queryByText("正在检测并复查额度窗口…")).not.toBeInTheDocument()
+})
+
 it("关闭开关直接保存关闭并停止状态查询", async () => {
   vi.mocked(getCodexSettings).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: true,
   })
   vi.mocked(setCodexQuotaAutoActivation).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: false,
   })
   const user = userEvent.setup()
@@ -154,6 +185,7 @@ it("关闭开关直接保存关闭并停止状态查询", async () => {
     expect(client.getQueryData(["codex-settings"])).toEqual({
       webSocketEnabled: true,
       accountRotationMode: "queue",
+      upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
       autoQuotaActivation: false,
     }),
   )
@@ -170,6 +202,7 @@ it("保存期间显示进度，拒绝重复切换且保留已确认值", async (
           resolve({
             webSocketEnabled: true,
             accountRotationMode: "queue",
+            upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
             autoQuotaActivation: true,
           })
       }),
@@ -193,6 +226,7 @@ it("首次占位观测显示待确认，不把零发送显示成已激活", asyn
   vi.mocked(getCodexSettings).mockResolvedValue({
     webSocketEnabled: true,
     accountRotationMode: "queue",
+    upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
     autoQuotaActivation: true,
   })
   vi.mocked(getCodexQuotaActivationStatus).mockResolvedValue({

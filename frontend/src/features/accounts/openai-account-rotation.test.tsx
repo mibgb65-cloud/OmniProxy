@@ -23,6 +23,7 @@ const settings = {
   webSocketEnabled: true,
   autoQuotaActivation: false,
   accountRotationMode: "queue",
+  upstreamBaseUrl: "https://chatgpt.com/backend-api/codex",
 }
 const status = {
   running: false,

@@ -424,6 +424,14 @@ export function GoogleSubscriptionQuota(id: string): $CancellablePromise<antigra
 }
 
 /**
+ * ImportCodexAuthFromClient 把本机 Codex 登录收进网关自己的池（v1 的导入语义）。
+ * 重复导入同一官方账号只更新凭据，不新增账号。
+ */
+export function ImportCodexAuthFromClient(): $CancellablePromise<account$0.Item> {
+    return $Call.ByID(1871010342);
+}
+
+/**
  * ImportLegacyData 必须携带刚预览的源快照，避免导入用户没有确认的变化。
  */
 export function ImportLegacyData(directory: string, snapshot: string): $CancellablePromise<legacyimport$0.Result> {

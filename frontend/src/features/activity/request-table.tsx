@@ -10,7 +10,7 @@ import {
   formatSpeed,
   formatFirstToken,
 } from "./activity-format"
-import { agentTitleKey } from "../gateway/agent-clients"
+import { requestAgentTitleKey } from "../gateway/agent-clients"
 import { formatTokens, type RequestItem } from "../../services/activity"
 import type { TranslationKey } from "../../i18n/translation"
 
@@ -72,7 +72,7 @@ export function RequestTable({
         </thead>
         <tbody>
           {items.map((item) => {
-            const agentKey = agentTitleKey(item.client)
+            const agentKey = requestAgentTitleKey(item.client)
             const cachedHit = formatCachedHit(
               item.cachedInputTokens,
               item.cachedInputKnown,

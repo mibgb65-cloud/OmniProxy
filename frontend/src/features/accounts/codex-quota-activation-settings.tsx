@@ -8,6 +8,7 @@ import {
   type CodexActivationStatus,
 } from "../../services/codex-settings"
 import { ProviderSwitch } from "../providers/provider-switch"
+import { activationReasonKey } from "./activation-reason"
 
 export function CodexQuotaActivationSettings({
   onResult,
@@ -74,6 +75,11 @@ export function CodexQuotaActivationSettings({
       {checked && status.data?.running ? (
         <p role="status" className="text-muted-foreground text-xs">
           {t("subscription.activation.checking")}
+        </p>
+      ) : null}
+      {checked && !status.data?.running && status.data?.errorCode ? (
+        <p role="status" className="text-muted-foreground text-xs">
+          {t(activationReasonKey(status.data.errorCode) ?? "subscription.activation.failed")}
         </p>
       ) : null}
       {status.isError && settings.data?.autoQuotaActivation ? (

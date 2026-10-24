@@ -76,6 +76,15 @@ export const subscriptionZh = {
   "subscription.activation.pending":
     "部分窗口仍在观测或等待官方确认；已经发送的请求只复查，不自动重发。",
   "subscription.activation.failed": "部分账号检测或激活未完成，请检查账号授权与网络。",
+  "subscription.activation.reason.models":
+    "有账号的官方模型目录为空，激活消息无法选择模型；请先同步该账号模型。",
+  "subscription.activation.reason.quota": "读取账号额度窗口失败，稍后会自动复查。",
+  "subscription.activation.reason.prepare": "发送前的额度复查未通过，本次未发送消息。",
+  "subscription.activation.reason.request": "激活消息未成功完成。",
+  "subscription.activation.reason.record": "激活登记写入失败，本次未发送消息。",
+  "subscription.activation.reason.identity": "账号身份发生变化，请重新授权该账号。",
+  "subscription.activation.reason.timing": "额度窗口的时间证据不足，正在等待下一次复查。",
+  "subscription.activation.reason.accounts": "读取账号或服务商列表失败。",
   "subscription.activation.statusFailed": "暂时无法读取自动激活状态。",
   "subscription.quota.title": "额度 / 余额",
   "subscription.quota.retained": "已保留上次获取的信息",

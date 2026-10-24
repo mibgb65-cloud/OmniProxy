@@ -14,7 +14,7 @@ import {
   formatSpeed,
   formatFirstToken,
 } from "./activity-format"
-import { agentTitleKey } from "../gateway/agent-clients"
+import { requestAgentTitleKey } from "../gateway/agent-clients"
 import { RequestAttempts } from "./request-attempts"
 
 export function RequestDialog({
@@ -36,7 +36,7 @@ export function RequestDialog({
   })
   const copy = useMutation({ mutationFn: () => Clipboard.SetText(id || "") })
   const item = data.data
-  const agentKey = agentTitleKey(item?.client)
+  const agentKey = requestAgentTitleKey(item?.client)
   return (
     <Dialog.Root
       open={!!id}
