@@ -42,7 +42,11 @@ func (s *cancelledSuccessSession) Next(context.Context) (PassthroughAttempt, err
 	return s.target, nil
 }
 
-func (s *cancelledSuccessSession) Done(context.Context, PassthroughAttempt, int) { s.done++ }
+func (s *cancelledSuccessSession) Done(context.Context, PassthroughAttempt, PassthroughOutcome) {
+	s.done++
+}
+
+func (s *cancelledSuccessSession) Switchable() bool { return true }
 
 func TestSocketCancelledPreparationDiscardsEvenSuccessfulLateResult(t *testing.T) {
 	parent, cancel := context.WithCancel(context.Background())

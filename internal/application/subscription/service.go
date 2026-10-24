@@ -64,6 +64,12 @@ type Service struct {
 	closed            bool
 	quotaObservations map[string]quotaObservation
 	quotaCache        *QuotaCache
+	// refreshMu 保护按需额度刷新：调用方在请求路径上，不能与登录会话锁互相阻塞。
+	refreshMu     sync.Mutex
+	refreshLast   map[string]time.Time
+	refreshCtx    context.Context
+	refreshCancel context.CancelFunc
+	refreshClosed bool
 }
 
 // New 使用按运行环境隔离的固定授权配置根目录。

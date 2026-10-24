@@ -21,7 +21,7 @@ type retryReason struct {
 func rejectedAccount(t target, response proxy.Response, now time.Time) *retryReason {
 	if t.kind == "openai" && response.PreExecutionQuotaRejected {
 		delay := 30 * time.Second
-		if response.QuotaResetAt.After(now) && response.QuotaResetAt.Sub(now) <= 8*24*time.Hour {
+		if response.QuotaResetAt.After(now) && response.QuotaResetAt.Sub(now) <= maxQuotaBlockWindow {
 			delay = response.QuotaResetAt.Sub(now)
 		}
 		return &retryReason{code: "upstream_quota_exhausted", delay: delay}

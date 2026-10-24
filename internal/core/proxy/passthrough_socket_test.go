@@ -76,7 +76,7 @@ func TestPassthroughSocketRelaysFrames(t *testing.T) {
 	if gotOrigin != "" {
 		t.Fatalf("Origin 不应透传给上游: %q", gotOrigin)
 	}
-	if len(session.done) != 1 || session.done[0] != http.StatusSwitchingProtocols {
+	if len(session.done) != 1 || session.done[0].StatusCode != http.StatusSwitchingProtocols {
 		t.Fatalf("socket attempt outcomes = %v", session.done)
 	}
 }
@@ -129,7 +129,7 @@ func TestPassthroughSocketSwitchesAccountOnHandshakeRejection(t *testing.T) {
 	if _, data, err := socket.Read(ctx); err != nil || string(data) != "ping" {
 		t.Fatalf("换号后未连到第二个账号: %v %q", err, data)
 	}
-	if len(session.done) != 2 || session.done[0] != http.StatusTooManyRequests || session.done[1] != http.StatusSwitchingProtocols {
+	if len(session.done) != 2 || session.done[0].StatusCode != http.StatusTooManyRequests || session.done[1].StatusCode != http.StatusSwitchingProtocols {
 		t.Fatalf("socket attempt outcomes = %v", session.done)
 	}
 }

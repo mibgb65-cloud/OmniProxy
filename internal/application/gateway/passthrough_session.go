@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 	"errors"
-	"time"
+	"net/http"
 
 	"omniproxy/internal/core/proxy"
 )
@@ -165,19 +165,36 @@ func (s *passthroughSession) attemptFor(ctx context.Context, candidate proxy.Acc
 
 // Retryable 只在关闭固定账号且故障切换开启时，按明确拒绝状态码换号。
 func (s *passthroughSession) Retryable(_ proxy.PassthroughAttempt, status int) bool {
-	if s.fixed || !s.enabled {
+	if !s.Switchable() {
 		return false
 	}
 	return passthroughRetryableStatus(status)
 }
 
-// Done 结束本次尝试：成功清除冷却，明确拒绝写入冷却窗口。
-func (s *passthroughSession) Done(_ context.Context, attempt proxy.PassthroughAttempt, status int) {
+// Switchable 报告是否允许换号：固定账号与关闭的故障切换都不遍历候选。
+func (s *passthroughSession) Switchable() bool { return !s.fixed && s.enabled }
+
+// Done 结束本次尝试：成功清除冷却并按需刷新额度观察；明确拒绝写入冷却或额度阻断。
+func (s *passthroughSession) Done(_ context.Context, attempt proxy.PassthroughAttempt, outcome proxy.PassthroughOutcome) {
 	if attempt.AccountID == "" || s.current.accountID != attempt.AccountID {
 		return
 	}
-	s.release(passthroughRejection(status), status >= 200 && status < 300)
+	current := s.current
 	s.current = target{}
+	if outcome.UpstreamQuotaRejected {
+		// 执行前额度拒绝按真实重置时间阻断账号；共享窗口对该账号的所有模型生效。
+		rejected := quotaRetryReason(outcome.QuotaResetAt, s.service.failover.now())
+		s.service.rememberQuotaRejection(current, rejected)
+		s.release(rejected, false)
+		s.service.refreshQuota(current)
+		return
+	}
+	// WebSocket 握手成功同样是「这次账号可用」的证据，不能因为没有 2xx 就留下旧冷却。
+	healthy := outcome.StatusCode == http.StatusSwitchingProtocols || outcome.StatusCode >= 200 && outcome.StatusCode < 300
+	s.release(passthroughRejection(outcome.StatusCode, outcome.RetryAfter, s.service.failover.now()), healthy)
+	if healthy {
+		s.service.refreshQuota(current)
+	}
 }
 
 // release 归还健康租约；没有租约（固定账号）时只清空本地状态。
@@ -186,28 +203,4 @@ func (s *passthroughSession) release(rejected *retryReason, healthy bool) {
 		s.service.failover.finish(s.lease, rejected, healthy)
 	}
 	s.lease = healthLease{}
-}
-
-// passthroughRetryableStatus 与 v1 的可重试集合一致，另外把 401 视为账号级失效。
-func passthroughRetryableStatus(status int) bool {
-	switch status {
-	case 401, 429, 500, 502, 503, 504:
-		return true
-	default:
-		return false
-	}
-}
-
-// passthroughRejection 只依据明确拒绝分类写入冷却，不猜泛化 5xx 之外的语义。
-func passthroughRejection(status int) *retryReason {
-	switch status {
-	case 401:
-		return &retryReason{code: "upstream_authentication_failed", delay: 5 * time.Minute}
-	case 429:
-		return &retryReason{code: "upstream_rate_limited", delay: 30 * time.Second}
-	case 500, 502, 503, 504:
-		return &retryReason{code: "upstream_unavailable", delay: 30 * time.Second}
-	default:
-		return nil
-	}
 }

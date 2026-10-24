@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // maxPassthroughAttempts 是单次透明转发的账号尝试上限，与 v1 同类设置对齐。
@@ -54,42 +56,72 @@ func (s *Server) readPassthroughBody(w http.ResponseWriter, r *http.Request) ([]
 }
 
 // forwardPassthrough 顺序尝试候选账号；只有宿主判定为明确拒绝才换号。
+// 执行前额度拒绝可能被 HTTP 200／429 包装在首事件里，必须在写给客户端之前判定。
 func (s *Server) forwardPassthrough(w http.ResponseWriter, r *http.Request, request PassthroughRequest, session PassthroughSession, trace *Trace) (int, string) {
 	ctx := r.Context()
 	var lastStatus int
 	var lastErr error
+	var quotaRejection *PassthroughOutcome
 	for attempt := 0; attempt < maxPassthroughAttempts; attempt++ {
 		target, err := session.Next(ctx)
 		if err != nil {
-			return s.failPassthrough(w, ctx, lastStatus, err)
+			return s.failPassthrough(w, ctx, lastStatus, lastErr, quotaRejection)
 		}
-		updateErr := trace.Update(ctx, Request{Model: target.Model, Stream: true}, target.Snapshot)
-		if updateErr != nil {
+		attemptRequest := Request{Model: target.Model, Stream: true}
+		// 尝试独立记账：被拒绝的账号不能把父记录的归属改写成自己。
+		if beginErr := trace.BeginAttempt(ctx, attemptRequest, target.Snapshot); beginErr != nil {
 			clearAttemptHeaders(target.Header)
-			session.Done(ctx, target, 0)
-			writeFailure(w, updateErr)
+			session.Done(ctx, target, PassthroughOutcome{})
+			writeFailure(w, beginErr)
 			return http.StatusServiceUnavailable, "accounting_unavailable"
 		}
 		resp, err := s.sendPassthrough(ctx, request, target)
 		clearAttemptHeaders(target.Header)
 		if err != nil {
-			session.Done(ctx, target, 0)
-			lastErr = err
+			_ = trace.EndAttempt(http.StatusBadGateway, "upstream_unavailable")
+			session.Done(ctx, target, PassthroughOutcome{})
+			lastErr, quotaRejection = err, nil
 			continue
 		}
+		outcome := PassthroughOutcome{StatusCode: resp.StatusCode, RetryAfter: resp.Header.Get("Retry-After")}
+		if reset, rejected := inspectPassthroughQuota(resp, time.Now()); rejected {
+			// 这段字节是执行前拒绝，不能交付给客户端；按真实重置时间冷却后换号。
+			_ = resp.Body.Close()
+			outcome.UpstreamQuotaRejected, outcome.QuotaResetAt = true, reset
+			_ = trace.EndAttempt(resp.StatusCode, "upstream_quota_exhausted")
+			session.Done(ctx, target, outcome)
+			lastStatus, lastErr, quotaRejection = resp.StatusCode, nil, &outcome
+			if session.Switchable() {
+				continue
+			}
+			break
+		}
 		if !session.Retryable(target, resp.StatusCode) {
-			session.Done(ctx, target, resp.StatusCode)
+			_ = trace.EndAttempt(resp.StatusCode, "")
+			if bindErr := trace.Update(ctx, attemptRequest, target.Snapshot); bindErr != nil {
+				_ = resp.Body.Close()
+				session.Done(ctx, target, outcome)
+				writeFailure(w, bindErr)
+				return http.StatusServiceUnavailable, "accounting_unavailable"
+			}
+			session.Done(ctx, target, outcome)
 			return s.writePassthroughResponse(w, r, trace, resp, request.Path)
 		}
-		session.Done(ctx, target, resp.StatusCode)
-		lastStatus = resp.StatusCode
+		_ = trace.EndAttempt(resp.StatusCode, "upstream_rejected_request")
+		session.Done(ctx, target, outcome)
+		lastStatus, lastErr, quotaRejection = resp.StatusCode, nil, nil
 		_ = resp.Body.Close()
 	}
-	return s.failPassthrough(w, ctx, lastStatus, lastErr)
+	return s.failPassthrough(w, ctx, lastStatus, lastErr, quotaRejection)
 }
 
 // failPassthrough 复刻 v1：保留最后一次上游状态码，否则返回网关失败码。
-func (s *Server) failPassthrough(w http.ResponseWriter, ctx context.Context, lastStatus int, err error) (int, string) {
+// 全部候选都在执行前被额度拒绝时，客户端统一收到受控 429；请求明细保留真实上游状态码。
+func (s *Server) failPassthrough(w http.ResponseWriter, ctx context.Context, lastStatus int, err error, rejected *PassthroughOutcome) (int, string) {
+	if rejected != nil {
+		writeFailure(w, &Error{Code: "upstream_quota_exhausted", StatusCode: http.StatusTooManyRequests, RetryAfter: quotaRetryAfter(rejected.QuotaResetAt, time.Now())})
+		return rejected.StatusCode, "upstream_quota_exhausted"
+	}
 	if lastStatus != 0 {
 		http.Error(w, http.StatusText(lastStatus), lastStatus)
 		return lastStatus, "upstream_rejected_request"
@@ -100,6 +132,18 @@ func (s *Server) failPassthrough(w http.ResponseWriter, ctx context.Context, las
 	}
 	writeFailure(w, failure)
 	return failure.StatusCode, failure.Code
+}
+
+// quotaRetryAfter 把重置时间换算成受控的 Retry-After 秒数；未知或越界时留空。
+func quotaRetryAfter(reset time.Time, now time.Time) string {
+	if !reset.After(now) {
+		return ""
+	}
+	seconds := int((reset.Sub(now) + time.Second - 1) / time.Second)
+	if seconds < 1 || seconds > 86400 {
+		return ""
+	}
+	return strconv.Itoa(seconds)
 }
 
 // clearBytes 抹掉正文副本中的请求内容。

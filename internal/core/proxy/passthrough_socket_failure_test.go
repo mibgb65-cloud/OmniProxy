@@ -18,8 +18,9 @@ type failingSession struct{ err error }
 func (s failingSession) Next(context.Context) (PassthroughAttempt, error) {
 	return PassthroughAttempt{}, s.err
 }
-func (failingSession) Retryable(PassthroughAttempt, int) bool        { return false }
-func (failingSession) Done(context.Context, PassthroughAttempt, int) {}
+func (failingSession) Retryable(PassthroughAttempt, int) bool                       { return false }
+func (failingSession) Switchable() bool                                             { return true }
+func (failingSession) Done(context.Context, PassthroughAttempt, PassthroughOutcome) {}
 
 type failingBinding struct{ err error }
 

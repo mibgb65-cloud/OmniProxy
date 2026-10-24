@@ -145,6 +145,10 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 			s.failover.finish(lease, cooldown, accepted)
 		}
 		released = true
+		if accepted && err == nil {
+			// 成功请求之后按需刷新该账号额度观察，让下一条消息不必先撞一次已知耗尽账号。
+			s.refreshQuota(t)
+		}
 		status, code := attemptFailure(ctx, err)
 		if t.kind == "river" && rejected == nil && responseStatus >= 400 {
 			status, code = responseStatus, "upstream_rejected_request"

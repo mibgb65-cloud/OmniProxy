@@ -171,6 +171,8 @@ func (s *Service) Cancel(id string) (State, error) {
 
 // Close 终止正在进行的授权，退出应用不会清理已保存账号的系统凭证。
 func (s *Service) Close() {
+	// 先停按需额度刷新，避免退出过程中再启动官方查询。
+	s.stopQuotaRefresh()
 	s.mu.Lock()
 	s.closed = true
 	job := s.current

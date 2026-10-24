@@ -11,10 +11,11 @@ import (
 
 // stubSession 用固定尝试序列实现转发会话，便于断言网络层行为。
 type stubSession struct {
-	attempts  []PassthroughAttempt
-	retryable map[int]bool
-	done      []int
-	index     int
+	attempts   []PassthroughAttempt
+	retryable  map[int]bool
+	switchable bool
+	done       []PassthroughOutcome
+	index      int
 }
 
 func (s *stubSession) Next(context.Context) (PassthroughAttempt, error) {
@@ -28,8 +29,10 @@ func (s *stubSession) Next(context.Context) (PassthroughAttempt, error) {
 
 func (s *stubSession) Retryable(_ PassthroughAttempt, status int) bool { return s.retryable[status] }
 
-func (s *stubSession) Done(_ context.Context, _ PassthroughAttempt, status int) {
-	s.done = append(s.done, status)
+func (s *stubSession) Switchable() bool { return s.switchable }
+
+func (s *stubSession) Done(_ context.Context, _ PassthroughAttempt, outcome PassthroughOutcome) {
+	s.done = append(s.done, outcome)
 }
 
 type stubBinding struct{ session *stubSession }
@@ -159,7 +162,7 @@ func TestPassthroughSwitchesAccountOnRetryableStatus(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("status = %d, want 200 after switching account", resp.StatusCode)
 	}
-	if len(session.done) != 2 || session.done[0] != 429 || session.done[1] != 200 {
+	if len(session.done) != 2 || session.done[0].StatusCode != 429 || session.done[1].StatusCode != 200 {
 		t.Fatalf("attempt outcomes = %v", session.done)
 	}
 }

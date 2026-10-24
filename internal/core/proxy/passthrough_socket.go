@@ -124,7 +124,7 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 		prepareCancel()
 		if err == nil && (prepareErr != nil || r.Context().Err() != nil) {
 			clearAttemptHeaders(target.Header)
-			session.Done(r.Context(), target, 0)
+			session.Done(r.Context(), target, PassthroughOutcome{})
 		}
 		if err != nil || prepareErr != nil || r.Context().Err() != nil {
 			if r.Context().Err() != nil {
@@ -138,7 +138,7 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 		targetURL, urlErr := PassthroughSocketURL(target.BaseURL, request.Path, request.Query)
 		if urlErr != nil {
 			clearAttemptHeaders(target.Header)
-			session.Done(r.Context(), target, 0)
+			session.Done(r.Context(), target, PassthroughOutcome{})
 			return nil, urlErr
 		}
 		dialCtx, dialCancel := context.WithTimeout(r.Context(), 5*time.Second)
@@ -161,13 +161,13 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 			}
 		}
 		if dialErr == nil && dialErrContext == nil && r.Context().Err() == nil {
-			session.Done(r.Context(), target, http.StatusSwitchingProtocols)
+			session.Done(r.Context(), target, PassthroughOutcome{StatusCode: http.StatusSwitchingProtocols})
 			return upstream, nil
 		}
 		if upstream != nil {
 			upstream.CloseNow()
 		}
-		session.Done(r.Context(), target, status)
+		session.Done(r.Context(), target, PassthroughOutcome{StatusCode: status, RetryAfter: socketRetryAfter(upstreamResp)})
 		if r.Context().Err() != nil {
 			return nil, r.Context().Err()
 		}
@@ -192,6 +192,14 @@ func socketDialFailure(status int) error {
 		return &Error{Code: "upstream_socket_rejected", StatusCode: status}
 	}
 	return Failure("upstream_unavailable", 502)
+}
+
+// socketRetryAfter 只读取握手失败响应里的重试提示，冷却语义仍由宿主决定。
+func socketRetryAfter(response *http.Response) string {
+	if response == nil {
+		return ""
+	}
+	return response.Header.Get("Retry-After")
 }
 
 // logSocketFailure 只写稳定分类与内部错误码，不带 URL、账号或底层错误文本。

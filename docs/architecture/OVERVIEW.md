@@ -1,5 +1,15 @@
 # Architecture Overview
 
+## Codex 透明转发的额度换号（2026-10-24）
+
+执行前额度拒绝的判定上提到 `core/proxy`（`QuotaRejected`／`InspectableQuotaResponse`），
+适配器与透明入口共用一份证据；`/codex/v1` 在写给客户端之前有界预读首个事件（最多 4 KiB，
+未命中按原字节接回），命中即按真实 `resets_at` 冷却并换号。透明转发改用尝试级记账
+（`BeginAttempt`／`EndAttempt`），父记录只在被接受的响应上绑定账号，避免换号时把父记录
+写成首个账号而被记账拒绝；`Done` 携带 `PassthroughOutcome`，冷却遵循上游 `Retry-After`。
+订阅额度改为按需刷新：真实请求结束后对同一账号＋凭据版本去抖 5 分钟重新观察，不新增定时器
+或全量后台探测。见 TASK-20261024-022。
+
 ## Codex WebSocket 握手与凭据准备（2026-10-24）
 
 透明中继保留上游先握手，默认 10 秒总预算仅作用于建连；凭据合计 5 秒、

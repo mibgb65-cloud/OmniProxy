@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [TASK-20261024-022](../tasks/active/TASK-20261024-022-passthrough-quota-failover.md)：Codex 透明入口（`/codex/v1`）在执行前额度拒绝时也能换号——额度判定上提到 `core/proxy` 共用、首事件 4 KiB 有界预读命中即按真实 `resets_at` 冷却换号、透明转发改尝试级记账（修掉换号即 `accounting_unavailable` 的缺陷）、冷却遵循上游 `Retry-After`、成功／拒绝后按需去抖刷新额度观察。全量 Go 测试与 format／vet／staticcheck 通过；实机 Codex 客户端验收待用户执行。
+
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。
