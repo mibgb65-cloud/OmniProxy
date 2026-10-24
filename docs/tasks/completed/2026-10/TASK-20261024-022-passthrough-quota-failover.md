@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -222,7 +222,7 @@ go test ./internal/application/subscription -run ObserveQuota PASS
 ## Commit
 
 ```text
-Not committed by Agent yet.
+1173f20 fix(gateway): 透明转发在执行前额度拒绝时换号并阻断账号
 ```
 
 ---
@@ -233,3 +233,9 @@ Codex 透明入口（客户端实际使用的 `/codex/v1`）现在会在 HTTP 20
 拒绝时换号，并按真实重置时间把该账号标为额度阻断，下一条消息直接使用同池其他账号；
 429 冷却与重置窗口取上游真实边界，成功请求后按需刷新额度观察。全量 Go 测试与
 format／vet／staticcheck 通过。
+
+---
+
+# Completed
+
+2026-10-24 23:35

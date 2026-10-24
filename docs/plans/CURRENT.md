@@ -10,8 +10,6 @@
 
 ## In Progress
 
-- [TASK-20261024-022](../tasks/active/TASK-20261024-022-passthrough-quota-failover.md)：Codex 透明入口（`/codex/v1`）在执行前额度拒绝时也能换号——额度判定上提到 `core/proxy` 共用、首事件 4 KiB 有界预读命中即按真实 `resets_at` 冷却换号、透明转发改尝试级记账（修掉换号即 `accounting_unavailable` 的缺陷）、冷却遵循上游 `Retry-After`、成功／拒绝后按需去抖刷新额度观察。全量 Go 测试与 format／vet／staticcheck 通过；实机 Codex 客户端验收待用户执行。
-
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。
@@ -65,6 +63,8 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261024-022](../tasks/completed/2026-10/TASK-20261024-022-passthrough-quota-failover.md)：`1173f20`，Codex 透明入口（`/codex/v1`）在执行前额度拒绝时也能换号——额度判定上提到 `core/proxy` 共用、首事件 4 KiB 有界预读命中即按真实 `resets_at` 冷却换号、透明转发改尝试级记账（修掉换号即 `accounting_unavailable` 的缺陷）、冷却遵循上游 `Retry-After`、成功／拒绝后按需去抖刷新额度观察。全量 Go 测试与 format／vet／staticcheck 通过；完整 `task verify` 与实机 Codex 客户端验收待用户执行。
 
 - [TASK-20261024-020](../tasks/completed/2026-10/TASK-20261024-020-builtin-oxionai-provider.md)：新增第十二个内置服务商 Oxion AI——`https://oxionai.com/v1`、`cc_` Bearer Key、只有 OpenAI 兼容 Chat Completions；目录按账号从 `GET /v1/models` 同步（只收 `type=chat`，映射上下文窗口与 vision／tools），无内置预设；Chat 原生透传，Responses／Messages 由网关转换后回包，不注入官方未声明的 `stream_options`／`reasoning_effort`。迁移 043、路由资格、模型目录、网关与前端名称／品牌图标完成；`task verify` exit 0（128 文件／760 项前端测试、Windows production 构建）。真实 Key 与原生窗口视觉待用户验收。
 
