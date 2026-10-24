@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.35 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.34 基础上修复：Codex 透明转发把已交付的回答记成失败（改为按协议终结事件／出错侧判定）、未声明 `Content-Type` 的流也能统计用量、WebSocket 失败交回真实代码并按全部订阅账号取号、「Codex WebSocket」开关对已建立连接逐帧生效、请求归属细分 `codex-cli`／`codex-desktop`／`codex-vscode`、自动激活按账号保留具体错误码并在面板显示原因。无新增迁移。完整质量门与 Windows 版本资源／发布资产校验通过；安装器 19,831,297 bytes，SHA256 `be8ad710…3a4f`，未签名。
+2.0.0-beta.36 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.35 基础上新增第十二个内置服务商 Oxion AI（`https://oxionai.com/v1`、`cc_` Bearer Key、只有 OpenAI 兼容 Chat Completions；目录按账号从 `GET /v1/models` 同步，无内置预设；Chat 原生透传，Responses／Messages 由网关转换后回包），新增迁移 043 只追加该预设，服务商页增加名称、品牌图标与中英文案。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,049,995 bytes，SHA256 `f9baf279…0bab`，未签名。
 
 ## In Progress
 
