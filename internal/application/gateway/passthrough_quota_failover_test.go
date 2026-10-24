@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 )
 
 // postCodexPassthrough 走 v2 一键配置写进客户端的 `/codex/v1` 入口。
-func postCodexPassthrough(t *testing.T, s *Service) (int, string) {
+func postCodexPassthrough(t *testing.T, s *Service) (int, string, string) {
 	t.Helper()
 	resp, err := http.Post(s.Info().Runtime.Address+"/codex/v1/responses", "application/json",
 		strings.NewReader(`{"model":"gpt-test","input":[{"role":"user","content":"Hi"}]}`))
@@ -27,14 +28,14 @@ func postCodexPassthrough(t *testing.T, s *Service) (int, string) {
 	if strings.Contains(string(body), "private-quota-marker") {
 		t.Fatalf("raw quota error leaked to the client: %q", body)
 	}
-	return resp.StatusCode, string(body)
+	return resp.StatusCode, string(body), resp.Header.Get("X-Request-ID")
 }
 
 // TestPassthroughQuotaRejectionSwitchesAccountAndBlocksIt 断言 Codex 透明入口在 HTTP 200
 // 包装的执行前额度拒绝时同样换号：客户端只看到备用账号的回答，被拒绝的账号按真实重置
 // 时间写入额度阻断，下一条消息不再先撞它。
 func TestPassthroughQuotaRejectionSwitchesAccountAndBlocksIt(t *testing.T) {
-	s, db, _, access := subscriptionQuotaFixture(t)
+	s, db, observer, access := subscriptionQuotaFixture(t)
 	reset := time.Now().Add(6 * 24 * time.Hour).Truncate(time.Second)
 	var mu sync.Mutex
 	calls := []string{}
@@ -57,8 +58,11 @@ func TestPassthroughQuotaRejectionSwitchesAccountAndBlocksIt(t *testing.T) {
 	}
 	s.SetCodexUpstreamBase(NewCodexSettingsService(db).UpstreamBaseURL)
 
-	if status, body := postCodexPassthrough(t, s); status != http.StatusOK || !strings.Contains(body, "response.completed") {
+	if status, body, requestID := postCodexPassthrough(t, s); status != http.StatusOK || !strings.Contains(body, "response.completed") {
 		t.Fatalf("status = %d body = %q", status, body)
+	} else if item, err := observer.Request(context.Background(), requestID); err != nil || item.AttemptCount != 2 ||
+		item.Attempts[0].StatusCode != http.StatusOK || item.Attempts[0].ErrorCode != "upstream_quota_exhausted" || item.AccountID != "b" {
+		t.Fatalf("透明转发的换号明细丢失: %+v err=%v", item, err)
 	}
 	mu.Lock()
 	first := strings.Join(calls, ",")
@@ -72,7 +76,7 @@ func TestPassthroughQuotaRejectionSwitchesAccountAndBlocksIt(t *testing.T) {
 	}
 
 	// 第二条消息：已知耗尽的账号直接跳过，不再先撞一次。
-	if status, body := postCodexPassthrough(t, s); status != http.StatusOK || !strings.Contains(body, "response.completed") {
+	if status, body, _ := postCodexPassthrough(t, s); status != http.StatusOK || !strings.Contains(body, "response.completed") {
 		t.Fatalf("second status = %d body = %q", status, body)
 	}
 	mu.Lock()
@@ -100,7 +104,7 @@ func TestPassthroughReturnsControlledQuotaFailureWhenPoolIsExhausted(t *testing.
 	}
 	s.SetCodexUpstreamBase(NewCodexSettingsService(db).UpstreamBaseURL)
 
-	status, body := postCodexPassthrough(t, s)
+	status, body, _ := postCodexPassthrough(t, s)
 	if status != http.StatusTooManyRequests || !strings.Contains(body, "upstream_quota_exhausted") {
 		t.Fatalf("status = %d body = %q", status, body)
 	}
