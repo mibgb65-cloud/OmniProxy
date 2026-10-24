@@ -334,6 +334,14 @@ never share a data directory. The active profile comes from the build tag
 (`production` for `wails3 build`) and can be overridden with
 `OMNIPROXY_PROFILE`.
 
+The data directory resolves in this order: `OMNIPROXY_DATA_DIR` →
+`app.json` `dataDir` → the installer's `data-dir.txt` next to the executable →
+the profile default (`%APPDATA%\<app>`). The installer file only carries the
+setup-time suggestion for users who have not chosen a location themselves, so
+a relocation made in the app is never undone by a reinstall or a silent update.
+A chosen directory that cannot be created falls back to the profile default
+with a warning instead of blocking startup.
+
 ## Data Flow
 
 Request path (target architecture):

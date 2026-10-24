@@ -102,6 +102,18 @@ func Detect() (*Profile, error) {
 	if strings.TrimSpace(os.Getenv(envDataDir)) != "" {
 		return p, nil // an explicit environment override always wins
 	}
+	// The installer choice only replaces the built-in default: the persisted
+	// app.json preference (below) still wins, so a relocation made in the app
+	// is never undone by a reinstall.
+	if dir := installDataDir(); dir != "" && !pathsEqual(dir, p.DataDir) {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
+			slog.Warn("installer data directory is unavailable, using the profile default",
+				"dir", dir, "default", p.DataDir, "error", err)
+		} else {
+			p.DataDir = dir
+			p.LogDir = filepath.Join(dir, "logs")
+		}
+	}
 
 	cfg, err := LoadConfig(kind)
 	if err != nil {

@@ -20,6 +20,7 @@ ManifestDPIAware true
 !define MUI_ABORTWARNING
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
+Page custom DataDirPageCreate DataDirPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -34,6 +35,7 @@ OutFile "..\..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe"
 !endif
 ShowInstDetails show
 !include "installer_runtime.nsh"
+!include "data_dir_page.nsh"
 
 Section
     !insertmacro wails.setShellContext
@@ -43,6 +45,7 @@ Section
     SetOutPath $INSTDIR
     !insertmacro wails.files
     File "/oname=app-icon-v2.ico" "..\icon.ico"
+    !insertmacro WriteDataDirChoice
     Call CreateAppShortcuts
     !insertmacro wails.associateFiles
     !insertmacro wails.associateCustomProtocols
@@ -67,6 +70,7 @@ Section "uninstall"
     !insertmacro wails.unassociateCustomProtocols
     Delete "$INSTDIR\${PRODUCT_EXECUTABLE}"
     Delete "$INSTDIR\app-icon-v2.ico"
+    Delete "$INSTDIR\data-dir.txt"
     !insertmacro wails.deleteUninstaller
     ; 只删除程序自有文件；未知文件及所有账号／数据库始终保留。
     RMDir "$INSTDIR"

@@ -84,6 +84,20 @@ of the default build.
 NSIS 打包需要 `makensis` 在 PATH 中。打包命令显式使用 `-INPUTCHARSET UTF8`，
 与仓库 UTF-8 无 BOM 的脚本编码保持一致，避免中文 Windows 按系统代码页读取时报错。
 
+## 安装时的数据存储位置
+
+安装向导在「选择安装目录」之后增加「数据存储位置」页（`build/windows/nsis/data_dir_page.nsh`）：
+留空使用当前用户的应用数据目录，选择其他目录后写入安装目录下的 `data-dir.txt`。
+
+- 数据目录是每用户概念（`%APPDATA%` 与 DPAPI 凭据），安装器是机器级的，因此安装页只写
+  「建议位置」，不直接改任何账号的 `app.json`；`app.json` 里用户自己的选择优先于它。
+- 静默升级（`/OMNIPROXY_AUTOUPDATE=1`）不显示该页、也不改写 `data-dir.txt`；覆盖安装时
+  该页会预填既有选择，留空即保留原设置。
+- 目标目录由应用首次启动时按当前用户权限创建；创建失败时回落到默认位置并写 warn 日志。
+- 卸载删除 `data-dir.txt`，账号与数据库始终保留。
+
+编译安全性：该页只影响安装器编译产物，`makensis` 编译通过不等于完成真实安装验收。
+
 ## Unified commands
 
 | Command            | Purpose                                            |
