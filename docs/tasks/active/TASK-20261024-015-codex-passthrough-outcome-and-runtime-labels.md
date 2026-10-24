@@ -207,9 +207,7 @@ upstream_media_type=missing
 
 # Remaining Risks
 
-- 未提交：本次改动的透明转发实现（`passthrough*.go`、`gateway/passthrough*.go`）本身还是
-  TASK-20261024-008 未提交的工作，`docs/plans/CURRENT.md`、`docs/product/GATEWAY.md`
-  也混有该任务的未提交内容。按 Git 安全规则不拆分、不夹带提交，等该任务收尾时一并提交并回填哈希。
+- 提交边界：透明转发实现（`passthrough*.go`、`gateway/passthrough*.go`）与 TASK-20261024-008 的工作互锁，无法单独编译；已按可构建边界与 008 一并提交为 `94985cb`，文档随 `90681e0`。
 - 透明转发的 WebSocket 仍不建请求记录：连接成不成功只体现在客户端提示与
   `gateway websocket failed` 日志里，请求列表看不到这类失败。逐轮（每个 `response.create`）
   记账需要先确定连接级与轮级的归属语义，留作后续任务。
@@ -220,3 +218,16 @@ upstream_media_type=missing
 - `request_cancelled` 记录为「取消」状态而非「失败」，前提是上游没有交付终结事件；
   如果客户端在上游终结事件之前断开，这确实是未完成的回答。
 
+# Git
+
+## Commit
+
+```text
+94985cb feat(gateway): Codex 透明转发、网关自有登录与 WebSocket 握手预算
+e8f0756 feat(frontend): 激活失败原因、Codex 运行时标签与请求页字段
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+后端随 94985cb、前端随 e8f0756 落库；记录随 90681e0 归档。
+
+---

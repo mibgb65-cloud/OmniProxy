@@ -116,7 +116,11 @@ TASK-20261023-003（River 图片输入接入）完成后，构建新的 Beta 生
 
 ## Commit
 
-Not committed by Agent.
+```text
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+版本映射随后续构建演进为 2.0.0-beta.35（9c7d61b）。
 
 ---
 

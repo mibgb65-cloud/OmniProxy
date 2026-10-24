@@ -71,3 +71,17 @@ task --force verify                 （Beta.31 打包前执行，见 TASK-202610
 - 客户端菜单仍取决于客户端自身是否渲染 effort 控件；本任务只保证目录词汇与请求链路正确。
 - River 四款模型的图片能力来自官方能力表，未逐张实测；`system`／`assistant` 消息中的图片仍由上游按官方限制拒绝。
 - 显示名改用 ID 后菜单更技术化，但每一行都可区分。
+
+# Git
+
+## Commit
+
+```text
+94985cb feat(gateway): Codex 透明转发、网关自有登录与 WebSocket 握手预算
+e8f0756 feat(frontend): 激活失败原因、Codex 运行时标签与请求页字段
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+代码随 94985cb 落库；记录随 90681e0 归档。
+
+---

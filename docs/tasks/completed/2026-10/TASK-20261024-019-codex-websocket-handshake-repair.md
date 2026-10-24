@@ -163,11 +163,21 @@ windows production build：go build -tags production 生成 bin/omniproxy.exe �
 
 # Git
 
-Not committed by Agent. 工作区包含多个既有未提交任务；不得夹带提交。
+## Commit
+
+```text
+94985cb feat(gateway): Codex 透明转发、网关自有登录与 WebSocket 握手预算
+e8f0756 feat(frontend): 激活失败原因、Codex 运行时标签与请求页字段
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+后端随 94985cb、前端随 e8f0756 落库，记录随 90681e0 归档；未夹带其他在办任务的改动。
+
+---
 
 # Result
 
-代码修复、文档同步与自动验证已完成：`task verify` exit 0（127 文件／757 项前端测试、Go 全部包 ok、Windows production 构建成功），八个相关包禁用缓存回归通过，现场同版本 Codex CLI 0.163.0 的隔离契约以 WebSocket 通过，热路径 20 连握手 P95 约 1.3–1.7 ms。真实账号的 CLI／Desktop 实机验收属于本任务 Out of Scope，仍待用户执行；因此不宣称现场约 15 秒握手超时已在用户机器上消失。工作区其他任务的未提交改动未被夹带，本任务未提交。
+代码修复、文档同步与自动验证已完成：`task verify` exit 0（127 文件／757 项前端测试、Go 全部包 ok、Windows production 构建成功），八个相关包禁用缓存回归通过，现场同版本 Codex CLI 0.163.0 的隔离契约以 WebSocket 通过，热路径 20 连握手 P95 约 1.3–1.7 ms。真实账号的 CLI／Desktop 实机验收属于本任务 Out of Scope，仍待用户执行；因此不宣称现场约 15 秒握手超时已在用户机器上消失。未夹带其他在办任务的改动，已随 94985cb（后端）、e8f0756（前端）、90681e0（文档）提交。
 
 ---
 

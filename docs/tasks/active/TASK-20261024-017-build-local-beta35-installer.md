@@ -70,3 +70,16 @@ In Progress（安装包已构建并校验，等待用户本地覆盖安装验收
 - 打包需先把 `%ProgramFiles(x86)%\NSIS` 加入 PATH（`build-release.ps1` 本来会做，直接调 `task package` 不会）。
 - `acct_bf1bf…`（x4107034@gmail.com）的空模型目录仍需用户同步或重新授权后才会激活成功；本版只让原因可见。
 - 安装器未签名，Windows SmartScreen 仍可能提示；未自动安装、未打标签、未推送。
+
+# Git
+
+## Commit
+
+```text
+9c7d61b chore(release): 2.0.0-beta.35 版本与 Windows 安装包元数据
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+版本映射随 9c7d61b 落库；安装包本身未签名、未推送、未发布。
+
+---

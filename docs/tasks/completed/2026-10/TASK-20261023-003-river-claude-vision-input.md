@@ -214,7 +214,13 @@ PASS（退出码 0）
 
 ## Commit
 
-Not committed by Agent.
+```text
+94985cb feat(gateway): Codex 透明转发、网关自有登录与 WebSocket 握手预算
+e8f0756 feat(frontend): 激活失败原因、Codex 运行时标签与请求页字段
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+代码随 94985cb 落库；记录随 90681e0 归档。
 
 ---
 

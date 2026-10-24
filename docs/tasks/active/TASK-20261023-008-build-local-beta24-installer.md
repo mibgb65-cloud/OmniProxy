@@ -114,7 +114,11 @@ In Progress
 
 ## Commit
 
-Not committed by Agent.（用户未要求提交；工作区仍含其未提交改动）
+```text
+90681e0 docs: 同步 Codex 透明转发决策、产品文档与 2026-10 任务记录
+```
+
+版本映射随后续构建演进为 2.0.0-beta.35（9c7d61b）。
 
 ---
 
