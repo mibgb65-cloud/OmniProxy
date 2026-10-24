@@ -330,6 +330,7 @@ export const zh = {
   "providers.kind.stepfun": "阶跃星辰",
   "providers.kind.atria": "Atria",
   "providers.kind.river": "River",
+  "providers.kind.oxionai": "Oxion AI",
 
   "pages.accounts.title": "账号",
   "accounts.loading": "正在加载账号…",

@@ -13,8 +13,11 @@ func TestBuiltInProbeEndpointsAreValid(t *testing.T) {
 		if _, err := validateBaseURL(definition.DefaultBaseURL); err != nil {
 			t.Errorf("%s has an invalid endpoint: %v", definition.Kind, err)
 		}
-		if len(definition.Models) == 0 {
+		if len(definition.Models) == 0 && !definition.DiscoveryOnly {
 			t.Errorf("%s has no model preview", definition.Kind)
+		}
+		if definition.DiscoveryOnly && len(definition.Models) != 0 {
+			t.Errorf("%s is discovery-only but ships preset models", definition.Kind)
 		}
 	}
 }

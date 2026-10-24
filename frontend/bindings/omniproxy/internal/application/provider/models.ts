@@ -33,6 +33,11 @@ export interface Definition {
     "models": string[] | null;
     "authMethods": string[] | null;
     "plannedAuthMethods": string[] | null;
+
+    /**
+     * DiscoveryOnly 表示目录按账号发放，没有可内置的预设模型；添加账号并同步后才有模型。
+     */
+    "discoveryOnly"?: boolean;
 }
 
 /**

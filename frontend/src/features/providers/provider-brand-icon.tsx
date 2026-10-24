@@ -15,6 +15,7 @@ const brandIcons: Record<
   stepfun: { file: "stepfun-color.svg" },
   atria: { file: "atria.png" },
   river: { file: "river.png", fullTile: true },
+  oxionai: { file: "oxionai.png" },
 }
 
 function resolveBrandIcon(kind: string, endpoint?: string) {

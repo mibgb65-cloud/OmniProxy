@@ -19,6 +19,7 @@ import (
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
+	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -63,6 +64,7 @@ type Service struct {
 	chatgpt         *chatgpt.Client
 	atria           *atria.Client
 	river           *river.Client
+	oxionai         *oxionai.Client
 	google          *google.Client
 	mimo            *mimo.Client
 	stepfun         *stepfun.Client
@@ -86,6 +88,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.failoverEnabled = opts.FailoverEnabled
 	s.atria = atria.New(nil)
 	s.river = river.New(nil)
+	s.oxionai = oxionai.New(nil)
 	s.google = google.New(nil)
 	s.antigravity = antigravity.New(nil)
 	s.mimo = mimo.New(nil)

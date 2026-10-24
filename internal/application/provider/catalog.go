@@ -6,6 +6,7 @@ import (
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
+	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -18,6 +19,8 @@ type Definition struct {
 	Models             []string `json:"models"`
 	AuthMethods        []string `json:"authMethods"`
 	PlannedAuthMethods []string `json:"plannedAuthMethods"`
+	// DiscoveryOnly 表示目录按账号发放，没有可内置的预设模型；添加账号并同步后才有模型。
+	DiscoveryOnly bool `json:"discoveryOnly,omitempty"`
 }
 
 const (
@@ -40,6 +43,7 @@ var definitions = []Definition{
 	{Kind: stepfun.Kind, Name: "StepFun", DefaultBaseURL: stepfun.DefaultBaseURL, Models: stepfun.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: river.Kind, Name: "River", DefaultBaseURL: river.DefaultBaseURL, Models: river.DisplayModels(), AuthMethods: []string{AuthAPIKey}},
+	{Kind: oxionai.Kind, Name: "Oxion AI", DefaultBaseURL: oxionai.DefaultBaseURL, Models: oxionai.Models(), AuthMethods: []string{AuthAPIKey}, DiscoveryOnly: true},
 }
 
 // Catalog returns an independent snapshot of the built-in provider kinds.

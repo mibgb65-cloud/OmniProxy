@@ -4,6 +4,7 @@ import (
 	"context"
 	"omniproxy/internal/core/agentprotocol"
 	"omniproxy/internal/core/proxy"
+	"omniproxy/internal/provider/oxionai"
 )
 
 type SubscriptionAccess interface {
@@ -59,6 +60,9 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	}
 	if target.kind == "river" {
 		return s.forwardRiver(ctx, target, request, consume)
+	}
+	if target.kind == oxionai.Kind {
+		return s.forwardOxionai(ctx, target, request, consume)
 	}
 	if target.kind == "atria" {
 		return s.useAPIKey(ctx, target, func(key []byte) error {

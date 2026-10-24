@@ -25,3 +25,12 @@
 - SHA-256：`3581dc78dc11b3013b32cebe5be117d7e00d4fec2755d0c30bb35c800455278d`。
 - 官方素材未声明 MIT 授权，不属于上述 Lobe Icons 授权范围；仅用于识别 River 服务商，商标权归对应权利人。
 - `river` 类型使用该素材；保留官方深蓝底、品牌留白及原始比例，填满既有 36 × 36 圆角图标容器，不重复添加白色底块，深浅主题一致且离线可用。
+
+## Oxion AI
+
+- 文件：`oxionai.png`，960 × 960，保留官方原始 PNG（透明背景）。
+- 来源：[Oxion AI 官网品牌图标](https://oxionai.com/storage/branding/gnTSUtCipPkKaXCdLz0xalunKg3UgWPeF8CsMrXs.png?v=1791603261)，由 [官网](https://oxionai.com/) 与 [文档](https://oxionai.com/docs) 页头引用。
+- 获取日期：2026-10-24。
+- SHA-256：`1c5d2e7bac0de02c064f396089c130be3e667c0ff1bcb731a41247575b1447e2`。
+- 官方素材未声明 MIT 授权，不属于上述 Lobe Icons 授权范围；仅用于识别 Oxion AI 服务商，商标权归对应权利人。
+- `oxionai` 类型使用该素材；图形为深色环加蓝色环，放在既有浅色图标底块内保持原始比例，离线可用。

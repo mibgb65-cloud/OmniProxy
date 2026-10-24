@@ -10,6 +10,7 @@ export const providerNameKeys = {
   stepfun: "providers.kind.stepfun",
   atria: "providers.kind.atria",
   river: "providers.kind.river",
+  oxionai: "providers.kind.oxionai",
 } as const
 
 export function isKnownProviderKind(kind: string): kind is keyof typeof providerNameKeys {

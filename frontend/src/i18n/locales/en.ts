@@ -346,6 +346,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.stepfun": "StepFun",
   "providers.kind.atria": "Atria",
   "providers.kind.river": "River",
+  "providers.kind.oxionai": "Oxion AI",
 
   "pages.accounts.title": "Accounts",
   "accounts.loading": "Loading accounts…",

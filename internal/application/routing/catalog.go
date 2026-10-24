@@ -8,6 +8,7 @@ import (
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 )
 
@@ -99,7 +100,7 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == "deepseek" && a.AuthMethod != account.AuthSubscription {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
-		if (p.Kind == atria.Kind || p.Kind == mimo.Kind || p.Kind == river.Kind) && a.AuthMethod == account.AuthAPIKey {
+		if (p.Kind == atria.Kind || p.Kind == mimo.Kind || p.Kind == river.Kind || p.Kind == oxionai.Kind) && a.AuthMethod == account.AuthAPIKey {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "minimax" && a.AuthMethod == account.AuthAPIKey {

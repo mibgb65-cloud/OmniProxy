@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/oxionai"
 )
 
 // Router 只解析配置，不读取密钥；安装后规则变更在每次请求时即时生效。
@@ -199,7 +200,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		return target{}, proxy.Failure("configuration_unavailable", 503)
 	}
 	for _, provider := range providers {
-		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax") || !provider.Enabled {
+		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "oxionai" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax") || !provider.Enabled {
 			continue
 		}
 		for _, account := range accounts {
@@ -219,7 +220,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if provider.Kind == "stepfun" && (account.AuthMethod != "api_key" || account.StepFun == nil || !account.StepFun.Valid()) {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				if (provider.Kind == "atria" || provider.Kind == "mimo" || provider.Kind == "river") && account.AuthMethod != "api_key" {
+				if (provider.Kind == "atria" || provider.Kind == "mimo" || provider.Kind == "river" || provider.Kind == oxionai.Kind) && account.AuthMethod != "api_key" {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				if provider.Kind == "google" && account.AuthMethod != "api_key" && !(account.AuthMethod == "subscription_login" && account.AuthState == "authenticated") {

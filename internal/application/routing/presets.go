@@ -4,6 +4,7 @@ import (
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/mimo"
+	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 )
 
@@ -18,13 +19,16 @@ func presetModels(kind string) []string {
 		return river.Models()
 	case mimo.Kind:
 		return mimo.Models()
+	case oxionai.Kind:
+		// Oxion AI 的目录按账号发放，没有任何可内置的预设模型。
+		return oxionai.Models()
 	default:
 		return nil
 	}
 }
 
 func supportedProvider(kind string) bool {
-	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind
+	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind || kind == oxionai.Kind
 }
 
 func hasPresetAccount(data snapshot, providerID string) bool {
