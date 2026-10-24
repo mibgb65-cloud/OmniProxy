@@ -84,19 +84,29 @@ of the default build.
 NSIS 打包需要 `makensis` 在 PATH 中。打包命令显式使用 `-INPUTCHARSET UTF8`，
 与仓库 UTF-8 无 BOM 的脚本编码保持一致，避免中文 Windows 按系统代码页读取时报错。
 
-## 安装时的数据存储位置
+## 安装向导（语言、安装目录、数据目录）
 
-安装向导在「选择安装目录」之后增加「数据存储位置」页（`build/windows/nsis/data_dir_page.nsh`）：
-留空使用当前用户的应用数据目录，选择其他目录后写入安装目录下的 `data-dir.txt`。
+向导顺序：语言（中文/English，记录在 `HKCU\Software\OmniProxy\InstallerLanguage`）→
+欢迎 → 安装目录 → **数据存储位置** → 安装 → 完成。自定义文案集中在
+`build/windows/nsis/strings.nsh`，页面逻辑在 `data_dir_page.nsh`。
 
-- 数据目录是每用户概念（`%APPDATA%` 与 DPAPI 凭据），安装器是机器级的，因此安装页只写
-  「建议位置」，不直接改任何账号的 `app.json`；`app.json` 里用户自己的选择优先于它。
-- 静默升级（`/OMNIPROXY_AUTOUPDATE=1`）不显示该页、也不改写 `data-dir.txt`；覆盖安装时
-  该页会预填既有选择，留空即保留原设置。
-- 目标目录由应用首次启动时按当前用户权限创建；创建失败时回落到默认位置并写 warn 日志。
-- 卸载删除 `data-dir.txt`，账号与数据库始终保留。
+数据存储位置页的语义：
 
-编译安全性：该页只影响安装器编译产物，`makensis` 编译通过不等于完成真实安装验收。
+- 页面打开时通过安装辅助程序（`omniproxy.exe --omniproxy-installer-data-dir-read`）
+  读出**当前用户正在使用**的数据目录，来源是 C 盘指针文件 `%APPDATA%\OmniProxy\app.json`；
+  读不到才回落到默认位置。升级安装因此显示的就是用户当初设置的位置。
+- 用户改动时先弹出「不会迁移已有数据」的确认框，取消则留在本页。
+- 确认后由辅助程序写入（`--omniproxy-installer-data-dir-write <绝对路径>`）：
+  路径必须绝对、可写、不与当前位置互相包含；**当前位置仍含数据库时直接拒绝**（退出码 3），
+  因为安装器不做迁移，真实搬迁只能由应用在退出时完成并可回滚。
+- 数据目录里放全部数据（数据库、DPAPI 凭据、日志、更新缓存），C 盘只留 `app.json` 指针。
+- 静默升级（`/OMNIPROXY_AUTOUPDATE=1`）不显示该页、也不写任何配置；帮助程序在 `.onInit`
+  解压一次，供页面调用。
+
+兼容：Beta.33 安装目录里的 `data-dir.txt` 仍会被 `profile.Detect` 当作最低优先级默认值读取，
+卸载时删除；新安装不再写它。
+
+编译安全性：向导页只影响安装器产物，`makensis` 编译通过不等于完成真实安装验收。
 
 ## Unified commands
 

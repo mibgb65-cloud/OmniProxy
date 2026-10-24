@@ -16,8 +16,12 @@ ManifestDPIAware true
 !define MUI_UNICON "..\icon.ico"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_EXECUTABLE}"
 !define MUI_FINISHPAGE_RUN_FUNCTION StartInstalledApp
-!define MUI_FINISHPAGE_RUN_TEXT "立即启动 OmniProxy"
+!define MUI_FINISHPAGE_RUN_TEXT "$(OMNI_RUN_TEXT)"
 !define MUI_ABORTWARNING
+; 语言选择在 .onInit 里弹出（静默升级自动跳过）；选择记录在 HKCU，卸载器复用。
+!define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
+!define MUI_LANGDLL_REGISTRY_KEY "Software\OmniProxy"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "InstallerLanguage"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
 Page custom DataDirPageCreate DataDirPageLeave
@@ -25,6 +29,8 @@ Page custom DataDirPageCreate DataDirPageLeave
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "English"
+!include "strings.nsh"
 
 Name "${INFO_PRODUCTNAME}"
 OutFile "..\..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe"
@@ -51,6 +57,9 @@ Section
     !insertmacro wails.associateCustomProtocols
     !insertmacro wails.writeUninstaller
     !insertmacro WriteInstallLocation
+    ${IfNot} ${Silent}
+        !insertmacro MUI_LANGDLL_SAVELANGUAGE
+    ${EndIf}
     ${If} $AutoUpdate == "1"
     ${AndIf} $NoRestart != "1"
         Call StartInstalledApp
@@ -74,5 +83,5 @@ Section "uninstall"
     !insertmacro wails.deleteUninstaller
     ; 只删除程序自有文件；未知文件及所有账号／数据库始终保留。
     RMDir "$INSTDIR"
-    DetailPrint "OmniProxy 本地数据已保留。"
+    DetailPrint "$(OMNI_DATA_KEPT)"
 SectionEnd

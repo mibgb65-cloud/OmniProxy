@@ -1,5 +1,16 @@
 !include "LogicLib.nsh"
 
+!macro ExtractHelper
+    InitPluginsDir
+    ; 数据位置页需要在向导阶段调用辅助程序读取当前目录，因此 .onInit 里先解压一次。
+    IfFileExists "$PLUGINSDIR\omniproxy-installer-helper.exe" +2
+    !ifdef ARG_WAILS_AMD64_BINARY
+        File "/oname=$PLUGINSDIR\omniproxy-installer-helper.exe" "${ARG_WAILS_AMD64_BINARY}"
+    !else
+        !error "OmniProxy 当前发布仅支持 Windows amd64"
+    !endif
+!macroend
+
 Var AutoUpdate
 Var NoRestart
 Var ExistingInstall
@@ -27,6 +38,9 @@ Function .onInit
             StrCpy $NoRestart "1"
         ${EndIf}
     ${EndIf}
+    ; 语言选择：静默升级已在上面 SetSilent，此处自动跳过；交互安装先选语言。
+    !insertmacro MUI_LANGDLL_DISPLAY
+    !insertmacro ExtractHelper
     !if "${WAILS_INSTALL_SCOPE}" == "user"
         ReadRegStr $0 HKCU "${UNINST_KEY}" "InstallLocation"
     !else
@@ -66,22 +80,13 @@ Function .onVerifyInstDir
     ${EndIf}
 FunctionEnd
 
-!macro ExtractHelper
-    InitPluginsDir
-    !ifdef ARG_WAILS_AMD64_BINARY
-        File "/oname=$PLUGINSDIR\omniproxy-installer-helper.exe" "${ARG_WAILS_AMD64_BINARY}"
-    !else
-        !error "OmniProxy 当前发布仅支持 Windows amd64"
-    !endif
-!macroend
-
 !macro StopTarget
     nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-stop "$INSTDIR\${PRODUCT_EXECUTABLE}"'
     Pop $0
     Pop $1
     ${If} $0 != 0
         IfSilent +2
-            MessageBox MB_OK|MB_ICONSTOP "无法关闭目标安装目录中的 OmniProxy，请手动退出后重试。"
+            MessageBox MB_OK|MB_ICONSTOP "$(OMNI_STOP_FAILED)"
         SetErrorLevel 66
         Abort
     ${EndIf}
@@ -117,6 +122,6 @@ Function StartInstalledApp
     Pop $1
     ${If} $0 != 0
         IfSilent +2
-            MessageBox MB_OK|MB_ICONEXCLAMATION "安装已完成，但无法以普通用户启动 OmniProxy。请从开始菜单打开。"
+            MessageBox MB_OK|MB_ICONEXCLAMATION "$(OMNI_RUN_FAILED)"
     ${EndIf}
 FunctionEnd

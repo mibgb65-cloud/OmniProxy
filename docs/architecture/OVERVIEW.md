@@ -340,7 +340,12 @@ the profile default (`%APPDATA%\<app>`). The installer file only carries the
 setup-time suggestion for users who have not chosen a location themselves, so
 a relocation made in the app is never undone by a reinstall or a silent update.
 A chosen directory that cannot be created falls back to the profile default
-with a warning instead of blocking startup.
+with a warning instead of blocking startup. The Windows installer reads and
+writes this preference through the app binary's `--omniproxy-installer-*`
+helper modes, so an upgrade shows the folder actually in use and refuses to
+switch while that folder still holds a database; relocating existing data stays
+an in-app action that moves and can revert it. The legacy `data-dir.txt`
+written by Beta.33 installers is still honoured as the lowest-priority default.
 
 ## Data Flow
 

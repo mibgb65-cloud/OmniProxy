@@ -15,7 +15,7 @@ func TestTargetValidationAndMalformedModes(t *testing.T) {
 			t.Errorf("unsafe target accepted: %s", target)
 		}
 	}
-	for _, args := range [][]string{{"--omniproxy-update-helper"}, {"--omniproxy-installer-stop"}, {"--omniproxy-installer-cleanup"}, {"--omniproxy-installer-launch"}, {"--omniproxy-installer-launch", `C:\Windows\notepad.exe`}} {
+	for _, args := range [][]string{{"--omniproxy-update-helper"}, {"--omniproxy-installer-stop"}, {"--omniproxy-installer-cleanup"}, {"--omniproxy-installer-launch"}, {"--omniproxy-installer-launch", `C:\Windows\notepad.exe`}, {"--omniproxy-installer-data-dir-read", "extra"}, {"--omniproxy-installer-data-dir-write"}} {
 		if handled, code := HandleMode(args); !handled || code == 0 {
 			t.Fatal("malformed mode escaped validation")
 		}

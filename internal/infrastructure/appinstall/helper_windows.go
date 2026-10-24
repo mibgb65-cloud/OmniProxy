@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -17,6 +18,7 @@ import (
 	"unsafe"
 
 	"golang.org/x/sys/windows"
+	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/version"
 )
 
@@ -38,13 +40,34 @@ func HandleMode(args []string) (bool, int) {
 		cleanupAutostart(args[1])
 		return true, 0
 	}
+	// 安装器读取／写入数据目录：写入只允许在用户自己的配置里做，且拒绝覆盖已有数据。
+	if len(args) == 1 && args[0] == "--omniproxy-installer-data-dir-read" {
+		dir, err := profile.InstallerDataDir(profile.Production)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return true, 2
+		}
+		fmt.Println(dir)
+		return true, 0
+	}
+	if len(args) == 2 && args[0] == "--omniproxy-installer-data-dir-write" {
+		err := profile.InstallerSetDataDir(profile.Production, args[1])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			if errors.Is(err, profile.ErrDataDirInUse) {
+				return true, 3 // 原目录仍有数据：安装器不迁移，提示用户装完后在应用内改
+			}
+			return true, 2
+		}
+		return true, 0
+	}
 	if len(args) > 0 && args[0] == "--omniproxy-update-helper" {
 		if len(args) != 8 {
 			return true, 2
 		}
 		return true, runUpdate(args[1:])
 	}
-	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup" || args[0] == "--omniproxy-installer-launch") {
+	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup" || args[0] == "--omniproxy-installer-launch" || args[0] == "--omniproxy-installer-data-dir-read" || args[0] == "--omniproxy-installer-data-dir-write") {
 		return true, 2
 	}
 	return false, 0
