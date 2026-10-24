@@ -64,6 +64,8 @@
 
 ## Recently Completed
 
+- [TASK-20261024-020](../tasks/completed/2026-10/TASK-20261024-020-builtin-oxionai-provider.md)：新增第十二个内置服务商 Oxion AI——`https://oxionai.com/v1`、`cc_` Bearer Key、只有 OpenAI 兼容 Chat Completions；目录按账号从 `GET /v1/models` 同步（只收 `type=chat`，映射上下文窗口与 vision／tools），无内置预设；Chat 原生透传，Responses／Messages 由网关转换后回包，不注入官方未声明的 `stream_options`／`reasoning_effort`。迁移 043、路由资格、模型目录、网关与前端名称／品牌图标完成；`task verify` exit 0（128 文件／760 项前端测试、Windows production 构建）。真实 Key 与原生窗口视觉待用户验收。
+
 2026-10-24 提交批次（工作区此前累积的 Codex 透明转发与握手修复改动）：`94985cb` 后端、`e8f0756` 前端、`9c7d61b` 版本、`90681e0` 文档、`6bb2538` 记录回填。这些任务互为编译依赖，逐任务拆分会产生无法编译的中间提交，因此按可构建边界合并；逐任务明细见各自 Task Record 的 Git 章节。
 
 - [TASK-20261024-019](../tasks/completed/2026-10/TASK-20261024-019-codex-websocket-handshake-repair.md)：Codex WebSocket 握手修复收尾——独立总预算（总计 10 秒／凭据合计 5 秒／单候选 3 秒／拨号 5 秒，握手结束即释放）、取消与超时分开分类（`credential_prepare_timeout`／`upstream_socket_timeout`）、阶段诊断不输出认证材料、按账号可取消互斥 `core/syncgate`、订阅健康快路径与必要时官方续期、自管授权 CAS 回写、受管配置旧 WebSocket 标记清理。八个相关包 `-count=1` 通过；现场同版本 Codex CLI 0.163.0 隔离契约以 WebSocket PASS；热路径连续 20 次握手四轮均 20/20、P95 约 1.3–1.7 ms；`task verify` exit 0（127 文件／757 项前端测试、Windows production 构建）。真实账号的 CLI／Desktop 实机验收属任务 Out of Scope，待用户执行。提交：`94985cb`（后端）／`e8f0756`（前端）／`90681e0`（文档）／`6bb2538`（记录回填）。

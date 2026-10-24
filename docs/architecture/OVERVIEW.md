@@ -284,7 +284,7 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages eleven default-enabled
+> Current state: `internal/application/provider` manages twelve default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
@@ -405,7 +405,7 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, Atria, River, and OpenAI-compatible endpoints. Eleven named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, and OpenAI-compatible endpoints. Twelve named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
   request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat are pending.
