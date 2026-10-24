@@ -1,16 +1,16 @@
 {
-  "fixed": {
-    "file_version": "2.0.0.0",
-    "product_version": "2.0.0.0"
-  },
-  "info": {
-    "0409": {
-      "ProductVersion": "2.0.0-beta.31",
-      "CompanyName": "OmniProxy",
-      "FileDescription": "A OmniProxy application",
-      "LegalCopyright": "(c) 2026, OmniProxy",
-      "ProductName": "OmniProxy",
-      "Comments": "This is a comment"
-    }
-  }
+    "fixed":  {
+                  "file_version":  "2.0.0.0",
+                  "product_version":  "2.0.0.0"
+              },
+    "info":  {
+                 "0409":  {
+                              "ProductVersion":  "2.0.0-beta.33",
+                              "CompanyName":  "OmniProxy",
+                              "FileDescription":  "A OmniProxy application",
+                              "LegalCopyright":  "(c) 2026, OmniProxy",
+                              "ProductName":  "OmniProxy",
+                              "Comments":  "This is a comment"
+                          }
+             }
 }
