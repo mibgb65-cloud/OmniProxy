@@ -13,13 +13,15 @@ import (
 
 // Server 管理单个本机监听器，启停操作串行化，停止会取消正在进行的上游请求。
 type Server struct {
-	mu          sync.Mutex
-	opts        Options
-	status      Status
-	http        *http.Server
-	cancel      context.CancelFunc
-	listener    net.Listener
-	onStatus    func(Status)
+	mu       sync.Mutex
+	opts     Options
+	status   Status
+	http     *http.Server
+	cancel   context.CancelFunc
+	listener net.Listener
+	onStatus func(Status)
+	// passthrough 是透明转发用的 HTTP 客户端：不跟随重定向，也不设整体期限。
+	passthrough *http.Client
 	slots       chan struct{}
 	socketSlots chan struct{}
 }
@@ -33,7 +35,15 @@ func New(opts Options) *Server {
 		opts.MaxConcurrent = 16
 	}
 	opts.Models = append([]string(nil), opts.Models...)
-	return &Server{opts: opts, status: Status{State: "stopped", Port: opts.Port}, slots: make(chan struct{}, opts.MaxConcurrent), socketSlots: make(chan struct{}, opts.MaxConcurrent)}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	// 只限制响应头到达时间：订阅端点的流式响应可能持续数分钟。
+	transport.ResponseHeaderTimeout = passthroughHeaderTimeout
+	return &Server{
+		opts: opts, status: Status{State: "stopped", Port: opts.Port},
+		slots:       make(chan struct{}, opts.MaxConcurrent),
+		socketSlots: make(chan struct{}, opts.MaxConcurrent),
+		passthrough: &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
+	}
 }
 
 // Status 返回不会暴露内部 HTTP 对象的快照。

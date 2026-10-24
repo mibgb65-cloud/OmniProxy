@@ -19,18 +19,31 @@ func normalizeChatText(raw json.RawMessage, maxMessageBytes int) (json.RawMessag
 		if len(content) == 0 || content[0] != '[' {
 			continue
 		}
-		var parts []struct {
-			Type string          `json:"type"`
-			Text json.RawMessage `json:"text"`
-		}
+		var parts []json.RawMessage
 		if json.Unmarshal(content, &parts) != nil || len(parts) == 0 || len(parts) > 128 {
 			return nil, false, Failure("invalid_messages", 400)
 		}
+		// 含图片的数组必须原样保留：图片由适配器按上游契约处理，不能被当成文本。
+		image := false
 		texts := make([]string, 0, len(parts))
 		length := 0
 		for _, part := range parts {
+			var block struct {
+				Type string          `json:"type"`
+				Text json.RawMessage `json:"text"`
+			}
+			if json.Unmarshal(part, &block) != nil {
+				return nil, false, Failure("invalid_messages", 400)
+			}
+			if block.Type != "text" {
+				if block.Type == "image_url" {
+					image = true
+					continue
+				}
+				return nil, false, Failure("invalid_messages", 400)
+			}
 			var text string
-			if part.Type != "text" || len(part.Text) == 0 || bytes.Equal(part.Text, []byte("null")) || json.Unmarshal(part.Text, &text) != nil {
+			if len(block.Text) == 0 || bytes.Equal(block.Text, []byte("null")) || json.Unmarshal(block.Text, &text) != nil {
 				return nil, false, Failure("invalid_messages", 400)
 			}
 			length += len(text)
@@ -41,6 +54,9 @@ func normalizeChatText(raw json.RawMessage, maxMessageBytes int) (json.RawMessag
 				return nil, false, Failure("invalid_messages", 400)
 			}
 			texts = append(texts, text)
+		}
+		if image {
+			continue
 		}
 		message["content"], _ = json.Marshal(strings.Join(texts, "\n"))
 		changed = true

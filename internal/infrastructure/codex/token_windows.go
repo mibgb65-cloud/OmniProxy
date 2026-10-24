@@ -3,6 +3,7 @@
 package codex
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -50,6 +51,13 @@ func UseToken(home, expectedID string, consume func([]byte, string) error) error
 }
 
 func useStoredAuth(home string, consume func([]byte) error) error {
+	return useStoredAuthContext(context.Background(), home, consume)
+}
+
+func useStoredAuthContext(ctx context.Context, home string, consume func([]byte) error) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if !filepath.IsAbs(home) || consume == nil {
 		return ErrProtocol
 	}
@@ -70,13 +78,16 @@ func useStoredAuth(home string, consume func([]byte) error) error {
 			if e != nil {
 				continue
 			}
-			data, err = readEncryptedAuth(path, passphrase)
+			data, err = readEncryptedAuthContext(ctx, path, passphrase)
 			clear(passphrase)
 			if err != nil {
 				return err
 			}
 		}
 		defer clear(data)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		return consume(data)
 	}
 	return ErrUnavailable

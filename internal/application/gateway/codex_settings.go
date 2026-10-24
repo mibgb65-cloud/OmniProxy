@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net/url"
 )
 
 // CodexSettings 是当前 OmniProxy 网关的应用级 Codex 接入设置。
@@ -11,6 +12,8 @@ type CodexSettings struct {
 	WebSocketEnabled    bool   `json:"webSocketEnabled"`
 	AutoQuotaActivation bool   `json:"autoQuotaActivation"`
 	AccountRotationMode string `json:"accountRotationMode"`
+	// UpstreamBaseURL 是透明转发的上游基址，默认官方订阅端点。
+	UpstreamBaseURL string `json:"upstreamBaseUrl"`
 }
 
 // CodexSettingsService 持久化非敏感开关，不读取或修改客户端身份、认证和会话。
@@ -22,14 +25,32 @@ func NewCodexSettingsService(db *sql.DB) *CodexSettingsService { return &CodexSe
 // Read 读取唯一设置记录；缺失或损坏必须报错，不能静默改变网关策略。
 func (s *CodexSettingsService) Read(ctx context.Context) (CodexSettings, error) {
 	var enabled, activation int
-	var mode string
-	if s.db == nil || s.db.QueryRowContext(ctx, `SELECT websocket_enabled,auto_quota_activation,account_rotation_mode FROM codex_settings WHERE id=1`).Scan(&enabled, &activation, &mode) != nil || (enabled != 0 && enabled != 1) || (activation != 0 && activation != 1) || !validRotationMode(mode) {
+	var mode, baseURL string
+	if s.db == nil || s.db.QueryRowContext(ctx, `SELECT websocket_enabled,auto_quota_activation,account_rotation_mode,upstream_base_url FROM codex_settings WHERE id=1`).Scan(&enabled, &activation, &mode, &baseURL) != nil || (enabled != 0 && enabled != 1) || (activation != 0 && activation != 1) || !validRotationMode(mode) || !validUpstreamBaseURL(baseURL) {
 		return CodexSettings{}, errors.New("gateway: configuration_unavailable")
 	}
-	return CodexSettings{WebSocketEnabled: enabled == 1, AutoQuotaActivation: activation == 1, AccountRotationMode: mode}, nil
+	return CodexSettings{WebSocketEnabled: enabled == 1, AutoQuotaActivation: activation == 1, AccountRotationMode: mode, UpstreamBaseURL: baseURL}, nil
 }
 
+// UpstreamBaseURL 只返回已校验的上游基址，供透明转发按请求读取。
+func (s *CodexSettingsService) UpstreamBaseURL(ctx context.Context) (string, error) {
+	settings, err := s.Read(ctx)
+	if err != nil {
+		return "", err
+	}
+	return settings.UpstreamBaseURL, nil
+}
+
+// validRotationMode 与 validUpstreamBaseURL 拒绝未知值：坏值不能退化成默认行为。
 func validRotationMode(mode string) bool { return mode == "queue" || mode == "balanced" }
+
+func validUpstreamBaseURL(value string) bool {
+	parsed, err := url.Parse(value)
+	if err != nil || parsed.Host == "" || parsed.User != nil || parsed.Fragment != "" {
+		return false
+	}
+	return parsed.Scheme == "http" || parsed.Scheme == "https"
+}
 
 // SetAccountRotationMode 只更新轮换方式，拒绝未知值，不改变其他开关。
 func (s *CodexSettingsService) SetAccountRotationMode(ctx context.Context, mode string) (CodexSettings, error) {

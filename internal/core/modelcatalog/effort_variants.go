@@ -8,7 +8,7 @@ import (
 // 上游用独立模型 ID 表达推理档位时（例如 Google 的 “… (High)／(Low)／(Medium)”），
 // 客户端看到的是多个“模型”。这里把变体折叠回基础模型：目录只发布一行，
 // 档位由客户端原生 effort 控件选择，网关在请求时换成实际存在的变体 ID。
-var variantEffortOrder = []string{"minimal", "low", "medium", "high", "xhigh"}
+var variantEffortOrder = []string{"minimal", "low", "medium", "high", "xhigh", "ultra"}
 
 // variantSuffixes 按长度无关的固定顺序匹配，避免依赖 map 迭代顺序。
 var variantSuffixes = []struct {
@@ -19,6 +19,8 @@ var variantSuffixes = []struct {
 	{" (low)", "low"},
 	{" (medium)", "medium"},
 	{" (high)", "high"},
+	{" (xhigh)", "xhigh"},
+	{" (ultra)", "ultra"},
 	{"（低）", "low"},
 	{"（中）", "medium"},
 	{"（高）", "high"},

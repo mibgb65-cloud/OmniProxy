@@ -12,6 +12,25 @@ func usageCount(value json.RawMessage) (int64, bool) {
 	return n, true
 }
 
+// terminalStreamEvent 只判定协议终结事件，与是否携带用量无关：
+// 终结事件已经交付之后再断开，不能再算成传输失败。
+func terminalStreamEvent(body []byte, protocol string) bool {
+	var envelope struct {
+		Type string `json:"type"`
+	}
+	if json.Unmarshal(body, &envelope) != nil {
+		return false
+	}
+	switch protocol {
+	case "responses":
+		return envelope.Type == "response.completed" || envelope.Type == "response.incomplete"
+	case "messages":
+		return envelope.Type == "message_stop" || envelope.Type == "message_delta"
+	default:
+		return false
+	}
+}
+
 // ParseUsage 只读取上游数字；缓存／推理计数不会被重复加到已包含它们的总数中。
 func ParseUsage(body []byte, protocol string, stream bool) UsageSnapshot {
 	var envelope struct {

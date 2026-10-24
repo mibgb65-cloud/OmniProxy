@@ -42,11 +42,17 @@ type Trace struct {
 	contentTypeInferred        bool
 	contentTypeInferenceReason string
 	contentTypeInferenceBytes  int
-	attempt                    *AttemptEvent
-	mu                         sync.Mutex
-	event                      RequestEvent
-	observer                   RequestObserver
-	startedAt                  time.Time
+	// terminal 表示上游已经发出协议终结事件：之后连接断开不再算传输失败。
+	terminal bool
+	// streamSide 记录流式转发在哪一侧出错，用于日志定位而不进请求库。
+	streamSide string
+	// accountingFailed 表示用量入库失败；它不能中断已经开始的客户端数据流。
+	accountingFailed bool
+	attempt          *AttemptEvent
+	mu               sync.Mutex
+	event            RequestEvent
+	observer         RequestObserver
+	startedAt        time.Time
 }
 
 func (s *Server) beginTrace(ctx context.Context, protocol, transport, client string) (*Trace, error) {
@@ -91,6 +97,64 @@ func (t *Trace) Update(ctx context.Context, request Request, target TargetSnapsh
 	}
 	return nil
 }
+
+// markTerminal 记录上游已发出协议终结事件。
+func (t *Trace) markTerminal() {
+	if t == nil {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.terminal = true
+}
+
+// terminalSeen 报告上游是否已经交付协议终结事件。
+func (t *Trace) terminalSeen() bool {
+	if t == nil {
+		return false
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return t.terminal
+}
+
+// markStreamSide 记录流式转发的出错侧（client／upstream）。
+func (t *Trace) markStreamSide(side string) {
+	if t == nil {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.streamSide = side
+}
+
+// markAccountingFailure 只记录用量入库失败，不改变已经交付的数据流。
+func (t *Trace) markAccountingFailure() {
+	if t == nil {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.accountingFailed = true
+}
+
+// diagnosticLogFields 只输出固定分类，供日志定位失败侧与记账状态。
+func (t *Trace) diagnosticLogFields() []any {
+	if t == nil {
+		return nil
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	var fields []any
+	if t.streamSide != "" {
+		fields = append(fields, "stream_error_side", t.streamSide)
+	}
+	if t.accountingFailed {
+		fields = append(fields, "accounting_failed", true)
+	}
+	return fields
+}
+
 func (t *Trace) Report(_ context.Context, usage UsageSnapshot) error {
 	if t == nil {
 		return nil

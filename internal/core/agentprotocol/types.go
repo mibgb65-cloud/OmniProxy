@@ -33,6 +33,8 @@ func content(v any) (string, error) {
 		case "text", "input_text", "output_text":
 			output += text(part["text"])
 		case "image", "input_image", "image_url":
+			// 图片由 chatImage 单独转换；纯文本入口（system 指令、自定义工具输入）
+			// 无法承载图片，必须显式失败而不是静默丢弃。
 			return "", ErrUnsupportedImage
 		default:
 			return "", ErrUnsupported

@@ -39,7 +39,7 @@ func buildGoose(body, key []byte, root string, plan Plan, owned bool) ([]byte, e
 	}
 	models := []any{}
 	for _, entry := range plan.Models {
-		model := map[string]any{"name": entry.ID, "supports_vision": false}
+		model := map[string]any{"name": entry.ID, "supports_vision": supportsClientImage(entry)}
 		if entry.Metadata.ContextWindow != nil {
 			model["context_limit"] = *entry.Metadata.ContextWindow
 		}

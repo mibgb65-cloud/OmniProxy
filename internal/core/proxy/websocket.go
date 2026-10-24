@@ -8,8 +8,47 @@ import (
 	"time"
 )
 
+// socketAccess 记录握手时实际使用的授权方式，供连接内逐帧复核复用。
+//
+// byPrefix 为真表示该连接由固定入口前缀放行（Codex 保留官方登录令牌，客户端不写接入 Key）；
+// 这种情况下 key 是官方登录令牌，既不是接入 Key 也不能进入接入 Key 比较。
+type socketAccess struct {
+	key      string
+	prefix   string
+	client   string
+	byPrefix bool
+}
+
+// reauthorize 按与握手一致的判定复核当前连接，返回最新的客户端归属。
+func (s *Server) reauthorize(ctx context.Context, access socketAccess) (socketAccess, error) {
+	if access.byPrefix {
+		if s.opts.PrefixAccess == nil {
+			return access, Failure("unauthorized", 401)
+		}
+		client, ok := s.opts.PrefixAccess(ctx, access.prefix)
+		if !ok {
+			return access, Failure("unauthorized", 401)
+		}
+		access.client = client
+		return access, nil
+	}
+	if s.opts.Authorize == nil {
+		return access, nil
+	}
+	// 超过上限的凭据绝不进入比较，与握手阶段保持一致。
+	if len(access.key) > 512 {
+		return access, Failure("unauthorized", 401)
+	}
+	client, ok := s.opts.Authorize(ctx, access.key)
+	if !ok {
+		return access, Failure("unauthorized", 401)
+	}
+	access.client = client
+	return access, nil
+}
+
 // serveResponsesSocket 支持内置 Codex 的 WebSocket，连接上下文仅在内存中保存。
-func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, key, client string, metadata CodexMetadata) {
+func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, access socketAccess, metadata CodexMetadata) {
 	select {
 	case s.socketSlots <- struct{}{}:
 		defer func() { <-s.socketSlots }()
@@ -32,15 +71,14 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 		if err != nil {
 			return
 		}
-		// 连接期间 Key 仍可能被停用或替换，每帧都要复核并同步客户端归属。
-		if s.opts.Authorize != nil {
-			current, ok := s.opts.Authorize(r.Context(), key)
-			if !ok {
-				socketError(r.Context(), socket, "unauthorized")
-				return
-			}
-			client = current
+		// 连接期间授权状态仍可能变化（接入 Key 停用／替换、固定入口停用），
+		// 每帧按握手时的同一判定复核并同步客户端归属。
+		renewed, reauthErr := s.reauthorize(r.Context(), access)
+		if reauthErr != nil {
+			socketFailure(r.Context(), socket, safeFailure(r.Context(), reauthErr).(*Error))
+			return
 		}
+		access = renewed
 		// 已建立连接也必须检查当前策略，关闭开关后不能继续通过旧连接创建响应。
 		if err := s.webSocketPolicy(r.Context()); err != nil {
 			socketFailure(r.Context(), socket, err)
@@ -125,7 +163,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ke
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
-		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", client)
+		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", access.client)
 		if traceErr != nil {
 			cancel()
 			<-s.slots

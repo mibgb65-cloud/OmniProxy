@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
+	"omniproxy/internal/core/syncgate"
 	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/chatgpt"
@@ -43,6 +44,7 @@ type Info struct {
 
 // Service 复用账号与提供商服务，不持有或缓存明文密钥。
 type Service struct {
+	codexCredentials  syncgate.Gate
 	failover          *failoverState
 	failoverEnabled   func(context.Context) (bool, error)
 	rotationMode      func(context.Context) (string, error)
@@ -56,17 +58,19 @@ type Service struct {
 	timeout           time.Duration
 	router            Router
 	subscription      SubscriptionAccess
-	chatgpt           *chatgpt.Client
-	atria             *atria.Client
-	river             *river.Client
-	google            *google.Client
-	mimo              *mimo.Client
-	stepfun           *stepfun.Client
-	kimi              *kimi.Client
-	minimax           *minimax.Client
-	googleResources   GoogleResourceObserver
-	googleAuth        GoogleSubscriptionAccess
-	antigravity       *antigravity.Client
+	// upstreamBase 读取 Codex 透明转发的上游基址；nil 时用默认官方端点。
+	upstreamBase    func(context.Context) (string, error)
+	chatgpt         *chatgpt.Client
+	atria           *atria.Client
+	river           *river.Client
+	google          *google.Client
+	mimo            *mimo.Client
+	stepfun         *stepfun.Client
+	kimi            *kimi.Client
+	minimax         *minimax.Client
+	googleResources GoogleResourceObserver
+	googleAuth      GoogleSubscriptionAccess
+	antigravity     *antigravity.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -89,6 +93,8 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.kimi = kimi.New(nil)
 	s.minimax = minimax.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
+	// Codex 入口走 v1 形态的透明转发；其余入口仍由 Forward 处理。
+	opts.Passthrough = s
 	s.server = proxy.New(opts)
 	return s
 }

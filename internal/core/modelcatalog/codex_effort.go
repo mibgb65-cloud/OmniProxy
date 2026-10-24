@@ -3,7 +3,9 @@ package modelcatalog
 // Codex 目录只接受来自 official catalog 的档位词汇。上游（River／MiniMax 等）
 // 使用 none／max 表达两端，Codex 没有同名档位，必须就近映射后才能在选择器里出现：
 // 未映射的档位不会显示，用户只能看到唯一一个已认识的值，表现为“无法选择推理强度”。
-var codexEffortLevels = []string{"minimal", "low", "medium", "high", "xhigh"}
+// official catalog 还会为 GPT 模型声明 ultra（最高强度 + 自动任务委派），
+// 它本身已是客户端词汇，必须原样发布，不能被当成未知值丢弃。
+var codexEffortLevels = []string{"minimal", "low", "medium", "high", "xhigh", "ultra"}
 
 // codexEffortAlias 是上游档位 → Codex 档位的就近映射。
 // none（关闭思考）在 Codex 侧用最低档 low 表达；max 用客户端最高的 xhigh。

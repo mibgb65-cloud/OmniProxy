@@ -77,12 +77,52 @@ func validateMessages(raw json.RawMessage, maxMessageBytes int) error {
 		if message.Role == "assistant" && (len(message.Content) == 0 || string(message.Content) == "null") && len(message.ToolCalls) > 0 {
 			continue
 		}
-		var content string
-		if len(message.Content) == 0 || string(message.Content) == "null" || json.Unmarshal(message.Content, &content) != nil || len(content) > maxMessageBytes {
+		if !validContent(message.Content, maxMessageBytes) {
 			return Failure("invalid_messages", 400)
 		}
 	}
 	return nil
+}
+
+// validContent 接受纯文本，以及含图片块的内容数组（base64 或 URL）。
+// 图片只允许 user／tool 消息；assistant／system 中的图片由上游按官方限制拒绝，
+// 但本层仍需拒绝无法识别的块，避免把任意 JSON 当内容透传。
+func validContent(raw json.RawMessage, maxMessageBytes int) bool {
+	if len(raw) == 0 || string(raw) == "null" {
+		return false
+	}
+	var text string
+	if json.Unmarshal(raw, &text) == nil {
+		return len(text) <= maxMessageBytes
+	}
+	var blocks []struct {
+		Type     string          `json:"type"`
+		Text     json.RawMessage `json:"text"`
+		ImageURL struct {
+			URL string `json:"url"`
+		} `json:"image_url"`
+	}
+	if json.Unmarshal(raw, &blocks) != nil || blocks == nil || len(blocks) > 128 {
+		return false
+	}
+	length := 0
+	for _, block := range blocks {
+		switch block.Type {
+		case "text":
+			var value string
+			if len(block.Text) == 0 || json.Unmarshal(block.Text, &value) != nil {
+				return false
+			}
+			length += len(value)
+		case "image_url":
+			if block.ImageURL.URL == "" || len(block.ImageURL.URL) > MaxResponsesRequestBytes {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return length <= maxMessageBytes
 }
 
 func validateParameters(fields map[string]json.RawMessage) error {

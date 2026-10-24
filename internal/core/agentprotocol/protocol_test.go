@@ -2,6 +2,7 @@ package agentprotocol
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -43,7 +44,10 @@ func TestResponsesCustomToolsAndCompletion(t *testing.T) {
 	if _, err := ReadResponses(strings.NewReader(`data: {"type":"response.output_text.delta","delta":"partial"}` + "\n\n")); err == nil {
 		t.Fatal("truncated response became successful")
 	}
-	if _, _, err := ToChat([]byte(`{"model":"test","input":[{"role":"user","content":[{"type":"input_image","image_url":"https://invalid"}]}]}`), "responses"); err == nil {
-		t.Fatal("unsupported multimodal input silently lost")
+	if _, _, err := ToChat([]byte(`{"model":"test","input":[{"role":"user","content":[{"type":"input_image","image_url":"https://invalid"}]}]}`), "responses"); err != nil {
+		t.Fatal("verified image input was rejected", err)
+	}
+	if _, _, err := ToChat([]byte(`{"model":"test","input":[{"role":"user","content":[{"type":"input_file","file_id":"f1"}]}]}`), "responses"); !errors.Is(err, ErrUnsupported) {
+		t.Fatal("unsupported content silently lost", err)
 	}
 }

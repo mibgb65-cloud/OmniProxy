@@ -70,6 +70,9 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 		if err := s.restoreCatalog(ctx); err != nil {
 			return nil, err
 		}
+		if err := s.restoreCodexLogin(); err != nil {
+			return nil, err
+		}
 	}
 	if err := s.deleteRestoreRecords(ctx, client, desktop != nil); err != nil {
 		return nil, errors.Join(err, s.rollbackClient(client, path, digest(original.Body, original.Exists), fileSnapshot{body, exists, revision}), desktop.rollback(3))

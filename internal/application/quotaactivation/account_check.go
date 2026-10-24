@@ -9,7 +9,8 @@ import (
 func (s *Service) checkAccount(ctx context.Context, item account.Item) error {
 	rawQuota, err := s.quotas.ReadQuota(ctx, item.ID)
 	if err != nil {
-		return err
+		// 额度读取失败属于可重试原因，但仍要给状态与日志一个稳定分类。
+		return errors.Join(failure("quota_unavailable"), err)
 	}
 	assessed, err := s.observe(ctx, item, rawQuota)
 	if err != nil {
@@ -59,7 +60,7 @@ func (s *Service) checkAccount(ctx context.Context, item account.Item) error {
 			s.mu.Unlock()
 			return releaseErr
 		}
-		return errors.Join(failure("prepare_failed"), releaseErr)
+		return errors.Join(prepareFailure(sendErr), releaseErr)
 	}
 	if sendErr == nil {
 		s.mu.Lock()

@@ -36,7 +36,8 @@ func ModelMetadata(model string) catalog.Metadata {
 	if model == DeepSeekFlash || model == DeepSeekFlash1017 {
 		output = 384000
 	}
-	m := catalog.Metadata{ContextWindow: &window, OutputTokenLimit: &output, InputModalities: []string{"text"}, ToolUse: &tools}
+	// 官方能力表声明四款模型均支持文本与图片输入，适配器已按 image_url 块转发。
+	m := catalog.Metadata{ContextWindow: &window, OutputTokenLimit: &output, InputModalities: []string{"text", "image"}, ToolUse: &tools}
 	// 1017 于 2026-10-22 以有界合成请求确认三档接受、非法档位拒绝；不再沿用未知能力快照。
 	if model == DeepSeekFlash || model == DeepSeekFlash1017 {
 		m.ReasoningEfforts = []catalog.Effort{{Value: "none", Description: "关闭思考"}, {Value: "high", Description: "高强度推理"}, {Value: "max", Description: "最高强度推理"}}

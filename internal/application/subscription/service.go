@@ -56,7 +56,7 @@ type Service struct {
 	accounts          *account.Service
 	root              string
 	factory           Factory
-	readToken         func(string, string, func([]byte, string) error) error
+	readToken         func(context.Context, string, string, string, func([]byte, string) error) error
 	removeCredentials func(string) error
 	current           *session
 	history           map[string]State
@@ -67,11 +67,12 @@ type Service struct {
 }
 
 // New 使用按运行环境隔离的固定授权配置根目录。
+// readToken 走 v1 形态的续期路径：官方令牌临近过期时由网关自行换新。
 func New(accounts *account.Service, root string, factory Factory) *Service {
 	if factory == nil {
 		factory = codex.Open
 	}
-	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseToken, removeCredentials: codex.DeleteCredentials, history: map[string]State{}}
+	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseFreshToken, removeCredentials: codex.DeleteCredentials, history: map[string]State{}}
 }
 func failure(code string) error { return errors.New("subscription: " + code) }
 func randomID() (string, error) {

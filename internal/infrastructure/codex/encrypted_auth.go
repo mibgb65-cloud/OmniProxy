@@ -2,6 +2,7 @@ package codex
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"filippo.io/age"
 	"io"
@@ -15,6 +16,13 @@ const maxAuthPassphraseBytes = 64 << 10
 
 // readEncryptedAuth 在内存解密官方 CodexAuth 命名空间，不写明文或读取其他秘密。
 func readEncryptedAuth(home string, passphrase []byte) ([]byte, error) {
+	return readEncryptedAuthContext(context.Background(), home, passphrase)
+}
+
+func readEncryptedAuthContext(ctx context.Context, home string, passphrase []byte) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if !filepath.IsAbs(home) || len(passphrase) == 0 || len(passphrase) > maxAuthPassphraseBytes {
 		return nil, ErrProtocol
 	}
@@ -41,7 +49,7 @@ func readEncryptedAuth(home string, passphrase []byte) ([]byte, error) {
 		return nil, ErrUnavailable
 	}
 	// 每次读取完整有界密文与系统 passphrase；mtime 不足以识别授权更新或替换。
-	return officialAuthCache.read(path, ciphertext, passphrase)
+	return officialAuthCache.readContext(ctx, path, ciphertext, passphrase)
 }
 
 func decryptAuthPayload(ciphertext, passphrase []byte) ([]byte, error) {

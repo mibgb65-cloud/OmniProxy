@@ -17,7 +17,7 @@ func TestStreamingTokenConsumerDoesNotBlockQuotaOrAnotherRequest(t *testing.T) {
 	otherView, otherClient, _ := f.begin(t, "")
 	otherClient.authorize("other@example.test")
 	other := awaitState(t, f.manager, otherView.ID, "completed").Account
-	f.manager.readToken = func(path, expectedID string, consume func([]byte, string) error) error {
+	f.manager.readToken = func(_ context.Context, path, expectedID, _ string, consume func([]byte, string) error) error {
 		if filepath.Clean(path) != filepath.Clean(home) || expectedID != item.AuthAccountID {
 			return failure("identity_changed")
 		}
@@ -80,7 +80,7 @@ func TestPreparedTokenIsIndependentAndClearedAfterConsumption(t *testing.T) {
 			item := awaitState(t, f.manager, view.ID, "completed").Account
 			var borrowed, consumed []byte
 			readerReturned := false
-			f.manager.readToken = func(_ string, expectedID string, callback func([]byte, string) error) error {
+			f.manager.readToken = func(_ context.Context, _ string, expectedID, _ string, callback func([]byte, string) error) error {
 				borrowed = []byte("test-only-token")
 				defer func() { clear(borrowed); readerReturned = true }()
 				return callback(borrowed, expectedID)

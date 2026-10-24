@@ -62,6 +62,8 @@ type Service struct {
 	catalog      Catalog
 	mu           sync.Mutex
 	codexVersion string
+	// codexLogin 给出要写进客户端登录的池账号 auth.json；nil 表示不接管登录。
+	codexLogin func(context.Context) ([]byte, error)
 }
 
 // SetCodexVersion 同步启动或安装后的本机核心版本，不自行安装或升级客户端。

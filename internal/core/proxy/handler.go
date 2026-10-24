@@ -18,46 +18,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("local_access_only", 403))
 		return
 	}
-	path, pathKey, prefix, allowed, valid := resolveAgentPath(r)
+	resolved, valid := resolveEntry(r, s.opts.Passthrough != nil)
 	if !valid {
 		writeFailure(w, Failure("not_found", 404))
 		return
 	}
+	// Codex 入口按 v1 语义透明转发：前缀之后不再有端点白名单。
+	if resolved.passthrough && isTransparentPath(resolved.path) {
+		client, key, byPrefix, authErr := s.authorizeEntry(r.Context(), r, resolved)
+		if authErr != nil {
+			writeFailure(w, authErr)
+			return
+		}
+		s.servePassthrough(w, r, resolved.path, socketAccess{client: client, key: key, prefix: resolved.prefix, byPrefix: byPrefix})
+		return
+	}
+	path, prefix := resolved.path, resolved.prefix
 	if !validModelQuery(path, r.URL.RawQuery) {
 		writeFailure(w, Failure("invalid_request", 400))
 		return
 	}
-	key := pathKey
-	client := ""
-	if s.opts.Authorize != nil {
-		if key == "" {
-			key = r.Header.Get("X-Api-Key")
-		}
-		if key == "" {
-			key = r.Header.Get("X-OmniProxy-Key")
-		}
-		if key == "" {
-			key = strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-		}
-		var authorized bool
-		// 超过上限的凭据绝不进入比较；Codex 官方登录令牌本身就超过该上限，
-		// 因此溢出时按"不是接入 Key"处理，交给固定前缀判定。
-		if len(key) <= 512 {
-			client, authorized = s.opts.Authorize(r.Context(), key)
-		}
-		if authorized && client != "" && len(allowed) > 0 && !clientAllowed(allowed, client) {
-			// 固定入口只接受本入口受管客户端的 Key，避免把别的 Agent 凭据写进本入口。
-			writeFailure(w, Failure("client_mismatch", 403))
-			return
-		}
-		if !authorized && prefix != "" && s.opts.PrefixAccess != nil {
-			// Codex 保留官方 auth.json，网关无法用接入 Key 校验其登录令牌。
-			client, authorized = s.opts.PrefixAccess(r.Context(), prefix)
-		}
-		if !authorized {
-			writeFailure(w, Failure("unauthorized", 401))
-			return
-		}
+	client, key, byPrefix, authErr := s.authorizeEntry(r.Context(), r, resolved)
+	if authErr != nil {
+		writeFailure(w, authErr)
+		return
 	}
 	var metadata CodexMetadata
 	if path == "/v1/responses" || path == "/v1/responses/compact" {
@@ -73,7 +57,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeFailure(w, err)
 			return
 		}
-		s.serveResponsesSocket(w, r, key, client, metadata)
+		s.serveResponsesSocket(w, r, socketAccess{key: key, prefix: prefix, client: client, byPrefix: byPrefix}, metadata)
 		return
 	}
 	if path == "/v1/models" && r.Method == http.MethodGet {

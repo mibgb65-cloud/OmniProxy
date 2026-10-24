@@ -22,7 +22,8 @@ func TestChatNormalizesTextPartsPreservingToolsAndOptions(t *testing.T) {
 }
 
 func TestChatRejectsUnsupportedAndUnboundedParts(t *testing.T) {
-	for _, content := range []string{`[]`, `[{"type":"image_url","image_url":{"url":"https://example.invalid"}}]`, `[{"type":"text"}]`, `[{"type":"text","text":null}]`, `[{"type":"text","text":4}]`, `[` + strings.Repeat(`{"type":"text","text":"x"},`, 128) + `{"type":"text","text":"x"}]`, `[{"type":"text","text":"` + strings.Repeat("x", 1<<20+1) + `"}]`} {
+	// image_url 已由适配器按上游契约处理，不再属于「不支持」的部分。
+	for _, content := range []string{`[]`, `[{"type":"text"}]`, `[{"type":"text","text":null}]`, `[{"type":"text","text":4}]`, `[{"type":"audio_url","audio_url":{"url":"https://example.invalid"}}]`, `[` + strings.Repeat(`{"type":"text","text":"x"},`, 128) + `{"type":"text","text":"x"}]`, `[{"type":"text","text":"` + strings.Repeat("x", 1<<20+1) + `"}]`} {
 		if _, err := ParseRequest([]byte(`{"model":"deepseek-flash","messages":[{"role":"user","content":` + content + `}]} `)); err == nil {
 			t.Fatal("unsupported text parts accepted")
 		}

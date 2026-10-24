@@ -77,14 +77,22 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 		}
 		return nil
 	}
+	var login *codexLoginChange
+	if input.Client == "codex" {
+		login, err = s.applyCodexLogin(ctx)
+		if err != nil {
+			return nil, err
+		}
+		defer login.clear()
+	}
 	if err := s.writeClient(input.Client, prepared.path, patched, input.Revision); err != nil {
-		return nil, errors.Join(err, rollbackCatalog())
+		return nil, errors.Join(err, login.rollback(), rollbackCatalog())
 	}
 	if err := desktop.write(); err != nil {
-		return nil, errors.Join(err, s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
+		return nil, errors.Join(err, login.rollback(), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	if err := s.commitFileVersions(ctx, input.Client, digest(patched, true), local, digest(catalogBody, true), fileVersionCommit{rebase: staged, desktop: desktop, saveSelection: true, modelIDs: input.ModelIDs, saveEfforts: effortClient(input.Client) && input.Efforts != nil, efforts: input.Efforts}); err != nil {
-		return nil, errors.Join(err, desktop.rollback(3), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
+		return nil, errors.Join(err, login.rollback(), desktop.rollback(3), s.rollbackClient(input.Client, prepared.path, digest(patched, true), before), rollbackCatalog())
 	}
 	committed = true
 	if err := s.SetEnabled(ctx, input.Client, true); err != nil {

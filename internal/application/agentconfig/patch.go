@@ -5,6 +5,7 @@ import (
 	"github.com/pelletier/go-toml/v2"
 	"omniproxy/internal/core/agentendpoint"
 	catalog "omniproxy/internal/core/modelcatalog"
+	"strings"
 )
 
 func build(client string, body, key []byte, port int, model string) ([]byte, string, error) {
@@ -82,8 +83,7 @@ func buildCodex(body, key []byte, baseURL, model string) ([]byte, string, error)
 		// 新版 Codex 禁止覆盖内置 openai 表。本地入口使用独立固定前缀，
 		// 官方 auth.json 与其登录令牌原样保留，网关按前缀归属而非接入 Key。
 		updates["openai_base_url"] = quote(baseURL)
-		updates["features.responses_websockets"] = "false"
-		updates["features.responses_websockets_v2"] = "false"
+		// 已移除的旧开关不再写入；是否接收 WS 由网关策略决定。
 		updates["features.enable_request_compression"] = "false"
 		result, err := patchTOML(body, provider, updates)
 		return result, provider, err
@@ -94,7 +94,9 @@ func buildCodex(body, key []byte, baseURL, model string) ([]byte, string, error)
 	}
 	updates[prefix+"wire_api"] = quote("responses")
 	updates[prefix+"requires_openai_auth"] = "false"
-	updates[prefix+"supports_websockets"] = "false"
+	if strings.HasSuffix(baseURL, "/codex/v1") {
+		updates[prefix+"supports_websockets"] = "true"
+	}
 	updates[prefix+"experimental_bearer_token"] = quote(string(key))
 	updates[prefix+"env_key"] = ""
 	result, err := patchTOML(body, provider, updates)

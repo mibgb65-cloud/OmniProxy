@@ -225,7 +225,8 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if provider.Kind == "google" && account.AuthMethod != "api_key" && !(account.AuthMethod == "subscription_login" && account.AuthState == "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				if provider.Kind == "openai" && (account.AuthMethod != "subscription_login" || account.AuthState != "authenticated") {
+				// 订阅账号有两种凭据来源：官方隔离登录与网关自己保管的 auth.json。
+				if provider.Kind == "openai" && (!codexLoginMethod(account.AuthMethod) || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				return target{authMethod: account.AuthMethod, accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account), stepfun: account.StepFun, kimi: account.Kimi, minimax: account.MiniMax, mimo: account.MiMo}, nil

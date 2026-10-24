@@ -30,10 +30,10 @@ func (s *Service) ConsumeReset(ctx context.Context, input ResetInput) (ResetResu
 	if !validCreditID(input.CreditID) || !validOperationID(input.OperationID) {
 		return ResetResult{}, failure("invalid_input")
 	}
-	if err := s.operations.Lock(ctx); err != nil {
+	if err := s.operations.LockAccount(ctx, input.AccountID); err != nil {
 		return ResetResult{}, failure("operation_cancelled")
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(input.AccountID)
 	if ctx.Err() != nil {
 		return ResetResult{}, failure("operation_cancelled")
 	}

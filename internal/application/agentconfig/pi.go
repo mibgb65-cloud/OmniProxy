@@ -21,7 +21,8 @@ func buildPi(body, key []byte, root string, plan Plan, owned bool) ([]byte, erro
 	}
 	models := []any{}
 	for _, entry := range plan.Models {
-		model := map[string]any{"id": entry.ID, "name": entry.Name, "input": []string{"text"}}
+		// 与 Harness 同为 pi-ai 配置：input 显式非空即优先，需按已确认能力声明。
+		model := map[string]any{"id": entry.ID, "name": entry.Name, "input": clientInputModalities(entry)}
 		if entry.Metadata.ContextWindow != nil {
 			model["contextWindow"] = *entry.Metadata.ContextWindow
 		}

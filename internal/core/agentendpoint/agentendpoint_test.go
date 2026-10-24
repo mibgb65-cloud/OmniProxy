@@ -42,3 +42,26 @@ func TestUnknownInputsAreRejected(t *testing.T) {
 		t.Fatal("expected unknown prefix to admit no client")
 	}
 }
+
+// TestRuntimeSeparatesCodexRuntimes 断言共用前缀的 Codex 运行形态按来源标识区分，
+// 并且只认固定标记：未知来源保持 codex，其他客户端完全不受影响。
+func TestRuntimeSeparatesCodexRuntimes(t *testing.T) {
+	for _, test := range []struct {
+		originator, userAgent, want string
+	}{
+		{"codex_cli_rs", "codex_cli_rs/0.163.0", "codex-cli"},
+		{"Codex Desktop", "codex_cli_rs/0.163.0-alpha.10.2", "codex-desktop"},
+		{"codex_desktop", "", "codex-desktop"},
+		{"codex_vscode", "", "codex-vscode"},
+		{"", "codex_cli_rs/0.163.0", "codex-cli"},
+		{"omniproxy", "OmniProxy/2.0.0", "codex"},
+		{"", "", "codex"},
+	} {
+		if got := Runtime("codex", test.originator, test.userAgent); got != test.want {
+			t.Fatalf("Runtime(codex, %q, %q) = %q, want %q", test.originator, test.userAgent, got, test.want)
+		}
+	}
+	if got := Runtime("claude-desktop", "codex_cli_rs", "codex_cli_rs/1.0"); got != "claude-desktop" {
+		t.Fatalf("其他客户端被改写: %q", got)
+	}
+}

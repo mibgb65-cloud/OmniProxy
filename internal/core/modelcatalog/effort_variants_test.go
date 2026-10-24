@@ -84,9 +84,14 @@ func TestEffortVariantBaseResolvesLegacySelection(t *testing.T) {
 }
 
 func TestValidateMetadataRejectsUnknownEffortModelLevel(t *testing.T) {
-	metadata := Metadata{EffortModels: map[string]string{"ultra": "model-x"}}
+	metadata := Metadata{EffortModels: map[string]string{"turbo": "model-x"}}
 	if ValidateMetadata(metadata) == nil {
 		t.Fatal("unknown effort level accepted")
+	}
+	// official catalog 为 GPT 模型声明的 ultra 变体必须被接受。
+	metadata = Metadata{EffortModels: map[string]string{"ultra": "model-x"}}
+	if ValidateMetadata(metadata) != nil {
+		t.Fatal("official ultra level rejected")
 	}
 	metadata = Metadata{EffortModels: map[string]string{"high": "bad model"}}
 	if ValidateMetadata(metadata) == nil {

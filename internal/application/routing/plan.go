@@ -66,7 +66,7 @@ func (s *Service) ResolvePlan(ctx context.Context, model string) (Plan, error) {
 		if a.ID == selected.ID || !SameAccountPool(selected, a) {
 			continue
 		}
-		if selected.AuthMethod == account.AuthSubscription && a.AuthAccountID == selected.AuthAccountID && strings.EqualFold(strings.TrimSpace(a.AuthEmail), strings.TrimSpace(selected.AuthEmail)) {
+		if codexLogin(selected) && a.AuthAccountID == selected.AuthAccountID && strings.EqualFold(strings.TrimSpace(a.AuthEmail), strings.TrimSpace(selected.AuthEmail)) {
 			continue
 		}
 		if !a.Enabled || !eligible(data, a, logical) && !uncataloguedSubscriptionBackup(data, a, logical) {
@@ -103,7 +103,7 @@ func SameAccountPool(a, b account.Item) bool {
 // 新登录订阅尚未同步目录时，仅作为已知模型的备用尝试；有明确目录却不支持的账号仍排除。
 // 不扩大模型发现或主路由，实际模型权限仍由备用账号的官方响应确认。
 func uncataloguedSubscriptionBackup(data snapshot, a account.Item, model string) bool {
-	if a.AuthMethod != account.AuthSubscription || a.AuthState != "authenticated" {
+	if !codexLogin(a) {
 		return false
 	}
 	openai := false

@@ -33,7 +33,7 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 		available := supportsLongContext(entry) && !strings.HasSuffix(entry.ID, ClaudeLongContextSuffix) && ValidClaudeModel(id)
 		onlyLong := available && entry.Metadata.ContextVerified
 		if !onlyLong {
-			result = append(result, entry)
+			result = append(result, claudeModalities(entry))
 		}
 		if !available || seen[id] {
 			continue
@@ -49,10 +49,22 @@ func ClaudeEntries(entries []Entry) ([]Entry, error) {
 		if !onlyLong {
 			entry.Metadata.IsDefault = false
 		}
-		result = append(result, entry)
+		result = append(result, claudeModalities(entry))
 	}
 	// 推理强度沿用客户端原生 effort 控件，不派生出 N×M 的档位模型条目。
 	return Normalize(result)
+}
+
+// claudeModalities 让 Claude 菜单按上游已确认的能力显示图片输入。
+// 这里只公布元数据；实际图片转换仍由各适配器的协议转换负责。
+func claudeModalities(entry Entry) Entry {
+	if len(entry.Metadata.InputModalities) > 0 {
+		return entry
+	}
+	if entry.ProviderKind == "river" {
+		entry.Metadata.InputModalities = []string{"text", "image"}
+	}
+	return entry
 }
 
 // ResolveClaudeSelection 解析客户端选择的模型与推理强度。

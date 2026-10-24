@@ -17,7 +17,7 @@ func TestTokenPreparationFailureCancellationAndPanicReleaseGate(t *testing.T) {
 			defer cancel()
 			var prepared []byte
 			readerErr := errors.New("test-reader-error")
-			f.manager.readToken = func(_ string, expectedID string, consume func([]byte, string) error) error {
+			f.manager.readToken = func(_ context.Context, _ string, expectedID, _ string, consume func([]byte, string) error) error {
 				key := []byte("test-only-token")
 				defer clear(key)
 				err := consume(key, expectedID)

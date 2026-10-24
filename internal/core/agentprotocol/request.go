@@ -51,6 +51,7 @@ func ToChat(body []byte, protocol string) ([]byte, map[string]string, error) {
 			}
 			bodyText := ""
 			calls := []any{}
+			images := []any{}
 			for _, entry := range array(m["content"]) {
 				part := object(entry)
 				switch text(part["type"]) {
@@ -59,20 +60,38 @@ func ToChat(body []byte, protocol string) ([]byte, map[string]string, error) {
 				case "tool_use":
 					calls = append(calls, Object{"id": part["id"], "type": "function", "function": Object{"name": part["name"], "arguments": string(encode(part["input"]))}})
 				case "tool_result":
-					s, e := content(part["content"])
+					// 工具结果中的图片（例如截图工具）必须随结果一起转发，不能只保留文本。
+					text, blocks, e := toolResultContent(part["content"])
 					if e != nil {
 						return nil, nil, e
 					}
-					messages = append(messages, Object{"role": "tool", "tool_call_id": part["tool_use_id"], "content": s})
+					result := Object{"role": "tool", "tool_call_id": part["tool_use_id"], "content": text}
+					if blocks != nil {
+						result["content"] = blocks
+					}
+					messages = append(messages, result)
 				case "thinking", "redacted_thinking": // 其他提供商不能验证 Anthropic 的推理签名，保留可见对话和工具链。
 				case "image", "input_image", "image_url":
-					return nil, nil, ErrUnsupportedImage
+					image, e := chatImage(part)
+					if e != nil {
+						return nil, nil, e
+					}
+					images = append(images, image)
 				default:
 					return nil, nil, ErrUnsupported
 				}
 			}
-			if bodyText != "" || len(calls) > 0 {
-				m := Object{"role": role, "content": bodyText}
+			if bodyText != "" || len(calls) > 0 || len(images) > 0 {
+				var content any = bodyText
+				if len(images) > 0 {
+					blocks := []any{}
+					if bodyText != "" {
+						blocks = append(blocks, Object{"type": "text", "text": bodyText})
+					}
+					blocks = append(blocks, images...)
+					content = blocks
+				}
+				m := Object{"role": role, "content": content}
 				if len(calls) > 0 {
 					m["tool_calls"] = calls
 				}
@@ -135,6 +154,14 @@ func responseInput(v any, messages []any) ([]any, error) {
 			if role != "user" && role != "assistant" && role != "system" {
 				return nil, ErrUnsupported
 			}
+			// 用户消息可携带 input_image；system／assistant 中的图片上游会拒绝，
+			// 但本地也不改写，交由上游按官方限制返回明确错误。
+			if blocks, e := chatBlocks(array(item["content"])); e != nil {
+				return nil, e
+			} else if blocks != nil {
+				messages = append(messages, Object{"role": role, "content": blocks})
+				continue
+			}
 			s, e := content(item["content"])
 			if e != nil {
 				return nil, e
@@ -145,11 +172,16 @@ func responseInput(v any, messages []any) ([]any, error) {
 		case "custom_tool_call":
 			messages = append(messages, Object{"role": "assistant", "content": nil, "tool_calls": []any{Object{"id": item["call_id"], "type": "function", "function": Object{"name": toolName(item), "arguments": string(encode(Object{"input": item["input"]}))}}}})
 		case "function_call_output", "custom_tool_call_output":
-			s, e := content(item["output"])
+			// 工具输出可能携带 input_image（例如截图工具），必须随结果转发。
+			s, blocks, e := toolResultContent(item["output"])
 			if e != nil {
 				return nil, e
 			}
-			messages = append(messages, Object{"role": "tool", "tool_call_id": item["call_id"], "content": s})
+			result := Object{"role": "tool", "tool_call_id": item["call_id"], "content": s}
+			if blocks != nil {
+				result["content"] = blocks
+			}
+			messages = append(messages, result)
 		case "reasoning":
 		default:
 			return nil, ErrUnsupported

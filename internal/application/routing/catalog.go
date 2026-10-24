@@ -117,11 +117,16 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == "google" && a.AuthMethod == account.AuthSubscription && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
-		if p.Kind == "openai" && a.AuthMethod == account.AuthSubscription && a.AuthState == "authenticated" {
+		if p.Kind == "openai" && codexLogin(a) {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 	}
 	return false
+}
+
+// codexLogin 覆盖两种订阅登录来源：官方隔离登录与网关自己保管的 auth.json。
+func codexLogin(a account.Item) bool {
+	return (a.AuthMethod == account.AuthSubscription || a.AuthMethod == account.AuthCodexFile) && a.AuthState == "authenticated"
 }
 
 // Models 只公布至少存在可用账号的模型，供网关和本地 Agent 选择。

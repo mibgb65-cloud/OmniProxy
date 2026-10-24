@@ -93,13 +93,17 @@ type Options struct {
 	Authorize func(context.Context, string) (string, bool)
 	// PrefixAccess 在接入 Key 不可用时判定固定入口前缀是否放行，返回归属客户端。
 	// 仅用于无法携带接入 Key 的客户端（Codex 保留官方登录），nil 表示一律不放行。
-	PrefixAccess   func(context.Context, string) (string, bool)
+	PrefixAccess func(context.Context, string) (string, bool)
+	// Passthrough 为非 nil 时，Codex 入口按 v1 语义透明转发；nil 保持固定端点流程。
+	Passthrough    PassthroughBinding
 	Port           int
 	RequestTimeout time.Duration
-	MaxConcurrent  int
-	Upstream       Upstream
-	Models         []string
-	Logger         *slog.Logger
+	// SocketHandshakeTimeout 仅约束透明 WebSocket 建连，不限制已建立连接的寿命。
+	SocketHandshakeTimeout time.Duration
+	MaxConcurrent          int
+	Upstream               Upstream
+	Models                 []string
+	Logger                 *slog.Logger
 }
 
 // Error 的 Code 可用于 UI 和协议错误；禁止放入原始上游正文、凭证或请求内容。

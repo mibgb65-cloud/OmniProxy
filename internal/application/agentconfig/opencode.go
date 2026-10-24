@@ -2,10 +2,10 @@ package agentconfig
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/tailscale/hujson"
+	"omniproxy/internal/core/agentendpoint"
 	catalog "omniproxy/internal/core/modelcatalog"
 )
 
@@ -52,7 +52,11 @@ func buildCompatibleClient(client string, body, key []byte, port int, plan Plan,
 	if config["provider"] != nil && !ok {
 		return nil, "", failure("invalid_config")
 	}
-	root := fmt.Sprintf("http://127.0.0.1:%d/v1", port)
+	root, ok := agentendpoint.BaseURL(client, port)
+	if !ok {
+		return nil, "", failure("invalid_client")
+	}
+	root += "/v1"
 	if prior, exists := providers["omniproxy"]; exists {
 		p, _ := prior.(map[string]any)
 		options, _ := p["options"].(map[string]any)
@@ -62,7 +66,8 @@ func buildCompatibleClient(client string, body, key []byte, port int, plan Plan,
 	}
 	models := map[string]any{}
 	for _, entry := range plan.Models {
-		model := map[string]any{"name": entry.Name, "modalities": map[string]any{"input": []string{"text"}, "output": []string{"text"}}}
+		// OpenCode 按 modalities.input 决定是否允许附图；省略会回落到 models.dev 的能力表。
+		model := map[string]any{"name": entry.Name, "modalities": map[string]any{"input": clientInputModalities(entry), "output": []string{"text"}}}
 		limits := map[string]int64{}
 		if entry.Metadata.ContextWindow != nil {
 			limits["context"] = *entry.Metadata.ContextWindow

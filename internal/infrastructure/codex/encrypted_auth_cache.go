@@ -1,6 +1,7 @@
 package codex
 
 import (
+	"context"
 	"crypto/sha256"
 	"errors"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"omniproxy/internal/core/syncgate"
 	"omniproxy/internal/infrastructure/credential"
 )
 
@@ -21,11 +23,26 @@ type encryptedAuthEntry struct {
 	expires     time.Time
 }
 type encryptedAuthCache struct {
-	mu      sync.Mutex
-	entries map[string]encryptedAuthEntry
-	now     func() time.Time
-	decrypt func([]byte, []byte) ([]byte, error)
-	protect func([]byte) (*credential.MemorySecret, error)
+	readGate syncgate.Gate
+	mu       sync.Mutex
+	entries  map[string]encryptedAuthEntry
+	now      func() time.Time
+	decrypt  func([]byte, []byte) ([]byte, error)
+	protect  func([]byte) (*credential.MemorySecret, error)
+}
+
+func (c *encryptedAuthCache) readContext(ctx context.Context, path string, ciphertext, passphrase []byte) ([]byte, error) {
+	// 等待另一个昂贵 KDF 时可取消；真正开始的本地 KDF 仍同步执行并保留内存上限。
+	if err := c.readGate.Lock(ctx); err != nil {
+		return nil, err
+	}
+	defer c.readGate.Unlock()
+	data, err := c.read(path, ciphertext, passphrase)
+	if ctx.Err() != nil {
+		clear(data)
+		return nil, ctx.Err()
+	}
+	return data, err
 }
 
 var officialAuthCache = newEncryptedAuthCache(decryptAuthPayload)

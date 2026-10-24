@@ -34,10 +34,10 @@ func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota
 	// 后台激活也使用此入口；总预算必须从排队前开始，而非仅依赖 Wails 的外层超时。
 	readCtx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
-	if err := s.operations.Lock(readCtx); err != nil {
+	if err := s.operations.LockAccount(readCtx, id); err != nil {
 		return Quota{}, quotaFailure(readCtx, "queue", "quota_unavailable", err)
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(id)
 	if s.accountBusy(id) {
 		return Quota{}, quotaFailure(readCtx, "account", "busy", failure("busy"))
 	}

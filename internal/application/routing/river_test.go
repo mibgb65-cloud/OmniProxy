@@ -36,7 +36,9 @@ func TestRiverPresetRoutingAliasesAndEligibility(t *testing.T) {
 	for _, entry := range entries {
 		if entry.ProviderKind == river.Kind {
 			found++
-			if entry.Metadata.ContextWindow == nil || *entry.Metadata.ContextWindow != 1048576 || len(entry.Metadata.InputModalities) != 1 || entry.Metadata.InputModalities[0] != "text" || len(entry.Protocols) != 3 {
+			if entry.Metadata.ContextWindow == nil || *entry.Metadata.ContextWindow != 1048576 ||
+				len(entry.Metadata.InputModalities) != 2 || entry.Metadata.InputModalities[0] != "text" || entry.Metadata.InputModalities[1] != "image" ||
+				len(entry.Protocols) != 3 {
 				t.Fatal("preset metadata lost", entry)
 			}
 		}

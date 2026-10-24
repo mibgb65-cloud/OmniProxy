@@ -8,10 +8,10 @@ import (
 
 // Logout 清除该账号系统凭证，保留元数据供重新授权。
 func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
-	if err := s.operations.Lock(ctx); err != nil {
+	if err := s.operations.LockAccount(ctx, id); err != nil {
 		return account.Item{}, failure("operation_cancelled")
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(id)
 	if s.accountBusy(id) {
 		return account.Item{}, failure("busy")
 	}
@@ -34,10 +34,10 @@ func (s *Service) Logout(ctx context.Context, id string) (account.Item, error) {
 
 // Delete 仅清理本地凭据和账号，不启动官方组件或执行官方退出登录。
 func (s *Service) Delete(ctx context.Context, id string) error {
-	if err := s.operations.Lock(ctx); err != nil {
+	if err := s.operations.LockAccount(ctx, id); err != nil {
 		return failure("operation_cancelled")
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(id)
 	if s.accountBusy(id) {
 		return failure("busy")
 	}

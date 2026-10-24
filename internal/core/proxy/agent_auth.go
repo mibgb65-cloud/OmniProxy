@@ -15,18 +15,26 @@ func scopedAgentPath(r *http.Request) (string, string, bool) {
 	}
 	parts := strings.Split(path, "/")
 	compact := len(parts) == 7 && parts[5] == "responses" && parts[6] == "compact"
-	if (len(parts) != 6 && !compact) || parts[2] != "codex" || len(parts[3]) != 68 || !strings.HasPrefix(parts[3], "opk_") || parts[4] != "v1" {
+	if (len(parts) != 6 && !compact) || parts[2] != "codex" || !validAccessKey(parts[3]) || parts[4] != "v1" {
 		return "", "", false
-	}
-	for _, ch := range parts[3][4:] {
-		if !(ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f') {
-			return "", "", false
-		}
 	}
 	if compact {
 		return "/v1/responses/compact", parts[3], true
 	}
 	return "/v1/" + parts[5], parts[3], true
+}
+
+// validAccessKey 只接受 opk_ + 64 位小写十六进制，与配置写出的接入 Key 形态一致。
+func validAccessKey(key string) bool {
+	if len(key) != 68 || !strings.HasPrefix(key, "opk_") {
+		return false
+	}
+	for _, ch := range key[4:] {
+		if !(ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f') {
+			return false
+		}
+	}
+	return true
 }
 
 // resolveAgentPath 把入口折叠成协议规范路径，并返回该入口允许的受管客户端。

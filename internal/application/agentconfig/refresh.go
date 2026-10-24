@@ -108,7 +108,21 @@ func (s *Service) refreshCodex(ctx context.Context, entries []catalog.Entry, con
 	if toml.Unmarshal(config.body, &values) != nil {
 		return failure("invalid_config")
 	}
+	configBody, err := s.cleanCodexTransport(ctx, config.body)
+	if err != nil {
+		return err
+	}
+	defer clear(configBody)
 	if values["model_catalog_json"] != s.catalogPath() {
+		if digest(configBody, true) == config.revision {
+			return nil
+		}
+		if err := writeAtomic(s.paths.Codex, configBody, config.revision); err != nil {
+			return err
+		}
+		if err := s.commitFileVersions(ctx, "codex", digest(configBody, true), false, ""); err != nil {
+			return errors.Join(err, rollbackFile(s.paths.Codex, digest(configBody, true), config))
+		}
 		return nil
 	}
 	if err := s.checkCatalogFile(ctx); err != nil {
@@ -123,13 +137,18 @@ func (s *Service) refreshCodex(ctx context.Context, entries []catalog.Entry, con
 	if err != nil {
 		return failure("models_unavailable")
 	}
-	if digest(body, true) == before.revision {
+	catalogChanged := digest(body, true) != before.revision
+	if catalogChanged {
+		if err := writeAtomic(s.catalogPath(), body, before.revision); err != nil {
+			return err
+		}
+	}
+	rollbackCatalog := func() error {
+		if catalogChanged {
+			return rollbackFile(s.catalogPath(), digest(body, true), before)
+		}
 		return nil
 	}
-	if err := writeAtomic(s.catalogPath(), body, before.revision); err != nil {
-		return err
-	}
-	configBody := config.body
 	original, _ := values["model"].(string)
 	selected := upgradeClaudeDefault(entries, original)
 	present := false
@@ -141,8 +160,7 @@ func (s *Service) refreshCodex(ctx context.Context, entries []catalog.Entry, con
 	if !present && len(entries) > 0 {
 		selected = entries[0].ID
 	}
-	configChanged := selected != original
-	if configChanged {
+	if selected != original {
 		provider, _ := values["model_provider"].(string)
 		if provider == "" {
 			provider = "openai"
@@ -151,21 +169,30 @@ func (s *Service) refreshCodex(ctx context.Context, entries []catalog.Entry, con
 		if !present {
 			fields["model_reasoning_effort"] = ""
 		}
-		configBody, err = patchTOML(config.body, provider, fields)
-		if err == nil {
-			err = writeAtomic(s.paths.Codex, configBody, config.revision)
-		}
+		updated, patchErr := patchTOML(configBody, provider, fields)
+		err = patchErr
 		if err != nil {
-			return errors.Join(err, rollbackFile(s.catalogPath(), digest(body, true), before))
+			return errors.Join(err, rollbackCatalog())
 		}
-		defer clear(configBody)
+		clear(configBody)
+		configBody = updated
+		defer clear(updated)
 	}
-	if err := s.commitFileVersions(ctx, "codex", digest(configBody, true), true, digest(body, true)); err != nil {
+	configChanged := digest(configBody, true) != config.revision
+	if !configChanged && !catalogChanged {
+		return nil
+	}
+	if configChanged {
+		if err := writeAtomic(s.paths.Codex, configBody, config.revision); err != nil {
+			return errors.Join(err, rollbackCatalog())
+		}
+	}
+	if err := s.commitFileVersions(ctx, "codex", digest(configBody, true), catalogChanged, digest(body, true)); err != nil {
 		var configError error
 		if configChanged {
 			configError = rollbackFile(s.paths.Codex, digest(configBody, true), config)
 		}
-		return errors.Join(err, configError, rollbackFile(s.catalogPath(), digest(body, true), before))
+		return errors.Join(err, configError, rollbackCatalog())
 	}
 	return nil
 }

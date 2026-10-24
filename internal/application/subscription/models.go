@@ -7,10 +7,10 @@ import (
 
 // Models 只使用本应用管理的授权目录，保持用户官方登录不变。
 func (s *Service) Models(ctx context.Context, id string) ([]codex.Model, error) {
-	if err := s.operations.Lock(ctx); err != nil {
+	if err := s.operations.LockAccount(ctx, id); err != nil {
 		return nil, failure("operation_cancelled")
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(id)
 	item, profile, err := s.accounts.SubscriptionProfile(ctx, id)
 	if err != nil || item.AuthState != "authenticated" || s.accountBusy(id) {
 		return nil, failure("invalid_account")

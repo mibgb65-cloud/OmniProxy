@@ -90,12 +90,30 @@ func (s *Service) Check(ctx context.Context) error {
 		err = s.checkAccount(accountCtx, item)
 		finish()
 		if err != nil && batchCtx.Err() == nil {
-			s.failed("activation_failed")
+			s.accountFailed(item.ID, err)
 		}
 	}
 	return nil
 }
 
+// accountFailed 记录账号级失败：状态码用具体原因，日志带稳定码与账号标识，
+// 避免把「模型目录不可用」这类确定性原因一律报成 activation_failed。
+func (s *Service) accountFailed(accountID string, err error) {
+	code := codeOf(err)
+	if code == "" {
+		code = "activation_failed"
+	}
+	s.mu.Lock()
+	s.status.Failed++
+	s.status.ErrorCode = code
+	log := s.log
+	s.mu.Unlock()
+	if log != nil {
+		log.Warn("Codex quota activation account failed", "module", "quotaactivation", "code", code, "account", accountID)
+	}
+}
+
+// failed 记录无法归属到单个账号的批级失败。
 func (s *Service) failed(code string) error {
 	s.mu.Lock()
 	s.status.Failed++

@@ -73,7 +73,7 @@ func (s *Service) rotateAccounts(ctx context.Context, initial target, request pr
 		}
 		seen[candidate.AccountID] = true
 		saved, exists := accounts[candidate.AccountID]
-		if !exists || !saved.Enabled || saved.ProviderID != initial.snapshot.ProviderID || saved.AuthMethod != account.AuthSubscription || saved.AuthState != "authenticated" || candidate.UpdatedAt != "" && saved.UpdatedAt != candidate.UpdatedAt {
+		if !exists || !saved.Enabled || saved.ProviderID != initial.snapshot.ProviderID || !codexLoginMethod(saved.AuthMethod) || saved.AuthState != "authenticated" || candidate.UpdatedAt != "" && saved.UpdatedAt != candidate.UpdatedAt {
 			return nil, proxy.Failure("route_configuration_changed", 503)
 		}
 		item := initial

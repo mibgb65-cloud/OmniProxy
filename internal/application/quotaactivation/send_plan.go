@@ -14,6 +14,14 @@ type SendPlan struct {
 	Floating []string
 }
 
+// prepareFailure 保留发送方给出的具体原因；只有拿不到稳定码时才退回通用码。
+func prepareFailure(sendErr error) error {
+	if codeOf(sendErr) != "" {
+		return sendErr
+	}
+	return errors.Join(sendErr, failure("prepare_failed"))
+}
+
 // 发送前仍需确认占位目标继续滑动；稳定／未知／耗尽的窗口不能被强行转换为未开始。
 func plannedNeed(fresh subscription.Quota, plan SendPlan) (bool, error) {
 	if len(plan.Claimed) < 1 || len(plan.Claimed) > 2 || len(plan.Floating) > 2 {

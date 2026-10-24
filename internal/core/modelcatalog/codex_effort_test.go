@@ -15,7 +15,10 @@ func TestCodexEffortsMapUpstreamVocabulary(t *testing.T) {
 		{"river-glm", []Effort{{Value: "low"}, {Value: "high"}, {Value: "max"}}, []string{"low", "high", "xhigh"}},
 		{"minimax", []Effort{{Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}, {Value: "max"}}, []string{"low", "medium", "high", "xhigh"}},
 		{"official", []Effort{{Value: "minimal"}, {Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}}, []string{"minimal", "low", "medium", "high", "xhigh"}},
-		{"unknown-only", []Effort{{Value: "ultra"}}, nil},
+		// official catalog 的 GPT 档位含 max 与 ultra：max 就近映射为 xhigh，
+		// ultra 本身是客户端词汇，必须原样保留而不是被当成未知值丢弃。
+		{"official-gpt", []Effort{{Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}, {Value: "max"}, {Value: "ultra"}}, []string{"low", "medium", "high", "xhigh", "ultra"}},
+		{"unknown-only", []Effort{{Value: "turbo"}}, nil},
 		{"collision", []Effort{{Value: "none"}, {Value: "low"}}, []string{"low"}},
 	}
 	for _, tc := range cases {
@@ -42,6 +45,14 @@ func TestCodexUpstreamEffortRestoresUpstreamValue(t *testing.T) {
 	for _, level := range []string{"", "minimal", "medium", "none", "max"} {
 		if _, ok := CodexUpstreamEffort(efforts, level); ok {
 			t.Fatalf("unconfirmed level %q accepted", level)
+		}
+	}
+	// gpt-6.1-sol 的官方档位：xhigh 与 ultra 各自原样还原，不能互相折叠。
+	official := []Effort{{Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}, {Value: "max"}, {Value: "ultra"}}
+	for level, want := range map[string]string{"low": "low", "xhigh": "xhigh", "ultra": "ultra"} {
+		got, ok := CodexUpstreamEffort(official, level)
+		if !ok || got != want {
+			t.Fatalf("official level %q = (%q,%t), want %q", level, got, ok, want)
 		}
 	}
 }

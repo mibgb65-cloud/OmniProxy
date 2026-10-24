@@ -11,10 +11,10 @@ import (
 func (s *Service) Refresh(ctx context.Context, id string) (account.Item, error) {
 	readCtx, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
-	if err := s.operations.Lock(readCtx); err != nil {
+	if err := s.operations.LockAccount(readCtx, id); err != nil {
 		return account.Item{}, refreshFailure(readCtx, true, err)
 	}
-	defer s.operations.Unlock()
+	defer s.operations.UnlockAccount(id)
 	if s.accountBusy(id) {
 		return account.Item{}, failure("busy")
 	}

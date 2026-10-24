@@ -80,7 +80,36 @@ type Service struct {
 func New(db *sql.DB, accounts Accounts, providers Providers, quotas Quotas, sender Sender) *Service {
 	return &Service{db: db, accounts: accounts, providers: providers, quotas: quotas, sender: sender, wake: make(chan struct{}, 1), now: time.Now, observations: map[string]string{}}
 }
-func failure(code string) error { return errors.New("activation: " + code) }
+
+// codeError 携带稳定错误码，让状态与日志能说明具体原因，而不是笼统的失败。
+type codeError struct{ code string }
+
+func (e *codeError) Error() string { return "activation: " + e.code }
+
+func failure(code string) error { return &codeError{code: code} }
+
+// codeOf 取错误链里第一个稳定码；组合错误按顺序查找，识别不到时返回空串。
+func codeOf(err error) string {
+	for err != nil {
+		if coded, ok := err.(*codeError); ok {
+			return coded.code
+		}
+		switch wrapped := err.(type) {
+		case interface{ Unwrap() []error }:
+			for _, inner := range wrapped.Unwrap() {
+				if code := codeOf(inner); code != "" {
+					return code
+				}
+			}
+			return ""
+		case interface{ Unwrap() error }:
+			err = wrapped.Unwrap()
+		default:
+			return ""
+		}
+	}
+	return ""
+}
 
 // ErrAlreadyActive 表示发送前的复查已确认无需消息，调用方只更新额度快照。
 var ErrAlreadyActive = errors.New("activation: already_active")
