@@ -51,6 +51,9 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - Codex CLI／Desktop、Claude Code CLI、Claude Desktop Code 的配置入口；默认模型／路由选择、受控预览、应用、加密备份和恢复。
 - 客户端独立接入 Key，支持复制及启停。复制在桌面端完成，完整 Key 不通过 Wails 绑定返回。
 - Codex 保留 model_provider、官方 auth.json 登录与会话目录。内置 openai 使用固定前缀 `…/codex/v1`，不重定义内置提供商表，配置中不再写入接入 Key。
+- Codex 入口按 v1 形态**透明转发**：前缀之后任意路径、客户端头部与正文原样送到
+  上游，WebSocket 双向中继，上游基址可配置（默认官方订阅端点）。见
+  [ADR 023](../decisions/ADR-023-codex-v1-transparent-passthrough.md)。
 - 每个受管客户端有固定入口前缀（`…/codex/v1`、`…/claude`、`…/opencode/v1`、`…/goose/v1/chat/completions` 等），前缀只做路由分组；协议、上限与鉴权口径不变。见 [ADR 021](../decisions/ADR-021-fixed-agent-entry-prefixes.md)。
 - Claude Desktop 添加独立 3P 条目，保留官方当前配置。首次使用需在桌面配置选择器选择该条目；不会自动切换官方工作空间。
 - Chat Completions、Responses、Messages 和 Codex Responses WebSocket。
@@ -59,15 +62,59 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 实际协议及配置范围见 [本地 Agent 接入](LOCAL_AGENTS.md)，会话保护设计见 [ADR 005](../decisions/ADR-005-preserve-agent-session-identity.md)。
 
+## Codex 透明转发（v1 形态）
+
+`…/codex/v1/…` 与 `…/agent/codex/<接入Key>/v1/…` 前缀之后的内容按 v1 语义处理：
+把 `/backend-api/codex`、`/codex`、`/v1` 版本段剥离后拼到可配置的上游基址
+（默认 `https://chatgpt.com/backend-api/codex`），调用 `…/responses`、
+`…/responses/compact`、`…/models` 等真实端点。
+
+- 客户端头部整体透传：`originator`、`session_id`、`conversation_id`、
+  `OpenAI-Beta`（含压缩／WS 协商）、`User-Agent` 都保留；只替换
+  `Authorization` 与 `ChatGPT-Account-ID`。
+- 登录由网关拥有（v1 语义，见 [ADR 024](../decisions/ADR-024-gateway-owned-codex-login.md)）：
+  池账号的 auth.json 存在受保护凭据存储里，可从本机 `~/.codex/auth.json` 导入；
+  一键配置会把它写成客户端登录（先备份原登录，恢复时还原）。
+- 正文不改写：网关不强制 `store`／`stream`，不删除采样参数，压缩编码原样转发。
+- 令牌临近过期时由网关自己用 `refresh_token` 续期，并把新 auth.json 写回池记录。
+- 明确拒绝（401／429／5xx）才换同池账号，冷却窗口与协议路径共用；
+  已提交的响应不重放。
+- WebSocket 握手没有正文，读不到模型时按全部已授权订阅账号建立候选序列再顺序取号；
+  借不出凭据返回 `credential_unavailable`（503），不折叠成 `502 upstream_unavailable`。
+  上游明确拒绝握手仍回原状态码与 `upstream_socket_rejected`，并写
+  `gateway websocket failed` 日志（只有稳定代码，无 URL／账号）。
+- 透明 WebSocket 握手总预算默认 10 秒；全部凭据准备合计最多 5 秒，单候选最多
+  3 秒，上游单次拨号最多 5 秒，均不得超过总剩余时间。取消立即停止候选遍历；
+  准备超时返回 `credential_prepare_timeout`（504），拨号超时返回
+  `upstream_socket_timeout`（504），总预算耗尽返回 `request_timeout`（504），
+  不把这些情况记成凭据或配置损坏。握手成功后中继不再受握手期限约束。
+- `gateway websocket stage` 按连接关联 ID 记录选路、凭据排队／准备、拨号、
+  确认握手及中继耗时；只有固定阶段、尝试序号、稳定代码与可证实的关闭码／方向，
+  不记录令牌、原始错误、URL、身份或帧内容。101 仅表示握手成功，不代表模型调用成功。
+- 上游未声明 `Content-Type` 时只读一段前缀判定 SSE／JSON，再把前缀与剩余正文接回去
+  继续转发；判定结果只影响记账，不改变客户端收到的字节。
+- 结束分类按可证实信号决定：已收到协议终结事件（`response.completed`／
+  `response.incomplete`／`message_delta`／`[DONE]`）后断开记为成功；客户端连接结束记为
+  `request_cancelled`；其余上游读流错误记为 `upstream_stream_failed`；出错侧写进日志
+  的 `stream_error_side`。记账入库失败只标记 `accounting_failed`，不中断已交付的回答。
+- `chat/completions` 与 `messages` 仍走协议转换（订阅端点只接受 Responses），
+  `/v1/codex-models` 仍是本地目录。
+
 ## 运行边界
 
-只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求、任意 URL 转发和上游重定向。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。接入 Key 同时决定请求归属的受管 Agent（`codex`、`claude-desktop`、`harness-web` 等），归属随首条记录写入请求明细，用于按 Agent 查看用量；Key 本身、原始 User-Agent 和请求头都不落库。
+只绑定 IPv4 loopback，检查请求 Host，禁止跨来源浏览器请求和上游重定向。Codex
+透明转发的上游主机由配置固定，透传只改变路径、头部与正文。每次请求均校验本地接入 Key，并重新检查路由、账号和提供商启用状态。接入 Key 同时决定请求归属的受管 Agent（`codex`、`claude-desktop`、`harness-web` 等），归属随首条记录写入请求明细，用于按 Agent 查看用量；Key 本身、原始 User-Agent 和请求头都不落库。Codex 的 CLI、桌面应用与 IDE 扩展共用 `codex` 前缀，请求明细按客户端自己声明的来源标识细化成 `codex-cli`／`codex-desktop`／`codex-vscode`（只保存映射后的固定标识，无法识别时保持 `codex`）。
 
 固定入口前缀与接入 Key 必须一致：带 Key 的请求走到别的 Agent 前缀时返回 `403 client_mismatch`。唯一例外是 Codex 前缀 `…/codex/v1`：Codex 在官方登录模式下发送的是 ChatGPT 令牌，网关无法用接入 Key 校验，因此该前缀在 Codex 接入启用时按前缀归属放行（仍受 loopback Host、协议校验与大小限制约束）。Claude CLI 与 Claude Desktop 共用 `…/claude`，归属仍由各自的接入 Key 区分。升级前写入的 `/v1/...` 与 `/agent/codex/<Key>/v1` 继续可用。
 
-Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。
+Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。Codex 透明转发路径不做协议解析：正文上限 32 MiB，响应按块转发并即时刷新，不设整体期限（只限制响应头到达时间 60 秒）。
 
-WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
+WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。Codex 透明转发路径的 WebSocket 直接拨到上游并双向中继帧，帧大小上限 16 MiB，网关不解码帧内容。「Codex WebSocket」开关在握手时以及每个客户端帧转发前复核：关闭后已建立的连接也不能继续发起新请求，只关闭该连接，不影响普通 HTTP/SSE。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
+
+透明握手在凭据准备和上游拨号之后再次核对开关与原授权方式；固定前缀登录只复核前缀，
+接入 Key 登录只复核原 Key，不因 Key 撤销而降级为前缀放行。已建立连接的每个客户端帧
+继续复用这一判定。同步执行的本地 scrypt 无法在计算中强行中断；排队可取消，
+实际计算完成后丢弃已取消请求的明文结果，不以脱离管理的后台解密伪装成严格实时返回。
 
 流读取失败返回 `upstream_stream_failed`，单行超限返回 `response_too_large`，客户端写入／刷新失败返回 `client_write_failed`；这些错误不会被误标为凭据不可用。取消及超时仍按既有分类处理。HTTP 已提交 SSE 响应头后保留实际状态码，通过请求失败状态与错误码记录中断；WebSocket 使用错误事件表达失败。开始生成后的中断不触发账号切换或自动重放。
 

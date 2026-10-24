@@ -80,7 +80,16 @@ OpenAI 订阅模型同步保留官方 `model/list` 公布的 `serviceTiers`，�
 
 账号 → OpenAI →「OpenAI 账号设置」提供应用级「Codex WebSocket」开关，默认开启。只控制当前 OmniProxy 网关是否允许 Responses WebSocket，所有 OpenAI 账号共用；设置保存在本机 SQLite（迁移 016），无需启动或重启网关即可保存。关闭后新握手返回 `403 websocket_disabled`；已连接会话在下一次创建响应时被拒绝，进行中的请求可以正常结束。普通 HTTP/SSE 保持可用，客户端是否自动回退取决于自身版本。
 
+握手与连接内每一帧按**同一判定**复核：由固定入口前缀放行（`…/codex/v1`，客户端保留官方登录令牌、不写接入 Key）的连接复核该前缀是否仍启用；带接入 Key 的连接复核该 Key 是否仍有效。逐帧复核不能改回接入 Key 比较——官方登录令牌既不是接入 Key，超过 512 字节的凭据也绝不进入比较。
+
 该开关不修改 Codex CLI／Desktop 的配置、提供商身份、登录、会话或环境变量。Codex 0.155.1 已将旧 responses_websockets／v2 标记为 removed，内置 openai 禁止覆盖；不能将旧标志的 false 当作真实关闭客户端传输。用户选择控制网关以保持 ADR-005 的身份保护。参考：[官方配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)、[开发者设置](https://learn.chatgpt.com/docs/developer-settings)。
+
+一键接入不再新增已移除的 `responses_websockets`／`responses_websockets_v2` 标记。
+受管目录刷新仅在当前配置修订吻合且原备份证明字段归属时清理旧的 `false`；
+原本存在的用户值保留，曾被旧版本覆盖的 `true` 恢复原意；外部修改仍报告冲突。
+自定义提供商仅在明确指向当前 OmniProxy `/codex/v1` 入口时声明
+`supports_websockets=true`，不对未知第三方端点盲目开启。备份与恢复语义保持不变。
+网关允许／拒绝接收不等于命令客户端立即切换 HTTP；握手超时与诊断见 `GATEWAY.md`。
 
 只影响当前运行的新版网关；旧应用进程和其他端口不联动。客户端若仍指向旧版 `/codex/v1` 地址，应使用新版网关页的一键接入，不能宣称只打开本开关已修复其他进程的 403。
 
@@ -181,7 +190,7 @@ Claude Desktop 的 Code 标签页只在**客户端自己认识该模型**时渲�
 
 ### 推理强度（Codex 与 Google 变体型号）
 
-Codex 目录只认 official catalog 的档位词汇（`minimal`／`low`／`medium`／`high`／`xhigh`）。上游用 `none`／`max` 表达两端时，目录按就近语义映射（`none → minimal`、`max → xhigh`）后再发布；否则 Codex 只看到一个已认识的值，表现成「无法选择推理强度」。网关接收 Responses 请求时按同一套映射还原上游取值（`minimal → none`、`xhigh → max`），未确认档位仍返回 `unsupported_reasoning_effort` 400。
+Codex 目录只认 official catalog 的档位词汇（`minimal`／`low`／`medium`／`high`／`xhigh`／`ultra`）。`ultra` 是 official catalog 为 GPT-6 系声明的最高档（“Maximum reasoning with automatic task delegation”），本身属于客户端词汇，必须原样发布，不能被当成未知值丢弃。上游用 `none`／`max` 表达两端时，目录按就近语义映射（`none → low`、`max → xhigh`）后再发布；否则 Codex 只看到一个已认识的值，表现成「无法选择推理强度」。网关接收 Responses 请求时按同一套映射还原上游取值（`low → none`、`xhigh → max`），`xhigh`／`ultra` 各自原样还原，未确认档位仍返回 `unsupported_reasoning_effort` 400。
 
 Google 系上游用**独立型号**表达 thinking level（`…-low`、`…-high`，显示名 `Gemini 3.8 Flash (Low)`）。目录把这些变体折叠回同名基础模型：菜单只留一行，档位由客户端 effort 控件选择，网关在请求时换成实际存在的变体型号并移除档位字段（订阅适配器的生成参数是白名单校验，多余的 `reasoning_effort` 会被拒绝）。折叠只在同名基础模型同时存在时发生；只有变体的孤立型号保持原样。目录刷新前保存的变体 ID（例如 `gemini-3.8-flash-low`）在路由失败时按反向映射还原为「基础模型 + 档位」，不会变成 `unsupported_model`。显示名相同但 ID 不同的型号（实测 `Gemini 3.5 Flash Lite` 有 4 个）不会合并，它们是不同的路由目标。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。
 
@@ -255,6 +264,10 @@ Gemini 当前只提供 Chat API，虽可在路由页同步官方模型和限制�
 `response.create` / `generate=false` 预热帧，再通过 `previous_response_id` 创建正式响应。
 网关在本地回复预热事件，只保存当前连接上下文，不发起模型调用、不产生模型请求或用量记录；
 正式请求合并上下文后移除 `generate` 等传输字段再转发。预热仍受鉴权、协议开关、请求大小及路由校验约束。
+
+固定前缀入口的会话不会因为「官方登录令牌不是接入 Key」被中断：逐帧复核沿用手握时的授权方式
+（前缀放行或接入 Key），只有该前缀／Key 真正停用时才回 `401 unauthorized`。此前逐帧复核固定走接入 Key
+比较，导致 `…/codex/v1` 的会话在首帧被判 `unauthorized`，客户端表现为反复「正在重新连接」。
 
 HTTP 与 WebSocket 共用上游失败分类：400 请求拒绝、401／403 认证失败、402 余额不足、
 429 限流；5xx 统一为安全的 502 上游不可用。WebSocket 错误帧保留真实分类后的状态、稳定错误码及

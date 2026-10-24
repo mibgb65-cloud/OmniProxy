@@ -6,9 +6,23 @@
 
 ## Current Version
 
-2.0.0-beta.31 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.30 基础上：关闭思考（`none`）在 Codex 里映射为最低档 `low`（`low → none` 反向还原）；Google 的档位变体折叠与重名去重改为在目录构建时执行，菜单不再出现 `(High)/(Low)/(Medium)` 多行，重名型号改用 ID 显示；River 条目在 Codex 目录声明 `text + image`，客户端不再拦截图片输入。完整质量门（126 文件 750 项前端测试）／版本资源与资产校验通过；安装器 19,661,392 bytes，SHA256 `48661800…83175c`，未签名。
+2.0.0-beta.35 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.34 基础上修复：Codex 透明转发把已交付的回答记成失败（改为按协议终结事件／出错侧判定）、未声明 `Content-Type` 的流也能统计用量、WebSocket 失败交回真实代码并按全部订阅账号取号、「Codex WebSocket」开关对已建立连接逐帧生效、请求归属细分 `codex-cli`／`codex-desktop`／`codex-vscode`、自动激活按账号保留具体错误码并在面板显示原因。无新增迁移。完整质量门与 Windows 版本资源／发布资产校验通过；安装器 19,831,297 bytes，SHA256 `be8ad710…3a4f`，未签名。
 
 ## In Progress
+
+- [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。
+
+- [TASK-20261024-015](../tasks/active/TASK-20261024-015-codex-passthrough-outcome-and-runtime-labels.md)：Codex 透明转发的失败判定改为可证实信号（交付终结事件后断开不再记 `client_write_failed`）、未声明 `Content-Type` 的流也能统计用量、WebSocket 失败交回真实代码（含 `credential_unavailable`）并按全部订阅账号取号；请求归属新增 `codex-cli`／`codex-desktop`／`codex-vscode`。
+
+- [TASK-20261024-014](../tasks/active/TASK-20261024-014-build-local-beta34-installer.md)：Beta.34 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,811,654 bytes，SHA256 `d338e703f4985654ac155494790f9acf8fb19e3ca5530f8207c6818f999b6f8d`）；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-009](../tasks/active/TASK-20261024-009-build-local-beta32-installer.md)：Beta.32 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,779,433 bytes，SHA256 `bacb7db125caac8258bdac388335c79d6178173a7b1531b09d349ab24f8315d2`）；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-008](../tasks/active/TASK-20261024-008-codex-v1-transparent-passthrough.md)：Codex 入口改回 v1 形态——透明转发（路径／头部／正文原样、WebSocket 真正桥到上游）＋登录改由网关拥有（`codex_auth_json` 池账号、自行续期并回写、一键配置把池账号写成客户端登录并可恢复）；客户端 Base URL 仍是 `…/codex/v1`，上游基址新增可配置项（迁移 042）。Go 全部包与新增用例通过；实机 Codex 客户端待验收。
+
+- [TASK-20261024-007](../tasks/active/TASK-20261024-007-codex-websocket-reauth-and-ultra-effort.md)：修复 Codex 固定前缀入口的 WebSocket 首帧 `401 unauthorized`（逐帧复核改回接入 Key 比较，导致客户端反复「正在重新连接」）；Codex 目录恢复 official catalog 声明的 `ultra` 档位（`xhigh`／`ultra` 各自原样还原）。定向用例与 Go 全部包通过；实机客户端重连与 Ultra 菜单待用户验收。
 
 - [TASK-20261024-006](../tasks/active/TASK-20261024-006-build-local-beta31-installer.md)：Beta.31 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,661,392 bytes，SHA256 `48661800…83175c`）；未签名、未自动安装、未推送或发布。
 
@@ -49,6 +63,12 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261024-019](../tasks/completed/2026-10/TASK-20261024-019-codex-websocket-handshake-repair.md)：Codex WebSocket 握手修复收尾——独立总预算（总计 10 秒／凭据合计 5 秒／单候选 3 秒／拨号 5 秒，握手结束即释放）、取消与超时分开分类（`credential_prepare_timeout`／`upstream_socket_timeout`）、阶段诊断不输出认证材料、按账号可取消互斥 `core/syncgate`、订阅健康快路径与必要时官方续期、自管授权 CAS 回写、受管配置旧 WebSocket 标记清理。八个相关包 `-count=1` 通过；现场同版本 Codex CLI 0.163.0 隔离契约以 WebSocket PASS；热路径连续 20 次握手四轮均 20/20、P95 约 1.3–1.7 ms；`task verify` exit 0（127 文件／757 项前端测试、Windows production 构建）。真实账号的 CLI／Desktop 实机验收属任务 Out of Scope，待用户执行；未提交（工作区含其他任务未提交改动）。
+
+- [TASK-20261024-011](../tasks/completed/2026-10/TASK-20261024-011-installer-data-directory-choice.md)：`6529fde`，安装向导新增「数据存储位置」页（留空=当前用户默认目录），选择写入安装目录 `data-dir.txt`；profile 解析顺序改为 `OMNIPROXY_DATA_DIR` > `app.json` > 安装选择 > 默认，应用内设置优先、静默升级不改写、目录不可用时回落并告警。`makensis` 编译 5 页通过、`task verify` exit 0；试用安装器 `bin/OmniProxy-amd64-installer-data-dir-page.exe`（19,793,667 bytes，未签名），向导页未做真实点击验收。
+
+- [TASK-20261024-010](../tasks/completed/2026-10/TASK-20261024-010-settings-switch-color-consistency.md)：`43bff26`，通用设置「桌面行为」里两个开关原本是两套实现（手写 `bg-primary` 近白 vs 共享 `Switch` 蓝色），现统一复用共享 `Switch`，颜色、尺寸、滑块与聚焦环一致，并加类名一致性回归测试；完整质量门 exit 0／751 项前端测试通过，原生窗口视觉待用户确认。
 
 - [TASK-20261023-009](../tasks/completed/2026-10/TASK-20261023-009-quota-usage-tooltip-request-agent.md)：`211a98f`，配额页对没有官方额度／余额接口的账号改显示本机已用 Token（输入／输出／缓存／请求数），账号详情与配额页共用同一用量面板；Token 用量悬浮改用产品统一 Tooltip；迁移 040 让请求明细记录受管 Agent 归属（按独立接入 Key 识别），请求列表／详情显示 Agent，未知来源显示「—」。完整质量门 exit 0／731 项前端测试、Go 全部包与 Windows production 构建通过；原生窗口 Tooltip 与真实客户端归属待用户验收。
 
@@ -397,6 +417,8 @@
   full desktop E2E (Playwright) remains pending.
 
 ## Next Steps
+
+已完成自动验证：[Codex WebSocket 握手超时修复计划](PLAN-20261024-codex-websocket-handshake.md)，实际结果以 [TASK-20261024-019](../tasks/completed/2026-10/TASK-20261024-019-codex-websocket-handshake-repair.md) 为准；计划编写历史见 TASK-20261024-018。真实账号的 CLI／Desktop 实机握手与开关切换仍待用户验收，不将自动验证视为实机修复完成。
 
 1. Connect Codex subscription inference and the Responses gateway using the
    verified subscription account authorization.

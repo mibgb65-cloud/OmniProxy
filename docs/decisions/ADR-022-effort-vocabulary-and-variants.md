@@ -16,9 +16,11 @@ Google 系上游用**独立型号**表达 thinking level（`…-low`、`…-high
 
 ## 决策
 
-- 目录向客户端发布的档位必须是客户端自己的词汇：Codex 用 `minimal…xhigh`，
-  上游 `none → minimal`、`max → xhigh` 就近映射，其余档位原样；未确认的档位不发布。
-- 网关接收请求时按同一套映射还原上游取值（`minimal → none`、`xhigh → max`），
+- 目录向客户端发布的档位必须是客户端自己的词汇：Codex 用 `minimal`／`low`／`medium`／
+  `high`／`xhigh`／`ultra`，上游 `none → low`、`max → xhigh` 就近映射，其余档位原样
+  （official catalog 为 GPT-6 系声明的 `ultra` 必须原样发布，不能当未知值丢弃）；
+  未确认的档位不发布。
+- 网关接收请求时按同一套映射还原上游取值（`low → none`、`xhigh → max`），
   只接受该模型已确认的枚举，未确认时返回 `unsupported_request_effort` 类安全错误码。
 - 上游用独立型号表达档位时，目录把它折叠回基础模型：只发布一行，
   `Metadata.EffortModels` 记录档位 → 变体 ID 的映射（不发给客户端）。
@@ -33,7 +35,8 @@ Google 系上游用**独立型号**表达 thinking level（`…-low`、`…-high
 - Codex 与 Claude 系客户端选择档位时看到的是自己认识的取值，不再出现"只能选一个"。
 - Google 系型号在客户端只占一行；档位由客户端 effort 控件选择，网关负责换型号。
 - 上游新增档位变体时，只有同时发布基础模型才会折叠；命名不符合 `(High)`／`(Low)`／
-  `(Medium)`／`(Minimal)` 约定的变体保持独立条目。
+  `(Medium)`／`(Minimal)`／`(Ultra)` 约定的变体保持独立条目。
 - 折叠在下次同步模型时生效；已保存的旧变体 ID 仍可解析，但目录刷新后菜单会少掉那些行。
-- 档位映射是就近语义（`none` → `minimal`、`max` → `xhigh`），不等于上游关闭思考／最高强度
-  在客户端有同名选项；描述文案沿用上游，不夸大能力。
+- 档位映射是就近语义（`none` → `low`、`max` → `xhigh`），不等于上游关闭思考／最高强度
+  在客户端有同名选项；描述文案沿用上游，不夸大能力。official catalog 声明的 `ultra`
+  不需要映射，原样发布与还原。
