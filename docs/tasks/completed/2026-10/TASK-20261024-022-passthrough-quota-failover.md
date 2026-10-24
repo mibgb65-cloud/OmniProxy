@@ -223,6 +223,7 @@ go test ./internal/application/subscription -run ObserveQuota PASS
 
 ```text
 1173f20 fix(gateway): 透明转发在执行前额度拒绝时换号并阻断账号
+8090b1c test(gateway): 断言透明转发换号保留两次尝试明细
 ```
 
 ---
