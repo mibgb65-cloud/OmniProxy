@@ -1,5 +1,7 @@
+import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { Switch } from "../../components/ui/switch"
 import { GatewayStartupSetting } from "./gateway-startup-setting"
 import {
   useDesktopSettings,
@@ -26,6 +28,7 @@ export function DesktopBehavior() {
   const { data, isPending, isError, error } = useDesktopSettings()
   const autoStart = useSetAutoStart()
   const closeBehavior = useSetCloseBehavior()
+  const autoStartId = useId()
 
   return (
     <Card className="gap-0 rounded-2xl py-0 shadow-none">
@@ -45,6 +48,7 @@ export function DesktopBehavior() {
         {data ? (
           <>
             <label
+              htmlFor={autoStartId}
               className={`flex items-center justify-between gap-4 py-4 ${
                 data.autoStartAvailable && !autoStart.isPending
                   ? "cursor-pointer"
@@ -59,26 +63,12 @@ export function DesktopBehavior() {
                     : t("settings.desktop.autoStartUnavailable")}
                 </span>
               </span>
-              <input
-                type="checkbox"
-                role="switch"
-                className="peer sr-only"
+              <Switch
+                id={autoStartId}
                 checked={data.autoStart}
                 disabled={autoStart.isPending || !data.autoStartAvailable}
-                onChange={(event) => autoStart.mutate(event.currentTarget.checked)}
+                onCheckedChange={(checked) => autoStart.mutate(checked)}
               />
-              <span
-                className={`peer-focus-visible:ring-ring/50 relative h-6 w-11 shrink-0 rounded-full peer-focus-visible:ring-4 ${
-                  data.autoStart ? "bg-primary" : "bg-input"
-                }`}
-                aria-hidden="true"
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm motion-safe:transition-transform ${
-                    data.autoStart ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </span>
             </label>
             {autoStart.isError ? (
               <p className="text-destructive text-xs" role="alert">

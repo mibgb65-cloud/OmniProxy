@@ -69,6 +69,17 @@ describe("DesktopBehavior", () => {
     expect(screen.getByRole("radio", { name: /保留在系统托盘/ })).not.toBeChecked()
   })
 
+  it("renders both desktop toggles through the shared switch component", async () => {
+    renderBehavior()
+
+    const autoStartToggle = await screen.findByRole("switch", { name: /开机自启动/ })
+    const gatewayToggle = screen.getByRole("switch", { name: /启动软件时自动启动网关/ })
+
+    expect(autoStartToggle).toHaveAttribute("data-slot", "switch")
+    expect(gatewayToggle).toHaveAttribute("data-slot", "switch")
+    expect(autoStartToggle.className).toBe(gatewayToggle.className)
+  })
+
   it("explains why startup is unavailable in development", async () => {
     current.autoStartAvailable = false
     renderBehavior()
