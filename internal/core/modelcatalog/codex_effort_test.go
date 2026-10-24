@@ -11,12 +11,12 @@ func TestCodexEffortsMapUpstreamVocabulary(t *testing.T) {
 		efforts  []Effort
 		expected []string
 	}{
-		{"river-deepseek", []Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}, []string{"minimal", "high", "xhigh"}},
+		{"river-deepseek", []Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}, []string{"low", "high", "xhigh"}},
 		{"river-glm", []Effort{{Value: "low"}, {Value: "high"}, {Value: "max"}}, []string{"low", "high", "xhigh"}},
 		{"minimax", []Effort{{Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}, {Value: "max"}}, []string{"low", "medium", "high", "xhigh"}},
 		{"official", []Effort{{Value: "minimal"}, {Value: "low"}, {Value: "medium"}, {Value: "high"}, {Value: "xhigh"}}, []string{"minimal", "low", "medium", "high", "xhigh"}},
 		{"unknown-only", []Effort{{Value: "ultra"}}, nil},
-		{"collision", []Effort{{Value: "none"}, {Value: "minimal"}}, []string{"minimal"}},
+		{"collision", []Effort{{Value: "none"}, {Value: "low"}}, []string{"low"}},
 	}
 	for _, tc := range cases {
 		result := CodexEfforts(tc.efforts)
@@ -33,13 +33,13 @@ func TestCodexEffortsMapUpstreamVocabulary(t *testing.T) {
 
 func TestCodexUpstreamEffortRestoresUpstreamValue(t *testing.T) {
 	efforts := []Effort{{Value: "none"}, {Value: "high"}, {Value: "max"}}
-	for level, want := range map[string]string{"minimal": "none", "high": "high", "xhigh": "max"} {
+	for level, want := range map[string]string{"low": "none", "high": "high", "xhigh": "max"} {
 		got, ok := CodexUpstreamEffort(efforts, level)
 		if !ok || got != want {
 			t.Fatalf("level %q = (%q,%t), want %q", level, got, ok, want)
 		}
 	}
-	for _, level := range []string{"", "low", "medium", "none", "max"} {
+	for _, level := range []string{"", "minimal", "medium", "none", "max"} {
 		if _, ok := CodexUpstreamEffort(efforts, level); ok {
 			t.Fatalf("unconfirmed level %q accepted", level)
 		}

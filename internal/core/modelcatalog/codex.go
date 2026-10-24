@@ -106,11 +106,16 @@ func CodexJSON(entries []Entry) ([]byte, error) {
 	return append(data, '\n'), nil
 }
 
-// 只有原生订阅 Responses 直通图片；其他适配器的多模态元数据不等于跨协议图片转换能力。
+// Codex 的 input_modalities 决定客户端是否允许附图。River 适配器已按官方契约
+// 转发 Chat image_url 与 Responses input_image，因此按目录已确认能力声明；
+// 其他兼容适配器仍只能声明文本，避免客户端放行后被上游拒绝。
 func codexInputModalities(entry Entry) []string {
 	modalities := []string{"text"}
-	if entry.ProviderKind == "openai" && slices.Contains(entry.Metadata.InputModalities, "image") {
-		modalities = append(modalities, "image")
+	switch entry.ProviderKind {
+	case "openai", "river":
+		if slices.Contains(entry.Metadata.InputModalities, "image") {
+			modalities = append(modalities, "image")
+		}
 	}
 	return modalities
 }

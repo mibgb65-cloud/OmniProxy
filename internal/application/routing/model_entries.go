@@ -143,5 +143,7 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 		}
 		entries = append(entries, entry)
 	}
-	return catalog.Normalize(entries)
+	// 上游用独立型号表达推理档位时折叠回基础模型；同名不同 ID 的条目改用 ID 显示，
+	// 避免客户端菜单出现多行完全相同的选项。
+	return catalog.Normalize(catalog.UniqueNames(catalog.FoldEffortVariants(entries)))
 }

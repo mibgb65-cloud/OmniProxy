@@ -6,8 +6,8 @@ package modelcatalog
 var codexEffortLevels = []string{"minimal", "low", "medium", "high", "xhigh"}
 
 // codexEffortAlias 是上游档位 → Codex 档位的就近映射。
-// none（关闭思考）对应最省的 minimal；max（最高强度）对应客户端最高的 xhigh。
-var codexEffortAlias = map[string]string{"none": "minimal", "max": "xhigh"}
+// none（关闭思考）在 Codex 侧用最低档 low 表达；max 用客户端最高的 xhigh。
+var codexEffortAlias = map[string]string{"none": "low", "max": "xhigh"}
 
 // CodexEfforts 返回可在 Codex 目录中发布的档位，未知取值一律不发布。
 func CodexEfforts(efforts []Effort) []Effort {
