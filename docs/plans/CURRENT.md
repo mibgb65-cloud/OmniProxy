@@ -6,9 +6,13 @@
 
 ## Current Version
 
-2.0.0-beta.30 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.29 基础上修正推理档位链路：Codex 目录按它自己的档位词汇发布（`none→minimal`、`max→xhigh`，网关请求时还原），因此 River 的 DeepSeek 型号不再只能停在「高」；Google 系用独立型号表达的档位（`…-low`、`(High)`）折叠成一行模型 + 档位映射，请求时换成实际变体型号并移除档位字段，旧变体 ID 反向解析保兼容。完整质量门（126 文件 750 项前端测试）／Windows 版本资源与资产校验通过；安装器 19,656,610 bytes，SHA256 `46b41488…c89bd1`，未签名。生产进程未变、未自动安装；Codex 需重新应用配置、Google／River 需同步一次模型目录。
+2.0.0-beta.31 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.30 基础上：关闭思考（`none`）在 Codex 里映射为最低档 `low`（`low → none` 反向还原）；Google 的档位变体折叠与重名去重改为在目录构建时执行，菜单不再出现 `(High)/(Low)/(Medium)` 多行，重名型号改用 ID 显示；River 条目在 Codex 目录声明 `text + image`，客户端不再拦截图片输入。完整质量门（126 文件 750 项前端测试）／版本资源与资产校验通过；安装器 19,661,392 bytes，SHA256 `48661800…83175c`，未签名。
 
 ## In Progress
+
+- [TASK-20261024-006](../tasks/active/TASK-20261024-006-build-local-beta31-installer.md)：Beta.31 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,661,392 bytes，SHA256 `48661800…83175c`）；未签名、未自动安装、未推送或发布。
+
+- [TASK-20261024-005](../tasks/active/TASK-20261024-005-effort-low-mapping-and-catalog-dedupe.md)：`none` 改映射 `low`；目录构建时折叠档位变体并按 ID 去重重名；River 条目在 Codex 目录声明图片能力。Go 全部包通过，实机菜单与图片请求待验收。
 
 - [TASK-20261024-004](../tasks/active/TASK-20261024-004-build-local-beta30-installer.md)：Beta.30 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,656,610 bytes，SHA256 `46b41488…c89bd1`）；未签名、未自动安装、未推送或发布。
 
