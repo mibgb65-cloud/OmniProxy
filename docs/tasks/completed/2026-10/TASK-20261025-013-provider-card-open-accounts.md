@@ -191,7 +191,7 @@ exit=0
 ## Commit
 
 ```text
-Not committed yet.
+d7a4cec feat(providers): 提供商卡片可进入对应账号页面
 ```
 
 ---
