@@ -1,5 +1,13 @@
 import { createMemoryHistory, createRouter, RouterContextProvider } from "@tanstack/react-router"
-import { act, fireEvent, isInaccessible, render, screen, waitFor } from "@testing-library/react"
+import {
+  act,
+  fireEvent,
+  isInaccessible,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -90,6 +98,26 @@ describe("AppSidebar", () => {
       await waitFor(() => expect(router.history.location.pathname).toBe("/accounts"))
     },
   )
+
+  it("keeps the only brand mark and the collapse toggle in the sidebar header", async () => {
+    const user = userEvent.setup()
+    renderSidebar()
+    const brand = screen.getByTestId("sidebar-brand")
+
+    expect(brand.querySelector("img")).not.toBeNull()
+    expect(screen.getAllByText("OmniProxy")).toHaveLength(1)
+    expect(within(brand).getByRole("button", { name: "折叠" })).toBeInTheDocument()
+    expect(within(brand).queryByRole("button", { name: "展开" })).not.toBeInTheDocument()
+
+    await user.click(within(brand).getByRole("button", { name: "折叠" }))
+
+    // 收起后品牌图标仍是唯一的品牌标识，整行变成展开按钮，文字不再占位。
+    expect(screen.getByTestId("sidebar-brand").querySelector("img")).not.toBeNull()
+    expect(
+      within(screen.getByTestId("sidebar-brand")).getByRole("button", { name: "展开" }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText("OmniProxy")).not.toBeInTheDocument()
+  })
 
   it("collapses to icons only and restores labels", async () => {
     const user = userEvent.setup()

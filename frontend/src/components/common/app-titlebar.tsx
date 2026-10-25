@@ -51,10 +51,12 @@ export function AppTitlebar() {
 
   return (
     <header className="window-titlebar border-border bg-sidebar text-sidebar-foreground flex h-11 w-full shrink-0 items-center border-b pl-3">
-      <div className="flex h-full min-w-0 flex-1 items-center gap-2" onDoubleClick={toggleMaximise}>
-        <img src="/app-icon.png" alt="" className="size-5 shrink-0" />
-        <span className="truncate text-xs font-semibold tracking-wide">{t("window.title")}</span>
-      </div>
+      {/* 品牌标识只出现在左上角侧栏品牌栏；这里留白仅作拖动区，双击最大化。 */}
+      <div
+        className="flex h-full min-w-0 flex-1 items-center"
+        data-testid="titlebar-drag-region"
+        onDoubleClick={toggleMaximise}
+      />
 
       {actionFailed ? (
         <span role="alert" className="text-destructive mr-2 text-xs">

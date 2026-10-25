@@ -64,6 +64,8 @@
 
 ## Recently Completed
 
+- [TASK-20261025-009](../tasks/completed/2026-10/TASK-20261025-009-sidebar-full-height-brand-header.md)：侧栏改为一体制通顶布局——标题栏不再横跨全屏左侧品牌，品牌标识（图标＋`OmniProxy`）只在侧栏顶部出现一次，收展按钮移到品牌栏右侧（收起态整行即展开按钮）；标题栏只覆盖内容区，保留拖动区与双击最大化。`task --force verify` exit 0（129 文件／782 项前端测试），1200×800 原生窗口展开／收起／悬停截图核对通过；浅色与 80%／140% 字号待用户视觉验收。
+
 - [TASK-20261025-008](../tasks/completed/2026-10/TASK-20261025-008-build-local-beta40-installer.md)：Beta.40 production 本地安装包已构建并通过完整质量门（129 文件／780 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,090,750 bytes，SHA256 `b9000218bfb7360f77797acfb561d9c51fe10e17f387a9cf9737b6f697cccb3d`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261025-007](../tasks/completed/2026-10/TASK-20261025-007-codex-quota-http-fast-path-and-retention.md)：Codex 订阅额度改走官方 HTTP 额度接口（`/backend-api/wham/usage`，只读本地隔离授权材料，不再为每次刷新启动官方子进程；拒绝授权直接返回未授权，传输／协议失败与需要续期才回退 stdio），显示快照写入失败降级为告警；前端额度改为 keep-last-good（瞬时失败在最近成功后 10 分钟内继续显示上次结果并标注，确定性失败立即透出）。`task verify` exit 0（129 文件／780 项前端测试）。未提交，等待用户确认。

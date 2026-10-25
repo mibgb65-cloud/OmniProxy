@@ -11,10 +11,11 @@ function RootLayout() {
   // 地址会先于 Outlet 更新；跟随已提交的匹配，避免用上一页高度恢复新页面。
   const pageKey = useMatches({ select: (matches) => matches.at(-1)?.pathname })
   return (
-    <div className="bg-background text-foreground flex h-full w-full flex-col overflow-hidden">
-      <AppTitlebar />
-      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
-        <AppSidebar />
+    // 侧栏通顶占据整列高度，品牌标识只留在窗口左上角一次；标题栏只覆盖内容区。
+    <div className="bg-background text-foreground flex h-full w-full overflow-hidden">
+      <AppSidebar />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <AppTitlebar />
         <ScrollRegion
           as="main"
           pageKey={pageKey}

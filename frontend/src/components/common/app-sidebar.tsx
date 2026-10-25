@@ -7,13 +7,13 @@ import {
   LayoutDashboard,
   Network,
   PanelLeftClose,
+  PanelLeftOpen,
   Route as RouteIcon,
   ScrollText,
   Server,
   Users,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "../ui/button"
 import { SidebarLabel } from "./sidebar-label"
 import { SidebarGatewayStatus } from "../../features/gateway/sidebar-gateway-status"
 import { AppPreferencesDialog } from "../../features/settings/app-preferences-dialog"
@@ -47,12 +47,54 @@ export function AppSidebar() {
         collapsed ? "w-16" : "w-56",
       )}
     >
-      {/* 图标固定在收起态的水平中心，避免宽度过渡时切换对齐方式产生跳动。 */}
-      <div className="border-sidebar-border flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-5 whitespace-nowrap">
-        <img src="/app-icon.png" alt="" draggable={false} className="size-6 shrink-0" />
-        <SidebarLabel collapsed={collapsed} className="font-semibold">
-          OmniProxy
-        </SidebarLabel>
+      {/* 品牌栏与标题栏同高，横向分隔线连续；全窗口只在这里出现品牌标识。 */}
+      <div
+        className="border-sidebar-border flex h-11 shrink-0 items-center gap-2 overflow-hidden border-b"
+        data-testid="sidebar-brand"
+      >
+        {collapsed ? (
+          <Tooltip content={t("common.expand")} side="right">
+            <button
+              type="button"
+              aria-label={t("common.expand")}
+              aria-expanded={false}
+              onClick={toggleSidebar}
+              className="group focus-visible:ring-ring relative flex h-11 w-full cursor-pointer items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-inset"
+            >
+              {/* 收起态整行就是展开按钮：默认显示品牌图标，悬停／聚焦换成展开图标。 */}
+              <img
+                src="/app-icon.png"
+                alt=""
+                draggable={false}
+                className="size-6 shrink-0 transition-opacity select-none group-hover:opacity-0 group-focus-visible:opacity-0"
+              />
+              <PanelLeftOpen className="absolute size-4 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+            </button>
+          </Tooltip>
+        ) : (
+          <>
+            <img
+              src="/app-icon.png"
+              alt=""
+              draggable={false}
+              className="ml-3 size-6 shrink-0 select-none"
+            />
+            <SidebarLabel collapsed={collapsed} className="font-semibold">
+              OmniProxy
+            </SidebarLabel>
+            <Tooltip content={t("common.collapse")}>
+              <button
+                type="button"
+                aria-label={t("common.collapse")}
+                aria-expanded
+                onClick={toggleSidebar}
+                className="text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-ring mr-2 ml-auto flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-inset"
+              >
+                <PanelLeftClose className="size-4" />
+              </button>
+            </Tooltip>
+          </>
+        )}
       </div>
 
       <SidebarGatewayStatus collapsed={collapsed} />
@@ -73,17 +115,6 @@ export function AppSidebar() {
       </ScrollRegion>
 
       <div className="border-sidebar-border flex shrink-0 flex-col gap-2 overflow-hidden border-t p-2 whitespace-nowrap">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-9 w-full justify-start gap-2 px-4 transition-colors has-[>svg]:px-4"
-          onClick={toggleSidebar}
-          aria-label={collapsed ? t("common.expand") : t("common.collapse")}
-          aria-expanded={!collapsed}
-        >
-          <PanelLeftClose className={cn("size-4 shrink-0", collapsed && "rotate-180")} />
-          <SidebarLabel collapsed={collapsed}>{t("common.collapse")}</SidebarLabel>
-        </Button>
         <AppPreferencesDialog collapsed={collapsed} />
       </div>
     </aside>

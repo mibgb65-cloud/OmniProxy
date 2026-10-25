@@ -78,6 +78,16 @@ describe("AppTitlebar", () => {
     expect(runtime.toggleMaximise).not.toHaveBeenCalled()
   })
 
+  it("leaves the single brand mark to the sidebar", () => {
+    const { container } = renderTitlebar()
+    const header = container.querySelector("header")
+
+    expect(header).not.toBeNull()
+    expect(header?.querySelector("img")).toBeNull()
+    expect(screen.queryByText("OmniProxy")).not.toBeInTheDocument()
+    expect(screen.getByTestId("titlebar-drag-region")).toBeInTheDocument()
+  })
+
   it("switches the full document theme and remembers the choice", async () => {
     const user = userEvent.setup()
     renderTitlebar()
@@ -129,7 +139,7 @@ describe("AppTitlebar", () => {
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(false)
     renderTitlebar()
-    const titlebarArea = screen.getByText("OmniProxy").parentElement!
+    const titlebarArea = screen.getByTestId("titlebar-drag-region")
 
     await user.dblClick(titlebarArea)
     expect(runtime.toggleMaximise).toHaveBeenCalledOnce()
@@ -164,7 +174,7 @@ describe("AppTitlebar", () => {
     const user = userEvent.setup()
     runtime.toggleMaximise.mockRejectedValueOnce(new Error("failed"))
     renderTitlebar()
-    const titlebarArea = screen.getByText("OmniProxy").parentElement!
+    const titlebarArea = screen.getByTestId("titlebar-drag-region")
 
     await user.dblClick(titlebarArea)
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("窗口操作失败"))
