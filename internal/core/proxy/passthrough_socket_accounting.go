@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"sync"
 
 	"github.com/coder/websocket"
 )
@@ -24,7 +25,9 @@ type socketTurnFrame struct {
 // 透明转发的帧字节必须原样中继，因此只能在已经转发的帧上旁路识别轮次与用量：
 // 客户端每次 response.create 开一轮，上游终结事件写入那一轮的用量。
 // 解析失败只丢统计，不改变交付给任何一侧的字节。
+// 两个方向的中继各自在独立 goroutine 里运行，轮次状态必须由 mu 保护。
 type socketAccounting struct {
+	mu       sync.Mutex
 	server   *Server
 	access   socketAccess
 	snapshot TargetSnapshot
@@ -45,6 +48,7 @@ func (a *socketAccounting) clientFrame(ctx context.Context, kind websocket.Messa
 	if a == nil || kind != websocket.MessageText {
 		return nil
 	}
+	// 帧解析不需要持锁，避免长帧阻塞上游方向的统计。
 	var frame socketTurnFrame
 	if json.Unmarshal(data, &frame) != nil || frame.Type != "response.create" {
 		return nil
@@ -53,6 +57,8 @@ func (a *socketAccounting) clientFrame(ctx context.Context, kind websocket.Messa
 	if frame.Generate != nil && !*frame.Generate {
 		return nil
 	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	// 上轮没有终结事件就又开始新一轮：先按未完成收尾，不让它一直悬着。
 	a.closeTurn(ctx, socketCancelledStatus, "request_cancelled")
 	return a.beginTurn(ctx, frame.Model)
@@ -84,7 +90,12 @@ func (a *socketAccounting) beginTurn(ctx context.Context, model string) error {
 
 // upstreamFrame 在帧已交给客户端之后读取首字与用量，统计失败不影响已送达的字节。
 func (a *socketAccounting) upstreamFrame(ctx context.Context, kind websocket.MessageType, data []byte) {
-	if a == nil || a.turn == nil || kind != websocket.MessageText {
+	if a == nil || kind != websocket.MessageText {
+		return
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.turn == nil {
 		return
 	}
 	if !terminalStreamEvent(data, a.protocol) {
@@ -101,6 +112,7 @@ func (a *socketAccounting) upstreamFrame(ctx context.Context, kind websocket.Mes
 }
 
 // closeTurn 结束当前一轮并清空；没有终结事件就断开时按未完成的回答收尾。
+// 调用方必须持有 a.mu。
 func (a *socketAccounting) closeTurn(ctx context.Context, status int, code string) {
 	if a == nil || a.turn == nil {
 		return
@@ -117,7 +129,12 @@ func (a *socketAccounting) closeTurn(ctx context.Context, status int, code strin
 
 // close 用中继的真实结束原因收尾，取消与上游抖动必须区分。
 func (a *socketAccounting) close(ctx context.Context, err error) {
+	if a == nil {
+		return
+	}
 	status, code := socketOutcome(err)
+	a.mu.Lock()
+	defer a.mu.Unlock()
 	a.closeTurn(ctx, status, code)
 }
 
