@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.39 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.38 基础上只修一件事：WebSocket 请求记录重新按客户端自报的 `originator`／`User-Agent` 细化成 `codex-cli`／`codex-desktop`／`codex-vscode`（Beta.38 的透明 WS 逐轮记账误用了前缀归属 `codex`，协议入口的 WS 也从未细化），未知来源仍记 `codex`，历史记录不回溯；无新增数据库迁移。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,075,276 bytes，SHA256 `3a1f56ec…dd5`，未签名。
+2.0.0-beta.40 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.39 基础上只改额度链路（TASK-20261025-007）：Codex 订阅额度优先调用官方 HTTP 额度接口 `/backend-api/wham/usage`（只读本地隔离授权材料，不再为每次刷新启动官方子进程；401／403 直返未授权，传输／协议失败与需要续期才回退 stdio），显示快照写入失败降级为告警；前端额度改为 keep-last-good（瞬时失败在最近成功后 10 分钟内持续显示上次结果并标注，确定性失败立即透出）；无新增数据库迁移。完整质量门（129 文件／780 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,090,750 bytes，SHA256 `b9000218…b3d`，未签名。
 
 ## In Progress
 
@@ -63,6 +63,8 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261025-008](../tasks/completed/2026-10/TASK-20261025-008-build-local-beta40-installer.md)：Beta.40 production 本地安装包已构建并通过完整质量门（129 文件／780 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,090,750 bytes，SHA256 `b9000218bfb7360f77797acfb561d9c51fe10e17f387a9cf9737b6f697cccb3d`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261025-007](../tasks/completed/2026-10/TASK-20261025-007-codex-quota-http-fast-path-and-retention.md)：Codex 订阅额度改走官方 HTTP 额度接口（`/backend-api/wham/usage`，只读本地隔离授权材料，不再为每次刷新启动官方子进程；拒绝授权直接返回未授权，传输／协议失败与需要续期才回退 stdio），显示快照写入失败降级为告警；前端额度改为 keep-last-good（瞬时失败在最近成功后 10 分钟内继续显示上次结果并标注，确定性失败立即透出）。`task verify` exit 0（129 文件／780 项前端测试）。未提交，等待用户确认。
 
