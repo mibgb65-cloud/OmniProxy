@@ -46,16 +46,21 @@ func (s *Service) run(ctx context.Context) {
 			s.status.ErrorCode = "check_failed"
 			s.mu.Unlock()
 		}
-		delay := s.intervalOr(detectionInterval)
-		if s.reobserve.Swap(false) && fast < s.fastLimitOr(fastReobserveLimit) {
-			// 已有滑动候选但证据不足：短间隔补一次观测，不占满一个完整周期。
-			delay = s.fastIntervalOr(fastReobserveDelay)
-			fast++
-		} else {
-			fast = 0
-		}
+		var delay time.Duration
+		delay, fast = s.nextDelay(fast, s.reobserve.Swap(false))
 		timer.Reset(delay)
 	}
+}
+
+// nextDelay 决定下一轮检测的间隔并累计连续补检次数；候选消失前不会重新累计。
+func (s *Service) nextDelay(fast int, reobserve bool) (time.Duration, int) {
+	if !reobserve {
+		return s.intervalOr(detectionInterval), 0
+	}
+	if fast >= s.fastLimitOr(fastReobserveLimit) {
+		return s.intervalOr(detectionInterval), fast
+	}
+	return s.fastIntervalOr(fastReobserveDelay), fast + 1
 }
 
 func (s *Service) intervalOr(fallback time.Duration) time.Duration {

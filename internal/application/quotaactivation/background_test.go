@@ -76,6 +76,31 @@ func TestActiveWindowDoesNotRequestFastReobservation(t *testing.T) {
 	}
 }
 
+// 连续补检有上限：达到上限后按完整周期复查，候选消失才重新累计。
+func TestFastReobservationStopsAtItsLimit(t *testing.T) {
+	f := newFixture(t)
+	const interval, fastInterval = time.Hour, 35 * time.Second
+	f.service.interval, f.service.fastInterval, f.service.fastLimit = interval, fastInterval, 3
+	fast := 0
+	var delays []time.Duration
+	for range 5 {
+		delay, next := f.service.nextDelay(fast, true)
+		fast = next
+		delays = append(delays, delay)
+	}
+	for index, delay := range delays[:3] {
+		if delay != fastInterval {
+			t.Fatalf("round %d delay = %v, want %v", index, delay, fastInterval)
+		}
+	}
+	if delays[3] != interval || delays[4] != interval {
+		t.Fatalf("delays after the limit = %v, want %v", delays[3:], interval)
+	}
+	if _, reset := f.service.nextDelay(fast, false); reset != 0 {
+		t.Fatalf("candidate cleared but counter = %d", reset)
+	}
+}
+
 func TestCheckPublishesAnonymousStatusOncePerRound(t *testing.T) {
 	f := newFixture(t)
 	f.enable(t)
