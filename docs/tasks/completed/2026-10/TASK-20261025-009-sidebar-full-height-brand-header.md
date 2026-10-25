@@ -188,7 +188,9 @@ Completed
 
 ## Commit
 
-待填写（本记录提交后回填）
+```text
+7ae0f22 feat(frontend): 侧栏通顶并合并为单一品牌标识
+```
 
 ---
 
