@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.36 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.35 基础上新增第十二个内置服务商 Oxion AI（`https://oxionai.com/v1`、`cc_` Bearer Key、只有 OpenAI 兼容 Chat Completions；目录按账号从 `GET /v1/models` 同步，无内置预设；Chat 原生透传，Responses／Messages 由网关转换后回包），新增迁移 043 只追加该预设，服务商页增加名称、品牌图标与中英文案。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,049,995 bytes，SHA256 `f9baf279…0bab`，未签名。
+2.0.0-beta.37 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.36 基础上只修复 Codex 透明入口（客户端实际使用的 `/codex/v1`）的额度换号：执行前额度拒绝（HTTP 200／429 包装的 `usage_limit_reached`）现在会按真实 `resets_at` 冷却并换到同池其他账号、透明转发改尝试级记账（修掉换号即 503 `accounting_unavailable`）、冷却遵循上游 `Retry-After`、请求结束后按需去抖刷新额度观察；无新增数据库迁移。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,063,983 bytes，SHA256 `0c117ed5…f365`，未签名。
 
 ## In Progress
 
