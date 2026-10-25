@@ -10,8 +10,6 @@
 
 ## In Progress
 
-- [TASK-20261025-012](../tasks/active/TASK-20261025-012-background-quota-activation-refresh.md)：自动激活改为真正后台常驻（开启后关闭窗口留在托盘、启动时校正）、滑动候选在启动／唤醒后约 35 秒补一次复检（连续最多 3 次），每轮结束推送脱敏状态，前端在根布局自动刷新并提示，不必打开设置面板。
-
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。
@@ -65,6 +63,8 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261025-012](../tasks/completed/2026-10/TASK-20261025-012-background-quota-activation-refresh.md)：自动激活改为真正后台常驻——开启后关闭主窗口留在托盘（启动时对已开启用户同样校正，托盘「退出」仍真正退出），出现滑动候选时启动／唤醒后约 35 秒补一次独立观测（连续最多 3 次）而不是等满 5 分钟；每轮结束推送 `subscription:activation-updated`（只有计数与稳定错误码），根布局的应用级监视器自动刷新并提示，不必打开设置面板，同一结果不重复弹出。发送判定、持久去重与至多一次语义不变。`task verify` exit 0（130 文件／787 项前端测试，Windows production 构建通过）；真实账号后台激活与托盘长周期行为待用户运行验收。实现提交 `4ec3667`。
 
 - [TASK-20261025-011](../tasks/completed/2026-10/TASK-20261025-011-build-local-beta41-installer.md)：Beta.41 production 本地安装包已构建并通过完整质量门（129 文件／785 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,093,224 bytes，SHA256 `f78bbef2e5536ddab8466e6638ae681563d2b48bad2ad2bb8c8e3f00f156f8d4`）；内容为侧栏通顶与 River「正在使用」圆环两项界面改动；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 

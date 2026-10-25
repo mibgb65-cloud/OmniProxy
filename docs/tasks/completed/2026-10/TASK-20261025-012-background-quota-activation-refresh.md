@@ -212,7 +212,7 @@ exit=0
 ## Commit
 
 ```text
-Not committed yet.
+4ec3667 feat(quota): 自动激活常驻后台并自动刷新结果
 ```
 
 ---
