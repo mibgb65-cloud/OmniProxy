@@ -115,7 +115,7 @@ Completed
 ## Commit
 
 ```text
-待填写
+8f3826945a8162774b80ba57a8119e546c6cb455 chore(release): 2.0.0-beta.41 版本与 Windows 安装包元数据
 ```
 
 仅本地提交，未推送；安装包本身未签名、未发布。
