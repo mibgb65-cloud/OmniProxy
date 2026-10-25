@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -98,7 +98,11 @@ In Progress
 
 ## Commit
 
-待填写。
+```text
+3491874 chore(release): 2.0.0-beta.38 版本与 Windows 安装包元数据
+```
+
+安装包本身未签名、未推送、未发布。
 
 ---
 
@@ -112,4 +116,5 @@ Beta.38 本地生产安装包已构建并校验通过（20,073,994 bytes／SHA25
 
 # Completed
 
-待填写。
+2026-10-25 10:52
+
