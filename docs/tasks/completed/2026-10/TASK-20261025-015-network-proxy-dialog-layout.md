@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress（实现与验证已完成，等待用户授权后提交）
+Completed
 
 ## Created
 
@@ -224,9 +224,13 @@ EXIT=0
 
 # Git
 
-未提交。`AGENTS.md` §7 规定未经用户显式授权不得 commit，本次未获授权；工作区改动仅限本任务
-涉及的 6 个文件 + 本记录。授权后按 `docs/development/GIT_WORKFLOW.md` 提交并回填 Commit hash，
-状态改 Completed 并移入 `docs/tasks/completed/2026-10/`。
+## Commit
+
+```text
+3d831c8 feat(frontend): 网络代理弹窗改为两栏分区与固定页脚
+```
+
+工作区改动仅限本任务涉及的 6 个文件 + 本记录，无夹带无关文件；未打标签、未推送。
 
 ---
 
@@ -239,4 +243,10 @@ EXIT=0
 - 提供商列表行高加大，三态控件右对齐成列，配合筛选与计数摘要。
 - 后端接口、数据模型、三态语义、脱敏行为零改动；本文件测试 12/12 通过，全量 809 通过。
 
-遗留：等待用户授权后提交并补 Commit hash。
+已随提交 `3d831c8` 落地，并在 Beta.44 本地生产安装包中交付。
+
+---
+
+# Completed
+
+2026-10-25 22:28（Asia/Shanghai）
