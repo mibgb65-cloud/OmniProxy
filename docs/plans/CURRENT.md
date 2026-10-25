@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [TASK-20261025-013](../tasks/active/TASK-20261025-013-provider-card-open-accounts.md)：提供商页卡片可进入对应提供商的账号页面（整卡点击＋标题键盘入口，卡片内启停／测试／模型预览／编辑／删除不受影响），路由层用 `useNavigate` 注入，未配置预设仍不可点击。
+
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。

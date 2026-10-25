@@ -257,6 +257,7 @@ export const zh = {
   "providers.enabled": "已启用",
   "providers.disabled": "已停用",
   "providers.toggleLabel": "切换{{name}}提供商的启用状态",
+  "providers.openAccounts": "查看{{name}}的账号",
   "providers.power.enable": "启用提供商",
   "providers.power.disable": "停用提供商",
   "providers.apiKey": "API Key",

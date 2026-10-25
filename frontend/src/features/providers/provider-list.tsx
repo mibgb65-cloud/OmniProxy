@@ -14,6 +14,7 @@ export function ProviderList({
   onToggle,
   onDelete,
   onProbe,
+  onOpen,
   probeResults,
   probingId,
   busy,
@@ -25,6 +26,7 @@ export function ProviderList({
   onToggle: (item: ProviderConfiguration, enabled: boolean) => Promise<void>
   onDelete: (id: string) => Promise<boolean>
   onProbe: (item: ProviderConfiguration) => void
+  onOpen?: (item: ProviderConfiguration) => void
   probeResults: Record<string, ProbeDisplay>
   probingId: string | null
   busy: boolean
@@ -96,6 +98,7 @@ export function ProviderList({
                   probePending={probingId === item.id}
                   onToggle={(enabled) => void toggle(item, enabled)}
                   onProbe={() => onProbe(item)}
+                  onOpen={onOpen ? () => onOpen(item) : undefined}
                   actions={
                     <>
                       <Button

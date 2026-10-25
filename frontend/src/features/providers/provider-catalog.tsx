@@ -11,6 +11,7 @@ export function ProviderCatalog({
   probeResults,
   onToggle,
   onProbe,
+  onOpen,
 }: {
   definitions: ProviderDefinition[]
   items: ProviderConfiguration[]
@@ -19,6 +20,7 @@ export function ProviderCatalog({
   probeResults: Record<string, ProbeDisplay>
   onToggle: (item: ProviderConfiguration, enabled: boolean) => void
   onProbe: (item: ProviderConfiguration) => void
+  onOpen?: (item: ProviderConfiguration) => void
 }) {
   const { t } = useTranslation()
   const byKind = new Map(items.map((item) => [item.kind, item]))
@@ -53,6 +55,7 @@ export function ProviderCatalog({
               probePending={probingId === item.id}
               onToggle={(enabled) => onToggle(item, enabled)}
               onProbe={() => onProbe(item)}
+              onOpen={onOpen ? () => onOpen(item) : undefined}
             />
           ) : (
             <div

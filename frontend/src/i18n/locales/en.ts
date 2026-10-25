@@ -268,6 +268,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.enabled": "Enabled",
   "providers.disabled": "Disabled",
   "providers.toggleLabel": "Toggle {{name}} provider",
+  "providers.openAccounts": "Open {{name}} accounts",
   "providers.power.enable": "Enable provider",
   "providers.power.disable": "Disable provider",
   "providers.apiKey": "API key",

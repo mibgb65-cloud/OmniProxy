@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { ProvidersView } from "../../features/providers/providers-view"
 
 export const Route = createFileRoute("/providers")({
@@ -6,5 +6,12 @@ export const Route = createFileRoute("/providers")({
 })
 
 function ProvidersPage() {
-  return <ProvidersView />
+  const navigate = useNavigate()
+  return (
+    <ProvidersView
+      onOpenProvider={(providerId) =>
+        void navigate({ to: "/accounts/$providerId", params: { providerId } })
+      }
+    />
+  )
 }

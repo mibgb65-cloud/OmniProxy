@@ -73,7 +73,7 @@ const custom: ProviderConfiguration = {
 }
 let saved: ProviderConfiguration[] = []
 
-function renderPage() {
+function renderPage(props: { onOpenProvider?: (providerId: string) => void } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   function Wrapper({ children }: { children: ReactNode }) {
     return (
@@ -82,7 +82,7 @@ function renderPage() {
       </I18nProvider>
     )
   }
-  return render(<ProvidersView />, { wrapper: Wrapper })
+  return render(<ProvidersView {...props} />, { wrapper: Wrapper })
 }
 
 describe("ProvidersView", () => {
@@ -207,6 +207,26 @@ describe("ProvidersView", () => {
     finishUpdate(saved.find((item) => item.id === "builtin_openai")!)
     await waitFor(() => expect(button).toBeEnabled())
     expect(button).toHaveAttribute("aria-pressed", "false")
+  })
+
+  it("opens the matching provider's accounts page from a card", async () => {
+    const user = userEvent.setup()
+    const onOpenProvider = vi.fn()
+    saved = [custom, ...saved]
+    renderPage({ onOpenProvider })
+    const title = await screen.findByRole("button", { name: "查看OpenAI的账号" })
+    await user.click(title)
+    expect(onOpenProvider).toHaveBeenLastCalledWith("builtin_openai")
+    // 卡片空白区域同样进入该提供商账号页面。
+    await user.click(title.closest("[data-slot='card']")!)
+    expect(onOpenProvider).toHaveBeenLastCalledWith("builtin_openai")
+    expect(onOpenProvider).toHaveBeenCalledTimes(2)
+    await user.click(screen.getByRole("button", { name: "查看My endpoint的账号" }))
+    expect(onOpenProvider).toHaveBeenLastCalledWith(custom.id)
+    // 启停仍是卡片自身的操作，不触发跳转。
+    await user.click(screen.getByRole("button", { name: "切换OpenAI提供商的启用状态" }))
+    await waitFor(() => expect(setProviderEnabled).toHaveBeenCalledWith("builtin_openai", false))
+    expect(onOpenProvider).toHaveBeenCalledTimes(3)
   })
 
   it("requires a URL and creates an enabled custom provider", async () => {

@@ -63,6 +63,7 @@ accounts need one local place to:
 - Provider cards show a curated model preview and an unauthenticated endpoint
   reachability/response-time check; actual model access depends on an account.
 - 点击模型预览后在浮层中查看完整预设列表，卡片和同一行相邻卡片高度保持稳定；浮层支持键盘打开、Esc／外部点击关闭和窗口边缘避让。
+- 点击提供商卡片（内置或自定义）进入该提供商自己的账号页面；卡片内的启停、测试、模型预览、编辑和删除仍只执行自身操作，标题是键盘可达的同一入口。
 - Multi-account management with OS-protected local credential storage; account
   metadata keeps only opaque references to secrets.
 - API Key 账号支持单个添加和批量添加。单个账号名称选填，留空时按 Key 的前最多 8 个 Unicode 字符命名；批量每行一个 Key、每次 1–100 个，只使用自动名称。

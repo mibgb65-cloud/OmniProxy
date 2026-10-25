@@ -18,7 +18,12 @@ import {
 type Editor = { initial?: ProviderConfiguration }
 const PROBE_TIP_DURATION_MS = 4_000
 
-export function ProvidersView() {
+export function ProvidersView({
+  onOpenProvider,
+}: {
+  /** 由路由层注入：从提供商卡片进入该提供商的账号页面。 */
+  onOpenProvider?: (providerId: string) => void
+} = {}) {
   const { t } = useTranslation()
   const catalog = useProviderCatalog()
   const providers = useProviders()
@@ -145,6 +150,7 @@ export function ProvidersView() {
           probeResults={probeResults}
           onToggle={toggleBuiltIn}
           onProbe={testConnection}
+          onOpen={onOpenProvider ? (item) => onOpenProvider(item.id) : undefined}
         />
       ) : null}
       {editor ? (
@@ -169,6 +175,7 @@ export function ProvidersView() {
           onToggle={toggle}
           onDelete={deleteItem}
           onProbe={testConnection}
+          onOpen={onOpenProvider ? (item) => onOpenProvider(item.id) : undefined}
           probeResults={probeResults}
           probingId={probingId}
           busy={setEnabled.isPending || update.isPending || remove.isPending}

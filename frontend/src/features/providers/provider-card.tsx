@@ -1,5 +1,5 @@
 import { Tooltip } from "../../components/ui/tooltip"
-import type { ReactNode } from "react"
+import type { MouseEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
@@ -12,6 +12,9 @@ import { subscriptionTypeKey } from "./provider-labels"
 import "./provider-probe-tooltip.css"
 
 export type ProbeDisplay = { result?: ProviderProbeResult; error?: boolean; visible?: boolean }
+
+// 卡片内的控件自己处理点击，不能把整卡跳转也带起来。
+const INTERACTIVE = "button, a, input, select, textarea, [role='dialog']"
 
 export function ProviderCard({
   kind,
@@ -28,6 +31,7 @@ export function ProviderCard({
   probePending,
   onToggle,
   onProbe,
+  onOpen,
   actions,
 }: {
   kind: string
@@ -44,18 +48,44 @@ export function ProviderCard({
   probePending: boolean
   onToggle: (enabled: boolean) => void
   onProbe: () => void
+  /** 提供后整张卡片可进入该提供商的账号页面；未提供时卡片保持只读展示。 */
+  onOpen?: () => void
   actions?: ReactNode
 }) {
   const { t } = useTranslation()
+  const open = (event: MouseEvent<HTMLDivElement>) => {
+    if (!onOpen || event.defaultPrevented) return
+    if ((event.target as HTMLElement).closest(INTERACTIVE)) return
+    onOpen()
+  }
   return (
-    <Card className="dark:bg-card/75 gap-0 py-0 shadow-sm">
+    <Card
+      className={`dark:bg-card/75 gap-0 py-0 shadow-sm transition-colors ${onOpen ? "hover:border-ring/60 focus-within:ring-ring/40 cursor-pointer focus-within:ring-2" : ""}`}
+      onClick={onOpen ? open : undefined}
+    >
       <CardContent className="space-y-3 px-4 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
             <ProviderBrandIcon kind={kind} endpoint={endpoint} />
             <div className="min-w-0 space-y-1">
               <Tooltip content={name}>
-                <h3 className="truncate text-sm font-semibold">{name}</h3>
+                <h3 className="truncate text-sm font-semibold">
+                  {onOpen ? (
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onOpen()
+                      }}
+                      aria-label={t("providers.openAccounts", { name })}
+                      className="focus-visible:ring-ring block max-w-full cursor-pointer truncate rounded-sm text-left hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      {name}
+                    </button>
+                  ) : (
+                    name
+                  )}
+                </h3>
               </Tooltip>
               <ModelPreview name={name} models={models} />
               {endpoint ? (

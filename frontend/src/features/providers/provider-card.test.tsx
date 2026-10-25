@@ -1,4 +1,6 @@
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import type { ComponentProps } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { ProviderCard } from "./provider-card"
@@ -18,7 +20,12 @@ const brandIcons = {
   river: "river.png",
 } as const
 
-function renderCard(kind: string, endpoint = "https://example.test/v1", authMethods = ["api_key"]) {
+function renderCard(
+  kind: string,
+  endpoint = "https://example.test/v1",
+  authMethods = ["api_key"],
+  overrides: Partial<ComponentProps<typeof ProviderCard>> = {},
+) {
   return render(
     <I18nProvider>
       <ProviderCard
@@ -33,6 +40,7 @@ function renderCard(kind: string, endpoint = "https://example.test/v1", authMeth
         probePending={false}
         onToggle={vi.fn()}
         onProbe={vi.fn()}
+        {...overrides}
       />
     </I18nProvider>,
   )
@@ -101,5 +109,39 @@ describe("ProviderCard icons", () => {
       "src",
       "/provider-icons/deepseek-color.svg",
     )
+  })
+})
+
+describe("ProviderCard accounts entry", () => {
+  beforeEach(() => useUIStore.setState({ language: "zh" }))
+
+  it("opens the provider accounts page from the card and from its title", async () => {
+    const user = userEvent.setup()
+    const onOpen = vi.fn()
+    renderCard("openai", "https://example.test/v1", ["api_key"], { onOpen })
+    await user.click(screen.getByText("openai").closest("[data-slot='card']")!)
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    // 标题是键盘可达的入口，不依赖整卡点击。
+    await user.click(screen.getByRole("button", { name: "查看openai的账号" }))
+    expect(onOpen).toHaveBeenCalledTimes(2)
+  })
+
+  it("keeps the power and test controls independent from the accounts entry", async () => {
+    const user = userEvent.setup()
+    const onOpen = vi.fn()
+    const onToggle = vi.fn()
+    const onProbe = vi.fn()
+    renderCard("openai", "https://example.test/v1", ["api_key"], { onOpen, onToggle, onProbe })
+    await user.click(screen.getByRole("button", { name: "切换openai提供商的启用状态" }))
+    await user.click(screen.getByRole("button", { name: "测试" }))
+    expect(onToggle).toHaveBeenCalledWith(false)
+    expect(onProbe).toHaveBeenCalledTimes(1)
+    expect(onOpen).not.toHaveBeenCalled()
+  })
+
+  it("stays a plain card when no accounts entry is provided", () => {
+    renderCard("openai")
+    expect(screen.queryByRole("button", { name: "查看openai的账号" })).not.toBeInTheDocument()
+    expect(screen.getByText("openai")).toBeInTheDocument()
   })
 })
