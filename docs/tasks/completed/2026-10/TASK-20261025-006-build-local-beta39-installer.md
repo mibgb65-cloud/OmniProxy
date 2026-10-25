@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -68,7 +68,10 @@ WebSocket 请求记录补回 `codex-cli`／`codex-desktop` 归属（提交 `dde6
 
 ## Commit
 
-待填写。
+```text
+319c702 chore(release): 2.0.0-beta.39 版本与 Windows 安装包元数据
+```n
+安装包本身未签名、未推送、未发布。
 
 ---
 
@@ -81,4 +84,4 @@ Beta.39 本地生产安装包已构建并校验通过（20,075,276 bytes／SHA25
 
 # Completed
 
-待填写。
+2026-10-25 11:45
