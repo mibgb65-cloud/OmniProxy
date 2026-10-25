@@ -64,6 +64,8 @@
 
 ## Recently Completed
 
+- [TASK-20261025-007](../tasks/completed/2026-10/TASK-20261025-007-codex-quota-http-fast-path-and-retention.md)：Codex 订阅额度改走官方 HTTP 额度接口（`/backend-api/wham/usage`，只读本地隔离授权材料，不再为每次刷新启动官方子进程；拒绝授权直接返回未授权，传输／协议失败与需要续期才回退 stdio），显示快照写入失败降级为告警；前端额度改为 keep-last-good（瞬时失败在最近成功后 10 分钟内继续显示上次结果并标注，确定性失败立即透出）。`task verify` exit 0（129 文件／780 项前端测试）。未提交，等待用户确认。
+
 - [TASK-20261025-006](../tasks/completed/2026-10/TASK-20261025-006-build-local-beta39-installer.md)：Beta.39 production 本地安装包已构建并通过完整质量门（128 文件／760 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,075,276 bytes，SHA256 `3a1f56ec43cfcba2e52d8b824c84e87b15db59400f78188c36b34aa317ab6dd5`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261025-005](../tasks/completed/2026-10/TASK-20261025-005-websocket-client-runtime-label.md)：`dde6dc8`，WebSocket 请求记录补回 Codex 运行形态归属——透明入口的逐轮记账此前误用前缀归属 `codex`，协议入口的 WS 也从未细化；两条路径改为一律调用 `recordedClient(originator/User-Agent)`，`access.client` 原始值不变以保住逐帧 `client_mismatch` 判定。`task verify` exit 0。
