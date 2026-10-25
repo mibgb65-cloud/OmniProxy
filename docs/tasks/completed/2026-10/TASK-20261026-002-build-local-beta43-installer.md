@@ -163,7 +163,7 @@ None. 按 Beta.42 的做法手工提升版本，未使用会重写 `info.json` �
 8ad73c8 feat(providers): 提供商出站代理支持 mixed/SOCKS5/HTTP 端口
 fd1ec5c docs(task): 记录 TASK-20261026-001 并归档
 af2cba5 chore(release): 2.0.0-beta.43 版本与 Windows 安装包元数据
-<docs-commit> docs(task): 记录 TASK-20261026-002 并归档
+fb33b75 docs(task): 记录 TASK-20261026-002 并归档
 ```
 
 ---
