@@ -79,6 +79,8 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ac
 			return
 		}
 		access = renewed
+		// 归属细化只用于记账：access.client 必须保持前缀／接入 Key 的原始值供逐帧复核。
+		client := recordedClient(access.client, r.Header)
 		// 已建立连接也必须检查当前策略，关闭开关后不能继续通过旧连接创建响应。
 		if err := s.webSocketPolicy(r.Context()); err != nil {
 			socketFailure(r.Context(), socket, err)
@@ -163,7 +165,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ac
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
-		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", access.client)
+		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", client)
 		if traceErr != nil {
 			cancel()
 			<-s.slots

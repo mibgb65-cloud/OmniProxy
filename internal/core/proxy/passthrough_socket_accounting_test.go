@@ -224,6 +224,76 @@ func TestPassthroughSocketTurnEndsWithoutTerminalEvent(t *testing.T) {
 	})
 }
 
+// socketTurnUpstream 是一个每轮只回一条完成事件的 WebSocket 上游。
+func socketTurnUpstream(t *testing.T) *httptest.Server {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		socket, err := websocket.Accept(w, r, &websocket.AcceptOptions{InsecureSkipVerify: true})
+		if err != nil {
+			return
+		}
+		defer socket.CloseNow()
+		for {
+			if _, _, err := socket.Read(r.Context()); err != nil {
+				return
+			}
+			event := `{"type":"response.completed","response":{"id":"resp_runtime","usage":{"input_tokens":5,"output_tokens":1}}}`
+			if err := socket.Write(r.Context(), websocket.MessageText, []byte(event)); err != nil {
+				return
+			}
+		}
+	}))
+	t.Cleanup(server.Close)
+	return server
+}
+
+// TestPassthroughSocketRecordsCodexRuntime 断言透明 WebSocket 与 HTTP 一样把 Codex 归属
+// 细化到 codex-cli／codex-desktop；未知来源仍按笼统的 codex 记录，不猜运行形态。
+func TestPassthroughSocketRecordsCodexRuntime(t *testing.T) {
+	for _, tc := range []struct{ name, originator, want string }{
+		{"cli", "codex_cli_rs", "codex-cli"},
+		{"desktop", "Codex Desktop", "codex-desktop"},
+		{"unknown", "some_other_agent", "codex"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			upstream := socketTurnUpstream(t)
+			session := &stubSession{attempts: []PassthroughAttempt{{
+				AccountID: "acct_socket", BaseURL: upstream.URL,
+				Header:   http.Header{"Authorization": {"Bearer pool-token"}},
+				Snapshot: TargetSnapshot{ProviderID: "builtin_openai", AccountID: "acct_socket", Email: "socket@example.invalid", WorkspaceID: "ws_socket"},
+			}}}
+			spy := &accountingSpy{}
+			server := New(Options{Port: 0, Passthrough: stubBinding{session}, Upstream: unusedUpstream(t), Observer: spy,
+				// 生产里 Codex 前缀由前缀归属放行，客户端标识就是 codex。
+				Authorize:    func(context.Context, string) (string, bool) { return "", false },
+				PrefixAccess: func(context.Context, string) (string, bool) { return "codex", true }})
+			if _, err := server.Start(); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() { _, _ = server.Stop(context.Background()) })
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			url := "ws" + strings.TrimPrefix(server.Status().Address, "http") + "/codex/v1/responses"
+			socket, _, err := websocket.Dial(ctx, url, &websocket.DialOptions{HTTPHeader: http.Header{"Originator": {tc.originator}}})
+			if err != nil {
+				t.Fatalf("dial gateway websocket: %v", err)
+			}
+			defer socket.CloseNow()
+			if err := socket.Write(ctx, websocket.MessageText, []byte(`{"type":"response.create","model":"gpt-6.1-sol"}`)); err != nil {
+				t.Fatal(err)
+			}
+			if _, _, err := socket.Read(ctx); err != nil {
+				t.Fatalf("read relayed frame: %v", err)
+			}
+			record := waitRecords(t, spy, 1)[0]
+			if record.Client != tc.want {
+				t.Fatalf("请求归属 = %q，期望 %q", record.Client, tc.want)
+			}
+		})
+	}
+}
+
 // TestPassthroughSocketWarmupIsNotRecorded 断言 generate:false 的预热轮不产生请求记录。
 func TestPassthroughSocketWarmupIsNotRecorded(t *testing.T) {
 	echo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

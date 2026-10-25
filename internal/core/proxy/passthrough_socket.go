@@ -92,7 +92,9 @@ func (s *Server) servePassthroughSocket(w http.ResponseWriter, r *http.Request, 
 	upstream.SetReadLimit(MaxResponsesRequestBytes)
 	relayContext := context.WithValue(r.Context(), socketHandshakeKey{}, ctx.Value(socketHandshakeKey{}))
 	stage = BeginSocketStage(relayContext, "relay")
-	accounting := newSocketAccounting(s, access, attempt, path)
+	// 归属在握手时细化一次：originator／User-Agent 不随帧变化，
+	// 而 access.client 必须保持前缀原始值供逐帧复核使用。
+	accounting := newSocketAccounting(s, recordedClient(access.client, r.Header), attempt, path)
 	relayErr := relaySocket(relayContext, socket, upstream, policy, accounting)
 	accounting.close(relayContext, relayErr)
 	stage(relayErr)

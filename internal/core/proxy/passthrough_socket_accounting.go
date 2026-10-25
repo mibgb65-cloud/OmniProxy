@@ -29,7 +29,7 @@ type socketTurnFrame struct {
 type socketAccounting struct {
 	mu       sync.Mutex
 	server   *Server
-	access   socketAccess
+	client   string
 	snapshot TargetSnapshot
 	model    string
 	protocol string
@@ -38,9 +38,11 @@ type socketAccounting struct {
 
 type socketTurn struct{ trace *Trace }
 
-// newSocketAccounting 绑定本次连接实际使用的账号身份与协议分类。
-func newSocketAccounting(server *Server, access socketAccess, attempt PassthroughAttempt, path string) *socketAccounting {
-	return &socketAccounting{server: server, access: access, snapshot: attempt.Snapshot, model: attempt.Model, protocol: passthroughProtocol(path)}
+// newSocketAccounting 绑定本次连接实际使用的账号身份、运行形态与协议分类。
+// client 必须已经由 recordedClient 细化到 codex-cli／codex-desktop 这一级，
+// 否则请求记录会退回笼统的 codex。
+func newSocketAccounting(server *Server, client string, attempt PassthroughAttempt, path string) *socketAccounting {
+	return &socketAccounting{server: server, client: client, snapshot: attempt.Snapshot, model: attempt.Model, protocol: passthroughProtocol(path)}
 }
 
 // clientFrame 在转发客户端帧之前开一轮：没有记账就不能把消费送到上游。
@@ -70,7 +72,7 @@ func (a *socketAccounting) beginTurn(ctx context.Context, model string) error {
 		model = a.model
 	}
 	request := Request{Model: model, Stream: true}
-	trace, err := a.server.beginTrace(ctx, a.protocol, "websocket", a.access.client)
+	trace, err := a.server.beginTrace(ctx, a.protocol, "websocket", a.client)
 	if err != nil {
 		a.logFailure()
 		return err

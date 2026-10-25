@@ -43,7 +43,42 @@ func dialPrefixedSocket(t *testing.T, options Options, header http.Header) (*web
 	return socket, ctx
 }
 
-// Codex 固定前缀入口不写接入 Key，握手由前缀放行；
+// TestCodexWebSocketRecordsRuntimeLabel 断言协议入口的 WebSocket 同样按来源标识细化
+// Codex 运行形态；access.client 的原始值保持不变，逐帧复核仍走同一判定。
+func TestCodexWebSocketRecordsRuntimeLabel(t *testing.T) {
+	for _, tc := range []struct{ name, originator, want string }{
+		{"cli", "codex_cli_rs", "codex-cli"},
+		{"desktop", "codex_desktop", "codex-desktop"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			observer := &testObserver{}
+			socket, ctx := dialPrefixedSocket(t, Options{
+				Upstream:         completedSocketUpstream(),
+				Observer:         observer,
+				Authorize:        func(context.Context, string) (string, bool) { return "", false },
+				PrefixAccess:     func(context.Context, string) (string, bool) { return "codex", true },
+				WebSocketAllowed: func(context.Context) (bool, error) { return true, nil },
+			}, http.Header{"Authorization": {"Bearer " + strings.Repeat("k", 1400)}, "Originator": {tc.originator}})
+
+			event := sendSocket(t, ctx, socket, `{"type":"response.create","model":"gpt-6.1-sol","input":[]}`)
+			if string(event["type"]) != `"response.completed"` {
+				t.Fatalf("socket turn failed: %s", event["type"])
+			}
+			deadline := time.Now().Add(5 * time.Second)
+			for len(observer.events) == 0 && time.Now().Before(deadline) {
+				time.Sleep(10 * time.Millisecond)
+			}
+			if len(observer.events) == 0 {
+				t.Fatal("socket turn was not recorded")
+			}
+			if got := observer.events[0].Client; got != tc.want {
+				t.Fatalf("请求归属 = %q，期望 %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestCodexWebSocketSurvivesPrefixedAuthorization 断言 Codex 固定前缀入口不写接入 Key，
 // 连接内逐帧复核必须沿用同一判定，否则首帧就被判 unauthorized，客户端反复重连。
 func TestCodexWebSocketSurvivesPrefixedAuthorization(t *testing.T) {
 	var authorized atomic.Int32
