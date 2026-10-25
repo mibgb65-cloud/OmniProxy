@@ -8,9 +8,11 @@
 
 ## Current Version
 
-2.0.0-beta.42 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.41 基础上只含两项改动（TASK-20261025-012、TASK-20261025-013）：自动激活改为真正后台常驻（开启后关闭主窗口留在托盘、启动时校正关闭行为），滑动候选在启动／唤醒后约 35 秒补一次独立观测（连续最多 3 次）而不是等满 5 分钟，每轮结束推送 `subscription:activation-updated` 并由根布局的应用级监视器自动刷新与提示，不必打开设置面板；提供商页卡片（内置与自定义）可点击进入该提供商自己的账号页面，卡片内的启停／测试／模型预览／编辑／删除不受影响；无新增数据库迁移、无新增依赖。完整质量门（131 文件／792 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,103,644 bytes，SHA256 `8b2fe33f…3ca`，未签名。
+2.0.0-beta.43 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.42 基础上只含一项新功能（TASK-20261026-001）：提供商出站代理——提供商页「网络代理」连接本机已运行的 v2rayN／Clash 端口，同一端口同时提供 HTTP 与 SOCKS5 的 mixed 模式由应用自动识别并在协议变化时纠偏，按提供商三态（跟随全局／直连／走代理）分流；覆盖 11 个适配器、网关请求作用域、连通性探针、Codex 透明转发（HTTP／WebSocket）、额度读取与令牌续期，另有本机端口发现与测试结果分类；代理层故障使用独立错误码，不换号、不写账号冷却。新增迁移 044（`proxy_settings` + `providers.proxy_mode`），无新增依赖。完整质量门（132 文件／806 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,194,569 bytes，SHA256 `968ca082…7a8`，未签名。
 
 ## In Progress
+
+- [TASK-20261026-002](../tasks/completed/2026-10/TASK-20261026-002-build-local-beta43-installer.md)：Beta.43 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（20,194,569 bytes，SHA256 `968ca0822e4e8d3bf426363364436341d63e9b3b961695a54b63fe50cc33e7a8`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
