@@ -64,7 +64,7 @@
 
 ## Recently Completed
 
-- [TASK-20261025-014](../tasks/active/TASK-20261025-014-build-local-beta42-installer.md)：Beta.42 production 本地安装包已构建并通过完整质量门（131 文件／792 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,103,644 bytes，SHA256 `8b2fe33feac3f68151a7188e9adb98f28adc983106b1334ca541b826d757a3ca`）；内容为自动激活后台常驻／自动刷新与提供商卡片进入账号页两项改动；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
+- [TASK-20261025-014](../tasks/completed/2026-10/TASK-20261025-014-build-local-beta42-installer.md)：Beta.42 production 本地安装包已构建并通过完整质量门（131 文件／792 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,103,644 bytes，SHA256 `8b2fe33feac3f68151a7188e9adb98f28adc983106b1334ca541b826d757a3ca`）；内容为自动激活后台常驻／自动刷新与提供商卡片进入账号页两项改动；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261025-013](../tasks/completed/2026-10/TASK-20261025-013-provider-card-open-accounts.md)：提供商页的卡片（内置与自定义）可点击进入该提供商自己的账号页面——整卡点击与标题键盘入口都跳转 `/accounts/<providerId>`，卡片内的启停、测试、模型预览、编辑、删除用 `closest` 守卫排除，不会被整卡点击吞掉；导航由路由层 `useNavigate` 注入，feature 组件保持无路由器依赖，未配置的内置预设仍不可点击。`task verify` exit 0（131 文件／792 项前端测试，含新增的路由级跳转验证）；真实窗口悬停／焦点与自定义提供商账号页待用户验收。实现提交 `d7a4cec`。
 

@@ -128,7 +128,7 @@ Completed
 ## Commit
 
 ```text
-<commit> chore(release): 2.0.0-beta.42 版本与 Windows 安装包元数据
+677b243b904b215b9d4365fc9a8d0dbc0a90b84d chore(release): 2.0.0-beta.42 版本与 Windows 安装包元数据
 ```
 
 仅本地提交，未推送；安装包本身未签名、未发布。
