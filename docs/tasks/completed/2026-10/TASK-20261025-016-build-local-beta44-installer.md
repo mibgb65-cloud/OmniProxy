@@ -172,7 +172,11 @@ scripts/verify-release-assets.ps1   PASS「发布资产校验通过：v2.0.0-bet
 3d831c8 feat(frontend): 网络代理弹窗改为两栏分区与固定页脚
 574434a docs(task): 记录 TASK-20261025-015 并归档
 e68b510 chore(release): 2.0.0-beta.44 版本与发布说明
+a0246fa fix(scripts): 发布脚本兼容 Windows PowerShell 5.1 与 task 的原生 stderr
+9fb2586 docs(task): 记录 TASK-20261025-016 并归档
 ```
+
+未打标签、未推送；`release-assets/` 与 `bin/` 均在 `.gitignore` 中，产物不进入提交。
 
 ---
 
