@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.38 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.37 基础上只做两件事：①额度美元估算不再被零星「HTTP 200 成功但缺 usage」的记录整窗否决（未知占比 ≤ 两成时按已确认样本估算，超过才显示 `—`，未知价格模型仍整窗否决）；②Codex 透明入口的 WebSocket 改为按轮记账——每个 `response.create` 记录一条 `transport=websocket` 请求、本轮账号尝试与终结事件带来的 Token 用量，客户端中断记取消、上游中断记失败，帧字节仍原样中继。无新增数据库迁移；完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,073,994 bytes，SHA256 `40a60aa7…f826`，未签名。
+2.0.0-beta.39 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.38 基础上只修一件事：WebSocket 请求记录重新按客户端自报的 `originator`／`User-Agent` 细化成 `codex-cli`／`codex-desktop`／`codex-vscode`（Beta.38 的透明 WS 逐轮记账误用了前缀归属 `codex`，协议入口的 WS 也从未细化），未知来源仍记 `codex`，历史记录不回溯；无新增数据库迁移。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,075,276 bytes，SHA256 `3a1f56ec…dd5`，未签名。
 
 ## In Progress
 
@@ -63,6 +63,10 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261025-006](../tasks/completed/2026-10/TASK-20261025-006-build-local-beta39-installer.md)：Beta.39 production 本地安装包已构建并通过完整质量门（128 文件／760 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,075,276 bytes，SHA256 `3a1f56ec43cfcba2e52d8b824c84e87b15db59400f78188c36b34aa317ab6dd5`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
+
+- [TASK-20261025-005](../tasks/completed/2026-10/TASK-20261025-005-websocket-client-runtime-label.md)：`dde6dc8`，WebSocket 请求记录补回 Codex 运行形态归属——透明入口的逐轮记账此前误用前缀归属 `codex`，协议入口的 WS 也从未细化；两条路径改为一律调用 `recordedClient(originator/User-Agent)`，`access.client` 原始值不变以保住逐帧 `client_mismatch` 判定。`task verify` exit 0。
 
 - [TASK-20261025-004](../tasks/completed/2026-10/TASK-20261025-004-build-local-beta38-installer.md)：`3491874`，Beta.38 production 本地安装包已构建并通过完整质量门（128 文件／760 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,073,994 bytes，SHA256 `40a60aa74a22159c0a2ee950644e6688bf2ccd0c3ab5832525bf1f872efcf826`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
