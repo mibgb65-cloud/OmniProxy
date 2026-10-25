@@ -64,6 +64,8 @@
 
 ## Recently Completed
 
+- [TASK-20261025-001](../tasks/completed/2026-10/TASK-20261025-001-build-local-beta37-installer.md)：`db6d331`，Beta.37 production 本地安装包已构建并通过完整质量门（128 文件／760 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,063,983 bytes，SHA256 `0c117ed5564903f7867b615b5308497c13017ba164e907c8047bf11c7e73f365`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
+
 - [TASK-20261024-022](../tasks/completed/2026-10/TASK-20261024-022-passthrough-quota-failover.md)：`1173f20`，Codex 透明入口（`/codex/v1`）在执行前额度拒绝时也能换号——额度判定上提到 `core/proxy` 共用、首事件 4 KiB 有界预读命中即按真实 `resets_at` 冷却换号、透明转发改尝试级记账（修掉换号即 `accounting_unavailable` 的缺陷）、冷却遵循上游 `Retry-After`、成功／拒绝后按需去抖刷新额度观察。全量 Go 测试与 format／vet／staticcheck 通过；完整 `task verify` 与实机 Codex 客户端验收待用户执行。
 
 - [TASK-20261024-020](../tasks/completed/2026-10/TASK-20261024-020-builtin-oxionai-provider.md)：新增第十二个内置服务商 Oxion AI——`https://oxionai.com/v1`、`cc_` Bearer Key、只有 OpenAI 兼容 Chat Completions；目录按账号从 `GET /v1/models` 同步（只收 `type=chat`，映射上下文窗口与 vision／tools），无内置预设；Chat 原生透传，Responses／Messages 由网关转换后回包，不注入官方未声明的 `stream_options`／`reasoning_effort`。迁移 043、路由资格、模型目录、网关与前端名称／品牌图标完成；`task verify` exit 0（128 文件／760 项前端测试、Windows production 构建）。真实 Key 与原生窗口视觉待用户验收。
