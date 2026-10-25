@@ -2,6 +2,7 @@ import { useQueries } from "@tanstack/react-query"
 import { useState } from "react"
 import { accountBalanceOptions } from "../accounts/use-account-balance"
 import { subscriptionQuotaOptions } from "../accounts/use-subscription-quota"
+import { retainQuota } from "../accounts/quota-retention"
 import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
 import { describeQuotaAccounts, makeQuotaEntry, quotaSummary } from "../quota/quota-model"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
@@ -45,15 +46,27 @@ export function useDashboardResources(
     const quota = quotaById.get(item.account.id)
     const balance = balanceById.get(item.account.id)
     const query = google ?? quota ?? balance
+    // 首页只订阅共享缓存；瞬时失败同样沿用上次成功结果，避免把旧额度计为当前确认值。
+    // 判定时刻取失败发生的时刻（errorUpdatedAt），避免在渲染期读时钟。
+    const retainedQuota = retainQuota({
+      data: quota?.data,
+      dataUpdatedAt: quota?.dataUpdatedAt ?? 0,
+      isError: quota?.isError ?? false,
+      error: quota?.error ?? null,
+      now: quota?.errorUpdatedAt ?? 0,
+    })
     return makeQuotaEntry(
       item,
       {
         googleQuota: google?.data,
-        quota: quota?.data,
+        quota:
+          retainedQuota.retained && retainedQuota.data
+            ? { ...retainedQuota.data, fromCache: true }
+            : retainedQuota.data,
         balance: balance?.data,
         pending: !!query?.isPending && !!query?.isFetching,
         fetching: query?.isFetching ?? false,
-        error: query?.error ?? null,
+        error: retainedQuota.retained ? null : (query?.error ?? null),
         refresh: item.canQuery && query ? () => query.refetch({ cancelRefetch: false }) : undefined,
       },
       now,

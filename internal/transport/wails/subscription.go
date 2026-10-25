@@ -51,6 +51,13 @@ func (s *AppService) subscriptionService() (*subscription.Service, error) {
 	root := filepath.Join(cache, "OmniProxy-CodexAuth", string(s.prof.Kind))
 	manager := subscription.New(accounts, root, nil)
 	manager.SetQuotaCache(subscription.NewQuotaCache(s.db))
+	// 额度优先走官方 HTTP 接口；不可用时由服务自身回退现有 stdio 链路。
+	manager.SetUsageSource(codex.NewUsageClient(nil))
+	manager.SetWarn(func(message string, args ...any) {
+		if s.log != nil {
+			s.log.Warn(message, args...)
+		}
+	})
 	manager.OnChange(func() {
 		diagnostic := manager.DiagnosticState()
 		if s.log != nil {

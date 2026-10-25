@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
@@ -34,7 +34,7 @@ function setup(item = account) {
       </QueryClientProvider>
     </I18nProvider>,
   )
-  return userEvent.setup()
+  return { user: userEvent.setup(), client }
 }
 describe("subscription quota", () => {
   beforeEach(() => {
@@ -113,7 +113,7 @@ describe("subscription quota", () => {
     vi.mocked(readSubscriptionQuota).mockRejectedValue(
       new Error("subscription: quota_unavailable private-quota-value"),
     )
-    const user = setup()
+    const { user } = setup()
     expect(await screen.findByRole("alert")).toHaveTextContent("额度查询失败")
     expect(screen.queryByText(/private-quota-value/)).not.toBeInTheDocument()
     expect(readSubscriptionQuota).toHaveBeenCalledTimes(1)
@@ -126,6 +126,39 @@ describe("subscription quota", () => {
     await user.click(screen.getByRole("button", { name: "刷新额度" }))
     await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument())
     expect(readSubscriptionQuota).toHaveBeenCalledTimes(2)
+  })
+  it("瞬时失败时保留上次额度并标注，不再显示错误", async () => {
+    const { client } = setup()
+    expect(await screen.findByText("75%")).toBeInTheDocument()
+    vi.mocked(readSubscriptionQuota).mockRejectedValueOnce(
+      new Error("subscription: quota_timeout private-quota-marker"),
+    )
+    await act(async () => {
+      await client.refetchQueries()
+    })
+    expect(readSubscriptionQuota).toHaveBeenCalledTimes(2)
+    // 保留标记出现即说明重渲染已完成，随后的“无 alert”断言才有效。
+    expect(await screen.findByText("已保留上次获取的信息")).toBeInTheDocument()
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByText("75%")).toBeInTheDocument()
+    expect(screen.getByRole("progressbar", { name: "5h 额度剩余额度" })).toHaveAttribute(
+      "aria-valuenow",
+      "75",
+    )
+    expect(screen.queryByText(/private-quota-marker/)).not.toBeInTheDocument()
+  })
+  it("确定性失败仍立即显示错误，不被旧数据掩盖", async () => {
+    const { client } = setup()
+    expect(await screen.findByText("75%")).toBeInTheDocument()
+    vi.mocked(readSubscriptionQuota).mockRejectedValueOnce(
+      new Error("subscription: quota_not_authenticated private-quota-marker"),
+    )
+    await act(async () => {
+      await client.refetchQueries()
+    })
+    expect(await screen.findByRole("alert")).toHaveTextContent("请重新登录后查询额度。")
+    expect(screen.queryByText("已保留上次获取的信息")).not.toBeInTheDocument()
+    expect(screen.queryByText(/private-quota-marker/)).not.toBeInTheDocument()
   })
   it("does not query or display cached quota for logged-out accounts", () => {
     setup({ ...account, authState: "logged_out" })

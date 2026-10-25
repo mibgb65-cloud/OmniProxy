@@ -81,7 +81,7 @@ function CodexSubscriptionQuota({ account }: { account: AccountItem }) {
       ) : !query.data?.weekly || (fiveHour && !query.data?.fiveHour) ? (
         <p className="text-muted-foreground text-[10px]">{t("subscription.quota.missingWindow")}</p>
       ) : null}
-      {authenticated && query.data?.fromCache ? (
+      {authenticated && (query.data?.fromCache || query.retained) ? (
         <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
       ) : null}
     </div>

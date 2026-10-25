@@ -6,6 +6,7 @@ import { useAccounts } from "../accounts/use-accounts"
 import { useProviders } from "../providers/use-providers"
 import { accountBalanceOptions } from "../accounts/use-account-balance"
 import { subscriptionQuotaOptions } from "../accounts/use-subscription-quota"
+import { retainQuota } from "../accounts/quota-retention"
 import {
   describeQuotaAccounts,
   filterQuotaEntries,
@@ -89,16 +90,37 @@ export function useQuotaOverview() {
     const quotaQuery = subscriptionById.get(item.account.id)
     const balanceQuery = balanceById.get(item.account.id)
     const query = googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery
+    // 瞬时失败沿用上次成功结果：错误置空，值标为本地留存，卡片因此显示“已保留上次获取的信息”。
+    // 判定时刻取失败发生的时刻（errorUpdatedAt），避免在渲染期读时钟。
+    const google = retainQuota({
+      data: googleQuery?.data,
+      dataUpdatedAt: googleQuery?.dataUpdatedAt ?? 0,
+      isError: googleQuery?.isError ?? false,
+      error: googleQuery?.error ?? null,
+      now: googleQuery?.errorUpdatedAt ?? 0,
+    })
+    const subscription = retainQuota({
+      data: quotaQuery?.data,
+      dataUpdatedAt: quotaQuery?.dataUpdatedAt ?? 0,
+      isError: quotaQuery?.isError ?? false,
+      error: quotaQuery?.error ?? null,
+      now: quotaQuery?.errorUpdatedAt ?? 0,
+    })
+    const retained = google.retained || subscription.retained
     return makeQuotaEntry(
       item,
       {
-        googleQuota: googleQuery?.data,
+        googleQuota:
+          google.retained && google.data ? { ...google.data, fromCache: true } : google.data,
         minimax: minimaxQuery?.data,
-        quota: quotaQuery?.data,
+        quota:
+          subscription.retained && subscription.data
+            ? { ...subscription.data, fromCache: true }
+            : subscription.data,
         balance: balanceQuery?.data,
         pending: query?.isPending ?? false,
         fetching: query?.isFetching ?? false,
-        error: query?.error ?? null,
+        error: retained ? null : (query?.error ?? null),
         refresh: item.canQuery && query ? () => query.refetch({ cancelRefetch: false }) : undefined,
       },
       now,

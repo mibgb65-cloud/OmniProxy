@@ -116,6 +116,9 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
           {t(entry.status === "stale" ? "quota.staleHint" : "quota.missingHint")}
         </p>
       ) : null}
+      {entry.kind === "subscription" && entry.quota?.fromCache ? (
+        <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
+      ) : null}
     </div>
   )
 }

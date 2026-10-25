@@ -81,9 +81,12 @@ describe("quota background refresh", () => {
   it("keeps the previous snapshot after a failed background refresh", async () => {
     const { rerender } = setup()
     await screen.findByText("75%")
-    vi.mocked(readSubscriptionQuota).mockRejectedValue(new Error("subscription: quota_unavailable"))
+    // 用确定性失败验证错误照实透出；瞬时失败（quota_timeout／quota_unavailable）会保留旧值。
+    vi.mocked(readSubscriptionQuota).mockRejectedValue(
+      new Error("subscription: quota_not_authenticated"),
+    )
     rerender({ ...account, updatedAt: "2026-10-09T00:02:00Z" })
-    expect(await screen.findByRole("alert")).toHaveTextContent("额度查询失败")
+    expect(await screen.findByRole("alert")).toHaveTextContent("请重新登录后查询额度。")
     expect(screen.getByText("75%")).toBeInTheDocument()
     expect(screen.getByRole("progressbar", { name: "一周额度剩余额度" })).toHaveAttribute(
       "aria-valuenow",

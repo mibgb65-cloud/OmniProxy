@@ -8,6 +8,7 @@ import {
   type SubscriptionQuota,
 } from "../../services/subscription"
 import { queueSubscriptionQuery } from "../../lib/query-queue"
+import { retainQuota } from "./quota-retention"
 
 export function subscriptionQuotaKey(account: AccountItem) {
   return [
@@ -58,6 +59,16 @@ export function useSubscriptionQuota(account: AccountItem) {
   const previous = useRef({ scope, version: account.updatedAt })
   const query = useQuery(options)
   const refetch = query.refetch
+  // 缓存保留的是查询自身的原始结果；这里只覆盖展示用的错误语义。
+  // 判定时刻取 errorUpdatedAt（失败发生的时刻），既不在渲染期读时钟，也让保留状态
+  // 在错误存续期间保持稳定，不会十分钟后突然跳成红色错误。
+  const retention = retainQuota({
+    data: query.data,
+    dataUpdatedAt: query.dataUpdatedAt,
+    isError: query.isError,
+    error: query.error,
+    now: query.errorUpdatedAt,
+  })
   useEffect(
     () =>
       Events.On("subscription:quota-updated", () => {
@@ -74,5 +85,12 @@ export function useSubscriptionQuota(account: AccountItem) {
     previous.current = { scope, version: account.updatedAt }
     if (changed && options.enabled) void refetch({ cancelRefetch: false })
   }, [account.updatedAt, scope, options.enabled, refetch])
-  return query
+  return {
+    ...query,
+    data: retention.data,
+    error: retention.error,
+    // 保留期间不进入错误分支，卡片继续显示上次成功结果。
+    isError: retention.retained ? false : query.isError,
+    retained: retention.retained,
+  }
 }

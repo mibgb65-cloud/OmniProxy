@@ -64,6 +64,8 @@ type Service struct {
 	closed            bool
 	quotaObservations map[string]quotaObservation
 	quotaCache        *QuotaCache
+	usage             UsageSource
+	warn              func(string, ...any)
 	// refreshMu 保护按需额度刷新：调用方在请求路径上，不能与登录会话锁互相阻塞。
 	refreshMu     sync.Mutex
 	refreshLast   map[string]time.Time

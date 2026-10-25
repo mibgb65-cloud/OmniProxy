@@ -173,10 +173,11 @@ describe("quota overview", () => {
     expect(card.getByText("75%")).toBeInTheDocument()
     expect(card.getByText(/最后成功刷新/)).toBeInTheDocument()
     await waitFor(() => expect(fail).toBeDefined())
+    // 确定性失败必须立即透出；瞬时失败（quota_unavailable 等）在窗口内保留旧值不报错。
     await act(async () => {
-      fail(new Error("subscription: quota_unavailable private detail"))
+      fail(new Error("subscription: quota_not_authenticated private detail"))
     })
-    expect(await card.findByRole("alert")).toHaveTextContent("额度查询失败")
+    expect(await card.findByRole("alert")).toHaveTextContent("请重新登录后查询额度。")
     expect(card.getByText("75%")).toBeInTheDocument()
     expect(card.queryByText(/private detail/)).not.toBeInTheDocument()
     expect(button).toBeEnabled()

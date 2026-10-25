@@ -48,6 +48,13 @@ func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota
 	if item.AuthState == "logged_out" || item.AuthState == "reauth_required" {
 		return Quota{}, quotaFailure(readCtx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
 	}
+	// 快路径：官方额度接口只需要本地隔离授权材料，不必为每次查询启动官方组件。
+	if quota, ok, err := s.readQuotaHTTP(readCtx, item, profile); ok {
+		if err != nil {
+			return Quota{}, quotaFailure(readCtx, "usage", "quota_not_authenticated", failure("quota_not_authenticated"))
+		}
+		return s.publishQuota(readCtx, item, profile, quota, display)
+	}
 	client, err := s.open(readCtx, profile)
 	if err != nil {
 		return Quota{}, quotaFailure(readCtx, "open", ErrorCode(err), err)
@@ -76,16 +83,5 @@ func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota
 	if err != nil {
 		return Quota{}, quotaFailure(readCtx, "normalize", "quota_unavailable", err)
 	}
-	s.rememberQuota(item.ID, item.UpdatedAt, quota)
-	if s.quotaCache != nil {
-		snapshot, err := s.quotaCache.Save(readCtx, item, profile, quota)
-		if err != nil {
-			return Quota{}, quotaFailure(readCtx, "cache", "quota_cache_unavailable", err)
-		}
-		if display {
-			snapshot.ResetCredits = quota.ResetCredits
-			return snapshot, nil
-		}
-	}
-	return quota, nil
+	return s.publishQuota(readCtx, item, profile, quota, display)
 }
