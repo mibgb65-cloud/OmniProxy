@@ -316,6 +316,12 @@ export const zh = {
   "providers.proxy.modeProxy": "走代理",
   "providers.proxy.allProxy": "全部走代理",
   "providers.proxy.allDirect": "全部直连",
+  "providers.proxy.filterPlaceholder": "筛选提供商",
+  "providers.proxy.filterEmpty": "没有匹配的提供商。",
+  "providers.proxy.filterSummary": "显示 {{shown}} / {{total}} 个提供商",
+  "providers.proxy.summary":
+    "共 {{total}} 个提供商 · 走代理 {{proxy}} · 直连 {{direct}} · 跟随全局 {{inherit}}",
+  "providers.proxy.disabledHint": "代理未启用：所有请求按直连发出。",
   "providers.proxy.save": "保存",
   "providers.proxy.cancel": "取消",
   "providers.proxy.saveFailed": "保存失败，请检查填写内容后重试。",

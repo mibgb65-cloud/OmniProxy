@@ -331,6 +331,12 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.proxy.modeProxy": "Use proxy",
   "providers.proxy.allProxy": "Proxy all",
   "providers.proxy.allDirect": "Direct for all",
+  "providers.proxy.filterPlaceholder": "Filter providers",
+  "providers.proxy.filterEmpty": "No matching provider.",
+  "providers.proxy.filterSummary": "Showing {{shown}} of {{total}} providers",
+  "providers.proxy.summary":
+    "{{total}} providers · {{proxy}} via proxy · {{direct}} direct · {{inherit}} follow global",
+  "providers.proxy.disabledHint": "Proxy is off: every request goes direct.",
   "providers.proxy.save": "Save",
   "providers.proxy.cancel": "Cancel",
   "providers.proxy.saveFailed": "Could not save. Check the form and try again.",

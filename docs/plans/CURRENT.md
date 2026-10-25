@@ -12,6 +12,8 @@
 
 ## In Progress
 
+- [TASK-20261025-015](../tasks/active/TASK-20261025-015-network-proxy-dialog-layout.md)：网络代理弹窗重做——左右两栏（代理服务器／提供商分流）+ 固定头部页脚，提供商列表独立滚动、行高加大、三态控件右对齐成列，并新增按名称筛选与三态计数摘要。行为与接口不变。
+
 - [TASK-20261026-002](../tasks/completed/2026-10/TASK-20261026-002-build-local-beta43-installer.md)：Beta.43 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（20,194,569 bytes，SHA256 `968ca0822e4e8d3bf426363364436341d63e9b3b961695a54b63fe50cc33e7a8`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。

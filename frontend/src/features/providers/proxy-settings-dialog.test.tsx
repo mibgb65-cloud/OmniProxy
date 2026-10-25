@@ -259,6 +259,35 @@ describe("ProxySettingsDialog", () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled())
   })
 
+  it("summarizes the provider outbound modes", async () => {
+    renderDialog()
+    await openForm()
+    expect(
+      await screen.findByText("共 3 个提供商 · 走代理 1 · 直连 1 · 跟随全局 1"),
+    ).toBeInTheDocument()
+  })
+
+  it("filters the provider list by name", async () => {
+    const user = userEvent.setup()
+    renderDialog()
+    await openForm()
+    const filter = await screen.findByRole("searchbox", { name: "筛选提供商" })
+    await user.type(filter, "deep")
+    expect(screen.getByText("显示 1 / 3 个提供商")).toBeInTheDocument()
+    expect(screen.queryByRole("group", { name: "OpenAI的出站方式" })).not.toBeInTheDocument()
+    expect(screen.getByRole("group", { name: "DeepSeek的出站方式" })).toBeInTheDocument()
+    await user.clear(filter)
+    await user.type(filter, "zzz")
+    expect(screen.getByText("没有匹配的提供商。")).toBeInTheDocument()
+  })
+
+  it("explains that a disabled proxy sends every request direct", async () => {
+    vi.mocked(getProxySettings).mockResolvedValue({ ...settings, enabled: false })
+    renderDialog()
+    await openForm()
+    expect(screen.getByText("代理未启用：所有请求按直连发出。")).toBeInTheDocument()
+  })
+
   it("keeps the dialog open and reports a sanitized failure", async () => {
     const user = userEvent.setup()
     const { onClose } = renderDialog()
