@@ -81,6 +81,7 @@ func (s *AppService) initGateway() {
 				emit()
 			}
 		})
+		s.quotaActivation.OnStatus(s.notifyActivation)
 	}
 }
 

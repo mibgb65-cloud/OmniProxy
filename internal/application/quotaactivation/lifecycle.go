@@ -21,9 +21,10 @@ func (s *Service) Start(ctx context.Context) {
 
 func (s *Service) run(ctx context.Context) {
 	defer close(s.done)
-	timer := time.NewTicker(detectionInterval)
+	timer := time.NewTimer(s.intervalOr(detectionInterval))
 	defer timer.Stop()
 	var last time.Time
+	fast := 0
 	for {
 		select {
 		case <-ctx.Done():
@@ -32,8 +33,12 @@ func (s *Service) run(ctx context.Context) {
 			s.force.Store(true)
 		case <-s.wake:
 		}
-		if !s.force.Swap(false) && s.now().Sub(last) < wakeDebounce {
-			continue
+		if !s.force.Swap(false) {
+			// 限频只推迟到原定最早时刻，重复唤醒不会把下一次检测越推越远。
+			if remaining := wakeDebounce - s.now().Sub(last); remaining > 0 {
+				timer.Reset(remaining)
+				continue
+			}
 		}
 		last = s.now()
 		if err := s.Check(ctx); err != nil && ctx.Err() == nil {
@@ -41,7 +46,37 @@ func (s *Service) run(ctx context.Context) {
 			s.status.ErrorCode = "check_failed"
 			s.mu.Unlock()
 		}
+		delay := s.intervalOr(detectionInterval)
+		if s.reobserve.Swap(false) && fast < s.fastLimitOr(fastReobserveLimit) {
+			// 已有滑动候选但证据不足：短间隔补一次观测，不占满一个完整周期。
+			delay = s.fastIntervalOr(fastReobserveDelay)
+			fast++
+		} else {
+			fast = 0
+		}
+		timer.Reset(delay)
 	}
+}
+
+func (s *Service) intervalOr(fallback time.Duration) time.Duration {
+	if s.interval > 0 {
+		return s.interval
+	}
+	return fallback
+}
+
+func (s *Service) fastIntervalOr(fallback time.Duration) time.Duration {
+	if s.fastInterval > 0 {
+		return s.fastInterval
+	}
+	return fallback
+}
+
+func (s *Service) fastLimitOr(fallback int) int {
+	if s.fastLimit > 0 {
+		return s.fastLimit
+	}
+	return fallback
 }
 
 // Wake 合并额度读取等信号，避免每个页面组件都启动一次批量检测。

@@ -2,6 +2,7 @@ import { createRootRoute, Outlet, useMatches } from "@tanstack/react-router"
 import { AppSidebar } from "../../components/common/app-sidebar"
 import { AppTitlebar } from "../../components/common/app-titlebar"
 import { ScrollRegion } from "../../components/common/scroll-region"
+import { CodexQuotaActivationWatcher } from "../../features/accounts/codex-quota-activation-watcher"
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -27,6 +28,8 @@ function RootLayout() {
           </div>
         </ScrollRegion>
       </div>
+      {/* 后台自动激活的结果在任何页面都提示，不需要先打开 OpenAI 设置面板。 */}
+      <CodexQuotaActivationWatcher />
     </div>
   )
 }

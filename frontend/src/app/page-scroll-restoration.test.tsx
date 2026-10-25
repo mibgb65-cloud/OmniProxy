@@ -13,6 +13,10 @@ vi.mock("../components/common/app-sidebar", () => ({ AppSidebar: () => <nav>Side
 vi.mock("../components/common/app-titlebar", () => ({
   AppTitlebar: () => <header>Titlebar</header>,
 }))
+// 应用级自动激活提示与本测试的滚动隔离无关，也不需要 QueryClient。
+vi.mock("../features/accounts/codex-quota-activation-watcher", () => ({
+  CodexQuotaActivationWatcher: () => null,
+}))
 
 function renderPages(settingsLoader?: () => Promise<void>) {
   const root = createRootRoute({ component: RootRoute.options.component })

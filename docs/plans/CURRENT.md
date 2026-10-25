@@ -10,6 +10,8 @@
 
 ## In Progress
 
+- [TASK-20261025-012](../tasks/active/TASK-20261025-012-background-quota-activation-refresh.md)：自动激活改为真正后台常驻（开启后关闭窗口留在托盘、启动时校正）、滑动候选在启动／唤醒后约 35 秒补一次复检（连续最多 3 次），每轮结束推送脱敏状态，前端在根布局自动刷新并提示，不必打开设置面板。
+
 - [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
 
 - [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。

@@ -11,6 +11,7 @@ import {
   setCodexAccountRotationMode,
 } from "../../services/codex-settings"
 import { OpenAIAccountSettings } from "./openai-account-settings"
+import { CodexQuotaActivationWatcher } from "./codex-quota-activation-watcher"
 
 vi.mock("../../services/codex-settings", () => ({
   getCodexSettings: vi.fn(),
@@ -53,6 +54,7 @@ async function setup() {
     <I18nProvider>
       <QueryClientProvider client={client}>
         <OpenAIAccountSettings />
+        <CodexQuotaActivationWatcher />
       </QueryClientProvider>
     </I18nProvider>,
   )

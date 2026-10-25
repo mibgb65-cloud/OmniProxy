@@ -1,48 +1,26 @@
-import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { useEffect } from "react"
-import {
-  getCodexSettings,
-  getCodexQuotaActivationStatus,
-  setCodexQuotaAutoActivation,
-  type CodexActivationStatus,
-} from "../../services/codex-settings"
+import { setCodexQuotaAutoActivation } from "../../services/codex-settings"
 import { ProviderSwitch } from "../providers/provider-switch"
 import { activationReasonKey } from "./activation-reason"
+import { codexActivationStatusKey, useCodexQuotaActivation } from "./use-codex-quota-activation"
 
-export function CodexQuotaActivationSettings({
-  onResult,
-}: {
-  onResult: (status: CodexActivationStatus) => void
-}) {
+export function CodexQuotaActivationSettings() {
   const { t } = useTranslation()
   const client = useQueryClient()
   // 各项设置返回完整对象，保存期间共享锁，避免响应乱序覆盖另一设置。
   const saving = useIsMutating({ mutationKey: ["codex-settings"] }) > 0
-  const settings = useQuery({ queryKey: ["codex-settings"], queryFn: getCodexSettings })
+  const { settings, status, enabled: checked } = useCodexQuotaActivation()
   const save = useMutation({
     mutationKey: ["codex-settings"],
     mutationFn: setCodexQuotaAutoActivation,
     onSuccess: async (data) => {
       await client.cancelQueries({ queryKey: ["codex-settings"] })
       client.setQueryData(["codex-settings"], data)
-      void client.invalidateQueries({ queryKey: ["codex-quota-activation"] })
+      void client.invalidateQueries({ queryKey: codexActivationStatusKey })
     },
   })
-  const status = useQuery({
-    queryKey: ["codex-quota-activation"],
-    queryFn: getCodexQuotaActivationStatus,
-    enabled: settings.data?.autoQuotaActivation === true,
-    retry: false,
-    refetchInterval: settings.data?.autoQuotaActivation ? 2000 : false,
-  })
-  const checked = settings.data?.autoQuotaActivation ?? false
   const disabled = !settings.isSuccess || settings.isFetching || saving
-  useEffect(() => {
-    if (checked && status.data && !status.data.running && status.data.updatedAt) {
-      onResult(status.data)
-    }
-  }, [checked, status.data, onResult])
   return (
     <section className="mt-4 space-y-3">
       <div className="space-y-2 rounded-lg border p-3">
@@ -54,7 +32,7 @@ export function CodexQuotaActivationSettings({
               ariaLabel={t("subscription.activation.title")}
               checked={checked}
               disabled={disabled}
-              onChange={(enabled) => save.mutate(enabled)}
+              onChange={(next) => save.mutate(next)}
             />
           </div>
         </div>
@@ -82,7 +60,7 @@ export function CodexQuotaActivationSettings({
           {t(activationReasonKey(status.data.errorCode) ?? "subscription.activation.failed")}
         </p>
       ) : null}
-      {status.isError && settings.data?.autoQuotaActivation ? (
+      {status.isError && checked ? (
         <p role="alert" className="text-destructive text-sm">
           {t("subscription.activation.statusFailed")}
         </p>

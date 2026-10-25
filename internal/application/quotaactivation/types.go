@@ -23,8 +23,13 @@ type Accounts interface {
 
 const (
 	detectionInterval = 5 * time.Minute
-	wakeDebounce      = 30 * time.Second
-	activationTimeout = 60 * time.Second
+	// fastReobserveDelay 比 wakeDebounce 略长：滑动目标需要两次相隔至少 30 秒的观测，
+	// 启动或唤醒后先补一次短间隔复检，不必等到下一个完整周期。
+	fastReobserveDelay = 35 * time.Second
+	// fastReobserveLimit 限制连续快速复检次数，避免候选长期无法判定时持续高频查询。
+	fastReobserveLimit = 3
+	wakeDebounce       = 30 * time.Second
+	activationTimeout  = 60 * time.Second
 )
 
 // Providers 用于核对账号所属服务商的类型和启用状态。
@@ -72,13 +77,19 @@ type Service struct {
 	done         chan struct{}
 	wake         chan struct{}
 	force        atomic.Bool
+	reobserve    atomic.Bool
+	interval     time.Duration
+	fastInterval time.Duration
+	fastLimit    int
 	onChange     func()
+	onStatus     func(Status)
 	now          func() time.Time
 }
 
 // New 创建默认尚未运行的自动激活服务；不读取凭据或发送模型请求。
 func New(db *sql.DB, accounts Accounts, providers Providers, quotas Quotas, sender Sender) *Service {
-	return &Service{db: db, accounts: accounts, providers: providers, quotas: quotas, sender: sender, wake: make(chan struct{}, 1), now: time.Now, observations: map[string]string{}}
+	return &Service{db: db, accounts: accounts, providers: providers, quotas: quotas, sender: sender, wake: make(chan struct{}, 1), now: time.Now, observations: map[string]string{},
+		interval: detectionInterval, fastInterval: fastReobserveDelay, fastLimit: fastReobserveLimit}
 }
 
 // codeError 携带稳定错误码，让状态与日志能说明具体原因，而不是笼统的失败。
@@ -125,6 +136,13 @@ func (s *Service) Status() Status { s.mu.Lock(); defer s.mu.Unlock(); return s.s
 
 // OnChange 设置只包含变更信号的通知，避免将账号身份写入事件。
 func (s *Service) OnChange(callback func()) { s.mu.Lock(); defer s.mu.Unlock(); s.onChange = callback }
+
+// OnStatus 设置每轮检测结束后的状态回调；状态同样只含计数与稳定错误码。
+func (s *Service) OnStatus(callback func(Status)) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.onStatus = callback
+}
 
 // SetLogger 安装统一脱敏日志器；通常在后台启动前调用。
 func (s *Service) SetLogger(log *slog.Logger) { s.mu.Lock(); defer s.mu.Unlock(); s.log = log }

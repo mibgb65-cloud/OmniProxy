@@ -72,6 +72,8 @@ type AppService struct {
 	updates          *updater.Service
 	stopUpdateChecks context.CancelFunc
 	quitForUpdate    func()
+	activationMu     sync.Mutex
+	emitActivation   func(quotaactivation.Status)
 }
 
 // NewAppService creates the bound application service.
@@ -133,6 +135,7 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 	if s.quotaActivation != nil {
 		s.quotaActivation.Start(context.Background())
 	}
+	s.ensureBackgroundActivation()
 	if err := s.control.Start(); err != nil {
 		s.log.Error("control API failed to start; external clients cannot connect",
 			"error", err, "control_port", s.prof.ControlPort)
@@ -230,6 +233,7 @@ func Run(app *App) error {
 	})
 	app.Service.bindLogEvents(wailsApp, window)
 	app.Service.bindSubscriptionEvents(wailsApp)
+	app.Service.bindActivationEvents(wailsApp)
 	tray := wailsApp.SystemTray.New()
 	tray.SetIcon(appIcon)
 	tray.SetTooltip("OmniProxy")

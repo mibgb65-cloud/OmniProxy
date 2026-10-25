@@ -7,6 +7,9 @@ import type { Events } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import type * as quotaactivation$0 from "../../../../../omniproxy/internal/application/quotaactivation/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import type * as proxy$0 from "../../../../../omniproxy/internal/core/proxy/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -19,6 +22,7 @@ declare module "@wailsio/runtime" {
             "gateway:status": proxy$0.Status;
             "logs:updated": wails$0.LogNotice;
             "modelcatalog:updated": wails$0.SubscriptionNotice;
+            "subscription:activation-updated": quotaactivation$0.Status;
             "subscription:quota-updated": wails$0.SubscriptionNotice;
             "subscription:updated": wails$0.SubscriptionNotice;
         }

@@ -81,7 +81,7 @@ export const subscriptionEn = {
     "Distribute requests across available accounts. With fresh quota data, accounts with more remaining quota receive more requests.",
   "subscription.activation.title": "Automatically activate Codex quota windows",
   "subscription.activation.description":
-    "When enabled, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped.",
+    "When enabled, a minimal message is sent with the same account when its five-hour or weekly window has not started, followed by a quota recheck. Active windows are skipped. The app keeps running in the background while this is on (closing the main window minimizes it to the tray), so checks and result updates continue without opening this panel.",
   "subscription.activation.saved": "Automatic activation settings saved.",
   "subscription.activation.saveFailed":
     "Automatic activation settings were not saved. Your previous settings remain active. Try again.",

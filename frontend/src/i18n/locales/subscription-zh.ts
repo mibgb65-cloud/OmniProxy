@@ -66,7 +66,7 @@ export const subscriptionZh = {
     "在可用账号间均衡分配请求；有最新额度时，剩余更多的账号分配更多请求。",
   "subscription.activation.title": "自动激活 Codex 额度窗口",
   "subscription.activation.description":
-    "开启后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。",
+    "开启后，检测到 5 小时或周额度尚未开始计时，会使用该账号发送一条最小消息并复查；已激活窗口不会重复发送。软件会保持在后台运行（关闭主窗口时最小化到托盘），不打开这个面板也会继续检测并自动更新结果。",
   "subscription.activation.saved": "自动激活设置已保存。",
   "subscription.activation.saveFailed": "自动激活设置未保存，原设置仍生效，请重试。",
   "subscription.activation.checking": "正在检测并复查额度窗口…",

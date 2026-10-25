@@ -16,6 +16,10 @@ func (s *Service) checkAccount(ctx context.Context, item account.Item) error {
 	if err != nil {
 		return err
 	}
+	// 接近满周期但证据不足时需要第二次独立观测；标记后由后台循环短间隔补检。
+	if assessed.waiting && NeedsObservation(rawQuota) {
+		s.reobserve.Store(true)
+	}
 	quota := assessed.quota
 	if err := s.reportQuota(item, rawQuota); err != nil {
 		return err

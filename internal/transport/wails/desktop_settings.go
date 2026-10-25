@@ -103,3 +103,33 @@ func (s *AppService) shouldCloseToTray() bool {
 	}
 	return mode == profile.CloseToTray
 }
+
+// ensureTrayCloseBehavior 让主窗口关闭后进程继续存活，自动激活的后台检测依赖它。
+// 只在关闭行为仍是「退出」时改写；失败只记录告警，不影响已保存的激活授权。
+func (s *AppService) ensureTrayCloseBehavior() {
+	if s.prof == nil {
+		return
+	}
+	s.settingsMu.Lock()
+	defer s.settingsMu.Unlock()
+	cfg, err := profile.LoadConfig(s.prof.Kind)
+	if err != nil {
+		if s.log != nil {
+			s.log.Warn("close behavior unavailable for background activation", "module", "quotaactivation", "error", err)
+		}
+		return
+	}
+	mode, err := profile.ParseCloseBehavior(cfg.CloseBehavior)
+	if err != nil || mode == profile.CloseToTray {
+		return
+	}
+	if err := profile.SetCloseBehavior(s.prof.Kind, profile.CloseToTray); err != nil {
+		if s.log != nil {
+			s.log.Warn("close behavior not switched to tray; background activation stops when the window closes", "module", "quotaactivation", "error", err)
+		}
+		return
+	}
+	if s.log != nil {
+		s.log.Info("close behavior switched to tray to keep quota activation running in background", "module", "quotaactivation")
+	}
+}

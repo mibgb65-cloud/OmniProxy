@@ -40,6 +40,7 @@ func (s *Service) Check(ctx context.Context) error {
 		s.status.Running = false
 		s.status.UpdatedAt = s.now().UTC().Format(time.RFC3339)
 		callback := s.onChange
+		statusCallback := s.onStatus
 		status, log := s.status, s.log
 		changed := s.status.Sent > 0 || s.changed
 		s.mu.Unlock()
@@ -48,6 +49,10 @@ func (s *Service) Check(ctx context.Context) error {
 		}
 		if callback != nil && changed {
 			callback()
+		}
+		// 每轮结束都推送一次状态：界面不必打开设置面板也能看到后台结果。
+		if statusCallback != nil {
+			statusCallback(status)
 		}
 	}()
 	providers, err := s.providers.List(batchCtx)

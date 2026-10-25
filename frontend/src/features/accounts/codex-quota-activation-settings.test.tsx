@@ -2,7 +2,6 @@ import { act, render, screen, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { CancellablePromise } from "@wailsio/runtime"
 import userEvent from "@testing-library/user-event"
-import { useState } from "react"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
@@ -10,10 +9,9 @@ import {
   getCodexSettings,
   getCodexQuotaActivationStatus,
   setCodexQuotaAutoActivation,
-  type CodexActivationStatus,
 } from "../../services/codex-settings"
 import { CodexQuotaActivationSettings } from "./codex-quota-activation-settings"
-import { CodexQuotaActivationToast } from "./codex-quota-activation-toast"
+import { CodexQuotaActivationWatcher } from "./codex-quota-activation-watcher"
 
 vi.mock("../../services/codex-settings", () => ({
   getCodexSettings: vi.fn(),
@@ -61,11 +59,11 @@ function renderSettings() {
 }
 
 function ActivationHarness() {
-  const [result, setResult] = useState<CodexActivationStatus>()
+  // 提示条挂在应用级监视器上，不再依赖设置面板是否打开。
   return (
     <>
-      <CodexQuotaActivationSettings onResult={setResult} />
-      {result ? <CodexQuotaActivationToast key={JSON.stringify(result)} status={result} /> : null}
+      <CodexQuotaActivationSettings />
+      <CodexQuotaActivationWatcher />
     </>
   )
 }
