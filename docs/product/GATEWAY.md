@@ -97,6 +97,10 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   `response.incomplete`／`message_delta`／`[DONE]`）后断开记为成功；客户端连接结束记为
   `request_cancelled`；其余上游读流错误记为 `upstream_stream_failed`；出错侧写进日志
   的 `stream_error_side`。记账入库失败只标记 `accounting_failed`，不中断已交付的回答。
+- 透明 WebSocket 按轮记账：每个客户端 `response.create` 帧（除 `generate:false` 预热）
+  在转发前开一条 `transport=websocket` 请求并登记本轮账号尝试，上游终结事件到达时写入
+  该轮的 input／output／缓存 Token；未收到终结事件就结束的连接按 `request_cancelled`
+  收尾，上游中途断开记 `upstream_disconnected`。帧字节始终原样中继，解析失败只丢统计。
 - `chat/completions` 与 `messages` 仍走协议转换（订阅端点只接受 Responses），
   `/v1/codex-models` 仍是本地目录。
 
@@ -109,7 +113,7 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。Codex 透明转发路径不做协议解析：正文上限 32 MiB，响应按块转发并即时刷新，不设整体期限（只限制响应头到达时间 60 秒）。
 
-WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。Codex 透明转发路径的 WebSocket 直接拨到上游并双向中继帧，帧大小上限 16 MiB，网关不解码帧内容。「Codex WebSocket」开关在握手时以及每个客户端帧转发前复核：关闭后已建立的连接也不能继续发起新请求，只关闭该连接，不影响普通 HTTP/SSE。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
+WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。Codex 透明转发路径的 WebSocket 直接拨到上游并双向中继帧，帧大小上限 16 MiB；网关不改写帧内容，只在已转发的帧上旁路识别逐轮请求与用量。「Codex WebSocket」开关在握手时以及每个客户端帧转发前复核：关闭后已建立的连接也不能继续发起新请求，只关闭该连接，不影响普通 HTTP/SSE。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
 
 透明握手在凭据准备和上游拨号之后再次核对开关与原授权方式；固定前缀登录只复核前缀，
 接入 Key 登录只复核原 Key，不因 Key 撤销而降级为前缀放行。已建立连接的每个客户端帧

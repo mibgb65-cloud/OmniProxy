@@ -59,7 +59,7 @@ func TestSocketCancelledPreparationDiscardsEvenSuccessfulLateResult(t *testing.T
 		AccountID: "a", BaseURL: "invalid-target-must-not-be-evaluated", Header: header,
 	}}
 	request := httptest.NewRequest(http.MethodGet, "http://localhost/codex/v1/responses", nil).WithContext(ctx)
-	socket, err := server.dialPassthroughSocket(request, session, PassthroughRequest{}, nil)
+	socket, _, err := server.dialPassthroughSocket(request, session, PassthroughRequest{}, nil)
 	if socket != nil || !errors.Is(err, context.Canceled) || session.done != 1 || len(header) != 0 {
 		t.Fatal("取消后仍使用迟到的准备结果或遗留租约／凭据", err)
 	}

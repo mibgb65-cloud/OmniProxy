@@ -58,7 +58,7 @@ func (s *Server) servePassthroughSocket(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	subprotocols := requestedSubprotocols(r)
-	upstream, err := s.dialPassthroughSocket(r.WithContext(ctx), session, request, subprotocols)
+	upstream, attempt, err := s.dialPassthroughSocket(r.WithContext(ctx), session, request, subprotocols)
 	if err != nil {
 		fail(err)
 		return
@@ -92,23 +92,27 @@ func (s *Server) servePassthroughSocket(w http.ResponseWriter, r *http.Request, 
 	upstream.SetReadLimit(MaxResponsesRequestBytes)
 	relayContext := context.WithValue(r.Context(), socketHandshakeKey{}, ctx.Value(socketHandshakeKey{}))
 	stage = BeginSocketStage(relayContext, "relay")
-	stage(relaySocket(relayContext, socket, upstream, policy))
+	accounting := newSocketAccounting(s, access, attempt, path)
+	relayErr := relaySocket(relayContext, socket, upstream, policy, accounting)
+	accounting.close(relayContext, relayErr)
+	stage(relayErr)
 }
 
 // dialPassthroughSocket 复刻 v1：握手被明确拒绝时换同池账号重拨，成功即停止。
 // 客户端握手只在拿到上游之后才应答，因此中途失败仍能返回真实状态码。
+// 成功时一并交回握手的尝试身份，让逐轮记账绑定真实账号。
 //
 // 失败必须原样交出原因：账号不可用、凭据借不出、URL 不可用都被折叠成
 // 502 upstream_unavailable 时，客户端只会把它当成上游抖动而无限重连。
-func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSession, request PassthroughRequest, subprotocols []string) (*websocket.Conn, error) {
+func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSession, request PassthroughRequest, subprotocols []string) (*websocket.Conn, PassthroughAttempt, error) {
 	prepareRemaining := 5 * time.Second
 	var lastErr error
 	for attempt := 0; attempt < maxPassthroughAttempts; attempt++ {
 		if err := r.Context().Err(); err != nil {
-			return nil, err
+			return nil, PassthroughAttempt{}, err
 		}
 		if prepareRemaining <= 0 {
-			return nil, Failure("credential_prepare_timeout", 504)
+			return nil, PassthroughAttempt{}, Failure("credential_prepare_timeout", 504)
 		}
 		prepareCtx, prepareCancel := context.WithTimeout(r.Context(), prepareRemaining)
 		stage := BeginSocketStage(prepareCtx, "credentials")
@@ -128,18 +132,18 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 		}
 		if err != nil || prepareErr != nil || r.Context().Err() != nil {
 			if r.Context().Err() != nil {
-				return nil, r.Context().Err()
+				return nil, PassthroughAttempt{}, r.Context().Err()
 			}
 			if prepareErr != nil {
-				return nil, Failure("credential_prepare_timeout", 504)
+				return nil, PassthroughAttempt{}, Failure("credential_prepare_timeout", 504)
 			}
-			return nil, err
+			return nil, PassthroughAttempt{}, err
 		}
 		targetURL, urlErr := PassthroughSocketURL(target.BaseURL, request.Path, request.Query)
 		if urlErr != nil {
 			clearAttemptHeaders(target.Header)
 			session.Done(r.Context(), target, PassthroughOutcome{})
-			return nil, urlErr
+			return nil, PassthroughAttempt{}, urlErr
 		}
 		dialCtx, dialCancel := context.WithTimeout(r.Context(), 5*time.Second)
 		stage = BeginSocketStage(dialCtx, "upstream_dial")
@@ -162,27 +166,27 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 		}
 		if dialErr == nil && dialErrContext == nil && r.Context().Err() == nil {
 			session.Done(r.Context(), target, PassthroughOutcome{StatusCode: http.StatusSwitchingProtocols})
-			return upstream, nil
+			return upstream, target, nil
 		}
 		if upstream != nil {
 			upstream.CloseNow()
 		}
 		session.Done(r.Context(), target, PassthroughOutcome{StatusCode: status, RetryAfter: socketRetryAfter(upstreamResp)})
 		if r.Context().Err() != nil {
-			return nil, r.Context().Err()
+			return nil, PassthroughAttempt{}, r.Context().Err()
 		}
 		if dialErrContext != nil {
-			return nil, Failure("upstream_socket_timeout", 504)
+			return nil, PassthroughAttempt{}, Failure("upstream_socket_timeout", 504)
 		}
 		lastErr = socketDialFailure(status)
 		if status == 0 || !session.Retryable(target, status) {
-			return nil, lastErr
+			return nil, PassthroughAttempt{}, lastErr
 		}
 	}
 	if lastErr == nil {
 		lastErr = Failure("upstream_unavailable", 502)
 	}
-	return nil, lastErr
+	return nil, PassthroughAttempt{}, lastErr
 }
 
 // socketDialFailure 把握手结果映射成稳定错误码：有状态码说明上游明确拒绝，
@@ -219,7 +223,8 @@ func (s *Server) logSocketFailure(err error) {
 //
 // guard 在转发每个客户端帧之前复核当前策略：关掉 WebSocket 开关后，
 // 已经建立的连接也不能继续创建新的响应，与协议路径的逐帧复核一致。
-func relaySocket(ctx context.Context, client, upstream *websocket.Conn, guard func(context.Context) error) error {
+// accounting 只在已转发的帧上旁路记账：客户端帧先记账再转发，上游帧先转发再统计。
+func relaySocket(ctx context.Context, client, upstream *websocket.Conn, guard func(context.Context) error, accounting *socketAccounting) error {
 	ctx, cancel := context.WithCancel(ctx)
 	var once sync.Once
 	closeBoth := func() {
@@ -245,6 +250,11 @@ func relaySocket(ctx context.Context, client, upstream *websocket.Conn, guard fu
 					return
 				}
 			}
+			// 记账失败就不把这一轮送给上游：未记录的上游消费不能发生。
+			if err := accounting.clientFrame(ctx, kind, data); err != nil {
+				results <- err
+				return
+			}
 			if err := upstream.Write(ctx, kind, data); err != nil {
 				results <- socketRelayFailure(ctx, err, "upstream_write_failed")
 				return
@@ -264,6 +274,8 @@ func relaySocket(ctx context.Context, client, upstream *websocket.Conn, guard fu
 		if err := client.Write(ctx, kind, data); err != nil {
 			return socketRelayFailure(ctx, err, "client_write_failed")
 		}
+		// 字节已经交给客户端，统计失败不能再改变这一轮的交付结果。
+		accounting.upstreamFrame(ctx, kind, data)
 	}
 }
 
