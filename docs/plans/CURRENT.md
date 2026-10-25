@@ -64,7 +64,7 @@
 
 ## Recently Completed
 
-- [TASK-20261025-003](../tasks/completed/2026-10/TASK-20261025-003-passthrough-websocket-turn-accounting.md)：`e539de9`，透明转发 WebSocket 按轮记账——每个 `response.create` 帧在转发前建一条 `transport=websocket` 请求并登记本轮账号尝试，上游终结事件写入该轮 input／output／缓存 Token 与首字耗时；客户端在终结事件前断开记 `request_cancelled`（499）、上游中途断开记 `upstream_disconnected`（502）、`generate:false` 预热不记账，帧字节始终原样中继。`task verify` exit 0；实机 Codex WebSocket 会话待用户验收。
+- [TASK-20261025-003](../tasks/completed/2026-10/TASK-20261025-003-passthrough-websocket-turn-accounting.md)：`e539de9`＋`b2b215f`，透明转发 WebSocket 按轮记账——每个 `response.create` 帧在转发前建一条 `transport=websocket` 请求并登记本轮账号尝试，上游终结事件写入该轮 input／output／缓存 Token 与首字耗时；客户端在终结事件前断开记 `request_cancelled`（499）、上游中途断开记 `upstream_disconnected`（502）、`generate:false` 预热不记账，帧字节始终原样中继。`task verify` exit 0；实机 Codex WebSocket 会话待用户验收。
 
 - [TASK-20261025-002](../tasks/completed/2026-10/TASK-20261025-002-quota-estimate-unknown-usage-tolerance.md)：`7279fa8`，额度美元估算不再被零星「成功但无 usage」的记录整窗否决——生产库实测一周窗口 192 条中有 4 条此类记录；现未知占比 ≤ 两成时按已确认样本估算（金额本就带 `≈`），超过才显示 `—`，未知价格模型仍整窗否决。`task verify` exit 0。
 

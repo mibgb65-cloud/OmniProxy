@@ -1,4 +1,4 @@
-﻿# TASK-20261025-003: 透明转发 WebSocket 逐轮请求与用量记账
+# TASK-20261025-003: 透明转发 WebSocket 逐轮请求与用量记账
 
 ## Status
 
@@ -142,6 +142,11 @@ PASS（format:check / lint: go vet + staticcheck + eslint / typecheck: tsc /
 Go 全包测试，含 internal/core/proxy 4.534s / 前端 128 文件 760 项测试 / Windows production 构建）
 ```
 
+加锁改动后重跑：`go test ./internal/core/proxy/ ./internal/application/activity/` 通过，
+`task verify` 再次 exit 0（前端 128 文件／760 项测试）。
+未执行 `go test -race`：本机没有 gcc，`CGO_ENABLED=1` 无法构建 runtime/cgo；
+两道中继方向的并发访问改由 `socketAccounting.mu` 串行化。
+
 未执行：真实 Codex 客户端经透明入口使用 WebSocket 的实机复核（需要用户重启客户端并安装带本次修改的构建）。
 
 ---
@@ -166,19 +171,12 @@ Go 全包测试，含 internal/core/proxy 4.534s / 前端 128 文件 760 项测�
 
 ## Commit
 
-待填写。
-
----
-
-# Result
-
-# Git
-
-## Commit
-
 ```text
 e539de9 feat(gateway): 透明转发 WebSocket 按轮记录请求与用量
+b2b215f fix(gateway): 透明 WebSocket 轮次状态加锁
 ```
+
+最后一笔把轮次状态加锁：客户端帧与上游帧在各自 goroutine 中中继，`turn` 会被两侧同时访问。
 
 ---
 
