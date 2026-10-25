@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.37 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.36 基础上只修复 Codex 透明入口（客户端实际使用的 `/codex/v1`）的额度换号：执行前额度拒绝（HTTP 200／429 包装的 `usage_limit_reached`）现在会按真实 `resets_at` 冷却并换到同池其他账号、透明转发改尝试级记账（修掉换号即 503 `accounting_unavailable`）、冷却遵循上游 `Retry-After`、请求结束后按需去抖刷新额度观察；无新增数据库迁移。完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,063,983 bytes，SHA256 `0c117ed5…f365`，未签名。
+2.0.0-beta.38 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.37 基础上只做两件事：①额度美元估算不再被零星「HTTP 200 成功但缺 usage」的记录整窗否决（未知占比 ≤ 两成时按已确认样本估算，超过才显示 `—`，未知价格模型仍整窗否决）；②Codex 透明入口的 WebSocket 改为按轮记账——每个 `response.create` 记录一条 `transport=websocket` 请求、本轮账号尝试与终结事件带来的 Token 用量，客户端中断记取消、上游中断记失败，帧字节仍原样中继。无新增数据库迁移；完整质量门（128 文件／760 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,073,994 bytes，SHA256 `40a60aa7…f826`，未签名。
 
 ## In Progress
 
