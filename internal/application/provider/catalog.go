@@ -67,6 +67,9 @@ func definitionForKind(kind string) (Definition, bool) {
 	return Definition{}, false
 }
 
+// DefinitionFor 供其他应用服务读取内置提供商的默认端点（例如代理出站的主机匹配）。
+func DefinitionFor(kind string) (Definition, bool) { return definitionForKind(kind) }
+
 func knownKind(kind string) bool {
 	for _, definition := range definitions {
 		if definition.Kind == kind {

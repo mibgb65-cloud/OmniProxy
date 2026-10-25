@@ -35,6 +35,7 @@ const catalogProps: ComponentProps<typeof ModelCatalog> = {
       name: "OpenAI",
       baseUrl: "",
       enabled: true,
+      proxyMode: "inherit",
       createdAt: "",
       updatedAt: "",
     },

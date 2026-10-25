@@ -17,6 +17,7 @@ const provider = {
   name: "Moonshot AI",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

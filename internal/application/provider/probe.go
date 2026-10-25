@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 const probeTimeout = 6 * time.Second
@@ -40,6 +42,8 @@ func (s *Service) Probe(ctx context.Context, id string) (ProbeResult, error) {
 		return ProbeResult{}, fmt.Errorf("%w: no valid test endpoint", ErrInvalidInput)
 	}
 
+	// 探针也必须遵循该提供商的出站策略，让“测试”按钮反映真实请求路径。
+	ctx = netproxy.WithProvider(ctx, item.ID, item.Kind)
 	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, endpoint, nil)
@@ -57,7 +61,7 @@ func (s *Service) Probe(ctx context.Context, id string) (ProbeResult, error) {
 	}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{
-		Transport: transport,
+		Transport: netproxy.Wrap(transport),
 		Timeout:   probeTimeout,
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse

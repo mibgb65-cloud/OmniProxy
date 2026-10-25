@@ -17,6 +17,7 @@ const provider = {
   name: "Xiaomi MiMo",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

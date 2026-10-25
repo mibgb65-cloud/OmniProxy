@@ -92,6 +92,7 @@ export function ProviderList({
                   plannedAuthMethods={definition?.plannedAuthMethods ?? []}
                   models={definition?.models ?? []}
                   endpoint={item.baseUrl}
+                  proxyMode={item.proxyMode}
                   probeResult={probeResults[item.id]?.result}
                   probeError={probeResults[item.id]?.error}
                   probeVisible={probeResults[item.id]?.visible}

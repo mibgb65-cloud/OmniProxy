@@ -2,7 +2,9 @@ package gateway
 
 import (
 	"context"
+
 	"omniproxy/internal/core/agentprotocol"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/provider/oxionai"
 )
@@ -15,6 +17,8 @@ func (s *Service) SetSubscription(service SubscriptionAccess) { s.subscription =
 
 // forwardAgent 订阅 Responses 原样流式转发，跨协议保留文本及工具调用关联。
 func (s *Service) forwardAgent(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
+	// 把提供商身份写进 ctx：出站代理按它决定直连还是走代理。
+	ctx = netproxy.WithProvider(ctx, target.snapshot.ProviderID, target.kind)
 	if request.Compaction {
 		return s.forwardCompaction(ctx, target, request, consume)
 	}

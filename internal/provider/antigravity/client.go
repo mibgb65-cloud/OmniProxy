@@ -8,7 +8,9 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
+
 	"strings"
 	"time"
 )
@@ -32,7 +34,7 @@ func New(transport http.RoundTripper) *Client {
 		t := http.DefaultTransport.(*http.Transport).Clone()
 		t.ResponseHeaderTimeout = 30 * time.Second
 		t.TLSHandshakeTimeout = 10 * time.Second
-		transport = t
+		transport = netproxy.Wrap(t)
 	}
 	return &Client{http: &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 }
@@ -88,7 +90,7 @@ func (c *Client) request(ctx context.Context, endpoint string, body []byte, toke
 	req.Header.Set("User-Agent", "antigravity/2.23.0 OmniProxy")
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, Failure("upstream_unavailable")
+		return nil, proxy.UpstreamFailure(err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		resp.Body.Close()

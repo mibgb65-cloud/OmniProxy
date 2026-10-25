@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 // Update changes the name and endpoint of a custom provider.
@@ -63,6 +65,29 @@ func (s *Service) SetEnabled(ctx context.Context, id string, enabled bool) (Conf
 	changed, err := result.RowsAffected()
 	if err != nil {
 		return Configuration{}, fmt.Errorf("provider: set enabled result: %w", err)
+	}
+	if changed == 0 {
+		return Configuration{}, ErrNotFound
+	}
+	return s.get(ctx, id)
+}
+
+// SetProxyMode 只改变该提供商的出站代理策略，不影响启停与端点。
+func (s *Service) SetProxyMode(ctx context.Context, id, mode string) (Configuration, error) {
+	if err := validateID(id); err != nil {
+		return Configuration{}, err
+	}
+	if !netproxy.ValidMode(mode) {
+		return Configuration{}, fmt.Errorf("%w: proxy mode", ErrInvalidInput)
+	}
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	result, err := s.db.ExecContext(ctx, `UPDATE providers SET proxy_mode = ?, updated_at = ? WHERE id = ?`, mode, now, id)
+	if err != nil {
+		return Configuration{}, fmt.Errorf("provider: set proxy mode: %w", err)
+	}
+	changed, err := result.RowsAffected()
+	if err != nil {
+		return Configuration{}, fmt.Errorf("provider: set proxy mode result: %w", err)
 	}
 	if changed == 0 {
 		return Configuration{}, ErrNotFound

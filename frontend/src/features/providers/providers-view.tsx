@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react"
+import { Globe } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { Button } from "../../components/ui/button"
 import type { ProviderConfiguration, UpdateProviderInput } from "../../services/omniproxy"
 import type { ProbeDisplay } from "./provider-card"
 import { ProviderCatalog } from "./provider-catalog"
 import { ProviderForm } from "./provider-form"
 import { ProviderList } from "./provider-list"
+import { ProxySettingsDialog } from "./proxy-settings-dialog"
 import {
   useCreateProvider,
   useDeleteProvider,
@@ -33,6 +36,7 @@ export function ProvidersView({
   const setEnabled = useSetProviderEnabled()
   const probe = useProbeProvider()
   const [editor, setEditor] = useState<Editor | null>(null)
+  const [proxyOpen, setProxyOpen] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
   const [probeResults, setProbeResults] = useState<Record<string, ProbeDisplay>>({})
   const [probingId, setProbingId] = useState<string | null>(null)
@@ -128,8 +132,17 @@ export function ProvidersView({
 
   return (
     <div className="w-full min-w-0 space-y-7 pb-6">
-      <header>
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("providers.title")}</h1>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setProxyOpen(true)}
+          className="cursor-pointer"
+        >
+          <Globe aria-hidden="true" />
+          {t("providers.proxy.open")}
+        </Button>
       </header>
       {catalog.isPending || providers.isPending ? (
         <p role="status" className="text-muted-foreground text-sm">
@@ -181,6 +194,7 @@ export function ProvidersView({
           busy={setEnabled.isPending || update.isPending || remove.isPending}
         />
       ) : null}
+      {proxyOpen ? <ProxySettingsDialog onClose={() => setProxyOpen(false)} /> : null}
     </div>
   )
 }

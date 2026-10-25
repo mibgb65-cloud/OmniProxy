@@ -111,6 +111,7 @@ export const providers: ProviderConfiguration[] = [
   source: "builtin",
   name: item.id,
   baseUrl: "",
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }))

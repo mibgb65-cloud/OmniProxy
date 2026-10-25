@@ -8,6 +8,8 @@ import (
 	"math"
 	"net/http"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 // usageEndpoint 是官方客户端读取订阅额度的固定地址；不随配置变化，也不接受调用方拼接。
@@ -32,9 +34,10 @@ type UsageClient struct {
 }
 
 // NewUsageClient 复用调用方传输；为空时使用仅约束本接口的默认客户端。
+// 默认传输仍按提供商的出站策略分流，否则开了代理也读不到额度。
 func NewUsageClient(client *http.Client) *UsageClient {
 	if client == nil {
-		client = &http.Client{Timeout: usageTimeout}
+		client = &http.Client{Transport: netproxy.Wrap(nil), Timeout: usageTimeout}
 	}
 	return &UsageClient{http: client, endpoint: usageEndpoint}
 }

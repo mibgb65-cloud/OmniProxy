@@ -65,6 +65,7 @@ describe("dashboard overview", () => {
         name: "Google",
         source: "builtin",
         enabled: true,
+        proxyMode: "inherit",
         baseUrl: "",
         createdAt: "",
         updatedAt: "",

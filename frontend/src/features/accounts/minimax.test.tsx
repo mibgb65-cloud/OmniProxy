@@ -25,6 +25,7 @@ const provider = {
   name: "MiniMax",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

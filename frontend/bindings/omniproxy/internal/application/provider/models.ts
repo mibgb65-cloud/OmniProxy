@@ -11,6 +11,11 @@ export interface Configuration {
     "name": string;
     "baseUrl": string;
     "enabled": boolean;
+
+    /**
+     * ProxyMode 决定该提供商是否经代理出站：inherit | direct | proxy。
+     */
+    "proxyMode": string;
     "createdAt": string;
     "updatedAt": string;
 }

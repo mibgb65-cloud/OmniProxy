@@ -22,6 +22,12 @@ import type {
   ProbeResult as ProviderProbeResult,
   UpdateInput as UpdateProviderInput,
 } from "../../bindings/omniproxy/internal/application/provider"
+import type {
+  Discovered as ProxyDiscovered,
+  SaveInput as ProxySaveInput,
+  Settings as ProxySettings,
+  TestResult as ProxyTestResult,
+} from "../../bindings/omniproxy/internal/application/proxysettings"
 
 export type {
   AppInfo,
@@ -46,6 +52,7 @@ export type {
   ProviderProbeResult,
   UpdateProviderInput,
 }
+export type { ProxyDiscovered, ProxySaveInput, ProxySettings, ProxyTestResult }
 
 /** getAppInfo returns the application runtime information from the Go backend. */
 export function getAppInfo(): Promise<AppInfo> {
@@ -149,6 +156,31 @@ export function probeProvider(id: string): Promise<ProviderProbeResult> {
 /** deleteProvider removes an unreferenced configuration. */
 export function deleteProvider(id: string): Promise<void> {
   return AppService.DeleteProvider(id)
+}
+
+/** setProviderProxyMode 设置该提供商的出站策略：inherit | direct | proxy。 */
+export function setProviderProxyMode(id: string, mode: string): Promise<ProviderConfiguration> {
+  return AppService.SetProviderProxyMode(id, mode)
+}
+
+/** 只返回脱敏后的代理配置，密码留在凭据库中。 */
+export function getProxySettings(): Promise<ProxySettings> {
+  return AppService.GetProxySettings()
+}
+
+/** saveProxySettings 保存代理连接参数；密码只写入凭据库。 */
+export function saveProxySettings(input: ProxySaveInput): Promise<ProxySettings> {
+  return AppService.SaveProxySettings(input)
+}
+
+/** testProxySettings 探测端点可用的协议，不改变已保存设置。 */
+export function testProxySettings(input: ProxySaveInput): Promise<ProxyTestResult> {
+  return AppService.TestProxySettings(input)
+}
+
+/** discoverProxyPorts 探测本机常见代理端口。 */
+export async function discoverProxyPorts(): Promise<ProxyDiscovered[]> {
+  return (await AppService.DiscoverProxyPorts()) ?? []
 }
 
 /** 返回账号元数据；自动名称可能含 Key 前缀，密钥字段与凭证引用不返回。 */

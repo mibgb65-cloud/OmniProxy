@@ -49,6 +49,7 @@ export function ProviderCatalog({
               plannedAuthMethods={definition.plannedAuthMethods}
               models={definition.models ?? []}
               endpoint={definition.defaultBaseUrl}
+              proxyMode={item.proxyMode}
               probeResult={probeResults[item.id]?.result}
               probeError={probeResults[item.id]?.error}
               probeVisible={probeResults[item.id]?.visible}

@@ -30,6 +30,7 @@ export const providers: ProviderConfiguration[] = [
   source: "builtin",
   enabled: true,
   baseUrl: "",
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }))

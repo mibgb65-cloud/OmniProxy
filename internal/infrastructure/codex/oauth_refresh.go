@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 // 与 v1 相同的官方 OAuth 参数：先用授权码换令牌，再用 refresh_token 续期。
@@ -47,7 +49,8 @@ func AuthNeedsRefresh(raw string, now time.Time) bool {
 // RefreshAuthJSON 用 refresh_token 换新访问令牌，其余字段原样保留。
 func RefreshAuthJSON(ctx context.Context, client *http.Client, raw string, now time.Time) (string, bool, error) {
 	if client == nil {
-		client = http.DefaultClient
+		// 续期同样属于提供商出站流量：默认客户端不能绕过代理策略。
+		client = &http.Client{Transport: netproxy.Wrap(nil)}
 	}
 	auth, tokens, topLevel, err := parseAuth(raw)
 	if err != nil {

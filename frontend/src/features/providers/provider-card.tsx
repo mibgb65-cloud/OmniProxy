@@ -25,6 +25,7 @@ export function ProviderCard({
   plannedAuthMethods,
   models,
   endpoint,
+  proxyMode,
   probeResult,
   probeError,
   probeVisible,
@@ -42,6 +43,8 @@ export function ProviderCard({
   plannedAuthMethods: string[] | null
   models: string[]
   endpoint?: string
+  /** 出站策略；只有 "proxy" 会在卡片上显示代理标记。 */
+  proxyMode?: string
   probeResult?: ProviderProbeResult
   probeError?: boolean
   probeVisible?: boolean
@@ -123,6 +126,16 @@ export function ProviderCard({
             <span className="border-border bg-muted/50 rounded-md border px-2 py-0.5 text-xs">
               {t(subscriptionTypeKey(kind))}
             </span>
+          ) : null}
+          {proxyMode === "proxy" ? (
+            <Tooltip content={t("providers.proxy.badgeHint")}>
+              <span
+                data-slot="provider-proxy-badge"
+                className="border-border bg-muted/50 rounded-md border px-2 py-0.5 text-xs"
+              >
+                {t("providers.proxy.badge")}
+              </span>
+            </Tooltip>
           ) : null}
         </div>
         <div className="border-border flex flex-wrap items-center justify-between gap-2 border-t pt-3">

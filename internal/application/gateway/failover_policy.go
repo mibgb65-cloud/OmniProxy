@@ -72,10 +72,14 @@ func riverTransientFailure(ctx context.Context, status int, err error) bool {
 	if ctx.Err() != nil {
 		return false
 	}
+	var failure *proxy.Error
+	if errors.As(err, &failure) && proxy.ProxyLayerFailure(failure.Code) {
+		// 代理层故障与账号无关，不能累加成账号失败。
+		return false
+	}
 	if status >= 500 && status <= 599 {
 		return true
 	}
-	var failure *proxy.Error
 	return errors.As(err, &failure) && failure.StatusCode >= 500 && strings.HasPrefix(failure.Code, "upstream_")
 }
 

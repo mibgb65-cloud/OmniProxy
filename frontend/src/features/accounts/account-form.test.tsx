@@ -12,6 +12,7 @@ const provider = {
   name: "DeepSeek",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

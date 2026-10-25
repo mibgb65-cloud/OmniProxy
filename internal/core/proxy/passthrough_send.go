@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 const passthroughChunkBytes = 32 << 10
@@ -25,6 +27,8 @@ func (s *Server) sendPassthrough(ctx context.Context, request PassthroughRequest
 	if err != nil {
 		return nil, Failure("invalid_request", 400)
 	}
+	// 透明转发同样按提供商的出站策略走代理，错误码带上代理层的区分。
+	req = req.WithContext(netproxy.WithProvider(req.Context(), target.Snapshot.ProviderID, target.Snapshot.ProviderKind))
 	copyPassthroughHeaders(req.Header, request.Header)
 	applyAttemptHeaders(req.Header, target.Header)
 	req.Host = req.URL.Host
@@ -33,7 +37,7 @@ func (s *Server) sendPassthrough(ctx context.Context, request PassthroughRequest
 		if ctx.Err() != nil {
 			return nil, safeFailure(ctx, err)
 		}
-		return nil, Failure("upstream_unavailable", 502)
+		return nil, UpstreamFailure(err)
 	}
 	return resp, nil
 }

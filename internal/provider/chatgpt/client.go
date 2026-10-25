@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 	"time"
 )
@@ -17,7 +18,7 @@ func New(transport http.RoundTripper) *Client {
 		t := http.DefaultTransport.(*http.Transport).Clone()
 		t.ResponseHeaderTimeout = 45 * time.Second
 		t.TLSHandshakeTimeout = 10 * time.Second
-		transport = t
+		transport = netproxy.Wrap(t)
 	}
 	return &Client{&http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 }
@@ -57,7 +58,7 @@ func (c *Client) send(ctx context.Context, key []byte, accountID string, raw []b
 	}
 	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewReader(raw))
 	if err != nil {
-		return proxy.Failure("upstream_unavailable", 502)
+		return proxy.UpstreamFailure(err)
 	}
 	req.Header.Set("Authorization", "Bearer "+string(key))
 	req.Header.Set("ChatGPT-Account-ID", accountID)
@@ -76,7 +77,7 @@ func (c *Client) send(ctx context.Context, key []byte, accountID string, raw []b
 	defer req.Header.Del("ChatGPT-Account-ID")
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return proxy.Failure("upstream_unavailable", 502)
+		return proxy.UpstreamFailure(err)
 	}
 	defer resp.Body.Close()
 	result := proxy.Response{StatusCode: resp.StatusCode, ContentType: resp.Header.Get("Content-Type"), RetryAfter: resp.Header.Get("Retry-After"), Body: resp.Body}

@@ -44,6 +44,9 @@ import * as modelcatalog$0 from "../../application/modelcatalog/models.js";
 import * as provider$0 from "../../application/provider/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as proxysettings$0 from "../../application/proxysettings/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as quotaactivation$0 from "../../application/quotaactivation/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -308,6 +311,13 @@ export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> 
 }
 
 /**
+ * DiscoverProxyPorts 探测本机常见代理端口（v2rayN / Clash / mihomo）。
+ */
+export function DiscoverProxyPorts(): $CancellablePromise<proxysettings$0.Discovered[] | null> {
+    return $Call.ByID(2679691642);
+}
+
+/**
  * GatewayFailoverHealth 只读当前运行状态，不修改账号启用或授权状态。
  */
 export function GatewayFailoverHealth(): $CancellablePromise<gateway$0.AccountHealth[] | null> {
@@ -375,6 +385,13 @@ export function GetKimiSettings(): $CancellablePromise<routing$0.KimiSettings> {
  */
 export function GetMiMoSettings(): $CancellablePromise<routing$0.MiMoSettings> {
     return $Call.ByID(2277291200);
+}
+
+/**
+ * GetProxySettings 返回不含密码的代理设置。
+ */
+export function GetProxySettings(): $CancellablePromise<proxysettings$0.Settings> {
+    return $Call.ByID(3156584628);
 }
 
 export function GetRiverSettings(): $CancellablePromise<gateway$0.RiverSettings> {
@@ -617,6 +634,13 @@ export function RuntimeInfo(): $CancellablePromise<$models.RuntimeInfo> {
 }
 
 /**
+ * SaveProxySettings 保存代理连接参数；密码只进凭据库。
+ */
+export function SaveProxySettings(input: proxysettings$0.SaveInput): $CancellablePromise<proxysettings$0.Settings> {
+    return $Call.ByID(1131378973, input);
+}
+
+/**
  * SelectDirectory opens a native folder picker and returns the chosen path.
  * An empty string means the user cancelled. The title is provided by the
  * caller so the dialog follows the UI language.
@@ -745,6 +769,13 @@ export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePr
     return $Call.ByID(3123769335, id, enabled);
 }
 
+/**
+ * SetProviderProxyMode 设置单个提供商的出站策略：inherit | direct | proxy。
+ */
+export function SetProviderProxyMode(id: string, mode: string): $CancellablePromise<provider$0.Configuration> {
+    return $Call.ByID(3155139389, id, mode);
+}
+
 export function SetRiverAccountRotationMode(mode: string): $CancellablePromise<gateway$0.RiverSettings> {
     return $Call.ByID(1061042611, mode);
 }
@@ -866,6 +897,13 @@ export function SubscriptionRefresh(id: string): $CancellablePromise<account$0.I
  */
 export function SubscriptionResetStatus(id: string): $CancellablePromise<subscription$0.ResetOperation> {
     return $Call.ByID(1027449805, id);
+}
+
+/**
+ * TestProxySettings 探测给定端点可用的协议，不改变已保存设置。
+ */
+export function TestProxySettings(input: proxysettings$0.SaveInput): $CancellablePromise<proxysettings$0.TestResult> {
+    return $Call.ByID(2259643390, input);
 }
 
 /**

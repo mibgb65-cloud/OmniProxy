@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 // servePassthroughSocket 与 v1 一致：真正拨到上游 wss，然后双向原样中继帧。
@@ -148,11 +150,14 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 			return nil, PassthroughAttempt{}, urlErr
 		}
 		dialCtx, dialCancel := context.WithTimeout(r.Context(), 5*time.Second)
+		// 与 HTTP 透明转发同一套出站策略：CONNECT 由代理 Transport 完成。
+		dialCtx = netproxy.WithProvider(dialCtx, target.Snapshot.ProviderID, target.Snapshot.ProviderKind)
 		stage = BeginSocketStage(dialCtx, "upstream_dial")
 		upstream, upstreamResp, dialErr := websocket.Dial(dialCtx, targetURL, &websocket.DialOptions{
 			HTTPHeader:      socketAttemptHeaders(request.Header, target.Header),
 			Subprotocols:    subprotocols,
 			CompressionMode: websocket.CompressionContextTakeover,
+			HTTPClient:      s.passthrough,
 		})
 		stage(dialErr)
 		dialErrContext := dialCtx.Err()
@@ -179,6 +184,10 @@ func (s *Server) dialPassthroughSocket(r *http.Request, session PassthroughSessi
 		}
 		if dialErrContext != nil {
 			return nil, PassthroughAttempt{}, Failure("upstream_socket_timeout", 504)
+		}
+		// 代理层故障与账号无关：既不换号，也不报成上游不可用。
+		if failure := UpstreamFailure(dialErr); netproxy.CodeOf(dialErr) != "" {
+			return nil, PassthroughAttempt{}, failure
 		}
 		lastErr = socketDialFailure(status)
 		if status == 0 || !session.Retryable(target, status) {

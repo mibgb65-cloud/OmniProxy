@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"omniproxy/internal/core/netproxy"
 )
 
 // Server 管理单个本机监听器，启停操作串行化，停止会取消正在进行的上游请求。
@@ -42,7 +44,7 @@ func New(opts Options) *Server {
 		opts: opts, status: Status{State: "stopped", Port: opts.Port},
 		slots:       make(chan struct{}, opts.MaxConcurrent),
 		socketSlots: make(chan struct{}, opts.MaxConcurrent),
-		passthrough: &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
+		passthrough: &http.Client{Transport: netproxy.Wrap(transport), CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
 	}
 }
 

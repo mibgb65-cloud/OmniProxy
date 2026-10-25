@@ -68,3 +68,4 @@ Kimi Code 订阅 Key、计费／地区顺序与身份保留见 [ADR-012](ADR-012
 | [ADR-004](ADR-004-reset-credit-idempotency.md)                   | Accepted| 重置卡手动兑换与持久化幂等操作记录       |
 | [ADR-007](ADR-007-dashboard-time-buckets.md)                    | Accepted| 仪表盘时间桶、统计保留与事件更新         |
 | [ADR-008](ADR-008-client-model-catalog.md)                    | Accepted| 统一模型目录、客户端格式与安全自动配置   |
+| [ADR-025](ADR-025-provider-outbound-proxy.md)                    | Accepted| 提供商出站代理：mixed 协议识别与三态路由  |

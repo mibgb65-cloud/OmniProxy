@@ -29,6 +29,7 @@ const provider: ProviderConfiguration = {
   source: "builtin",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

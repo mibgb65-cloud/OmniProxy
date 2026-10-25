@@ -8,6 +8,7 @@ import {
   createProvider,
   deleteProvider,
   getProviderCatalog,
+  getProxySettings,
   listProviders,
   probeProvider,
   setProviderEnabled,
@@ -26,6 +27,11 @@ vi.mock("../../services/omniproxy", () => ({
   setProviderEnabled: vi.fn(),
   probeProvider: vi.fn(),
   deleteProvider: vi.fn(),
+  getProxySettings: vi.fn(),
+  saveProxySettings: vi.fn(),
+  testProxySettings: vi.fn(),
+  discoverProxyPorts: vi.fn(),
+  setProviderProxyMode: vi.fn(),
 }))
 
 afterEach(() => vi.useRealTimers())
@@ -58,6 +64,7 @@ const builtins: ProviderConfiguration[] = kinds.map((kind) => ({
   name: kind,
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "2026-09-28T00:00:00Z",
   updatedAt: "2026-09-28T00:00:00Z",
 }))
@@ -68,6 +75,7 @@ const custom: ProviderConfiguration = {
   name: "My endpoint",
   baseUrl: "https://api.example.test/v1",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "2026-09-28T00:00:00Z",
   updatedAt: "2026-09-28T00:00:00Z",
 }
@@ -292,5 +300,24 @@ describe("ProvidersView", () => {
     await user.click(await screen.findByRole("button", { name: "删除" }))
     await user.click(screen.getAllByRole("button", { name: "删除" })[1])
     expect(await screen.findByRole("alert")).toHaveTextContent("该配置下仍有账号")
+  })
+
+  it("opens the outbound proxy dialog from the header", async () => {
+    const user = userEvent.setup()
+    vi.mocked(getProxySettings).mockResolvedValue({
+      enabled: false,
+      scheme: "auto",
+      host: "",
+      port: 0,
+      username: "",
+      hasPassword: false,
+      noProxy: "",
+      detectedScheme: "",
+      updatedAt: "",
+      endpoint: "",
+    })
+    renderPage()
+    await user.click(await screen.findByRole("button", { name: "网络代理" }))
+    expect(await screen.findByRole("dialog")).toHaveAccessibleName("网络代理")
   })
 })

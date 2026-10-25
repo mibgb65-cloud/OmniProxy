@@ -20,9 +20,12 @@ import (
 	"omniproxy/internal/application/agentconfig"
 	"omniproxy/internal/application/agentinstall"
 	"omniproxy/internal/application/gateway"
+	"omniproxy/internal/application/proxysettings"
 	"omniproxy/internal/application/quotaactivation"
 	"omniproxy/internal/application/updater"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/appinstall"
+	"omniproxy/internal/infrastructure/credential"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
 	"omniproxy/internal/transport/httpapi"
@@ -53,6 +56,8 @@ type AppService struct {
 	prof             *profile.Profile
 	control          *httpapi.Server
 	db               *sql.DB
+	secrets          proxysettings.SecretStore
+	proxySettings    *proxysettings.Service
 	logFiles         *logger.Files
 	log              *slog.Logger
 	startedAt        time.Time
@@ -92,9 +97,29 @@ func NewAppService(
 		log:       log,
 		startedAt: time.Now(),
 	}
+	service.initOutboundProxy()
 	service.initGateway()
 	service.initAgentInstaller()
 	return service
+}
+
+// initOutboundProxy 安装出站代理解析器，让所有上游适配器按设置分流。
+// 凭据库不可用时保持直连行为，不阻断应用启动。
+func (s *AppService) initOutboundProxy() {
+	if s.db == nil || s.prof == nil {
+		return
+	}
+	store, err := credential.New(s.prof)
+	if err != nil {
+		if s.log != nil {
+			s.log.Warn("outbound proxy credentials unavailable; provider proxy disabled", "module", "netproxy", "error", err)
+		}
+		return
+	}
+	s.secrets = store
+	// 绑定层与出站分流使用同一个服务实例，保存后的失效才对两者同时生效。
+	s.proxySettings = proxysettings.NewService(s.db, store)
+	netproxy.Install(s.proxySettings)
 }
 
 // AppInfo is a snapshot of application runtime information for the UI.

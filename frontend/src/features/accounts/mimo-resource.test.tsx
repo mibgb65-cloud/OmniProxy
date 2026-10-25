@@ -18,6 +18,7 @@ const provider = {
   name: "MiMo",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "",
   updatedAt: "",
 }

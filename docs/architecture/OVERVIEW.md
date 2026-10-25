@@ -333,6 +333,8 @@ types, no Wails types, no database types in its public API.
 
 DeepSeek 适配器在回调结束前关闭响应，禁止上游重定向，仅接受 HTTPS 或明确配置的本机 HTTP 端点。客户端 Header 不透传；上游错误只向客户端返回稳定代码。代理日志只记录模型、流式标记、分类和耗时，不保存提示词、回复或密钥。
 
+`internal/core/netproxy` 负责出站代理：端点解析（`mixed:10808`、`socks5h://…`、纯端口形式）、mixed 端口的协议探测（SOCKS5 greeting 与 HTTP CONNECT 状态行，不产生真实出网流量）、本机端口发现，以及按请求上下文里的提供商身份分流的上游 `RoundTripper`。各提供商适配器只在自建 Transport 时调用 `netproxy.Wrap`，本地超时与 TLS 配置保持不变；未安装 Resolver 时原样返回，测试与旧行为一致。代理层故障换算成 `proxy_unavailable`／`proxy_protocol_mismatch`／`proxy_not_configured`，不参与账号换号与冷却。设置读取由 `internal/application/proxysettings` 实现（迁移 044 的 `proxy_settings` 单例与 `providers.proxy_mode`）。详见 `docs/product/NETWORK_PROXY.md` 与 ADR-025。
+
 桌面绑定提供 GatewayInfo／GatewayStart／GatewayStop／GatewayTest。状态变化通过类型化 `gateway:status` 事件通知前端重新读取快照，避免事件乱序覆盖真实状态；无轮询。关闭网关和退出应用都会取消在途请求。HTTP Control API 仍只提供健康检查，与代理端口、桌面绑定分离。
 
 ### Infrastructure

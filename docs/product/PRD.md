@@ -62,6 +62,7 @@ accounts need one local place to:
 - 提供商卡片使用与账号一致的电源图标按钮控制启停：绿色表示启用，灰色表示停用，悬浮提示说明下一步操作。
 - Provider cards show a curated model preview and an unauthenticated endpoint
   reachability/response-time check; actual model access depends on an account.
+- 提供商页提供「网络代理」设置：连接本机已运行的 v2rayN／Clash 端口（支持同一端口同时提供 HTTP 与 SOCKS5 的 mixed 模式，由应用自动识别并纠偏），按提供商三态选择跟随全局／直连／走代理；代理端口不可用时返回独立错误码，不消耗账号、不写冷却；应用自身更新与 Agent 下载不经该代理。详见 `docs/product/NETWORK_PROXY.md`、ADR-025。
 - 点击模型预览后在浮层中查看完整预设列表，卡片和同一行相邻卡片高度保持稳定；浮层支持键盘打开、Esc／外部点击关闭和窗口边缘避让。
 - 点击提供商卡片（内置或自定义）进入该提供商自己的账号页面；卡片内的启停、测试、模型预览、编辑和删除仍只执行自身操作，标题是键盘可达的同一入口。
 - Multi-account management with OS-protected local credential storage; account

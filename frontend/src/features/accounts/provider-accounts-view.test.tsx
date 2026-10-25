@@ -67,6 +67,7 @@ const provider: ProviderConfiguration = {
   name: "DeepSeek",
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "2026-09-28T00:00:00Z",
   updatedAt: "2026-09-28T00:00:00Z",
 }

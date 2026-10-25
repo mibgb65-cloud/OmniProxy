@@ -46,13 +46,13 @@ func setupService(t *testing.T, handler http.Handler) (*Service, *sql.DB, *testS
 			t.Error(err)
 		}
 	})
-	_, err = db.Exec(`CREATE TABLE providers(id TEXT PRIMARY KEY,kind TEXT,source TEXT,name TEXT,base_url TEXT,enabled INTEGER,created_at TEXT,updated_at TEXT);
+	_, err = db.Exec(`CREATE TABLE providers(id TEXT PRIMARY KEY,kind TEXT,source TEXT,name TEXT,base_url TEXT,enabled INTEGER,created_at TEXT,updated_at TEXT,proxy_mode TEXT DEFAULT 'inherit');
 	CREATE TABLE accounts(id TEXT PRIMARY KEY,provider_id TEXT,name TEXT,credential_ref TEXT,enabled INTEGER,created_at TEXT,updated_at TEXT,auth_method TEXT DEFAULT 'api_key',auth_email TEXT DEFAULT '',auth_plan TEXT DEFAULT '',auth_state TEXT DEFAULT '',auth_account_id TEXT DEFAULT '');
 	INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('acct_first','builtin_deepseek','name must not be logged','test-ref',1,'2026-01-01T00:00:00Z','2026-01-01T00:00:00Z');`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec(`INSERT INTO providers VALUES('builtin_deepseek','deepseek','builtin','DeepSeek',?,1,'2026-01-01T00:00:00Z','2026-01-01T00:00:00Z')`, upstream.URL); err != nil {
+	if _, err := db.Exec(`INSERT INTO providers VALUES('builtin_deepseek','deepseek','builtin','DeepSeek',?,1,'2026-01-01T00:00:00Z','2026-01-01T00:00:00Z','inherit')`, upstream.URL); err != nil {
 		t.Fatal(err)
 	}
 	store := &testStore{}

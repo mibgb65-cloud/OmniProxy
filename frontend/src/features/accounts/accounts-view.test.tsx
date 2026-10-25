@@ -64,6 +64,7 @@ const providers: ProviderConfiguration[] = kinds.map((kind) => ({
   name: kind,
   baseUrl: "",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "2026-09-28T00:00:00Z",
   updatedAt: "2026-09-28T00:00:00Z",
 }))
@@ -74,6 +75,7 @@ const custom: ProviderConfiguration = {
   name: "Custom API",
   baseUrl: "https://example.test/v1",
   enabled: true,
+  proxyMode: "inherit",
   createdAt: "2026-09-28T00:00:00Z",
   updatedAt: "2026-09-28T00:00:00Z",
 }

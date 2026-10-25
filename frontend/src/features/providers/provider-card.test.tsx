@@ -144,4 +144,17 @@ describe("ProviderCard accounts entry", () => {
     expect(screen.queryByRole("button", { name: "查看openai的账号" })).not.toBeInTheDocument()
     expect(screen.getByText("openai")).toBeInTheDocument()
   })
+
+  it("marks a provider whose requests use the outbound proxy", () => {
+    renderCard("openai", "https://example.test/v1", ["api_key"], { proxyMode: "proxy" })
+    expect(screen.getByText("代理")).toHaveAttribute("data-slot", "provider-proxy-badge")
+  })
+
+  it.each(["inherit", "direct", undefined])(
+    "keeps the proxy badge off for the %s mode",
+    (proxyMode) => {
+      renderCard("openai", "https://example.test/v1", ["api_key"], { proxyMode })
+      expect(screen.queryByText("代理")).not.toBeInTheDocument()
+    },
+  )
 })

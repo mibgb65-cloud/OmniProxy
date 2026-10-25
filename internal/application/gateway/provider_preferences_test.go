@@ -46,10 +46,10 @@ func TestGatewayUsesModelProviderPreferenceWithoutRestart(t *testing.T) {
 INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('acct_backup','backup','Backup','test-ref',1,'2026-02-01T00:00:00Z','now');`); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec(`INSERT INTO providers VALUES('backup','deepseek','custom','Backup',?,1,'2026-02-01T00:00:00Z','now')`, backup.URL); err != nil {
+	if _, err := db.Exec(`INSERT INTO providers VALUES('backup','deepseek','custom','Backup',?,1,'2026-02-01T00:00:00Z','now','inherit')`, backup.URL); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.Exec(`INSERT INTO providers VALUES('second','deepseek','custom','Second',?,1,'2026-03-01T00:00:00Z','now');
+	if _, err := db.Exec(`INSERT INTO providers VALUES('second','deepseek','custom','Second',?,1,'2026-03-01T00:00:00Z','now','inherit');
 INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at) VALUES('acct_second','second','Second','test-ref',1,'2026-03-01T00:00:00Z','now');`, second.URL); err != nil {
 		t.Fatal(err)
 	}

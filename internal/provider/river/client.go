@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 )
 
@@ -23,7 +24,7 @@ func New(transport http.RoundTripper) *Client {
 		standard.ResponseHeaderTimeout = 45 * time.Second
 		standard.TLSHandshakeTimeout = 10 * time.Second
 		standard.MaxIdleConnsPerHost = 16
-		transport = standard
+		transport = netproxy.Wrap(standard)
 	}
 	return &Client{http: &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 }
@@ -47,7 +48,7 @@ func (c *Client) Forward(ctx context.Context, baseURL string, key []byte, reques
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
-		return proxy.Failure("upstream_unavailable", 502)
+		return proxy.UpstreamFailure(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+string(key))
@@ -57,7 +58,7 @@ func (c *Client) Forward(ctx context.Context, baseURL string, key []byte, reques
 	}
 	response, err := c.http.Do(req)
 	if err != nil {
-		return proxy.Failure("upstream_unavailable", 502)
+		return proxy.UpstreamFailure(err)
 	}
 	defer func() {
 		if err := response.Body.Close(); err != nil && result == nil {

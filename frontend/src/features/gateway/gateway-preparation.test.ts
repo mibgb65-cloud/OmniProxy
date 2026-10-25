@@ -22,6 +22,7 @@ describe("网关接入准备", () => {
       source: "builtin",
       name: item.id,
       baseUrl: "",
+      proxyMode: "inherit",
       createdAt: "",
       updatedAt: "",
     }))
