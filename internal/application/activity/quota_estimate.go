@@ -12,6 +12,10 @@ import (
 	"omniproxy/internal/core/tokenprice"
 )
 
+// quotaEstimateUnknownShareLimit 是窗口内允许的「用量未知记录」占比上限。
+// 少量未知只让金额偏低，仍比整窗不显示有用；超过上限时偏差无法解释，宁可显示 —。
+const quotaEstimateUnknownShareLimit = 0.2
+
 // QuotaEstimate 按旧版公式推算当前窗口，仅基于保留的本机代理样本和基础参考价。
 type QuotaEstimate struct {
 	FetchedAt string               `json:"fetchedAt"`
@@ -127,7 +131,7 @@ func (s *Service) windowCost(ctx context.Context, item account.Item, start, end 
 		return ErrUnavailable
 	}
 	defer rows.Close()
-	incomplete := false
+	incomplete := 0
 	for rows.Next() {
 		var model, state string
 		var input, output int64
@@ -138,7 +142,7 @@ func (s *Service) windowCost(ctx context.Context, item account.Item, start, end 
 		}
 		result.Requests++
 		if !complete || state == "pending" {
-			incomplete = true
+			incomplete++
 			continue
 		}
 		price, ok := tokenprice.Lookup(model)
@@ -160,7 +164,9 @@ func (s *Service) windowCost(ctx context.Context, item account.Item, start, end 
 	switch {
 	case result.UnpricedRequests > 0:
 		result.Status = "unknown_price"
-	case incomplete:
+	// 缺用量与未知价格不同：缺用量的记录只是没进入已知样本，少量时金额只会偏低；
+	// 未知模型可能整窗都无法定价，因此仍然否决。未知占比超过上限时同样无法解释偏差。
+	case result.Requests > 0 && float64(incomplete) > float64(result.Requests)*quotaEstimateUnknownShareLimit:
 		result.Status = "missing_usage"
 	case result.Requests == 0 || result.UsedMax <= 0:
 		result.Status = "no_usage"

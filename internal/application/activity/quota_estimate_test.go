@@ -121,6 +121,45 @@ func TestQuotaEstimateUnknownModelThresholdExpiryAndIncompleteUsage(t *testing.T
 	}
 }
 
+// TestQuotaEstimateToleratesFewUnknownUsageRecords 断言少量「成功但没有 usage」的记录
+// 不再否决整窗：金额按已知样本估算，只有未知占比超过上限时才回到 missing_usage。
+// 回归背景：透明转发下偶尔出现 200 但 usage 缺失的记录，曾让 98% 有效样本的窗口显示 “—”。
+func TestQuotaEstimateToleratesFewUnknownUsageRecords(t *testing.T) {
+	unknownEvent := func(t *testing.T, s *Service, id int, item account.Item, now time.Time) {
+		t.Helper()
+		e := event(id, item.AuthEmail, item.ID)
+		e.StartedAt, e.FinishedAt = now.Add(-time.Hour), now.Add(-time.Minute)
+		record(t, s, e)
+	}
+	t.Run("few unknown keeps estimate", func(t *testing.T) {
+		s, item, quota, now := estimateFixture(t)
+		for index := 1; index <= 5; index++ {
+			estimateEvent(t, s, index, now.Add(-time.Hour), "gpt-6.1-sol", nil)
+		}
+		unknownEvent(t, s, 6, item, now)
+		got, err := s.EstimateQuota(context.Background(), item, quota, now)
+		if err != nil || got.Weekly.Status != "ready" || got.Weekly.Requests != 6 {
+			t.Fatal("少量未知用量否决了整窗", got.Weekly, err)
+		}
+		// 5 条已知样本各 3 USD 等值，已用 20% → 75；未知记录不能污染已知样本合计。
+		if !closeEnough(got.Weekly.UsedMax, 15) || !closeEnough(got.Weekly.Total, 75) {
+			t.Fatal("unknown record leaked into the estimate", got.Weekly)
+		}
+	})
+	t.Run("too many unknown still refused", func(t *testing.T) {
+		s, item, quota, now := estimateFixture(t)
+		for index := 1; index <= 3; index++ {
+			estimateEvent(t, s, index, now.Add(-time.Hour), "gpt-6.1-sol", nil)
+		}
+		unknownEvent(t, s, 4, item, now)
+		unknownEvent(t, s, 5, item, now)
+		got, err := s.EstimateQuota(context.Background(), item, quota, now)
+		if err != nil || got.Weekly.Status != "missing_usage" {
+			t.Fatal("未知占比超过上限仍给出金额", got.Weekly, err)
+		}
+	})
+}
+
 func TestQuotaEstimateFiveHourEarlyResetPreservesFullWeeklyUsage(t *testing.T) {
 	s, item, quota, now := estimateFixture(t)
 	if _, err := s.db.Exec(`INSERT INTO accounts(id,provider_id,name,created_at,updated_at) VALUES('a','builtin_openai','test','now','now')`); err != nil {
