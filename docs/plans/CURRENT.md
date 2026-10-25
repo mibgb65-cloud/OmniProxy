@@ -64,6 +64,10 @@
 
 ## Recently Completed
 
+- [TASK-20261025-003](../tasks/completed/2026-10/TASK-20261025-003-passthrough-websocket-turn-accounting.md)：`e539de9`，透明转发 WebSocket 按轮记账——每个 `response.create` 帧在转发前建一条 `transport=websocket` 请求并登记本轮账号尝试，上游终结事件写入该轮 input／output／缓存 Token 与首字耗时；客户端在终结事件前断开记 `request_cancelled`（499）、上游中途断开记 `upstream_disconnected`（502）、`generate:false` 预热不记账，帧字节始终原样中继。`task verify` exit 0；实机 Codex WebSocket 会话待用户验收。
+
+- [TASK-20261025-002](../tasks/completed/2026-10/TASK-20261025-002-quota-estimate-unknown-usage-tolerance.md)：`7279fa8`，额度美元估算不再被零星「成功但无 usage」的记录整窗否决——生产库实测一周窗口 192 条中有 4 条此类记录；现未知占比 ≤ 两成时按已确认样本估算（金额本就带 `≈`），超过才显示 `—`，未知价格模型仍整窗否决。`task verify` exit 0。
+
 - [TASK-20261025-001](../tasks/completed/2026-10/TASK-20261025-001-build-local-beta37-installer.md)：`db6d331`，Beta.37 production 本地安装包已构建并通过完整质量门（128 文件／760 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,063,983 bytes，SHA256 `0c117ed5564903f7867b615b5308497c13017ba164e907c8047bf11c7e73f365`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261024-022](../tasks/completed/2026-10/TASK-20261024-022-passthrough-quota-failover.md)：`1173f20`，Codex 透明入口（`/codex/v1`）在执行前额度拒绝时也能换号——额度判定上提到 `core/proxy` 共用、首事件 4 KiB 有界预读命中即按真实 `resets_at` 冷却换号、透明转发改尝试级记账（修掉换号即 `accounting_unavailable` 的缺陷）、冷却遵循上游 `Retry-After`、成功／拒绝后按需去抖刷新额度观察。全量 Go 测试与 format／vet／staticcheck 通过；完整 `task verify` 与实机 Codex 客户端验收待用户执行。

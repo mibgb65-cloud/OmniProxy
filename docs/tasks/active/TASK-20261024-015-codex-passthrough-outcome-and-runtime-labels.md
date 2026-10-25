@@ -211,6 +211,8 @@ upstream_media_type=missing
 - 透明转发的 WebSocket 仍不建请求记录：连接成不成功只体现在客户端提示与
   `gateway websocket failed` 日志里，请求列表看不到这类失败。逐轮（每个 `response.create`）
   记账需要先确定连接级与轮级的归属语义，留作后续任务。
+  > 已由 [TASK-20261025-003](../completed/2026-10/TASK-20261025-003-passthrough-websocket-turn-accounting.md)
+  > 处理：透明 WebSocket 现按轮记录请求、账号尝试与 Token 用量。
 - `codex-desktop`／`codex-vscode` 的识别依据是客户端自报的 `originator`／`User-Agent`；
   上游若改变这些标记，归属会退回 `codex`，不会错误归属到别的客户端。
 - 未声明 `Content-Type` 时按前缀判定，极少数以 `data:` 开头的非 SSE 正文会被当成流观察；
