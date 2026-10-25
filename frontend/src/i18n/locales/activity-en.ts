@@ -75,8 +75,6 @@ export const activityEn = {
   "activity.accountUsageLoading": "Reading local usage…",
   "activity.accountUsageFailed": "Cannot read local usage.",
   "activity.accountUsageRetry": "Retry",
-  "activity.accountUsageIncomplete":
-    "Includes requests in progress or with incomplete usage. Values reflect recorded usage only.",
   "activity.accountUsageNote":
     "Retained local proxy requests only; cached tokens are included in input. “—” means not reported and “≥” marks a partial known total.",
   "activity.retentionTitle": "Request and log records",

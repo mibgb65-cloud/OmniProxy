@@ -54,6 +54,7 @@ const usage = {
   requests: 5,
   unknownCacheRequests: 0,
   incompleteRequests: 0,
+  pendingRequests: 0,
 }
 
 function setup(value: SubscriptionQuota | null = quota, fiveHour = true) {

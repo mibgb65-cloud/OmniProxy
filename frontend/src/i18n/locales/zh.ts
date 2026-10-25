@@ -367,6 +367,7 @@ export const zh = {
   "accounts.cancel": "取消",
   "accounts.enabled": "已启用",
   "accounts.disabled": "已停用",
+  "accounts.inUse": "该 API Key 正在使用中",
   "accounts.toggleLabel": "切换账号“{{name}}”的启用状态",
   "accounts.power.enable": "启用账号",
   "accounts.power.disable": "停用账号",

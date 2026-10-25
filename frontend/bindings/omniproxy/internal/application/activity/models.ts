@@ -12,6 +12,11 @@ export interface AccountTokenUsage {
     "requests": number;
     "unknownCacheRequests": number;
     "incompleteRequests": number;
+
+    /**
+     * PendingRequests 是此刻仍在进行中的记录数，用于「正在使用」状态；历史未完整记录不算进行中。
+     */
+    "pendingRequests": number;
 }
 
 /**

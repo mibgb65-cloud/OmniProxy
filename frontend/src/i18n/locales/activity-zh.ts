@@ -74,7 +74,6 @@ export const activityZh = {
   "activity.accountUsageLoading": "正在读取本机用量…",
   "activity.accountUsageFailed": "无法读取本机用量。",
   "activity.accountUsageRetry": "重试",
-  "activity.accountUsageIncomplete": "包含进行中或用量未完整返回的请求，当前数值仅为已记录用量。",
   "activity.accountUsageNote":
     "仅统计本机留存的代理请求，缓存已包含在输入中；“—”表示上游未返回明细，“≥”表示仅统计到部分已知用量。",
   "activity.retentionTitle": "请求与日志记录",

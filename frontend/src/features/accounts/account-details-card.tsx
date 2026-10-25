@@ -10,6 +10,7 @@ import { Tooltip } from "../../components/ui/tooltip"
 import { useTranslation } from "react-i18next"
 import { Card, CardContent } from "../../components/ui/card"
 import { accountDisplayName, formatAccountTime } from "./account-display"
+import { AccountInUseIndicator } from "./account-in-use-indicator"
 import { AccountItemActions, type AccountItemActionsProps } from "./account-item-actions"
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
@@ -73,7 +74,8 @@ export function AccountDetailsCard({
             <div className="min-w-0 flex-1">
               <AccountKeyPreview account={account} />
             </div>
-            <div className="flex shrink-0 items-center">
+            <div className="flex shrink-0 items-center gap-2">
+              <AccountInUseIndicator account={account} />
               <AccountStatusBadge enabled={account.enabled} />
             </div>
           </div>

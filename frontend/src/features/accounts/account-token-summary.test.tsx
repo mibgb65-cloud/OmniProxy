@@ -10,6 +10,7 @@ const usage = {
   requests: 2,
   unknownCacheRequests: 2,
   incompleteRequests: 0,
+  pendingRequests: 0,
 }
 
 it("distinguishes unknown cache from zero and keeps partial lower bounds without notices", () => {

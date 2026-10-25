@@ -64,6 +64,8 @@
 
 ## Recently Completed
 
+- [TASK-20261025-010](../tasks/completed/2026-10/TASK-20261025-010-account-in-use-indicator.md)：River 账号卡片不再闪烁「包含进行中或用量未完整返回的请求…」说明行——改为 API Key 与「已启用」徽标之间的固定槽位：请求进行中显示旋转圆环，悬浮提示「该 API Key 正在使用中」，卡片高度因此恒定；判断依据从历史 `incompleteRequests` 换成新增的 `pendingRequests`（`state='pending'` 记录数），并保留 1.2 秒避免连续请求闪断。`task --force verify` exit 0（129 文件／785 项前端测试），1200×800 原生窗口圆环与悬浮提示截图核对通过；浅色与 80%／140% 字号待用户视觉验收。
+
 - [TASK-20261025-009](../tasks/completed/2026-10/TASK-20261025-009-sidebar-full-height-brand-header.md)：侧栏改为一体制通顶布局——标题栏不再横跨全屏左侧品牌，品牌标识（图标＋`OmniProxy`）只在侧栏顶部出现一次，收展按钮移到品牌栏右侧（收起态整行即展开按钮）；标题栏只覆盖内容区，保留拖动区与双击最大化。`task --force verify` exit 0（129 文件／782 项前端测试），1200×800 原生窗口展开／收起／悬停截图核对通过；浅色与 80%／140% 字号待用户视觉验收。
 
 - [TASK-20261025-008](../tasks/completed/2026-10/TASK-20261025-008-build-local-beta40-installer.md)：Beta.40 production 本地安装包已构建并通过完整质量门（129 文件／780 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,090,750 bytes，SHA256 `b9000218bfb7360f77797acfb561d9c51fe10e17f387a9cf9737b6f697cccb3d`）；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。

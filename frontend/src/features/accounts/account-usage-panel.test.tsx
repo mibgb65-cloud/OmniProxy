@@ -33,6 +33,7 @@ const usage = {
   requests: 2,
   unknownCacheRequests: 1,
   incompleteRequests: 0,
+  pendingRequests: 0,
 }
 const actions = { busy: false, onToggle: vi.fn(), onDelete: vi.fn(), onEdit: vi.fn() }
 
@@ -71,7 +72,7 @@ it.each(["cards", "list"] as const)("replaces River balance placeholders in %s",
   expect(readAccountTokenUsage).toHaveBeenCalledWith(account.id)
 })
 
-it("distinguishes explicit zero, unknown details and incomplete requests", async () => {
+it("distinguishes explicit zero and unknown details without a hint line", async () => {
   vi.mocked(readAccountTokenUsage).mockResolvedValue({
     ...usage,
     inputTokens: "0",
@@ -79,10 +80,57 @@ it("distinguishes explicit zero, unknown details and incomplete requests", async
     cachedInputTokens: "",
     incompleteRequests: 1,
   })
-  setup()
+  setup("cards")
   expect(await screen.findByText("0")).toBeInTheDocument()
   expect(screen.getAllByText("—")).toHaveLength(2)
-  expect(screen.getByText(/包含进行中或用量未完整返回/)).toBeInTheDocument()
+  // 追加说明行会改变卡片高度并随请求反复闪烁，改为卡片头部的「正在使用」圆环。
+  expect(screen.queryByText(/包含进行中或用量未完整返回/)).not.toBeInTheDocument()
+})
+
+it("shows an in-use ring while requests are pending and holds it briefly", async () => {
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({ ...usage, pendingRequests: 1 })
+  const { unmount } = setup("cards")
+  const ring = await screen.findByRole("status", { name: "该 API Key 正在使用中" })
+  expect(ring).toBeInTheDocument()
+  // 圆环固定占位，启用徽标的位置不随状态变化。
+  expect(screen.getByText("已启用")).toBeInTheDocument()
+
+  const listener = vi
+    .mocked(Events.On)
+    .mock.calls.find(([name]) => name === "activity:updated")?.[1]
+  vi.mocked(readAccountTokenUsage).mockResolvedValue(usage)
+  act(() => listener?.({ name: "activity:updated", data: [] }))
+  await waitFor(
+    () =>
+      expect(
+        screen.queryByRole("status", { name: "该 API Key 正在使用中" }),
+      ).not.toBeInTheDocument(),
+    { timeout: 3000 },
+  )
+  unmount()
+})
+
+it("explains the ring in a tooltip on hover", async () => {
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({ ...usage, pendingRequests: 1 })
+  setup("cards")
+  const ring = await screen.findByRole("status", { name: "该 API Key 正在使用中" })
+  await userEvent.hover(ring)
+  expect(await screen.findByRole("tooltip")).toHaveTextContent("该 API Key 正在使用中")
+})
+
+it("does not track accounts without the local usage panel", async () => {
+  vi.mocked(readAccountTokenUsage).mockResolvedValue({ ...usage, pendingRequests: 1 })
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <I18nProvider>
+      <QueryClientProvider client={client}>
+        <AccountDetailsCard account={{ ...account, providerId: "builtin_deepseek" }} {...actions} />
+      </QueryClientProvider>
+    </I18nProvider>,
+  )
+  await screen.findByText("已启用")
+  expect(screen.queryByRole("status", { name: "该 API Key 正在使用中" })).not.toBeInTheDocument()
+  expect(readAccountTokenUsage).not.toHaveBeenCalled()
 })
 
 it("hides raw errors and allows retrying local reads", async () => {

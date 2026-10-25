@@ -147,6 +147,7 @@ describe("ProviderAccountsView", () => {
       cachedInputTokens: "0",
       requests: 1,
       incompleteRequests: 0,
+      pendingRequests: 0,
       unknownCacheRequests: 0,
     })
     renderPage(river.id)

@@ -384,6 +384,7 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.cancel": "Cancel",
   "accounts.enabled": "Enabled",
   "accounts.disabled": "Disabled",
+  "accounts.inUse": "This API key is in use",
   "accounts.toggleLabel": "Toggle {{name}} account",
   "accounts.power.enable": "Enable account",
   "accounts.power.disable": "Disable account",

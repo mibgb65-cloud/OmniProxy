@@ -80,19 +80,20 @@ func TestAccountTokenUsageZeroUnknownAndPartial(t *testing.T) {
 			u := result.Usage
 			switch kind {
 			case "empty", "explicit_zero":
-				if u.InputTokens != "0" || u.OutputTokens != "0" || u.CachedInputTokens != "0" || u.IncompleteRequests != 0 {
+				if u.InputTokens != "0" || u.OutputTokens != "0" || u.CachedInputTokens != "0" || u.IncompleteRequests != 0 || u.PendingRequests != 0 {
 					t.Fatal("known zero rendered as unknown", u)
 				}
 			case "unknown":
-				if u.InputTokens != "" || u.OutputTokens != "" || u.CachedInputTokens != "" || u.IncompleteRequests != 1 {
+				if u.InputTokens != "" || u.OutputTokens != "" || u.CachedInputTokens != "" || u.IncompleteRequests != 1 || u.PendingRequests != 0 {
 					t.Fatal("missing usage fabricated zero", u)
 				}
 			case "pending":
-				if u.InputTokens != "123" || u.OutputTokens != "" || u.CachedInputTokens != "" || u.IncompleteRequests != 1 {
+				// 只有仍在进行中的记录计入 PendingRequests；历史未完整记录只影响 IncompleteRequests。
+				if u.InputTokens != "123" || u.OutputTokens != "" || u.CachedInputTokens != "" || u.IncompleteRequests != 1 || u.PendingRequests != 1 {
 					t.Fatal("pending known usage was hidden or invented", u)
 				}
 			case "partial":
-				if u.InputTokens != "" || u.OutputTokens != "42" || u.IncompleteRequests != 1 {
+				if u.InputTokens != "" || u.OutputTokens != "42" || u.IncompleteRequests != 1 || u.PendingRequests != 0 {
 					t.Fatal("partial output was discarded", u)
 				}
 			}

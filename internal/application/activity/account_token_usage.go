@@ -18,6 +18,8 @@ type AccountTokenUsage struct {
 	Requests             int64  `json:"requests"`
 	UnknownCacheRequests int64  `json:"unknownCacheRequests"`
 	IncompleteRequests   int64  `json:"incompleteRequests"`
+	// PendingRequests 是此刻仍在进行中的记录数，用于「正在使用」状态；历史未完整记录不算进行中。
+	PendingRequests int64 `json:"pendingRequests"`
 }
 
 // usageIdentity 只含公开身份字段，必须与网关记账时的快照取值一致。
@@ -61,12 +63,13 @@ func (s *Service) tokenUsage(ctx context.Context, item account.Item, kind string
 		COALESCE(SUM(input_known),0),COALESCE(SUM(output_known),0),
 		COUNT(cached_input_tokens),COUNT(*),
 		COALESCE(SUM(CASE WHEN cached_input_tokens IS NULL AND (input_known=0 OR input_tokens>0) THEN 1 ELSE 0 END),0),
-		COALESCE(SUM(CASE WHEN usage_complete=0 OR state='pending' THEN 1 ELSE 0 END),0)
+		COALESCE(SUM(CASE WHEN usage_complete=0 OR state='pending' THEN 1 ELSE 0 END),0),
+		COALESCE(SUM(CASE WHEN state='pending' THEN 1 ELSE 0 END),0)
 		FROM request_records WHERE subject=? AND provider_id=? AND account_id=? AND lower(trim(email))=? AND workspace_id=?
 		AND (state IN ('success','pending') OR input_known=1 OR output_known=1)`,
 		key, item.ProviderID, item.ID, strings.ToLower(strings.TrimSpace(item.AuthEmail)), item.AuthAccountID,
 	).Scan(&input, &output, &cached, &inputKnown, &outputKnown, &cacheKnown,
-		&result.Requests, &result.UnknownCacheRequests, &result.IncompleteRequests)
+		&result.Requests, &result.UnknownCacheRequests, &result.IncompleteRequests, &result.PendingRequests)
 	if err != nil {
 		return nil, ErrUnavailable
 	}

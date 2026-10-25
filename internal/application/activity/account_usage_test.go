@@ -74,7 +74,7 @@ func TestAccountUsageEmptyPartialFailedAndInvalid(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, err = s.AccountUsage(ctx, item)
-	if err != nil || got.InputTokens != "30" || got.OutputTokens != "" || got.CachedInputTokens != "" || got.IncompleteRequests != 2 {
+	if err != nil || got.InputTokens != "30" || got.OutputTokens != "" || got.CachedInputTokens != "" || got.IncompleteRequests != 2 || got.PendingRequests != 1 {
 		t.Fatal("known partial failure usage discarded or fabricated", got, err)
 	}
 	// 无账号 ID、无提供商或提供商已不存在时无法构造记账身份，必须明确拒绝而不是返回零。

@@ -12,6 +12,7 @@ import { CircleHelp } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { AccountItem } from "../../services/omniproxy"
 import { accountDisplayName, formatAccountTime } from "./account-display"
+import { AccountInUseIndicator } from "./account-in-use-indicator"
 import { AccountItemActions, type AccountItemActionsProps } from "./account-item-actions"
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
@@ -101,7 +102,10 @@ export function AccountDetailsList({
                 <AccountKeyPreview account={account} />
               </td>
               <td className="px-4 py-3">
-                <AccountStatusBadge enabled={account.enabled} />
+                <div className="flex items-center gap-2">
+                  <AccountInUseIndicator account={account} />
+                  <AccountStatusBadge enabled={account.enabled} />
+                </div>
               </td>
               <td className="px-4 py-3">
                 {account.authMethod === "subscription_login" ? (

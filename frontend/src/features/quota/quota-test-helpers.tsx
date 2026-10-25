@@ -100,6 +100,7 @@ export function resetQuotaServices() {
     requests: 2,
     unknownCacheRequests: 0,
     incompleteRequests: 0,
+    pendingRequests: 0,
   })
   vi.mocked(readSubscriptionQuota).mockImplementation(async (id) =>
     id === "sub-empty"

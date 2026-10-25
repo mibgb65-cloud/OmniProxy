@@ -1,33 +1,14 @@
-import { useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { Events } from "@wailsio/runtime"
 import { useTranslation } from "react-i18next"
-import { readAccountTokenUsage } from "../../services/activity"
 import type { AccountItem } from "../../services/omniproxy"
 import { Button } from "../../components/ui/button"
 import { AccountTokenSummary } from "./account-token-summary"
+import { useAccountTokenUsage } from "./use-account-token-usage"
 
 // 本机留存用量：没有官方额度／余额接口的账号（River、自定义提供商等）用它展示已用 Token。
+// 请求进行中的状态不在这里追加占位行（会改变卡片高度），改由卡片头部的「正在使用」圆环表达。
 export function AccountUsagePanel({ account }: { account: AccountItem }) {
   const { t } = useTranslation()
-  const query = useQuery({
-    queryKey: ["account-token-usage", account.id, account.updatedAt],
-    queryFn: () => readAccountTokenUsage(account.id),
-    retry: false,
-    staleTime: 30_000,
-  })
-  const refetch = query.refetch
-  useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState !== "hidden") void refetch({ cancelRefetch: false })
-    }
-    const off = Events.On("activity:updated", refresh)
-    document.addEventListener("visibilitychange", refresh)
-    return () => {
-      off()
-      document.removeEventListener("visibilitychange", refresh)
-    }
-  }, [refetch])
+  const query = useAccountTokenUsage(account)
 
   return (
     <div className="min-w-0 space-y-2">
@@ -43,15 +24,11 @@ export function AccountUsagePanel({ account }: { account: AccountItem }) {
             size="sm"
             variant="outline"
             disabled={query.isFetching}
-            onClick={() => void refetch()}
+            onClick={() => void query.refetch()}
           >
             {t("activity.accountUsageRetry")}
           </Button>
         </div>
-      ) : query.data?.incompleteRequests ? (
-        <p className="text-muted-foreground text-xs leading-5">
-          {t("activity.accountUsageIncomplete")}
-        </p>
       ) : null}
     </div>
   )
