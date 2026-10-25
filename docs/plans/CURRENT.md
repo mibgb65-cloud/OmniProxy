@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已完成：[TASK-20261026-001](../tasks/completed/2026-10/TASK-20261026-001-provider-outbound-proxy.md)，提供商出站代理：`proxy_settings` 单例 + `providers.proxy_mode` 三态（迁移 044），Core `internal/core/netproxy` 负责端点解析、mixed 端口协议探测与运行期纠偏、本机端口发现与按提供商分流的 Transport；11 个适配器、网关作用域、连通性探针、Codex 透明转发（HTTP/WebSocket）、额度与续期已接入；代理层故障使用独立错误码且不写账号冷却。见 `docs/product/NETWORK_PROXY.md` 与 ADR-025。
+
 进行中：[TASK-20261022-004](../tasks/active/TASK-20261022-004-codex-compaction-river-token-usage.md)，River 本机输入／输出／缓存 Token 统计已实现，干净副本完整质量门／724 项前端测试及 Windows 构建通过；隔离原生窗口空白，视觉验收未完成。Codex 约 500k 提前压缩仍未复现，已排除简单的全局阈值遗漏，保留用户既有 1.05M／900k 设置，不宣称已修复或扩大上游能力。
 
 ## Current Version
