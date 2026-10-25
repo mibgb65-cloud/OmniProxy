@@ -6,7 +6,7 @@
 
 ## Current Version
 
-2.0.0-beta.40 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.39 基础上只改额度链路（TASK-20261025-007）：Codex 订阅额度优先调用官方 HTTP 额度接口 `/backend-api/wham/usage`（只读本地隔离授权材料，不再为每次刷新启动官方子进程；401／403 直返未授权，传输／协议失败与需要续期才回退 stdio），显示快照写入失败降级为告警；前端额度改为 keep-last-good（瞬时失败在最近成功后 10 分钟内持续显示上次结果并标注，确定性失败立即透出）；无新增数据库迁移。完整质量门（129 文件／780 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,090,750 bytes，SHA256 `b9000218…b3d`，未签名。
+2.0.0-beta.41 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.40 基础上只含两项界面改动（TASK-20261025-009、TASK-20261025-010）：侧栏改为一体式通顶布局，标题栏不再横跨全屏左侧品牌，全窗口只在左上角保留一个品牌标识，收展按钮移到品牌栏右侧；River 账号卡片用「正在使用」圆环（API Key 与「已启用」之间的固定槽位，悬浮提示「该 API Key 正在使用中」）替代会闪烁的「包含进行中或用量未完整返回的请求…」说明行，判据换成新增的 `pendingRequests`；无新增数据库迁移。完整质量门（129 文件／785 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,093,224 bytes，SHA256 `f78bbef2…8d4`，未签名。
 
 ## In Progress
 
@@ -63,6 +63,8 @@
 - [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
 
 ## Recently Completed
+
+- [TASK-20261025-011](../tasks/completed/2026-10/TASK-20261025-011-build-local-beta41-installer.md)：Beta.41 production 本地安装包已构建并通过完整质量门（129 文件／785 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,093,224 bytes，SHA256 `f78bbef2e5536ddab8466e6638ae681563d2b48bad2ad2bb8c8e3f00f156f8d4`）；内容为侧栏通顶与 River「正在使用」圆环两项界面改动；未签名、未自动安装、未推送或发布，等待用户本地覆盖安装验收。
 
 - [TASK-20261025-010](../tasks/completed/2026-10/TASK-20261025-010-account-in-use-indicator.md)：River 账号卡片不再闪烁「包含进行中或用量未完整返回的请求…」说明行——改为 API Key 与「已启用」徽标之间的固定槽位：请求进行中显示旋转圆环，悬浮提示「该 API Key 正在使用中」，卡片高度因此恒定；判断依据从历史 `incompleteRequests` 换成新增的 `pendingRequests`（`state='pending'` 记录数），并保留 1.2 秒避免连续请求闪断。`task --force verify` exit 0（129 文件／785 项前端测试），1200×800 原生窗口圆环与悬浮提示截图核对通过；浅色与 80%／140% 字号待用户视觉验收。
 
