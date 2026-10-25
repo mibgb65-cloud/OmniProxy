@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -187,16 +187,19 @@ In Progress
 
 ## Commit
 
-Not committed by Agent.
+- `a3b288fc8c93b5c681554f50e42486000038895a` fix(frontend): 账号卡片改用「正在使用」圆环替代闪烁提示（22 文件，+369/−44）
 
 ---
 
 # Result
 
-待填写
+- 请求进行中时，River 账号卡片与列表的状态列出现旋转圆环，悬浮（或键盘聚焦）提示「该 API Key 正在使用中」；说明行与 `activity.accountUsageIncomplete` 文案删除，卡片高度不再随请求变化，用户报告的闪烁消失。
+- 「正在使用」由 `pendingRequests`（`state='pending'`）驱动，历史未完整记录不再误报；消失延后 1.2 秒避免连续请求闪断。
+- 影响面限于账号卡片／列表与本机用量面板；Token 数值口径、`incompleteRequests` 语义、配额页展示均未改变。
+- 质量门 exit 0（129 文件／785 项前端测试），原生窗口圆环与悬浮提示截图核对通过。
 
 ---
 
 # Completed
 
-待填写
+2026-10-25 12:52（Asia/Singapore）
