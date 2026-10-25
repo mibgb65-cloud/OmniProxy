@@ -11,14 +11,23 @@ try{
  }
  & "$PSScriptRoot/set-release-version.ps1" -Version $Version
  if(-not(Test-Path -LiteralPath "docs/releases/$Version.md" -PathType Leaf)){throw '请先添加人工整理的发布说明'}
+ # task 会把进度行写到 stderr（其中包含 Windows 上缺少 uname 的提示）；在 Stop 下
+ # PowerShell 会把原生 stderr 当成终止错误，导致脚本在质量门开跑前就退出。
+ $gateErrorAction=$ErrorActionPreference
+ $ErrorActionPreference='Continue'
  & task --force verify
- if($LASTEXITCODE -ne 0){throw '完整质量门失败'}
+ $verifyCode=$LASTEXITCODE
  & task --force package
- if($LASTEXITCODE -ne 0){throw '安装器打包失败'}
+ $packageCode=$LASTEXITCODE
+ $ErrorActionPreference=$gateErrorAction
+ if($verifyCode -ne 0){throw '完整质量门失败'}
+ if($packageCode -ne 0){throw '安装器打包失败'}
  $application=Join-Path $root 'bin/omniproxy.exe'
  $installer=Join-Path $root 'bin/OmniProxy-amd64-installer.exe'
  & "$PSScriptRoot/test-windows-metadata.ps1" -Application $application -Installer $installer -Version $Version
- $output=[IO.Path]::GetFullPath($OutputDirectory,$root)
+ # Windows PowerShell 5.1 没有 GetFullPath(path, basePath) 重载，先拼接再规范化。
+ $output=if([IO.Path]::IsPathRooted($OutputDirectory)){$OutputDirectory}else{Join-Path $root $OutputDirectory}
+ $output=[IO.Path]::GetFullPath($output)
  if(Test-Path -LiteralPath $output){if(@(Get-ChildItem -LiteralPath $output -Force).Count -gt 0){throw '发布目录非空，拒绝覆盖已有发布资产'}}
  New-Item -ItemType Directory -Path $output -Force|Out-Null
  $name="OmniProxy-Setup-$Version-windows-amd64.exe"
