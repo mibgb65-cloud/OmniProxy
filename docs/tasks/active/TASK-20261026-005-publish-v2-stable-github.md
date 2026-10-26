@@ -2,7 +2,7 @@
 
 ## Status
 
-Blocked
+In Progress
 
 ## Created
 
@@ -116,11 +116,16 @@ Blocked
 
 ## Blocker
 
+2026-10-27 更新：维护者明确要求移除未获批的服务并选择项目自签，后续由 TASK-20261026-006
+替换签名方案。下述原服务配置阻塞不再作为发布前提；当前等待自签流程验证。
+
 原仓库要求每次发布经 SignPath 人工审批签名，但仓库未配置相关 Secret／Variable。
 不能伪造配置、代替维护者获取／透露签名凭据，或把未签名文件当作合规正式产物。
 因此本任务不能标记 Completed，v2.0.0 尚未公开发布。
 
 ## Required To Continue
+
+以下为旧方案的历史配置要求，已被维护者的新选择替代，不再要求填写：
 
 由维护者在 GitHub 仓库 Settings → Secrets and variables → Actions 中配置：
 

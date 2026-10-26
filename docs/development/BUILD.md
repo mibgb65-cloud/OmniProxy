@@ -60,6 +60,7 @@ task build
 ## 应用图标
 
 NSIS 同时安装自有 `app-icon-v2.ico` 和 `OmniProxy-LICENSE.txt`（保留原 MIT 版权与许可文本）。
+另分发 `OmniProxy-CodeSigning.cer` 公开证书，不导入证书库、不修改用户信任设置。
 桌面／开始菜单快捷方式显式引用自有 ICO，避免复用旧 EXE 路径的 Shell 图标缓存。
 卸载只删除这些明确归属程序的文件。更换下一代图标设计时应同时考虑新资源路径，
 不能仅覆盖图像后假设 Explorer 已刷新。

@@ -88,13 +88,13 @@ complete user flow, not before.
 
 ## 发布签名门禁
 
-使用本地**未签名**安装器作夹具：
+本地只做不改变用户信任库的边界检查：
 
 ```powershell
-./scripts/test-release-signature.ps1 -Version v2.0.0 -Installer ./bin/OmniProxy-amd64-installer.exe
+./scripts/test-windows-signing.ps1 -Installer ./bin/OmniProxy-amd64-installer.exe
 actionlint .github/workflows/release.yml
 ```
 
-签名门禁测试先真实拒绝未签名文件，再在独立 PowerShell 作用域中 mock 签名查询，
-覆盖错误签名者、签名后重新计算摘要和拒绝陈旧摘要。Mock 分支通过不代表真实代码签名通过；
-真实签名、证书信任及 SignPath 人工审批必须由 Release 流水线完成，不能被本地测试替代。
+本地检查公开证书、原生未签名拒绝、其他签名者的 pin 拒绝和非 CI 环境禁止临时信任。
+真实签名通过 Actions 的 `publish=false` 模式验证：校验实际签名，并翻转代码区一字节确认拒绝篡改，
+随后重新生成并复核最终摘要。不能把 Runner 临时信任或自签成功描述为用户系统公开信任。

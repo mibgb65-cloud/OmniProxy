@@ -77,3 +77,6 @@ MIT — see [LICENSE](LICENSE), inherited from the original OmniProxy repository
 
 Release builds follow the [code-signing policy](CODE_SIGNING_POLICY.md), [privacy policy](PRIVACY.md)
 and [security policy](SECURITY.md). Local verification builds are not public Release artifacts.
+
+Windows release installers use a project self-signed certificate, not a publicly trusted CA certificate.
+SmartScreen or unknown-publisher warnings may remain; the installer never changes the user's certificate trust stores.

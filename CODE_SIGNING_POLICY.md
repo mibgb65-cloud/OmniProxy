@@ -1,92 +1,67 @@
 # Code signing policy / 代码签名策略
 
-Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+## Current status / 当前状态
 
-OmniProxy 的免费代码签名服务由 [SignPath.io](https://signpath.io/) 提供，证书由 [SignPath Foundation](https://signpath.org/) 提供。
+SignPath approval was not obtained and OmniProxy does not use that service. v2 Windows release installers
+use a maintainer-controlled **self-signed code-signing certificate**. This is not a publicly trusted CA certificate,
+does not establish a verified legal publisher and does not guarantee removal of SmartScreen warnings.
+Historical artifacts must be checked individually; the application executable is not separately signed.
 
-## Scope / 适用范围
+SignPath 申请未获通过，项目不使用该服务。v2 Windows 发布安装包使用维护者控制的**自签代码签名证书**，
+不是公开受信任 CA 证书，不代表发布者经过法律身份认证，也不保证消除 SmartScreen 警告。
+历史产物须逐个核验；应用程序本体暂不单独签名。
 
-This policy applies only to OmniProxy artifacts built from the public source repository at <https://github.com/mibgb65-cloud/OmniProxy>.
+## Certificate and keys / 证书与私钥
 
-本策略只适用于由公开源码仓库 <https://github.com/mibgb65-cloud/OmniProxy> 构建的 OmniProxy 产物。
+The public certificate is [build/windows/codesign.cer](https://github.com/mibgb65-cloud/OmniProxy/blob/main/build/windows/codesign.cer).
+Release verification pins the exact certificate's SHA256, not just its subject name.
+Only the public certificate is committed. Private keys and passwords must never enter Git, logs, release assets or chat.
 
-OmniProxy is released under the OSI-approved [MIT License](LICENSE) and is not commercially dual-licensed. Third-party components remain under their respective open-source licenses.
+公开证书见 [build/windows/codesign.cer](https://github.com/mibgb65-cloud/OmniProxy/blob/main/build/windows/codesign.cer)。
+发布校验固定匹配证书的 SHA256，不只比较名称。Git 只保存公开证书，私钥及密码不得进入源码、日志、
+Release 资产或聊天。
 
-OmniProxy 使用 OSI 批准的 [MIT License](LICENSE) 发布，不采用商业双重许可；第三方组件继续适用其各自的开源许可证。
+The project key is retained in the maintainer's current-user Windows certificate store. Actions uses an encrypted PFX
+and its password through this repository's encrypted Secrets, scoped to the signing step. Do not use the key for other projects.
 
-Eligible Windows artifacts are:
+项目私钥保存在维护者的 Windows 当前用户证书库；Actions 通过本仓库 encrypted Secrets 使用加密 PFX
+及其密码，凭据只传给签名步骤，不用于其他项目。
 
-- the project-owned `OmniProxy.exe` application binary when it is submitted by the release workflow;
-- the project-owned NSIS installer named `OmniProxy-Setup-<tag>-windows-amd64.exe`.
+## Release process / 发布流程
 
-允许签名的 Windows 产物包括：
+Public assets must originate from the tagged public source and GitHub-hosted Release workflow, pass the quality gate,
+version and asset checks, then receive an Authenticode signature using the pinned project certificate.
+SHA256 must be regenerated after signing. Signing failure, certificate mismatch or file tampering prevents publication.
+Do not replace this process by uploading locally built installers.
 
-- 由发布工作流提交的项目自有应用程序 `OmniProxy.exe`；
-- 项目自有的 NSIS 安装包 `OmniProxy-Setup-<tag>-windows-amd64.exe`。
+公开产物必须来自版本标签对应的公开源码及 GitHub 托管 Release 流程，通过质量门、版本和资产检查后，
+使用固定的项目证书进行 Authenticode 签名。签名后重新生成 SHA256；签名失败、证书不匹配或文件篡改
+都阻止发布，不得以手工上传本机构建安装包替代。
 
-OmniProxy signing credentials must not be used for unrelated projects, locally built files or third-party executables. Third-party runtime installers and standalone libraries must not be signed with the OmniProxy signing policy.
+For integrity verification only, the isolated Actions Runner temporarily trusts the exact public certificate and removes
+that trust afterward. This does not make the certificate publicly trusted. The installer only ships the public certificate
+and **never imports it into a user's Root or TrustedPublisher store**, disables SmartScreen or changes security settings.
 
-OmniProxy 的签名权限不得用于无关项目、本机构建文件或第三方可执行文件。第三方运行库安装程序和独立库不得使用 OmniProxy 的签名策略进行签名。
+仅为校验完整性，隔离 Actions Runner 临时信任精确匹配的公开证书，验证后清理；这不会赋予证书公开信任。
+安装器只分发公开证书，**不导入用户的 Root／TrustedPublisher 证书库**，不关闭 SmartScreen 或修改安全设置。
 
-## Trusted build and release process / 受信任构建与发布流程
+## Verification and limitations / 验证与边界
 
-Release artifacts must:
+Check the embedded certificate and compare it with the versioned public certificate. On a normal machine that has not
+explicitly trusted it, `Get-AuthenticodeSignature` may report an untrusted root. That is expected for self-signing.
+A SHA256 file detects byte changes but is not proof of publisher identity.
 
-1. originate from this repository and the revision identified by a version tag;
-2. be built by `.github/workflows/release.yml` on GitHub-hosted runners;
-3. install dependencies from the lock files in the repository and pass the workflow's backend, frontend and source checks;
-4. carry `OmniProxy` product metadata and the numeric version derived from the release tag;
-5. be uploaded as a GitHub Actions artifact before any SignPath signing request;
-6. receive manual approval from an authorized approver for every release-signing request;
-7. be published only after the signed artifact is downloaded and its SHA-256 checksum is regenerated.
+请核对内嵌证书与对应版本的公开证书。在未主动信任该证书的普通电脑上，
+`Get-AuthenticodeSignature` 可能报告根不受信任，这是自签名的预期边界。
+SHA256 用于检查文件字节变化，不代表发布者身份认证。
 
-发布产物必须：
+If publicly trusted signing is needed later, use a legitimately issued code-signing certificate or trusted signing service.
+Self-signing is not a substitute. On key compromise, rotate the project certificate and Secrets and notify users;
+any user who manually trusted the old certificate must remove that trust themselves.
 
-1. 来源于本仓库以及版本标签所标识的修订；
-2. 由 `.github/workflows/release.yml` 在 GitHub 托管的 Runner 上构建；
-3. 根据仓库锁文件安装依赖，并通过工作流中的后端、前端和源码检查；
-4. 包含 `OmniProxy` 产品元数据以及由发布标签派生的数字版本；
-5. 在提交 SignPath 签名请求前先上传为 GitHub Actions Artifact；
-6. 每个正式签名请求都由授权审批人手工批准；
-7. 下载已签名产物并重新生成 SHA-256 校验值后才能公开发布。
+未来如需公开受信任签名，应使用正规 CA 代码签名证书或受信任签名服务，自签不能替代。
+私钥泄露时应轮换项目证书与 Secrets 并通知用户；曾手工信任旧证书的用户应自行撤销该信任。
 
-The signature embedded in a released artifact is authoritative. An artifact must not be described as SignPath-signed unless its signature has been verified in the release workflow.
+OmniProxy remains under the [MIT License](LICENSE). See also [PRIVACY.md](PRIVACY.md) and [SECURITY.md](SECURITY.md).
 
-公开产物中嵌入的数字签名是判断签名状态的最终依据。只有在发布工作流中验证过签名的产物，才能标注为已由 SignPath 签名。
-
-## Team roles / 团队角色
-
-- Committer and reviewer / 提交者与审查者：[mibgb65-cloud](https://github.com/mibgb65-cloud)
-- Signing approver / 签名审批人：[mibgb65-cloud](https://github.com/mibgb65-cloud)
-
-Changes from contributors without direct commit access require review before merge. Changes to build scripts, release workflows, dependency definitions and this policy are security-sensitive and require the same review standard as application code.
-
-没有直接提交权限的贡献者所提交的变更必须经过审查才能合并。构建脚本、发布工作流、依赖定义和本策略的变更属于安全敏感变更，其审查标准与应用代码相同。
-
-Everyone assigned to a signing role must use multi-factor authentication for both GitHub and SignPath. Signing API tokens must be stored only as encrypted GitHub Actions secrets and granted the minimum required permissions.
-
-所有签名角色都必须为 GitHub 和 SignPath 启用多因素认证。签名 API Token 只能保存为 GitHub Actions 加密 Secret，并仅授予所需的最小权限。
-
-## Privacy and user control / 隐私与用户控制
-
-OmniProxy is local-first and does not send credentials, prompts, responses or usage history to infrastructure operated by its maintainers. Network requests are sent to GitHub and to providers, gateways or proxies selected by the user as described in the [privacy policy](PRIVACY.md).
-
-OmniProxy 采用本地优先设计，不会把凭据、提示词、响应或用量历史发送到维护者运营的基础设施。应用会依据[隐私政策](PRIVACY.md)访问 GitHub，以及用户选择的服务商、网关或代理。
-
-Features that modify client configuration, enable autostart, consume a quota reset credit or send a quota-activation request require an explicit user action or opt-in setting. Release builds perform documented scheduled update checks and may download a checksum-protected update from GitHub; matching restore or uninstall paths are provided where applicable.
-
-修改客户端配置、启用开机启动、消耗额度刷新卡或发送额度激活请求等功能，需要用户主动操作或明确启用。正式版会按文档说明定期检查更新，并可能从 GitHub 下载带校验文件保护的更新；适用场景同时提供恢复或卸载路径。
-
-## Verification / 验证
-
-For a signed Windows artifact, users can open **Properties → Digital Signatures** or run:
-
-对于已签名的 Windows 产物，用户可以打开“属性 → 数字签名”，或运行：
-
-```powershell
-Get-AuthenticodeSignature -LiteralPath .\OmniProxy-Setup-<tag>-windows-amd64.exe | Format-List
-```
-
-The expected signer for artifacts covered by the free OSS program is SignPath Foundation. SHA-256 files provide integrity checks but do not replace signature validation.
-
-免费开源计划所覆盖产物的预期签名者为 SignPath Foundation。SHA-256 文件用于完整性校验，但不能代替数字签名验证。
+OmniProxy 继续采用 [MIT 许可证](LICENSE)，另见[隐私政策](PRIVACY.md)及[安全政策](SECURITY.md)。

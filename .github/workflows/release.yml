@@ -9,6 +9,11 @@ on:
         description: Existing version tag to package and publish
         required: true
         type: string
+      publish:
+        description: Publish the tagged release; false validates the selected workflow revision without publishing
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -24,6 +29,8 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       prerelease: ${{ steps.version.outputs.prerelease }}
       unsigned_artifact_id: ${{ steps.unsigned.outputs.artifact-id }}
+      checkout_ref: ${{ steps.version.outputs.checkout_ref }}
+      publish: ${{ steps.version.outputs.publish }}
     defaults:
       run:
         shell: pwsh
@@ -32,14 +39,20 @@ jobs:
         id: version
         env:
           REQUESTED_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+          REQUESTED_PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+          VALIDATION_REF: ${{ github.sha }}
         run: |
           $tag = $env:REQUESTED_TAG
           if ($tag -notmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw 'Invalid version tag' }
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "prerelease=$($tag.Contains('-').ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          $publish = $env:REQUESTED_PUBLISH -eq 'true'
+          $checkout = if ($publish) { $tag } else { $env:VALIDATION_REF }
+          "checkout_ref=$checkout" >> $env:GITHUB_OUTPUT
+          "publish=$($publish.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.version.outputs.tag }}
+          ref: ${{ steps.version.outputs.checkout_ref }}
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26'
@@ -83,23 +96,18 @@ jobs:
           TEMP: ${{ runner.temp }}
           TMP: ${{ runner.temp }}
         run: ./scripts/build-release.ps1 -Version $env:RELEASE_TAG
-      - name: Test signature gate with unsigned build fixture
-        env:
-          RELEASE_TAG: ${{ steps.version.outputs.tag }}
-        run: ./scripts/test-release-signature.ps1 -Version $env:RELEASE_TAG -Installer "release-assets/OmniProxy-Setup-$($env:RELEASE_TAG)-windows-amd64.exe"
       - id: unsigned
         uses: actions/upload-artifact@v4
         with:
           name: windows-release-unsigned
-          # 签名配置只接收自有安装器，不提交校验文件或第三方运行时。
-          path: release-assets/*.exe
+          path: release-assets/*
           if-no-files-found: error
           retention-days: 14
 
   sign:
     needs: build
     runs-on: windows-latest
-    timeout-minutes: 65
+    timeout-minutes: 15
     permissions:
       contents: read
       actions: read
@@ -109,39 +117,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.build.outputs.tag }}
-      - name: Check required signing configuration
-        env:
-          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
-          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
-          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
-        run: |
-          $required = @('SIGNPATH_API_TOKEN', 'SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG')
-          foreach ($name in $required) {
-            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
-              throw "Required signing configuration is missing: $name. No unsigned release will be published."
-            }
-          }
-      - name: Submit signing request and wait for authorized approval
-        id: signpath
-        # 官方 v2 固定修订；审批由 SignPath 策略执行，不提供跳过审批或未签名回退。
-        uses: signpath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627
+          ref: ${{ needs.build.outputs.checkout_ref }}
+      - uses: actions/download-artifact@v4
         with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
-          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
-          github-artifact-id: ${{ needs.build.outputs.unsigned_artifact_id }}
-          wait-for-completion: true
-          wait-for-completion-timeout-in-seconds: 3600
-          output-artifact-directory: signed-release
-      - name: Verify signed installer and regenerate SHA256
+          name: windows-release-unsigned
+          path: signed-release
+      - name: Self-sign project installer, verify certificate pin and reject tampering
         env:
           RELEASE_TAG: ${{ needs.build.outputs.tag }}
-        run: ./scripts/verify-release-signature.ps1 -Version $env:RELEASE_TAG -AssetDirectory signed-release -WriteChecksum
+          OMNIPROXY_SIGNING_PFX: ${{ secrets.OMNIPROXY_SIGNING_PFX }}
+          OMNIPROXY_SIGNING_PASSWORD: ${{ secrets.OMNIPROXY_SIGNING_PASSWORD }}
+        run: ./scripts/sign-release.ps1 -Version $env:RELEASE_TAG -AssetDirectory signed-release
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release-signed
@@ -150,6 +136,7 @@ jobs:
           retention-days: 14
 
   publish:
+    if: needs.build.outputs.publish == 'true'
     needs: [build, sign]
     runs-on: windows-latest
     permissions:

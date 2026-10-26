@@ -22,7 +22,10 @@ build/android/gen/
 *.pem
 *.key
 *.pfx
+*.p12
 *.cer
+# 只允许项目公开签名证书；私钥与 PFX 始终忽略。
+!build/windows/codesign.cer
 credentials*
 secrets*
 

@@ -39,10 +39,10 @@ contact the relevant provider. Optional quota-activation requests require an exp
 模型、余额和额度查询会访问相应服务商。可选的额度窗口激活需明确开启，可能消耗提供商额度。
 
 Production update checks contact GitHub Releases; automatic download is a separate opt-in.
-Signing uses only public-source build artifacts in GitHub Actions and does not upload local user data to SignPath.
+Signing operates on public-source build artifacts in GitHub Actions, using the maintainer's project-specific encrypted signing secrets, not application user data.
 
-正式版更新检查访问 GitHub Releases，自动下载需单独开启。代码签名仅处理 GitHub Actions 的公开源码构建产物，
-不会把本地用户数据上传到 SignPath。
+正式版更新检查访问 GitHub Releases，自动下载需单独开启。代码签名只处理 GitHub Actions 的公开源码构建产物，
+使用维护者的项目专用加密签名凭据，不处理应用用户数据。
 
 ## No maintainer telemetry / 无维护者遥测
 

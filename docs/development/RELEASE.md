@@ -4,7 +4,7 @@
 
 原仓库默认分支 `master` 保留 v1，v2 开发与发布源码位于 `main`；两者不是同一根历史。
 不要为发 v2 强推、重置或替换 master，也不要删除旧版／Beta 的标签或已公开 Release。
-v2 沿用原仓库 MIT、SECURITY 与 CODE_SIGNING_POLICY；不得把本地 v2 分支先前缺少 LICENSE
+v2 沿用原仓库 MIT 与 SECURITY；签名策略按维护者 2026-10-27 明确选择改为项目自签证书，不再依赖未获批的服务。不得把本地 v2 分支先前缺少 LICENSE
 误解为项目尚未选择许可证。
 
 公开发布必须使用 `.github/workflows/release.yml` 的 GitHub 托管构建，不能上传本机验证包代替。
@@ -12,30 +12,29 @@ v2 沿用原仓库 MIT、SECURITY 与 CODE_SIGNING_POLICY；不得把本地 v2 �
 Refactor & Performance 及真实 Full Changelog；没有内容的节写 `None / 无`，不伪造 PR 或贡献者。
 v2.0.0 的比较起点为最后公开的 v2.0.0-beta.5，不是仅本机存在的 Beta.44，也不是跨根的 v1.3.1。
 
-### SignPath 配置与人工审批
+### 项目自签证书
 
-以下配置必须由维护者在仓库 Settings → Secrets and variables → Actions 中填写真实值；
-Token 只能放 Secret，不能贴在聊天、源码、日志或普通 Variable 中：
+维护者已明确选择免费自签，不采用外部签名审批服务。自签仅校验项目密钥身份和文件完整性，
+不等同于公开受信任 CA 证书，不保证消除未知发布者或 SmartScreen 提示。
 
-| 类型 | 名称 | 用途 |
-| --- | --- | --- |
-| Secret | `SIGNPATH_API_TOKEN` | 最小权限的 SignPath 提交凭据 |
-| Variable | `SIGNPATH_ORGANIZATION_ID` | 已批准的 SignPath 组织 ID |
-| Variable | `SIGNPATH_PROJECT_SLUG` | 关联原公开仓库的项目 |
-| Variable | `SIGNPATH_ARTIFACT_CONFIGURATION_SLUG` | 实际安装器 ZIP 配置 |
-| Variable | `SIGNPATH_SIGNING_POLICY_SLUG` | 需要授权审批人手工批准的正式签名策略 |
+- Git 只保存 `build/windows/codesign.cer` 公开证书，签名时匹配其完整 SHA256 pin。
+- 专用私钥保存在维护者 Windows 当前用户证书库；Actions 仅在签名步骤接收
+  `OMNIPROXY_SIGNING_PFX` 与 `OMNIPROXY_SIGNING_PASSWORD` encrypted Secrets。
+  私钥／密码不能出现在 Git、命令行参数、日志或公开 Artifact 中。
+- 隔离 Runner 临时信任精确匹配的公开证书以调用 Windows 原生验签，结束后清理；
+  这不是为终端用户赋予系统信任。安装器只带公开证书文件，不向用户信任库导入证书。
+- 流程为质量门／打包 → unsigned Artifact → 安装包自签 → 验证 pin、原生签名及篡改拒绝 →
+  重生成 SHA256 → signed Artifact → 发布作业复验后公开。不对第三方运行时签名。
+- 证书／私钥不匹配、签名或摘要失败均阻止发布，不将失败文件作为已签名资产上传。
 
-在 SignPath 配置 GitHub.com Trusted Build System，并按服务要求安装 GitHub App、授权本仓库。
-审批人沿用签名策略中的 `mibgb65-cloud`，GitHub 与 SignPath 都需启用 MFA。
-Artifact Configuration 的根须接受 Actions 上传的 ZIP，只匹配
-`OmniProxy-Setup-v*-windows-amd64.exe`，保持原文件名，不签第三方运行时或本地构建文件。
-不得指向自动批准、测试证书或放宽源仓库验证的替代策略。
+先从 main 验证但不发布：
 
-流水线为：质量门／打包 → 上传 unsigned Artifact → SignPath 请求并等待人工审批 →
-下载 signed Artifact → 验证有效 Authenticode、SignPath Foundation 签名者和产品版本 →
-对签名后的文件生成新 SHA256 → 上传 signed Artifact → 发布作业重新验证后公开。
-签名配置缺失、审批超时或签名不可信时均失败关闭，不发布未签名版本。
-Actions 构建结束不代表签名审批已完成，更不代表公开发布成功。
+```powershell
+gh workflow run release.yml --ref main -f tag=v2.0.0 -f publish=false
+```
+
+该模式构建所选 workflow 的不可变提交，不要求先创建版本标签，且 publish job 明确跳过。
+真正公开发布仍需版本标签对应的源码；新标签推送默认发布，已存在标签可手工调度。
 对已存在标签重新调度时必须显式选择 v2 的 `main` 工作流，例如
 `gh workflow run release.yml --ref main -f tag=v2.0.0`，不能误用默认 master 上的 v1 工作流。
 
@@ -59,8 +58,8 @@ Actions 构建结束不代表签名审批已完成，更不代表公开发布成
 
 `.github/workflows/release.yml` 响应版本标签或手动指定已存在标签。构建作业只有读取权限；发布作业才有 `contents: write`，使用 Actions 临时令牌，令牌不写入文件。
 
-构建校验成功后只将自有安装器上传 unsigned Artifact，再经上述签名步骤产生安装器和新的 `.sha256`。
-发布作业只接受 signed Artifact，重新验证签名和摘要，先创建 draft、上传全部资产并检查数量和大小，
+构建校验成功后将安装器及摘要上传 unsigned Artifact，自签后重新生成最终 `.sha256`。
+发布作业只接受 signed Artifact，重新验证项目 pin、实际签名和摘要，先创建 draft、上传全部资产并检查数量和大小，
 最后取消 draft。Beta 不取代 stable latest；正式版设为 latest。不会删除历史 Release、重写标签或
 覆盖已经公开的 Release。失败重试只复用同标签的 draft。
 
