@@ -27,6 +27,18 @@ func assertNoQuotaRead(t *testing.T, reads <-chan struct{}) {
 	}
 }
 
+type completedQuotaProbe struct {
+	quotaProbeClient
+	done chan struct{}
+}
+
+func (c completedQuotaProbe) Close() {
+	c.quotaProbeClient.Close()
+	// readQuota 在 normalize／publishQuota 返回后才执行 Close；
+	// 不能在 RateLimits 返回前通知，否则测试会抢在网关观察写入前继续。
+	close(c.done)
+}
+
 // TestObserveQuotaRefreshesOncePerAccountVersion 断言按需刷新只对同一账号＋凭据版本
 // 去抖一次，凭据版本变化后立即重新观察，退出后不再发起查询。
 func TestObserveQuotaRefreshesOncePerAccountVersion(t *testing.T) {
@@ -75,10 +87,10 @@ func TestObserveQuotaFeedsGatewayAvailability(t *testing.T) {
 
 	done := make(chan struct{})
 	f.manager.factory = func(context.Context, string) (codex.Client, error) {
-		return quotaProbeClient{Client: client, account: client.Account, limits: func(ctx context.Context) (codex.RateLimits, error) {
-			defer close(done)
-			return client.RateLimits(ctx)
-		}}, nil
+		return completedQuotaProbe{
+			quotaProbeClient: quotaProbeClient{Client: client, account: client.Account, limits: client.RateLimits},
+			done:             done,
+		}, nil
 	}
 	f.manager.ObserveQuota(item.ID, item.UpdatedAt)
 	awaitQuotaRead(t, done)
