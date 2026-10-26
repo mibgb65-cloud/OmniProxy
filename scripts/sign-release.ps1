@@ -17,26 +17,38 @@ $path = Join-Path $AssetDirectory $name
 & "$PSScriptRoot/verify-release-assets.ps1" -Version $Version -AssetDirectory $AssetDirectory
 Assert-ProjectInstallerMetadata -Version $Version -Path $path
 $expected = Get-ProjectSigningCertificate
-$pfxPath = Join-Path $env:RUNNER_TEMP ("omniproxy-signing-" + [guid]::NewGuid().ToString('N') + '.pfx')
 $imported = $null
+$personalStore = $null
 $removeImported = $false
 try {
     $bytes = [Convert]::FromBase64String($env:OMNIPROXY_SIGNING_PFX)
-    $password = ConvertTo-SecureString $env:OMNIPROXY_SIGNING_PASSWORD -AsPlainText -Force
+    $password = $env:OMNIPROXY_SIGNING_PASSWORD
     $env:OMNIPROXY_SIGNING_PFX = $null
     $env:OMNIPROXY_SIGNING_PASSWORD = $null
-    try { [IO.File]::WriteAllBytes($pfxPath, $bytes) }
-    finally { [Security.Cryptography.CryptographicOperations]::ZeroMemory($bytes) }
     $removeImported = -not (Test-Path -LiteralPath "Cert:\CurrentUser\My\$($expected.Thumbprint)")
-    $imported = Import-PfxCertificate -FilePath $pfxPath -Password $password -CertStoreLocation 'Cert:\CurrentUser\My'
+    Write-Output 'Signing stage: import encrypted project key without UI or PFX files'
+    try {
+        $flags = [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::UserKeySet -bor
+            [Security.Cryptography.X509Certificates.X509KeyStorageFlags]::PersistKeySet
+        $imported = [Security.Cryptography.X509Certificates.X509Certificate2]::new($bytes, $password, $flags)
+    } finally {
+        [Security.Cryptography.CryptographicOperations]::ZeroMemory($bytes)
+        $password = $null
+    }
     if (-not $imported.HasPrivateKey -or (Get-CertificateSha256 $imported) -ne (Get-CertificateSha256 $expected)) {
         throw '签名凭据与已提交的公开证书不匹配'
     }
+    $personalStore = [Security.Cryptography.X509Certificates.X509Store]::new('My', 'CurrentUser')
+    $personalStore.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+    $personalStore.Add($imported)
+    Write-Output 'Signing stage: imported project key matches public certificate'
     Invoke-WithProjectCertificateTrust {
         param($certificate)
+        Write-Output 'Signing stage: Authenticode SHA256'
         $signature = Set-AuthenticodeSignature -LiteralPath $path -Certificate $imported -HashAlgorithm SHA256
         if ($signature.Status -ne 'Valid') { throw '安装器自签名失败' }
         Assert-ProjectAuthenticode -Path $path -ExpectedCertificate $certificate
+        Write-Output 'Signing stage: signed-file verification passed'
         # 在真实签名文件的被哈希代码区翻转一字节，确保验签不是只检查证书是否存在。
         $tampered = Join-Path $env:RUNNER_TEMP ("omniproxy-tampered-" + [guid]::NewGuid().ToString('N') + '.exe')
         try {
@@ -53,16 +65,16 @@ try {
             try { Assert-ProjectAuthenticode -Path $tampered -ExpectedCertificate $certificate }
             catch { $rejected = $true }
             if (-not $rejected) { throw '篡改安装器未被拒绝' }
+            Write-Output 'Signing stage: tampered-file rejection passed'
         } finally { if (Test-Path -LiteralPath $tampered) { Remove-Item -LiteralPath $tampered } }
     }
     & "$PSScriptRoot/verify-release-signature.ps1" -Version $Version -AssetDirectory $AssetDirectory -WriteChecksum
 } finally {
+    if ($personalStore) { $personalStore.Close() }
     if ($imported) { $imported.Dispose() }
     if ($removeImported -and $expected.Thumbprint -match '^[0-9A-Fa-f]{40}$' -and
         (Test-Path -LiteralPath "Cert:\CurrentUser\My\$($expected.Thumbprint)")) {
         Remove-Item -LiteralPath "Cert:\CurrentUser\My\$($expected.Thumbprint)" -DeleteKey -Force
     }
-    if (Test-Path -LiteralPath $pfxPath) { Remove-Item -LiteralPath $pfxPath }
-    if ($password) { $password.Dispose() }
     $expected.Dispose()
 }

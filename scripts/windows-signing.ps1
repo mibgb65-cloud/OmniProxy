@@ -26,8 +26,13 @@ function Get-CertificateSha256($Certificate) {
 }
 
 function Invoke-WithProjectCertificateTrust([scriptblock]$Action) {
-    if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows') {
+    if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
         throw '临时证书信任只允许用于隔离的 GitHub Actions Windows Runner'
+    }
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        throw 'Runner 临时机器信任需要其现有管理员身份，不自动请求提权'
     }
     $certificate = Get-ProjectSigningCertificate
     $stores = [Collections.Generic.List[object]]::new()
@@ -35,7 +40,9 @@ function Invoke-WithProjectCertificateTrust([scriptblock]$Action) {
         # 仅在临时 Runner 中信任精确 pin 的公开证书，以使用 Windows 原生验签检查文件完整性。
         # 安装器和用户应用不执行此逻辑，验证后仅删除本次加入的证书。
         foreach ($name in @('Root', 'TrustedPublisher')) {
-            $store = [Security.Cryptography.X509Certificates.X509Store]::new($name, 'CurrentUser')
+            # 托管 Runner 的 CurrentUser Root 写入可能弹交互确认；仅在该临时 VM 使用机器库。
+            Write-Output "Signing stage: temporary hosted-runner machine trust ($name)"
+            $store = [Security.Cryptography.X509Certificates.X509Store]::new($name, 'LocalMachine')
             $store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
             $existing = $store.Certificates.Find('FindByThumbprint', $certificate.Thumbprint, $false)
             $added = $existing.Count -eq 0

@@ -14,6 +14,11 @@ on:
         required: false
         default: true
         type: boolean
+      fixture_run_id:
+        description: Optional successful unsigned Release build to test signing only; publish must be false
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: read
@@ -24,6 +29,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_dispatch' || inputs.fixture_run_id == ''
     runs-on: windows-latest
     outputs:
       tag: ${{ steps.version.outputs.tag }}
@@ -182,3 +188,45 @@ jobs:
           $latest = if ($pre -eq 'true') { 'false' } else { 'true' }
           gh release edit $tag --draft=false "--prerelease=$pre" "--latest=$latest"
           if ($LASTEXITCODE -ne 0) { throw 'Release publish failed' }
+
+  check-signing:
+    if: github.event_name == 'workflow_dispatch' && inputs.fixture_run_id != ''
+    runs-on: windows-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate trusted fixture provenance and forbid publication
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_RUN: ${{ inputs.fixture_run_id }}
+          REQUESTED_PUBLISH: ${{ inputs.publish }}
+        run: |
+          if ($env:REQUESTED_PUBLISH -ne 'false' -or $env:INPUT_RUN -notmatch '^\d{1,20}$') {
+            throw 'Signing fixture mode is validation-only'
+          }
+          $run = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:INPUT_RUN" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $run.head_repository.full_name -ne $env:GITHUB_REPOSITORY -or
+              $run.path -ne '.github/workflows/release.yml' -or $run.event -notin @('push', 'workflow_dispatch')) {
+            throw 'Fixture must come from this repository trusted Release workflow'
+          }
+          $jobs = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:INPUT_RUN/jobs" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or @($jobs.jobs | Where-Object { $_.name -eq 'build' -and $_.conclusion -eq 'success' }).Count -ne 1) {
+            throw 'Unsigned fixture build did not pass'
+          }
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-release-unsigned
+          path: signing-check
+          run-id: ${{ inputs.fixture_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify real self-signature and tamper rejection without publication
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          OMNIPROXY_SIGNING_PFX: ${{ secrets.OMNIPROXY_SIGNING_PFX }}
+          OMNIPROXY_SIGNING_PASSWORD: ${{ secrets.OMNIPROXY_SIGNING_PASSWORD }}
+        run: ./scripts/sign-release.ps1 -Version $env:RELEASE_TAG -AssetDirectory signing-check
