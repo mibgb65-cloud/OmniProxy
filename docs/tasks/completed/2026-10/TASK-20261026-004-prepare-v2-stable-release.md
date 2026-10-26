@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -134,7 +134,10 @@ In Progress
 
 ## Git
 
-Not committed by Agent.
+`bc49edd384e56b521a0ab328541a7d334669436e` — `fix(release): 修复安装数据保护并准备 2.0.0`。
+
+实现、测试、版本、发行说明及本聊天的前置审查记录已本地提交；随后归档本任务记录。
+未创建标签、未推送、未执行远端发布。
 
 ## Result
 
@@ -148,3 +151,7 @@ Not committed by Agent.
 已同步 Architecture、BUILD、RELEASE、UPDATE、CURRENT 与 v2.0.0 发行说明。
 遵循原有 Windows／Go／Wails 技术栈，无新增依赖或 ADR。主 helper 文件 203 行，
 新增身份及结果协议已拆为独立文件，其余入口保持连续分派，暂不为三行超出指导值做无关拆分。
+
+## Completed
+
+2026-10-26（Asia/Singapore）
