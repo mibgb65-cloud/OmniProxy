@@ -23,6 +23,7 @@ jobs:
     outputs:
       tag: ${{ steps.version.outputs.tag }}
       prerelease: ${{ steps.version.outputs.prerelease }}
+      unsigned_artifact_id: ${{ steps.unsigned.outputs.artifact-id }}
     defaults:
       run:
         shell: pwsh
@@ -82,15 +83,74 @@ jobs:
           TEMP: ${{ runner.temp }}
           TMP: ${{ runner.temp }}
         run: ./scripts/build-release.ps1 -Version $env:RELEASE_TAG
+      - name: Test signature gate with unsigned build fixture
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: ./scripts/test-release-signature.ps1 -Version $env:RELEASE_TAG -Installer "release-assets/OmniProxy-Setup-$($env:RELEASE_TAG)-windows-amd64.exe"
+      - id: unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-unsigned
+          # 签名配置只接收自有安装器，不提交校验文件或第三方运行时。
+          path: release-assets/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  sign:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 65
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.tag }}
+      - name: Check required signing configuration
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+        run: |
+          $required = @('SIGNPATH_API_TOKEN', 'SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG')
+          foreach ($name in $required) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw "Required signing configuration is missing: $name. No unsigned release will be published."
+            }
+          }
+      - name: Submit signing request and wait for authorized approval
+        id: signpath
+        # 官方 v2 固定修订；审批由 SignPath 策略执行，不提供跳过审批或未签名回退。
+        uses: signpath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ needs.build.outputs.unsigned_artifact_id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed-release
+      - name: Verify signed installer and regenerate SHA256
+        env:
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+        run: ./scripts/verify-release-signature.ps1 -Version $env:RELEASE_TAG -AssetDirectory signed-release -WriteChecksum
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-release
-          path: release-assets/*
+          name: windows-release-signed
+          path: signed-release/*
           if-no-files-found: error
           retention-days: 14
 
   publish:
-    needs: build
+    needs: [build, sign]
     runs-on: windows-latest
     permissions:
       contents: write
@@ -108,10 +168,10 @@ jobs:
           ref: ${{ needs.build.outputs.tag }}
       - uses: actions/download-artifact@v4
         with:
-          name: windows-release
+          name: windows-release-signed
           path: release-assets
-      - name: Verify uploaded artifact
-        run: ./scripts/verify-release-assets.ps1 -Version $env:RELEASE_TAG -AssetDirectory release-assets
+      - name: Reverify signature and checksum before publishing
+        run: ./scripts/verify-release-signature.ps1 -Version $env:RELEASE_TAG -AssetDirectory release-assets
       - name: Publish complete release
         run: |
           $tag = $env:RELEASE_TAG

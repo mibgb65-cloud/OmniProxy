@@ -73,4 +73,7 @@ AI agents must read [`AGENTS.md`](AGENTS.md) before starting any task.
 
 ## License
 
-TBD — no license has been selected yet.
+MIT — see [LICENSE](LICENSE), inherited from the original OmniProxy repository.
+
+Release builds follow the [code-signing policy](CODE_SIGNING_POLICY.md), [privacy policy](PRIVACY.md)
+and [security policy](SECURITY.md). Local verification builds are not public Release artifacts.

@@ -85,3 +85,16 @@ regressions.
 Playwright will cover the core user flows (start app → configure provider →
 complete a request through the gateway). It is added together with the first
 complete user flow, not before.
+
+## 发布签名门禁
+
+使用本地**未签名**安装器作夹具：
+
+```powershell
+./scripts/test-release-signature.ps1 -Version v2.0.0 -Installer ./bin/OmniProxy-amd64-installer.exe
+actionlint .github/workflows/release.yml
+```
+
+签名门禁测试先真实拒绝未签名文件，再在独立 PowerShell 作用域中 mock 签名查询，
+覆盖错误签名者、签名后重新计算摘要和拒绝陈旧摘要。Mock 分支通过不代表真实代码签名通过；
+真实签名、证书信任及 SignPath 人工审批必须由 Release 流水线完成，不能被本地测试替代。

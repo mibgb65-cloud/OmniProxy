@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+GitHub 发布：[TASK-20261026-005](../tasks/active/TASK-20261026-005-publish-v2-stable-github.md)。已核对原仓库：v1 在默认 master，v2 在 main；沿用原 MIT／安全／签名策略，恢复许可证并随安装器分发，补齐双语发布说明及 Beta.5→2.0.0 的 035–044 迁移提示。公开资产必须来自 GitHub Actions 并经 SignPath 人工审批签名；已接入失败关闭的签名／SHA256 门禁，本地完整质量门、打包和用户级 MIT 安装卸载验证通过。仓库尚缺 SignPath 配置，未创建 v2.0.0 标签或公开 Release；本机安装包只能验证，不能手工上传代替正式产物。
+
 发布准备：[TASK-20261026-004](../tasks/completed/2026-10/TASK-20261026-004-prepare-v2-stable-release.md)。已修复原始评估 [TASK-20261026-003](../tasks/completed/2026-10/TASK-20261026-003-v2-release-readiness-review.md) 的旧数据目录保护与提权用户身份问题，并补齐原生中文目录传输。最终质量门、Windows production 打包、版本资源及 SHA256 通过；隔离用户级原生向导／改程序目录／静默覆盖升级／卸载保留数据验收通过。真实跨用户／机器级 UAC 与主客户端真实请求仍需发布前人工确认；修复已本地提交 `bc49edd`，未创建标签、推送或公开发布。
 
 已完成：[TASK-20261026-001](../tasks/completed/2026-10/TASK-20261026-001-provider-outbound-proxy.md)，提供商出站代理：`proxy_settings` 单例 + `providers.proxy_mode` 三态（迁移 044），Core `internal/core/netproxy` 负责端点解析、mixed 端口协议探测与运行期纠偏、本机端口发现与按提供商分流的 Transport；11 个适配器、网关作用域、连通性探针、Codex 透明转发（HTTP/WebSocket）、额度与续期已接入；代理层故障使用独立错误码且不写账号冷却。见 `docs/product/NETWORK_PROXY.md` 与 ADR-025。
@@ -10,7 +12,7 @@
 
 ## Current Version
 
-2.0.0 — 本地 Windows amd64 production 正式版本资产已准备，尚未公开发布。在 Beta.44 功能基础上修复安装目录兼容、实际使用者身份、中文目录桥接及配置原子保存，正式版／Beta 默认渠道均有明确回归测试；无新增数据库迁移或依赖。最终完整质量门（132 文件／809 项前端测试）、Windows 版本资源及发布资产校验通过。安装器 `release-assets/v2.0.0/OmniProxy-Setup-v2.0.0-windows-amd64.exe`，20,242,608 bytes，SHA256 `f17e2a5709cbd459cff7f82b28768574fce75839a22e28df1c371ad9e3dd0560`，未签名。正式发布说明见 `docs/releases/v2.0.0.md`；机器级／跨用户 UAC、真实客户端验收及发布操作边界见任务记录。
+2.0.0 — 当前源码版本，尚未公开发布。安装目录兼容、使用者身份、中文桥接、原子保存及原 MIT 分发已完成；完整质量门（132 文件／809 项前端测试）和本地 production 打包通过。相对本地 Beta.44 无额外迁移，但公开 Beta.5 及更早版本会按需执行既有 035–044。此前 TASK-20261026-004 的未签名本机包及其哈希只作为验证历史，不属于公开 Release；正式资产和最终 SHA256 必须由 GitHub Actions 签名流程生成。原仓库 stable Latest 仍为 v1.3.1；阻塞项与配置要求见 TASK-20261026-005。
 
 ## In Progress
 
