@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/database"
@@ -139,6 +140,9 @@ func TestSnapshotCarriesProviderModesAndDetectedScheme(t *testing.T) {
 
 func TestSnapshotInvalidatedBySaveAndEndpointChangeClearsDetection(t *testing.T) {
 	service, _ := newTestService(t)
+	// Windows 时钟可能在相邻保存之间不前进；用已有时钟注入精确验证时间与缓存失效。
+	now := time.Date(2026, 10, 26, 0, 0, 0, 0, time.UTC)
+	service.now = func() time.Time { return now }
 	ctx := context.Background()
 	first, err := service.Save(ctx, SaveInput{Enabled: true, Scheme: netproxy.SchemeAuto, Host: "127.0.0.1", Port: 10808})
 	if err != nil {
@@ -151,6 +155,7 @@ func TestSnapshotInvalidatedBySaveAndEndpointChangeClearsDetection(t *testing.T)
 	if err != nil || snapshot.Detected != netproxy.SchemeSOCKS5 {
 		t.Fatalf("snapshot = %#v err=%v", snapshot, err)
 	}
+	now = now.Add(time.Millisecond) // 仍在 5 秒缓存窗口内，不能靠缓存自然到期通过。
 	if _, err := service.Save(ctx, SaveInput{Enabled: true, Scheme: netproxy.SchemeAuto, Host: "127.0.0.1", Port: 10809}); err != nil {
 		t.Fatalf("save: %v", err)
 	}
@@ -161,8 +166,12 @@ func TestSnapshotInvalidatedBySaveAndEndpointChangeClearsDetection(t *testing.T)
 	if read.DetectedScheme != "" {
 		t.Fatalf("expected detection cleared after endpoint change, got %q", read.DetectedScheme)
 	}
-	if read.UpdatedAt == first.UpdatedAt {
-		t.Fatal("expected updated_at to change")
+	if read.UpdatedAt == first.UpdatedAt || read.UpdatedAt != now.Format(time.RFC3339Nano) {
+		t.Fatalf("updated_at = %q, want injected time %q", read.UpdatedAt, now.Format(time.RFC3339Nano))
+	}
+	snapshot, err = service.Snapshot(ctx)
+	if err != nil || snapshot.Endpoint.Port != 10809 || snapshot.Detected != "" {
+		t.Fatalf("cached snapshot was not invalidated: %#v err=%v", snapshot, err)
 	}
 }
 

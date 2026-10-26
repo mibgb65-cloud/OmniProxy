@@ -15,8 +15,8 @@ import (
 )
 
 func TestInstallerLocationUsesTokenInsteadOfInheritedEnvironment(t *testing.T) {
-	token, err := installerUserToken()
-	if err != nil {
+	var token windows.Token
+	if err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE, &token); err != nil {
 		t.Fatal(err)
 	}
 	defer token.Close()
@@ -29,6 +29,28 @@ func TestInstallerLocationUsesTokenInsteadOfInheritedEnvironment(t *testing.T) {
 	t.Setenv("OMNIPROXY_DATA_DIR", t.TempDir())
 	target := filepath.Join(t.TempDir(), "OmniProxy.exe")
 	want := filepath.Join(root, installerAppName)
+	location, err := installerLocation(token, target)
+	if err != nil || location.ConfigDir != want || location.DefaultDataDir != want || location.InstallDir != filepath.Dir(target) {
+		t.Fatalf("explicit token location ignores inheritance incorrectly: %+v %v", location, err)
+	}
+	// 托管 Runner 的桌面可能本身提权；生产入口必须拒绝它，而不是要求测试创建普通桌面或跳过。
+	selected, selectErr := installerUserToken()
+	if selectErr != nil {
+		visited := false
+		err := withInstallerUser(target, func(profile.InstallerLocation) error { visited = true; return nil })
+		if !windows.GetCurrentProcessToken().IsElevated() || err == nil || visited ||
+			(selectErr.Error() != "installer: desktop_elevated" && selectErr.Error() != "installer: desktop_unavailable") {
+			t.Fatalf("invalid desktop did not fail closed: %v callback=%v", err, visited)
+		}
+		t.Log("Verified refusal without an ordinary desktop; no administrator fallback")
+		return
+	}
+	defer selected.Close()
+	selectedRoot, err := selected.KnownFolderPath(windows.FOLDERID_RoamingAppData, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = filepath.Join(selectedRoot, installerAppName)
 	visited := false
 	expected := errors.New("synthetic callback failure")
 	err = withInstallerUser(target, func(location profile.InstallerLocation) error {
