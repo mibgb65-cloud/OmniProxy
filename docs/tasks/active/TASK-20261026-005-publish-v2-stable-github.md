@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Blocked
 
 ## Created
 
@@ -90,6 +90,12 @@ In Progress
   精确断言更新时间并在 5 秒缓存窗口内验证缓存真正失效；重复 100 次 PASS。
   身份测试始终验证显式令牌／环境隔离，并在托管 Runner 没有普通桌面时断言拒绝且不调用写入回调，
   不跳过测试、不回退管理员；本机重复 20 次 PASS。两个修改包无缓存全套测试通过。
+- 修复后的真实 GitHub CI：
+  https://github.com/mibgb65-cloud/OmniProxy/actions/runs/40346218978 ，**SUCCESS**，
+  源码提交 `08b05f7562c01cd36be436f284bdec12918c637d`。
+  远端完整质量门、两个修复包、132 文件／809 项前端测试、Windows production 构建与 Artifact 上传通过。
+- 最终再次只查询配置名称：四个 SignPath Variable 与一个 API Token Secret 仍全部缺失；
+  stable Latest 仍为 v1.3.1，v2.0.0 标签与公开 Release 均未创建。
 - 本地验证日志：
   `C:/Users/mimanchi/.codex/visualizations/2026/10/26/01a17824-8bec-7e20-8fee-78aedc6c123e/v2-github-release-policy-verify.log`。
 
@@ -97,13 +103,36 @@ In Progress
 
 `a19fcde6d847fd9c621e6443ac299f7d5bcdffb6` — `ci(release): 按原仓库策略接入签名发布门禁`，
 已通过普通快进推送至 origin/main。原 master 保持 `56448d20ccd797bc32aae1c02a5e2f2030b8b6c8`，
-未创建标签或 Release。远端 CI 测试兼容修正提交待记录。
+未创建标签或 Release。
+
+`08b05f7562c01cd36be436f284bdec12918c637d` — `test(ci): 固定代理时钟并验证提权桌面拒绝契约`，
+已正常推送 main，远端 CI 成功。没有强推或改写共享历史。
 
 ## Result
 
-合规修正与本地验证已完成，main 已正常推送；修正首次远端 CI 暴露的测试环境假设后继续核验。
+合规修正、本地验证和远端完整 CI 均已完成，main 已正常推送。
 公开发布仍需真实 SignPath 组织／项目／策略与 Token 配置，以及授权审批人手工批准。
 在这些前提未满足前，不创建新版本标签，不上传本机构建文件，不更改现有公开 Release。
+
+## Blocker
+
+原仓库要求每次发布经 SignPath 人工审批签名，但仓库未配置相关 Secret／Variable。
+不能伪造配置、代替维护者获取／透露签名凭据，或把未签名文件当作合规正式产物。
+因此本任务不能标记 Completed，v2.0.0 尚未公开发布。
+
+## Required To Continue
+
+由维护者在 GitHub 仓库 Settings → Secrets and variables → Actions 中配置：
+
+- Secret：`SIGNPATH_API_TOKEN`（只填入 GitHub Secret，不发送到聊天或提交到源码）。
+- Variables：`SIGNPATH_ORGANIZATION_ID`、`SIGNPATH_PROJECT_SLUG`、
+  `SIGNPATH_ARTIFACT_CONFIGURATION_SLUG`、`SIGNPATH_SIGNING_POLICY_SLUG`。
+- SignPath 项目关联本公开仓库、GitHub 托管构建与安装器 ZIP；正式策略须人工审批，
+  审批人按原策略为 `mibgb65-cloud`，相关账号启用 MFA。
+
+配置就绪后确认 main／CI 状态，再创建并推送新的 `v2.0.0` 标签；跟踪 Release 的签名请求，
+由维护者在 SignPath 手工批准。签名、最终摘要与公开资产验证都成功后才能完成本任务。
+如标签已存在，必须从 main 的 v2 工作流调度，不移动标签或覆盖已公开版本。
 
 ## Deviations
 

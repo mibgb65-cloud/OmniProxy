@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-GitHub 发布：[TASK-20261026-005](../tasks/active/TASK-20261026-005-publish-v2-stable-github.md)。已核对原仓库：v1 在默认 master，v2 在 main；沿用原 MIT／安全／签名策略，恢复许可证并随安装器分发，补齐双语发布说明及 Beta.5→2.0.0 的 035–044 迁移提示。公开资产必须来自 GitHub Actions 并经 SignPath 人工审批签名；已接入失败关闭的签名／SHA256 门禁，本地完整质量门、打包和用户级 MIT 安装卸载验证通过。仓库尚缺 SignPath 配置，未创建 v2.0.0 标签或公开 Release；本机安装包只能验证，不能手工上传代替正式产物。
+GitHub 发布：[TASK-20261026-005](../tasks/active/TASK-20261026-005-publish-v2-stable-github.md)，**Blocked：等待 SignPath 配置与人工审批**。已按原仓库恢复 MIT／安全／签名策略及许可分发，补双语说明和 Beta.5→2.0.0 迁移提示。签名门禁已接入，源码正常推送 main；修正托管 Runner 时钟与提权桌面测试后，远端完整 [CI 40346218978](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/40346218978) 成功（`08b05f7`，132 文件／809 项前端测试及 Windows 构建）。仓库仍缺一个 Secret 与四个 SignPath Variable，未创建 v2.0.0 标签或 Release；原 master、stable Latest 与历史版本保持不变，本机包不能手工上传代替签名产物。
 
 发布准备：[TASK-20261026-004](../tasks/completed/2026-10/TASK-20261026-004-prepare-v2-stable-release.md)。已修复原始评估 [TASK-20261026-003](../tasks/completed/2026-10/TASK-20261026-003-v2-release-readiness-review.md) 的旧数据目录保护与提权用户身份问题，并补齐原生中文目录传输。最终质量门、Windows production 打包、版本资源及 SHA256 通过；隔离用户级原生向导／改程序目录／静默覆盖升级／卸载保留数据验收通过。真实跨用户／机器级 UAC 与主客户端真实请求仍需发布前人工确认；修复已本地提交 `bc49edd`，未创建标签、推送或公开发布。
 
