@@ -3,7 +3,6 @@
 package appinstall
 
 import (
-	"errors"
 	"os/exec"
 	"path/filepath"
 	"unsafe"
@@ -25,25 +24,11 @@ func startInstalled(target string) error {
 		return cmd.Process.Release()
 	}
 	// 只使用当前交互桌面的 shell 身份；没有普通用户桌面时提示手动启动。
-	hwnd, _, _ := user32.NewProc("GetShellWindow").Call()
-	var pid uint32
-	user32.NewProc("GetWindowThreadProcessId").Call(hwnd, uintptr(unsafe.Pointer(&pid)))
-	if hwnd == 0 || pid == 0 {
-		return errors.New("installer: desktop_unavailable")
-	}
-	process, err := windows.OpenProcess(windows.PROCESS_QUERY_LIMITED_INFORMATION, false, pid)
+	token, err := desktopUserToken()
 	if err != nil {
 		return err
 	}
-	defer windows.CloseHandle(process)
-	var token windows.Token
-	if err := windows.OpenProcessToken(process, windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE|windows.TOKEN_ASSIGN_PRIMARY, &token); err != nil {
-		return err
-	}
 	defer token.Close()
-	if token.IsElevated() {
-		return errors.New("installer: desktop_elevated")
-	}
 	// 使用当前进程持有的主令牌副本并加载用户配置，避免直接使用 shell
 	// 进程令牌时 CreateProcessWithTokenW 返回拒绝访问。
 	var primary windows.Token

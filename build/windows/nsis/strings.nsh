@@ -30,6 +30,9 @@ LangString OMNI_DATADIR_CHANGE_WARN ${LANG_ENGLISH}     "Changing the data folde
 LangString OMNI_DATADIR_CHANGE_FAILED ${LANG_SIMPCHINESE} "数据位置没有更改："
 LangString OMNI_DATADIR_CHANGE_FAILED ${LANG_ENGLISH}     "The data folder was not changed: "
 
+LangString OMNI_DATADIR_READ_FAILED ${LANG_SIMPCHINESE} "无法确认当前使用者的数据位置，安装已停止，原有配置与数据保持不变。请登录实际使用者的桌面后重试，并检查原数据目录是否可访问。"
+LangString OMNI_DATADIR_READ_FAILED ${LANG_ENGLISH}     "The current user's data folder could not be verified. Setup has stopped without changing existing settings or data. Sign in to the user's desktop and check access to the existing data folder before retrying."
+
 LangString OMNI_DATADIR_IN_USE     ${LANG_SIMPCHINESE} "数据位置没有更改：原位置仍包含账号与请求记录，安装器不会迁移数据。请安装完成后在应用内「设置 → 数据存储 → 数据主目录」搬迁。"
 LangString OMNI_DATADIR_IN_USE     ${LANG_ENGLISH}     "The data folder was not changed: the current location still holds accounts and request history, and the installer never moves data. Use Settings → Data storage → Data folder after installation."
 

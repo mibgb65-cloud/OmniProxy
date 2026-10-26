@@ -9,32 +9,36 @@ import (
 
 // isolateInstallerConfig keeps installer tests away from the real user config
 // and from any ambient data-directory override.
-func isolateInstallerConfig(t *testing.T) {
+func isolateInstallerConfig(t *testing.T) InstallerLocation {
 	t.Helper()
-	useTempConfigDir(t)
+	config := useTempConfigDir(t)
 	t.Setenv(envDataDir, "")
+	return InstallerLocation{
+		ConfigDir: config, DefaultDataDir: filepath.Join(t.TempDir(), AppName),
+		InstallDir: t.TempDir(),
+	}
 }
 
 func TestInstallerDataDirDefaultsWithoutConfig(t *testing.T) {
-	isolateInstallerConfig(t)
+	location := isolateInstallerConfig(t)
 
-	got, err := InstallerDataDir(Production)
+	got, err := location.DataDir()
 	if err != nil {
 		t.Fatalf("InstallerDataDir error: %v", err)
 	}
-	if want := defaultDataDir(AppName); got != want {
+	if want := location.DefaultDataDir; got != want {
 		t.Fatalf("InstallerDataDir() = %q, want %q", got, want)
 	}
 }
 
 func TestInstallerDataDirReportsStoredChoice(t *testing.T) {
-	isolateInstallerConfig(t)
+	location := isolateInstallerConfig(t)
 	stored := t.TempDir()
 	if err := SaveConfig(Production, Config{DataDir: stored}); err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := InstallerDataDir(Production)
+	got, err := location.DataDir()
 	if err != nil {
 		t.Fatalf("InstallerDataDir error: %v", err)
 	}
@@ -44,14 +48,14 @@ func TestInstallerDataDirReportsStoredChoice(t *testing.T) {
 }
 
 func TestInstallerSetDataDirPersistsChoice(t *testing.T) {
-	isolateInstallerConfig(t)
+	location := isolateInstallerConfig(t)
 	current := t.TempDir()
 	if err := SaveConfig(Production, Config{DataDir: current}); err != nil {
 		t.Fatal(err)
 	}
 	target := filepath.Join(t.TempDir(), "OmniProxyData")
 
-	if err := InstallerSetDataDir(Production, target); err != nil {
+	if err := location.SetDataDir(target); err != nil {
 		t.Fatalf("InstallerSetDataDir error: %v", err)
 	}
 	cfg, err := LoadConfig(Production)
@@ -64,7 +68,7 @@ func TestInstallerSetDataDirPersistsChoice(t *testing.T) {
 	if info, err := os.Stat(target); err != nil || !info.IsDir() {
 		t.Fatalf("target directory was not created: %v", err)
 	}
-	if got, err := InstallerDataDir(Production); err != nil || got != target {
+	if got, err := location.DataDir(); err != nil || got != target {
 		t.Fatalf("InstallerDataDir() = %q (err %v), want %q", got, err, target)
 	}
 }
@@ -72,7 +76,7 @@ func TestInstallerSetDataDirPersistsChoice(t *testing.T) {
 func TestInstallerSetDataDirRefusesToAbandonExistingData(t *testing.T) {
 	for _, name := range []string{"database", "isolated v2 database"} {
 		t.Run(name, func(t *testing.T) {
-			isolateInstallerConfig(t)
+			location := isolateInstallerConfig(t)
 			current := t.TempDir()
 			if err := SaveConfig(Production, Config{DataDir: current}); err != nil {
 				t.Fatal(err)
@@ -89,7 +93,7 @@ func TestInstallerSetDataDirRefusesToAbandonExistingData(t *testing.T) {
 			}
 			target := filepath.Join(t.TempDir(), "elsewhere")
 
-			if err := InstallerSetDataDir(Production, target); !errors.Is(err, ErrDataDirInUse) {
+			if err := location.SetDataDir(target); !errors.Is(err, ErrDataDirInUse) {
 				t.Fatalf("expected ErrDataDirInUse, got %v", err)
 			}
 			cfg, err := LoadConfig(Production)
@@ -107,13 +111,13 @@ func TestInstallerSetDataDirRefusesToAbandonExistingData(t *testing.T) {
 }
 
 func TestInstallerSetDataDirAcceptsRepeatedChoice(t *testing.T) {
-	isolateInstallerConfig(t)
+	location := isolateInstallerConfig(t)
 	stored := t.TempDir()
 	if err := SaveConfig(Production, Config{DataDir: stored, PreviousDataDir: `C:\old`}); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := InstallerSetDataDir(Production, stored); err != nil {
+	if err := location.SetDataDir(stored); err != nil {
 		t.Fatalf("InstallerSetDataDir error: %v", err)
 	}
 	cfg, err := LoadConfig(Production)
@@ -126,13 +130,13 @@ func TestInstallerSetDataDirAcceptsRepeatedChoice(t *testing.T) {
 }
 
 func TestInstallerSetDataDirRejectsInvalidInput(t *testing.T) {
-	isolateInstallerConfig(t)
+	location := isolateInstallerConfig(t)
 	current := t.TempDir()
 	if err := SaveConfig(Production, Config{DataDir: current}); err != nil {
 		t.Fatal(err)
 	}
 	for _, target := range []string{"", "   ", "relative\\dir", filepath.Join(current, "nested")} {
-		if err := InstallerSetDataDir(Production, target); err == nil {
+		if err := location.SetDataDir(target); err == nil {
 			t.Fatalf("InstallerSetDataDir(%q) accepted an invalid target", target)
 		}
 	}

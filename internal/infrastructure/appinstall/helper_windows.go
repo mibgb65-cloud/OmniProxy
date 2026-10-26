@@ -40,18 +40,36 @@ func HandleMode(args []string) (bool, int) {
 		cleanupAutostart(args[1])
 		return true, 0
 	}
-	// 安装器读取／写入数据目录：写入只允许在用户自己的配置里做，且拒绝覆盖已有数据。
-	if len(args) == 1 && args[0] == "--omniproxy-installer-data-dir-read" {
-		dir, err := profile.InstallerDataDir(profile.Production)
+	// 原安装程序路径必须显式传入；临时助手所在目录和管理员环境都不是用户数据来源。
+	if len(args) == 2 && (args[0] == "--omniproxy-installer-data-dir-read" || args[0] == "--omniproxy-installer-data-dir-read-file") {
+		var dir string
+		err := withInstallerUser(args[1], func(location profile.InstallerLocation) error {
+			var err error
+			dir, err = location.DataDir()
+			return err
+		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return true, 2
 		}
-		fmt.Println(dir)
+		if args[0] == "--omniproxy-installer-data-dir-read-file" {
+			executable, err := os.Executable()
+			if err == nil {
+				err = writeInstallerDirectoryResult(executable, dir)
+			}
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return true, 2
+			}
+		} else {
+			fmt.Println(dir)
+		}
 		return true, 0
 	}
-	if len(args) == 2 && args[0] == "--omniproxy-installer-data-dir-write" {
-		err := profile.InstallerSetDataDir(profile.Production, args[1])
+	if len(args) == 3 && args[0] == "--omniproxy-installer-data-dir-write" {
+		err := withInstallerUser(args[1], func(location profile.InstallerLocation) error {
+			return location.SetDataDir(args[2])
+		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			if errors.Is(err, profile.ErrDataDirInUse) {
@@ -67,7 +85,7 @@ func HandleMode(args []string) (bool, int) {
 		}
 		return true, runUpdate(args[1:])
 	}
-	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup" || args[0] == "--omniproxy-installer-launch" || args[0] == "--omniproxy-installer-data-dir-read" || args[0] == "--omniproxy-installer-data-dir-write") {
+	if len(args) > 0 && (args[0] == "--omniproxy-installer-stop" || args[0] == "--omniproxy-installer-cleanup" || args[0] == "--omniproxy-installer-launch" || args[0] == "--omniproxy-installer-data-dir-read" || args[0] == "--omniproxy-installer-data-dir-read-file" || args[0] == "--omniproxy-installer-data-dir-write") {
 		return true, 2
 	}
 	return false, 0

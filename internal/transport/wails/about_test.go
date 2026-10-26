@@ -52,10 +52,20 @@ func TestRuntimeInfo(t *testing.T) {
 }
 
 func TestDefaultUpdatePreferences(t *testing.T) {
-	svc, _ := newTestService(t)
-	prefs, err := svc.GetUpdatePreferences()
-	if err != nil || prefs.Repo != update.DefaultRepo || prefs.Channel != "beta" {
-		t.Fatalf("preferences = %+v, %v", prefs, err)
+	original := version.Version
+	t.Cleanup(func() { version.Version = original })
+	for _, tc := range []struct{ version, channel string }{
+		{"2.0.0", "stable"},
+		{"2.0.0-beta.44", "beta"},
+	} {
+		t.Run(tc.version, func(t *testing.T) {
+			version.Version = tc.version
+			svc, _ := newTestService(t)
+			prefs, err := svc.GetUpdatePreferences()
+			if err != nil || prefs.Repo != update.DefaultRepo || prefs.Channel != tc.channel {
+				t.Fatalf("preferences = %+v, %v; want %s", prefs, err, tc.channel)
+			}
+		})
 	}
 }
 

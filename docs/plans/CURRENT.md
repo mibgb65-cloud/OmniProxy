@@ -2,13 +2,15 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+发布准备：[TASK-20261026-004](../tasks/active/TASK-20261026-004-prepare-v2-stable-release.md)。已修复原始评估 [TASK-20261026-003](../tasks/completed/2026-10/TASK-20261026-003-v2-release-readiness-review.md) 的旧数据目录保护与提权用户身份问题，并补齐原生中文目录传输。最终质量门、Windows production 打包、版本资源及 SHA256 通过；隔离用户级原生向导／改程序目录／静默覆盖升级／卸载保留数据验收通过。真实跨用户／机器级 UAC 与主客户端真实请求仍需发布前人工确认；未创建标签、推送或公开发布。
+
 已完成：[TASK-20261026-001](../tasks/completed/2026-10/TASK-20261026-001-provider-outbound-proxy.md)，提供商出站代理：`proxy_settings` 单例 + `providers.proxy_mode` 三态（迁移 044），Core `internal/core/netproxy` 负责端点解析、mixed 端口协议探测与运行期纠偏、本机端口发现与按提供商分流的 Transport；11 个适配器、网关作用域、连通性探针、Codex 透明转发（HTTP/WebSocket）、额度与续期已接入；代理层故障使用独立错误码且不写账号冷却。见 `docs/product/NETWORK_PROXY.md` 与 ADR-025。
 
 进行中：[TASK-20261022-004](../tasks/active/TASK-20261022-004-codex-compaction-river-token-usage.md)，River 本机输入／输出／缓存 Token 统计已实现，干净副本完整质量门／724 项前端测试及 Windows 构建通过；隔离原生窗口空白，视觉验收未完成。Codex 约 500k 提前压缩仍未复现，已排除简单的全局阈值遗漏，保留用户既有 1.05M／900k 设置，不宣称已修复或扩大上游能力。
 
 ## Current Version
 
-2.0.0-beta.44 — 本地 Windows amd64 production 安装包，未公开发布。在 Beta.43 基础上只含一项界面改动（TASK-20261025-015）：重做「网络代理」弹窗布局——560px 单栏整块滚动改为 880px 两栏分区（左「代理服务器」、右「使用代理的提供商」），标题与「保存／取消」固定，提供商列表独立滚动并新增按名称筛选与三态计数摘要，行高加大、三态控件右对齐成列。纯前端改动：接口、三态语义、脱敏行为不变，无数据库迁移、无新增依赖。完整质量门（132 文件／809 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,198,610 bytes，SHA256 `913b5050…884`，未签名。
+2.0.0 — 本地 Windows amd64 production 正式版本资产已准备，尚未公开发布。在 Beta.44 功能基础上修复安装目录兼容、实际使用者身份、中文目录桥接及配置原子保存，正式版／Beta 默认渠道均有明确回归测试；无新增数据库迁移或依赖。最终完整质量门（132 文件／809 项前端测试）、Windows 版本资源及发布资产校验通过。安装器 `release-assets/v2.0.0/OmniProxy-Setup-v2.0.0-windows-amd64.exe`，20,242,608 bytes，SHA256 `f17e2a5709cbd459cff7f82b28768574fce75839a22e28df1c371ad9e3dd0560`，未签名。正式发布说明见 `docs/releases/v2.0.0.md`；机器级／跨用户 UAC、真实客户端验收及发布操作边界见任务记录。
 
 ## In Progress
 

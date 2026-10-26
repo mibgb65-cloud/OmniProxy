@@ -17,10 +17,12 @@ try{
  $ErrorActionPreference='Continue'
  & task --force verify
  $verifyCode=$LASTEXITCODE
+ $ErrorActionPreference=$gateErrorAction
+ if($verifyCode -ne 0){throw '完整质量门失败'}
+ $ErrorActionPreference='Continue'
  & task --force package
  $packageCode=$LASTEXITCODE
  $ErrorActionPreference=$gateErrorAction
- if($verifyCode -ne 0){throw '完整质量门失败'}
  if($packageCode -ne 0){throw '安装器打包失败'}
  $application=Join-Path $root 'bin/omniproxy.exe'
  $installer=Join-Path $root 'bin/OmniProxy-amd64-installer.exe'

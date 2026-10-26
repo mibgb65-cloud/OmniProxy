@@ -81,7 +81,11 @@ func TestCheckForUpdateAutomaticDownloadPolicy(t *testing.T) {
 }
 
 func TestUpdateChannelCannotChangeDuringCheck(t *testing.T) {
-	svc, _ := newTestService(t)
+	svc, prof := newTestService(t)
+	// 显式偏好必须保留，不依赖当前构建恰好是 Beta 还是正式版。
+	if err := profile.SaveConfig(prof.Kind, profile.Config{UpdateChannel: "beta"}); err != nil {
+		t.Fatal(err)
+	}
 	started, release := make(chan struct{}), make(chan struct{})
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		close(started)

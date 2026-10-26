@@ -14,6 +14,7 @@
 Var AutoUpdate
 Var NoRestart
 Var ExistingInstall
+Var DataDirSourceDir
 
 Function .onInit
     !insertmacro wails.checkArchitecture
@@ -64,6 +65,8 @@ Function .onInit
         StrCpy $INSTDIR "$0"
         StrCpy $ExistingInstall "1"
     ${EndIf}
+    ; 目录选择页可以修改 INSTDIR，但历史数据标记始终来自原安装位置。
+    StrCpy $DataDirSourceDir "$INSTDIR"
     Call .onVerifyInstDir
 FunctionEnd
 

@@ -1,5 +1,14 @@
 # Architecture Overview
 
+## 正式版安装器数据身份（2026-10-26）
+
+安装器通过明确的原安装程序路径传递历史标记来源，`platform/profile.InstallerLocation`
+负责 app.json／旧标记／默认位置的解析和已有数据库保护，不依赖辅助进程自身路径。
+Windows 适配层从普通使用者令牌的 KnownFolder 定位配置；已在该身份下时直接执行，提权时在
+专属锁定线程上模拟该用户完成目录权限校验与配置读写，不能修改全局环境或回退为管理员写入。
+保留历史数据位置时可固化
+app.json，静默更新不改数据配置。实现及验收边界见 TASK-20261026-004。
+
 ## Codex 透明转发的额度换号（2026-10-24）
 
 执行前额度拒绝的判定上提到 `core/proxy`（`QuotaRejected`／`InspectableQuotaResponse`），

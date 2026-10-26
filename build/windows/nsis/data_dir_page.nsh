@@ -20,16 +20,31 @@ Function DataDirPageCreate
     StrCpy $DataDirCurrent ""
     StrCpy $DataDirPath ""
 
-    nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-data-dir-read'
+    Delete "$PLUGINSDIR\omniproxy-data-dir.txt"
+    nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-data-dir-read-file "$DataDirSourceDir\${PRODUCT_EXECUTABLE}"'
     Pop $0
     Pop $1
+    StrCpy $1 ""
+    ${If} $0 == "0"
+        ClearErrors
+        FileOpen $2 "$PLUGINSDIR\omniproxy-data-dir.txt" r
+        ${IfNot} ${Errors}
+            ; 显式 UTF-16LE 协议，避免 nsExec 的系统代码页损坏中文数据路径。
+            FileReadUTF16LE $2 $1
+            FileClose $2
+        ${EndIf}
+    ${EndIf}
+    Delete "$PLUGINSDIR\omniproxy-data-dir.txt"
     ${If} $0 == "0"
     ${AndIf} $1 != ""
         StrCpy $DataDirPath $1
         Call DataDirTrimNewLines
         StrCpy $DataDirCurrent $DataDirPath
     ${Else}
-        StrCpy $DataDirPath ""
+        ; 无法确认实际使用者或原数据位置时，不能猜默认值后继续写配置。
+        MessageBox MB_OK|MB_ICONSTOP "$(OMNI_DATADIR_READ_FAILED)"
+        SetErrorLevel 67
+        Quit
     ${EndIf}
 
     nsDialogs::Create 1018
@@ -121,15 +136,16 @@ Function DataDirPageLeave
     data_dir_leave_empty:
     ; 留空表示保持当前位置不变。
     StrCpy $DataDirChanged "0"
+    StrCpy $DataDirPath "$DataDirCurrent"
 
     data_dir_leave_done:
 FunctionEnd
 
 !macro WriteDataDirChoice
     ${IfNot} ${Silent}
-        ${If} $DataDirChanged == "1"
-        ${AndIf} $DataDirPath != ""
-            nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-data-dir-write "$DataDirPath"'
+        ${If} $DataDirPath != ""
+            ; 同位置也执行安全固化：程序安装目录改变后，历史 data-dir.txt 不再是唯一指针。
+            nsExec::ExecToStack '"$PLUGINSDIR\omniproxy-installer-helper.exe" --omniproxy-installer-data-dir-write "$DataDirSourceDir\${PRODUCT_EXECUTABLE}" "$DataDirPath"'
             Pop $0
             Pop $1
             ${If} $0 == "0"

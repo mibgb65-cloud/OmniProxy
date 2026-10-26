@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -61,39 +60,12 @@ func ConfigFilePath(kind Kind) string {
 // empty configuration; a corrupt file is an error so the problem surfaces
 // instead of silently resetting the user's choice.
 func LoadConfig(kind Kind) (Config, error) {
-	var cfg Config
-	data, err := os.ReadFile(ConfigFilePath(kind))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return cfg, nil
-		}
-		return cfg, fmt.Errorf("profile: read config: %w", err)
-	}
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return cfg, fmt.Errorf("profile: parse %s: %w", ConfigFilePath(kind), err)
-	}
-	return cfg, nil
+	return loadConfigFile(ConfigFilePath(kind))
 }
 
 // SaveConfig atomically writes the configuration (temp file + rename).
 func SaveConfig(kind Kind, cfg Config) error {
-	path := ConfigFilePath(kind)
-	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
-		return fmt.Errorf("profile: create config dir: %w", err)
-	}
-	data, err := json.MarshalIndent(cfg, "", "  ")
-	if err != nil {
-		return fmt.Errorf("profile: encode config: %w", err)
-	}
-	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
-		return fmt.Errorf("profile: write config: %w", err)
-	}
-	if err := os.Rename(tmp, path); err != nil {
-		_ = os.Remove(tmp)
-		return fmt.Errorf("profile: replace config: %w", err)
-	}
-	return nil
+	return saveConfigFile(ConfigFilePath(kind), cfg)
 }
 
 // SetDataDir validates and persists a new data directory. The change takes
@@ -169,12 +141,14 @@ func ensureWritableDir(dir string) error {
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return fmt.Errorf("profile: create %s: %w", dir, err)
 	}
-	probe := filepath.Join(dir, ".omniproxy-write-test")
-	f, err := os.OpenFile(probe, os.O_CREATE|os.O_WRONLY, 0o600)
+	// 唯一探针不得覆盖／删除目录中已有的同名文件。
+	f, err := os.CreateTemp(dir, ".omniproxy-write-test-*")
 	if err != nil {
 		return fmt.Errorf("profile: %s is not writable: %w", dir, err)
 	}
+	probe := f.Name()
 	if err := f.Close(); err != nil {
+		_ = os.Remove(probe)
 		return fmt.Errorf("profile: %s is not writable: %w", dir, err)
 	}
 	if err := os.Remove(probe); err != nil {
