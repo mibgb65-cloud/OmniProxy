@@ -41,7 +41,8 @@ readQuota 的 defer client.Close 在 publishQuota 返回后执行，可作为现
 
 ## Git
 
-待记录。
+`5d9dac4df30cfef37cb93a1b8b213c2c9e1b1daa` —
+`test(subscription): 用额度发布完成屏障消除竞态`。仅测试与记录，不改 v2.0.0 标签源码及公开资产。
 
 ## Result
 

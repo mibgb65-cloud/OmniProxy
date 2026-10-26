@@ -2,7 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-GitHub 发布：[TASK-20261026-005](../tasks/active/TASK-20261026-005-publish-v2-stable-github.md) 继续进行。维护者明确取消未获批的服务，选择项目自签；由 [TASK-20261026-006](../tasks/active/TASK-20261026-006-remove-signpath-dependency.md) 替换签名任务、验证证书 pin 和篡改拒绝。项目私钥保存在维护者用户证书库，Actions encrypted Secrets 已配置，Git 只含公开证书。自签不表示系统公开信任，不保证消除 SmartScreen；安装器不得修改用户信任库。将先执行不发布的 Actions 验证，成功后再按正式标签发布；历史版本保留。
+GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-20261026-005-publish-v2-stable-github.md)／[TASK-20261026-006](../tasks/completed/2026-10/TASK-20261026-006-remove-signpath-dependency.md)。[v2.0.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0) 已公开并成为 stable Latest；正式 [Actions 40366364069](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/40366364069) 从标签重新构建、完整质量门、自签、pin／篡改／SHA256 及公开资产核验通过。项目私钥仅在维护者用户证书库与本项目 encrypted Secrets，Git 只有公开证书；未修改用户信任库，自签不等同于公开受信任 CA。历史 Release／标签保留，master 只修正签名文档。
+
+收尾验证：[TASK-20261027-001](../tasks/completed/2026-10/TASK-20261027-001-quota-observer-test-barrier.md) 修复并发主分支 CI 的测试完成信号竞态，等待实际额度发布结束而非读取结束；重复 100 次及包测试通过。仅改测试，不移动 v2.0.0 标签或替换公开资产。
 
 发布准备：[TASK-20261026-004](../tasks/completed/2026-10/TASK-20261026-004-prepare-v2-stable-release.md)。已修复原始评估 [TASK-20261026-003](../tasks/completed/2026-10/TASK-20261026-003-v2-release-readiness-review.md) 的旧数据目录保护与提权用户身份问题，并补齐原生中文目录传输。最终质量门、Windows production 打包、版本资源及 SHA256 通过；隔离用户级原生向导／改程序目录／静默覆盖升级／卸载保留数据验收通过。真实跨用户／机器级 UAC 与主客户端真实请求仍需发布前人工确认；修复已本地提交 `bc49edd`，未创建标签、推送或公开发布。
 
@@ -12,7 +14,7 @@ GitHub 发布：[TASK-20261026-005](../tasks/active/TASK-20261026-005-publish-v2
 
 ## Current Version
 
-2.0.0 — 当前源码版本，尚未公开发布。安装目录兼容、使用者身份、中文桥接、原子保存及原 MIT 分发已完成；此前完整质量门（132 文件／809 项前端测试）及远端 CI 通过。相对本地 Beta.44 无额外迁移，公开 Beta.5 及更早版本会按需执行既有 035–044。自签方案验证中，正式资产与最终 SHA256 将由 GitHub Actions 生成；此前未签名本机包仅作验证，不手工上传。用户无需购买证书，但自签安装包仍可能被系统提示不受信任。
+2.0.0 — 已于 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 ## In Progress
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -81,12 +81,40 @@ SmartScreen 信誉；公开发行若需要受信任发布者，应使用正规 C
 - 隔离用户级原生向导／改程序目录／静默升级／卸载：PASS。
   公开证书和 MIT 原文正确分发／清理，旧数据与未知文件保留，用户 Root 信任未被修改。
 - 未执行真实上游付费请求或跨用户 UAC；自签不能取代这些既有人工验收边界。
-- 云端不发布签名验证与正式公开产物：待执行。
+- 云端不发布验签与正式标签重新构建发布：PASS，实际公开下载核验通过。
+- 首次完整预验证 `40359373376`：构建及完整质量门成功，签名阶段 15 分钟超时，
+  没有发布。改为无 UI 的内存 PFX 导入，并仅在 GitHub 托管 Windows Runner 既有管理员身份下
+  使用临时机器信任库，增加不含密钥的阶段日志。
+- 隔离验签 `40365440314`：SUCCESS，重用同仓库上述成功构建的 unsigned Artifact，
+  校验其 provenance 后实际完成自签、pin 验证、原生验签、代码区篡改拒绝与最终摘要检查；
+  所有公开发布作业跳过，不能把该夹具模式当成新版本的构建或发布。
+- 正式 `v2.0.0` 标签已正常创建于 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`。
+  Release `40366364069` 从标签重新运行完整构建、签名和发布，未复用夹具作为公开产物；SUCCESS。
+- 公开 Release 非草稿、非预发布，stable Latest 为 v2.0.0；实际下载的安装器与 API digest／
+  `.sha256` 均一致，内嵌 signer 为 `CN=OmniProxy Self-Signed`，证书 SHA256 与公开 pin 一致。
+- 安装器 20,286,400 bytes，SHA256
+  `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`。
+  客户端原生状态 `UnknownError` 为未信任根的预期边界，没有向用户 Root 增加证书。
+- 并发主分支 CI 40365457327 暴露了另一项测试完成信号竞态，非签名／业务改动，
+  由 TASK-20261027-001 独立修复；没有把失败记录隐去或替换已公开 v2.0.0。
 
 ## Git
 
-待记录。
+- `d262ebd92c997246336d7ba8739822bfacfb15f2`：项目自签方案及公开证书，已正常推送 main。
+- `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`：非交互 Runner 修正及隔离验签模式，
+  已正常推送 main；正式标签指向此修订。
+- `4bcee95bf1831e2f70de29281ef23a207de6e146`：master 文档快进提交，仅
+  CODE_SIGNING_POLICY.md、README.md、README_EN.md 三份文件。未切换工作区、未改 v1 业务代码。
+- 未强推、未移动或删除共享标签，未覆盖历史 Release。
 
 ## Result
 
-待完成。
+已移除未获批服务，完成项目自签证书与加密凭据配置，并通过 GitHub Actions 发布 v2.0.0：
+https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0 。
+公开安装包实际自签、证书 pin 与最终 SHA256 均核验，历史版本保留。
+自签不等同于公开受信任签名，可能继续出现 SmartScreen／未知发布者提示；
+客户端信任库未被修改，私钥不在 Git 或公开资产中。
+
+## Completed
+
+2026-10-27（Asia/Singapore）
