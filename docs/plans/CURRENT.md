@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261027-016](../tasks/completed/2026-10/TASK-20261027-016-build-local-v2.0.1-beta.2-installer.md) 已产出 `v2.0.1-beta.2` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），含重置卡信息恢复读取与请求页滚动改动；`task --force verify` exit 0（132 文件／811 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,275,456 bytes，SHA256 `9ebea510011723c6def363fca1062b4b535fc3fb7006113f0bb83f199ce3b15a`，覆盖安装与真实账号验收由用户执行。
+
 已修复：[TASK-20261027-015](../tasks/completed/2026-10/TASK-20261027-015-reset-credits-http-display.md) 重置卡面板在此之前恒显示「官方暂未返回重置卡信息」——额度改走 `/backend-api/wham/usage` 后没有任何代码读取重置卡。官方 HTTP 客户端补上 `/rate-limit-reset-credits`（数量以 `availableCount` 为准，`credits:null` 只表示详情未知，缺失获得时间保持未知），界面读取与额度并行取得并合并，失败只记稳定码并保持未知，后台观察与调度不额外请求。`gofmt`／`go vet`／`staticcheck`／Go 全量包、前端 132 文件／811 项测试与 production 构建通过；真实账号上的接口字段仍待一次实机刷新确认。实现提交 `edc2edaa`。
 
 源码修复完成：[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md) 已修复 HTTP 透明转发提前结束尝试导致的 Token 漏记，并统一透明响应记账失败的非截断策略。真实 SQLite／错误路径定向重复 10 次通过，干净副本完整 `task verify`（含 809 项前端测试及 Windows production 构建）通过；实现提交 `04e053c`。未回填历史数据、安装、重启或发布生产程序。
@@ -23,7 +25,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 **已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
-**本地构建（未发布）：2.0.1-beta.1** — 2026-10-27 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.0 含两项用户可见改动：HTTP 透明转发 Token 用量的尝试生命周期修复（TASK-20261027-003）、OpenAI 预设对齐官方 Featured models 且 River 预设增至六款（TASK-20261027-011）。完整质量门（132 文件／809 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,260,640 bytes，SHA256 `bbca554220f277ee6bf4d2e4eae747582a20a523da0d18bc5de5ad3aee7dc11c`。
+**本地构建（未发布）：2.0.1-beta.2** — 2026-10-27 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.1-beta.1 含三项用户可见改动：重置卡信息恢复读取（TASK-20261027-015，`edc2edaa`）、请求列表横向滚动条改为统一细滑块（TASK-20261027-013）、请求页改为表格内部滚动（TASK-20261027-014）。完整质量门（132 文件／811 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,275,456 bytes，SHA256 `9ebea510011723c6def363fca1062b4b535fc3fb7006113f0bb83f199ce3b15a`。
+
+**本地构建（未发布，已被 beta.2 取代）：2.0.1-beta.1** — 相对 2.0.0 含 HTTP 透明转发 Token 用量的尝试生命周期修复（TASK-20261027-003）、OpenAI 预设对齐官方 Featured models 且 River 预设增至六款（TASK-20261027-011）；安装器 20,260,640 bytes，SHA256 `bbca554220f277ee6bf4d2e4eae747582a20a523da0d18bc5de5ad3aee7dc11c`。
 
 ## In Progress
 
