@@ -197,7 +197,8 @@ scripts/verify-release-assets.ps1       → 「发布资产校验通过：v2.0.1
 
 ## Commit
 
-待填写。
+3bc4f850 chore(release): 2.0.1-beta.1 版本与本地 Windows 安装包
+（仅本地提交，未推送；安装包未签名、未打标签、未发布。）
 
 ---
 

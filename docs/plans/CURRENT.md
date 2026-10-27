@@ -78,7 +78,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
-- [TASK-20261027-012](../tasks/completed/2026-10/TASK-20261027-012-build-local-v2.0.1-beta.1-installer.md)：v2.0.1-beta.1 本地生产安装包已构建并通过完整质量门（132 文件／809 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,260,640 bytes，SHA256 `bbca5542…dc11c`）；内容为透明转发 Token 漏记修复与 OpenAI 预设／River 六款模型两项改动，版本源统一为 `2.0.1-beta.1`／`2.0.1.0`／NSIS `2.0.1`；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装验收。实现提交 `<hash>`。
+- [TASK-20261027-012](../tasks/completed/2026-10/TASK-20261027-012-build-local-v2.0.1-beta.1-installer.md)：v2.0.1-beta.1 本地生产安装包已构建并通过完整质量门（132 文件／809 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,260,640 bytes，SHA256 `bbca5542…dc11c`）；内容为透明转发 Token 漏记修复与 OpenAI 预设／River 六款模型两项改动，版本源统一为 `2.0.1-beta.1`／`2.0.1.0`／NSIS `2.0.1`；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装验收。实现提交 `3bc4f850`。
 
 - [TASK-20261027-011](../tasks/completed/2026-10/TASK-20261027-011-refresh-openai-and-river-models.md)：提供商页 OpenAI 预设与官方 Featured models 对齐（`GPT-6 Astra`／`GPT-6.1 Sol`／`GPT-6.1 Terra`／`GPT-6 Luna`，移除过时的 `GPT-5.4`／`o3`）；River 依官方能力表与公开计费接口加入 `Qwen/Qwen3.8-27B-FP8`（262144／262143，none·low·medium·xhigh）与 `moonshotai/Kimi-K3`（1048576／32768，none·max），预设增至六款，公共 ID 为 `Qwen3.8-27B-FP8`／`Kimi-K3`，`Kimi-K3` 不与直连 `kimi-k3` 合并；路由测试改为按真实元数据断言。`task verify` exit 0（132 文件／809 项前端测试及 Windows production 构建）；真实 Key 推理与原生窗口视觉待用户验收。实现提交 `ba5ea28f`。
 
