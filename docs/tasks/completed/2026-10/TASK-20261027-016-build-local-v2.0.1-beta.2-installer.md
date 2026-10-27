@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -193,17 +193,23 @@ scripts/verify-release-assets.ps1       → 「发布资产校验通过：v2.0.1
 ## Commit
 
 ```text
-Not committed by Agent.
+f2627495 chore(release): 2.0.1-beta.2 版本与本地 Windows 安装包
 ```
+
+（仅本地提交，未推送；安装包未签名、未打标签、未发布，`release-assets/` 与 `bin/` 按 `.gitignore` 不入库。）
 
 ---
 
 # Result
 
-PENDING
+- `v2.0.1-beta.2` 本地生产安装包已构建并校验通过：20,275,456 bytes，
+  SHA256 `9ebea510011723c6def363fca1062b4b535fc3fb7006113f0bb83f199ce3b15a`，
+  位于 `release-assets/v2.0.1-beta.2/OmniProxy-Setup-v2.0.1-beta.2-windows-amd64.exe`。
+- 相对 beta.1 含三项用户可见改动：重置卡信息恢复读取、请求列表细横向滚动条、请求页内部滚动。
+- 安装器未签名、未自动安装、未打标签、未推送；覆盖安装与真实账号验收由用户执行。
 
 ---
 
 # Completed
 
-PENDING
+2026-10-27 20:52
