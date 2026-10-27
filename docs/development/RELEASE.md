@@ -1,8 +1,8 @@
 # Windows 发布与安装验收
 
-## 原仓库发布契约
+## 仓库分支与发布契约
 
-原仓库默认分支 `master` 保留 v1，v2 开发与发布源码位于 `main`；两者不是同一根历史。
+仓库默认分支现为 `main`，承载 v2 开发与发布源码；`master` 保留 v1 历史实现，两者不是同一根历史。
 不要为发 v2 强推、重置或替换 master，也不要删除旧版／Beta 的标签或已公开 Release。
 v2 沿用原仓库 MIT 与 SECURITY；签名策略按维护者 2026-10-27 明确选择改为项目自签证书，不再依赖未获批的服务。不得把本地 v2 分支先前缺少 LICENSE
 误解为项目尚未选择许可证。
@@ -36,7 +36,7 @@ gh workflow run release.yml --ref main -f tag=v2.0.0 -f publish=false
 该模式构建所选 workflow 的不可变提交，不要求先创建版本标签，且 publish job 明确跳过。
 真正公开发布仍需版本标签对应的源码；新标签推送默认发布，已存在标签可手工调度。
 对已存在标签重新调度时必须显式选择 v2 的 `main` 工作流，例如
-`gh workflow run release.yml --ref main -f tag=v2.0.0`，不能误用默认 master 上的 v1 工作流。
+`gh workflow run release.yml --ref main -f tag=v2.0.0`，不能误用 master 上保留的 v1 工作流。
 
 ## 版本和资产
 
