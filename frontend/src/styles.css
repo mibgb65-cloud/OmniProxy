@@ -178,32 +178,21 @@
     height: 0;
   }
   /*
-   * 表格等横向滚动容器：WebView2 原生横向滚动条是整幅浅色轨道 + 两端箭头，
-   * 在深色卡片里很跳，端角还会盖住表格圆角底边。这里同样只保留 4px 圆角滑块。
-   * 不设 scrollbar-gutter：横向预留会在表格右侧多出一条空带。
+   * 列表类页面占满内容区可视高度：标题栏 h-11（2.75rem）+ 根页面上下留白 py-6（3rem）。
+   * 页面本身不滚动，长列表交给内部滚动区消化，避免把整页顶出窗口。
    */
-  .app-scroll-x {
-    overscroll-behavior-x: contain;
+  .app-page-fit {
+    height: calc(100dvh - 5.75rem);
   }
-  .app-scroll-x::-webkit-scrollbar {
-    height: 10px;
-  }
-  .app-scroll-x::-webkit-scrollbar-track,
-  .app-scroll-x::-webkit-scrollbar-corner {
-    background: transparent;
-  }
-  .app-scroll-x::-webkit-scrollbar-thumb {
-    border: 3px solid transparent;
-    border-radius: 9999px;
-    background-color: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
-    background-clip: content-box;
-  }
-  .app-scroll-x::-webkit-scrollbar-thumb:hover {
-    background-color: color-mix(in oklab, var(--muted-foreground) 80%, transparent);
-  }
-  .app-scroll-x::-webkit-scrollbar-button {
-    display: none;
-    width: 0;
-    height: 0;
+  /*
+   * 表格内部纵向滚动时的吸顶表头。表头背景必须不透明，否则滚动行会从表头后面透出；
+   * 混合出与旧 bg-muted/30 等价的不透明底色，深浅主题一致，并补一条下边线。
+   */
+  .app-table-head th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: color-mix(in oklab, var(--muted) 30%, var(--background));
+    box-shadow: inset 0 -1px 0 var(--border);
   }
 }

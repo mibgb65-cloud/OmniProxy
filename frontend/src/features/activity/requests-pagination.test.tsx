@@ -78,3 +78,12 @@ it("英文分页同样显示总页数而非记录数", async () => {
   mount(1017)
   expect(await screen.findByText("Page 1 / 21 pages")).toBeInTheDocument()
 })
+
+it("请求页占满内容区可视高度，长列表不把整页顶出窗口", async () => {
+  mount(50)
+  await waitFor(() => expect(screen.getByRole("button", { name: "刷新" })).toBeEnabled())
+  const page = screen.getByRole("heading", { level: 1 }).closest("section")
+  expect(page).toHaveClass("app-page-fit")
+  expect(page).toHaveClass("flex-col")
+  expect(page).not.toHaveClass("space-y-5")
+})

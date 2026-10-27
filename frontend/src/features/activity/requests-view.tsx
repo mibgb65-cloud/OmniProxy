@@ -32,8 +32,9 @@ export function RequestsView({
   })
   const items = data.data?.items ?? []
   return (
-    <section className="w-full min-w-0 space-y-5 pb-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    // 页面占满内容区可视高度：标题、筛选、分页常驻，只有表格内部滚动。
+    <section className="app-page-fit flex w-full min-w-0 flex-col gap-5">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.requests.title")}</h1>
         <Button variant="outline" disabled={data.isFetching} onClick={() => void data.refetch()}>
           <RefreshCw
@@ -43,7 +44,7 @@ export function RequestsView({
           {t("activity.refresh")}
         </Button>
       </header>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex shrink-0 flex-wrap gap-3">
         <Input
           aria-label={t("activity.search")}
           placeholder={t("activity.search")}
@@ -75,22 +76,22 @@ export function RequestsView({
         />
       </div>
       {data.isError ? (
-        <p role="alert" className="text-destructive text-sm">
+        <p role="alert" className="text-destructive shrink-0 text-sm">
           {t("activity.failed")}
         </p>
       ) : null}
       {data.isPending ? (
-        <p role="status" className="text-muted-foreground text-sm">
+        <p role="status" className="text-muted-foreground shrink-0 text-sm">
           {t("activity.loading")}
         </p>
       ) : items.length ? (
-        <RequestTable items={items} onSelect={setSelected} />
+        <RequestTable className="min-h-0 flex-1" items={items} onSelect={setSelected} />
       ) : (
-        <p className="text-muted-foreground rounded-xl border p-8 text-center text-sm">
+        <p className="text-muted-foreground flex min-h-0 flex-1 items-center justify-center rounded-xl border p-8 text-center text-sm">
           {t("activity.noRequests")}
         </p>
       )}
-      <footer className="text-muted-foreground flex flex-wrap items-center justify-between gap-3 text-xs">
+      <footer className="text-muted-foreground flex shrink-0 flex-wrap items-center justify-between gap-3 text-xs">
         <span>
           {t("activity.retained", {
             count: data.data?.total ?? 0,

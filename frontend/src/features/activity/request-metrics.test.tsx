@@ -47,7 +47,7 @@ function mount(items: RequestItem[]) {
   render(
     <I18nProvider>
       <QueryClientProvider client={client}>
-        <RequestTable items={items} onSelect={() => {}} />
+        <RequestTable className="min-h-0 flex-1" items={items} onSelect={() => {}} />
       </QueryClientProvider>
     </I18nProvider>,
   )
@@ -105,11 +105,13 @@ it("请求列表新增缓存命中、成本、速度与首字列并带说明提�
   expect(within(row).getByText("200 ms")).toBeInTheDocument()
 })
 
-it("请求表横向滚动沿用统一细滑块样式，不再露出原生滚动条", () => {
+it("请求表在内部滚动视口内滚动，表头吸顶并沿用统一细滑块", () => {
   mount([item])
-  const wrapper = screen.getByRole("table").parentElement
-  expect(wrapper).toHaveClass("app-scroll-x")
-  expect(wrapper).toHaveClass("overflow-x-auto")
+  const table = screen.getByRole("table")
+  expect(table.parentElement).toHaveClass("app-scroll")
+  expect(table.parentElement).toHaveClass("overflow-auto")
+  expect(table.querySelector("thead")).toHaveClass("app-table-head")
+  expect(table.parentElement?.parentElement).toHaveClass("overflow-hidden")
 })
 
 it("缺少缓存、成本或输出明细的请求显示破折号而不是零", () => {

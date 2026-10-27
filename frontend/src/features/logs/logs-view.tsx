@@ -43,8 +43,8 @@ export function LogsView({
   const pending = logs.paused ? logs.pending : follow.unread
 
   return (
-    // 标题栏 2.75rem 与根页面上下留白 3rem，日志列表占满剩余窗口高度。
-    <section className="flex h-[calc(100dvh-5.75rem)] min-h-0 flex-col gap-4">
+    // app-page-fit 扣掉标题栏与根页面上下留白，日志列表占满剩余窗口高度。
+    <section className="app-page-fit flex min-h-0 flex-col gap-4">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.logs.title")}</h1>
         <div className="flex flex-wrap gap-2">
