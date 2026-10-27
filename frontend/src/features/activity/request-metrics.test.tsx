@@ -105,6 +105,13 @@ it("请求列表新增缓存命中、成本、速度与首字列并带说明提�
   expect(within(row).getByText("200 ms")).toBeInTheDocument()
 })
 
+it("请求表横向滚动沿用统一细滑块样式，不再露出原生滚动条", () => {
+  mount([item])
+  const wrapper = screen.getByRole("table").parentElement
+  expect(wrapper).toHaveClass("app-scroll-x")
+  expect(wrapper).toHaveClass("overflow-x-auto")
+})
+
 it("缺少缓存、成本或输出明细的请求显示破折号而不是零", () => {
   mount([
     {

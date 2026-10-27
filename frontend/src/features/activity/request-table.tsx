@@ -56,7 +56,7 @@ export function RequestTable({
   const { t, i18n } = useTranslation()
   const language = i18n.resolvedLanguage
   return (
-    <div className="overflow-x-auto rounded-xl border">
+    <div className="app-scroll-x overflow-x-auto rounded-xl border">
       <table className="w-full text-left text-sm">
         <thead className="bg-muted/30 text-muted-foreground text-xs">
           <tr>
