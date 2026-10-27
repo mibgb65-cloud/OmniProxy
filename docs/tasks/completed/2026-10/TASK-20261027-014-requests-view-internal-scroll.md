@@ -1,8 +1,8 @@
-# TASK-20261027-014: 请求页改为表格内部滚动
+﻿# TASK-20261027-014: 请求页改为表格内部滚动
 
 ## Status
 
-Planned
+Completed（2026-10-27 18:12）
 
 ## Created
 
@@ -176,7 +176,7 @@ PASS
 ## Commit
 
 ```text
-<commit hash> feat(activity): 请求页改为表格内部滚动
+82c28ed3 feat(activity): 请求页改为表格内部滚动
 ```
 
 ---
@@ -184,3 +184,9 @@ PASS
 # Result
 
 请求页已固定在内容区可视高度内：标题、搜索／状态筛选、保留条数与分页常驻，50 行只在表格内部纵横向滚动，表头吸顶且底色不透明；页面不再把整页顶出窗口，根滚动区不再需要滚动。高度定义抽成 `.app-page-fit` 由请求页与日志页共用，上一任务的 `.app-scroll-x` 被 `.app-scroll` 取代。新增 1 项布局回归测试，完整 `task verify` exit 0（132 文件／811 项前端测试、Windows production 构建）。深色／浅色已用无头 Edge 复现核对，真实原生窗口、140% 字号与窄窗口高度待用户验收。
+
+---
+
+# Completed
+
+2026-10-27 18:12

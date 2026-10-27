@@ -78,7 +78,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
-- [TASK-20261027-013](../tasks/completed/2026-10/TASK-20261027-013-request-table-horizontal-scrollbar.md)：请求列表底部的 WebView2 原生横向滚动条（整幅浅色轨道 + 两端箭头）换成与产品其它滚动区一致的 `.app-scroll-x` 细滑块（10px 槽位、透明轨道、4px 圆角滑块、悬停加深、箭头隐藏），列宽、分页与数据契约不变，新增 1 项容器类名回归测试；`task verify` exit 0（132 文件／810 项前端测试、Windows production 构建），深浅主题由生产 CSS + 无头 Edge 静态复现核对，真实原生窗口与 140% 字号待用户视觉验收。实现提交 `d9a30e6a`。
+- [TASK-20261027-014](../tasks/completed/2026-10/TASK-20261027-014-requests-view-internal-scroll.md)：请求页固定为内容区可视高度（新增 `.app-page-fit` = `100dvh` − 标题栏 2.75rem − 根页面留白 3rem，日志页同步改用该类），标题／搜索筛选／保留条数与分页常驻，50 行只在表格内部纵横向滚动，表头用 `.app-table-head` 吸顶且底色不透明；滚动视口沿用 `.app-scroll`，上一任务的 `.app-scroll-x` 被取代并删除。新增 1 项布局回归测试；`task verify` exit 0（132 文件／811 项前端测试、Windows production 构建），无头 Edge 复现 1200×800 得到 `main scrollH=664/clientH=664`（外部不滚动）与 `table scrollH=1706/clientH=456`（内部滚动），真实原生窗口、140% 字号与窄窗口高度待用户验收。实现提交 `82c28ed3`。
+
+- [TASK-20261027-013](../tasks/completed/2026-10/TASK-20261027-013-request-table-horizontal-scrollbar.md)：请求列表底部的 WebView2 原生横向滚动条（整幅浅色轨道 + 两端箭头）换成与产品其它滚动区一致的细滑块（10px 槽位、透明轨道、4px 圆角滑块、悬停加深、箭头隐藏），列宽、分页与数据契约不变，新增 1 项容器类名回归测试；`task verify` exit 0（132 文件／810 项前端测试、Windows production 构建），深浅主题由生产 CSS + 无头 Edge 静态复现核对，真实原生窗口与 140% 字号待用户视觉验收。实现提交 `d9a30e6a`。其中 `.app-scroll-x` 已由 [TASK-20261027-014](../tasks/completed/2026-10/TASK-20261027-014-requests-view-internal-scroll.md) 的表格内部滚动取代。
 
 - [TASK-20261027-012](../tasks/completed/2026-10/TASK-20261027-012-build-local-v2.0.1-beta.1-installer.md)：v2.0.1-beta.1 本地生产安装包已构建并通过完整质量门（132 文件／809 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,260,640 bytes，SHA256 `bbca5542…dc11c`）；内容为透明转发 Token 漏记修复与 OpenAI 预设／River 六款模型两项改动，版本源统一为 `2.0.1-beta.1`／`2.0.1.0`／NSIS `2.0.1`；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装验收。实现提交 `3bc4f850`。
 
