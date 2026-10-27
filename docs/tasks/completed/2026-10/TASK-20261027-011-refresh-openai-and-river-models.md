@@ -223,7 +223,9 @@ windows:build:native              PASS（bin/omniproxy.exe 23,127,040 bytes）
 
 ## Commit
 
-待填写。
+```text
+ba5ea28f feat(provider): 同步 OpenAI 官方预设并接入 River 新模型
+```
 
 ---
 
