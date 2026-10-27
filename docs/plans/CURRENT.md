@@ -4,6 +4,8 @@
 
 源码修复完成：[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md) 已修复 HTTP 透明转发提前结束尝试导致的 Token 漏记，并统一透明响应记账失败的非截断策略。真实 SQLite／错误路径定向重复 10 次通过，干净副本完整 `task verify`（含 809 项前端测试及 Windows production 构建）通过；实现提交 `04e053c`。未回填历史数据、安装、重启或发布生产程序。
 
+生产排查：[TASK-20261027-002](../tasks/completed/2026-10/TASK-20261027-002-production-missing-token-investigation.md) 已确认 Codex HTTP 透明转发提前结束尝试，导致上游已报告的 Token 在持久化时整笔回滚；隔离复现与候选顺序调整的相关包测试通过。**仅完成排查，尚未正式修复、部署或回填历史数据**。
+
 GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-20261026-005-publish-v2-stable-github.md)／[TASK-20261026-006](../tasks/completed/2026-10/TASK-20261026-006-remove-signpath-dependency.md)。[v2.0.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0) 已公开并成为 stable Latest；正式 [Actions 40366364069](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/40366364069) 从标签重新构建、完整质量门、自签、pin／篡改／SHA256 及公开资产核验通过。项目私钥仅在维护者用户证书库与本项目 encrypted Secrets，Git 只有公开证书；未修改用户信任库，自签不等同于公开受信任 CA。历史 Release／标签保留，master 只修正签名文档。
 
 收尾验证：[TASK-20261027-001](../tasks/completed/2026-10/TASK-20261027-001-quota-observer-test-barrier.md) 修复并发主分支 CI 的测试完成信号竞态，等待实际额度发布结束而非读取结束；重复 100 次及包测试通过。仅改测试，不移动 v2.0.0 标签或替换公开资产。
@@ -12,71 +14,65 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 已完成：[TASK-20261026-001](../tasks/completed/2026-10/TASK-20261026-001-provider-outbound-proxy.md)，提供商出站代理：`proxy_settings` 单例 + `providers.proxy_mode` 三态（迁移 044），Core `internal/core/netproxy` 负责端点解析、mixed 端口协议探测与运行期纠偏、本机端口发现与按提供商分流的 Transport；11 个适配器、网关作用域、连通性探针、Codex 透明转发（HTTP/WebSocket）、额度与续期已接入；代理层故障使用独立错误码且不写账号冷却。见 `docs/product/NETWORK_PROXY.md` 与 ADR-025。
 
-进行中：[TASK-20261022-004](../tasks/active/TASK-20261022-004-codex-compaction-river-token-usage.md)，River 本机输入／输出／缓存 Token 统计已实现，干净副本完整质量门／724 项前端测试及 Windows 构建通过；隔离原生窗口空白，视觉验收未完成。Codex 约 500k 提前压缩仍未复现，已排除简单的全局阈值遗漏，保留用户既有 1.05M／900k 设置，不宣称已修复或扩大上游能力。
+已归档：[TASK-20261022-004](../tasks/completed/2026-10/TASK-20261022-004-codex-compaction-river-token-usage.md)，River 本机输入／输出／缓存 Token 统计已实现，干净副本完整质量门／724 项前端测试及 Windows 构建通过；隔离原生窗口空白，视觉验收未完成。Codex 约 500k 提前压缩仍未复现，已排除简单的全局阈值遗漏，保留用户既有 1.05M／900k 设置，不宣称已修复或扩大上游能力。
 
 ## Current Version
 
-2.0.0 — 已于 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
+**已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
+
 
 ## In Progress
 
-- [TASK-20261025-016](../tasks/completed/2026-10/TASK-20261025-016-build-local-beta44-installer.md)：Beta.44 production 本地安装包（含 TASK-20261025-015 的网络代理弹窗两栏布局）已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（20,198,610 bytes，SHA256 `913b5050903a36ee9700d99864d347b8bd86aaadeaf45b6b3404b9f5a75f6884`）；未签名、未自动安装、未推送或发布。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
-- [TASK-20261025-015](../tasks/completed/2026-10/TASK-20261025-015-network-proxy-dialog-layout.md)：网络代理弹窗重做完成——左右两栏（代理服务器／提供商分流）+ 固定头部页脚，提供商列表独立滚动、行高加大、三态控件右对齐成列，并新增按名称筛选与三态计数摘要。行为与接口不变；已随 Beta.44 交付（提交 `3d831c8`）。
+已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
+与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
+两条版本基线记录改为 Cancelled，见
+[TASK-20261027-010](../tasks/completed/2026-10/TASK-20261027-010-revert-version-baseline.md)：
+用户当前不发布新版本，版本源已退回已发布的 `2.0.0`，`git diff` 对 5 个版本源为空。
+后续版本号只在用户明确通知时再改。
 
-- [TASK-20261026-002](../tasks/completed/2026-10/TASK-20261026-002-build-local-beta43-installer.md)：Beta.43 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（20,194,569 bytes，SHA256 `968ca0822e4e8d3bf426363364436341d63e9b3b961695a54b63fe50cc33e7a8`）；未签名、未自动安装、未推送或发布。
+`docs/tasks/active/` 在本轮之前已清空并归档：所有创建于 v2.0.0（2026-10-27 发布）之前的
+任务记录均已完成归档，见
+[TASK-20261027-007](../tasks/completed/2026-10/TASK-20261027-007-archive-pre-v2-tasks.md)。
+归档的 34 项最终全部标记 Completed（其中 Atria 规划草稿与既有实现记录同 ID，按用户要求
+一并标记 Completed 并注明其不承载独立交付）。
 
-- [TASK-20261024-017](../tasks/active/TASK-20261024-017-build-local-beta35-installer.md)：Beta.35 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,831,297 bytes，SHA256 `be8ad7106e58d7d15652e8be4cca95072d004ffeb909bd5022519a18ca493a4f`）；未签名、未自动安装、未推送或发布。
+### Post-release Follow-ups（v2.0.0 交付后待人工验收）
 
-- [TASK-20261024-016](../tasks/active/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)：自动激活的失败原因按账号写入状态与日志（不再统一 `activation_failed`，并保留发送方的具体码）；「Codex WebSocket」开关在透明转发的每个客户端帧前复核，关闭后已建立连接也停止转发。
+以下 8 类事项来自 v2.0.0 归档时「已交付但未由人工验收」与「已知未修复」两部分，
+按验收 → 修复 → 复验推进；它们不是某个已定版本的范围，等用户确定版本后再排期：
 
-- [TASK-20261024-015](../tasks/active/TASK-20261024-015-codex-passthrough-outcome-and-runtime-labels.md)：Codex 透明转发的失败判定改为可证实信号（交付终结事件后断开不再记 `client_write_failed`）、未声明 `Content-Type` 的流也能统计用量、WebSocket 失败交回真实代码（含 `credential_unavailable`）并按全部订阅账号取号；请求归属新增 `codex-cli`／`codex-desktop`／`codex-vscode`。
 
-- [TASK-20261024-014](../tasks/active/TASK-20261024-014-build-local-beta34-installer.md)：Beta.34 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,811,654 bytes，SHA256 `d338e703f4985654ac155494790f9acf8fb19e3ca5530f8207c6818f999b6f8d`）；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261024-009](../tasks/active/TASK-20261024-009-build-local-beta32-installer.md)：Beta.32 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,779,433 bytes，SHA256 `bacb7db125caac8258bdac388335c79d6178173a7b1531b09d349ab24f8315d2`）；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261024-008](../tasks/active/TASK-20261024-008-codex-v1-transparent-passthrough.md)：Codex 入口改回 v1 形态——透明转发（路径／头部／正文原样、WebSocket 真正桥到上游）＋登录改由网关拥有（`codex_auth_json` 池账号、自行续期并回写、一键配置把池账号写成客户端登录并可恢复）；客户端 Base URL 仍是 `…/codex/v1`，上游基址新增可配置项（迁移 042）。Go 全部包与新增用例通过；实机 Codex 客户端待验收。
-
-- [TASK-20261024-007](../tasks/active/TASK-20261024-007-codex-websocket-reauth-and-ultra-effort.md)：修复 Codex 固定前缀入口的 WebSocket 首帧 `401 unauthorized`（逐帧复核改回接入 Key 比较，导致客户端反复「正在重新连接」）；Codex 目录恢复 official catalog 声明的 `ultra` 档位（`xhigh`／`ultra` 各自原样还原）。定向用例与 Go 全部包通过；实机客户端重连与 Ultra 菜单待用户验收。
-
-- [TASK-20261024-006](../tasks/active/TASK-20261024-006-build-local-beta31-installer.md)：Beta.31 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,661,392 bytes，SHA256 `48661800…83175c`）；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261024-005](../tasks/active/TASK-20261024-005-effort-low-mapping-and-catalog-dedupe.md)：`none` 改映射 `low`；目录构建时折叠档位变体并按 ID 去重重名；River 条目在 Codex 目录声明图片能力。Go 全部包通过，实机菜单与图片请求待验收。
-
-- [TASK-20261024-004](../tasks/active/TASK-20261024-004-build-local-beta30-installer.md)：Beta.30 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验（19,656,610 bytes，SHA256 `46b41488…c89bd1`）；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261024-003](../tasks/active/TASK-20261024-003-effort-vocabulary-and-google-variants.md)：推理档位按客户端词汇发布（Codex `none→minimal`、`max→xhigh`，网关请求时还原），Google 的 `(High)/(Low)/(Medium)` 变体型号折叠成一行模型 + 档位映射；旧变体 ID 反向解析保兼容。Go 全部包与新增用例通过，实机客户端菜单待验收。
-
-- [TASK-20261024-002](../tasks/active/TASK-20261024-002-build-local-beta29-installer.md)：Beta.29 production 本地安装包已构建并通过完整质量门、Windows 版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261024-001](../tasks/active/TASK-20261024-001-fixed-agent-entry-prefixes.md)：每个受管客户端改为固定入口前缀（Codex `…/codex/v1`、Claude `…/claude`、其余 `…/<client>/v1`）。前缀折叠成 `/v1/...` 后进入既有协议、上限与鉴权；带 Key 的请求与入口不符返回 `403 client_mismatch`，Codex 前缀在该接入启用时按前缀放行并保留官方 auth.json。旧 `/v1` 与 `/agent/codex/<Key>/v1` 保留兼容；Go 全部 internal 包与 gateway 前端 193 项测试通过，实机客户端未验收。
-
-- [TASK-20261023-018](../tasks/active/TASK-20261023-018-build-local-beta28-installer.md)：Beta.28 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261023-017](../tasks/active/TASK-20261023-017-storage-breakdown-and-update-leftovers.md)：数据存储占用拆分出「更新缓存」与「登录凭据」，只显示非零分类并按大小降序排列；更新缓存附一行说明并提供「清理更新残留」删除安装辅助程序副本（保留已下载安装包与状态文件，仅显式触发）。实机「其他 102 MB 86%」即 5 份安装残留 + 1 份包缓存。质量门与前端 126 文件／750 项测试通过；原生窗口视觉待用户验收。
-
-- [TASK-20261023-016](../tasks/active/TASK-20261023-016-dashboard-trend-ui-and-scrollbar.md)：仪表盘「调用趋势」改为左侧整刻度轴、独立横轴标签行（首尾不裁切）、居中柱形与整列悬浮／焦点高亮，图例补各分类合计；图区横向滚动改用 8px 细圆角自绘滑块（拖动／轨道跳转，无需滚动时收起），替换系统滚动条。前端 126 文件 / 747 项测试通过；原生窗口视觉待用户验收。
-
-- [TASK-20261023-015](../tasks/active/TASK-20261023-015-build-local-beta27-installer.md)：Beta.27 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261023-014](../tasks/active/TASK-20261023-014-request-page-cache-cost-speed.md)：请求列表与详情新增缓存命中、估算成本、速度 `tok/s` 和首字耗时。复用迁移 032／037 已保存数据，无新迁移；未知上游明细保持 `—`，成本为参考价估算而非账单。实现提交 `ebf117e`；原生窗口视觉确认待人工复核。
-
-- [TASK-20261023-013](../tasks/active/TASK-20261023-013-build-local-beta26-installer.md)：Beta.26 production 本地安装包已构建并通过版本资源、SHA256 与资产校验；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261023-012](../tasks/active/TASK-20261023-012-model-effort-pin.md)：应用内按模型固定思考档位（迁移 041 `model_effort_pins`）。Claude／Claude Desktop 的模型卡片新增「思考强度」选择，只列上游已确认档位；网关在 Messages 请求上覆盖 `output_config.effort` 并同步 `thinking`，与配置版本同事务提交。实现提交 `7957edc`，完整质量门通过；真实会话待用户验收。
-
-- [TASK-20261023-011](../tasks/active/TASK-20261023-011-claude-desktop-effort-entry.md)：取证 Claude Desktop 2.42304.2 只在客户端认识的模型 ID 上渲染 effort 控件（内置 8 个 Claude ID 表 + 签名模型目录），不透明 `claude-omniproxy-*` 路由名无入口且无法用配置注入；补齐 Desktop 目录的 `maxEffort` 与顶层 `defaultModelEffort`（只写已确认档位）。
-
-- [TASK-20261022-006](../tasks/active/TASK-20261022-006-agent-usage-scrollbar-and-group-one-click-config.md)：用量页账号／模型汇总改用细圆角滚动条；本地 Agent 分组卡片新增卡片级「一键配置」（完整默认目录、逐项结果）。实现与前端 728 项测试通过，原生窗口视觉待验收。
-
-- [TASK-20261023-002](../tasks/active/TASK-20261023-002-build-local-beta21-installer.md)：Beta.21 production 安装包已构建并通过版本资源、SHA256 与资产校验（当时 16 个发布目录各 2 文件，历史资产未变）。已被 Beta.22 取代；未签名、未自动安装、未推送或发布。
-
-- [TASK-20261023-001](../tasks/active/TASK-20261023-001-claude-effort-single-model-picker.md)：Claude 菜单回归「一个模型一行」，推理强度改用客户端原生 effort 控件（`behavesAs` + `effortLevel`／`maxEffortLevel`），历史 `omniproxy-effort-*` 选择仍可解码路由；实现提交 `e8e684e`，完整质量门 exit 0。待用户在实际 Claude 客户端完全重启后验收原生菜单与 effort 滑杆。
-
-- [TASK-20261021-006](../tasks/active/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)：21 工具／约 79 KB 合成请求真实复现 Google 429／RESOURCE_EXHAUSTED，最大输出降到 512 仍拒绝，无细分配额信息。用户已同意备用对照，但两个禁用账号访问令牌均已过期且授权项目与原账号相同；只读预检后停止，备用生成和续期请求均为 0，启用状态／路由指纹未变。待确认正常续期后做跨登录身份对照，不能冒充独立项目测试。完整 Desktop 尚未修复，无生产代码变更或新安装包。
-
-- [TASK-20261020-008](../tasks/active/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)：启动网关偏好已实现，完整门禁／671 项前端测试及原生验证通过。用户授权旧方式试验后，增加独立 Windows 工具、DPAPI 备份／版本保护恢复与并发锁，真实池账号隔离 app-server 校验及临时恢复通过；完整门禁和命令单测／lint／构建通过。已应用至实际 Codex 默认配置，保留 openai／原网关／模型，CLI 识别 ChatGPT/file，系统加密登录未变；未自动重启 Desktop，等待用户重开后的发送／旧聊天验收，第二项不标记已修复。River 图片／专用工具尚未扩展，未安装或发布新版本。
+- **Codex 实机**：CLI／Desktop 在 `/codex/v1` 下的登录身份、长会话（16 MiB 上限）、模型目录与
+  Ultra 档位菜单，WebSocket 断线重连与「Codex WebSocket」开关的实际效果
+  （[TASK-20261024-001](../tasks/completed/2026-10/TASK-20261024-001-fixed-agent-entry-prefixes.md)、
+  [007](../tasks/completed/2026-10/TASK-20261024-007-codex-websocket-reauth-and-ultra-effort.md)、
+  [015](../tasks/completed/2026-10/TASK-20261024-015-codex-passthrough-outcome-and-runtime-labels.md)）。
+- **Codex Desktop 额度拦截**：待授权正常续期后，验收「客户端登录账号耗尽、网关另有可用账号」时的
+  真实发送与原聊天续接
+  （[TASK-20261020-008](../tasks/completed/2026-10/TASK-20261020-008-gateway-startup-quota-content-compatibility.md)）。
+- **Gemini Desktop**：完整默认工具请求仍遇 429，跨登录身份对照未完成，不作为已修复
+  （[TASK-20261021-006](../tasks/completed/2026-10/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)）。
+- **Codex 约 500k 提前压缩**：未复现、根因未定位，不宣称已修复
+  （[TASK-20261022-004](../tasks/completed/2026-10/TASK-20261022-004-codex-compaction-river-token-usage.md)）。
+- **原生窗口视觉**：请求页缓存／成本／速度四项指标、仪表盘调用趋势与自绘滚动条、存储占用拆分、
+  用量页滚动条与本地 Agent 分组「一键配置」
+  （[TASK-20261023-014](../tasks/completed/2026-10/TASK-20261023-014-request-page-cache-cost-speed.md)、
+  [016](../tasks/completed/2026-10/TASK-20261023-016-dashboard-trend-ui-and-scrollbar.md)、
+  [017](../tasks/completed/2026-10/TASK-20261023-017-storage-breakdown-and-update-leftovers.md)、
+  [TASK-20261022-006](../tasks/completed/2026-10/TASK-20261022-006-agent-usage-scrollbar-and-group-one-click-config.md)）。
+- **推理档位实机表现**：Claude／Harness／Claude Desktop 的 Effort 控件与滑杆、按模型固定档位后
+  上游是否真按最高档推理
+  （[TASK-20261023-001](../tasks/completed/2026-10/TASK-20261023-001-claude-effort-single-model-picker.md)、
+  [007](../tasks/completed/2026-10/TASK-20261023-007-claude-harness-reasoning-effort.md)、
+  [011](../tasks/completed/2026-10/TASK-20261023-011-claude-desktop-effort-entry.md)、
+  [012](../tasks/completed/2026-10/TASK-20261023-012-model-effort-pin.md)）。
+- **安装器**：Beta.21–36 未做真实覆盖安装验收，已被 v2.0.0 取代；v2.0.0 的跨用户／机器级 UAC
+  提权安装与主客户端真实请求仍需人工确认
+  （[TASK-20261026-004](../tasks/completed/2026-10/TASK-20261026-004-prepare-v2-stable-release.md)）。
+- **发布后修复待部署**：透明转发 Token 漏记已在源码修复（`04e053c`），历史数据未回填、生产程序
+  未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
 
