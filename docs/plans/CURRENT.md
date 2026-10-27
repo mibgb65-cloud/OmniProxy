@@ -58,9 +58,11 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   （[TASK-20261021-006](../tasks/completed/2026-10/TASK-20261021-006-reproduce-gemini-desktop-rejection.md)）。
 - **Codex 约 500k 提前压缩**：未复现、根因未定位，不宣称已修复
   （[TASK-20261022-004](../tasks/completed/2026-10/TASK-20261022-004-codex-compaction-river-token-usage.md)）。
-- **原生窗口视觉**：请求页缓存／成本／速度四项指标、仪表盘调用趋势与自绘滚动条、存储占用拆分、
-  用量页滚动条与本地 Agent 分组「一键配置」
+- **原生窗口视觉**：请求页缓存／成本／速度四项指标与横向细滑块、请求页表格内部滚动、仪表盘调用趋势与自绘滚动条、
+  存储占用拆分、用量页滚动条与本地 Agent 分组「一键配置」
   （[TASK-20261023-014](../tasks/completed/2026-10/TASK-20261023-014-request-page-cache-cost-speed.md)、
+  [TASK-20261027-013](../tasks/completed/2026-10/TASK-20261027-013-request-table-horizontal-scrollbar.md)、
+  [TASK-20261027-014](../tasks/completed/2026-10/TASK-20261027-014-requests-view-internal-scroll.md)、
   [016](../tasks/completed/2026-10/TASK-20261023-016-dashboard-trend-ui-and-scrollbar.md)、
   [017](../tasks/completed/2026-10/TASK-20261023-017-storage-breakdown-and-update-leftovers.md)、
   [TASK-20261022-006](../tasks/completed/2026-10/TASK-20261022-006-agent-usage-scrollbar-and-group-one-click-config.md)）。

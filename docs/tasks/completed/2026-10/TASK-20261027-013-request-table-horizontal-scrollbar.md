@@ -103,7 +103,7 @@ Completed（2026-10-27 17:55）
 - `frontend/src/styles.css`
 - `frontend/src/features/activity/request-table.tsx`
 - `frontend/src/features/activity/request-metrics.test.tsx`
-- `docs/tasks/active/TASK-20261027-013-request-table-horizontal-scrollbar.md`
+- `docs/tasks/completed/2026-10/TASK-20261027-013-request-table-horizontal-scrollbar.md`（实现期间位于 `docs/tasks/active/`）
 - `docs/plans/CURRENT.md`
 
 ## Technical Notes
@@ -166,7 +166,12 @@ PASS
 
 ```text
 d9a30e6a feat(activity): 请求列表横向滚动条改为统一细滑块
+e5d62944 docs(tasks): 归档 TASK-20261027-013 并记录提交 hash
 ```
+
+## Related Tasks
+
+- 后续：[TASK-20261027-014](TASK-20261027-014-requests-view-internal-scroll.md) 把请求页改为表格内部滚动，本条引入的 `.app-scroll-x` 被 `.app-scroll` 取代并删除；本任务的可见结果（请求表横向只剩 4px 圆角细滑块、无原生轨道与箭头）在该任务之后仍然成立。
 
 ---
 

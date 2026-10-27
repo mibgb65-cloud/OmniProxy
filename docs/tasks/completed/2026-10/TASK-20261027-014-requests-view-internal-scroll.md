@@ -1,4 +1,4 @@
-﻿# TASK-20261027-014: 请求页改为表格内部滚动
+# TASK-20261027-014: 请求页改为表格内部滚动
 
 ## Status
 
@@ -113,7 +113,7 @@ Completed（2026-10-27 18:12）
 - `frontend/src/styles.css`
 - `frontend/src/features/activity/request-metrics.test.tsx`
 - `frontend/src/features/activity/requests-pagination.test.tsx`
-- `docs/tasks/active/TASK-20261027-014-requests-view-internal-scroll.md`
+- `docs/tasks/completed/2026-10/TASK-20261027-014-requests-view-internal-scroll.md`（实现期间位于 `docs/tasks/active/`）
 - `docs/plans/CURRENT.md`
 
 ## Technical Notes
@@ -177,7 +177,12 @@ PASS
 
 ```text
 82c28ed3 feat(activity): 请求页改为表格内部滚动
+0ebfca15 docs(tasks): 归档 TASK-20261027-014 并记录提交 hash
 ```
+
+## Related Tasks
+
+- 前序：[TASK-20261027-013](TASK-20261027-013-request-table-horizontal-scrollbar.md) 引入的 `.app-scroll-x` 在本任务被 `.app-scroll` 取代（横向细滑块的观感不变）。
 
 ---
 
