@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -60,12 +60,23 @@ master 的产品首页组织较完整，但 Wails 2／Vue、macOS、旧目录与
 - `go test ./internal/core/agentendpoint ./internal/core/proxy ./internal/transport/httpapi -count=1`：PASS（0.121s／2.804s／0.174s），覆盖入口与 HTTP 健康检查相关实现。
 - `git diff --check`：PASS。
 - 未运行 `task verify`：本次仅修改 Markdown，未变更业务代码、依赖、配置或构建流程；命令和接口示例已经做针对性验证。
-- 推送前 fetch 首次遭遇 TLS 握手错误，保留证书校验，仅按命令使用 HTTP/1.1 重试成功；未修改全局 Git 网络设置或关闭 SSL 验证。
+- fetch 与推送后的首次远端核对曾遭遇 TLS 握手错误；保留证书校验，仅按命令使用 HTTP/1.1 重试成功。推送本身成功后没有盲目重推，而是重新读取远端引用；未修改全局 Git 网络设置或关闭 SSL 验证。
+- 正常快进推送 `origin/main` 成功，随后远端 `main` 核对为 `f7abca0927b2d0362eeed9f34919c95ae616a0ee`，与实现提交一致。
+- 远端默认分支仍为 `refs/heads/master`，master 仍为 `4bcee95bf1831e2f70de29281ef23a207de6e146`；没有修改默认分支、旧版分支或公开资产。
 
 ## Git
 
-待记录。
+```text
+f7abca0927b2d0362eeed9f34919c95ae616a0ee docs(readme): 参考旧版完善 v2 中英文项目首页
+```
+
+已正常推送到 `origin/main`。本任务归档随后作为独立文档提交推送；未纳入既有 CURRENT 排查段落和 TASK-20261027-002 未提交记录。
 
 ## Result
 
-待完成。
+main 的中英文 README 已按完整产品首页结构更新并推送，补齐架构、矩阵、接入和贡献说明，保留 LINUX DO 社区致谢，明确同一项目 v1 → v2 的延续。
+内容遵循 v2 实现，不继承旧版过时技术栈、平台、接口或脚本。默认分支设置维持不变，后续由维护者决定何时切换为 main。
+
+## Completed
+
+2026-10-27（Asia/Singapore）
