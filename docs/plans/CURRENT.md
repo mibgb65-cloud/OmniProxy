@@ -21,6 +21,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 **已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
+**本地构建（未发布）：2.0.1-beta.1** — 2026-10-27 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.0 含两项用户可见改动：HTTP 透明转发 Token 用量的尝试生命周期修复（TASK-20261027-003）、OpenAI 预设对齐官方 Featured models 且 River 预设增至六款（TASK-20261027-011）。完整质量门（132 文件／809 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,260,640 bytes，SHA256 `bbca554220f277ee6bf4d2e4eae747582a20a523da0d18bc5de5ad3aee7dc11c`。
+
 ## In Progress
 
 无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
@@ -75,6 +77,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261027-012](../tasks/completed/2026-10/TASK-20261027-012-build-local-v2.0.1-beta.1-installer.md)：v2.0.1-beta.1 本地生产安装包已构建并通过完整质量门（132 文件／809 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,260,640 bytes，SHA256 `bbca5542…dc11c`）；内容为透明转发 Token 漏记修复与 OpenAI 预设／River 六款模型两项改动，版本源统一为 `2.0.1-beta.1`／`2.0.1.0`／NSIS `2.0.1`；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装验收。实现提交 `<hash>`。
 
 - [TASK-20261027-011](../tasks/completed/2026-10/TASK-20261027-011-refresh-openai-and-river-models.md)：提供商页 OpenAI 预设与官方 Featured models 对齐（`GPT-6 Astra`／`GPT-6.1 Sol`／`GPT-6.1 Terra`／`GPT-6 Luna`，移除过时的 `GPT-5.4`／`o3`）；River 依官方能力表与公开计费接口加入 `Qwen/Qwen3.8-27B-FP8`（262144／262143，none·low·medium·xhigh）与 `moonshotai/Kimi-K3`（1048576／32768，none·max），预设增至六款，公共 ID 为 `Qwen3.8-27B-FP8`／`Kimi-K3`，`Kimi-K3` 不与直连 `kimi-k3` 合并；路由测试改为按真实元数据断言。`task verify` exit 0（132 文件／809 项前端测试及 Windows production 构建）；真实 Key 推理与原生窗口视觉待用户验收。实现提交 `ba5ea28f`。
 
