@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+源码修复完成：[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md) 已修复 HTTP 透明转发提前结束尝试导致的 Token 漏记，并统一透明响应记账失败的非截断策略。真实 SQLite／错误路径定向重复 10 次通过，干净副本完整 `task verify`（含 809 项前端测试及 Windows production 构建）通过；实现提交 `04e053c`。未回填历史数据、安装、重启或发布生产程序。
+
 GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-20261026-005-publish-v2-stable-github.md)／[TASK-20261026-006](../tasks/completed/2026-10/TASK-20261026-006-remove-signpath-dependency.md)。[v2.0.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.0.0) 已公开并成为 stable Latest；正式 [Actions 40366364069](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/40366364069) 从标签重新构建、完整质量门、自签、pin／篡改／SHA256 及公开资产核验通过。项目私钥仅在维护者用户证书库与本项目 encrypted Secrets，Git 只有公开证书；未修改用户信任库，自签不等同于公开受信任 CA。历史 Release／标签保留，master 只修正签名文档。
 
 收尾验证：[TASK-20261027-001](../tasks/completed/2026-10/TASK-20261027-001-quota-observer-test-barrier.md) 修复并发主分支 CI 的测试完成信号竞态，等待实际额度发布结束而非读取结束；重复 100 次及包测试通过。仅改测试，不移动 v2.0.0 标签或替换公开资产。
