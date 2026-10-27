@@ -78,6 +78,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
+- [TASK-20261027-013](../tasks/completed/2026-10/TASK-20261027-013-request-table-horizontal-scrollbar.md)：请求列表底部的 WebView2 原生横向滚动条（整幅浅色轨道 + 两端箭头）换成与产品其它滚动区一致的 `.app-scroll-x` 细滑块（10px 槽位、透明轨道、4px 圆角滑块、悬停加深、箭头隐藏），列宽、分页与数据契约不变，新增 1 项容器类名回归测试；`task verify` exit 0（132 文件／810 项前端测试、Windows production 构建），深浅主题由生产 CSS + 无头 Edge 静态复现核对，真实原生窗口与 140% 字号待用户视觉验收。实现提交 `d9a30e6a`。
+
 - [TASK-20261027-012](../tasks/completed/2026-10/TASK-20261027-012-build-local-v2.0.1-beta.1-installer.md)：v2.0.1-beta.1 本地生产安装包已构建并通过完整质量门（132 文件／809 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,260,640 bytes，SHA256 `bbca5542…dc11c`）；内容为透明转发 Token 漏记修复与 OpenAI 预设／River 六款模型两项改动，版本源统一为 `2.0.1-beta.1`／`2.0.1.0`／NSIS `2.0.1`；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装验收。实现提交 `3bc4f850`。
 
 - [TASK-20261027-011](../tasks/completed/2026-10/TASK-20261027-011-refresh-openai-and-river-models.md)：提供商页 OpenAI 预设与官方 Featured models 对齐（`GPT-6 Astra`／`GPT-6.1 Sol`／`GPT-6.1 Terra`／`GPT-6 Luna`，移除过时的 `GPT-5.4`／`o3`）；River 依官方能力表与公开计费接口加入 `Qwen/Qwen3.8-27B-FP8`（262144／262143，none·low·medium·xhigh）与 `moonshotai/Kimi-K3`（1048576／32768，none·max），预设增至六款，公共 ID 为 `Qwen3.8-27B-FP8`／`Kimi-K3`，`Kimi-K3` 不与直连 `kimi-k3` 合并；路由测试改为按真实元数据断言。`task verify` exit 0（132 文件／809 项前端测试及 Windows production 构建）；真实 Key 推理与原生窗口视觉待用户验收。实现提交 `ba5ea28f`。

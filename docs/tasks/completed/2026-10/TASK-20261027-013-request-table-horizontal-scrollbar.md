@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed（2026-10-27 17:55）
 
 ## Created
 
@@ -165,7 +165,7 @@ PASS
 ## Commit
 
 ```text
-<commit hash> feat(activity): 请求列表横向滚动条改为统一细滑块
+d9a30e6a feat(activity): 请求列表横向滚动条改为统一细滑块
 ```
 
 ---
@@ -173,3 +173,10 @@ PASS
 # Result
 
 请求页列表底部的 WebView2 原生横向滚动条（整幅浅色轨道 + 两端箭头）已替换为产品统一的 4px 圆角半透明滑块，悬停加深、箭头隐藏、横向滚动不再链接外层；表格结构、列宽、分页与数据契约保持不变。新增 1 项容器类名回归测试，完整 `task verify` exit 0（132 文件／810 项前端测试、Windows production 构建）。浅色／深色以无头 Edge 静态复现核对，真实原生窗口与 140% 字号待用户视觉验收。
+
+---
+
+# Completed
+
+2026-10-27 17:55
+
