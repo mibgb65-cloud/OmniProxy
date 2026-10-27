@@ -49,7 +49,11 @@ func normalizeResetCredits(raw *codex.ResetCreditSummary) *ResetCreditSummary {
 	}
 	result := &ResetCreditSummary{AvailableCount: *raw.AvailableCount, DetailsKnown: raw.Credits != nil, Credits: []ResetCredit{}}
 	for _, value := range raw.Credits {
-		card := ResetCredit{ID: value.ID, Title: value.Title, Description: value.Description, ResetType: value.ResetType, Status: value.Status, GrantedAt: time.Unix(*value.GrantedAt, 0).UTC().Format(time.RFC3339)}
+		card := ResetCredit{ID: value.ID, Title: value.Title, Description: value.Description, ResetType: value.ResetType, Status: value.Status}
+		// 官方可能不返回获得时间：留空由界面显示未知，不伪造时间。
+		if value.GrantedAt != nil {
+			card.GrantedAt = time.Unix(*value.GrantedAt, 0).UTC().Format(time.RFC3339)
+		}
 		if value.ExpiresAt != nil {
 			card.ExpiresAt = time.Unix(*value.ExpiresAt, 0).UTC().Format(time.RFC3339)
 		}

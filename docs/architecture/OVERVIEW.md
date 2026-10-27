@@ -282,7 +282,7 @@ Core would still compile and run behind the local HTTP Control API.
 
 DeepSeek 余额查询通过 Wails `AccountBalance` → `internal/application/balance` → `internal/provider/deepseek` 实现。应用层核对账号归属，在 account.UseAPIKey 回调内请求固定官方地址；返回金额文本与币种，不暴露凭据。无需启动网关，无余额历史落库，前端按账号版本单独缓存。见 `docs/product/BALANCE.md`。
 
-订阅额度查询通过 Wails `SubscriptionQuota` → `internal/application/subscription` → `internal/infrastructure/codex` 读取，仅返回窗口剩余百分比与重置时间。默认路径是官方 HTTP 额度接口（`/backend-api/wham/usage`，只使用本地隔离授权材料，不启动子进程）；接口拒绝授权时直接返回未授权，传输或协议失败、以及需要续期时才回退同一官方组件的 stdio 协议。账号元数据列表不触发网络查询；前端单独按需缓存额度，既有操作互斥限制子进程数量，失败不改变授权；瞬时失败在留存窗口内继续显示上次结果，确定性失败立即透出。具体边界见 `docs/product/SUBSCRIPTION.md`。
+订阅额度查询通过 Wails `SubscriptionQuota` → `internal/application/subscription` → `internal/infrastructure/codex` 读取，返回窗口剩余百分比、重置时间，以及界面读取时的公开重置卡汇总。默认路径是官方 HTTP 额度接口（`/backend-api/wham/usage`，只使用本地隔离授权材料，不启动子进程）；接口拒绝授权时直接返回未授权，传输或协议失败、以及需要续期时才回退同一官方组件的 stdio 协议。界面读取并行请求同一前缀下的重置卡汇总（`/backend-api/wham/rate-limit-reset-credits`），失败只让该部分保持未知，不影响窗口；后台观察与调度不请求该接口。账号元数据列表不触发网络查询；前端单独按需缓存额度，既有操作互斥限制子进程数量，失败不改变授权；瞬时失败在留存窗口内继续显示上次结果，确定性失败立即透出。具体边界见 `docs/product/SUBSCRIPTION.md`。
 
 手动重置卡使用通过同一官方组件完成，账号应用服务维护迁移 006 的操作记录。调用前持久化幂等键和身份归属，兑换结果不确定时保留 pending，核对复用同一键；完成回执和刷新失败独立处理，不由前端推算额度恢复。见 ADR-004。
 

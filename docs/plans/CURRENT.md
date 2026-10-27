@@ -25,7 +25,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261027-015](../tasks/active/TASK-20261027-015-reset-credits-http-display.md)：修复重置卡面板恒显示「官方暂未返回重置卡信息」——额度改走 `/backend-api/wham/usage` 后没有任何代码读取重置卡，官方 HTTP 客户端补上 `/rate-limit-reset-credits`，界面读取与额度并行获取并合并，失败只让该部分保持未知；后台观察与调度不额外请求。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

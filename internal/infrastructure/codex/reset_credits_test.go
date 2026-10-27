@@ -14,7 +14,8 @@ func TestResetSummaryPreservesUnknownEmptyAndCountOnly(t *testing.T) {
 			t.Fatal("valid reset summary rejected")
 		}
 	}
-	for _, raw := range []string{`{}`, `{"availableCount":-1}`, `{"availableCount":1,"credits":[{"id":"x","status":"available","resetType":"codexRateLimits"}]}`} {
+	// 缺少获得时间不再是无效元数据（官方 HTTP 汇总可能不返回），缺少卡片 ID 仍然无效。
+	for _, raw := range []string{`{}`, `{"availableCount":-1}`, `{"availableCount":1,"credits":[{"status":"available","resetType":"codexRateLimits"}]}`, `{"availableCount":1,"credits":[{"id":"x","status":"available","expiresAt":253402300800}]}`, `{"availableCount":1,"credits":[{"id":"x","status":"available"},{"id":"x","status":"available"}]}`} {
 		var summary *ResetCreditSummary
 		if json.Unmarshal([]byte(raw), &summary) != nil {
 			t.Fatal("test fixture invalid")

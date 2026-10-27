@@ -49,7 +49,7 @@ func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota
 		return Quota{}, quotaFailure(readCtx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
 	}
 	// 快路径：官方额度接口只需要本地隔离授权材料，不必为每次查询启动官方组件。
-	if quota, ok, err := s.readQuotaHTTP(readCtx, item, profile); ok {
+	if quota, ok, err := s.readQuotaHTTP(readCtx, item, profile, display); ok {
 		if err != nil {
 			return Quota{}, quotaFailure(readCtx, "usage", "quota_not_authenticated", failure("quota_not_authenticated"))
 		}

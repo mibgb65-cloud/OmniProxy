@@ -9,17 +9,33 @@ import (
 
 // fixedUsage 记录调用并返回固定结果，用来区分 HTTP 快路径与 stdio 回退。
 type fixedUsage struct {
-	result codex.RateLimits
-	err    error
-	calls  int
-	token  []byte
-	id     string
+	result  codex.RateLimits
+	err     error
+	credits *codex.ResetCreditSummary
+	credErr error
+	calls   int
+	creditN int
+	token   []byte
+	id      string
 }
 
 func (u *fixedUsage) Read(_ context.Context, token []byte, accountID string) (codex.RateLimits, error) {
 	u.calls++
 	u.token, u.id = append([]byte(nil), token...), accountID
 	return u.result, u.err
+}
+
+func (u *fixedUsage) ReadResetCredits(_ context.Context, _ []byte, _ string) (*codex.ResetCreditSummary, error) {
+	u.creditN++
+	return u.credits, u.credErr
+}
+
+// resetCreditCards 构造一份带明细的官方重置卡汇总。
+func resetCreditCards(count int64) *codex.ResetCreditSummary {
+	granted, expires := int64(1761346800), int64(1800000000)
+	return &codex.ResetCreditSummary{AvailableCount: &count, Credits: []codex.ResetCredit{
+		{ID: "credit-one", Title: "额度重置卡", ResetType: "codexRateLimits", Status: "available", GrantedAt: &granted, ExpiresAt: &expires},
+	}}
 }
 
 func quotaWindows(accountID string) codex.RateLimits {
@@ -121,5 +137,55 @@ func TestQuotaStillReturnsWhenSnapshotCannotBeSaved(t *testing.T) {
 	}
 	if warned != "subscription quota snapshot not saved" {
 		t.Fatal("snapshot failure was not reported to the log callback")
+	}
+}
+
+func TestDisplayQuotaCarriesOfficialResetCredits(t *testing.T) {
+	f, id, usage, opened := quotaSubject(t)
+	usage.credits = resetCreditCards(1)
+	quota, err := f.manager.ReadDisplayQuota(context.Background(), id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *opened || usage.calls != 1 || usage.creditN != 1 {
+		t.Fatal("display quota must read windows and reset credits once over HTTP")
+	}
+	summary := quota.ResetCredits
+	if summary == nil || summary.AvailableCount != 1 || !summary.DetailsKnown || len(summary.Credits) != 1 {
+		t.Fatal("official reset credits were not published with the display quota")
+	}
+	if summary.Credits[0].ID != "credit-one" || summary.Credits[0].GrantedAt != "2025-10-24T23:00:00Z" {
+		t.Fatal("reset credit details were not normalized for the interface")
+	}
+}
+
+func TestObservationQuotaSkipsResetCredits(t *testing.T) {
+	f, id, usage, _ := quotaSubject(t)
+	usage.credits = resetCreditCards(1)
+	quota, err := f.manager.ReadQuota(context.Background(), id)
+	if err != nil || quota.Weekly == nil {
+		t.Fatal("quota observation must still read the official windows")
+	}
+	if usage.creditN != 0 || quota.ResetCredits != nil {
+		t.Fatal("background observation must not request or expose reset credits")
+	}
+}
+
+func TestDisplayQuotaKeepsWindowsWhenResetCreditsFail(t *testing.T) {
+	for _, failure := range []error{codex.ErrUsageTransient, codex.ErrProtocol, codex.ErrUsageUnauthorized} {
+		f, id, usage, _ := quotaSubject(t)
+		usage.credErr = failure
+		warned := ""
+		f.manager.SetWarn(func(message string, _ ...any) { warned = message })
+		quota, err := f.manager.ReadDisplayQuota(context.Background(), id)
+		if err != nil || quota.FiveHour == nil || quota.Weekly == nil {
+			t.Fatal("a reset credit failure must not discard a successful quota read")
+		}
+		if quota.ResetCredits != nil {
+			t.Fatal("unreadable reset credits must stay unknown instead of zero")
+		}
+		if warned != "subscription reset credits not read" {
+			t.Fatal("reset credit failure was not reported to the log callback")
+		}
 	}
 }

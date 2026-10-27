@@ -27,7 +27,8 @@ func validResetCredits(summary *ResetCreditSummary) bool {
 	}
 	seen := map[string]bool{}
 	for _, card := range summary.Credits {
-		if card.ID == "" || seen[card.ID] || !validMetadata(card.ID, 256) || !validMetadata(card.Title, 256) || !validMetadata(card.Description, 4096) || !validMetadata(card.ResetType, 80) || !validMetadata(card.Status, 80) || card.GrantedAt == nil || *card.GrantedAt < 0 || *card.GrantedAt > 253402300799 || card.ExpiresAt != nil && (*card.ExpiresAt < 0 || *card.ExpiresAt > 253402300799) {
+		// 官方 HTTP 汇总可能不带获得时间：缺失按未知处理，不否决整份明细。
+		if card.ID == "" || seen[card.ID] || !validMetadata(card.ID, 256) || !validMetadata(card.Title, 256) || !validMetadata(card.Description, 4096) || !validMetadata(card.ResetType, 80) || !validMetadata(card.Status, 80) || card.GrantedAt != nil && !validUnixSeconds(*card.GrantedAt) || card.ExpiresAt != nil && !validUnixSeconds(*card.ExpiresAt) {
 			return false
 		}
 		seen[card.ID] = true
