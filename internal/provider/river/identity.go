@@ -3,10 +3,14 @@ package river
 // PublicModel 将已确认的 River 型号映射到稳定的逻辑模型，未知名称不做模糊匹配。
 func PublicModel(model string) string {
 	switch model {
+	case Qwen:
+		return "Qwen3.8-27B-FP8"
 	case DeepSeekFlash:
 		return "deepseek-flash"
 	case DeepSeekFlash1017:
 		return "DeepSeek-V4.1-Flash-1017"
+	case KimiK3:
+		return "Kimi-K3"
 	case NemotronVL:
 		return "NVIDIA-Nemotron-3.5"
 	case GLMFlash:

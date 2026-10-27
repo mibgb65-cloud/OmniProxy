@@ -81,7 +81,12 @@ func TestRiverLogicalModelsSharePriorityAndKeepLegacyRoutes(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, raw := range river.Models() {
-		for _, old := range []string{raw + "[1m]", catalog.DesktopAlias(raw), catalog.DesktopAlias(raw + "[1m]")} {
+		variants := []string{raw, catalog.DesktopAlias(raw)}
+		// 只有窗口达到 1M 的型号才发布／解析 Claude 长上下文变体。
+		if window := river.ModelMetadata(raw).ContextWindow; window != nil && *window >= catalog.ClaudeLongContextWindow {
+			variants = append(variants, raw+("[1m]"), catalog.DesktopAlias(raw+catalog.ClaudeLongContextSuffix))
+		}
+		for _, old := range variants {
 			if actual, ok := catalog.ResolveClaudeModel(legacy, old); !ok || actual != raw {
 				t.Fatal("old Claude ID no longer resolves", old, actual)
 			}

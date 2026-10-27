@@ -6,14 +6,21 @@ River 是内置 API Key 服务商，默认启用；已有安装通过迁移 029 
 
 | 精确模型 ID | 上下文（输入＋输出） | 最大输出 | 已确认推理档位 | 输入模态 |
 | --- | --- | --- | --- | --- |
-| `deepseek-ai/DeepSeek-V4.1-Flash` | 1048576 | 384000 | none／high／max | 文本＋图片 |
+| `Qwen/Qwen3.8-27B-FP8` | 262144 | 262143 | none／low／medium／xhigh（官方用 `xhigh`，没有 high／max） | 文本＋图片 |
+| `deepseek-ai/DeepSeek-V4.1-Flash` | 1048576 | 384000 | none／high／max，默认 high | 文本＋图片 |
 | `deepseek-ai/DeepSeek-V4.1-Flash-1017` | 1048576 | 384000 | 官方控制参数表未单列，使用上游默认 | 文本＋图片 |
+| `moonshotai/Kimi-K3` | 1048576 | 32768（官方 32K） | none（关闭）／max（开启），默认 max | 文本＋图片 |
 | `nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4` | 1048576 | 131072（官方 128K） | 未公布，使用上游默认 | 文本＋图片 |
 | `zai-org/GLM-5.3-Flash` | 1048576 | 131072（官方 128K） | low／high／max，不能关闭思考 | 文本＋图片 |
 
-公共目录使用 `deepseek-flash`、`NVIDIA-Nemotron-3.5` 和 `GLM-5.3-Flash`，其中 Flash 与直连 DeepSeek 合并为同款模型，在路由页保存服务商优先级。选择 River 后才还原上表的完整官方 ID；选择直连后发送 `deepseek-flash`。优先级只选择配置可用的候选，不新增请求失败重试。智谱直连尚未接入，不发布虚构 GLM 候选。旧 River 完整 ID、精确规则、固定账号、Claude `[1m]` 和 Desktop 摘要仍兼容解析，公共菜单不重复发布旧 ID；旧优先级通过迁移 030 归入逻辑模型，已有逻辑配置优先。也可配置自定义别名或固定账号。停用服务商／账号后，不在可调用目录中发布对应模型。
+Kimi-K3 的标准档位只开关思考，默认 `max`；官方 `low`／`high`／`max` 分层要用
+`chat_template_kwargs.thinking_effort` 选择，本适配器不发送该扩展，因此只公布标准字段能表达的
+`none`／`max`，不把未发送的分层当作已支持。Qwen3.8 的上下文只有 262,144，不足 1M，
+客户端不会出现它的 `[1m]` 选项。
 
-River 原版 Flash 显示为 `DeepSeek-V4.1-Flash`，保留 `deepseek-flash` 公共 ID 和既有优先级。1017 版本单独使用 `DeepSeek-V4.1-Flash-1017` 公共 ID／显示名，只映射到其完整官方 ID，不合并原版或回退到直连 DeepSeek。Nemotron 和 GLM 的显示与映射不变。已同步过的账号仍以最近成功的官方目录为准；需要再次「同步官方模型」才能纳入新版本。
+公共目录使用 `Qwen3.8-27B-FP8`、`deepseek-flash`、`NVIDIA-Nemotron-3.5`、`Kimi-K3` 和 `GLM-5.3-Flash`，其中 Flash 与直连 DeepSeek 合并为同款模型，在路由页保存服务商优先级。选择 River 后才还原上表的完整官方 ID；选择直连后发送 `deepseek-flash`。优先级只选择配置可用的候选，不新增请求失败重试。智谱直连尚未接入，不发布虚构 GLM 候选。旧 River 完整 ID、精确规则、固定账号、Claude `[1m]` 和 Desktop 摘要仍兼容解析，公共菜单不重复发布旧 ID；旧优先级通过迁移 030 归入逻辑模型，已有逻辑配置优先。也可配置自定义别名或固定账号。停用服务商／账号后，不在可调用目录中发布对应模型。
+
+River 原版 Flash 显示为 `DeepSeek-V4.1-Flash`，保留 `deepseek-flash` 公共 ID 和既有优先级。1017 版本单独使用 `DeepSeek-V4.1-Flash-1017` 公共 ID／显示名，只映射到其完整官方 ID，不合并原版或回退到直连 DeepSeek。Nemotron 和 GLM 的显示与映射不变。Qwen 与 Kimi-K3 分别使用 `Qwen3.8-27B-FP8`、`Kimi-K3` 公共 ID；`Kimi-K3` 不与直连 Moonshot 的 `kimi-k3` 合并，两者是不同计费入口，本版不提供跨服务商同款模型优先级。已同步过的账号仍以最近成功的官方目录为准；需要再次「同步官方模型」才能纳入新版本。
 
 Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函数工具调用、工具结果及官方 usage。Chat 流式请求添加 `stream_options.include_usage`。Responses 无状态，客户端必须发送完整历史；拒绝 `store: true`、`background: true`、`previous_response_id`、`conversation` 和上下文管理引用，不静默丢失历史。仅支持函数工具，不开放托管搜索、计算机等专用工具。
 
@@ -21,7 +28,7 @@ Messages 使用现有文本／函数工具／图片协议转换，经 Chat 接�
 
 推理强度经客户端原生 effort 传递：Chat 用 `reasoning_effort`，Responses 用 `reasoning.effort`，Messages 用 `output_config.effort`。Codex 目录发布它自己的档位词汇（`none`／`max` 就近映射为 `minimal`／`xhigh`），网关收到后还原成上游取值；Messages → Chat 转换时只透传该模型已确认的档位，非法值返回 400 而不是静默丢弃；请求未带档位时使用上表公布的上游默认档位。Claude 菜单不再按档位派生模型条目，详见 `docs/product/LOCAL_AGENTS.md` 的「推理强度（Claude）」。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。
 
-首版只接入了文本和图片输入，音频与文件（Files API `file_id`）仍未接入。图片按官方契约转换为 Chat `image_url` 块（base64 data URL 或外部 URL），Claude Code／Desktop 的 Messages 与 Responses 图片历史、工具结果中的截图都会原样转发给上游，不再本地拒绝；目录据此把四款模型标记为 `text` + `image`。图片格式限官方公布的 JPEG／PNG／GIF／WebP，单图 base64 上限 16 MiB（组件有界值，低于官方 32 MiB），`detail` 只透传 `low`／`high`／`auto`／`original`。无法验证的图片形式（未知 `source.type`、`file_id`、非 base64 数据）以及 `input_file`／`input_audio` 仍返回明确的 400，不静默删除内容。现有本地请求体限制、超时与并发继续生效；1M 官方上下文元数据不代表完成长输入或最大输出实测。没有余额／套餐查询，不显示推算剩余额度；不支持官方上游 WebSocket。同池故障切换与轮换方式见下文。
+首版只接入了文本和图片输入，音频与文件（Files API `file_id`）仍未接入。图片按官方契约转换为 Chat `image_url` 块（base64 data URL 或外部 URL），Claude Code／Desktop 的 Messages 与 Responses 图片历史、工具结果中的截图都会原样转发给上游，不再本地拒绝；目录据此把六款模型标记为 `text` + `image`。图片格式限官方公布的 JPEG／PNG／GIF／WebP，单图 base64 上限 16 MiB（组件有界值，低于官方 32 MiB），`detail` 只透传 `low`／`high`／`auto`／`original`。无法验证的图片形式（未知 `source.type`、`file_id`、非 base64 数据）以及 `input_file`／`input_audio` 仍返回明确的 400，不静默删除内容。现有本地请求体限制、超时与并发继续生效；1M 官方上下文元数据不代表完成长输入或最大输出实测。没有余额／套餐查询，不显示推算剩余额度；不支持官方上游 WebSocket。同池故障切换与轮换方式见下文。
 
 ## 长会话与消息容量
 
@@ -57,4 +64,4 @@ Claude 的 Messages → Chat 转换还会拒绝非函数工具块和无法验证
 可先新建纯文本会话，使用受支持的函数工具和完整历史配置，以区分图片与其他内容限制。
 网关不会通过静默删除图片、工具或历史来伪装请求成功。
 
-核对日期：初版 2026-10-17，四款模型及 1017 独立版本于 2026-10-20 再次核对，图片输入于 2026-10-23 接入。依据 [官方模型与限制](https://docs.river.ai/guides/inference-models/)、[推理接入](https://docs.river.ai/guides/inference/)、[图片输入](https://docs.river.ai/guides/inference-images/)、[API 控制参数](https://docs.river.ai/guides/inference-controls/)、[函数工具](https://docs.river.ai/guides/inference-tools/) 与 [超时及错误](https://docs.river.ai/guides/inference-limits/)。尚未使用真实 River Key 验证账号权限、计费、客户端或长窗口。
+核对日期：初版 2026-10-17，四款模型及 1017 独立版本于 2026-10-20 再次核对，图片输入于 2026-10-23 接入；`Qwen/Qwen3.8-27B-FP8` 与 `moonshotai/Kimi-K3` 于 2026-10-27 依官方模型／控制参数页与公开计费接口加入。依据 [官方模型与限制](https://docs.river.ai/guides/inference-models/)、[推理接入](https://docs.river.ai/guides/inference/)、[图片输入](https://docs.river.ai/guides/inference-images/)、[API 控制参数](https://docs.river.ai/guides/inference-controls/)、[函数工具](https://docs.river.ai/guides/inference-tools/) 与 [超时及错误](https://docs.river.ai/guides/inference-limits/)。尚未使用真实 River Key 验证账号权限、计费、客户端或长窗口。

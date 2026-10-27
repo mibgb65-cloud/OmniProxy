@@ -39,7 +39,7 @@ OmniProxy 时生效，关闭后恢复手动启动。此偏好独立于 Windows �
 
 网关和仪表盘复用统计缓存、范围生成和本地 `activity:updated` 事件。隐藏网关面板不继续读取统计；背景记账刷新不会启动手动刷新按钮动画。读取失败展示错误，未知值不伪装为零，页面不会调用模型或主动检查官方额度。
 
-River 原生转发 Chat／Responses JSON 与 SSE；Messages 文本／工具／图片通过 Chat 转换，完整上游结果返回后才生成下游 SSE。添加 API Key 后提供四款官方预设，可同步实际目录；详细能力与限制见 [RIVER.md](RIVER.md)。
+River 原生转发 Chat／Responses JSON 与 SSE；Messages 文本／工具／图片通过 Chat 转换，完整上游结果返回后才生成下游 SSE。添加 API Key 后提供六款官方预设，可同步实际目录；详细能力与限制见 [RIVER.md](RIVER.md)。
 
 Atria 使用独立原生适配器，将 Chat Completions／Responses／Messages 转发到官方相应端点，保留 JSON、SSE 和工具调用正文。只接受文本内容与整数 1–65536 的输出上限；使用既有受控凭证、错误分类、Retry-After、取消及请求／用量统计。模型预设为 `Atria-Dawn-Preview`，不表示 Key 已验证，不新增隐式重试、自动调度、余额查询或上游 WebSocket。
 

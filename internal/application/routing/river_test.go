@@ -36,7 +36,10 @@ func TestRiverPresetRoutingAliasesAndEligibility(t *testing.T) {
 	for _, entry := range entries {
 		if entry.ProviderKind == river.Kind {
 			found++
-			if entry.Metadata.ContextWindow == nil || *entry.Metadata.ContextWindow != 1048576 ||
+			// 每款官方模型的窗口／输出上限不同（Qwen 为 262k），按目录元数据逐项核对。
+			want := river.ModelMetadata(entry.TargetModel)
+			if entry.Metadata.ContextWindow == nil || want.ContextWindow == nil || *entry.Metadata.ContextWindow != *want.ContextWindow ||
+				entry.Metadata.OutputTokenLimit == nil || want.OutputTokenLimit == nil || *entry.Metadata.OutputTokenLimit != *want.OutputTokenLimit ||
 				len(entry.Metadata.InputModalities) != 2 || entry.Metadata.InputModalities[0] != "text" || entry.Metadata.InputModalities[1] != "image" ||
 				len(entry.Protocols) != 3 {
 				t.Fatal("preset metadata lost", entry)

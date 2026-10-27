@@ -44,7 +44,7 @@ beforeEach(() => {
       kind: "openai",
       name: "openai",
       defaultBaseUrl: "https://api.example.test/v1",
-      models: ["GPT-5.4"],
+      models: ["GPT-6 Astra"],
       authMethods: ["api_key"],
       plannedAuthMethods: ["subscription_login"],
     },

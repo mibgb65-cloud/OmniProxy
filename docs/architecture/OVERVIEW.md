@@ -141,7 +141,7 @@ Responses／Messages，普通 API Key 保持 Chat。网关复用 `core/agentprot
 
 ## River 内置推理（2026-10-17）
 
-迁移 029 追加第十一家内置服务商。`provider/river` 使用标准库原生 Chat／Responses HTTP／SSE，Messages 复用现有文本工具转换并缓冲完整结果。账号、DPAPI、目录凭据版本校验、路由和原上游 usage 沿用现有边界。模型预设与实时发现区分，仅开放已核对的四款文本模型（含独立的 DeepSeek V4.1 Flash 1017 版本）；详情见 `docs/product/RIVER.md`。
+迁移 029 追加第十一家内置服务商。`provider/river` 使用标准库原生 Chat／Responses HTTP／SSE，Messages 复用现有文本工具转换并缓冲完整结果。账号、DPAPI、目录凭据版本校验、路由和原上游 usage 沿用现有边界。模型预设与实时发现区分，仅开放已核对的六款文本模型（含独立的 DeepSeek V4.1 Flash 1017 版本、262k 窗口的 Qwen3.8-27B-FP8 与 Kimi-K3）；详情见 `docs/product/RIVER.md`。
 
 迁移 030 将 River 旧优先级合并到逻辑型号；`provider/river` 集中维护公共 ID／短名称与上游 ID 的精确映射。路由先按逻辑型号选账号，再还原所选提供商的实际 ID；网关对默认映射和显式别名均改写正文。公共目录去重，兼容目录保留旧原始 ID 及 Claude Desktop 摘要；账号快照仍保存官方原始 ID。Claude 的 DeepSeek 普通／1M 双选与已实测订阅目标的独立规则分别维护。
 

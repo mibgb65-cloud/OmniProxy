@@ -53,7 +53,10 @@ const catalog: ProviderDefinition[] = kinds.map((kind) => ({
   kind,
   name: kind,
   defaultBaseUrl: "https://api.example.test/v1",
-  models: kind === "openai" ? ["GPT-5.4", "GPT-4.1", "o3"] : ["Model A", "Model B"],
+  models:
+    kind === "openai"
+      ? ["GPT-6 Astra", "GPT-6.1 Sol", "GPT-6.1 Terra", "GPT-6 Luna"]
+      : ["Model A", "Model B"],
   authMethods: ["api_key"],
   plannedAuthMethods: kind === "openai" ? ["subscription_login"] : null,
 }))
@@ -173,7 +176,7 @@ describe("ProvidersView", () => {
     const user = userEvent.setup()
     renderPage()
     await user.click((await screen.findAllByRole("button", { name: /查看全部预设模型/ }))[0])
-    expect(screen.getByText("o3")).toBeInTheDocument()
+    expect(screen.getByText("GPT-6 Luna")).toBeInTheDocument()
     // 提示保持 4 秒，使用虚拟时钟避免 CI 的渲染负载挤占整项 5 秒期限。
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
     try {
