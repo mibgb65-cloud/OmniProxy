@@ -97,15 +97,18 @@ func (s *Server) forwardPassthrough(w http.ResponseWriter, r *http.Request, requ
 			break
 		}
 		if !session.Retryable(target, resp.StatusCode) {
-			_ = trace.EndAttempt(resp.StatusCode, "")
+			trace.observeStatus(resp.StatusCode)
 			if bindErr := trace.Update(ctx, attemptRequest, target.Snapshot); bindErr != nil {
 				_ = resp.Body.Close()
+				code := finishPassthroughAttempt(trace, http.StatusServiceUnavailable, "accounting_unavailable")
 				session.Done(ctx, target, outcome)
 				writeFailure(w, bindErr)
-				return http.StatusServiceUnavailable, "accounting_unavailable"
+				return http.StatusServiceUnavailable, code
 			}
 			session.Done(ctx, target, outcome)
-			return s.writePassthroughResponse(w, r, trace, resp, request.Path)
+			// usage 事务只接受进行中的尝试；必须读完正文后再收尾，否则用量会整笔回滚。
+			status, code := s.writePassthroughResponse(w, r, trace, resp, request.Path)
+			return status, finishPassthroughAttempt(trace, status, code)
 		}
 		_ = trace.EndAttempt(resp.StatusCode, "upstream_rejected_request")
 		session.Done(ctx, target, outcome)
@@ -113,6 +116,17 @@ func (s *Server) forwardPassthrough(w http.ResponseWriter, r *http.Request, requ
 		_ = resp.Body.Close()
 	}
 	return s.failPassthrough(w, ctx, lastStatus, lastErr, quotaRejection)
+}
+
+// finishPassthroughAttempt 让记账收尾失败可见，但不追加正文或覆盖真实的取消／流中断原因。
+func finishPassthroughAttempt(trace *Trace, status int, code string) string {
+	if err := trace.EndAttempt(status, code); err != nil {
+		trace.markAccountingFailure()
+		if code == "" {
+			return "accounting_unavailable"
+		}
+	}
+	return code
 }
 
 // failPassthrough 复刻 v1：保留最后一次上游状态码，否则返回网关失败码。

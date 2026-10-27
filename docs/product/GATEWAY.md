@@ -96,7 +96,12 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - 结束分类按可证实信号决定：已收到协议终结事件（`response.completed`／
   `response.incomplete`／`message_delta`／`[DONE]`）后断开记为成功；客户端连接结束记为
   `request_cancelled`；其余上游读流错误记为 `upstream_stream_failed`；出错侧写进日志
-  的 `stream_error_side`。记账入库失败只标记 `accounting_failed`，不中断已交付的回答。
+  的 `stream_error_side`。用量观察入库失败标记 `accounting_failed`，无论上游是否声明内容类型，
+  都不截断透明响应；尝试收尾失败记录 `accounting_unavailable`，但不覆盖已有取消／流中断原因，
+  不改写已经发出的 HTTP 状态或追加错误正文。
+- HTTP 透明转发在响应正文消费结束后才结束账号尝试，确保终结事件中的 usage 在尝试仍为
+  `pending` 时原子保存到请求、尝试与各级汇总。客户端取消或上游中断按真实结果同步收尾，
+  没有上游用量时仍保留未知；换号时明确拒绝的账号不分摊成功账号的 Token。
 - 透明 WebSocket 按轮记账：每个客户端 `response.create` 帧（除 `generate:false` 预热）
   在转发前开一条 `transport=websocket` 请求并登记本轮账号尝试，上游终结事件到达时写入
   该轮的 input／output／缓存 Token；未收到终结事件就结束的连接按 `request_cancelled`

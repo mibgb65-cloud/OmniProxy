@@ -18,12 +18,13 @@ const passthroughSniffBytes = 4 << 10
 // 既不重新编码也不改变客户端收到的内容。
 func ObservePassthroughResponse(ctx context.Context, trace *Trace, response Response, protocol string) Response {
 	if observableMediaType(response.ContentType) || response.Body == nil || response.StatusCode != http.StatusOK {
-		return ObserveResponse(ctx, trace, response, protocol)
+		// 已声明类型的透明响应同样不能因记账失败被截断，不能误用协议转换的严格模式。
+		return observeResponse(ctx, trace, response, protocol, false)
 	}
 	body, media, reason := sniffPassthroughStream(response.Body)
 	response.Body = body
 	if media != "sse" && media != "json" {
-		return ObserveResponse(ctx, trace, response, protocol)
+		return observeResponse(ctx, trace, response, protocol, false)
 	}
 	response.ContentTypeInferred, response.ContentTypeInferenceReason = true, reason
 	trace.observeStatus(response.StatusCode)

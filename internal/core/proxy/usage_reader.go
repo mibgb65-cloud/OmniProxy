@@ -23,6 +23,10 @@ type usageReader struct {
 
 // ObserveResponse 挂在原上游读流，转换后的默认零值不会进入统计。
 func ObserveResponse(ctx context.Context, trace *Trace, response Response, protocol string) Response {
+	return observeResponse(ctx, trace, response, protocol, true)
+}
+
+func observeResponse(ctx context.Context, trace *Trace, response Response, protocol string, strict bool) Response {
 	trace.observeStatus(response.StatusCode)
 	trace.observeResponseHeaders(response)
 	if trace == nil || response.PreExecutionQuotaRejected || response.StatusCode != 200 || response.Body == nil {
@@ -35,7 +39,7 @@ func ObserveResponse(ctx context.Context, trace *Trace, response Response, proto
 	if kind != "application/json" && kind != "text/event-stream" {
 		return response
 	}
-	response.Body = &usageReader{reader: response.Body, trace: trace, ctx: ctx, protocol: protocol, stream: kind == "text/event-stream", strict: true}
+	response.Body = &usageReader{reader: response.Body, trace: trace, ctx: ctx, protocol: protocol, stream: kind == "text/event-stream", strict: strict}
 	return response
 }
 
