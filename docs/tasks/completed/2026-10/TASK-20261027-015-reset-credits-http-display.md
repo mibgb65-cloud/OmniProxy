@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -178,17 +178,17 @@ None.
 ## Commit
 
 ```text
-Not committed by Agent.
+edc2edaa fix(subscription): 重置卡信息改由官方 HTTP 汇总读取
 ```
 
 ---
 
 # Result
 
-PENDING
+重置卡面板重新拿到官方可用数量与明细：界面额度读取与官方重置卡汇总接口并行，数量以 `availableCount` 为准，`credits:null` 只表示详情未知；接口失败或未返回时保持「官方暂未返回重置卡信息」而不是零，额度窗口与既有兑换幂等链路不受影响。
 
 ---
 
 # Completed
 
-PENDING
+2026-10-27 20:30
