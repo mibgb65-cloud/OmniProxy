@@ -172,7 +172,8 @@ Cancelled
 ## Commit
 
 ```text
-Not committed by Agent.
+a453fdab docs(tasks): 归档 v2.0.0 之前的任务记录并撤销版本基线改动
+（本记录作为被否决的过程记录随该提交入库；2.0.1 基线未落地，版本源保持 2.0.0）
 ```
 
 ---

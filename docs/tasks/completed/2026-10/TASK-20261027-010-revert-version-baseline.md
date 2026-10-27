@@ -173,7 +173,8 @@ git diff -- <5 个版本源>            → 空（与已发布 2.0.0 源码一�
 ## Commit
 
 ```text
-Not committed by Agent.
+a453fdab docs(tasks): 归档 v2.0.0 之前的任务记录并撤销版本基线改动
+（本任务的撤销动作与 008／009 的 Cancelled 改判随该提交入库）
 ```
 
 ---

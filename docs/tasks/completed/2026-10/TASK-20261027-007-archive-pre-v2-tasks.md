@@ -240,8 +240,8 @@ git status → 仅 docs/ 变更，无代码／配置／迁移改动
 ## Commit
 
 ```text
-Not committed by Agent.（纯文档归档，等待用户审阅后提交；
-工作区原有 docs/plans/CURRENT.md 修改与未跟踪的 TASK-20261027-002 记录未代为提交）
+a453fdab docs(tasks): 归档 v2.0.0 之前的任务记录并撤销版本基线改动
+（本记录的归档动作、34 个文件移动与 docs/plans/CURRENT.md 归档段均在该提交内）
 ```
 
 ---
