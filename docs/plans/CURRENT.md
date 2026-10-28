@@ -2,9 +2,11 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261028-002](../tasks/completed/2026-10/TASK-20261028-002-build-local-v2.0.1-beta.3-installer.md) 已产出 `v2.0.1-beta.3` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），含主题切换圆形扩散过渡；`task --force verify` exit 0（134 文件／819 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,278,174 bytes，SHA256 `b167f19b5017754b3ec8e9e45b0614ef2033ec15f657d47b5aae7f8dbe972a9c`，覆盖安装由用户执行。
+本地构建：[TASK-20261028-004](../tasks/completed/2026-10/TASK-20261028-004-build-local-v2.0.1-beta.4-installer.md) 已产出 `v2.0.1-beta.4` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），含侧栏导航滑动药丸背景；`task --force verify` exit 0（135 文件／824 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,280,078 bytes，SHA256 `08788bb9851a3a589164d6ffa6a3c09c4a42f3522667c6219ad9df2e531a2dd9`，覆盖安装由用户执行。
 
-新增：[TASK-20261028-001](../tasks/completed/2026-10/TASK-20261028-001-theme-circular-reveal-transition.md) 标题栏亮暗模式按钮改为基于点击位置的圆形扩散（View Transitions API）：新主题以点击点为圆心、点击点到最远屏幕角为半径，700ms `cubic-bezier(0.4, 0, 0.2, 1)` 铺满窗口，默认交叉淡入淡出被关闭；键盘激活取按钮中心，运行时缺少该 API、系统要求减少动画或浏览器拒绝启动过渡时立即切换且不留残余样式。前端 134 文件／819 项测试与 production 构建通过，真实窗口扩散观感待人工验收。实现提交 `63c8e3df`。
+新增：[TASK-20261028-003](../tasks/completed/2026-10/TASK-20261028-003-sidebar-sliding-nav-indicator.md) 侧栏九个导航项的选中态改为独立滑动药丸背景（方案 A：DOM 测量 + CSS transform，无新依赖）：450ms `cubic-bezier(0.22, 1, 0.36, 1)` 阻尼缓动在 `transform`／`height` 上过渡，背景块 `z-index: 0` 且不拦截点击、内容层 `relative z-10`；选中判定由 `MutationObserver` 观察链接上的 `data-active`（不复制路由匹配规则），字号缩放与侧栏收展由 `ResizeObserver` 重测，首次测量完成前不加过渡，`prefers-reduced-motion` 下直接到位。前端 135 文件／824 项测试与 production 构建通过，真实窗口滑动观感待人工验收。实现提交 `fc03fa98`。
+
+新增：[TASK-20261028-001](../tasks/completed/2026-10/TASK-20261028-001-theme-circular-reveal-transition.md) 标题栏亮暗模式按钮改为基于点击位置的圆形扩散（View Transitions API）：新主题以点击点为圆心、点击点到最远屏幕角为半径，700ms `cubic-bezier(0.4, 0, 0.2, 1)` 铺满窗口，默认交叉淡入淡出被关闭；键盘激活取按钮中心，运行时缺少该 API、系统要求减少动画或浏览器拒绝启动过渡时立即切换且不留残余样式。实现提交 `63c8e3df`。
 
 已修复：[TASK-20261027-015](../tasks/completed/2026-10/TASK-20261027-015-reset-credits-http-display.md) 重置卡面板在此之前恒显示「官方暂未返回重置卡信息」——额度改走 `/backend-api/wham/usage` 后没有任何代码读取重置卡。官方 HTTP 客户端补上 `/rate-limit-reset-credits`（数量以 `availableCount` 为准，`credits:null` 只表示详情未知，缺失获得时间保持未知），界面读取与额度并行取得并合并，失败只记稳定码并保持未知，后台观察与调度不额外请求。`gofmt`／`go vet`／`staticcheck`／Go 全量包、前端 132 文件／811 项测试与 production 构建通过；真实账号上的接口字段仍待一次实机刷新确认。实现提交 `edc2edaa`。
 
@@ -27,7 +29,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 **已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
-**本地构建（未发布）：2.0.1-beta.3** — 2026-10-28 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.1-beta.2 含一项用户可见改动：主题切换圆形扩散过渡（TASK-20261028-001，`63c8e3df`）。完整质量门（134 文件／819 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,278,174 bytes，SHA256 `b167f19b5017754b3ec8e9e45b0614ef2033ec15f657d47b5aae7f8dbe972a9c`。
+**本地构建（未发布）：2.0.1-beta.4** — 2026-10-28 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.1-beta.3 含一项用户可见改动：侧栏导航选中态改为滑动药丸背景（TASK-20261028-003，`fc03fa98`）。完整质量门（135 文件／824 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,280,078 bytes，SHA256 `08788bb9851a3a589164d6ffa6a3c09c4a42f3522667c6219ad9df2e531a2dd9`。
+
+**本地构建（未发布，已被 beta.4 取代）：2.0.1-beta.3** — 相对 2.0.1-beta.2 含一项用户可见改动：主题切换圆形扩散过渡（TASK-20261028-001，`63c8e3df`）；安装器 20,278,174 bytes，SHA256 `b167f19b5017754b3ec8e9e45b0614ef2033ec15f657d47b5aae7f8dbe972a9c`，记录见 [TASK-20261028-002](../tasks/completed/2026-10/TASK-20261028-002-build-local-v2.0.1-beta.3-installer.md)。
 
 **本地构建（未发布，已被 beta.3 取代）：2.0.1-beta.2** — 相对 2.0.1-beta.1 含三项用户可见改动：重置卡信息恢复读取（TASK-20261027-015，`edc2edaa`）、请求列表横向滚动条改为统一细滑块（TASK-20261027-013）、请求页改为表格内部滚动（TASK-20261027-014）；安装器 20,275,456 bytes，SHA256 `9ebea510011723c6def363fca1062b4b535fc3fb7006113f0bb83f199ce3b15a`，记录见 [TASK-20261027-016](../tasks/completed/2026-10/TASK-20261027-016-build-local-v2.0.1-beta.2-installer.md)。
 
@@ -89,6 +93,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261028-004](../tasks/completed/2026-10/TASK-20261028-004-build-local-v2.0.1-beta.4-installer.md)：`v2.0.1-beta.4` 本地 production 安装包已构建并通过完整质量门（135 文件／824 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,280,078 bytes，SHA256 `08788bb9…2dd9`）；版本源统一为 `2.0.1-beta.4`／`2.0.1.0`／NSIS `2.0.1`，内容为侧栏导航滑动药丸背景；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装。
 
 - [TASK-20261028-003](../tasks/completed/2026-10/TASK-20261028-003-sidebar-sliding-nav-indicator.md)：侧栏导航选中态改为独立的滑动药丸背景（方案 A：DOM 测量 + CSS transform，无新依赖）——背景块按选中项真实 `offsetTop`／`offsetHeight` 定位，450ms `cubic-bezier(0.22, 1, 0.36, 1)` 阻尼缓动在 `transform`／`height` 上过渡，`z-index: 0` 且不拦截点击、内容层 `relative z-10`；选中判定由 `MutationObserver` 观察链接上的 `data-active`（不复制路由匹配规则，嵌套路由行为不变），字号缩放与侧栏收展由 `ResizeObserver` 重新测量，首次测量完成前不加过渡，`prefers-reduced-motion` 下直接到位。`task verify` exit 0（135 文件／824 项前端测试、Windows production 构建），真实窗口滑动观感待用户验收。实现提交 `fc03fa98`。
 
