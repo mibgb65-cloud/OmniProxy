@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -145,9 +145,18 @@ git diff --check
 
 # Git
 
-实现及测试待本地提交；提交后回填 hash 并归档本记录。不推送远端。
+```text
+8e3c36527652bc4de9956f289c80d031a396b0ce
+fix(accounts): 修复 Bento 展开闪动并优化单行切换 Dock
+```
+
+已本地提交实现与测试，不推送远端；随后归档本记录并同步 CURRENT。
 
 # Result
 
 已完成账号 Bento 动画与视觉层级修复，完整质量门及隔离浏览器验证通过。
 Windows production 二进制已构建，安装包未重打；原生实机观感仍待确认。
+
+# Completed
+
+2026-10-28 20:31（Asia/Singapore）
