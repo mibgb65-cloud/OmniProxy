@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+发布进行中：[TASK-20261028-012](../tasks/active/TASK-20261028-012-release-v2.1.0.md)。用户已明确选择正式版 `v2.1.0`；版本与相对 v2.0.0 的中英文发布说明已就绪，本地完整质量门（139 文件／851 项前端测试）、NSIS 打包、版本资源及 SHA256 校验通过。随后通过 GitHub Actions 构建、自签及公开发布，完成前不将本地构建视为已公开版本。
+
 本地构建：[TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md) 已产出 `v2.0.1-beta.7` Windows amd64 production 安装包，包含 TASK-20261028-010 的账号 Dock 越界与遮挡修复；完整质量门（139 文件／851 项前端测试）、NSIS 打包、原生版本资源与 SHA256 校验通过。安装包 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已修复：[TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)，账号页提供商切换动画不再侵入侧栏：副本限制在账号网格和主视口内，详情／Dock／迷你卡片分层绘制，Dock 使用不透明主题底色，避免文字和图标重叠。`task --force verify` exit 0（139 文件／851 项前端测试、Go 检查及 Windows production 构建），隔离 Chromium 九组检查通过；原生测试实例无可操作窗口或 CDP，实机视觉仍待确认。未重打安装包或替换运行中的安装版。实现提交 `970990e0`。
@@ -36,10 +38,12 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
+**待发布源码：2.1.0** — 包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复。Windows 数字版本为 `2.1.0.0`，正式发布结果待 TASK-20261028-012 验证。
+
 **已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
-**本地构建（未发布）：2.0.1-beta.7** — 2026-10-28 本地 Windows amd64 production 安装包，相对 Beta.6 包含账号 Dock 越界与遮挡修复（TASK-20261028-010，`970990e0`）。完整质量门（139 文件／851 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未推送或公开发布。
+**历史本地构建（未发布）：2.0.1-beta.7** — 2026-10-28 本地 Windows amd64 production 安装包，相对 Beta.6 包含账号 Dock 越界与遮挡修复（TASK-20261028-010，`970990e0`）。完整质量门（139 文件／851 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未推送或公开发布；其变更纳入本次 2.1.0 正式版。
 
 **本地构建（未发布，已被 beta.7 取代）：2.0.1-beta.6** — 相对 Beta.5 包含本地网关端口可配置与冲突自动避让（TASK-20261028-008，`4f09490a`）；安装器 20,315,659 bytes，SHA256 `3fee16a3f6d79358c4a1bfdd9da662455b527de435d224a97fe58fa686eb7aa3`，记录见 [TASK-20261028-009](../tasks/completed/2026-10/TASK-20261028-009-build-local-v2.0.1-beta.6-installer.md)。
 
@@ -55,14 +59,14 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+[TASK-20261028-012](../tasks/active/TASK-20261028-012-release-v2.1.0.md)：按用户授权发布 v2.1.0 正式版。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
 两条版本基线记录改为 Cancelled，见
 [TASK-20261027-010](../tasks/completed/2026-10/TASK-20261027-010-revert-version-baseline.md)：
-用户当前不发布新版本，版本源已退回已发布的 `2.0.0`，`git diff` 对 5 个版本源为空。
-后续版本号只在用户明确通知时再改。
+上述记录撤销时用户尚未决定发布，版本源曾退回 `2.0.0`。本轮用户已明确选择 `2.1.0`，
+以 TASK-20261028-012 为本次发布依据，不改变历史 Cancelled 结论。
 
 `docs/tasks/active/` 在本轮之前已清空并归档：所有创建于 v2.0.0（2026-10-27 发布）之前的
 任务记录均已完成归档，见
