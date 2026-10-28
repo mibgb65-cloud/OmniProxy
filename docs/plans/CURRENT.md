@@ -90,7 +90,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
-- [TASK-20261028-003](../tasks/completed/2026-10/TASK-20261028-003-sidebar-sliding-nav-indicator.md)：侧栏导航选中态改为独立的滑动药丸背景（方案 A：DOM 测量 + CSS transform，无新依赖）——背景块按选中项真实 `offsetTop`／`offsetHeight` 定位，450ms `cubic-bezier(0.22, 1, 0.36, 1)` 阻尼缓动在 `transform`／`height` 上过渡，`z-index: 0` 且不拦截点击、内容层 `relative z-10`；选中判定由 `MutationObserver` 观察链接上的 `data-active`（不复制路由匹配规则，嵌套路由行为不变），字号缩放与侧栏收展由 `ResizeObserver` 重新测量，首次测量完成前不加过渡，`prefers-reduced-motion` 下直接到位。`task verify` exit 0（135 文件／824 项前端测试、Windows production 构建），真实窗口滑动观感待用户验收。实现提交 `<commit>`。
+- [TASK-20261028-003](../tasks/completed/2026-10/TASK-20261028-003-sidebar-sliding-nav-indicator.md)：侧栏导航选中态改为独立的滑动药丸背景（方案 A：DOM 测量 + CSS transform，无新依赖）——背景块按选中项真实 `offsetTop`／`offsetHeight` 定位，450ms `cubic-bezier(0.22, 1, 0.36, 1)` 阻尼缓动在 `transform`／`height` 上过渡，`z-index: 0` 且不拦截点击、内容层 `relative z-10`；选中判定由 `MutationObserver` 观察链接上的 `data-active`（不复制路由匹配规则，嵌套路由行为不变），字号缩放与侧栏收展由 `ResizeObserver` 重新测量，首次测量完成前不加过渡，`prefers-reduced-motion` 下直接到位。`task verify` exit 0（135 文件／824 项前端测试、Windows production 构建），真实窗口滑动观感待用户验收。实现提交 `fc03fa98`。
 
 - [TASK-20261028-002](../tasks/completed/2026-10/TASK-20261028-002-build-local-v2.0.1-beta.3-installer.md)：`v2.0.1-beta.3` 本地 production 安装包已构建并通过完整质量门（134 文件／819 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,278,174 bytes，SHA256 `b167f19b…72a9c`）；版本源统一为 `2.0.1-beta.3`／`2.0.1.0`／NSIS `2.0.1`，内容为主题切换圆形扩散过渡；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装。
 

@@ -205,7 +205,7 @@ Windows production 构建：通过；产物 CSS 含
 ## Commit
 
 ```text
-<filled after commit>
+fc03fa98 feat(sidebar): 导航选中态改为滑动药丸背景
 ```
 
 ---
