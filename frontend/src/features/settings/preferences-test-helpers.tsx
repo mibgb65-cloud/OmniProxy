@@ -12,7 +12,12 @@ import { vi } from "vitest"
 import { AppSidebar } from "../../components/common/app-sidebar"
 import { I18nProvider } from "../../i18n/provider"
 import { readRetention, setRetention } from "../../services/activity"
-import { getDesktopSettings, getRuntimeInfo, getStorageInfo } from "../../services/omniproxy"
+import {
+  getDesktopSettings,
+  getProxyPort,
+  getRuntimeInfo,
+  getStorageInfo,
+} from "../../services/omniproxy"
 import { useUIStore } from "../../stores/ui-store"
 import { useAppPreferences } from "./app-preferences-state"
 import { OpenPreferencesRoute } from "./open-preferences-route"
@@ -30,6 +35,8 @@ vi.mock("../../services/omniproxy", () => ({
   setAutoStart: vi.fn(),
   setGatewayAutoStart: vi.fn(),
   setCloseBehavior: vi.fn(),
+  getProxyPort: vi.fn(),
+  setProxyPort: vi.fn(),
   getRuntimeInfo: vi.fn(),
   checkForUpdate: vi.fn(),
 }))
@@ -86,6 +93,13 @@ export function resetPreferences() {
     maxRecords: 20000,
     storedRecords: 4,
     logCapacity: 5000,
+  })
+  vi.mocked(getProxyPort).mockResolvedValue({
+    port: 3002,
+    defaultPort: 3002,
+    available: true,
+    running: false,
+    envLocked: false,
   })
   vi.mocked(getRuntimeInfo).mockResolvedValue({
     version: "0.1.0",

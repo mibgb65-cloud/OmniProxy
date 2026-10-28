@@ -148,6 +148,12 @@ The active profile is selected by the build tag and can be overridden with
 | development | 3001       | 3891         | `<config dir>/OmniProxy-dev`    |
 | test        | 3002       | 3892         | `<config dir>/OmniProxy-test`   |
 
+The proxy port column is the profile **default**: users can change it in
+「通用设置 → 本地网关端口」 (persisted as `proxyPort` in the profile's
+`app.json`) and `OMNIPROXY_PROXY_PORT` still overrides both. When the port is
+already taken, the app moves to the next free port in the same range and
+rewrites the addresses it had written into managed local-client configs.
+
 `<config dir>` is `%APPDATA%` on Windows. Dev and production never share a
 data directory. Logs go to `<data dir>/logs/omniproxy.log` (rotating, 5 MiB ×
 3 backups).

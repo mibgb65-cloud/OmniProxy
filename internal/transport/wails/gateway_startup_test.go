@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -23,6 +24,15 @@ func startupGatewayService(t *testing.T) (*AppService, *profile.Profile) {
 		}
 	})
 	return service, prof
+}
+
+func occupyPort(t *testing.T) (int, net.Listener) {
+	t.Helper()
+	listener, err := net.Listen("tcp4", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return listener.Addr().(*net.TCPAddr).Port, listener
 }
 
 func TestGatewayStartupDefaultsToStoppedAndPreferenceDoesNotStartImmediately(t *testing.T) {
@@ -59,34 +69,68 @@ func TestGatewayStartupDefaultsToStoppedAndPreferenceDoesNotStartImmediately(t *
 	}
 }
 
-func TestGatewayStartupReportsPortConflictAndAllowsManualRetry(t *testing.T) {
-	service, _ := startupGatewayService(t)
-	listener, err := net.Listen("tcp4", "127.0.0.1:0")
+func TestGatewayStartupAvoidsOccupiedPort(t *testing.T) {
+	service, prof := startupGatewayService(t)
+	occupied, listener := occupyPort(t)
+	defer listener.Close()
+	service.gateway = gateway.New(proxy.Options{Port: occupied}, nil, nil, nil)
+	prof.ProxyPort = occupied
+	if _, err := service.SetGatewayAutoStart(true); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.startGatewayOnStartup(); err != nil {
+		t.Fatalf("startup did not avoid the occupied port: %v", err)
+	}
+	info := service.gateway.Info()
+	if info.Runtime.State != "running" {
+		t.Fatalf("gateway not running: %+v", info.Runtime)
+	}
+	if info.Runtime.Port == occupied {
+		t.Fatalf("gateway still listens on the occupied port %d", occupied)
+	}
+	if prof.ProxyPort != info.Runtime.Port {
+		t.Fatalf("profile port %d and runtime port %d disagree", prof.ProxyPort, info.Runtime.Port)
+	}
+	cfg, err := profile.LoadConfig(prof.Kind)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if cfg.ProxyPort != info.Runtime.Port {
+		t.Fatalf("persisted port = %d, want %d", cfg.ProxyPort, info.Runtime.Port)
+	}
+}
+
+func TestGatewayStartupKeepsEnvironmentLockedPortConflict(t *testing.T) {
+	service, prof := startupGatewayService(t)
+	occupied, listener := occupyPort(t)
 	defer listener.Close()
-	service.gateway = gateway.New(proxy.Options{Port: listener.Addr().(*net.TCPAddr).Port}, nil, nil, nil)
+	t.Setenv("OMNIPROXY_PROXY_PORT", strconv.Itoa(occupied))
+	service.gateway = gateway.New(proxy.Options{Port: occupied}, nil, nil, nil)
+	prof.ProxyPort = occupied
 	if _, err := service.SetGatewayAutoStart(true); err != nil {
 		t.Fatal(err)
 	}
 	if err := service.startGatewayOnStartup(); err == nil {
-		t.Fatal("port conflict silently ignored")
+		t.Fatal("environment-locked port conflict was silently avoided")
 	}
-	service.prof.ControlPort = 0
-	if err := service.ServiceStartup(context.Background(), application.ServiceOptions{}); err != nil {
-		t.Fatalf("gateway conflict prevented desktop startup: %v", err)
-	}
-	t.Cleanup(func() {
-		if err := service.control.Shutdown(context.Background()); err != nil {
-			t.Error(err)
-		}
-	})
-	if err := listener.Close(); err != nil {
+	cfg, err := profile.LoadConfig(prof.Kind)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.GatewayStart(); err != nil {
-		t.Fatalf("manual retry failed: %v", err)
+	if cfg.ProxyPort != 0 {
+		t.Fatalf("environment-locked conflict persisted port %d", cfg.ProxyPort)
+	}
+}
+
+func TestGatewayStartupReportsNonPortFailure(t *testing.T) {
+	service, _ := startupGatewayService(t)
+	if _, err := service.SetGatewayAutoStart(true); err != nil {
+		t.Fatal(err)
+	}
+	// 网关不可用不是端口冲突：错误必须原样上报，不能触发避让。
+	service.gateway = nil
+	if err := service.startGatewayOnStartup(); err == nil {
+		t.Fatal("missing gateway did not report an error")
 	}
 }
 
@@ -103,5 +147,31 @@ func TestGatewayStartupDoesNotOverwriteCorruptConfig(t *testing.T) {
 	}
 	if service.gateway.Info().Runtime.State != "stopped" {
 		t.Fatal("gateway started despite invalid config")
+	}
+}
+
+func TestServiceStartupSurvivesGatewayPortConflict(t *testing.T) {
+	service, prof := startupGatewayService(t)
+	occupied, listener := occupyPort(t)
+	defer listener.Close()
+	service.gateway = gateway.New(proxy.Options{Port: occupied}, nil, nil, nil)
+	prof.ProxyPort = occupied
+	if _, err := service.SetGatewayAutoStart(true); err != nil {
+		t.Fatal(err)
+	}
+	service.prof.ControlPort = 0
+	if err := service.ServiceStartup(context.Background(), application.ServiceOptions{}); err != nil {
+		t.Fatalf("gateway conflict prevented desktop startup: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := service.control.Shutdown(context.Background()); err != nil {
+			t.Error(err)
+		}
+	})
+	if service.gateway.Info().Runtime.State != "running" {
+		t.Fatal("gateway did not start on an alternative port")
+	}
+	if service.gateway.Info().Runtime.Port == occupied {
+		t.Fatal("gateway kept the occupied port")
 	}
 }

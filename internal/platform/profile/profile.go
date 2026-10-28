@@ -38,6 +38,32 @@ const (
 // AppName is the product name used for directory and identifier resolution.
 const AppName = "OmniProxy"
 
+// Proxy port bounds accepted from the persisted configuration and the UI.
+const (
+	minProxyPort = 1
+	maxProxyPort = 65535
+)
+
+// DefaultProxyPort returns the built-in proxy port of a profile. It is the
+// value used when the user never changed the port.
+func DefaultProxyPort(kind Kind) int {
+	switch kind {
+	case Development:
+		return developmentProxyPort
+	case Test:
+		return testProxyPort
+	default:
+		return productionProxyPort
+	}
+}
+
+// ProxyPortEnvOverride reports whether OMNIPROXY_PROXY_PORT pins the proxy
+// port. The environment always wins over the persisted preference, so the UI
+// must not let the user believe a change took effect.
+func ProxyPortEnvOverride() bool {
+	return strings.TrimSpace(os.Getenv(envProxyPort)) != ""
+}
+
 // Environment variable names honoured by the profile resolver.
 const (
 	envProfile     = "OMNIPROXY_PROFILE"
@@ -86,6 +112,9 @@ func New(kind Kind) (*Profile, error) {
 // Detect resolves the profile for the current process. The OMNIPROXY_PROFILE
 // environment variable overrides the build-tag default.
 //
+// The proxy port resolves in this order: OMNIPROXY_PROXY_PORT > persisted
+// app.json > profile default.
+//
 // The data directory resolves in this order: OMNIPROXY_DATA_DIR > persisted
 // app.json > profile default. An interrupted relocation (a crash between
 // persisting the new location and moving the data at shutdown) is detected
@@ -98,6 +127,16 @@ func Detect() (*Profile, error) {
 	p, err := New(kind)
 	if err != nil {
 		return nil, err
+	}
+	cfg, err := LoadConfig(kind)
+	if err != nil {
+		return nil, err
+	}
+	// The persisted port only replaces the profile default: OMNIPROXY_PROXY_PORT
+	// still wins, and a corrupt value falls back to the default instead of
+	// preventing the application from starting.
+	if !ProxyPortEnvOverride() && cfg.ProxyPort >= minProxyPort && cfg.ProxyPort <= maxProxyPort {
+		p.ProxyPort = cfg.ProxyPort
 	}
 	if strings.TrimSpace(os.Getenv(envDataDir)) != "" {
 		return p, nil // an explicit environment override always wins
@@ -113,11 +152,6 @@ func Detect() (*Profile, error) {
 			p.DataDir = dir
 			p.LogDir = filepath.Join(dir, "logs")
 		}
-	}
-
-	cfg, err := LoadConfig(kind)
-	if err != nil {
-		return nil, err
 	}
 	dir := cfg.effectiveDataDir()
 	if dir == "" || pathsEqual(dir, p.DataDir) {

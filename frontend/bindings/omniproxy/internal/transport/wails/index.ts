@@ -12,6 +12,8 @@ export type {
     DesktopSettings,
     LogExportResult,
     LogNotice,
+    ProxyPortState,
+    ProxyPortUpdate,
     RuntimeInfo,
     SetDataDirResult,
     StorageInfo,

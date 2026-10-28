@@ -49,6 +49,63 @@ export interface LogNotice {
 }
 
 /**
+ * ProxyPortState 描述本地网关端口的当前设置与占用状态。
+ */
+export interface ProxyPortState {
+    /**
+     * Port 是当前生效的监听端口。
+     */
+    "port": number;
+
+    /**
+     * DefaultPort 是该 profile 未做改动时使用的端口。
+     */
+    "defaultPort": number;
+
+    /**
+     * Available 表示端口现在可以被网关监听（已由本应用监听时也为 true）。
+     */
+    "available": boolean;
+
+    /**
+     * Running 表示网关正在监听。
+     */
+    "running": boolean;
+
+    /**
+     * EnvLocked 表示 OMNIPROXY_PROXY_PORT 固定了端口，界面只能读取。
+     */
+    "envLocked": boolean;
+}
+
+/**
+ * ProxyPortUpdate 是保存端口后的结果，包含自动避让与受管客户端的处理情况。
+ */
+export interface ProxyPortUpdate {
+    "state": ProxyPortState;
+
+    /**
+     * Requested 是用户请求的端口；0 表示恢复默认端口。
+     */
+    "requested": number;
+
+    /**
+     * Adjusted 表示请求端口被占用，已自动改用 State.Port。
+     */
+    "adjusted": boolean;
+
+    /**
+     * Updated 是地址已随端口改写的受管客户端。
+     */
+    "updated": string[] | null;
+
+    /**
+     * Manual 是需要用户重新一键配置的客户端。
+     */
+    "manual": string[] | null;
+}
+
+/**
  * RuntimeInfo is a snapshot of the application runtime for the About page.
  */
 export interface RuntimeInfo {

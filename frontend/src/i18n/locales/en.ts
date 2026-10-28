@@ -244,6 +244,31 @@ export const en: Record<keyof typeof zh, string> = {
   "settings.desktop.closeFailed": "Could not save close behavior: {{error}}",
   "settings.desktop.saving": "Saving…",
 
+  "settings.proxyPort.title": "Local gateway port",
+  "settings.proxyPort.description":
+    "Change the port the local gateway listens on. The listener restarts on the new port immediately and managed local clients are updated to the new address; if the port is taken, the next free port in the same range is used automatically.",
+  "settings.proxyPort.label": "Port",
+  "settings.proxyPort.current": "Current port: {{port}}",
+  "settings.proxyPort.default": "Default port: {{port}}",
+  "settings.proxyPort.available": "Port available",
+  "settings.proxyPort.unavailable": "Port already in use",
+  "settings.proxyPort.running": "Gateway listening",
+  "settings.proxyPort.stopped": "Gateway stopped",
+  "settings.proxyPort.loading": "Reading port settings…",
+  "settings.proxyPort.save": "Save port",
+  "settings.proxyPort.saving": "Applying…",
+  "settings.proxyPort.reset": "Restore default port",
+  "settings.proxyPort.invalid": "Enter a port between 1 and 65535.",
+  "settings.proxyPort.envLocked":
+    "The port is pinned by OMNIPROXY_PROXY_PORT and cannot be changed here. Remove that variable to edit it.",
+  "settings.proxyPort.loadFailed": "Could not read port settings: {{error}}",
+  "settings.proxyPort.failed": "Could not change the port: {{error}}",
+  "settings.proxyPort.adjusted": "Port {{requested}} is in use; switched to {{port}}.",
+  "settings.proxyPort.saved": "Port updated to {{port}}.",
+  "settings.proxyPort.rebased": " Updated managed client addresses: {{clients}}.",
+  "settings.proxyPort.manual":
+    "These clients were edited outside OmniProxy, so their addresses were left untouched. Re-read and apply the configuration for: {{clients}}",
+
   "providers.title": "Providers",
   "providers.catalog": "Built-in providers",
   "providers.presetUnavailable": "Built-in configuration missing. Restart the app.",

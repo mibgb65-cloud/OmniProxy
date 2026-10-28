@@ -111,3 +111,89 @@ func TestDetectFallsBackToBuildDefault(t *testing.T) {
 		t.Fatalf("kind = %q, want default %q", p.Kind, defaultKind)
 	}
 }
+
+func TestSetProxyPortValidatesAndPersists(t *testing.T) {
+	useTempConfigDir(t)
+	if err := SetProxyPort(Test, 43210); err != nil {
+		t.Fatalf("SetProxyPort error: %v", err)
+	}
+	cfg, err := LoadConfig(Test)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.ProxyPort != 43210 {
+		t.Fatalf("ProxyPort = %d, want 43210", cfg.ProxyPort)
+	}
+	// Zero restores the profile default and must stay persisted as "unset".
+	if err := SetProxyPort(Test, 0); err != nil {
+		t.Fatalf("SetProxyPort(0) error: %v", err)
+	}
+	if cfg, err = LoadConfig(Test); err != nil || cfg.ProxyPort != 0 {
+		t.Fatalf("ProxyPort after reset = %d, %v", cfg.ProxyPort, err)
+	}
+	for _, port := range []int{-1, maxProxyPort + 1} {
+		if err := SetProxyPort(Test, port); err == nil {
+			t.Fatalf("SetProxyPort(%d) accepted an invalid port", port)
+		}
+	}
+}
+
+func TestDetectAppliesStoredProxyPort(t *testing.T) {
+	useTempConfigDir(t)
+	t.Setenv(envProfile, "test")
+	if err := SetProxyPort(Test, 43111); err != nil {
+		t.Fatal(err)
+	}
+	p, err := Detect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.ProxyPort != 43111 {
+		t.Fatalf("ProxyPort = %d, want stored 43111", p.ProxyPort)
+	}
+	if p.ControlPort != testControlPort {
+		t.Fatalf("ControlPort = %d, want %d", p.ControlPort, testControlPort)
+	}
+}
+
+func TestDetectEnvProxyPortWinsOverStored(t *testing.T) {
+	useTempConfigDir(t)
+	t.Setenv(envProfile, "test")
+	if err := SetProxyPort(Test, 43112); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv(envProxyPort, "43113")
+	p, err := Detect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.ProxyPort != 43113 {
+		t.Fatalf("ProxyPort = %d, want env 43113", p.ProxyPort)
+	}
+	if !ProxyPortEnvOverride() {
+		t.Fatal("ProxyPortEnvOverride() = false, want true")
+	}
+}
+
+func TestDetectIgnoresInvalidStoredProxyPort(t *testing.T) {
+	useTempConfigDir(t)
+	t.Setenv(envProfile, "test")
+	if err := SaveConfig(Test, Config{ProxyPort: maxProxyPort + 1}); err != nil {
+		t.Fatal(err)
+	}
+	p, err := Detect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := DefaultProxyPort(Test); p.ProxyPort != want {
+		t.Fatalf("ProxyPort = %d, want default %d", p.ProxyPort, want)
+	}
+}
+
+func TestDefaultProxyPortMatchesProfileDefaults(t *testing.T) {
+	for kind, want := range map[Kind]int{Production: 3000, Development: 3001, Test: 3002} {
+		if got := DefaultProxyPort(kind); got != want {
+			t.Errorf("DefaultProxyPort(%q) = %d, want %d", kind, got, want)
+		}
+	}
+}

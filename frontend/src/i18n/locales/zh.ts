@@ -234,6 +234,31 @@ export const zh = {
   "settings.desktop.closeFailed": "保存关闭行为失败：{{error}}",
   "settings.desktop.saving": "正在保存…",
 
+  "settings.proxyPort.title": "本地网关端口",
+  "settings.proxyPort.description":
+    "更改本地网关监听的端口。保存后监听器立即在新端口上重启，已接入的本地客户端会同步更新地址；端口被其它程序占用时自动改用同区间内的可用端口。",
+  "settings.proxyPort.label": "端口",
+  "settings.proxyPort.current": "当前端口：{{port}}",
+  "settings.proxyPort.default": "默认端口：{{port}}",
+  "settings.proxyPort.available": "端口可用",
+  "settings.proxyPort.unavailable": "端口已被占用",
+  "settings.proxyPort.running": "网关正在监听",
+  "settings.proxyPort.stopped": "网关未运行",
+  "settings.proxyPort.loading": "正在读取端口设置…",
+  "settings.proxyPort.save": "保存端口",
+  "settings.proxyPort.saving": "正在应用…",
+  "settings.proxyPort.reset": "恢复默认端口",
+  "settings.proxyPort.invalid": "请输入 1–65535 之间的端口号。",
+  "settings.proxyPort.envLocked":
+    "端口由环境变量 OMNIPROXY_PROXY_PORT 固定，界面无法修改。移除该变量后即可在此更改。",
+  "settings.proxyPort.loadFailed": "读取端口设置失败：{{error}}",
+  "settings.proxyPort.failed": "更改端口失败：{{error}}",
+  "settings.proxyPort.adjusted": "端口 {{requested}} 已被占用，已自动改用 {{port}}。",
+  "settings.proxyPort.saved": "端口已更新为 {{port}}。",
+  "settings.proxyPort.rebased": "已同步更新受管客户端地址：{{clients}}。",
+  "settings.proxyPort.manual":
+    "以下客户端的配置被外部改动过，未自动改写地址，请重新读取并一键配置：{{clients}}",
+
   "providers.title": "提供商",
   "providers.catalog": "内置提供商",
   "providers.presetUnavailable": "未找到内置配置，请重启应用。",

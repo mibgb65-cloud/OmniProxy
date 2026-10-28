@@ -107,6 +107,31 @@ func (s *Server) Start() (Status, error) {
 	return s.Status(), nil
 }
 
+// SetPort 切换监听端口：先保存新端口，运行中则先停止（取消在途请求）再在新端口上
+// 恢复监听。未运行或停止失败时不会自行启动监听器。
+func (s *Server) SetPort(ctx context.Context, port int) (Status, error) {
+	if port < 0 || port > 65535 {
+		return s.Status(), Failure("invalid_configuration", 400)
+	}
+	s.mu.Lock()
+	if s.status.State == "stopping" {
+		s.mu.Unlock()
+		return s.Status(), Failure("gateway_busy", 409)
+	}
+	running := s.http != nil
+	s.opts.Port = port
+	s.status.Port = port
+	s.mu.Unlock()
+	s.notify()
+	if !running {
+		return s.Status(), nil
+	}
+	if _, err := s.Stop(ctx); err != nil {
+		return s.Status(), err
+	}
+	return s.Start()
+}
+
 func (s *Server) serve(server *http.Server, listener net.Listener) {
 	err := server.Serve(listener)
 	if err == nil || errors.Is(err, http.ErrServerClosed) {

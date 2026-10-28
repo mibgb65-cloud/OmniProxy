@@ -123,6 +123,12 @@ func (s *Service) Stop(ctx context.Context) (Info, error) {
 	return s.Info(), err
 }
 
+// SetPort 切换监听端口；运行中会先停止再在新端口上恢复监听。
+func (s *Service) SetPort(ctx context.Context, port int) (Info, error) {
+	_, err := s.server.SetPort(ctx, port)
+	return s.Info(), err
+}
+
 // OnStatus 将核心状态变更交给桌面适配层，不让 Core 依赖 Wails。
 func (s *Service) OnStatus(listener func(proxy.Status)) { s.server.OnStatus(listener) }
 

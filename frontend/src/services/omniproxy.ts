@@ -3,6 +3,8 @@ import {
   type AppInfo,
   type CleanResult,
   type DesktopSettings,
+  type ProxyPortState,
+  type ProxyPortUpdate,
   type RuntimeInfo,
   type SetDataDirResult,
   type StorageInfo,
@@ -33,6 +35,8 @@ export type {
   AppInfo,
   CleanResult,
   DesktopSettings,
+  ProxyPortState,
+  ProxyPortUpdate,
   RuntimeInfo,
   SetDataDirResult,
   StorageInfo,
@@ -103,6 +107,19 @@ export function setAutoStart(enabled: boolean): Promise<boolean> {
 
 export function setGatewayAutoStart(enabled: boolean): Promise<boolean> {
   return AppService.SetGatewayAutoStart(enabled)
+}
+
+/** getProxyPort 读取本地网关端口、默认端口与占用状态。 */
+export function getProxyPort(): Promise<ProxyPortState> {
+  return AppService.ProxyPort()
+}
+
+/**
+ * setProxyPort 保存并立即应用网关端口；端口被占用时后端自动避让到同区间可用端口，
+ * 传 0 表示恢复默认端口。
+ */
+export function setProxyPort(port: number): Promise<ProxyPortUpdate> {
+  return AppService.SetProxyPort(port)
 }
 
 /** setCloseBehavior persists how closing the main window should behave. */

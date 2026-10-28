@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261028-008](../tasks/completed/2026-10/TASK-20261028-008-configurable-gateway-port.md)，本地网关端口可配置：`app.json` 新增 `proxyPort`（`OMNIPROXY_PROXY_PORT` 仍优先，锁定时界面只读），设置页「通用设置 → 本地网关端口」保存后监听器在新端口重启、受管客户端地址同步改写；端口被占用时（含启动自动启动）在同区间自动避让 20 个候选端口并持久化，被外部改动过的客户端保持原样并提示重新配置。新增 `internal/core/netport`、`proxy.Server.SetPort`、`gateway.Service.SetPort`、`agentconfig.RebasePort`。`task verify` exit 0（139 文件／849 项前端测试、Windows production 构建），原生窗口与真实客户端联调待人工验收。
+
 已实现：[TASK-20261028-007](../tasks/completed/2026-10/TASK-20261028-007-accounts-bento-motion-polish.md)，修复账号 Bento 闪动与 Dock 拥挤：保留 600ms 原位布局动画，改用可打断的只读过渡层与文字反缩放，移除整块 0.12 淡化；底部改为单行横向滚动切换条，去除详情总外框与额度嵌套框。`task --force verify` 通过（138 文件／841 项前端测试、Go 检查和 Windows production 构建），隔离 Chromium 九项检查通过。原生隔离 WebView2 未加载出可操作页面，原生观感仍待实机确认；未重打安装包、未发布。实现提交 `8e3c3652`。
 
 本地构建：[TASK-20261028-006](../tasks/completed/2026-10/TASK-20261028-006-build-local-v2.0.1-beta.5-installer.md) 已产出 `v2.0.1-beta.5` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），含账号概览页 Bento 原位展开与底部切换 Dock；`task --force verify` exit 0（135 文件／826 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,283,688 bytes，SHA256 `3f71ca546726f212945c0cc6aab772bbdb7a6a705a35ba57a969c209f6cf2a7e`，覆盖安装由用户执行。

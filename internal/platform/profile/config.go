@@ -42,6 +42,9 @@ type Config struct {
 	// the historical default of exiting the application.
 	CloseBehavior    string `json:"closeBehavior,omitempty"`
 	GatewayAutoStart bool   `json:"gatewayAutoStart,omitempty"`
+	// ProxyPort is the persisted gateway listen port. 0 means "use the
+	// profile default"; OMNIPROXY_PROXY_PORT always wins over this value.
+	ProxyPort int `json:"proxyPort,omitempty"`
 }
 
 // ConfigFilePath returns the fixed path of the persisted configuration for

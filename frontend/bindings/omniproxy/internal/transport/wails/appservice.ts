@@ -610,6 +610,13 @@ export function ProviderCatalog(): $CancellablePromise<provider$0.Definition[] |
     return $Call.ByID(3706786763);
 }
 
+/**
+ * ProxyPort 返回本地网关端口的当前设置。
+ */
+export function ProxyPort(): $CancellablePromise<$models.ProxyPortState> {
+    return $Call.ByID(2033408652);
+}
+
 export function RequestRead(id: string): $CancellablePromise<activity$0.RequestItem> {
     return $Call.ByID(3283823074, id);
 }
@@ -774,6 +781,16 @@ export function SetProviderEnabled(id: string, enabled: boolean): $CancellablePr
  */
 export function SetProviderProxyMode(id: string, mode: string): $CancellablePromise<provider$0.Configuration> {
     return $Call.ByID(3155139389, id, mode);
+}
+
+/**
+ * SetProxyPort 保存并立即应用新的网关端口。
+ * 
+ * 端口被占用时自动避让到同区间内第一个可用端口（见 ProxyPortUpdate.Adjusted）；
+ * 端口由 OMNIPROXY_PROXY_PORT 固定时拒绝修改，避免界面与环境变量互相覆盖。
+ */
+export function SetProxyPort(port: number): $CancellablePromise<$models.ProxyPortUpdate> {
+    return $Call.ByID(2970027974, port);
 }
 
 export function SetRiverAccountRotationMode(mode: string): $CancellablePromise<gateway$0.RiverSettings> {

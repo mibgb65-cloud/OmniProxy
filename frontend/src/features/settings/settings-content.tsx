@@ -1,6 +1,7 @@
 import { AppearanceSettings } from "./appearance-settings"
 import { DataDirForm } from "./data-dir-form"
 import { DesktopBehavior } from "./desktop-behavior"
+import { ProxyPortSetting } from "./proxy-port-setting"
 import { RequestRetentionSettings } from "./request-retention"
 import { StorageOverview } from "./storage-overview"
 import { LegacyImportCard } from "./legacy-import-card"
@@ -16,6 +17,7 @@ export function SettingsContent({
       {section === "settings" ? (
         <>
           <DesktopBehavior />
+          <ProxyPortSetting />
           <AppearanceSettings />
         </>
       ) : null}

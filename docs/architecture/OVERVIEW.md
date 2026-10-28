@@ -371,6 +371,15 @@ never share a data directory. The active profile comes from the build tag
 (`production` for `wails3 build`) and can be overridden with
 `OMNIPROXY_PROFILE`.
 
+The proxy port resolves in this order: `OMNIPROXY_PROXY_PORT` →
+`app.json` `proxyPort` → the profile default (3000/3001/3002). The persisted
+value is the port the gateway actually listens on; when it is already taken the
+desktop layer moves to the next free port in the same range, persists it and
+rewrites the loopback addresses it had written into managed client configs
+(`agent_backups.applied_hash` still matching the file). Configs edited outside
+the app are left untouched and reported to the UI. A port pinned by
+`OMNIPROXY_PROXY_PORT` is never avoided automatically.
+
 The data directory resolves in this order: `OMNIPROXY_DATA_DIR` →
 `app.json` `dataDir` → the installer's `data-dir.txt` next to the executable →
 the profile default (`%APPDATA%\<app>`). The installer file only carries the

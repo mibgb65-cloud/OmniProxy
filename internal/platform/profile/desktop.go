@@ -43,3 +43,17 @@ func SetGatewayAutoStart(kind Kind, enabled bool) error {
 	cfg.GatewayAutoStart = enabled
 	return SaveConfig(kind, cfg)
 }
+
+// SetProxyPort validates and persists the gateway listen port. Zero restores
+// the profile default; any other value must be a usable TCP port.
+func SetProxyPort(kind Kind, port int) error {
+	if port != 0 && (port < minProxyPort || port > maxProxyPort) {
+		return fmt.Errorf("profile: invalid proxy port %d", port)
+	}
+	cfg, err := LoadConfig(kind)
+	if err != nil {
+		return err
+	}
+	cfg.ProxyPort = port
+	return SaveConfig(kind, cfg)
+}
