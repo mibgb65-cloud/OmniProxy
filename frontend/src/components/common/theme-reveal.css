@@ -1,0 +1,45 @@
+/*
+ * 主题切换的圆形扩散过渡（View Transitions API）。
+ *
+ * 这些伪元素属于整个文档而不是某个组件，样式集中在这里由标题栏在挂载时导入。
+ * 新主题快照被裁剪成以点击位置为圆心的圆形，从 0 扩散到铺满窗口，
+ * 旧主题保持完整可见，因此扩散过程中不会出现整屏淡入淡出。
+ */
+
+:root {
+  /* 与 useThemeTransition 的预期节奏一致：稍长但仍在 600–800ms 区间内。 */
+  --theme-reveal-duration: 700ms;
+}
+
+/* 关闭默认的交叉淡入淡出，只保留新主题的 clip-path 扩散。 */
+::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  z-index: 0;
+}
+
+::view-transition-new(root) {
+  animation: theme-reveal var(--theme-reveal-duration) cubic-bezier(0.4, 0, 0.2, 1) both;
+  mix-blend-mode: normal;
+  z-index: 1;
+}
+
+/*
+ * 圆心与半径由 useThemeTransition 写入 :root 的自定义属性。
+ * 半径取点击点到视口最远角的距离，扩散结束时刚好铺满整个窗口。
+ */
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0px at var(--theme-reveal-x) var(--theme-reveal-y));
+  }
+
+  to {
+    clip-path: circle(var(--theme-reveal-radius) at var(--theme-reveal-x) var(--theme-reveal-y));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

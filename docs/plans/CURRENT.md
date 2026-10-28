@@ -31,7 +31,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+[TASK-20261028-001](../tasks/completed/2026-10/TASK-20261028-001-theme-circular-reveal-transition.md)：标题栏亮暗模式按钮改为基于点击位置的圆形扩散（View Transitions API）过渡，不支持时优雅降级；前端 133 文件／818 项测试、typecheck、lint、format 与 production 构建通过，真实窗口动画观感待人工验收。
+
+其余历史任务：无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

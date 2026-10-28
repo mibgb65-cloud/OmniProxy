@@ -3,8 +3,10 @@ import { useEffect, useState } from "react"
 import { Events, Window } from "@wailsio/runtime"
 import { Copy, Minus, Moon, Square, Sun, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useThemeTransition } from "../../hooks/use-theme-transition"
 import { useUIStore } from "../../stores/ui-store"
 import { LanguageSwitcher } from "./language-switcher"
+import "./theme-reveal.css"
 
 const controlClass =
   "hover:bg-sidebar-accent focus-visible:ring-ring flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-inset"
@@ -12,7 +14,7 @@ const controlClass =
 export function AppTitlebar() {
   const { t } = useTranslation()
   const theme = useUIStore((s) => s.theme)
-  const toggleTheme = useUIStore((s) => s.toggleTheme)
+  const toggleThemeWithReveal = useThemeTransition()
   const [isMaximised, setIsMaximised] = useState(false)
   const [actionFailed, setActionFailed] = useState(false)
 
@@ -71,7 +73,7 @@ export function AppTitlebar() {
             type="button"
             className={controlClass}
             aria-label={themeLabel}
-            onClick={toggleTheme}
+            onClick={toggleThemeWithReveal}
           >
             {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </button>
