@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md) 已产出 `v2.0.1-beta.7` Windows amd64 production 安装包，包含 TASK-20261028-010 的账号 Dock 越界与遮挡修复；完整质量门（139 文件／851 项前端测试）、NSIS 打包、原生版本资源与 SHA256 校验通过。安装包 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
 已修复：[TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)，账号页提供商切换动画不再侵入侧栏：副本限制在账号网格和主视口内，详情／Dock／迷你卡片分层绘制，Dock 使用不透明主题底色，避免文字和图标重叠。`task --force verify` exit 0（139 文件／851 项前端测试、Go 检查及 Windows production 构建），隔离 Chromium 九组检查通过；原生测试实例无可操作窗口或 CDP，实机视觉仍待确认。未重打安装包或替换运行中的安装版。实现提交 `970990e0`。
 
 本地构建：[TASK-20261028-009](../tasks/completed/2026-10/TASK-20261028-009-build-local-v2.0.1-beta.6-installer.md) 已产出 `v2.0.1-beta.6` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），内容为本地网关端口可配置与端口冲突自动避让；`task --force verify` exit 0（139 文件／849 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,315,659 bytes，SHA256 `3fee16a3f6d79358c4a1bfdd9da662455b527de435d224a97fe58fa686eb7aa3`，覆盖安装由用户执行。
@@ -37,7 +39,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 **已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
-**本地构建（未发布）：2.0.1-beta.6** — 2026-10-28 本地 Windows amd64 production 安装包，未签名、未打标签、未推送、未公开发布，仅供本机覆盖更新。相对 2.0.1-beta.5 含一项用户可见改动：本地网关端口可配置并在冲突时自动避让（TASK-20261028-008，`4f09490a`）。完整质量门（139 文件／849 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,315,659 bytes，SHA256 `3fee16a3f6d79358c4a1bfdd9da662455b527de435d224a97fe58fa686eb7aa3`。
+**本地构建（未发布）：2.0.1-beta.7** — 2026-10-28 本地 Windows amd64 production 安装包，相对 Beta.6 包含账号 Dock 越界与遮挡修复（TASK-20261028-010，`970990e0`）。完整质量门（139 文件／851 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未推送或公开发布。
+
+**本地构建（未发布，已被 beta.7 取代）：2.0.1-beta.6** — 相对 Beta.5 包含本地网关端口可配置与冲突自动避让（TASK-20261028-008，`4f09490a`）；安装器 20,315,659 bytes，SHA256 `3fee16a3f6d79358c4a1bfdd9da662455b527de435d224a97fe58fa686eb7aa3`，记录见 [TASK-20261028-009](../tasks/completed/2026-10/TASK-20261028-009-build-local-v2.0.1-beta.6-installer.md)。
 
 **本地构建（未发布，已被 beta.6 取代）：2.0.1-beta.5** — 相对 2.0.1-beta.4 含一项用户可见改动：账号概览页 Bento 原位展开与底部切换 Dock（TASK-20261028-005，`34953623`）；安装器 20,283,688 bytes，SHA256 `3f71ca546726f212945c0cc6aab772bbdb7a6a705a35ba57a969c209f6cf2a7e`，记录见 [TASK-20261028-006](../tasks/completed/2026-10/TASK-20261028-006-build-local-v2.0.1-beta.5-installer.md)。
 
@@ -51,7 +55,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261028-011](../tasks/active/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：构建包含 Dock 越界与遮挡修复的本地 `v2.0.1-beta.7` Windows production 安装包，正在执行质量门和打包校验。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -105,6 +109,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：`v2.0.1-beta.7` 本地 Windows production 安装包已构建并通过完整质量门（139 文件／851 项前端测试）、原生版本资源与 SHA256 校验；包含 Dock 越界与遮挡修复，20,318,085 bytes，未签名、未安装、未推送或发布。
 
 - [TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)：修复账号切换副本侵入侧栏和压住 Dock，保留 600ms 动画与键盘/横向切换；完整质量门及隔离浏览器九组检查通过，新 Windows 可执行文件已生成，未重新打包或安装。实现提交 `970990e0`。
 

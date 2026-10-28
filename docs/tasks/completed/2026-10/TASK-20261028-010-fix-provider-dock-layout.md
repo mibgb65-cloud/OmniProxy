@@ -136,6 +136,10 @@ fix(accounts): 约束提供商切换动画并修复 Dock 遮挡
 两处截图问题已在源码修复，并通过完整质量门及隔离浏览器验证。
 新 Windows 可执行文件已生成；未替换用户正在运行的安装版。
 
+后续本地交付：[TASK-20261028-011](TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)
+已将本修复纳入 `v2.0.1-beta.7` Windows production 安装包并完成版本资源与 SHA256 校验；
+安装及原生视觉确认仍由用户执行。
+
 ## Completed
 
 2026-10-28 23:10（Asia/Singapore）
