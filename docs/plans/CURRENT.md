@@ -55,7 +55,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261028-011](../tasks/active/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：构建包含 Dock 越界与遮挡修复的本地 `v2.0.1-beta.7` Windows production 安装包，正在执行质量门和打包校验。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -110,7 +110,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
-- [TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：`v2.0.1-beta.7` 本地 Windows production 安装包已构建并通过完整质量门（139 文件／851 项前端测试）、原生版本资源与 SHA256 校验；包含 Dock 越界与遮挡修复，20,318,085 bytes，未签名、未安装、未推送或发布。
+- [TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：`v2.0.1-beta.7` 本地 Windows production 安装包已构建并通过完整质量门（139 文件／851 项前端测试）、原生版本资源与 SHA256 校验；包含 Dock 越界与遮挡修复，20,318,085 bytes，未签名、未安装、未推送或发布。构建记录提交 `13dc37e8`。
 
 - [TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)：修复账号切换副本侵入侧栏和压住 Dock，保留 600ms 动画与键盘/横向切换；完整质量门及隔离浏览器九组检查通过，新 Windows 可执行文件已生成，未重新打包或安装。实现提交 `970990e0`。
 
