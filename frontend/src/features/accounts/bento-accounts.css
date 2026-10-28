@@ -4,6 +4,7 @@
 }
 
 .bento-accounts {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
@@ -26,14 +27,27 @@
   opacity: 0;
 }
 
-/* 只读过渡层脱离 Dock 的横向裁剪，所有卡片从原位置真正飞入底部，而非到位才出现。 */
+/* 过渡层脱离 Dock 的横向裁剪，但不能脱离主视口或盖住停靠区。 */
+.bento-motion-boundary {
+  position: absolute;
+  inset: 0;
+  /* 不创建层叠上下文，让详情副本与迷你卡片分别处于 Dock 的下方和上方。 */
+  overflow: clip;
+  pointer-events: none;
+}
+
 .bento-motion-surface {
-  position: fixed;
-  z-index: 40;
+  position: absolute;
+  z-index: 3;
   overflow: clip;
   pointer-events: none;
   transform-origin: top left;
   will-change: transform;
+}
+
+/* 详情副本位于停靠区下方；飞向 Dock 的迷你卡片仍需在其底色上连续可见。 */
+.bento-motion-surface--panel {
+  z-index: 1;
 }
 
 .bento-motion-content {
@@ -67,8 +81,7 @@
   align-self: end;
   padding: 0.75rem 0 0.5rem;
   border-top: 1px solid var(--border);
-  background: color-mix(in oklab, var(--background) 94%, transparent);
-  backdrop-filter: blur(12px);
+  background: var(--background);
 }
 
 .bento-dock-heading {

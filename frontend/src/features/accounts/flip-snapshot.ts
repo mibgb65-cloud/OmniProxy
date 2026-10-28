@@ -1,7 +1,7 @@
 export type FlipSnapshot = { rect: DOMRect; content: HTMLElement }
 
 /**
- * 保留旧画面的只读副本，放在滚动裁剪之外过渡。
+ * 保留旧画面的只读副本，脱离 Dock 的横向裁剪，但仍受主内容视口约束。
  * 连点时冻结屏幕上正在播放的层，而不是重新取已落位但不可见的真实节点。
  */
 export function takeFlipSnapshot(source: HTMLElement): FlipSnapshot {
@@ -60,15 +60,19 @@ export function animateFlipSnapshot(
   element: HTMLElement,
   last: DOMRect,
   options: KeyframeAnimationOptions,
+  boundary: { element: HTMLElement; rect: DOMRect },
 ) {
   const surface = document.createElement("div")
   surface.className = "bento-motion-surface"
+  if (element.classList.contains("bento-panel-slot")) {
+    surface.classList.add("bento-motion-surface--panel")
+  }
   surface.setAttribute("aria-hidden", "true")
   surface.dataset.motionId = element.dataset.flipId
   surface.inert = true
   Object.assign(surface.style, {
-    left: `${last.left}px`,
-    top: `${last.top}px`,
+    left: `${last.left - boundary.rect.left}px`,
+    top: `${last.top - boundary.rect.top}px`,
     width: `${last.width}px`,
     height: `${last.height}px`,
   })
@@ -78,7 +82,7 @@ export function animateFlipSnapshot(
   oldLayer.append(first.content)
   newLayer.append(takeFlipSnapshot(element).content)
   surface.append(oldLayer, newLayer)
-  document.body.append(surface)
+  boundary.element.append(surface)
   const scaleX = first.rect.width / last.width
   const scaleY = first.rect.height / last.height
   const animation = surface.animate(

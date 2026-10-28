@@ -21,6 +21,7 @@ export function useFlipReflow(
   const previousRects = useRef(new Map<string, FlipSnapshot>())
   const pending = useRef(false)
   const running = useRef(new Map<HTMLElement, ReturnType<typeof animateFlipSnapshot>>())
+  const boundaryRef = useRef<HTMLDivElement | null>(null)
   const cancelAnimations = useCallback(() => {
     for (const [element, { animations, surface }] of running.current) {
       for (const animation of animations) animation.cancel()
@@ -28,10 +29,12 @@ export function useFlipReflow(
       delete element.dataset.flipFlying
     }
     running.current.clear()
+    boundaryRef.current?.remove()
+    boundaryRef.current = null
   }, [])
 
   useEffect(() => {
-    // 窗口尺寸或用户滚动改变了目标坐标时直接交回真实布局，不保留过期的固定过渡层。
+    // 窗口尺寸或用户滚动改变了目标坐标时直接交回真实布局，不保留过期的过渡层。
     window.addEventListener("resize", cancelAnimations)
     window.addEventListener("wheel", cancelAnimations, { passive: true })
     window.addEventListener("touchstart", cancelAnimations, { passive: true })
@@ -66,6 +69,7 @@ export function useFlipReflow(
     if (prefersReducedMotion()) return
 
     // 先读取所有终点再写动画，避免前一个动画影响后续布局测量。
+    const containerRect = container.getBoundingClientRect()
     const targets = Array.from(
       container.querySelectorAll<HTMLElement>(FLIP_SELECTOR),
       (element) => ({
@@ -93,8 +97,20 @@ export function useFlipReflow(
         Math.abs(scaleY - 1) < 0.01
       if (settled) continue
 
+      if (!boundaryRef.current) {
+        const boundary = document.createElement("div")
+        boundary.className = "bento-motion-boundary"
+        boundary.setAttribute("aria-hidden", "true")
+        boundary.inert = true
+        // 必须留在网格内：继承主视口裁剪，详情副本与迷你卡片按 Dock 分层。
+        container.append(boundary)
+        boundaryRef.current = boundary
+      }
       const options = { duration, easing, fill: "both" as const }
-      const flight = animateFlipSnapshot(snapshot, element, last, options)
+      const flight = animateFlipSnapshot(snapshot, element, last, options, {
+        element: boundaryRef.current,
+        rect: containerRect,
+      })
       element.dataset.flipFlying = "true"
       running.current.set(element, flight)
       const settle = () => {
@@ -104,6 +120,10 @@ export function useFlipReflow(
         flight.surface.remove()
         running.current.delete(element)
         delete element.dataset.flipFlying
+        if (running.current.size === 0) {
+          boundaryRef.current?.remove()
+          boundaryRef.current = null
+        }
       }
       flight.animation.finished.then(settle, settle)
     }

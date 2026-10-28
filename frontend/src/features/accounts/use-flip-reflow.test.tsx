@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { useFlipReflow } from "./use-flip-reflow"
 
-function Fixture() {
+function Fixture({ multiple = false }: { multiple?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const capture = useFlipReflow(containerRef)
   const [expanded, setExpanded] = useState(false)
@@ -18,9 +18,10 @@ function Fixture() {
         toggle
       </button>
       <div ref={containerRef} data-expanded={expanded}>
-        <div data-flip-id="provider">
+        <div data-flip-id="provider" className={expanded ? "bento-panel-slot" : ""}>
           <div>content</div>
         </div>
+        {multiple ? <div data-flip-id="second-provider">second</div> : null}
       </div>
     </>
   )
@@ -113,6 +114,35 @@ describe("useFlipReflow", () => {
     ).toBe(true)
     expect(document.querySelector("[data-flip-id]")).toHaveAttribute("data-flip-flying", "true")
     expect(records[0].element).toHaveAttribute("aria-hidden", "true")
+    expect(records[0].element).toHaveClass("bento-motion-surface--panel")
+    const boundary = records[0].element.parentElement
+    expect(boundary).toHaveClass("bento-motion-boundary")
+    expect(boundary?.parentElement).toBe(document.querySelector("[data-expanded]"))
+    expect(boundary).toHaveAttribute("aria-hidden", "true")
+    expect(boundary?.inert).toBe(true)
+    expect(document.body.querySelector(":scope > .bento-motion-surface")).toBeNull()
+  })
+
+  it("positions motion surfaces relative to the content boundary rather than the window", () => {
+    vi.mocked(HTMLElement.prototype.getBoundingClientRect).mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.hasAttribute("data-expanded")) return new DOMRect(253, -120, 897, 1200)
+      return this.parentElement?.dataset.expanded === "true"
+        ? new DOMRect(253, -120, 897, 600)
+        : new DOMRect(710, 220, 440, 320)
+    })
+    render(<Fixture />)
+    fireEvent.click(screen.getByText("toggle"))
+    expect(records[0].element).toHaveStyle({
+      left: "0px",
+      top: "0px",
+      width: "897px",
+      height: "600px",
+    })
+    expect((records[0].frames as Keyframe[])[0].transform).toBe(
+      `translate(457px, 340px) scale(${440 / 897}, ${320 / 600})`,
+    )
   })
 
   it("samples the displayed rect before cancelling and ignores stale completion callbacks", async () => {
@@ -128,6 +158,7 @@ describe("useFlipReflow", () => {
       true,
     )
     const current = records[3]
+    expect(current.element).not.toHaveClass("bento-motion-surface--panel")
     const target = document.querySelector("[data-flip-id]")
     await act(async () => old[0].finish())
     expect(target).toHaveAttribute("data-flip-flying", "true")
@@ -135,6 +166,7 @@ describe("useFlipReflow", () => {
     await act(async () => current.finish())
     expect(target).not.toHaveAttribute("data-flip-flying")
     expect(current.animation.cancel).toHaveBeenCalledOnce()
+    expect(document.querySelector(".bento-motion-boundary")).not.toBeInTheDocument()
   })
 
   it("cancels all live animations when unmounted", () => {
@@ -146,6 +178,20 @@ describe("useFlipReflow", () => {
     ).toBe(true)
     expect(records[0].element.dataset.flipFlying).toBeUndefined()
     expect(document.querySelector(".bento-motion-surface")).not.toBeInTheDocument()
+    expect(document.querySelector(".bento-motion-boundary")).not.toBeInTheDocument()
+  })
+
+  it("shares one boundary and keeps it until the last surface settles", async () => {
+    render(<Fixture multiple />)
+    fireEvent.click(screen.getByText("toggle"))
+    expect(records).toHaveLength(6)
+    const boundary = records[0].element.parentElement
+    expect(records[3].element.parentElement).toBe(boundary)
+    await act(async () => records[0].finish())
+    expect(boundary).toBeInTheDocument()
+    expect(boundary?.children).toHaveLength(1)
+    await act(async () => records[3].finish())
+    expect(boundary).not.toBeInTheDocument()
   })
 
   it("skips animations for reduced motion", () => {
@@ -156,6 +202,7 @@ describe("useFlipReflow", () => {
     render(<Fixture />)
     fireEvent.click(screen.getByText("toggle"))
     expect(records).toHaveLength(0)
+    expect(document.querySelector(".bento-motion-boundary")).not.toBeInTheDocument()
   })
 
   it.each(["resize", "wheel", "touchstart"])("cleans up stale geometry on %s", (event) => {
@@ -163,6 +210,7 @@ describe("useFlipReflow", () => {
     fireEvent.click(screen.getByText("toggle"))
     fireEvent(window, new Event(event))
     expect(document.querySelector(".bento-motion-surface")).not.toBeInTheDocument()
+    expect(document.querySelector(".bento-motion-boundary")).not.toBeInTheDocument()
     expect(document.querySelector("[data-flip-id]")).not.toHaveAttribute("data-flip-flying")
     expect(
       records.every(({ animation }) => vi.mocked(animation.cancel).mock.calls.length === 1),
