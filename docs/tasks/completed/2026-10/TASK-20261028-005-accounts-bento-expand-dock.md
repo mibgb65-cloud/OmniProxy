@@ -227,7 +227,7 @@ Windows production 构建：通过；产物 CSS 含 .bento-accounts / .bento-pan
 ## Commit
 
 ```text
-<filled after commit>
+34953623 feat(accounts): 概览页改为 Bento 原位展开与底部切换 Dock
 ```
 
 ---
