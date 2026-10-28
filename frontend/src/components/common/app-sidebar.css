@@ -2,11 +2,48 @@
   --sidebar-expanded-width: 14rem;
   --sidebar-duration: 250ms;
   --sidebar-easing: ease-in-out;
+  /* 选中背景滑动的节奏：比侧栏收展慢一些并带阻尼，跨项长距离移动也能跟手。 */
+  --sidebar-indicator-duration: 450ms;
+  --sidebar-indicator-easing: cubic-bezier(0.22, 1, 0.36, 1);
   transition: width var(--sidebar-duration) var(--sidebar-easing);
+}
+
+/* 定位上下文：选中背景按行坐标（offsetTop／offsetHeight）绝对定位。 */
+.app-sidebar-nav {
+  position: relative;
+}
+
+/*
+ * 滑动药丸背景。只在纵向移动与高度变化上做过渡，宽度跟随列表容器，
+ * 因此侧栏收展时不用单独补偿；pointer-events 关闭后点击仍然落到链接上。
+ */
+.sidebar-nav-indicator {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: var(--radius-md);
+  background-color: var(--sidebar-accent);
+  /* 极细顶边高光：深色主题下是提亮，浅色主题自动转为压暗。 */
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--sidebar-accent-foreground) 8%, transparent);
+  /* 首次测量完成前不加过渡，避免挂载时从容器顶部滑下来的误触发动画。 */
+  transition: none;
+}
+
+.sidebar-nav-indicator[data-measured="true"] {
+  transition:
+    transform var(--sidebar-indicator-duration) var(--sidebar-indicator-easing),
+    height var(--sidebar-indicator-duration) var(--sidebar-indicator-easing);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar {
+    transition: none;
+  }
+
+  .sidebar-nav-indicator,
+  .sidebar-nav-indicator[data-measured="true"] {
     transition: none;
   }
 }

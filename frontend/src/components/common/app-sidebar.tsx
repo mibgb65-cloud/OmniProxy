@@ -13,8 +13,10 @@ import {
   Server,
   Users,
 } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SidebarLabel } from "./sidebar-label"
+import { SidebarNavIndicator } from "./sidebar-nav-indicator"
 import { SidebarGatewayStatus } from "../../features/gateway/sidebar-gateway-status"
 import { AppPreferencesDialog } from "../../features/settings/app-preferences-dialog"
 import { ScrollRegion } from "./scroll-region"
@@ -39,6 +41,8 @@ export function AppSidebar() {
   const { t } = useTranslation()
   const collapsed = useUIStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  // 列表元素以状态保存：滑动背景需要在元素真正挂载后再测量。
+  const [navList, setNavList] = useState<HTMLUListElement | null>(null)
 
   return (
     <aside
@@ -105,13 +109,17 @@ export function AppSidebar() {
         viewportClassName="p-2"
         ariaLabel="Primary"
       >
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.to}>
-              <SidebarLink item={item} collapsed={collapsed} label={t(item.labelKey)} />
-            </li>
-          ))}
-        </ul>
+        <div className="app-sidebar-nav">
+          {/* 选中背景独立成层，随当前项滑动；放在列表外层以便按行坐标定位。 */}
+          <SidebarNavIndicator list={navList} />
+          <ul ref={setNavList} className="space-y-1">
+            {navItems.map((item) => (
+              <li key={item.to}>
+                <SidebarLink item={item} collapsed={collapsed} label={t(item.labelKey)} />
+              </li>
+            ))}
+          </ul>
+        </div>
       </ScrollRegion>
 
       <div className="border-sidebar-border flex shrink-0 flex-col gap-2 overflow-hidden border-t p-2 whitespace-nowrap">
@@ -140,11 +148,15 @@ function SidebarLink({
         draggable={false}
         onDragStart={(event) => event.preventDefault()}
         // 固定行高，防止移除文字后由较矮的图标撑高而导致整列导航上移。
-        className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center gap-2 overflow-hidden rounded-md px-4 text-sm whitespace-nowrap select-none data-[active=true]:font-medium"
+        // 选中／悬停不再自绘背景：背景由滑动块提供，这里只做文字提亮。
+        className="hover:text-sidebar-accent-foreground data-[active=true]:text-sidebar-accent-foreground flex h-9 items-center overflow-hidden rounded-md px-4 text-sm whitespace-nowrap transition-colors duration-150 select-none data-[active=true]:font-medium"
         activeProps={{ "data-active": "true" }}
       >
-        <Icon className="size-4 shrink-0" />
-        <SidebarLabel collapsed={collapsed}>{label}</SidebarLabel>
+        {/* 内容层压在滑动背景之上，保证图标与文字始终清晰。 */}
+        <span className="relative z-10 flex min-w-0 items-center gap-2">
+          <Icon className="size-4 shrink-0" />
+          <SidebarLabel collapsed={collapsed}>{label}</SidebarLabel>
+        </span>
       </Link>
     </Tooltip>
   )

@@ -14,6 +14,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { routeTree } from "../../app/routeTree.gen"
 import { I18nProvider } from "../../i18n/provider"
 import { useUIStore } from "../../stores/ui-store"
+import { stubNavRowMetrics } from "../../test/nav-row-metrics"
 import { AppSidebar } from "./app-sidebar"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
@@ -133,5 +134,48 @@ describe("AppSidebar", () => {
     expect(screen.getByText("仪表盘")).toBeInTheDocument()
     expect(isInaccessible(screen.getByText("仪表盘"))).toBe(false)
     expect(screen.getByRole("button", { name: "折叠" })).toHaveAttribute("aria-expanded", "true")
+  })
+
+  it("slides the selected background to the new item instead of swapping it", async () => {
+    const user = userEvent.setup()
+    const restoreMetrics = stubNavRowMetrics()
+    try {
+      const { container } = renderSidebar()
+
+      // 「提供商」是第三行：药丸位移到 2 ×（行高 36 + 间距 4），高度等于行高。
+      await user.click(screen.getByRole("link", { name: "提供商" }))
+      await waitFor(() =>
+        expect(
+          container.querySelector<HTMLElement>(".sidebar-nav-indicator")?.style.transform,
+        ).toBe("translateY(80px)"),
+      )
+      const background = container.querySelector(".sidebar-nav-indicator")
+      expect((background as HTMLElement).style.height).toBe("36px")
+
+      // 回到第一行：仍是同一个背景元素，只是位置变了。
+      await user.click(screen.getByRole("link", { name: "仪表盘" }))
+      await waitFor(() => expect(background).toHaveStyle({ transform: "translateY(0px)" }))
+      expect(container.querySelector(".sidebar-nav-indicator")).toBe(background)
+    } finally {
+      restoreMetrics()
+    }
+  })
+
+  it("keeps the selected background in place when the sidebar collapses", async () => {
+    const user = userEvent.setup()
+    const restoreMetrics = stubNavRowMetrics()
+    try {
+      const { container } = renderSidebar()
+      const background = container.querySelector<HTMLElement>(".sidebar-nav-indicator")
+      expect(background?.style.transform).toBe("translateY(0px)")
+
+      // 收展只改变宽度：背景块沿用同一元素与同一行坐标，不被重建或错位。
+      await user.click(screen.getByRole("button", { name: "折叠" }))
+      expect(background?.style.transform).toBe("translateY(0px)")
+      expect(background?.style.height).toBe("36px")
+      expect(container.querySelector(".sidebar-nav-indicator")).toBe(background)
+    } finally {
+      restoreMetrics()
+    }
   })
 })
