@@ -204,7 +204,7 @@ Windows production 构建（wails3 generate bindings + vite build + go build）�
 ## Commit
 
 ```text
-<filled after commit>  feat(theme): 主题切换改为基于点击位置的圆形扩散过渡
+63c8e3df feat(theme): 主题切换改为基于点击位置的圆形扩散过渡
 ```
 
 ---
