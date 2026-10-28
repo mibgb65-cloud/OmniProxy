@@ -188,7 +188,12 @@ scripts/build-release.ps1 -Version v2.0.1-beta.6 -OutputDirectory release-assets
 
 ## Commit
 
-Pending.
+```text
+88f83d2a chore(release): 2.0.1-beta.6 版本与本地 Windows 安装包
+```
+
+（仅本地提交，未推送；安装包未签名、未打标签、未发布，`release-assets/` 与 `bin/` 按 `.gitignore` 不入库。
+commit 字段由后续 docs 提交回填。）
 
 ---
 
