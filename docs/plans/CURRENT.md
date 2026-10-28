@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-发布进行中：[TASK-20261028-012](../tasks/active/TASK-20261028-012-release-v2.1.0.md)。用户已明确选择正式版 `v2.1.0`；版本与相对 v2.0.0 的中英文发布说明已就绪，本地完整质量门（139 文件／851 项前端测试）、NSIS 打包、版本资源及 SHA256 校验通过。随后通过 GitHub Actions 构建、自签及公开发布，完成前不将本地构建视为已公开版本。
+已发布：[TASK-20261028-012](../tasks/completed/2026-10/TASK-20261028-012-release-v2.1.0.md)。`v2.1.0` 于 2026-10-29（Asia/Singapore）公开为正式 Latest；main CI `40719270841`、Release `40719321092` 成功，完整质量门（139 文件／851 项前端测试）、托管生产构建、项目自签／证书 pin／篡改拒绝及摘要复验通过。生产更新组件确认正式／Beta 渠道均发现新版，公开下载及校验成功；未自动安装或改动用户数据。
 
 本地构建：[TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md) 已产出 `v2.0.1-beta.7` Windows amd64 production 安装包，包含 TASK-20261028-010 的账号 Dock 越界与遮挡修复；完整质量门（139 文件／851 项前端测试）、NSIS 打包、原生版本资源与 SHA256 校验通过。安装包 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
@@ -38,9 +38,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**待发布源码：2.1.0** — 包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复。Windows 数字版本为 `2.1.0.0`，正式发布结果待 TASK-20261028-012 验证。
+**已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
-**已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
+**历史已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.1.0 取代。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
 
 **历史本地构建（未发布）：2.0.1-beta.7** — 2026-10-28 本地 Windows amd64 production 安装包，相对 Beta.6 包含账号 Dock 越界与遮挡修复（TASK-20261028-010，`970990e0`）。完整质量门（139 文件／851 项前端测试）、Windows 版本资源与发布资产校验通过；数字版本仍为 `2.0.1.0`；安装器 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未推送或公开发布；其变更纳入本次 2.1.0 正式版。
@@ -59,7 +59,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-[TASK-20261028-012](../tasks/active/TASK-20261028-012-release-v2.1.0.md)：按用户授权发布 v2.1.0 正式版。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -113,6 +113,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261028-012](../tasks/completed/2026-10/TASK-20261028-012-release-v2.1.0.md)：`v2.1.0` 已公开为正式 Latest；源码 `4cf78954`，main CI `40719270841`／Release `40719321092` 成功，托管构建、自签、证书 pin、篡改拒绝和公开下载／更新渠道核验通过。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`；未安装或修改用户数据。
 
 - [TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md)：`v2.0.1-beta.7` 本地 Windows production 安装包已构建并通过完整质量门（139 文件／851 项前端测试）、原生版本资源与 SHA256 校验；包含 Dock 越界与遮挡修复，20,318,085 bytes，未签名、未安装、未推送或发布。构建记录提交 `13dc37e8`。
 
