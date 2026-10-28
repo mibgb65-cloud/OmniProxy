@@ -1,0 +1,76 @@
+/*
+ * 账号概览的 Bento 布局：卡片墙 → 顶部展开面板 + 底部切换 Dock。
+ * 位置变化全部交给 FLIP 补间（use-flip-reflow.ts），这里只描述两种布局本身。
+ */
+
+.bento-accounts {
+  --bento-gap: 0.75rem;
+
+  display: grid;
+  gap: var(--bento-gap);
+  /* 与卡片墙一致的连续列宽：宽窗两列，窄窗自动降为一列。 */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  align-items: start;
+}
+
+/* FLIP 补间的载体：动画只改 transform，布局位置由网格决定。 */
+.bento-flip {
+  min-width: 0;
+}
+
+/*
+ * 展开卡片与 Dock 都横跨整行（两列时即 col-span-2），
+ * 因此被展开的提供商永远位于网格顶部。
+ */
+.bento-panel-slot,
+.bento-dock {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.bento-panel {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .bento-panel {
+  background-color: color-mix(in oklab, var(--card) 75%, transparent);
+}
+
+/* 底部迷你切换卡片：紧凑一排，列数随宽度自适应。 */
+.bento-dock {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.bento-dock-card {
+  border-color: var(--border);
+}
+
+/*
+ * 卡片与面板尺寸差异大，缩放期间文字会被压扁：飞行中把内部内容淡到近乎透明，
+ * 落位后（属性移除）用同样的时长淡回，视觉上是「面板移动 → 内容呈现」。
+ * 过渡写在基础状态上，属性增删两个方向都平滑。
+ */
+.bento-flip > * {
+  transition: opacity 120ms linear;
+}
+
+.bento-flip[data-flip-flying="true"] > * {
+  opacity: 0.12;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-flip > * {
+    transition: none;
+  }
+
+  .bento-flip[data-flip-flying="true"] > * {
+    opacity: 1;
+  }
+}

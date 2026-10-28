@@ -1,11 +1,18 @@
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
+import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
+import type { ProviderConfiguration } from "../../services/omniproxy"
 import { AccountProviderCard } from "./account-provider-card"
 import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
+import { ProviderAccountsView } from "./provider-accounts-view"
+import { ProviderDockCard } from "./provider-dock-card"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
+import { useFlipReflow } from "./use-flip-reflow"
 import "./account-card-grid.css"
+import "./bento-accounts.css"
 
 export function AccountsView() {
   const { t } = useTranslation()
@@ -22,6 +29,45 @@ export function AccountsView() {
     ),
     ...items.filter((item) => item.source === "custom"),
   ]
+
+  /**
+   * 展开只改本页状态、不改路由：被点开的提供商在网格顶部横跨整行展开详情，
+   * 其余提供商压缩成底部 Dock；切换与收起共用同一条 FLIP 过渡。
+   */
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const lastExpandedId = useRef<string | null>(null)
+  const captureFlip = useFlipReflow(containerRef)
+
+  const expanded = orderedProviders.find((provider) => provider.id === expandedId) ?? null
+  const dockProviders = orderedProviders.filter((provider) => provider.id !== expanded?.id)
+
+  const showProvider = (providerId: string | null) => {
+    // 必须先在旧布局下取样，布局提交后才由 FLIP 补间到新位置。
+    captureFlip()
+    setExpandedId(providerId)
+  }
+
+  // 展开后把焦点交给面板，收起后交回对应卡片，避免焦点落到页面根节点。
+  useEffect(() => {
+    if (expandedId) {
+      lastExpandedId.current = expandedId
+      panelRef.current?.focus()
+      return
+    }
+    const previous = lastExpandedId.current
+    lastExpandedId.current = null
+    if (!previous) return
+    const slots = containerRef.current?.querySelectorAll<HTMLElement>("[data-flip-id]") ?? []
+    const slot = Array.from(slots).find((element) => element.dataset.flipId === previous)
+    slot?.querySelector<HTMLElement>("button")?.focus()
+  }, [expandedId])
+
+  const displayName = (provider: ProviderConfiguration) =>
+    provider.source === "builtin" && isKnownProviderKind(provider.kind)
+      ? t(providerNameKeys[provider.kind])
+      : provider.name
 
   return (
     <div className="w-full min-w-0 space-y-7 pb-6">
@@ -49,20 +95,55 @@ export function AccountsView() {
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div className="account-card-grid account-card-grid-overview items-start">
-          {orderedProviders.map((provider) => (
-            <AccountProviderCard
-              key={provider.id}
-              provider={provider}
-              accounts={accounts.data.filter((account) => account.providerId === provider.id)}
-              busy={actions.busy}
-              onCreate={actions.save}
-              onBatchCreate={actions.saveBatch}
-              onToggle={actions.toggle}
-              onDelete={actions.deleteItem}
-              onEdit={actions.editItem}
-            />
-          ))}
+        <div ref={containerRef} className="bento-accounts">
+          {expanded ? (
+            <>
+              <div className="bento-flip bento-panel-slot" data-flip-id={expanded.id}>
+                <div
+                  ref={panelRef}
+                  role="region"
+                  tabIndex={-1}
+                  aria-label={displayName(expanded)}
+                  className="bento-panel outline-none"
+                >
+                  <ProviderAccountsView
+                    providerId={expanded.id}
+                    embedded
+                    onCollapse={() => showProvider(null)}
+                  />
+                </div>
+              </div>
+              <div className="bento-dock" role="group" aria-label={t("accounts.dock.label")}>
+                {dockProviders.map((provider) => (
+                  <div key={provider.id} className="bento-flip" data-flip-id={provider.id}>
+                    <ProviderDockCard
+                      provider={provider}
+                      accountCount={
+                        accounts.data.filter((account) => account.providerId === provider.id).length
+                      }
+                      onSelect={() => showProvider(provider.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            orderedProviders.map((provider) => (
+              <div key={provider.id} className="bento-flip" data-flip-id={provider.id}>
+                <AccountProviderCard
+                  provider={provider}
+                  accounts={accounts.data.filter((account) => account.providerId === provider.id)}
+                  busy={actions.busy}
+                  onCreate={actions.save}
+                  onBatchCreate={actions.saveBatch}
+                  onToggle={actions.toggle}
+                  onDelete={actions.deleteItem}
+                  onEdit={actions.editItem}
+                  onExpand={() => showProvider(provider.id)}
+                />
+              </div>
+            ))
+          )}
         </div>
       ) : null}
       <DeleteAccountDialog actions={actions} />

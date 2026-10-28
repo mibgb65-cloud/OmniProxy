@@ -400,6 +400,7 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.count": "{{count}} accounts",
   "accounts.add": "Add account",
   "accounts.openDetails": "View {{name}} account details",
+  "accounts.dock.label": "Switch provider",
   "accounts.listFor": "{{name}} accounts",
   "accounts.newFor": "Add {{name}} account",
   "accounts.multipleHint": "You can add multiple API Key accounts for this provider.",

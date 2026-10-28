@@ -20,7 +20,16 @@ import { StepFunAccountSettings } from "./stepfun-account-settings"
 import { KimiAccountSettings } from "./kimi-account-settings"
 import "./account-card-grid.css"
 
-export function ProviderAccountsView({ providerId }: { providerId: string }) {
+export function ProviderAccountsView({
+  providerId,
+  embedded = false,
+  onCollapse,
+}: {
+  providerId: string
+  /** 作为概览页原位展开面板的内容时使用：标题降为 h2，不渲染返回链接。 */
+  embedded?: boolean
+  onCollapse?: () => void
+}) {
   const { t } = useTranslation()
   const providers = useProviders()
   const accounts = useAccounts()
@@ -32,16 +41,28 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
       ? t(providerNameKeys[provider.kind])
       : (provider?.name ?? "")
   const items = accounts.data?.filter((account) => account.providerId === providerId) ?? []
+  const Title = embedded ? "h2" : "h1"
 
   return (
-    <section className="w-full min-w-0 space-y-6 pb-6">
-      <Link
-        to="/accounts"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        {t("accounts.detail.back")}
-      </Link>
+    <section className={embedded ? "w-full min-w-0 space-y-5" : "w-full min-w-0 space-y-6 pb-6"}>
+      {embedded ? (
+        <button
+          type="button"
+          onClick={onCollapse}
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex cursor-pointer items-center gap-1.5 rounded-sm text-sm outline-none focus-visible:ring-4"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          {t("accounts.detail.back")}
+        </button>
+      ) : (
+        <Link
+          to="/accounts"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          {t("accounts.detail.back")}
+        </Link>
+      )}
       {providers.isPending || accounts.isPending ? (
         <p role="status" className="text-muted-foreground text-sm">
           {t("accounts.loading")}
@@ -63,9 +84,9 @@ export function ProviderAccountsView({ providerId }: { providerId: string }) {
             <div className="flex min-w-0 items-center gap-3">
               <ProviderBrandIcon kind={provider.kind} endpoint={provider.baseUrl} />
               <div className="min-w-0">
-                <h1 className="truncate text-2xl font-semibold tracking-tight">
+                <Title className="truncate text-2xl font-semibold tracking-tight">
                   {t("accounts.detail.title", { name })}
-                </h1>
+                </Title>
                 <p className="text-muted-foreground text-sm">
                   {t("accounts.count", { count: items.length })}
                 </p>

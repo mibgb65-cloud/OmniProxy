@@ -383,6 +383,7 @@ export const zh = {
   "accounts.count": "{{count}} 个账号",
   "accounts.add": "添加账号",
   "accounts.openDetails": "查看{{name}}账号详情",
+  "accounts.dock.label": "切换提供商",
   "accounts.listFor": "{{name}}的账号列表",
   "accounts.newFor": "添加 {{name}} 账号",
   "accounts.multipleHint": "同一提供商可添加多个 API Key 账号。",

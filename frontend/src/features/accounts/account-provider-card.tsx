@@ -2,8 +2,8 @@ import { MiniMaxBadge } from "./minimax-options"
 import { KimiPlatformBadge } from "./kimi-platform"
 import { StepFunBadge } from "./stepfun-options"
 import { Tooltip } from "../../components/ui/tooltip"
-import { Link } from "@tanstack/react-router"
 import { ChevronRight } from "lucide-react"
+import type { MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { Card, CardContent } from "../../components/ui/card"
 import { ScrollRegion } from "../../components/common/scroll-region"
@@ -23,6 +23,9 @@ import { AccountItemActions } from "./account-item-actions"
 import { AddAccountDialog } from "./add-account-dialog"
 import { accountDisplayName } from "./account-display"
 
+// 卡片内的控件自己处理点击，不能把整卡展开也带起来。
+const INTERACTIVE = "button, a, input, select, textarea, [role='dialog']"
+
 export function AccountProviderCard({
   provider,
   accounts,
@@ -32,6 +35,7 @@ export function AccountProviderCard({
   onToggle,
   onDelete,
   onEdit,
+  onExpand,
 }: {
   provider: ProviderConfiguration
   accounts: AccountItem[]
@@ -41,6 +45,8 @@ export function AccountProviderCard({
   onToggle: (id: string, enabled: boolean) => void
   onDelete: (account: AccountItem) => void
   onEdit: (account: AccountItem) => void
+  /** 在原位展开该提供商的详情（不跳转路由）。 */
+  onExpand: () => void
 }) {
   const { t } = useTranslation()
   const name =
@@ -48,27 +54,40 @@ export function AccountProviderCard({
       ? t(providerNameKeys[provider.kind])
       : provider.name
 
+  const open = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.defaultPrevented) return
+    if ((event.target as HTMLElement).closest(INTERACTIVE)) return
+    onExpand()
+  }
+
   return (
-    <Card className="dark:bg-card/75 h-[320px] min-w-0 gap-0 py-0 shadow-sm">
+    <Card
+      className="dark:bg-card/75 hover:border-ring/60 flex h-[320px] min-w-0 cursor-pointer flex-col gap-0 py-0 shadow-sm transition-colors"
+      onClick={open}
+    >
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-          <Link
-            to="/accounts/$providerId"
-            params={{ providerId: provider.id }}
-            aria-label={t("accounts.openDetails", { name })}
-            className="group focus-visible:ring-ring/50 flex min-w-0 items-center gap-3 rounded-md focus-visible:ring-4"
-          >
+          <div className="flex min-w-0 items-center gap-3">
             <ProviderBrandIcon kind={provider.kind} endpoint={provider.baseUrl} />
             <div className="min-w-0">
               <Tooltip content={name}>
-                <h2 className="group-hover:text-primary truncate text-sm font-semibold">{name}</h2>
+                <h2 className="truncate text-sm font-semibold">
+                  <button
+                    type="button"
+                    onClick={onExpand}
+                    aria-label={t("accounts.openDetails", { name })}
+                    className="hover:text-primary focus-visible:ring-ring/50 block max-w-full cursor-pointer truncate rounded-sm text-left outline-none focus-visible:ring-4"
+                  >
+                    {name}
+                  </button>
+                </h2>
               </Tooltip>
               <p className="text-muted-foreground text-xs">
                 {t("accounts.count", { count: accounts.length })}
               </p>
             </div>
             <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
-          </Link>
+          </div>
           <AddAccountDialog provider={provider} onCreate={onCreate} onBatchCreate={onBatchCreate} />
         </div>
         {!provider.enabled ? (

@@ -39,7 +39,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+[TASK-20261028-005](../tasks/active/TASK-20261028-005-accounts-bento-expand-dock.md)：账号概览页改为 Bento 原位展开（卡片点击不跳路由，顶部撑满展开账号／额度详情，其余提供商压缩成底部 Dock），600ms FLIP 过渡（原生 `getBoundingClientRect` + `Element.animate`，零新依赖）；等 `task verify` 与真实窗口观感验收。
+
+其余历史任务：无。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

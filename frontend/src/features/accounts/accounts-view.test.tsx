@@ -249,15 +249,58 @@ describe("AccountsView", () => {
     expect(within(dialog).getByRole("button", { name: "取消" })).toBeDisabled()
   })
 
-  it("links built-in and custom providers to their own account pages", async () => {
+  it("expands a provider in place without leaving the accounts route", async () => {
     const user = userEvent.setup()
     const { router } = renderPage()
-    const builtIn = await screen.findByRole("link", { name: "查看DeepSeek账号详情" })
-    const customLink = screen.getByRole("link", { name: "查看Custom API账号详情" })
-    expect(builtIn).toHaveAttribute("href", "/accounts/builtin_deepseek")
-    expect(customLink).toHaveAttribute("href", `/accounts/${custom.id}`)
+    const builtIn = await screen.findByRole("button", { name: "查看DeepSeek账号详情" })
+    expect(screen.getByRole("button", { name: "查看Custom API账号详情" })).toBeInTheDocument()
+
     await user.click(builtIn)
-    await waitFor(() => expect(router.state.location.pathname).toBe("/accounts/builtin_deepseek"))
+
+    // 原位展开：地址仍是概览页，详情直接出现在同一页里。
+    expect(router.state.location.pathname).toBe("/accounts")
+    const panel = screen.getByRole("region", { name: "DeepSeek" })
+    expect(within(panel).getByRole("heading", { name: "DeepSeek 账号" })).toBeInTheDocument()
+    // 其他提供商压缩成底部 Dock，被展开的那个不再出现在 Dock 或卡片墙里。
+    const dock = screen.getByRole("group", { name: "切换提供商" })
+    expect(within(dock).getByRole("button", { name: "查看Custom API账号详情" })).toBeInTheDocument()
+    expect(
+      within(dock).queryByRole("button", { name: "查看DeepSeek账号详情" }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole("heading", { name: "Custom API" })).not.toBeInTheDocument()
+  })
+
+  it("switches the expanded provider from the bottom dock", async () => {
+    const user = userEvent.setup()
+    const { router } = renderPage()
+    await user.click(await screen.findByRole("button", { name: "查看OpenAI账号详情" }))
+    expect(screen.getByRole("region", { name: "OpenAI" })).toBeInTheDocument()
+
+    // Dock 里的 OpenAI 迷你卡片可以随时回到顶部面板。
+    await user.click(screen.getByRole("button", { name: "查看DeepSeek账号详情" }))
+
+    expect(screen.getByRole("region", { name: "DeepSeek" })).toBeInTheDocument()
+    expect(screen.queryByRole("region", { name: "OpenAI" })).not.toBeInTheDocument()
+    expect(
+      within(screen.getByRole("group", { name: "切换提供商" })).getByRole("button", {
+        name: "查看OpenAI账号详情",
+      }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe("/accounts")
+  })
+
+  it("collapses the expanded panel back into the provider grid", async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(await screen.findByRole("button", { name: "查看OpenAI账号详情" }))
+    expect(screen.getByRole("group", { name: "切换提供商" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "返回账号" }))
+
+    expect(screen.queryByRole("region", { name: "OpenAI" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("group", { name: "切换提供商" })).not.toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "OpenAI" })).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "添加账号" })).toHaveLength(10)
   })
 
   it("keeps provider cards at a fixed height while retaining all account rows", async () => {
