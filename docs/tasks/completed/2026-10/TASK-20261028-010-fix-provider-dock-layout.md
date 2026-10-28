@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -124,9 +124,18 @@ PASS
 
 ## Git
 
-待提交当前实现与验证结果。
+```text
+970990e0ea460cbfd0fb68e2f6f987ed9e9dce91
+fix(accounts): 约束提供商切换动画并修复 Dock 遮挡
+```
+
+已本地提交实现、测试及验证记录；随后归档本记录并同步 CURRENT，不推送远端。
 
 ## Result
 
 两处截图问题已在源码修复，并通过完整质量门及隔离浏览器验证。
 新 Windows 可执行文件已生成；未替换用户正在运行的安装版。
+
+## Completed
+
+2026-10-28 23:10（Asia/Singapore）

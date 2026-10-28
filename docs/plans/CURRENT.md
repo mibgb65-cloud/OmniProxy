@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)，账号页提供商切换动画不再侵入侧栏：副本限制在账号网格和主视口内，详情／Dock／迷你卡片分层绘制，Dock 使用不透明主题底色，避免文字和图标重叠。`task --force verify` exit 0（139 文件／851 项前端测试、Go 检查及 Windows production 构建），隔离 Chromium 九组检查通过；原生测试实例无可操作窗口或 CDP，实机视觉仍待确认。未重打安装包或替换运行中的安装版。实现提交 `970990e0`。
+
 本地构建：[TASK-20261028-009](../tasks/completed/2026-10/TASK-20261028-009-build-local-v2.0.1-beta.6-installer.md) 已产出 `v2.0.1-beta.6` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），内容为本地网关端口可配置与端口冲突自动避让；`task --force verify` exit 0（139 文件／849 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,315,659 bytes，SHA256 `3fee16a3f6d79358c4a1bfdd9da662455b527de435d224a97fe58fa686eb7aa3`，覆盖安装由用户执行。
 
 已实现：[TASK-20261028-008](../tasks/completed/2026-10/TASK-20261028-008-configurable-gateway-port.md)，本地网关端口可配置：`app.json` 新增 `proxyPort`（`OMNIPROXY_PROXY_PORT` 仍优先，锁定时界面只读），设置页「通用设置 → 本地网关端口」保存后监听器在新端口重启、受管客户端地址同步改写；端口被占用时（含启动自动启动）在同区间自动避让 20 个候选端口并持久化，被外部改动过的客户端保持原样并提示重新配置。新增 `internal/core/netport`、`proxy.Server.SetPort`、`gateway.Service.SetPort`、`agentconfig.RebasePort`。`task verify` exit 0（139 文件／849 项前端测试、Windows production 构建），原生窗口与真实客户端联调待人工验收。
@@ -49,7 +51,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261028-010](../tasks/active/TASK-20261028-010-fix-provider-dock-layout.md)：修复账号页提供商切换动画侵入左侧栏、详情副本遮挡底部 Dock；已复现，正在验证。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -103,6 +105,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261028-010](../tasks/completed/2026-10/TASK-20261028-010-fix-provider-dock-layout.md)：修复账号切换副本侵入侧栏和压住 Dock，保留 600ms 动画与键盘/横向切换；完整质量门及隔离浏览器九组检查通过，新 Windows 可执行文件已生成，未重新打包或安装。实现提交 `970990e0`。
 
 - [TASK-20261028-009](../tasks/completed/2026-10/TASK-20261028-009-build-local-v2.0.1-beta.6-installer.md)：`v2.0.1-beta.6` 本地 production 安装包已构建并通过完整质量门（139 文件／849 项前端测试）、Windows 版本资源、SHA256 与资产校验（20,315,659 bytes，SHA256 `3fee16a3…7aa3`）；版本源统一为 `2.0.1-beta.6`／`2.0.1.0`／NSIS `2.0.1`，内容为本地网关端口可配置与端口冲突自动避让；未签名、未自动安装、未打标签、未推送或发布，等待用户本地覆盖安装。
 
