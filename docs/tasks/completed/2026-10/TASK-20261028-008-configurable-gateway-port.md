@@ -245,7 +245,11 @@ build         PASS（wails3 build，Windows amd64 production，bin/omniproxy.exe
 
 ## Commit
 
-Not committed by Agent.
+```text
+4f09490a feat(gateway): make the local proxy port configurable and avoid conflicts
+```
+
+未推送、未打标签、未重打安装包。commit 字段由后续 docs 提交回填。
 
 ---
 
