@@ -190,7 +190,7 @@ None.（本轮按计划一次跑通 `build-release.ps1`，未出现重跑或跳�
 ## Commit
 
 ```text
-<filled after commit>
+60143132 chore(release): 2.0.1-beta.4 版本与本地 Windows 安装包
 ```
 
 （仅本地提交，未推送；安装包未签名、未打标签、未发布，`release-assets/` 与 `bin/` 按 `.gitignore` 不入库。）
