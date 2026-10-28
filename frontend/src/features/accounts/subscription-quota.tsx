@@ -33,7 +33,7 @@ function CodexSubscriptionQuota({ account }: { account: AccountItem }) {
   return (
     <div
       aria-busy={authenticated && query.isFetching}
-      className="bg-muted/20 min-w-0 space-y-2.5 rounded-xl border p-3"
+      className="subscription-quota-panel bg-muted/20 min-w-0 space-y-2.5 rounded-xl border p-3"
     >
       {fiveHour ? (
         <SubscriptionQuotaRow

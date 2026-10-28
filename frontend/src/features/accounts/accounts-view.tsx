@@ -7,7 +7,7 @@ import { AccountProviderCard } from "./account-provider-card"
 import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
 import { ProviderAccountsView } from "./provider-accounts-view"
-import { ProviderDockCard } from "./provider-dock-card"
+import { ProviderSwitcherDock } from "./provider-switcher-dock"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
 import { useFlipReflow } from "./use-flip-reflow"
@@ -42,8 +42,13 @@ export function AccountsView() {
 
   const expanded = orderedProviders.find((provider) => provider.id === expandedId) ?? null
   const dockProviders = orderedProviders.filter((provider) => provider.id !== expanded?.id)
+  const accountCounts = new Map<string, number>()
+  for (const account of accounts.data ?? []) {
+    accountCounts.set(account.providerId, (accountCounts.get(account.providerId) ?? 0) + 1)
+  }
 
   const showProvider = (providerId: string | null) => {
+    if (providerId === expandedId) return
     // 必须先在旧布局下取样，布局提交后才由 FLIP 补间到新位置。
     captureFlip()
     setExpandedId(providerId)
@@ -53,7 +58,7 @@ export function AccountsView() {
   useEffect(() => {
     if (expandedId) {
       lastExpandedId.current = expandedId
-      panelRef.current?.focus()
+      panelRef.current?.focus({ preventScroll: true })
       return
     }
     const previous = lastExpandedId.current
@@ -61,7 +66,7 @@ export function AccountsView() {
     if (!previous) return
     const slots = containerRef.current?.querySelectorAll<HTMLElement>("[data-flip-id]") ?? []
     const slot = Array.from(slots).find((element) => element.dataset.flipId === previous)
-    slot?.querySelector<HTMLElement>("button")?.focus()
+    slot?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true })
   }, [expandedId])
 
   const displayName = (provider: ProviderConfiguration) =>
@@ -70,7 +75,7 @@ export function AccountsView() {
       : provider.name
 
   return (
-    <div className="w-full min-w-0 space-y-7 pb-6">
+    <div className="accounts-page w-full min-w-0 space-y-7 pb-6">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.accounts.title")}</h1>
       </header>
@@ -95,10 +100,14 @@ export function AccountsView() {
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div ref={containerRef} className="bento-accounts">
+        <div ref={containerRef} className="bento-accounts" data-expanded={!!expanded}>
           {expanded ? (
             <>
-              <div className="bento-flip bento-panel-slot" data-flip-id={expanded.id}>
+              <div
+                key={expanded.id}
+                className="bento-flip bento-panel-slot"
+                data-flip-id={expanded.id}
+              >
                 <div
                   ref={panelRef}
                   role="region"
@@ -113,19 +122,13 @@ export function AccountsView() {
                   />
                 </div>
               </div>
-              <div className="bento-dock" role="group" aria-label={t("accounts.dock.label")}>
-                {dockProviders.map((provider) => (
-                  <div key={provider.id} className="bento-flip" data-flip-id={provider.id}>
-                    <ProviderDockCard
-                      provider={provider}
-                      accountCount={
-                        accounts.data.filter((account) => account.providerId === provider.id).length
-                      }
-                      onSelect={() => showProvider(provider.id)}
-                    />
-                  </div>
-                ))}
-              </div>
+              {dockProviders.length ? (
+                <ProviderSwitcherDock
+                  providers={dockProviders}
+                  accountCounts={accountCounts}
+                  onSelect={showProvider}
+                />
+              ) : null}
             </>
           ) : (
             orderedProviders.map((provider) => (

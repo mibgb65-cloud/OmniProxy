@@ -2,9 +2,11 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261028-007](../tasks/active/TASK-20261028-007-accounts-bento-motion-polish.md)，修复账号 Bento 闪动与 Dock 拥挤：保留 600ms 原位布局动画，改用可打断的只读过渡层与文字反缩放，移除整块 0.12 淡化；底部改为单行横向滚动切换条，去除详情总外框与额度嵌套框。隔离 Chromium 合成数据逐帧验证已通过，最终质量门与原生 WebView2 检查进行中。
+
 本地构建：[TASK-20261028-006](../tasks/completed/2026-10/TASK-20261028-006-build-local-v2.0.1-beta.5-installer.md) 已产出 `v2.0.1-beta.5` 本地 Windows amd64 production 安装包（未签名、未打标签、未推送、未公开发布），含账号概览页 Bento 原位展开与底部切换 Dock；`task --force verify` exit 0（135 文件／826 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过。安装器 20,283,688 bytes，SHA256 `3f71ca546726f212945c0cc6aab772bbdb7a6a705a35ba57a969c209f6cf2a7e`，覆盖安装由用户执行。
 
-新增：[TASK-20261028-005](../tasks/completed/2026-10/TASK-20261028-005-accounts-bento-expand-dock.md) 账号概览页改为 Bento 原位展开：卡片点击不再跳路由，被点开的提供商在网格顶部横跨整行展开完整账号／额度详情，其余提供商以 600ms FLIP 压缩成底部切换 Dock，点 Dock 无缝切换、面板内「返回账号」收起回卡片墙；FLIP 用原生 `getBoundingClientRect` + `Element.animate` 手写（零新依赖），飞行期内容淡到 0.12 避免缩放压扁文字，`prefers-reduced-motion` 下直接切换；`/accounts/<providerId>` 深链接仍进独立详情页。实现提交 `34953623`。
+新增：[TASK-20261028-005](../tasks/completed/2026-10/TASK-20261028-005-accounts-bento-expand-dock.md) 账号概览页 Bento 原位展开初版：卡片点击不再跳路由，顶部全宽详情与底部切换 Dock 使用原生 `getBoundingClientRect` + `Element.animate`（零新依赖），减少动画时直接切换，独立详情深链接保留。实现提交 `34953623`；初版飞行期间全内容淡化与 Dock 多行挤压由 TASK-20261028-007 继续修正。
 
 新增：[TASK-20261028-003](../tasks/completed/2026-10/TASK-20261028-003-sidebar-sliding-nav-indicator.md) 侧栏九个导航项的选中态改为独立滑动药丸背景（450ms `cubic-bezier(0.22, 1, 0.36, 1)`，`z-index: 0` 不拦截点击、内容层 `relative z-10`，选中判定观察链接上的 `data-active`，字号缩放与侧栏收展重测，首次测量完成前不加过渡）。实现提交 `fc03fa98`。
 

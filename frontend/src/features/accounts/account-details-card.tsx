@@ -40,7 +40,7 @@ export function AccountDetailsCard({
   const subscription = account.authMethod === "subscription_login"
 
   return (
-    <Card className="dark:bg-card/75 min-w-0 gap-0 py-0 shadow-sm">
+    <Card className="account-details-card dark:bg-card/75 min-w-0 gap-0 py-0 shadow-sm">
       <CardContent className="flex flex-1 flex-col gap-4 px-5 py-4">
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0 flex-1 space-y-1">

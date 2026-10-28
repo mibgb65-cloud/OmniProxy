@@ -66,7 +66,7 @@ export function AccountProviderCard({
       onClick={open}
     >
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b pb-4">
           <div className="flex min-w-0 items-center gap-3">
             <ProviderBrandIcon kind={provider.kind} endpoint={provider.baseUrl} />
             <div className="min-w-0">
@@ -94,13 +94,13 @@ export function AccountProviderCard({
           <p className="text-muted-foreground shrink-0 text-xs">{t("accounts.providerDisabled")}</p>
         ) : null}
         {accounts.length === 0 ? (
-          <p className="text-muted-foreground border-border flex min-h-0 flex-1 items-center justify-center rounded-lg border border-dashed px-3 py-4 text-sm">
+          <p className="text-muted-foreground flex min-h-0 flex-1 items-center justify-center px-3 py-4 text-sm">
             {t("accounts.empty")}
           </p>
         ) : (
           <ScrollRegion
             as="section"
-            className="min-h-0 flex-1 rounded-lg border"
+            className="min-h-0 flex-1"
             ariaLabel={t("accounts.listFor", { name })}
           >
             <ul className="divide-border divide-y">

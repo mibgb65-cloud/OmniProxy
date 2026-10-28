@@ -38,7 +38,7 @@ export function AccountTokenSummary({
           // 卡片用紧凑写法，完整数字通过产品统一 Tooltip 与无障碍名称提供，不用系统原生提示框。
           const exact = !error && value ? formatTokens(value, i18n.language) : ""
           return (
-            <div key={label} className="bg-muted/40 min-w-0 space-y-1 rounded-lg px-2 py-1.5">
+            <div key={label} className="min-w-0 space-y-1 py-1.5">
               <dt className="text-muted-foreground">{label}</dt>
               <Tooltip content={exact}>
                 <dd

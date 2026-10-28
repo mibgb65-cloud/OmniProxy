@@ -1,3 +1,11 @@
+/* 账号卡片已提供容器，不再给额度套第二个盒子；额度页独立使用时仍保留原样。 */
+.account-details-card .subscription-quota-panel {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+}
+
 /* 只在信息变化时淡入，进度条保留原节点以便从旧宽度过渡到新宽度。 */
 .quota-information-update {
   display: inline-block;

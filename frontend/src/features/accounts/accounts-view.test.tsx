@@ -321,4 +321,29 @@ describe("AccountsView", () => {
     expect(within(list).getAllByRole("listitem")).toHaveLength(7)
     expect(screen.getByText("7 个账号")).toBeInTheDocument()
   })
+
+  it("keeps focus on the expanded panel and restores it without implicit scrolling", async () => {
+    const user = userEvent.setup()
+    const focus = vi.spyOn(HTMLElement.prototype, "focus")
+    renderPage()
+    await user.click(await screen.findByRole("button", { name: "查看OpenAI账号详情" }))
+    expect(screen.getByRole("region", { name: "OpenAI" })).toHaveFocus()
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+    await user.click(screen.getByRole("button", { name: "返回账号" }))
+    expect(screen.getByRole("button", { name: "查看OpenAI账号详情" })).toHaveFocus()
+    focus.mockRestore()
+  })
+
+  it("keeps the route and all other providers available after repeated switches", async () => {
+    const user = userEvent.setup()
+    const { router } = renderPage()
+    for (const name of ["OpenAI", "DeepSeek", "Google", "Custom API", "OpenAI"]) {
+      await user.click(await screen.findByRole("button", { name: `查看${name}账号详情` }))
+      expect(screen.getByRole("region", { name })).toBeInTheDocument()
+      const dock = screen.getByRole("group", { name: "切换提供商" })
+      expect(dock.querySelectorAll(".bento-dock-card")).toHaveLength(9)
+      expect(within(dock).queryByRole("button", { name: `查看${name}账号详情` })).toBeNull()
+      expect(router.state.location.pathname).toBe("/accounts")
+    }
+  })
 })
