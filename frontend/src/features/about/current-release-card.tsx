@@ -1,8 +1,9 @@
 import { FileText } from "lucide-react"
 import { useId } from "react"
 import { useTranslation } from "react-i18next"
+import { Markdown } from "../../components/common/markdown"
 import { Card } from "../../components/ui/card"
-import { getCurrentReleaseNotes, parseReleaseNotes } from "./current-release"
+import { getCurrentReleaseNotes, withoutTopHeading } from "./current-release"
 
 export function CurrentReleaseCard({
   version,
@@ -27,12 +28,9 @@ export function CurrentReleaseCard({
           <span className="text-muted-foreground font-mono text-xs">{version}</span>
         ) : null}
       </div>
-      <div
-        className="space-y-3 p-4 text-sm leading-relaxed [overflow-wrap:anywhere]"
-        aria-busy={pending}
-      >
+      <div className="p-4" aria-busy={pending}>
         {pending || failed || !notes ? (
-          <p className="text-muted-foreground" role={failed ? "alert" : undefined}>
+          <p className="text-muted-foreground text-sm" role={failed ? "alert" : undefined}>
             {t(
               pending
                 ? "updates.notesLoading"
@@ -42,23 +40,7 @@ export function CurrentReleaseCard({
             )}
           </p>
         ) : (
-          parseReleaseNotes(notes).map((block, index) =>
-            block.kind === "list" ? (
-              <ul key={index} className="text-muted-foreground list-disc space-y-2 pl-5">
-                {block.items.map((item, itemIndex) => (
-                  <li key={itemIndex}>{item}</li>
-                ))}
-              </ul>
-            ) : block.kind === "heading" ? (
-              <h4 key={index} className="pt-2 font-medium">
-                {block.text}
-              </h4>
-            ) : (
-              <p key={index} className="text-muted-foreground whitespace-pre-wrap">
-                {block.text}
-              </p>
-            ),
-          )
+          <Markdown source={withoutTopHeading(notes)} />
         )}
       </div>
     </Card>

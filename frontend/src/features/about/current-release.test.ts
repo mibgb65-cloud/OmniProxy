@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { getCurrentReleaseNotes, parseReleaseNotes, versionChannel } from "./current-release"
+import { getCurrentReleaseNotes, versionChannel, withoutTopHeading } from "./current-release"
 
 describe("当前版本发行说明", () => {
   it.each(["2.0.0-beta.18", "v2.0.0-beta.18", "2.0.0-beta.18+local.123"])(
@@ -118,23 +118,18 @@ describe("当前版本发行说明", () => {
       expect(notes).toContain("本地安装包未签名")
     },
   )
-  it("只组织文本结构，不解释 HTML、链接或脚本", () => {
-    expect(
-      parseReleaseNotes(
-        "# App v1\n\n简介\n\n## 修复\n\n- 第一项\n- <script>alert(1)</script>\n\n[链接](javascript:alert(1))",
-      ),
-    ).toEqual([
-      { kind: "paragraph", text: "简介" },
-      { kind: "heading", text: "修复" },
-      { kind: "list", items: ["第一项", "<script>alert(1)</script>"] },
-      { kind: "paragraph", text: "[链接](javascript:alert(1))" },
-    ])
+  it("去掉顶级版本标题，正文不变", () => {
+    expect(withoutTopHeading("# App v1\n\n简介\n\n## 修复\n\n- 第一项")).toBe(
+      "简介\n\n## 修复\n\n- 第一项",
+    )
   })
   it("兼容 Windows 换行且不保留顶级版本标题", () => {
-    expect(parseReleaseNotes("# App v1\r\n\r\n## 内容\r\n\r\n- A\r\n- B")).toEqual([
-      { kind: "heading", text: "内容" },
-      { kind: "list", items: ["A", "B"] },
-    ])
+    expect(withoutTopHeading("# App v1\r\n\r\n## 内容\r\n\r\n- A\r\n- B")).toBe(
+      "## 内容\r\n\r\n- A\r\n- B",
+    )
+  })
+  it("没有顶级标题时保持原文", () => {
+    expect(withoutTopHeading("## 内容\n\n- A")).toBe("## 内容\n\n- A")
   })
 })
 

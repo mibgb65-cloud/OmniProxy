@@ -17,23 +17,7 @@ export function versionChannel(version: string): "stable" | "beta" | "prerelease
   return /-beta(?:[.-]|$)/.test(base) ? "beta" : "prerelease"
 }
 
-export type ReleaseNoteBlock =
-  { kind: "heading" | "paragraph"; text: string } | { kind: "list"; items: string[] }
-
-// 仅将仓库说明中的标题、段落和无序列表结构化；正文始终是 React 文本，不解析 HTML 或执行链接。
-export function parseReleaseNotes(source: string): ReleaseNoteBlock[] {
-  return source
-    .trim()
-    .split(/\r?\n\s*\r?\n/)
-    .flatMap((block): ReleaseNoteBlock[] => {
-      if (/^# /.test(block)) return []
-      if (/^#{2,6} /.test(block)) {
-        return [{ kind: "heading", text: block.replace(/^#{2,6} /, "") }]
-      }
-      const lines = block.split(/\r?\n/)
-      if (lines.every((line) => /^[-*] /.test(line))) {
-        return [{ kind: "list", items: lines.map((line) => line.slice(2)) }]
-      }
-      return [{ kind: "paragraph", text: block }]
-    })
+/** 卡片页眉已显示运行版本，正文不再重复发行说明的顶级版本标题。 */
+export function withoutTopHeading(source: string): string {
+  return source.replace(/^\s*#[ \t]+[^\n]*(?:\r?\n)*/, "")
 }
