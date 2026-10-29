@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261029-002](../tasks/completed/2026-10/TASK-20261029-002-build-local-v2.1.1-beta.1-installer.md) 已产出 `v2.1.1-beta.1` 本地 Windows amd64 production 安装包，内容为升级浮窗三段式布局与发布说明 Markdown 渲染；完整质量门（142 文件／869 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.1`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,332,085 bytes，SHA256 `b029b3742df30bd6d253738891a5e9ff6bb5abdf8a8bdd82293d5e4f80a53a5c`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
 已优化：[TASK-20261029-001](../tasks/completed/2026-10/TASK-20261029-001-update-dialog-layout-and-markdown.md)，升级浮窗改为「固定标题栏 + 可滚动正文 + 固定操作区」，版本摘要按「当前版本 → 可升级版本」分区并附发布时间／包大小／发布页入口；发布说明不再原样输出 Markdown 源码，改由新增的零依赖解析器（块级 + 行内）渲染标题、段落、粗体／斜体／行内代码、链接、有序／无序及嵌套列表、引用、代码块与分隔线，HTML 与 `javascript:` 链接只作纯文本、远端图片只保留替代文字。`task verify` exit 0（142 文件／869 项前端测试、Windows production 构建），隔离 Chromium 深浅主题／空闲／可重启及 900×560 窄窗截图核对通过；原生 WebView2 实机观感待用户确认。实现提交 `cd67d25b`。
 
 已发布：[TASK-20261028-012](../tasks/completed/2026-10/TASK-20261028-012-release-v2.1.0.md)。`v2.1.0` 于 2026-10-29（Asia/Singapore）公开为正式 Latest；main CI `40719270841`、Release `40719321092` 成功，完整质量门（139 文件／851 项前端测试）、托管生产构建、项目自签／证书 pin／篡改拒绝及摘要复验通过。生产更新组件确认正式／Beta 渠道均发现新版，公开下载及校验成功；未自动安装或改动用户数据。
@@ -41,6 +43,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 ## Current Version
 
 **已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
+
+**本地构建（未发布）：2.1.1-beta.1** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的唯一用户可见改动为升级浮窗三段式布局与发布说明 Markdown 渲染（TASK-20261029-001，`cd67d25b`）。完整质量门（142 文件／869 项前端测试）、Windows 版本资源（应用 `2.1.1-beta.1`／安装器 `2.1.1`／数字版本 `2.1.1.0`）与发布资产校验通过；安装器 20,332,085 bytes，SHA256 `b029b3742df30bd6d253738891a5e9ff6bb5abdf8a8bdd82293d5e4f80a53a5c`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-002](../tasks/completed/2026-10/TASK-20261029-002-build-local-v2.1.1-beta.1-installer.md)。
 
 **历史已发布：2.0.0** — 2026-10-27（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.1.0 取代。标签源码 `c9c48b4a31988a6cc3fa2f4b1d423e61bd10f71b`；Actions 完整质量门 132 文件／809 项前端测试及 Windows 构建通过。安装器 20,286,400 bytes，SHA256 `d43abd28773a192b46139a68dac6411543f146781dedb22b0da3e3f285a0e6a1`，实际下载及内嵌自签证书 pin 核验通过。公开 Beta.5 及更早版本会按需执行既有 035–044，升级前备份；自签仍可能触发 SmartScreen／未知发布者提示，不代表公开受信任 CA。安装器只分发公开证书、不导入用户信任库。
 
@@ -115,6 +119,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261029-002](../tasks/completed/2026-10/TASK-20261029-002-build-local-v2.1.1-beta.1-installer.md)：`v2.1.1-beta.1` 本地 production 安装包已构建并通过完整质量门（142 文件／869 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,332,085 bytes，SHA256 `b029b374…a5c`）；内容为升级浮窗布局与发布说明 Markdown 渲染，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
 - [TASK-20261029-001](../tasks/completed/2026-10/TASK-20261029-001-update-dialog-layout-and-markdown.md)：升级浮窗重排为固定标题栏／滚动正文／固定操作区，版本摘要按「当前版本 → 可升级版本」分区并附发布时间、包大小与发布页入口；新增零依赖 Markdown 解析与渲染（标题、段落、粗体／斜体、行内代码、链接、有序／无序及嵌套列表、引用、代码块、分隔线），HTML 与 `javascript:` 链接只作纯文本、远端图片只保留替代文字。`task verify` exit 0（142 文件／869 项前端测试、Windows production 构建），隔离 Chromium 四态与 900×560 窄窗截图核对通过；未打包或发布。实现提交 `cd67d25b`。
 
