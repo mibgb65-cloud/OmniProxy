@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md) 已产出 `v2.1.1-beta.4` 本地 Windows amd64 production 安装包，内容为升级完成后的「更新完成」提示（TASK-20261029-005）、弹窗淡入淡出（TASK-20261029-006）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.4`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+本地构建：[TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md) 已产出 `v2.1.1-beta.5` 本地 Windows amd64 production 安装包，内容为全部弹窗与浮层的进出过渡（TASK-20261029-008）、「更新完成」提示（TASK-20261029-005）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.5`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已修复：[TASK-20261029-008](../tasks/completed/2026-10/TASK-20261029-008-unify-overlay-motion.md)，弹窗与浮层的过渡扫尾：12 个弹窗（账号新增／编辑／删除确认、订阅登录、请求详情、Google 项目、代理设置、路由编辑／删除、优先级编辑、设置窗口、两个更新浮窗）与 5 个浮层（账号设置、MiMo 详情、模型预览、订阅模型、重置卡）统一为 150ms 淡入淡出 + 轻微缩放，全局提示补上退出过渡；仍是条件挂载的四处改为常驻，新增 `useLastValue`（关闭动画期间保留数据）与 `useOpenGeneration`（重新打开换 key 保持空白草稿），`ProviderPriorityEditor`／`ProxySettingsDialog` 改为受控 `open`。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 与审计脚本确认无「进入有、退出无」的残留。实现提交 `a226264d`。原生 WebView2 观感待用户确认。
 
@@ -54,7 +54,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 **已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
-**本地构建（未发布）：2.1.1-beta.4** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为「更新完成」提示（`84e3b785`）、弹窗淡入淡出（`7d4ff154`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)。
+**本地构建（未发布）：2.1.1-beta.5** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为全部弹窗与浮层的进出过渡（`a226264d`）、「更新完成」提示（`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)。
+
+**历史本地构建（未发布，已被 beta.5 取代）：2.1.1-beta.4** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为「更新完成」提示（`84e3b785`）、弹窗淡入淡出（`7d4ff154`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)。
 
 **历史本地构建（未发布，已被 beta.4 取代）：2.1.1-beta.3** — 2026-10-29 本地 Windows amd64 production 安装包，内容为「更新完成」提示与既有的浮窗／设置页 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`，记录见 [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)。因不含弹窗退出动画，未交付安装，由 `beta.4` 取代。
 
@@ -136,7 +138,10 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
+- [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)：`v2.1.1-beta.5` 本地 production 安装包已构建并通过完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,343,683 bytes，SHA256 `96df0593…dfa4`）；内容为全部弹窗／浮层过渡与「更新完成」提示，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
+
 - [TASK-20261029-008](../tasks/completed/2026-10/TASK-20261029-008-unify-overlay-motion.md)：12 个弹窗与 5 个浮层统一为 150ms 淡入淡出 + 轻微缩放，全局提示补上退出过渡；条件挂载全部常驻，新增 `useLastValue` / `useOpenGeneration`，`ProviderPriorityEditor`／`ProxySettingsDialog` 改为受控 `open`。`task verify` exit 0（145 文件／880 项前端测试），审计脚本确认无「进入有、退出无」。实现提交 `a226264d`。
+
 
 - [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)：`v2.1.1-beta.4` 本地 production 安装包已构建并通过完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,341,751 bytes，SHA256 `c5078af7…0a93`）；内容为「更新完成」提示与弹窗淡入淡出，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
