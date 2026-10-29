@@ -139,9 +139,11 @@ Windows amd64 production build：PASS
 
 # Documentation
 
-- [x] 已更新 `docs/product/UPDATE.md`：「当前版本更新日志」改为与浮窗共用 Markdown 排版，
+- [x] `docs/product/UPDATE.md`：「当前版本更新日志」改为与浮窗共用 Markdown 排版，
   并写明链接白名单、HTML／`javascript:` 纯文本、不加载远端图片。
-- 无 PRD、架构、技术栈、数据库或构建流程变更。
+- [x] `docs/plans/CURRENT.md`：顶部摘要、`## Current Version` 与 `## Recently Completed` 在归档提交中更新。
+- [ ] PRD / Architecture / Tech Stack / Coding Rules / Testing / Build / ADR：无变更
+  （只改前端渲染路径，接口、依赖与构建流程不变）。
 
 ---
 

@@ -193,14 +193,12 @@ PASS (exit 0)
 
 # Documentation
 
-- [ ] PRD — 不需改动（`PRD.md` 只描述「侧栏升级标记打开版本浮窗」，细粒度行为在 UPDATE.md）
-- [ ] Architecture
-- [ ] Tech Stack
-- [ ] Coding Rules
-- [ ] Testing
-- [ ] Build
-- [ ] ADR
+检查结果（勾选＝本次有改动）：
+
+- [ ] PRD — 不改：`PRD.md` 只描述「侧栏升级标记打开版本浮窗」，细粒度行为在 `UPDATE.md`
+- [ ] Architecture / Tech Stack / Coding Rules / Testing / Build / ADR — 不改：无新依赖、无接口或构建流程变更
 - [x] CURRENT
+- [x] `docs/product/UPDATE.md`
 
 已更新 `docs/product/UPDATE.md` 的浮窗描述：三段式布局、摘要分区、Markdown 排版范围与
 安全边界（HTML／`javascript:` 纯文本、远端图片只保留替代文字）。

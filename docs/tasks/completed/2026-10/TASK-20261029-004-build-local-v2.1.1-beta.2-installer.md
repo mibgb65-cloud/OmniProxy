@@ -141,9 +141,12 @@ NSIS 统计：`Total size: 20332270 / 81010656 bytes (25.0%)`，数据块优化�
 
 # Documentation
 
-- 新增 `docs/releases/v2.1.1-beta.2.md`（中英双语）。
-- 更新 `docs/plans/CURRENT.md`：顶部摘要、`## Current Version`、`## Recently Completed`。
-- `docs/product/UPDATE.md` 已在 TASK-20261029-001／003 中说明浮窗与设置页共用 Markdown 渲染，本任务无产品行为变更，未再改。
+- [x] `docs/releases/v2.1.1-beta.2.md`（中英双语）。
+- [x] `docs/plans/CURRENT.md`：顶部摘要、`## Current Version`、`## Recently Completed`。
+- [ ] PRD / Architecture / Tech Stack / Coding Rules / Testing / Build / ADR：无变更
+  （只出包，不改接口、依赖与构建流程）。
+- `docs/product/UPDATE.md` 已在 TASK-20261029-001／003 中说明浮窗与设置页共用 Markdown 渲染，
+  本任务无产品行为变更，未再改。
 
 ---
 
@@ -162,11 +165,13 @@ NSIS 统计：`Total size: 20332270 / 81010656 bytes (25.0%)`，数据块优化�
 
 ## Commit
 
-实现与版本源：`e38fbf96` — `chore(release): 构建 2.1.1-beta.2 本地生产安装包`
+```text
+e38fbf96 chore(release): 构建 2.1.1-beta.2 本地生产安装包
+```
 
-前置实现提交：`cd67d25b`（TASK-20261029-001）、`ae97d7b8`（TASK-20261029-003）
+前置实现提交：`cd67d25b`（TASK-20261029-001）、`ae97d7b8`（TASK-20261029-003）。
 
-归档提交见 `docs/tasks/completed/2026-10/` 同名记录所在提交。
+任务归档与 CURRENT.md 回填为后续独立文档提交；构建产物、`bin/` 与 `tmp/` 日志未提交。
 
 ---
 
