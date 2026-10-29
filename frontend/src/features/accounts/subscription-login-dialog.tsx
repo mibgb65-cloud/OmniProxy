@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Tooltip } from "../../components/ui/tooltip"
+import { useOpenGeneration } from "../../lib/use-open-generation"
 import { validAccountName } from "./account-input"
 import { useSubscriptionLogin } from "./use-subscription-login"
 import { SubscriptionLoginStatus } from "./subscription-login-status"
@@ -23,6 +24,7 @@ export function SubscriptionLoginDialog({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const generation = useOpenGeneration(open)
   const label = t(
     accountId
       ? "subscription.relogin"
@@ -47,17 +49,26 @@ export function SubscriptionLoginDialog({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       {accountId ? <Tooltip content={label}>{trigger}</Tooltip> : trigger}
-      {open ? <LoginContent providerId={providerId} accountId={accountId} /> : null}
+      {/* 常驻内容：退出动画需要 Radix 的关闭态有机会渲染；每次打开换 key 保证干净表单。 */}
+      <LoginContent key={generation} providerId={providerId} accountId={accountId} enabled={open} />
     </Dialog.Root>
   )
 }
 
-function LoginContent({ providerId, accountId }: { providerId: string; accountId?: string }) {
+function LoginContent({
+  providerId,
+  accountId,
+  enabled,
+}: {
+  providerId: string
+  accountId?: string
+  enabled: boolean
+}) {
   const { t } = useTranslation()
   const id = useId()
   const [name, setName] = useState("")
   const [mode, setMode] = useState("browser")
-  const login = useSubscriptionLogin({ providerId, accountId })
+  const login = useSubscriptionLogin({ providerId, accountId }, { enabled })
   const google = providerId === "builtin_google"
   const inProgress = subscriptionInProgress(login.view?.state)
   const complete = login.view?.state === "completed"
@@ -65,9 +76,9 @@ function LoginContent({ providerId, accountId }: { providerId: string; accountId
   const invalid = !validAccountName(name)
   return (
     <Dialog.Portal>
-      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/55" />
+      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/55 motion-safe:duration-150" />
       <Dialog.Content
-        className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl outline-none"
+        className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl outline-none motion-safe:duration-150"
         onEscapeKeyDown={(event) => {
           if (login.starting) event.preventDefault()
         }}

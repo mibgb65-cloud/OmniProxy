@@ -7,11 +7,14 @@ import type { DefaultModelRoute } from "../../services/routing"
 import { moveProviderPriority, providerPriorityChoices } from "./provider-priority"
 
 export function ProviderPriorityEditor({
+  open,
   item,
   onSave,
   onClose,
   onRestoreFocus,
 }: {
+  /** 开关由页面控制：组件常驻挂载以保留退出动画，关闭后内容仍由 Radix 释放。 */
+  open: boolean
   item: DefaultModelRoute
   onSave: (providerIds: string[]) => Promise<void>
   onClose: () => void
@@ -36,15 +39,15 @@ export function ProviderPriorityEditor({
   }
   return (
     <Dialog.Root
-      open
-      onOpenChange={(open) => {
-        if (!open && !saving) onClose()
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && !saving) onClose()
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50" />
+        <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/50 motion-safe:duration-150" />
         <Dialog.Content
-          className="bg-card text-card-foreground fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border p-6 shadow-xl outline-none"
+          className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border p-6 shadow-xl outline-none motion-safe:duration-150"
           onCloseAutoFocus={(event) => {
             event.preventDefault()
             onRestoreFocus()

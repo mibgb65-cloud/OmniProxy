@@ -92,7 +92,7 @@ function renderDialog() {
     )
   }
   const onClose = vi.fn()
-  render(<ProxySettingsDialog onClose={onClose} />, { wrapper: Wrapper })
+  render(<ProxySettingsDialog open onClose={onClose} />, { wrapper: Wrapper })
   return { onClose }
 }
 

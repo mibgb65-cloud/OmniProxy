@@ -13,7 +13,12 @@ import {
   type SubscriptionSession,
 } from "../../services/subscription"
 
-export function useSubscriptionLogin(scope: { providerId: string; accountId?: string }) {
+export function useSubscriptionLogin(
+  scope: { providerId: string; accountId?: string },
+  // 常驻挂载（为了退出动画）时关闭查询，避免没打开弹窗就去读订阅会话。
+  options: { enabled?: boolean } = {},
+) {
+  const enabled = options.enabled ?? true
   const client = useQueryClient()
   const [session, setSession] = useState<SubscriptionSession>()
   const [starting, setStarting] = useState(false)
@@ -26,6 +31,7 @@ export function useSubscriptionLogin(scope: { providerId: string; accountId?: st
     staleTime: 0,
     gcTime: 0,
     retry: false,
+    enabled,
   })
   const active = session ?? (resume.data?.id ? resume.data : undefined)
   const query = useQuery({
@@ -100,7 +106,7 @@ export function useSubscriptionLogin(scope: { providerId: string; accountId?: st
   }
   return {
     view,
-    starting: starting || resume.isPending,
+    starting: starting || (enabled && resume.isPending),
     error:
       error ||
       (resume.isError

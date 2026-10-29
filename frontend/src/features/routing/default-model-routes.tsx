@@ -8,6 +8,7 @@ import { ModelProviderViewToggle, type ModelProviderView } from "./model-provide
 import type { RoutingData } from "./use-routing"
 import type { DefaultModelRoute } from "../../services/routing"
 import { ProviderPriorityEditor } from "./provider-priority-editor"
+import { useLastValue } from "../../lib/use-last-value"
 import "./default-model-route-grid.css"
 
 export function DefaultModelRoutes({ data }: { data: RoutingData }) {
@@ -15,6 +16,8 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
   const [search, setSearch] = useState("")
   const [view, setView] = useState<ModelProviderView>("model")
   const [priorityTarget, setPriorityTarget] = useState<DefaultModelRoute | null>(null)
+  // 关闭动画期间仍需要这条路由可渲染，保留最后一次打开的目标。
+  const priority = useLastValue(priorityTarget)
   const returnFocus = useRef<HTMLElement | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   function configurePriority(item: DefaultModelRoute) {
@@ -124,11 +127,12 @@ export function DefaultModelRoutes({ data }: { data: RoutingData }) {
           <p className="text-muted-foreground text-sm">{t("routing.defaults.empty")}</p>
         ) : null}
         <p className="text-muted-foreground text-xs leading-5">{t("routing.defaults.policy")}</p>
-        {priorityTarget ? (
+        {priority ? (
           <ProviderPriorityEditor
-            item={priorityTarget}
+            open={priorityTarget !== null}
+            item={priority}
             onSave={(providerIds) =>
-              data.priority.mutateAsync({ model: priorityTarget.model, providerIds })
+              data.priority.mutateAsync({ model: priority.model, providerIds })
             }
             onClose={() => setPriorityTarget(null)}
             onRestoreFocus={() => {

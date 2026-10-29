@@ -145,26 +145,28 @@ function ModeToggle({
 }
 
 export function ProxySettingsDialog({
+  open,
   onClose,
 }: {
-  /** 关闭由页面控制：弹窗只在打开时挂载，关闭即释放表单状态。 */
+  /** 开关由页面控制；弹窗常驻挂载以保留退出动画，关闭后内容仍由 Radix 释放。 */
+  open: boolean
   onClose: () => void
 }) {
   const { t } = useTranslation()
-  const settings = useProxySettings()
+  const settings = useProxySettings({ enabled: open })
   const hostRef = useRef<HTMLInputElement>(null)
   return (
     <Dialog.Root
-      open
+      open={open}
       onOpenChange={(next) => {
         if (!next) onClose()
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
+        <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/50 motion-safe:duration-150" />
         <Dialog.Content
           aria-modal="true"
-          className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(880px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl outline-none"
+          className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(880px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl outline-none motion-safe:duration-150"
           onOpenAutoFocus={(event) => {
             event.preventDefault()
             hostRef.current?.focus()

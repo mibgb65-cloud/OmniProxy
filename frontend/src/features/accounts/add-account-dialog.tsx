@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Dialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
+import { useOpenGeneration } from "../../lib/use-open-generation"
 import type {
   CreateAccountInput,
   CreateAccountsInput,
@@ -21,6 +22,7 @@ export function AddAccountDialog({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const generation = useOpenGeneration(open)
 
   const create = async (input: CreateAccountInput) => {
     await onCreate(input)
@@ -43,9 +45,13 @@ export function AddAccountDialog({
             {t("accounts.add")}
           </Button>
         </Dialog.Trigger>
-        {open ? (
-          <AccountForm provider={provider} onSubmit={create} onBatchSubmit={createBatch} />
-        ) : null}
+        {/* 常驻表单：退出动画需要 Radix 的关闭态有机会渲染；每次打开换 key 保证空白草稿。 */}
+        <AccountForm
+          key={generation}
+          provider={provider}
+          onSubmit={create}
+          onBatchSubmit={createBatch}
+        />
       </Dialog.Root>
     </div>
   )

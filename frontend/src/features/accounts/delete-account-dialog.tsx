@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react"
 import { AlertDialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
+import { useLastValue } from "../../lib/use-last-value"
 import type { useAccountActions } from "./use-account-actions"
 
 export function DeleteAccountDialog({
@@ -10,6 +11,8 @@ export function DeleteAccountDialog({
   actions: ReturnType<typeof useAccountActions>
 }) {
   const { t } = useTranslation()
+  // 关闭动画期间仍要显示被删除的账号名，保留最后一次打开的目标。
+  const target = useLastValue(actions.deleteTarget)
   return (
     <AlertDialog.Root
       open={actions.deleteTarget !== null}
@@ -18,9 +21,9 @@ export function DeleteAccountDialog({
       }}
     >
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50" />
+        <AlertDialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/50 motion-safe:duration-150" />
         <AlertDialog.Content
-          className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 w-[min(440px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border p-6 shadow-xl outline-none"
+          className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 w-[min(440px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border p-6 shadow-xl outline-none motion-safe:duration-150"
           onEscapeKeyDown={(event) => {
             if (actions.deleting) event.preventDefault()
           }}
@@ -38,11 +41,11 @@ export function DeleteAccountDialog({
                 {t("accounts.deleteTitle")}
               </AlertDialog.Title>
               <AlertDialog.Description className="text-muted-foreground text-sm break-words">
-                {t("accounts.deleteConfirm", { name: actions.deleteTarget?.name ?? "" })}
+                {t("accounts.deleteConfirm", { name: target?.name ?? "" })}
               </AlertDialog.Description>
               <p className="text-muted-foreground text-xs">
                 {t(
-                  actions.deleteTarget?.authMethod === "subscription_login"
+                  target?.authMethod === "subscription_login"
                     ? "subscription.deleteNotice"
                     : "accounts.deleteNotice",
                 )}

@@ -39,7 +39,7 @@ export function AccountSettingsPopover({
           sticky="always"
           aria-labelledby={titleId}
           aria-describedby={undefined}
-          className="bg-popover text-popover-foreground z-50 flex max-h-[min(560px,var(--radix-popover-content-available-height))] w-[min(420px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border p-4 shadow-xl outline-none"
+          className="bg-popover text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 z-50 flex max-h-[min(560px,var(--radix-popover-content-available-height))] w-[min(420px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border p-4 shadow-xl outline-none motion-safe:duration-150"
         >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b pb-3">
             <h2 id={titleId} className="text-base font-semibold">

@@ -11,8 +11,13 @@ import {
 const providerQueryKey = ["providers"] as const
 const proxySettingsQueryKey = ["proxy-settings"] as const
 
-export function useProxySettings() {
-  return useQuery({ queryKey: proxySettingsQueryKey, queryFn: getProxySettings })
+export function useProxySettings(options: { enabled?: boolean } = {}) {
+  return useQuery({
+    queryKey: proxySettingsQueryKey,
+    queryFn: () => getProxySettings(),
+    // 弹窗常驻挂载（为了退出动画）时只有打开才读取设置。
+    enabled: options.enabled ?? true,
+  })
 }
 
 export function useSaveProxySettings() {

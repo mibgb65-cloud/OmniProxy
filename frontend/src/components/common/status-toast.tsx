@@ -26,7 +26,7 @@ export function StatusToast({
           onOpenChange={setOpen}
           type="background"
           data-slot="global-status-toast"
-          className="bg-popover text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:slide-in-from-bottom-2 pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border p-4 shadow-2xl"
+          className="bg-popover text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:slide-in-from-bottom-2 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:slide-out-to-bottom-2 pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border p-4 shadow-2xl motion-safe:duration-150"
         >
           <Icon
             className={`mt-0.5 size-5 shrink-0 ${tone === "warning" ? "text-amber-600 dark:text-amber-400" : tone === "info" ? "text-blue-600 dark:text-blue-400" : "text-emerald-600 dark:text-emerald-400"}`}

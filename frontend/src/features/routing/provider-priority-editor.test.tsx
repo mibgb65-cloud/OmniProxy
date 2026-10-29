@@ -12,6 +12,7 @@ it("保留失效服务商的位置，可移除并只提交剩余候选", async (
   render(
     <I18nProvider>
       <ProviderPriorityEditor
+        open
         item={{
           ...defaultMapping,
           providerOrder: [
@@ -47,6 +48,7 @@ it("保存期间禁止重排、重复提交和 Escape 关闭，完成后正常�
   render(
     <I18nProvider>
       <ProviderPriorityEditor
+        open
         item={defaultMapping}
         onSave={onSave}
         onClose={onClose}

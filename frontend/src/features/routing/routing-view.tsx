@@ -175,7 +175,8 @@ export function RoutingView({
           if (!busy) setOpen(next)
         }}
       >
-        {open && ready ? (
+        {/* 常驻编辑器：退出动画需要 Radix 的关闭态有机会渲染，条件挂载会瞬间消失。 */}
+        {ready ? (
           <RoutingEditor
             key={editor?.rule.id ?? "new"}
             initial={editor}

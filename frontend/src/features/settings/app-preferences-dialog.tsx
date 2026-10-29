@@ -61,10 +61,10 @@ function PreferencesWindow() {
   if (!visited.includes(tab)) setVisited([...visited, tab])
   return (
     <Dialog.Portal>
-      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/40 backdrop-blur-sm motion-safe:duration-150" />
       <Dialog.Content
         ref={setToastContainer}
-        className="bg-background text-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none"
+        className="bg-background text-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none motion-safe:duration-150"
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           activeTab.current?.focus()

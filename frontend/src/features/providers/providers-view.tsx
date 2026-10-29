@@ -194,7 +194,8 @@ export function ProvidersView({
           busy={setEnabled.isPending || update.isPending || remove.isPending}
         />
       ) : null}
-      {proxyOpen ? <ProxySettingsDialog onClose={() => setProxyOpen(false)} /> : null}
+      {/* 常驻弹窗：退出动画需要 Radix 的关闭态有机会渲染，条件挂载会瞬间消失。 */}
+      <ProxySettingsDialog open={proxyOpen} onClose={() => setProxyOpen(false)} />
     </div>
   )
 }

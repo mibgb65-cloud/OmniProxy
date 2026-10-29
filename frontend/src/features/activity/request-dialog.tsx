@@ -14,6 +14,7 @@ import {
   formatSpeed,
   formatFirstToken,
 } from "./activity-format"
+import { useLastValue } from "../../lib/use-last-value"
 import { requestAgentTitleKey } from "../gateway/agent-clients"
 import { RequestAttempts } from "./request-attempts"
 
@@ -36,6 +37,8 @@ export function RequestDialog({
   })
   const copy = useMutation({ mutationFn: () => Clipboard.SetText(id || "") })
   const item = data.data
+  // 关闭动画期间仍要显示请求编号，保留最后一次打开的目标。
+  const shown = useLastValue(id)
   const agentKey = requestAgentTitleKey(item?.client)
   return (
     <Dialog.Root
@@ -45,10 +48,10 @@ export function RequestDialog({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+        <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/50 backdrop-blur-sm motion-safe:duration-150" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="bg-popover text-popover-foreground fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-3rem)] w-[min(800px,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 rounded-xl border p-6 shadow-2xl outline-none"
+          className="bg-popover text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-3rem)] w-[min(800px,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 rounded-xl border p-6 shadow-2xl outline-none motion-safe:duration-150"
         >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b pb-3">
             <Dialog.Title className="text-base font-semibold">{t("activity.details")}</Dialog.Title>
@@ -63,7 +66,7 @@ export function RequestDialog({
           </div>
           <div className="min-h-0 flex-1 space-y-4 overflow-auto pr-1">
             <div className="flex items-center justify-between gap-2 rounded-lg border p-3">
-              <code className="min-w-0 text-xs wrap-anywhere">{id}</code>
+              <code className="min-w-0 text-xs wrap-anywhere">{shown}</code>
               <Tooltip content={t(copy.isSuccess ? "activity.copied" : "activity.copyId")}>
                 <Button
                   variant="ghost"

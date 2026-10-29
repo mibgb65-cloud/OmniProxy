@@ -54,49 +54,48 @@ export function ResetCreditsPopover({
           </Button>
         </Popover.Trigger>
       </Tooltip>
-      {open ? (
-        <Popover.Portal>
-          <Popover.Content
-            side="bottom"
-            align="start"
-            sideOffset={8}
-            collisionPadding={12}
-            sticky="always"
-            aria-labelledby={titleId}
-            aria-describedby={descriptionId}
-            className="bg-popover text-popover-foreground z-50 flex h-[440px] max-h-[var(--radix-popover-content-available-height)] w-[min(360px,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-xl outline-none"
-            onEscapeKeyDown={(event) => {
-              if (busy) event.preventDefault()
-            }}
-            onInteractOutside={(event) => {
-              if (busy) event.preventDefault()
-            }}
-          >
-            <div className="flex items-start justify-between gap-3 border-b pb-3">
-              <div className="min-w-0">
-                <h3 id={titleId} className="font-semibold">
-                  {t("subscription.reset.title")}
-                </h3>
-                <p id={descriptionId} className="text-muted-foreground mt-1 text-xs break-all">
-                  {accountDisplayName(account)}
-                </p>
-              </div>
-              <Popover.Close asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={busy}
-                  aria-label={t("subscription.reset.close")}
-                >
-                  <X className="size-4" aria-hidden="true" />
-                </Button>
-              </Popover.Close>
+      {/* 常驻 Portal：退出动画需要 Radix 的关闭态有机会渲染，条件挂载会瞬间消失。 */}
+      <Popover.Portal>
+        <Popover.Content
+          side="bottom"
+          align="start"
+          sideOffset={8}
+          collisionPadding={12}
+          sticky="always"
+          aria-labelledby={titleId}
+          aria-describedby={descriptionId}
+          className="bg-popover text-popover-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 z-50 flex h-[440px] max-h-[var(--radix-popover-content-available-height)] w-[min(360px,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-xl outline-none motion-safe:duration-150"
+          onEscapeKeyDown={(event) => {
+            if (busy) event.preventDefault()
+          }}
+          onInteractOutside={(event) => {
+            if (busy) event.preventDefault()
+          }}
+        >
+          <div className="flex items-start justify-between gap-3 border-b pb-3">
+            <div className="min-w-0">
+              <h3 id={titleId} className="font-semibold">
+                {t("subscription.reset.title")}
+              </h3>
+              <p id={descriptionId} className="text-muted-foreground mt-1 text-xs break-all">
+                {accountDisplayName(account)}
+              </p>
             </div>
-            <ResetCreditsContent account={account} onBusyChange={setBusy} />
-          </Popover.Content>
-        </Popover.Portal>
-      ) : null}
+            <Popover.Close asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={busy}
+                aria-label={t("subscription.reset.close")}
+              >
+                <X className="size-4" aria-hidden="true" />
+              </Button>
+            </Popover.Close>
+          </div>
+          <ResetCreditsContent account={account} onBusyChange={setBusy} />
+        </Popover.Content>
+      </Popover.Portal>
     </Popover.Root>
   )
 }
