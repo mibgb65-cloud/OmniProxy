@@ -4,6 +4,8 @@
 
 本地构建：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md) 已产出 `v2.1.1-beta.3` 本地 Windows amd64 production 安装包，内容为升级结束并重新打开后的一次性「更新完成」浮窗（TASK-20261029-005）、升级浮窗三段式布局（TASK-20261029-001）与浮窗／设置页共用的 Markdown 渲染（TASK-20261029-003）；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.3`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
+已修复：[TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)，关闭「设置与关于」窗口不再闪一下就消失：内容改为常驻 `Dialog.Portal`，由 Radix Presence 控制挂载生命周期，遮罩与窗口补上 150ms 的淡入淡出与 `.95` 缩放（`motion-safe`，减少动画偏好下直接切换）；居中用独立 `translate` 属性，缩放期间不跳位。升级浮窗与「更新完成」浮窗同步补齐退出动画。关闭后内容仍由 Presence 释放，焦点归还、草稿保留与按需加载的既有测试全部维持。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 工具类与静态采样截图核对通过；原生 WebView2 观感待用户确认。实现提交 `7d4ff154`。其余业务弹窗仍沿用条件挂载写法，本次未一并修改。
+
 已实现：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)，升级完成后不再没有任何反馈：后端在更新记录里保存安装前版本与「已提示」版本，`restore()` 判定升级确实生效且尚未提示时给出一次性 `installed` 通知；前端根布局挂载监视器，自动弹出三段式「更新完成」浮窗，说明「升级前版本 → 当前版本」并按 Markdown 列出本版新增内容（正文取构建内置的 `docs/releases/<运行版本>.md`，不额外联网）。确认、关闭按钮、Esc 与遮罩点击都写入 `noticeSeen` 回执，同一版本只提示一次，写入失败不假装已读；「查看完整更新日志」先回执再打开设置页关于分区。「只下载未安装」「安装回执失败」「无更新记录」都不提示。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），隔离 Chromium 深浅主题与 900×560／760×560 窄窗截图核对通过；原生 WebView2 与 140% 字号观感待用户本地更新后确认。实现提交 `84e3b785`。
 
 已修复：[TASK-20261029-003](../tasks/completed/2026-10/TASK-20261029-003-settings-changelog-markdown.md)，设置页「当前版本更新日志」不再原样显示 Markdown 记号，改由与升级浮窗共用的 `Markdown` 组件渲染；卡片保留区域语义与版本代码样式，顶部重复标题由 `withoutTopHeading` 去掉，链接白名单（仅 `http(s)` 与根相对路径）与「远端图片只保留替代文字」的安全边界一并生效。删除了旧的 `parseReleaseNotes`／`ReleaseNoteBlock` 手写分支。新增 3 项卡片测试（渲染真实发布说明、链接只出 2 条、`<script>` 不进 DOM）与 3 项 `withoutTopHeading` 测试；`task verify` exit 0（143 文件／873 项前端测试、Windows production 构建）。实现提交 `ae97d7b8`。
@@ -129,6 +131,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)：设置窗口关闭不再瞬间消失——内容常驻 Portal 由 Radix Presence 控制卸载，遮罩与窗口补上 150ms 淡入淡出 + `.95` 缩放（`motion-safe`），升级浮窗与「更新完成」浮窗同步补齐退出动画；既有焦点、草稿与按需加载测试全部维持，`task verify` exit 0（145 文件／880 项前端测试）。实现提交 `7d4ff154`。
 
 - [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)：升级并重启后自动弹出一次「更新完成」浮窗，说明「升级前版本 → 当前版本」并按 Markdown 列出本版新增内容；正文取构建内置的发布说明，确认后写入 `noticeSeen` 回执，同一版本只提示一次。含 `v2.1.1-beta.3` 本地 production 构建（20,340,868 bytes，SHA256 `6f906819…35fe`）；`task verify` exit 0（145 文件／880 项前端测试），未签名、未安装、未推送或发布。实现提交 `84e3b785`。
 
