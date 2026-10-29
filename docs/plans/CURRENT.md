@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已优化：[TASK-20261029-001](../tasks/completed/2026-10/TASK-20261029-001-update-dialog-layout-and-markdown.md)，升级浮窗改为「固定标题栏 + 可滚动正文 + 固定操作区」，版本摘要按「当前版本 → 可升级版本」分区并附发布时间／包大小／发布页入口；发布说明不再原样输出 Markdown 源码，改由新增的零依赖解析器（块级 + 行内）渲染标题、段落、粗体／斜体／行内代码、链接、有序／无序及嵌套列表、引用、代码块与分隔线，HTML 与 `javascript:` 链接只作纯文本、远端图片只保留替代文字。`task verify` exit 0（142 文件／869 项前端测试、Windows production 构建），隔离 Chromium 深浅主题／空闲／可重启及 900×560 窄窗截图核对通过；原生 WebView2 实机观感待用户确认。实现提交 `cd67d25b`。
+
 已发布：[TASK-20261028-012](../tasks/completed/2026-10/TASK-20261028-012-release-v2.1.0.md)。`v2.1.0` 于 2026-10-29（Asia/Singapore）公开为正式 Latest；main CI `40719270841`、Release `40719321092` 成功，完整质量门（139 文件／851 项前端测试）、托管生产构建、项目自签／证书 pin／篡改拒绝及摘要复验通过。生产更新组件确认正式／Beta 渠道均发现新版，公开下载及校验成功；未自动安装或改动用户数据。
 
 本地构建：[TASK-20261028-011](../tasks/completed/2026-10/TASK-20261028-011-build-local-v2.0.1-beta.7-installer.md) 已产出 `v2.0.1-beta.7` Windows amd64 production 安装包，包含 TASK-20261028-010 的账号 Dock 越界与遮挡修复；完整质量门（139 文件／851 项前端测试）、NSIS 打包、原生版本资源与 SHA256 校验通过。安装包 20,318,085 bytes，SHA256 `515bff6d371f4a84ea8742af32998c51d36c3ebfef42860b9f8f0478a65d4664`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
@@ -113,6 +115,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261029-001](../tasks/completed/2026-10/TASK-20261029-001-update-dialog-layout-and-markdown.md)：升级浮窗重排为固定标题栏／滚动正文／固定操作区，版本摘要按「当前版本 → 可升级版本」分区并附发布时间、包大小与发布页入口；新增零依赖 Markdown 解析与渲染（标题、段落、粗体／斜体、行内代码、链接、有序／无序及嵌套列表、引用、代码块、分隔线），HTML 与 `javascript:` 链接只作纯文本、远端图片只保留替代文字。`task verify` exit 0（142 文件／869 项前端测试、Windows production 构建），隔离 Chromium 四态与 900×560 窄窗截图核对通过；未打包或发布。实现提交 `cd67d25b`。
 
 - [TASK-20261028-012](../tasks/completed/2026-10/TASK-20261028-012-release-v2.1.0.md)：`v2.1.0` 已公开为正式 Latest；源码 `4cf78954`，main CI `40719270841`／Release `40719321092` 成功，托管构建、自签、证书 pin、篡改拒绝和公开下载／更新渠道核验通过。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`；未安装或修改用户数据。
 
