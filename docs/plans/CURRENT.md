@@ -4,7 +4,9 @@
 
 本地构建：[TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md) 已产出 `v2.1.1-beta.4` 本地 Windows amd64 production 安装包，内容为升级完成后的「更新完成」提示（TASK-20261029-005）、弹窗淡入淡出（TASK-20261029-006）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.4`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
-已修复：[TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)，关闭「设置与关于」窗口不再闪一下就消失：内容改为常驻 `Dialog.Portal`，由 Radix Presence 控制挂载生命周期，遮罩与窗口补上 150ms 的淡入淡出与 `.95` 缩放（`motion-safe`，减少动画偏好下直接切换）；居中用独立 `translate` 属性，缩放期间不跳位。升级浮窗与「更新完成」浮窗同步补齐退出动画。关闭后内容仍由 Presence 释放，焦点归还、草稿保留与按需加载的既有测试全部维持。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 工具类与静态采样截图核对通过；原生 WebView2 观感待用户确认。实现提交 `7d4ff154`。其余业务弹窗仍沿用条件挂载写法，本次未一并修改。
+已修复：[TASK-20261029-008](../tasks/completed/2026-10/TASK-20261029-008-unify-overlay-motion.md)，弹窗与浮层的过渡扫尾：12 个弹窗（账号新增／编辑／删除确认、订阅登录、请求详情、Google 项目、代理设置、路由编辑／删除、优先级编辑、设置窗口、两个更新浮窗）与 5 个浮层（账号设置、MiMo 详情、模型预览、订阅模型、重置卡）统一为 150ms 淡入淡出 + 轻微缩放，全局提示补上退出过渡；仍是条件挂载的四处改为常驻，新增 `useLastValue`（关闭动画期间保留数据）与 `useOpenGeneration`（重新打开换 key 保持空白草稿），`ProviderPriorityEditor`／`ProxySettingsDialog` 改为受控 `open`。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 与审计脚本确认无「进入有、退出无」的残留。实现提交 `a226264d`。原生 WebView2 观感待用户确认。
+
+已修复：[TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)，关闭「设置与关于」窗口不再闪一下就消失：内容改为常驻 `Dialog.Portal`，由 Radix Presence 控制挂载生命周期，遮罩与窗口补上 150ms 的淡入淡出与 `.95` 缩放（`motion-safe`，减少动画偏好下直接切换）；居中用独立 `translate` 属性，缩放期间不跳位。升级浮窗与「更新完成」浮窗同步补齐退出动画。关闭后内容仍由 Presence 释放，焦点归还、草稿保留与按需加载的既有测试全部维持。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 工具类与静态采样截图核对通过。实现提交 `7d4ff154`。
 
 已实现：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)，升级完成后不再没有任何反馈：后端在更新记录里保存安装前版本与「已提示」版本，`restore()` 判定升级确实生效且尚未提示时给出一次性 `installed` 通知；前端根布局挂载监视器，自动弹出三段式「更新完成」浮窗，说明「升级前版本 → 当前版本」并按 Markdown 列出本版新增内容（正文取构建内置的 `docs/releases/<运行版本>.md`，不额外联网）。确认、关闭按钮、Esc 与遮罩点击都写入 `noticeSeen` 回执，同一版本只提示一次，写入失败不假装已读；「查看完整更新日志」先回执再打开设置页关于分区。「只下载未安装」「安装回执失败」「无更新记录」都不提示。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），隔离 Chromium 深浅主题与 900×560／760×560 窄窗截图核对通过；原生 WebView2 与 140% 字号观感待用户本地更新后确认。实现提交 `84e3b785`。
 
@@ -133,6 +135,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261029-008](../tasks/completed/2026-10/TASK-20261029-008-unify-overlay-motion.md)：12 个弹窗与 5 个浮层统一为 150ms 淡入淡出 + 轻微缩放，全局提示补上退出过渡；条件挂载全部常驻，新增 `useLastValue` / `useOpenGeneration`，`ProviderPriorityEditor`／`ProxySettingsDialog` 改为受控 `open`。`task verify` exit 0（145 文件／880 项前端测试），审计脚本确认无「进入有、退出无」。实现提交 `a226264d`。
 
 - [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)：`v2.1.1-beta.4` 本地 production 安装包已构建并通过完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,341,751 bytes，SHA256 `c5078af7…0a93`）；内容为「更新完成」提示与弹窗淡入淡出，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
