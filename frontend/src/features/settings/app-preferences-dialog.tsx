@@ -41,7 +41,8 @@ export function AppPreferencesDialog({ collapsed }: { collapsed: boolean }) {
             </Button>
           </Dialog.Trigger>
         </Tooltip>
-        {open ? <PreferencesWindow /> : null}
+        {/* 常驻 Portal：退出动画需要 Radix 的关闭态有机会渲染，条件挂载会瞬间消失。 */}
+        <PreferencesWindow />
       </Dialog.Root>
       <UpdateBadge collapsed={collapsed} onOpen={() => setOpen(false)} />
     </div>
@@ -56,14 +57,14 @@ function PreferencesWindow() {
   const [toastContainer, setToastContainer] = useState<HTMLDivElement | null>(null)
   const [visited, setVisited] = useState<AppPreferencesTab[]>([tab])
   const currentSection = SECTIONS.find((section) => section.value === tab)!
-  // 已访问页签保留表单和异步反馈，打开窗口时才挂载，关闭后释放内容。
+  // 已访问页签保留表单和异步反馈；内容只在窗口打开（含关闭动画）期间挂载，关闭后释放。
   if (!visited.includes(tab)) setVisited([...visited, tab])
   return (
     <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
       <Dialog.Content
         ref={setToastContainer}
-        className="bg-background text-foreground fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none"
+        className="bg-background text-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=closed]:zoom-out-95 fixed top-1/2 left-1/2 z-50 h-[min(36rem,calc(100dvh-3rem))] w-[calc(100vw-3rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border shadow-2xl outline-none"
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           activeTab.current?.focus()

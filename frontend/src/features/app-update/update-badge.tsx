@@ -45,7 +45,8 @@ export function UpdateBadge({ collapsed, onOpen }: { collapsed: boolean; onOpen:
           </Button>
         </Dialog.Trigger>
       </Tooltip>
-      {open ? <UpdateDialog state={state} /> : null}
+      {/* 常驻浮窗：退出动画依赖 Radix 的关闭态，条件挂载会瞬间消失。 */}
+      <UpdateDialog state={state} />
     </Dialog.Root>
   )
 }
