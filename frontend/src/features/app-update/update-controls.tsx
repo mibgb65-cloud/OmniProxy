@@ -41,76 +41,83 @@ export function UpdateControls({ state }: { state: ApplicationUpdate }) {
           </div>
         </div>
       ) : null}
-      {ready ? (
-        <p role="status" className="text-muted-foreground text-sm">
-          {t("appUpdate.ready", { version: transfer.version })}
-        </p>
-      ) : null}
-      {installing ? (
-        <p role="status" className="flex items-center gap-2 text-sm">
-          <LoaderCircle
-            className="size-4 animate-spin motion-reduce:animate-none"
-            aria-hidden="true"
-          />
-          {t(transfer.state === "verifying" ? "appUpdate.verifying" : "appUpdate.installing")}
-        </p>
-      ) : null}
-      {transfer.state === "cancelled" ? (
-        <p role="status" className="text-muted-foreground text-sm">
-          {t("appUpdate.cancelled")}
-        </p>
-      ) : null}
-      {transfer.error || error ? (
-        <p role="alert" className="text-destructive text-sm">
-          {String(transfer.error || error?.message).includes("checksum")
-            ? t("appUpdate.checksumFailed")
-            : t("appUpdate.failed")}
-        </p>
-      ) : null}
-      {!state.canInstall && state.release ? (
-        <p className="text-muted-foreground text-sm">{t("appUpdate.installerRequired")}</p>
-      ) : null}
-      {state.release && !state.release.packageAvailable ? (
-        <p className="text-muted-foreground text-sm">{t("appUpdate.noPackage")}</p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
-        {downloading ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={cancel.isPending}
-            onClick={() => cancel.mutate()}
-          >
-            <X aria-hidden="true" />
-            {t("appUpdate.cancel")}
-          </Button>
-        ) : null}
-        {state.canInstall && ready ? (
-          <Button size="sm" disabled={busy} onClick={() => install.mutate(transfer.version)}>
-            <RotateCw aria-hidden="true" />
-            {t("appUpdate.restart")}
-          </Button>
-        ) : null}
-        {state.canInstall &&
-        state.release?.packageAvailable &&
-        !ready &&
-        !downloading &&
-        !installing ? (
-          <Button
-            size="sm"
-            disabled={busy}
-            onClick={() => {
-              if (target) download.mutate(target)
-            }}
-          >
-            <Download aria-hidden="true" />
-            {download.isPending ? t("appUpdate.starting") : t("appUpdate.download")}
-          </Button>
-        ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          {ready ? (
+            <p role="status" className="text-muted-foreground text-sm">
+              {t("appUpdate.ready", { version: transfer.version })}
+            </p>
+          ) : null}
+          {installing ? (
+            <p role="status" className="flex items-center gap-2 text-sm">
+              <LoaderCircle
+                className="size-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+              {t(transfer.state === "verifying" ? "appUpdate.verifying" : "appUpdate.installing")}
+            </p>
+          ) : null}
+          {transfer.state === "cancelled" ? (
+            <p role="status" className="text-muted-foreground text-sm">
+              {t("appUpdate.cancelled")}
+            </p>
+          ) : null}
+          {transfer.error || error ? (
+            <p role="alert" className="text-destructive text-sm">
+              {String(transfer.error || error?.message).includes("checksum")
+                ? t("appUpdate.checksumFailed")
+                : t("appUpdate.failed")}
+            </p>
+          ) : null}
+          {!state.canInstall && state.release ? (
+            <p className="text-muted-foreground text-sm">{t("appUpdate.installerRequired")}</p>
+          ) : null}
+          {state.release && !state.release.packageAvailable ? (
+            <p className="text-muted-foreground text-sm">{t("appUpdate.noPackage")}</p>
+          ) : null}
+          {ready && state.canInstall ? (
+            <p className="text-muted-foreground text-xs">{t("appUpdate.restartHint")}</p>
+          ) : null}
+          {!ready && !downloading && !installing && state.canInstall && state.release ? (
+            <p className="text-muted-foreground text-xs">{t("appUpdate.downloadHint")}</p>
+          ) : null}
+        </div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {downloading ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={cancel.isPending}
+              onClick={() => cancel.mutate()}
+            >
+              <X aria-hidden="true" />
+              {t("appUpdate.cancel")}
+            </Button>
+          ) : null}
+          {state.canInstall && ready ? (
+            <Button size="sm" disabled={busy} onClick={() => install.mutate(transfer.version)}>
+              <RotateCw aria-hidden="true" />
+              {t("appUpdate.restart")}
+            </Button>
+          ) : null}
+          {state.canInstall &&
+          state.release?.packageAvailable &&
+          !ready &&
+          !downloading &&
+          !installing ? (
+            <Button
+              size="sm"
+              disabled={busy}
+              onClick={() => {
+                if (target) download.mutate(target)
+              }}
+            >
+              <Download aria-hidden="true" />
+              {download.isPending ? t("appUpdate.starting") : t("appUpdate.download")}
+            </Button>
+          ) : null}
+        </div>
       </div>
-      {ready && state.canInstall ? (
-        <p className="text-muted-foreground text-xs">{t("appUpdate.restartHint")}</p>
-      ) : null}
     </div>
   )
 }

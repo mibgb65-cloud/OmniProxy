@@ -550,8 +550,9 @@ export const en: Record<keyof typeof zh, string> = {
   "appUpdate.title": "Upgrade OmniProxy",
   "appUpdate.description": "Review the release and download a verified installer.",
   "appUpdate.close": "Close upgrade window",
-  "appUpdate.current": "Current version: {{version}}",
-  "appUpdate.target": "Available version: {{version}}",
+  "appUpdate.releaseInfo": "Release information",
+  "appUpdate.currentLabel": "Current version",
+  "appUpdate.targetLabel": "Available version",
   "appUpdate.notes": "Release notes",
   "appUpdate.noNotes": "No release notes were provided.",
   "appUpdate.autoCheck": "Check automatically after startup",
@@ -565,6 +566,8 @@ export const en: Record<keyof typeof zh, string> = {
   "appUpdate.restart": "Restart and install silently",
   "appUpdate.restartHint":
     "OmniProxy will close and reopen after installation. Accounts and preferences are preserved. Windows may request administrator permission.",
+  "appUpdate.downloadHint":
+    "The download is verified with SHA256 automatically; installation and restart still need your confirmation.",
   "appUpdate.verifying": "Verifying the installer again…",
   "appUpdate.installing": "Preparing installation; OmniProxy will reopen automatically…",
   "appUpdate.failed":

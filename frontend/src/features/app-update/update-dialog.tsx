@@ -1,21 +1,28 @@
 import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useTranslation } from "react-i18next"
+import { Markdown } from "../../components/common/markdown"
 import { Button } from "../../components/ui/button"
-import { formatBytes } from "../../lib/format"
 import type { ApplicationUpdate } from "../../services/updates"
 import { UpdateControls } from "./update-controls"
+import { UpdateVersionSummary } from "./update-version-summary"
 
+/**
+ * 升级浮窗：标题栏与操作区固定，中间是可滚动的版本摘要与发布说明，
+ * 说明正文按 Markdown 排版而不是原样输出源码。
+ */
 export function UpdateDialog({ state }: { state: ApplicationUpdate }) {
   const { t } = useTranslation()
-  const release = state.release
+  const notes = state.release?.notes.trim()
   return (
     <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
-      <Dialog.Content className="bg-background text-foreground fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-3rem)] w-[calc(100vw-3rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border p-6 shadow-2xl outline-none">
-        <div className="flex items-start justify-between gap-3">
+      <Dialog.Overlay className="motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+      <Dialog.Content className="bg-card text-card-foreground motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0 motion-safe:data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(720px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border shadow-2xl outline-none">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b px-6 py-4">
           <div className="min-w-0 space-y-1">
-            <Dialog.Title className="text-lg font-semibold">{t("appUpdate.title")}</Dialog.Title>
+            <Dialog.Title className="text-lg font-semibold tracking-tight">
+              {t("appUpdate.title")}
+            </Dialog.Title>
             <Dialog.Description className="text-muted-foreground text-sm">
               {t("appUpdate.description")}
             </Dialog.Description>
@@ -25,40 +32,23 @@ export function UpdateDialog({ state }: { state: ApplicationUpdate }) {
               <X aria-hidden="true" />
             </Button>
           </Dialog.Close>
-        </div>
-        <div className="mt-5 space-y-4">
-          <div className="bg-muted/50 space-y-1 rounded-xl p-3 text-sm">
-            <p>{t("appUpdate.current", { version: state.currentVersion })}</p>
-            <p className="font-medium">
-              {t("appUpdate.target", { version: release?.version ?? state.download.version })}
-            </p>
-            {release?.publishedAt ? (
-              <p className="text-muted-foreground">
-                {new Date(release.publishedAt).toLocaleString()}
-              </p>
-            ) : null}
-            {release?.size ? (
-              <p className="text-muted-foreground">{formatBytes(release.size)}</p>
-            ) : null}
-          </div>
+        </header>
+        <div className="app-scroll min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+          <UpdateVersionSummary state={state} />
           <section className="space-y-2">
             <h3 className="text-sm font-medium">{t("appUpdate.notes")}</h3>
-            <p className="text-muted-foreground max-h-52 overflow-y-auto text-sm break-words whitespace-pre-wrap">
-              {release?.notes || t("appUpdate.noNotes")}
-            </p>
+            <div className="bg-muted/20 rounded-xl border px-4 py-3">
+              {notes ? (
+                <Markdown source={notes} />
+              ) : (
+                <p className="text-muted-foreground text-sm">{t("appUpdate.noNotes")}</p>
+              )}
+            </div>
           </section>
-          <UpdateControls state={state} />
-          {release?.url ? (
-            <a
-              href={release.url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-primary inline-block text-sm underline underline-offset-4"
-            >
-              {t("about.update.openRelease")}
-            </a>
-          ) : null}
         </div>
+        <footer className="shrink-0 border-t px-6 py-4">
+          <UpdateControls state={state} />
+        </footer>
       </Dialog.Content>
     </Dialog.Portal>
   )
