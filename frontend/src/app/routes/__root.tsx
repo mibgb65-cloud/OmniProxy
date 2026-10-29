@@ -3,6 +3,7 @@ import { AppSidebar } from "../../components/common/app-sidebar"
 import { AppTitlebar } from "../../components/common/app-titlebar"
 import { ScrollRegion } from "../../components/common/scroll-region"
 import { CodexQuotaActivationWatcher } from "../../features/accounts/codex-quota-activation-watcher"
+import { UpdateCompletedWatcher } from "../../features/app-update/update-completed-watcher"
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -30,6 +31,8 @@ function RootLayout() {
       </div>
       {/* 后台自动激活的结果在任何页面都提示，不需要先打开 OpenAI 设置面板。 */}
       <CodexQuotaActivationWatcher />
+      {/* 自我更新重启后的一次性提示，不依赖设置页是否打开。 */}
+      <UpdateCompletedWatcher />
     </div>
   )
 }

@@ -17,6 +17,10 @@ vi.mock("../components/common/app-titlebar", () => ({
 vi.mock("../features/accounts/codex-quota-activation-watcher", () => ({
   CodexQuotaActivationWatcher: () => null,
 }))
+// 「更新完成」提示同样挂在根布局上，属于应用级反馈，不参与滚动隔离断言。
+vi.mock("../features/app-update/update-completed-watcher", () => ({
+  UpdateCompletedWatcher: () => null,
+}))
 
 function renderPages(settingsLoader?: () => Promise<void>) {
   const root = createRootRoute({ component: RootRoute.options.component })

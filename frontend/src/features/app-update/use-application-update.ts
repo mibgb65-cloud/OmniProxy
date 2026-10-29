@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  acknowledgeApplicationUpdateInstalled,
   getApplicationUpdate,
   startApplicationUpdate,
   cancelApplicationUpdate,
@@ -34,5 +35,10 @@ export function useApplicationUpdateActions() {
     onSuccess: accept,
     onError: () => client.invalidateQueries({ queryKey: applicationUpdateKey }),
   })
-  return { download, cancel, install }
+  // 回执只写本地「已提示」标记；失败时保留提示状态，下次启动会再次出现。
+  const acknowledge = useMutation({
+    mutationFn: () => acknowledgeApplicationUpdateInstalled(),
+    onSuccess: accept,
+  })
+  return { download, cancel, install, acknowledge }
 }

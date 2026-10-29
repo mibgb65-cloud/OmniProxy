@@ -159,6 +159,8 @@ func (s *Service) Install(expected string) (Snapshot, error) {
 	}
 	s.state.Download.State = "installing"
 	s.record.Transfer = s.state.Download
+	// 记录本次安装前正在运行的版本，供重启后的「更新完成」提示说明来源。
+	s.record.Previous = s.opts.Version
 	err = s.saveLocked()
 	s.mu.Unlock()
 	if err == nil {

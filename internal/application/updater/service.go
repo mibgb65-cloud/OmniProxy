@@ -31,6 +31,13 @@ type Transfer struct {
 	Error    string `json:"error"`
 }
 
+// Installed 表示「刚刚升级到这个运行版本」，只在用户确认前出现一次。
+// From 为空时不宣称知道升级前的版本。
+type Installed struct {
+	Version string `json:"version"`
+	From    string `json:"from"`
+}
+
 // Snapshot 是侧栏、浮窗和设置页共用的真实状态。
 type Snapshot struct {
 	CurrentVersion string       `json:"currentVersion"`
@@ -38,6 +45,7 @@ type Snapshot struct {
 	CheckError     string       `json:"checkError"`
 	Release        *ReleaseInfo `json:"release,omitempty"`
 	Download       Transfer     `json:"download"`
+	Installed      *Installed   `json:"installed,omitempty"`
 	CanInstall     bool         `json:"canInstall"`
 }
 
@@ -57,6 +65,10 @@ type record struct {
 	File     string         `json:"file"`
 	Digest   string         `json:"digest"`
 	Transfer Transfer       `json:"transfer"`
+	// Previous 是发起安装时正在运行的版本，只用于「从 X 升级到 Y」的说明。
+	Previous string `json:"previous,omitempty"`
+	// NoticeSeen 是用户已经确认过「更新完成」的运行版本，空表示尚未提示。
+	NoticeSeen string `json:"noticeSeen,omitempty"`
 }
 
 // Service 串行化检查、下载与安装，下载进度仅在内存聚合。
@@ -100,10 +112,19 @@ func New(opts Options) *Service {
 func (s *Service) Snapshot() Snapshot {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.snapshotLocked()
+}
+
+// snapshotLocked 供已持锁的调用方使用；重复加锁会自锁。
+func (s *Service) snapshotLocked() Snapshot {
 	result := s.state
 	if result.Release != nil {
 		copy := *result.Release
 		result.Release = &copy
+	}
+	if result.Installed != nil {
+		copy := *result.Installed
+		result.Installed = &copy
 	}
 	return result
 }
@@ -140,6 +161,7 @@ func (s *Service) Configure(repo string, beta bool) error {
 	s.state.Release = nil
 	s.state.CheckState = "idle"
 	s.state.CheckError = ""
+	// 已完成的升级提示属于运行版本，不随更新渠道切换消失。
 	if s.record.Package.Repo == repo && s.record.Transfer.State == "ready" && (beta || !version.IsPrerelease(s.record.Package.Version)) {
 		s.state.Download = s.record.Transfer
 		p := s.record.Package

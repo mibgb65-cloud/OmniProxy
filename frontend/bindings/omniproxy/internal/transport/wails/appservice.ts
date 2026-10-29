@@ -98,6 +98,14 @@ export function AccountTokenUsage(id: string): $CancellablePromise<activity$0.Ac
     return $Call.ByID(458711972, id);
 }
 
+/**
+ * AcknowledgeApplicationUpdateInstalled 记录用户已看过「更新完成」提示，
+ * 只写本地提示标记，不联网、不改动已下载的安装包或升级渠道。
+ */
+export function AcknowledgeApplicationUpdateInstalled(): $CancellablePromise<updater$0.Snapshot> {
+    return $Call.ByID(882390416);
+}
+
 export function AgentApply(input: agentconfig$0.Input): $CancellablePromise<agentconfig$0.Item[] | null> {
     return $Call.ByID(1413500582, input);
 }

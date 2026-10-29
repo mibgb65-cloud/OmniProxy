@@ -578,6 +578,16 @@ export const en: Record<keyof typeof zh, string> = {
     "This is not a registered installation. Install OmniProxy from its release page before using restart to upgrade.",
   "appUpdate.noPackage":
     "This release has no matching Windows installer and checksum. Visit the release page for details.",
+  "appUpdate.completedTitle": "Update complete",
+  "appUpdate.completedDescription": "Upgraded from {{from}} to {{version}}. Here is what is new.",
+  "appUpdate.completedDescriptionUnknown": "Updated to {{version}}. Here is what is new.",
+  "appUpdate.completedNotes": "What is new",
+  "appUpdate.completedNoNotes":
+    "This release ships without notes. See Settings → About for the current version details.",
+  "appUpdate.completedHint": "This notice appears once and stays hidden after you confirm.",
+  "appUpdate.completedOpenNotes": "Open release notes",
+  "appUpdate.completedConfirm": "Got it",
+  "appUpdate.completedClose": "Close update notice",
   "updates.settingsFailed": "Unable to read or save update settings. Please retry.",
   "legacy.title": "Import OmniProxy v1 data",
   "legacy.description": "Preview before importing. Original files stay unchanged.",

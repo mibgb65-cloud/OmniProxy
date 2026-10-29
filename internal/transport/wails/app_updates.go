@@ -87,6 +87,16 @@ func (s *AppService) InstallApplicationUpdate(expected string) (updater.Snapshot
 	return state, err
 }
 
+// AcknowledgeApplicationUpdateInstalled 记录用户已看过「更新完成」提示，
+// 只写本地提示标记，不联网、不改动已下载的安装包或升级渠道。
+func (s *AppService) AcknowledgeApplicationUpdateInstalled() (updater.Snapshot, error) {
+	service, err := s.applicationUpdater()
+	if err != nil {
+		return updater.Snapshot{}, err
+	}
+	return service.AcknowledgeInstalled()
+}
+
 func (s *AppService) startUpdateChecks() {
 	if !s.prof.IsProduction() {
 		return

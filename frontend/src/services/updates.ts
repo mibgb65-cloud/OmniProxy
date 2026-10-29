@@ -9,6 +9,7 @@ export function setUpdateChannel(channel: string) {
 export type {
   Snapshot as ApplicationUpdate,
   Transfer as UpdateTransfer,
+  Installed as ApplicationUpdateInstalled,
 } from "../../bindings/omniproxy/internal/application/updater"
 export function getApplicationUpdate() {
   return AppService.ApplicationUpdate()
@@ -21,6 +22,9 @@ export function cancelApplicationUpdate() {
 }
 export function installApplicationUpdate(version: string) {
   return AppService.InstallApplicationUpdate(version)
+}
+export function acknowledgeApplicationUpdateInstalled() {
+  return AppService.AcknowledgeApplicationUpdateInstalled()
 }
 export function setAutomaticUpdateCheck(enabled: boolean) {
   return AppService.SetAutomaticUpdateCheck(enabled)
