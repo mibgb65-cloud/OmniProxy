@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md) 已产出 `v2.1.1-beta.3` 本地 Windows amd64 production 安装包，内容为升级结束并重新打开后的一次性「更新完成」浮窗（TASK-20261029-005）、升级浮窗三段式布局（TASK-20261029-001）与浮窗／设置页共用的 Markdown 渲染（TASK-20261029-003）；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.3`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+本地构建：[TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md) 已产出 `v2.1.1-beta.4` 本地 Windows amd64 production 安装包，内容为升级完成后的「更新完成」提示（TASK-20261029-005）、弹窗淡入淡出（TASK-20261029-006）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.4`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已修复：[TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)，关闭「设置与关于」窗口不再闪一下就消失：内容改为常驻 `Dialog.Portal`，由 Radix Presence 控制挂载生命周期，遮罩与窗口补上 150ms 的淡入淡出与 `.95` 缩放（`motion-safe`，减少动画偏好下直接切换）；居中用独立 `translate` 属性，缩放期间不跳位。升级浮窗与「更新完成」浮窗同步补齐退出动画。关闭后内容仍由 Presence 释放，焦点归还、草稿保留与按需加载的既有测试全部维持。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 工具类与静态采样截图核对通过；原生 WebView2 观感待用户确认。实现提交 `7d4ff154`。其余业务弹窗仍沿用条件挂载写法，本次未一并修改。
 
@@ -52,7 +52,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 **已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
-**本地构建（未发布）：2.1.1-beta.3** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为升级完成后的一次性「更新完成」浮窗（TASK-20261029-005，`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（TASK-20261029-001，`cd67d25b`）以及设置页「当前版本更新日志」改用同一渲染（TASK-20261029-003，`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)。
+**本地构建（未发布）：2.1.1-beta.4** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为「更新完成」提示（`84e3b785`）、弹窗淡入淡出（`7d4ff154`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)。
+
+**历史本地构建（未发布，已被 beta.4 取代）：2.1.1-beta.3** — 2026-10-29 本地 Windows amd64 production 安装包，内容为「更新完成」提示与既有的浮窗／设置页 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`，记录见 [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)。因不含弹窗退出动画，未交付安装，由 `beta.4` 取代。
 
 **历史本地构建（未发布，已被 beta.3 取代）：2.1.1-beta.2** — 2026-10-29 本地 Windows amd64 production 安装包，包含升级浮窗三段式布局与浮窗／设置页共用的发布说明 Markdown 渲染；完整质量门（143 文件／873 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,332,270 bytes，SHA256 `2067937c9f62899870fe875287bc3db88c17242a25011b118d260aab3332a07f`，记录见 [TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md)。
 
@@ -131,6 +133,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)：`v2.1.1-beta.4` 本地 production 安装包已构建并通过完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,341,751 bytes，SHA256 `c5078af7…0a93`）；内容为「更新完成」提示与弹窗淡入淡出，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
 - [TASK-20261029-006](../tasks/completed/2026-10/TASK-20261029-006-settings-dialog-exit-animation.md)：设置窗口关闭不再瞬间消失——内容常驻 Portal 由 Radix Presence 控制卸载，遮罩与窗口补上 150ms 淡入淡出 + `.95` 缩放（`motion-safe`），升级浮窗与「更新完成」浮窗同步补齐退出动画；既有焦点、草稿与按需加载测试全部维持，`task verify` exit 0（145 文件／880 项前端测试）。实现提交 `7d4ff154`。
 
