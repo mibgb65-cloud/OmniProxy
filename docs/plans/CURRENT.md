@@ -2,7 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md) 已产出 `v2.1.1-beta.2` 本地 Windows amd64 production 安装包，内容为升级浮窗三段式布局（TASK-20261029-001）与升级浮窗／设置页「当前版本更新日志」共用的 Markdown 渲染（TASK-20261029-003）；完整质量门（143 文件／873 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.2`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,332,270 bytes，SHA256 `2067937c9f62899870fe875287bc3db88c17242a25011b118d260aab3332a07f`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+本地构建：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md) 已产出 `v2.1.1-beta.3` 本地 Windows amd64 production 安装包，内容为升级结束并重新打开后的一次性「更新完成」浮窗（TASK-20261029-005）、升级浮窗三段式布局（TASK-20261029-001）与浮窗／设置页共用的 Markdown 渲染（TASK-20261029-003）；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.3`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
+已实现：[TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)，升级完成后不再没有任何反馈：后端在更新记录里保存安装前版本与「已提示」版本，`restore()` 判定升级确实生效且尚未提示时给出一次性 `installed` 通知；前端根布局挂载监视器，自动弹出三段式「更新完成」浮窗，说明「升级前版本 → 当前版本」并按 Markdown 列出本版新增内容（正文取构建内置的 `docs/releases/<运行版本>.md`，不额外联网）。确认、关闭按钮、Esc 与遮罩点击都写入 `noticeSeen` 回执，同一版本只提示一次，写入失败不假装已读；「查看完整更新日志」先回执再打开设置页关于分区。「只下载未安装」「安装回执失败」「无更新记录」都不提示。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），隔离 Chromium 深浅主题与 900×560／760×560 窄窗截图核对通过；原生 WebView2 与 140% 字号观感待用户本地更新后确认。实现提交 `84e3b785`。
 
 已修复：[TASK-20261029-003](../tasks/completed/2026-10/TASK-20261029-003-settings-changelog-markdown.md)，设置页「当前版本更新日志」不再原样显示 Markdown 记号，改由与升级浮窗共用的 `Markdown` 组件渲染；卡片保留区域语义与版本代码样式，顶部重复标题由 `withoutTopHeading` 去掉，链接白名单（仅 `http(s)` 与根相对路径）与「远端图片只保留替代文字」的安全边界一并生效。删除了旧的 `parseReleaseNotes`／`ReleaseNoteBlock` 手写分支。新增 3 项卡片测试（渲染真实发布说明、链接只出 2 条、`<script>` 不进 DOM）与 3 项 `withoutTopHeading` 测试；`task verify` exit 0（143 文件／873 项前端测试、Windows production 构建）。实现提交 `ae97d7b8`。
 
@@ -48,7 +50,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 **已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
-**本地构建（未发布）：2.1.1-beta.2** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为升级浮窗三段式布局与发布说明 Markdown 渲染（TASK-20261029-001，`cd67d25b`）以及设置页「当前版本更新日志」改用同一渲染（TASK-20261029-003，`ae97d7b8`）。完整质量门（143 文件／873 项前端测试）、Windows 版本资源（应用 `2.1.1-beta.2`／安装器 `2.1.1`／数字版本 `2.1.1.0`）与发布资产校验通过；安装器 20,332,270 bytes，SHA256 `2067937c9f62899870fe875287bc3db88c17242a25011b118d260aab3332a07f`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md)。
+**本地构建（未发布）：2.1.1-beta.3** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为升级完成后的一次性「更新完成」浮窗（TASK-20261029-005，`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（TASK-20261029-001，`cd67d25b`）以及设置页「当前版本更新日志」改用同一渲染（TASK-20261029-003，`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,340,868 bytes，SHA256 `6f9068194a06b2fddab3292b3a95a7bd45fd2a2fd9ef1e7ee0ca4ec7509e35fe`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)。
+
+**历史本地构建（未发布，已被 beta.3 取代）：2.1.1-beta.2** — 2026-10-29 本地 Windows amd64 production 安装包，包含升级浮窗三段式布局与浮窗／设置页共用的发布说明 Markdown 渲染；完整质量门（143 文件／873 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,332,270 bytes，SHA256 `2067937c9f62899870fe875287bc3db88c17242a25011b118d260aab3332a07f`，记录见 [TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md)。
 
 **历史本地构建（未发布，已被 beta.2 取代）：2.1.1-beta.1** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的唯一用户可见改动为升级浮窗三段式布局与发布说明 Markdown 渲染（TASK-20261029-001，`cd67d25b`）。完整质量门（142 文件／869 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,332,085 bytes，SHA256 `b029b3742df30bd6d253738891a5e9ff6bb5abdf8a8bdd82293d5e4f80a53a5c`。未交付使用，由 `v2.1.1-beta.2` 取代（缺少设置页日志修复），记录见 [TASK-20261029-002](../tasks/completed/2026-10/TASK-20261029-002-build-local-v2.1.1-beta.1-installer.md)。
 
@@ -126,7 +130,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
-- [TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md)：`v2.1.1-beta.2` 本地 production 安装包已构建并通过完整质量门（143 文件／873 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,332,270 bytes，SHA256 `2067937c…a07f`）；内容为升级浮窗布局与浮窗／设置页共用的发布说明 Markdown 渲染，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
+- [TASK-20261029-005](../tasks/completed/2026-10/TASK-20261029-005-update-completed-notice.md)：升级并重启后自动弹出一次「更新完成」浮窗，说明「升级前版本 → 当前版本」并按 Markdown 列出本版新增内容；正文取构建内置的发布说明，确认后写入 `noticeSeen` 回执，同一版本只提示一次。含 `v2.1.1-beta.3` 本地 production 构建（20,340,868 bytes，SHA256 `6f906819…35fe`）；`task verify` exit 0（145 文件／880 项前端测试），未签名、未安装、未推送或发布。实现提交 `84e3b785`。
+
+- [TASK-20261029-004](../tasks/completed/2026-10/TASK-20261029-004-build-local-v2.1.1-beta.2-installer.md)：`v2.1.1-beta.2` 本地 production 安装包已构建并通过完整质量门（143 文件／873 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,332,270 bytes，SHA256 `2067937c…a07f`）；内容为升级浮窗布局与浮窗／设置页共用的发布说明 Markdown 渲染，未签名、未安装、未推送或发布，已由 `v2.1.1-beta.3` 取代。
 
 - [TASK-20261029-003](../tasks/completed/2026-10/TASK-20261029-003-settings-changelog-markdown.md)：设置页「当前版本更新日志」改用与升级浮窗共用的 `Markdown` 组件渲染，去掉重复顶部标题，保留区域语义、版本代码样式与加载／失败／未知版本状态；链接限制为 `http(s)` 与根相对路径，HTML 与远端图片不进入 DOM。新增 3 项卡片测试与 3 项 `withoutTopHeading` 测试，`task verify` exit 0（143 文件／873 项前端测试）。实现提交 `ae97d7b8`。
 
