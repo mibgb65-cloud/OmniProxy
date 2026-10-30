@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-进行中：[TASK-20261030-002](../tasks/active/TASK-20261030-002-accounts-dock-scroll-stability.md)，修复账号页提供商切换栏在页面底部上下移动：展开后使用有界工作区与独立详情滚动，Dock 固定到底部且不遮挡账号内容；动画副本保留滚动位置。32 项针对性测试、隔离 Chromium 11 项布局／交互检查及完整质量门通过（145 文件／883 项前端测试、Windows production 构建；Vitest 进程限制为 4 worker）。待提交归档；原生 WebView2 观感待确认。
+已修复：[TASK-20261030-002](../tasks/completed/2026-10/TASK-20261030-002-accounts-dock-scroll-stability.md)，账号页提供商切换栏不再在页面底部上下移动：展开后使用有界工作区与独立详情滚动，Dock 固定到底部且不遮挡账号内容；动画副本保留滚动位置。32 项针对性测试、隔离 Chromium 11 项布局／交互检查及完整质量门通过（145 文件／883 项前端测试、Windows production 构建；Vitest 进程限制为 4 worker）。实现提交 `ab47f044`；原生 WebView2 观感待确认。
 
 GitHub 发布已完成：[TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)，[v2.2.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.0) 于 2026-10-30 14:10:34（Asia/Singapore）公开为正式 Latest。发布源码 CI、Release 构建／自签／篡改拒绝和公开资产校验通过；安装器 20,384,832 bytes，SHA256 `36a59e88eb369a2d0ee296e93b7e76b34bbb7e0fe48ff986e2d310a27d3404d7`。正式／Beta 发现及临时 HTTP/1.1 公开下载复核通过，本机默认传输仍有 EOF／摘要获取失败，实机覆盖安装与原生窗口验收保持独立。
 
