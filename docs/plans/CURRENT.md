@@ -95,8 +95,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-[TASK-20261030-004](../tasks/active/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md)：
-`v2.2.1-beta.1` 本地安装包已构建并完成校验，待提交与归档。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

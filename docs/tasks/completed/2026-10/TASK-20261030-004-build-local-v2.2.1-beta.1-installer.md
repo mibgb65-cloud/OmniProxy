@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -147,7 +147,7 @@ NSIS 统计：`Total size: 20352203 / 81176962 bytes (25.0%)`。与 `v2.1.1-beta
 ## Commit
 
 ```text
-PENDING chore(release): 构建 2.2.1-beta.1 本地生产安装包
+e4f37328 chore(release): 构建 2.2.1-beta.1 本地生产安装包
 ```
 
 归档与 CURRENT.md 回填为后续文档提交。未推送、未打标签、未签名。
@@ -160,3 +160,9 @@ PENDING chore(release): 构建 2.2.1-beta.1 本地生产安装包
 NSIS 打包、Windows 版本资源与发布资产校验；安装器 20,352,203 bytes，
 SHA256 `8f14e3281b5984927ee9c2c251d5eb5d1294b2e29391f902f6970608dfa54cd1`。
 内容为仪表盘卡片自适应填充与账号页提供商切换栏修复，未签名、未自动安装、未打标签、未推送、未公开发布。
+
+---
+
+# Completed
+
+2026-10-30 21:05
