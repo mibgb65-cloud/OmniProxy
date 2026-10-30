@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261030-004](../tasks/completed/2026-10/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md) 已产出 `v2.2.1-beta.1` 本地 Windows amd64 production 安装包，相对公开 `2.2.0` 的用户可见改动为仪表盘右侧卡片自适应填充（TASK-20261030-003，`c6c2f658`）与账号页提供商切换栏固定／详情独立滚动（TASK-20261030-002，`ab47f044`）；完整质量门（145 文件／884 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.2.1-beta.1`、安装器 `2.2.1`、数字版本 `2.2.1.0`）与发布资产校验通过。安装器 20,352,203 bytes，SHA256 `8f14e3281b5984927ee9c2c251d5eb5d1294b2e29391f902f6970608dfa54cd1`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
 已优化：[TASK-20261030-003](../tasks/completed/2026-10/TASK-20261030-003-dashboard-cards-adaptive-fill.md)，仪表盘在超宽窗口不再出现右侧卡片下方的大块空白：两行网格由 `items-start` 改为拉伸对齐、`2xl` 断点把 2:1 收到 1.75:1；「待处理问题」空态换成三行体检清单（订阅登录／额度与余额／路由配置，与问题列表共用同一过滤口径，有单测断言两者一致），有 issue 时按类型分组计数并用一行带出「其余正常」；「资源概况」新增健康分布条与按供应商状态点阵，缓存与入口收口到卡底；调用趋势绘图高度改为 13／14.5／16.5rem 断点变量、柱宽上限 28px。`task verify` exit 0（145 文件／884 项前端测试、Windows production 构建），隔离 Chromium 2560×1392 与 1440×900 截图核对通过，原生 WebView2 观感待确认。
 
 已修复：[TASK-20261030-002](../tasks/completed/2026-10/TASK-20261030-002-accounts-dock-scroll-stability.md)，账号页提供商切换栏不再在页面底部上下移动：展开后使用有界工作区与独立详情滚动，Dock 固定到底部且不遮挡账号内容；动画副本保留滚动位置。32 项针对性测试、隔离 Chromium 11 项布局／交互检查及完整质量门通过（145 文件／883 项前端测试、Windows production 构建；Vitest 进程限制为 4 worker）。实现提交 `ab47f044`；原生 WebView2 观感待确认。
@@ -58,11 +60,13 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
+**本地构建（未发布）：2.2.1-beta.1** — 2026-10-30 本地 Windows amd64 production 安装包，相对公开 `2.2.0` 的用户可见改动为仪表盘右侧卡片自适应填充（`c6c2f658`）与账号页提供商切换栏固定／详情独立滚动（`ab47f044`）。完整质量门（145 文件／884 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,352,203 bytes，SHA256 `8f14e3281b5984927ee9c2c251d5eb5d1294b2e29391f902f6970608dfa54cd1`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261030-004](../tasks/completed/2026-10/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md)。
+
 **已发布：2.2.0** — 2026-10-30 14:10:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `fe4509528e027cea1693043a59102bdae0623c5f`，Windows 数字版本 `2.2.0.0`。包含更新完成提示、发布说明 Markdown 排版和弹窗／浮层进出过渡，无新增数据库迁移或依赖。签名安装器及摘要、原生版本资源、内嵌证书 pin 已核验；详细网络和人工验收边界见 [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)。
 
 **历史已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.0 取代。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
-**本地构建（未发布）：2.1.1-beta.5** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为全部弹窗与浮层的进出过渡（`a226264d`）、「更新完成」提示（`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)。
+**历史本地构建（未发布，已被 2.2.0 取代）：2.1.1-beta.5** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为全部弹窗与浮层的进出过渡（`a226264d`）、「更新完成」提示（`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)。
 
 **历史本地构建（未发布，已被 beta.5 取代）：2.1.1-beta.4** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为「更新完成」提示（`84e3b785`）、弹窗淡入淡出（`7d4ff154`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,341,751 bytes，SHA256 `c5078af748d3b7dc47bb86297441075af610f1314a9c4707012ec6f67f6e0a93`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-007](../tasks/completed/2026-10/TASK-20261029-007-build-local-v2.1.1-beta.4-installer.md)。
 
@@ -91,7 +95,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+[TASK-20261030-004](../tasks/active/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md)：
+`v2.2.1-beta.1` 本地安装包已构建并完成校验，待提交与归档。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -145,6 +150,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261030-004](../tasks/completed/2026-10/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md)：`v2.2.1-beta.1` 本地 production 安装包已构建并通过完整质量门（145 文件／884 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,352,203 bytes，SHA256 `8f14e328…4cd1`）；内容为仪表盘卡片自适应填充与账号页切换栏修复，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
 - [TASK-20261030-003](../tasks/completed/2026-10/TASK-20261030-003-dashboard-cards-adaptive-fill.md)：仪表盘右侧卡片自适应填充——两行网格改为拉伸对齐并在 `2xl` 收窄比例，待处理问题空态换成三行体检清单（与问题列表共用过滤口径），资源概况新增健康分布条与按供应商状态点阵，调用趋势绘图高度改为断点变量。`task verify` exit 0（145 文件／884 项前端测试、Windows production 构建），隔离 Chromium 2560×1392／1440×900 截图核对通过。实现提交 `c6c2f658`。
 
