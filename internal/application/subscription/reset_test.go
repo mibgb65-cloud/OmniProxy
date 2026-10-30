@@ -85,6 +85,24 @@ func TestUncertainResetSurvivesServiceRestartAndReusesKeyEvenWithZeroInventory(t
 	}
 }
 
+func TestResetAcceptsOfficialTypeSpellings(t *testing.T) {
+	// 官方 reset_type 的大小写／下划线写法在不同环境下不一致，都应当可用于兑换。
+	for _, spelling := range []string{"codexRateLimits", "codex_rate_limits", "CodexRateLimits", "rate_limits"} {
+		t.Run(spelling, func(t *testing.T) {
+			f, client, id := resetFixture(t)
+			card := &client.rateLimits.ResetCredits.Credits[0]
+			card.ResetType = spelling
+			result, err := f.manager.ConsumeReset(context.Background(), ResetInput{AccountID: id, CreditID: card.ID, OperationID: resetTestKey})
+			if err != nil {
+				t.Fatalf("usable credit rejected: %v", err)
+			}
+			if result.Operation.State != "completed" || len(client.resetCreditIDs) != 1 {
+				t.Fatal("usable credit did not reach consume API")
+			}
+		})
+	}
+}
+
 func TestResetValidationPreventsUnusableOrForeignCredits(t *testing.T) {
 	for _, invalid := range []string{"unknown", "expired", "redeemed", "unsupported", "different-account"} {
 		t.Run(invalid, func(t *testing.T) {

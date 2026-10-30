@@ -137,6 +137,29 @@ describe("manual reset credits", () => {
     await waitFor(() => expect(consumeSubscriptionReset).toHaveBeenCalledTimes(2))
     expect(vi.mocked(consumeSubscriptionReset).mock.calls[1][0]).toEqual(first)
   })
+  it("treats other official spellings of the reset type as usable", async () => {
+    quota.resetCredits!.credits![0]!.resetType = "codex_rate_limits"
+    const user = setup()
+    const dialog = await open(user)
+    // 徽标与按钮共用判定：不会再出现「写着可使用、按钮是灰的」。
+    expect(within(dialog).getByText("可使用")).toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "使用这张卡" })).toBeEnabled()
+    await user.click(within(dialog).getByRole("button", { name: "使用这张卡" }))
+    await user.click(within(dialog).getByRole("button", { name: "确认使用" }))
+    expect(consumeSubscriptionReset).toHaveBeenCalledWith(
+      expect.objectContaining({ creditId: "credit-test" }),
+    )
+  })
+  it("marks a foreign credit type as not exchangeable instead of showing it as available", async () => {
+    quota.resetCredits!.credits![0]!.resetType = "promoCredit"
+    const user = setup()
+    await user.click(screen.getByRole("button", { name: "重置卡" }))
+    const dialog = screen.getByRole("dialog", { name: "重置卡" })
+    expect(await within(dialog).findByText("当前不可兑换")).toBeInTheDocument()
+    expect(within(dialog).queryByText("可使用")).not.toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "使用这张卡" })).toBeDisabled()
+    expect(consumeSubscriptionReset).not.toHaveBeenCalled()
+  })
   it("keeps unavailable information distinct from zero inventory", async () => {
     quota = { ...quota, resetCredits: null }
     const user = setup()

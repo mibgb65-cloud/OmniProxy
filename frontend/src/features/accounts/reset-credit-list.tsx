@@ -5,6 +5,28 @@ import { Button } from "../../components/ui/button"
 import type { SubscriptionResetCredit } from "../../services/subscription"
 import { formatAccountTime } from "./account-display"
 
+/**
+ * 官方重置卡类型枚举在不同环境下写法不一致（大小写、下划线）。
+ * 只有明显属于别的权益（例如促销额度）才拒绝，其余按官方状态与有效期判定。
+ */
+export function usableResetType(value: string) {
+  const normalized = value.toLowerCase().replace(/[\s_-]/g, "")
+  return (
+    normalized === "" ||
+    normalized === "codexratelimits" ||
+    normalized === "ratelimits" ||
+    normalized === "ratelimit"
+  )
+}
+
+/** 卡片当前是否可用于兑换：官方状态 + 类型写法 + 有效期。 */
+export function resetCreditUsable(
+  card: Pick<SubscriptionResetCredit, "status" | "resetType">,
+  expired: boolean,
+) {
+  return card.status === "available" && usableResetType(card.resetType) && !expired
+}
+
 export function ResetCreditList({
   cards,
   busy,
@@ -24,8 +46,8 @@ export function ResetCreditList({
     <ul className="space-y-3">
       {cards.map((card) => {
         const expired = !!card.expiresAt && Date.parse(card.expiresAt) <= now
-        const available =
-          card.status === "available" && card.resetType === "codexRateLimits" && !expired
+        // 徽标与按钮共用同一判定，避免出现「写着可使用、按钮是灰的」。
+        const available = resetCreditUsable(card, expired)
         const knownStatus =
           card.status === "available" || card.status === "redeeming" || card.status === "redeemed"
             ? card.status
@@ -42,7 +64,9 @@ export function ResetCreditList({
               <span className="bg-muted text-muted-foreground shrink-0 rounded-md px-2 py-1 text-xs">
                 {expired
                   ? t("subscription.reset.expired")
-                  : t(`subscription.reset.status.${knownStatus}`)}
+                  : card.status === "available" && !available
+                    ? t("subscription.reset.status.unusable")
+                    : t(`subscription.reset.status.${knownStatus}`)}
               </span>
             </div>
             {card.description ? (

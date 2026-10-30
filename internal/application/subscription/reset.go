@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"omniproxy/internal/application/account"
@@ -134,14 +135,40 @@ func checkResetCredit(summary *codex.ResetCreditSummary, id string) error {
 	if id == "" {
 		return nil
 	}
+	now := time.Now().Unix()
 	for _, card := range summary.Credits {
 		if card.ID != id {
 			continue
 		}
-		if card.Status != "available" || card.ResetType != "codexRateLimits" || card.ExpiresAt != nil && *card.ExpiresAt <= time.Now().Unix() {
+		if !usableResetCredit(card, now) {
 			return failure("reset_not_usable")
 		}
 		return nil
 	}
 	return failure("reset_not_usable")
+}
+
+// usableResetCredit 判定单张卡能否兑换：官方状态与有效期是权威信号。
+func usableResetCredit(card codex.ResetCredit, now int64) bool {
+	if card.Status != "available" || !usableResetType(card.ResetType) {
+		return false
+	}
+	return card.ExpiresAt == nil || *card.ExpiresAt > now
+}
+
+// usableResetType 归一官方 reset_type 的大小写与下划线差异；
+// 界面徽标按 status 显示，这里若按字面量严格比较，就会出现「写着可使用、按钮不可用」。
+func usableResetType(value string) bool {
+	var normalized strings.Builder
+	for _, char := range strings.ToLower(value) {
+		if char == '_' || char == '-' || char == ' ' || char == '\t' {
+			continue
+		}
+		normalized.WriteRune(char)
+	}
+	switch normalized.String() {
+	case "", "codexratelimits", "ratelimits", "ratelimit":
+		return true
+	}
+	return false
 }

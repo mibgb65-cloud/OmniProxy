@@ -38,13 +38,16 @@ export function ResetCreditsContent({
             variant="ghost"
             size="icon-sm"
             aria-label={t("subscription.reset.refresh")}
-            disabled={busy || wallet.quota.isFetching}
+            disabled={busy}
             onClick={() => {
               void wallet.quota.refetch()
               void wallet.status.refetch()
             }}
           >
-            <RefreshCw className="size-4" aria-hidden="true" />
+            <RefreshCw
+              className={wallet.quota.isFetching ? "size-4 motion-safe:animate-spin" : "size-4"}
+              aria-hidden="true"
+            />
           </Button>
         </Tooltip>
       </div>
@@ -73,6 +76,11 @@ export function ResetCreditsContent({
               <ResetCreditList cards={cards} busy={locked} onSelect={wallet.setSelection} />
             </>
           )}
+          {wallet.status.isPending ? (
+            <p role="status" className="text-muted-foreground text-xs">
+              {t("subscription.reset.checking")}
+            </p>
+          ) : null}
           {wallet.status.isError ? (
             <p role="alert" className="text-destructive text-sm">
               {t("subscription.error.reset_record_failed")}

@@ -32,6 +32,7 @@ export const subscriptionEn = {
   "subscription.reset.status.redeeming": "Processing",
   "subscription.reset.status.redeemed": "Used",
   "subscription.reset.status.unknown": "Status unknown",
+  "subscription.reset.status.unusable": "Not exchangeable",
   "subscription.reset.use": "Use this credit",
   "subscription.reset.next": "the next available reset credit",
   "subscription.reset.useNext": "Use next available credit",
@@ -43,6 +44,7 @@ export const subscriptionEn = {
   "subscription.reset.pending":
     "The result is not confirmed. Verify this attempt before using another credit.",
   "subscription.reset.verify": "Verify this attempt",
+  "subscription.reset.checking": "Checking the latest redemption…",
   "subscription.reset.unavailable": "The service has not returned reset credit information.",
   "subscription.reset.empty": "No reset credits are currently available.",
   "subscription.reset.partial":
