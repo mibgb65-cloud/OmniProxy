@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
@@ -55,6 +55,27 @@ export function AccountsView() {
     setExpandedId(providerId)
   }
 
+  /**
+   * 展开态占满主内容视口，页面本身不再滚动，只有详情区滚动。
+   * 仅靠 CSS 高度约束时，任何残留溢出（例如过渡层或第三方浮层）都会让
+   * 外层滚动区多出滚动范围，滚动后整块覆盖层连同 Dock 一起上移；
+   * 这里显式锁定外层滚动区，把「可滚动」这件事只留给详情区。
+   */
+  useLayoutEffect(() => {
+    if (!expanded) return
+    const region = containerRef.current?.closest<HTMLElement>(".scroll-region")
+    const viewport = Array.from(region?.children ?? []).find((child) =>
+      child.classList.contains("scroll-region__viewport"),
+    )
+    if (!region || !viewport) return
+    region.dataset.locked = "true"
+    // 折叠网格里滚动过之后，展开的第一屏必须从头开始，不能沿用旧偏移。
+    viewport.scrollTop = 0
+    return () => {
+      delete region.dataset.locked
+    }
+  }, [expanded])
+
   // 展开后把焦点交给面板，收起后交回对应卡片，避免焦点落到页面根节点。
   useEffect(() => {
     if (expandedId) {
@@ -101,7 +122,12 @@ export function AccountsView() {
         </p>
       ) : null}
       {catalog.data && providers.data && accounts.data ? (
-        <div ref={containerRef} className="bento-accounts" data-expanded={!!expanded}>
+        <div
+          ref={containerRef}
+          className="bento-accounts"
+          data-expanded={!!expanded}
+          data-has-dock={dockProviders.length > 0}
+        >
           {expanded ? (
             <>
               <div

@@ -12,6 +12,8 @@
   width: auto;
   min-height: 0;
   padding-bottom: 0;
+  /* 覆盖层自身的溢出不能变成页面滚动范围，否则滚动会把 Dock 一起带走。 */
+  overflow: clip;
 }
 
 .bento-accounts {
@@ -31,7 +33,8 @@
   grid-template-rows: minmax(0, 1fr);
 }
 
-.bento-accounts[data-expanded="true"]:has(> .bento-dock) {
+/* Dock 是否存在由组件显式声明，不依赖 :has() 的结构推断。 */
+.bento-accounts[data-expanded="true"][data-has-dock="true"] {
   grid-template-rows: minmax(0, 1fr) auto;
 }
 

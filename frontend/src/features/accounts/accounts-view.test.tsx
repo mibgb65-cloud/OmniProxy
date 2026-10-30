@@ -82,7 +82,7 @@ const custom: ProviderConfiguration = {
 let saved: AccountItem[] = []
 let nextId = 0
 
-function renderPage() {
+function renderPage({ shell = false }: { shell?: boolean } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const rootRoute = createRootRoute()
   const accountsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/accounts" })
@@ -103,7 +103,20 @@ function renderPage() {
       </I18nProvider>
     )
   }
-  return { ...render(<AccountsView />, { wrapper: Wrapper }), router }
+  // shell 复刻根布局里主内容滚动区的结构，用于断言页面滚动被锁定。
+  const view = shell ? (
+    <div className="scroll-region">
+      <main className="scroll-region__viewport">
+        <div className="scroll-region__content">
+          <AccountsView />
+        </div>
+      </main>
+      <div className="scroll-region__rail" />
+    </div>
+  ) : (
+    <AccountsView />
+  )
+  return { ...render(view, { wrapper: Wrapper }), router }
 }
 
 describe("AccountsView", () => {
@@ -310,6 +323,25 @@ describe("AccountsView", () => {
     await user.click(screen.getByRole("button", { name: "返回账号" }))
     expect(page).toHaveAttribute("data-expanded", "false")
     expect(container.querySelector(".bento-panel-scroll")).not.toBeInTheDocument()
+  })
+
+  it("locks the page scroller so only the expanded details scroll", async () => {
+    const user = userEvent.setup()
+    const { container } = renderPage({ shell: true })
+    const region = container.querySelector(".scroll-region")!
+    const viewport = container.querySelector(".scroll-region__viewport") as HTMLElement
+    expect(region).not.toHaveAttribute("data-locked")
+
+    await user.click(await screen.findByRole("button", { name: "查看OpenAI账号详情" }))
+
+    // 展开后页面滚动被锁定，Dock 与详情同处一个不滚动的网格里。
+    expect(region).toHaveAttribute("data-locked", "true")
+    expect(viewport.scrollTop).toBe(0)
+    expect(container.querySelector(".bento-accounts")).toHaveAttribute("data-has-dock", "true")
+    expect(screen.getByRole("group", { name: "切换提供商" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "返回账号" }))
+    expect(region).not.toHaveAttribute("data-locked")
   })
 
   it("keeps a single provider scrollable without an empty dock", async () => {

@@ -23,6 +23,16 @@
   outline-offset: -2px;
 }
 
+/* 固定布局页面（如账号页展开态）：页面自身不滚动，滚动交给页面内部的区域。
+   clip 而非 hidden：hidden 仍可被程序化 scrollTop 抖动（并会沿用滚动位置的恢复值）。 */
+.scroll-region[data-locked="true"] > .scroll-region__viewport {
+  overflow-y: clip;
+}
+
+.scroll-region[data-locked="true"] > .scroll-region__rail {
+  display: none;
+}
+
 .scroll-region__rail {
   position: relative;
   width: 12px;
