@@ -136,9 +136,9 @@ NSIS 统计：`Total size: 20352203 / 81176962 bytes (25.0%)`。与 `v2.1.1-beta
    与 `2.1.1-beta.*` 的处理一致。
 2. 数字版本为 `2.2.1.0`：发布脚本按 patch 段映射，预发布标识不进第四段，因此与 `2.2.0.0` 可区分。
 3. `build/windows/info.json` 被发布脚本改写为 CRLF，提交前已还原为 LF（`CRLF=0`）。
-4. 发布脚本日志中 `task --force verify` 处出现 PowerShell 把原生命令 stderr 渲染成错误记录
-   （`+ & task --force verify` / `exit 1`）的既有噪声；脚本仅在 `$LASTEXITCODE -ne 0` 时抛错，
-   而后续 NSIS 打包与资产校验均完成，说明质量门实际为 exit 0。
+4. 日志里 `+ & task --force verify` 是 Taskfile 的 `uname` 缺失提示写到 stderr 引起的
+   NativeCommandError 渲染，`exit 1` 是 Taskfile gofmt 检查分支的脚本正文被回显，二者都不是失败；
+   脚本随后完成 NSIS 打包与资产校验，说明质量门实际为 exit 0。
 
 ---
 

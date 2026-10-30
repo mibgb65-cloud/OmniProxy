@@ -178,7 +178,7 @@ Dock 与详情同处不滚动的两行网格。
 ## Commit
 
 ```text
-PENDING fix(accounts): 锁定展开态页面滚动并固定切换提供商栏
+902cc49c fix(accounts): 锁定展开态页面滚动并固定切换提供商栏
 ```
 
 归档与 CURRENT.md 回填为后续文档提交。未推送、未打标签、未签名。
@@ -194,3 +194,8 @@ PENDING fix(accounts): 锁定展开态页面滚动并固定切换提供商栏
 `v2.2.1-beta.2` 安装包 20,354,025 bytes，SHA256
 `0d2ad9a56c2edfc44ec6ee1314ef315bc72732e41d8c8b71d1935c031b3d866f`，未签名、未自动安装、未推送、未公开发布。
 
+---
+
+# Completed
+
+2026-10-30 21:45
