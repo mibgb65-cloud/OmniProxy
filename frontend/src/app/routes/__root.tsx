@@ -22,9 +22,10 @@ function RootLayout() {
           as="main"
           pageKey={pageKey}
           className="scroll-region--window-edge min-w-0 flex-1"
+          viewportClassName="relative [--page-padding-block:1.5rem] [--page-padding-inline:clamp(16px,2.5vw,96px)]"
         >
           {/* 统一限制页面左右留白，超宽窗口也不会让内容缩在中央。 */}
-          <div className="w-full min-w-0 px-[clamp(16px,2.5vw,96px)] py-6">
+          <div className="w-full min-w-0 px-(--page-padding-inline) py-(--page-padding-block)">
             <Outlet />
           </div>
         </ScrollRegion>

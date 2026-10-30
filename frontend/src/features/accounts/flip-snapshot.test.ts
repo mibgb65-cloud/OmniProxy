@@ -43,4 +43,24 @@ describe("takeFlipSnapshot", () => {
       animation: "none",
     })
   })
+
+  it("restores captured scroll offsets after mounting without using changed source positions", () => {
+    const source = document.createElement("div")
+    const viewport = document.createElement("div")
+    source.append(viewport)
+    source.scrollTop = 40
+    viewport.scrollTop = 280
+    viewport.scrollLeft = 60
+
+    const snapshot = takeFlipSnapshot(source)
+    source.scrollTop = viewport.scrollTop = viewport.scrollLeft = 0
+    document.body.append(snapshot.content)
+    snapshot.restoreScroll()
+
+    expect(snapshot.content.scrollTop).toBe(40)
+    expect(snapshot.content.firstElementChild?.scrollTop).toBe(280)
+    expect(snapshot.content.firstElementChild?.scrollLeft).toBe(60)
+    expect(viewport.scrollTop).toBe(0)
+    snapshot.content.remove()
+  })
 })

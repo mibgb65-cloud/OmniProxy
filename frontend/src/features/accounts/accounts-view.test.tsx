@@ -289,6 +289,41 @@ describe("AccountsView", () => {
     expect(router.state.location.pathname).toBe("/accounts")
   })
 
+  it("keeps the dock outside the independently scrolling provider details", async () => {
+    const user = userEvent.setup()
+    const { container } = renderPage()
+    await user.click(await screen.findByRole("button", { name: "查看DeepSeek账号详情" }))
+
+    const page = container.querySelector(".accounts-page")
+    const panel = screen.getByRole("region", { name: "DeepSeek" })
+    const viewport = panel.closest(".scroll-region__viewport")
+    const dock = screen.getByRole("group", { name: "切换提供商" })
+    expect(page).toHaveAttribute("data-expanded", "true")
+    expect(viewport).not.toBeNull()
+    expect(viewport).not.toContainElement(dock)
+    expect(panel.closest(".bento-accounts")).toContainElement(dock)
+
+    await user.click(within(dock).getByRole("button", { name: "查看Google账号详情" }))
+    expect(
+      screen.getByRole("region", { name: "Google" }).closest(".scroll-region__viewport"),
+    ).not.toBeNull()
+    await user.click(screen.getByRole("button", { name: "返回账号" }))
+    expect(page).toHaveAttribute("data-expanded", "false")
+    expect(container.querySelector(".bento-panel-scroll")).not.toBeInTheDocument()
+  })
+
+  it("keeps a single provider scrollable without an empty dock", async () => {
+    vi.mocked(listProviders).mockResolvedValue([providers[3]])
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(await screen.findByRole("button", { name: "查看DeepSeek账号详情" }))
+    expect(
+      screen.getByRole("region", { name: "DeepSeek" }).closest(".scroll-region__viewport"),
+    ).not.toBeNull()
+    expect(screen.queryByRole("group", { name: "切换提供商" })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "返回账号" })).toBeInTheDocument()
+  })
+
   it("collapses the expanded panel back into the provider grid", async () => {
     const user = userEvent.setup()
     renderPage()

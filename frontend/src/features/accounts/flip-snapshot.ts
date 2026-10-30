@@ -1,4 +1,8 @@
-export type FlipSnapshot = { rect: DOMRect; content: HTMLElement }
+export type FlipSnapshot = {
+  rect: DOMRect
+  content: HTMLElement
+  restoreScroll: () => void
+}
 
 /**
  * 保留旧画面的只读副本，脱离 Dock 的横向裁剪，但仍受主内容视口约束。
@@ -9,8 +13,12 @@ export function takeFlipSnapshot(source: HTMLElement): FlipSnapshot {
   const content = source.cloneNode(true) as HTMLElement
   const originals = [source, ...source.querySelectorAll<HTMLElement>("*")]
   const copies = [content, ...content.querySelectorAll<HTMLElement>("*")]
+  const scrollPositions: { element: HTMLElement; top: number; left: number }[] = []
   originals.forEach((original, index) => {
     const copy = copies[index]
+    if (original.scrollTop || original.scrollLeft) {
+      scrollPositions.push({ element: copy, top: original.scrollTop, left: original.scrollLeft })
+    }
     copy.removeAttribute("id")
     copy.removeAttribute("autofocus")
     copy.removeAttribute("data-flip-id")
@@ -36,7 +44,17 @@ export function takeFlipSnapshot(source: HTMLElement): FlipSnapshot {
     transformOrigin: "top left",
     transform: `scale(${rect.width / (source.offsetWidth || rect.width || 1)}, ${rect.height / (source.offsetHeight || rect.height || 1)})`,
   })
-  return { rect, content }
+  return {
+    rect,
+    content,
+    // cloneNode 不保留滚动位置；必须在副本接入布局后恢复，避免切换时闪回详情顶部。
+    restoreScroll: () => {
+      for (const { element, top, left } of scrollPositions) {
+        element.scrollTop = top
+        element.scrollLeft = left
+      }
+    },
+  }
 }
 
 // 在共同的外层几何下反向缩放内容。全程 old + new 的 opacity = 1，没有空白帧。
@@ -80,9 +98,12 @@ export function animateFlipSnapshot(
   const newLayer = document.createElement("div")
   oldLayer.className = newLayer.className = "bento-motion-content"
   oldLayer.append(first.content)
-  newLayer.append(takeFlipSnapshot(element).content)
+  const next = takeFlipSnapshot(element)
+  newLayer.append(next.content)
   surface.append(oldLayer, newLayer)
   boundary.element.append(surface)
+  first.restoreScroll()
+  next.restoreScroll()
   const scaleX = first.rect.width / last.width
   const scaleY = first.rect.height / last.height
   const animation = surface.animate(

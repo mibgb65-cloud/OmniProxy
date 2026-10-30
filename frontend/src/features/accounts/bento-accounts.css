@@ -3,6 +3,17 @@
   container-type: inline-size;
 }
 
+/* 展开后占满主内容视口，只有详情滚动；不再让 Dock 在文档末尾退出 sticky。 */
+.accounts-page[data-expanded="true"] {
+  position: absolute;
+  inset: var(--page-padding-block) var(--page-padding-inline);
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
 .bento-accounts {
   position: relative;
   display: grid;
@@ -12,6 +23,16 @@
   min-width: 0;
   isolation: isolate;
   overflow-anchor: none;
+}
+
+.bento-accounts[data-expanded="true"] {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.bento-accounts[data-expanded="true"]:has(> .bento-dock) {
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .bento-flip {
@@ -62,9 +83,21 @@
   min-width: 0;
 }
 
+.bento-panel-slot {
+  align-self: stretch;
+  min-height: 0;
+}
+
+.bento-panel-scroll {
+  height: 100%;
+}
+
+.bento-panel-scroll > .scroll-region__viewport {
+  overscroll-behavior-y: contain;
+}
+
 /* 展开区域不再包一层带背景/边框的大卡片，只保留账号自身的卡片层级。 */
 .bento-panel {
-  min-height: clamp(24rem, calc(100dvh - 17rem), 42rem);
   padding: 0.25rem 0;
 }
 
@@ -75,8 +108,7 @@
 
 /* 一条停靠带，而非第二个卡片网格；品牌与文字保留足够宽度，不再挤成省略号。 */
 .bento-dock {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   z-index: 2;
   align-self: end;
   padding: 0.75rem 0 0.5rem;

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { useProviderCatalog, useProviders } from "../providers/use-providers"
 import { isKnownProviderKind, providerNameKeys } from "../providers/provider-labels"
 import type { ProviderConfiguration } from "../../services/omniproxy"
+import { ScrollRegion } from "../../components/common/scroll-region"
 import { AccountProviderCard } from "./account-provider-card"
 import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
@@ -75,7 +76,7 @@ export function AccountsView() {
       : provider.name
 
   return (
-    <div className="accounts-page w-full min-w-0 space-y-7 pb-6">
+    <div className="accounts-page w-full min-w-0 space-y-7 pb-6" data-expanded={!!expanded}>
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.accounts.title")}</h1>
       </header>
@@ -108,19 +109,21 @@ export function AccountsView() {
                 className="bento-flip bento-panel-slot"
                 data-flip-id={expanded.id}
               >
-                <div
-                  ref={panelRef}
-                  role="region"
-                  tabIndex={-1}
-                  aria-label={displayName(expanded)}
-                  className="bento-panel outline-none"
-                >
-                  <ProviderAccountsView
-                    providerId={expanded.id}
-                    embedded
-                    onCollapse={() => showProvider(null)}
-                  />
-                </div>
+                <ScrollRegion as="section" className="bento-panel-scroll">
+                  <div
+                    ref={panelRef}
+                    role="region"
+                    tabIndex={-1}
+                    aria-label={displayName(expanded)}
+                    className="bento-panel outline-none"
+                  >
+                    <ProviderAccountsView
+                      providerId={expanded.id}
+                      embedded
+                      onCollapse={() => showProvider(null)}
+                    />
+                  </div>
+                </ScrollRegion>
               </div>
               {dockProviders.length ? (
                 <ProviderSwitcherDock
