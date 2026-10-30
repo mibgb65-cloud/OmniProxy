@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已优化：[TASK-20261030-003](../tasks/active/TASK-20261030-003-dashboard-cards-adaptive-fill.md)，仪表盘在超宽窗口不再出现右侧卡片下方的大块空白：两行网格由 `items-start` 改为拉伸对齐、`2xl` 断点把 2:1 收到 1.75:1；「待处理问题」空态换成三行体检清单（订阅登录／额度与余额／路由配置，与问题列表共用同一过滤口径，有单测断言两者一致），有 issue 时按类型分组计数并用一行带出「其余正常」；「资源概况」新增健康分布条与按供应商状态点阵，缓存与入口收口到卡底；调用趋势绘图高度改为 13／14.5／16.5rem 断点变量、柱宽上限 28px。`task verify` exit 0（145 文件／884 项前端测试、Windows production 构建），隔离 Chromium 2560×1392 与 1440×900 截图核对通过，原生 WebView2 观感待确认。
+已优化：[TASK-20261030-003](../tasks/completed/2026-10/TASK-20261030-003-dashboard-cards-adaptive-fill.md)，仪表盘在超宽窗口不再出现右侧卡片下方的大块空白：两行网格由 `items-start` 改为拉伸对齐、`2xl` 断点把 2:1 收到 1.75:1；「待处理问题」空态换成三行体检清单（订阅登录／额度与余额／路由配置，与问题列表共用同一过滤口径，有单测断言两者一致），有 issue 时按类型分组计数并用一行带出「其余正常」；「资源概况」新增健康分布条与按供应商状态点阵，缓存与入口收口到卡底；调用趋势绘图高度改为 13／14.5／16.5rem 断点变量、柱宽上限 28px。`task verify` exit 0（145 文件／884 项前端测试、Windows production 构建），隔离 Chromium 2560×1392 与 1440×900 截图核对通过，原生 WebView2 观感待确认。
 
 已修复：[TASK-20261030-002](../tasks/completed/2026-10/TASK-20261030-002-accounts-dock-scroll-stability.md)，账号页提供商切换栏不再在页面底部上下移动：展开后使用有界工作区与独立详情滚动，Dock 固定到底部且不遮挡账号内容；动画副本保留滚动位置。32 项针对性测试、隔离 Chromium 11 项布局／交互检查及完整质量门通过（145 文件／883 项前端测试、Windows production 构建；Vitest 进程限制为 4 worker）。实现提交 `ab47f044`；原生 WebView2 观感待确认。
 
@@ -91,7 +91,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261030-003](../tasks/active/TASK-20261030-003-dashboard-cards-adaptive-fill.md)：仪表盘右侧卡片自适应填充（实现与验证已完成，等待归档）。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -145,6 +145,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261030-003](../tasks/completed/2026-10/TASK-20261030-003-dashboard-cards-adaptive-fill.md)：仪表盘右侧卡片自适应填充——两行网格改为拉伸对齐并在 `2xl` 收窄比例，待处理问题空态换成三行体检清单（与问题列表共用过滤口径），资源概况新增健康分布条与按供应商状态点阵，调用趋势绘图高度改为断点变量。`task verify` exit 0（145 文件／884 项前端测试、Windows production 构建），隔离 Chromium 2560×1392／1440×900 截图核对通过。实现提交 `c6c2f658`。
 
 - [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)：v2.2.0 正式发布，main CI 与 Release 均成功，公开安装器自签、摘要、版本资源和证书 pin 核验通过。默认网络下载仍有失败，临时 HTTP/1.1 复核成功，未自动安装或修改用户设置。
 
