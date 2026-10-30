@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-发布进行中：[TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md) 按用户确认准备 `v2.2.0` 正式版，汇总 v2.1.0 之后的更新完成提示、发布说明 Markdown 排版和弹窗交互优化。完整质量门（145 文件／880 项前端测试）、Windows production 构建、NSIS 打包、版本资源及资产摘要校验已通过；接下来通过 GitHub Actions 构建、自签并公开发布，在流水线与公开资产核验完成前不视为已发布。
+GitHub 发布已完成：[TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)，[v2.2.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.0) 于 2026-10-30 14:10:34（Asia/Singapore）公开为正式 Latest。发布源码 CI、Release 构建／自签／篡改拒绝和公开资产校验通过；安装器 20,384,832 bytes，SHA256 `36a59e88eb369a2d0ee296e93b7e76b34bbb7e0fe48ff986e2d310a27d3404d7`。正式／Beta 发现及临时 HTTP/1.1 公开下载复核通过，本机默认传输仍有 EOF／摘要获取失败，实机覆盖安装与原生窗口验收保持独立。
 
 本地构建：[TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md) 已产出 `v2.1.1-beta.5` 本地 Windows amd64 production 安装包，内容为全部弹窗与浮层的进出过渡（TASK-20261029-008）、「更新完成」提示（TASK-20261029-005）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.5`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
@@ -54,9 +54,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**准备发布：2.2.0** — 完整应用／前端／安装器版本 `2.2.0`，Windows 数字版本 `2.2.0.0`。无新增数据库迁移或依赖；发布进度见 [TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md)，公开 Latest 暂仍为 2.1.0。
+**已发布：2.2.0** — 2026-10-30 14:10:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `fe4509528e027cea1693043a59102bdae0623c5f`，Windows 数字版本 `2.2.0.0`。包含更新完成提示、发布说明 Markdown 排版和弹窗／浮层进出过渡，无新增数据库迁移或依赖。签名安装器及摘要、原生版本资源、内嵌证书 pin 已核验；详细网络和人工验收边界见 [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)。
 
-**已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
+**历史已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.0 取代。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
 **本地构建（未发布）：2.1.1-beta.5** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为全部弹窗与浮层的进出过渡（`a226264d`）、「更新完成」提示（`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)。
 
@@ -87,7 +87,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md)：发布 v2.2.0 正式版，执行版本同步、完整质量门、GitHub Actions 构建／自签和公开资产核验。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -141,6 +141,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)：v2.2.0 正式发布，main CI 与 Release 均成功，公开安装器自签、摘要、版本资源和证书 pin 核验通过。默认网络下载仍有失败，临时 HTTP/1.1 复核成功，未自动安装或修改用户设置。
 
 - [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)：`v2.1.1-beta.5` 本地 production 安装包已构建并通过完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,343,683 bytes，SHA256 `96df0593…dfa4`）；内容为全部弹窗／浮层过渡与「更新完成」提示，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
