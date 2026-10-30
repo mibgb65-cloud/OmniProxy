@@ -75,7 +75,9 @@ export function DashboardView() {
           <span>{t("dash.updated", { time: formatAccountTime(statistics.updatedAt) })}</span>
         </div>
       ) : null}
-      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      {/* 两行都让卡片吃掉整行高度（默认 stretch）：右列不再因内容少而在行底留下空洞；
+          超宽窗口把 2:1 收到 1.75:1，避免左侧图表被拉成「宽而扁」。 */}
+      <div className="grid min-w-0 items-stretch gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
         <DashboardTrend
           data={statistics}
           period={data.period}
@@ -83,7 +85,7 @@ export function DashboardView() {
         />
         <DashboardIssues data={data} />
       </div>
-      <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid min-w-0 items-stretch gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
         <DashboardRecent items={statistics?.recent ?? []} loading={data.statistics.isPending} />
         <DashboardResources
           data={data.resources}

@@ -2,6 +2,27 @@
  * 调用趋势横向滚动：隐藏 WebView2 原生滚动条（灰色轨道 + 两端箭头），
  * 改用与主滚动区一致的细圆角滑块；滑块只在需要滚动时占位，避免卡片无谓变高。
  */
+
+/*
+ * 绘图区高度随窗口宽度增长：超宽窗口下 13rem 的定高会把卡片压成「宽而扁」，
+ * 左侧图表自身也会出现大片空白。纵轴刻度、网格线与柱形共用同一个变量。
+ */
+.trend-card {
+  --trend-h: 13rem;
+}
+
+@media (min-width: 1280px) {
+  .trend-card {
+    --trend-h: 14.5rem;
+  }
+}
+
+@media (min-width: 1680px) {
+  .trend-card {
+    --trend-h: 16.5rem;
+  }
+}
+
 .trend-scroll {
   overflow-x: auto;
   overflow-y: hidden;

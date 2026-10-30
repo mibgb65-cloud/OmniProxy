@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   dashboardAxisMaximum,
   dashboardAxisTicks,
+  dashboardChecklist,
   dashboardLabelStep,
   dashboardRange,
   dashboardTokenRatio,
@@ -10,6 +11,7 @@ import {
 } from "./dashboard-model"
 import { accounts, providers } from "../quota/quota-test-helpers"
 import { describeQuotaAccounts, makeQuotaEntry } from "../quota/quota-model"
+import type { RouteItem } from "../../services/routing"
 
 afterEach(() => vi.unstubAllEnvs())
 
@@ -54,6 +56,76 @@ describe("dashboard local ranges", () => {
     const issues = dashboardIssues(accounts, providers, [], [resource])
     expect(issues.map((item) => item.kind)).toEqual(["account"])
     expect(issues[0]?.name).toBe("out@example.invalid")
+  })
+})
+
+describe("dashboard checklist", () => {
+  it("counts coverage with the same filters as the issue list", () => {
+    const now = Date.now()
+    const empty = {
+      pending: false,
+      fetching: false,
+      error: null,
+      quota: {
+        plan: "pro",
+        fiveHourEnabled: false,
+        fiveHour: null,
+        weekly: { remainingPercent: 0, resetsAt: "2099-10-15T00:00:00Z" },
+        fetchedAt: "",
+      },
+    }
+    const entries = describeQuotaAccounts(accounts, providers).map((item) =>
+      makeQuotaEntry(
+        item,
+        item.account.id === "sub-empty" ? empty : { pending: false, fetching: false, error: null },
+        now,
+      ),
+    )
+    const routes: RouteItem[] = [
+      {
+        rule: {
+          id: "route-broken",
+          alias: "coding",
+          providerId: "openai",
+          accountId: "",
+          model: "gpt-test",
+          enabled: true,
+          createdAt: "",
+          updatedAt: "",
+        },
+        providerName: "OpenAI",
+        accountName: "",
+        errorCode: "provider_disabled",
+      },
+      {
+        rule: {
+          id: "route-off",
+          alias: "paused",
+          providerId: "openai",
+          accountId: "",
+          model: "gpt-test",
+          enabled: false,
+          createdAt: "",
+          updatedAt: "",
+        },
+        providerName: "OpenAI",
+        accountName: "",
+        errorCode: "provider_disabled",
+      },
+    ]
+    const checklist = dashboardChecklist(accounts, providers, routes, entries)
+    expect(checklist).toEqual([
+      // 3 个启用的订阅账号，其中 1 个需要重新登录（禁用的账号不计入）。
+      { key: "dash.checkSubscriptions", healthy: 2, problems: 1 },
+      // 4 个可监控账号（不支持查询与禁用账号不计入），其中 1 个额度耗尽。
+      { key: "dash.checkQuota", healthy: 3, problems: 1 },
+      // 只统计启用的路由，1 条异常。
+      { key: "dash.checkRouting", healthy: 0, problems: 1 },
+    ])
+    // 清单的问题数与问题列表条数必须一致，避免「清单说正常、列表有问题」。
+    expect(checklist.reduce((sum, item) => sum + item.problems, 0)).toBe(
+      dashboardIssues(accounts, providers, routes, entries).length,
+    )
   })
 })
 

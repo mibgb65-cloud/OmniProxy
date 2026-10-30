@@ -20,7 +20,7 @@ type TrendMode = "requests" | "tokens"
 /** 自绘滑块的最短长度，保证极长的横轴仍能抓住滑块。 */
 const MIN_THUMB_WIDTH = 28
 /** 每列最小宽度（px）：低于此宽度柱形与横轴标签会挤在一起。 */
-const MIN_COLUMN_WIDTH = 22
+const MIN_COLUMN_WIDTH = 26
 
 function series(summary: DashboardSummary, mode: TrendMode) {
   return mode === "tokens"
@@ -190,7 +190,7 @@ export function DashboardTrend({
   const compact = compactFormatter(language)
   const labelStep = dashboardLabelStep(columns.length)
   return (
-    <Card className="min-w-0 gap-3 py-4">
+    <Card className="trend-card min-w-0 gap-3 py-4">
       <CardHeader className="space-y-3 px-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-semibold">{t("dash.trend")}</h2>
@@ -229,10 +229,10 @@ export function DashboardTrend({
           ))}
         </div>
       </CardHeader>
-      <CardContent className="min-w-0 px-4">
+      <CardContent className="flex min-w-0 flex-1 flex-col justify-center px-4">
         {data && maximum > 0n ? (
           <div className="flex min-w-0 gap-2 pt-1">
-            <div aria-hidden="true" className="relative h-52 w-9 shrink-0 sm:w-10">
+            <div aria-hidden="true" className="relative h-(--trend-h) w-9 shrink-0 sm:w-10">
               {ticks.map((value, index) => (
                 <span
                   key={value.toString()}
@@ -257,7 +257,7 @@ export function DashboardTrend({
                 style={{ minWidth: Math.max(260, columns.length * MIN_COLUMN_WIDTH) }}
               >
                 <div
-                  className="pointer-events-none absolute inset-x-0 top-0 h-52"
+                  className="pointer-events-none absolute inset-x-0 top-0 h-(--trend-h)"
                   aria-hidden="true"
                 >
                   {ticks.slice(1, -1).map((value, index) => (
@@ -271,7 +271,7 @@ export function DashboardTrend({
                   <div className="border-border absolute inset-x-0 bottom-0 border-t" />
                 </div>
                 <div
-                  className="relative grid h-52 items-end"
+                  className="relative grid h-(--trend-h) items-end"
                   style={{
                     gridTemplateColumns: `repeat(${columns.length}, minmax(0,1fr))`,
                   }}
@@ -321,7 +321,7 @@ export function DashboardTrend({
                           <div className="relative flex h-full w-full items-end justify-center">
                             {total > 0n ? (
                               <div
-                                className="flex w-[58%] max-w-[22px] min-w-[4px] flex-col-reverse overflow-hidden rounded-t-[3px]"
+                                className="flex w-[58%] max-w-[28px] min-w-[4px] flex-col-reverse overflow-hidden rounded-t-[3px]"
                                 style={{
                                   height: `${dashboardTokenRatio(total.toString(), ticks[0]!)}%`,
                                   minHeight: 2,
@@ -376,7 +376,7 @@ export function DashboardTrend({
         ) : (
           <p
             role={loading ? "status" : undefined}
-            className="text-muted-foreground flex min-h-52 items-center justify-center px-4 text-center text-sm"
+            className="text-muted-foreground flex min-h-(--trend-h) items-center justify-center px-4 text-center text-sm"
           >
             {t(
               loading

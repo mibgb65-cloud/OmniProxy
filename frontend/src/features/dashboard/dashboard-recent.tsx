@@ -10,7 +10,7 @@ import { formatDashboardLatency } from "./dashboard-model"
 export function DashboardRecent({ items, loading }: { items: RequestItem[]; loading: boolean }) {
   const { t, i18n } = useTranslation()
   return (
-    <Card className="min-w-0 gap-3 py-4">
+    <Card className="flex h-full min-w-0 flex-col gap-3 py-4">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 px-4">
         <h2 className="text-base font-semibold">{t("dash.recent")}</h2>
         <Link

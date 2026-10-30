@@ -63,15 +63,32 @@ export function formatDashboardLatency(value: number | null | undefined, languag
     : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value / 1000)} s`
 }
 
+/** 首页只看启用提供商下启用的账号；问题列表与体检清单共用同一口径。 */
+function enabledProviderIds(providers: ProviderConfiguration[]) {
+  return new Set(providers.filter((item) => item.enabled).map((item) => item.id))
+}
+
+function liveAccounts(accounts: AccountItem[], providers: ProviderConfiguration[]) {
+  const enabled = enabledProviderIds(providers)
+  return accounts.filter((item) => item.enabled && enabled.has(item.providerId))
+}
+
+function liveResources(resources: QuotaEntry[], providers: ProviderConfiguration[]) {
+  const enabled = enabledProviderIds(providers)
+  return resources.filter(
+    // 不支持查询的类型没有额度语义，既不算问题也不进体检清单的分母。
+    (item) =>
+      item.kind !== "unsupported" && item.account.enabled && enabled.has(item.account.providerId),
+  )
+}
+
 export function dashboardIssues(
   accounts: AccountItem[],
   providers: ProviderConfiguration[],
   routes: RouteItem[],
   resources: QuotaEntry[],
 ): DashboardIssue[] {
-  const enabledProviders = new Set(providers.filter((item) => item.enabled).map((item) => item.id))
-  const relevant = accounts.filter((item) => item.enabled && enabledProviders.has(item.providerId))
-  const issues: DashboardIssue[] = relevant
+  const issues: DashboardIssue[] = liveAccounts(accounts, providers)
     .filter(
       (item) =>
         item.authMethod === "subscription_login" &&
@@ -83,11 +100,8 @@ export function dashboardIssues(
       name: accountDisplayName(item),
       providerId: item.providerId,
     }))
-  for (const item of resources.filter(
-    (item) =>
-      item.account.enabled &&
-      enabledProviders.has(item.account.providerId) &&
-      item.status === "exhausted",
+  for (const item of liveResources(resources, providers).filter(
+    (item) => item.status === "exhausted",
   )) {
     issues.push({
       key: `resource:${item.account.id}`,
@@ -99,6 +113,51 @@ export function dashboardIssues(
   const invalid = routes.filter((item) => item.rule.enabled && item.errorCode)
   if (invalid.length) issues.push({ key: "route", kind: "route", name: "", count: invalid.length })
   return issues
+}
+
+export type DashboardCheck = {
+  key: "dash.checkSubscriptions" | "dash.checkQuota" | "dash.checkRouting"
+  healthy: number
+  problems: number
+}
+
+/**
+ * 无待处理问题时前端展示的三行体检清单：把「0 项」拆成可核对的覆盖面，
+ * 避免空状态只剩一句结论而无任何信息量。口径与 `dashboardIssues` 完全一致。
+ */
+export function dashboardChecklist(
+  accounts: AccountItem[],
+  providers: ProviderConfiguration[],
+  routes: RouteItem[],
+  resources: QuotaEntry[],
+): DashboardCheck[] {
+  const subscriptions = liveAccounts(accounts, providers).filter(
+    (item) => item.authMethod === "subscription_login",
+  )
+  const reauth = subscriptions.filter((item) =>
+    ["logged_out", "reauth_required"].includes(item.authState ?? ""),
+  )
+  const monitored = liveResources(resources, providers)
+  const exhausted = monitored.filter((item) => item.status === "exhausted")
+  const enabledRoutes = routes.filter((item) => item.rule.enabled)
+  const invalidRoutes = enabledRoutes.filter((item) => item.errorCode)
+  return [
+    {
+      key: "dash.checkSubscriptions",
+      healthy: subscriptions.length - reauth.length,
+      problems: reauth.length,
+    },
+    {
+      key: "dash.checkQuota",
+      healthy: monitored.length - exhausted.length,
+      problems: exhausted.length,
+    },
+    {
+      key: "dash.checkRouting",
+      healthy: enabledRoutes.length - invalidRoutes.length,
+      problems: invalidRoutes.length,
+    },
+  ]
 }
 
 export function dashboardTokenRatio(value: string, maximum: bigint) {

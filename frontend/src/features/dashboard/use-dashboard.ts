@@ -4,7 +4,7 @@ import { listRoutes } from "../../services/routing"
 import { listAgentClients } from "../../services/agents"
 import { useAccounts } from "../accounts/use-accounts"
 import { useProviders } from "../providers/use-providers"
-import { dashboardIssues } from "./dashboard-model"
+import { dashboardChecklist, dashboardIssues } from "./dashboard-model"
 import { useDashboardResources } from "./use-dashboard-resources"
 import { useDashboardStatistics } from "./use-dashboard-statistics"
 
@@ -31,6 +31,9 @@ export function useDashboard() {
       setRefreshing(false)
     }
   }
+  const accountList = accounts.data ?? []
+  const providerList = providers.data ?? []
+  const routeList = routes.data ?? []
   return {
     period,
     setPeriod,
@@ -43,12 +46,8 @@ export function useDashboard() {
     agents,
     refresh,
     refreshing: refreshing || statistics.isFetching,
-    issues: dashboardIssues(
-      accounts.data ?? [],
-      providers.data ?? [],
-      routes.data ?? [],
-      resources.entries,
-    ),
+    issues: dashboardIssues(accountList, providerList, routeList, resources.entries),
+    checklist: dashboardChecklist(accountList, providerList, routeList, resources.entries),
     metadataError: accounts.isError || providers.isError || routes.isError,
     metadataPending: accounts.isPending || providers.isPending || routes.isPending,
   }
