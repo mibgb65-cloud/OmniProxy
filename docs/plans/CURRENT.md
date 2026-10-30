@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+发布进行中：[TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md) 按用户确认准备 `v2.2.0` 正式版，汇总 v2.1.0 之后的更新完成提示、发布说明 Markdown 排版和弹窗交互优化。完整质量门（145 文件／880 项前端测试）、Windows production 构建、NSIS 打包、版本资源及资产摘要校验已通过；接下来通过 GitHub Actions 构建、自签并公开发布，在流水线与公开资产核验完成前不视为已发布。
+
 本地构建：[TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md) 已产出 `v2.1.1-beta.5` 本地 Windows amd64 production 安装包，内容为全部弹窗与浮层的进出过渡（TASK-20261029-008）、「更新完成」提示（TASK-20261029-005）、升级浮窗三段式布局与浮窗／设置页共用的 Markdown 渲染；完整质量门（145 文件／880 项前端测试）、NSIS 打包、Windows 版本资源（应用 `2.1.1-beta.5`、安装器 `2.1.1`、数字版本 `2.1.1.0`）与发布资产校验通过。安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已修复：[TASK-20261029-008](../tasks/completed/2026-10/TASK-20261029-008-unify-overlay-motion.md)，弹窗与浮层的过渡扫尾：12 个弹窗（账号新增／编辑／删除确认、订阅登录、请求详情、Google 项目、代理设置、路由编辑／删除、优先级编辑、设置窗口、两个更新浮窗）与 5 个浮层（账号设置、MiMo 详情、模型预览、订阅模型、重置卡）统一为 150ms 淡入淡出 + 轻微缩放，全局提示补上退出过渡；仍是条件挂载的四处改为常驻，新增 `useLastValue`（关闭动画期间保留数据）与 `useOpenGeneration`（重新打开换 key 保持空白草稿），`ProviderPriorityEditor`／`ProxySettingsDialog` 改为受控 `open`。`task verify` exit 0（145 文件／880 项前端测试、Windows production 构建），生产 CSS 与审计脚本确认无「进入有、退出无」的残留。实现提交 `a226264d`。原生 WebView2 观感待用户确认。
@@ -52,6 +54,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
+**准备发布：2.2.0** — 完整应用／前端／安装器版本 `2.2.0`，Windows 数字版本 `2.2.0.0`。无新增数据库迁移或依赖；发布进度见 [TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md)，公开 Latest 暂仍为 2.1.0。
+
 **已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
 **本地构建（未发布）：2.1.1-beta.5** — 2026-10-29 本地 Windows amd64 production 安装包，相对公开 `2.1.0` 的用户可见改动为全部弹窗与浮层的进出过渡（`a226264d`）、「更新完成」提示（`84e3b785`）、升级浮窗三段式布局与发布说明 Markdown 渲染（`cd67d25b`）、设置页「当前版本更新日志」改用同一渲染（`ae97d7b8`）。完整质量门（145 文件／880 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,343,683 bytes，SHA256 `96df05939fe238f8c386d3d07969a07a1b9a3bfd6a7703b05fd8ca1f2376dfa4`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261029-009](../tasks/completed/2026-10/TASK-20261029-009-build-local-v2.1.1-beta.5-installer.md)。
@@ -83,7 +87,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261030-001](../tasks/active/TASK-20261030-001-release-v2.2.0.md)：发布 v2.2.0 正式版，执行版本同步、完整质量门、GitHub Actions 构建／自签和公开资产核验。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
