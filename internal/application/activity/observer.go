@@ -2,6 +2,7 @@ package activity
 
 import (
 	"context"
+	"database/sql"
 	"math"
 	"omniproxy/internal/core/proxy"
 	"time"
@@ -59,9 +60,11 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	}
 	defer tx.Rollback()
 	var oldInput, oldOutput int64
-	var oldComplete bool
+	var oldCached sql.NullInt64
+	var oldComplete, oldInputKnown, oldOutputKnown bool
 	var oldSubject, state, startedAt string
-	if tx.QueryRowContext(ctx, `SELECT input_tokens,output_tokens,usage_complete,subject,state,started_at FROM request_records WHERE id=?`, event.ID).Scan(&oldInput, &oldOutput, &oldComplete, &oldSubject, &state, &startedAt) != nil {
+	if tx.QueryRowContext(ctx, `SELECT input_tokens,output_tokens,usage_complete,subject,state,started_at,input_known,output_known,cached_input_tokens FROM request_records WHERE id=?`, event.ID).
+		Scan(&oldInput, &oldOutput, &oldComplete, &oldSubject, &state, &startedAt, &oldInputKnown, &oldOutputKnown, &oldCached) != nil {
 		return ErrUnavailable
 	}
 	if state != "pending" {
@@ -91,8 +94,27 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 			return ErrUnavailable
 		}
 	}
+	newRequest := oldSubject == "" && key != ""
+	if key != "" {
+		delta := accountUsageDelta{
+			requests: flagCount(newRequest), completed: completeDelta,
+			input: input - oldInput, output: output - oldOutput,
+			inputKnown: flagCount(usage.InputKnown && !oldInputKnown), outputKnown: flagCount(usage.OutputKnown && !oldOutputKnown),
+		}
+		// 缓存明细只增不减：后续快照缺少缓存字段、或上游把同一请求的缓存值改小时，累计不回退。
+		if usage.InputKnown && usage.CachedInput != nil {
+			if !oldCached.Valid {
+				delta.cachedKnown, delta.cached = 1, *usage.CachedInput
+			} else if *usage.CachedInput > oldCached.Int64 {
+				delta.cached = *usage.CachedInput - oldCached.Int64
+			}
+		}
+		if err := updateAccountUsage(ctx, tx, event, key, delta); err != nil {
+			return ErrUnavailable
+		}
+	}
 	var totalInput, totalOutput int64
-	if err := updateProviderModel(ctx, tx, event, oldSubject == "" && key != "", input-oldInput, output-oldOutput, completeDelta); err != nil {
+	if err := updateProviderModel(ctx, tx, event, newRequest, input-oldInput, output-oldOutput, completeDelta); err != nil {
 		return ErrUnavailable
 	}
 	if tx.QueryRowContext(ctx, `SELECT input_tokens,output_tokens FROM usage_totals WHERE id=1`).Scan(&totalInput, &totalOutput) != nil || totalInput > math.MaxInt64-(input-oldInput) || totalOutput > math.MaxInt64-(output-oldOutput) {
@@ -106,8 +128,9 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	if err != nil {
 		return ErrUnavailable
 	}
-	if usage.InputKnown {
-		if _, err := tx.ExecContext(ctx, `UPDATE request_records SET cached_input_tokens=? WHERE id=?`, usage.CachedInput, event.ID); err != nil {
+	if usage.InputKnown && usage.CachedInput != nil {
+		// 已知缓存只增不减：缺少缓存字段的中间快照不改写明细，未知与真实零继续区分，重复上报不会重复计入。
+		if _, err := tx.ExecContext(ctx, `UPDATE request_records SET cached_input_tokens=MAX(COALESCE(cached_input_tokens,0),?) WHERE id=?`, *usage.CachedInput, event.ID); err != nil {
 			return ErrUnavailable
 		}
 	}

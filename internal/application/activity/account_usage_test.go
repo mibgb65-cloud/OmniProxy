@@ -32,7 +32,6 @@ func TestAccountUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
 	record(t, s, e)
 	for i, change := range []func(*proxy.RequestEvent){
 		func(e *proxy.RequestEvent) { e.Target.AccountID = "river-b" },
-		func(e *proxy.RequestEvent) { e.Target.ProviderID = "other-provider" },
 		func(e *proxy.RequestEvent) { e.Target.ProviderKind = "other-kind" },
 	} {
 		e := riverUsageEvent(i+10, item.ID)
@@ -45,12 +44,14 @@ func TestAccountUsageKeepsAccountAndProviderBoundaries(t *testing.T) {
 		got.CachedInputTokens != "80" || got.Requests != 2 || got.UnknownCacheRequests != 1 {
 		t.Fatal("cross-account, duplicate or unknown usage", got, err)
 	}
+	// 明细删除不能让账号累计变小：终身值来自按身份索引的累计，不是留存明细。
 	if _, err := s.db.Exec(`DELETE FROM request_records WHERE id=?`, riverUsageEvent(1, "").ID); err != nil {
 		t.Fatal(err)
 	}
 	got, err = s.AccountUsage(ctx, item)
-	if err != nil || got.InputTokens != "50" || got.CachedInputTokens != "" {
-		t.Fatal("retention boundary ignored", got, err)
+	if err != nil || got.InputTokens != "150" || got.OutputTokens != "25" || got.CachedInputTokens != "80" ||
+		got.Requests != 2 || got.UnknownCacheRequests != 1 {
+		t.Fatal("deleted detail reduced the lifetime total", got, err)
 	}
 }
 

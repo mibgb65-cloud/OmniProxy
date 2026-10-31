@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261031-003](../tasks/active/TASK-20261031-003-account-lifetime-token-usage.md)，账号卡片／配额页的「Token 用量」改为该记账身份的终身累计，不再随请求明细淘汰而变小：此前它读受保留上限（默认 10000 条）约束的 `request_records`，而同账号在「用量」页读不淘汰的每日桶，实测相差 1.5–2.4 倍（`rv_1fjif` 1,798,841,626 对 749,404,763、`mibgb65@gmail.com` 1,029,907,068 对 703,496,436），卡片数值甚至会下降。迁移 045 新建 `usage_accounts`（`subject` 主键），与 `usage_totals`／`usage_buckets`／`usage_provider_models` 在同一记账事务内按差值更新，缓存明细只增不减；建表时从每日桶回填 Token／请求数／完整用量数，并用仍在保留期内的明细回填缓存已知部分（更早的缓存保持下界语义）。`AccountTokenUsage` 改主键读取，`pendingRequests` 仍取留存明细；身份边界与每日桶一致，订阅身份为「提供商类型 + 邮箱 + 工作区」。新增「淘汰 5 条明细后累计仍为 105000」「删除账号行不减少」「迁移回填」三项回归测试。
+
 本地构建：[TASK-20261031-002](../tasks/completed/2026-10/TASK-20261031-002-build-local-v2.2.1-beta.4-installer.md) 已产出 `v2.2.1-beta.4` 本地 Windows amd64 production 安装包，修正账号页原位展开面板里账号卡片被拉成半个屏幕宽：`bento-accounts.css` 曾用 `repeat(2, minmax(0, 1fr))` 覆盖详情页既有的封顶列宽，2560×1392 全屏时单卡约 1075px、卡片内额度与 Token 信息被摊平；现沿用 `auto-fill` + `clamp(20rem, …, 28rem)` 只覆盖间距，宽屏只增列不增宽（同一容器 2 列 × ≈1075px → 4 列 × 448px），窄面板单列时用满 28rem 上限，并补 3 项 CSS 断言测试禁止再写固定列数。完整质量门（146 文件／890 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,357,883 bytes，SHA256 `85727445caac9adb51d2e2636c42819006d7d5670eada16f9eb9384b4c435475`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 本地构建：[TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md) 已产出 `v2.2.1-beta.3`（已被 beta.4 取代）本地 Windows amd64 production 安装包，修正「重置卡」面板里「使用这张卡」按钮变灰。安装器 20,356,443 bytes，SHA256 `5ba8696e9490ab5c57fab45fe79e3bb6a461081e9ea3bf4e7fc80a4f4ff95553`。
