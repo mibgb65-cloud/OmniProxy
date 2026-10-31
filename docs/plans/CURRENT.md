@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-发布进行中：[TASK-20261031-005](../tasks/active/TASK-20261031-005-release-v2.2.1.md)，用户确认以 `v2.2.1` 正式版发布，并要求交付 GitHub Actions 托管构建的签名安装器。源码版本源已同步为 `2.2.1`（Windows 数字版本 `2.2.1.0`／NSIS `2.2.1`），新增中英发布说明 `docs/releases/v2.2.1.md` 并更新 UPGRADE。待完成：完整质量门与本地打包校验、提交推送 main 与 `v2.2.1` 标签、跟踪 Actions build → sign → publish、复验公开资产与更新发现。本次交付内容为 2.2.0 之后的 6 项用户可见改动（仪表盘卡片填充与空态体检清单、账号页切换栏固定与滚动锁定、重置卡可用性判定、展开面板卡片列宽、账号 Token 终身累计与迁移 045）。
+GitHub 发布已完成：[TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)，[v2.2.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.1) 于 2026-10-31 21:25:03（Asia/Singapore）公开为正式 Latest（非草稿、非预发布）。标签源码 `870c1344`，main CI [41204152658](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152658) 与 Release [41204152545](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152545) 全部成功（build／sign／publish）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`，与侧车摘要、GitHub API digest 及实际下载一致；签名证书 `CN=OmniProxy Self-Signed`，SHA256 pin `bfd485e9…c054` 匹配仓库公开证书。生产更新组件的正式／Beta 发现、资产选择、下载与摘要复验全部通过（本次默认传输未再出现 EOF）。实机覆盖安装、迁移 045 首次执行与原生窗口观感保持独立人工验收。
 
 本地构建：[TASK-20261031-004](../tasks/completed/2026-10/TASK-20261031-004-build-local-v2.2.1-beta.5-installer.md) 已产出 `v2.2.1-beta.5` 本地 Windows amd64 production 安装包，内容为账号 Token 用量改为终身累计（TASK-20261031-003，`c2c538b4`）：账号卡片／配额页此前读受保留上限（默认 10000 条）约束的 `request_records`，与「用量」页相差 1.5–2.4 倍且会随时间下降；迁移 045 新建按记账身份索引的 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史（`rv_1fjif` 卡片 749,404,763 → 1,798,841,626）。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
@@ -72,7 +72,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**本地构建（未发布）：2.2.1-beta.5** — 2026-10-31 本地 Windows amd64 production 安装包，账号 Token 用量改为该身份的终身累计（TASK-20261031-004／TASK-20261031-003，`c2c538b4`）：迁移 045 新建 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史，明细淘汰／账号删除／重启都不再让卡片变小。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+**已发布：2.2.1** — 2026-10-31 21:25:03（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest，取代 2.2.0。标签源码 `870c1344`，Windows 数字版本 `2.2.1.0`。内容为 2.2.0 之后的 6 项用户可见改动：仪表盘卡片自适应填充与空态体检清单（`c6c2f658`）、账号页提供商切换栏固定与滚动锁定（`ab47f044`／`902cc49c`）、重置卡可用性判定统一（`7a53b872`）、展开面板卡片列宽封顶（`6c934061`）、账号 Token 用量改终身累计并新增迁移 045（`c2c538b4`）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`；签名 pin、版本资源、更新发现与下载摘要已核验，实机覆盖安装与迁移 045 首次执行待独立验收，见 [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)。
+
+**历史本地构建（未发布，已被 2.2.1 取代）：2.2.1-beta.5** — 2026-10-31 本地 Windows amd64 production 安装包，账号 Token 用量改为该身份的终身累计（TASK-20261031-004／TASK-20261031-003，`c2c538b4`）：迁移 045 新建 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史，明细淘汰／账号删除／重启都不再让卡片变小。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。其变更已纳入本次 2.2.1 正式版。
 
 **历史本地构建（未发布，已被 beta.5 取代）：2.2.1-beta.4** — 2026-10-31 本地 Windows amd64 production 安装包，修正账号页展开面板的账号卡片宽度（TASK-20261031-002／TASK-20261031-001，`6c934061`）：恢复单卡 28rem 封顶并按可用宽度自动增列，全屏下每行多列、卡片内部不再被摊平。安装器 20,357,883 bytes，SHA256 `85727445caac9adb51d2e2636c42819006d7d5670eada16f9eb9384b4c435475`，记录见 [TASK-20261031-002](../tasks/completed/2026-10/TASK-20261031-002-build-local-v2.2.1-beta.4-installer.md)。
 
@@ -82,7 +84,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 **历史本地构建（未发布，已被 beta.2 取代）：2.2.1-beta.1** — 2026-10-30 本地 Windows amd64 production 安装包，相对公开 `2.2.0` 的用户可见改动为仪表盘右侧卡片自适应填充（`c6c2f658`）与账号页提供商切换栏固定／详情独立滚动（`ab47f044`）。完整质量门（145 文件／884 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,352,203 bytes，SHA256 `8f14e3281b5984927ee9c2c251d5eb5d1294b2e29391f902f6970608dfa54cd1`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261030-004](../tasks/completed/2026-10/TASK-20261030-004-build-local-v2.2.1-beta.1-installer.md)。
 
-**已发布：2.2.0** — 2026-10-30 14:10:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest。标签源码 `fe4509528e027cea1693043a59102bdae0623c5f`，Windows 数字版本 `2.2.0.0`。包含更新完成提示、发布说明 Markdown 排版和弹窗／浮层进出过渡，无新增数据库迁移或依赖。签名安装器及摘要、原生版本资源、内嵌证书 pin 已核验；详细网络和人工验收边界见 [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)。
+**历史已发布：2.2.0** — 2026-10-30 14:10:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.1 取代。标签源码 `fe4509528e027cea1693043a59102bdae0623c5f`，Windows 数字版本 `2.2.0.0`。包含更新完成提示、发布说明 Markdown 排版和弹窗／浮层进出过渡，无新增数据库迁移或依赖。签名安装器及摘要、原生版本资源、内嵌证书 pin 已核验；详细网络和人工验收边界见 [TASK-20261030-001](../tasks/completed/2026-10/TASK-20261030-001-release-v2.2.0.md)。
 
 **历史已发布：2.1.0** — 2026-10-29 00:03:34（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.0 取代。标签源码 `4cf789542dfe805dcf31cd0eb42d98233372a223`，Windows 数字版本 `2.1.0.0`。安装器 20,362,016 bytes，SHA256 `8c11a064c3e69726ba71c9d3c72804a7c313ed7cc8f3aa3d452a2f55c9dda8ca`。包含 v2.0.0 之后的网关端口管理与自动避让、新模型、账号交互及记账／额度修复；无新增数据库迁移或依赖。正式／Beta 更新渠道、公开下载、摘要及内嵌证书 pin 已核验，自签仍可能提示未知发布者，实机覆盖安装和客户端联调仍需独立验收。
 
@@ -115,7 +117,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-进行中：[TASK-20261031-005](../tasks/active/TASK-20261031-005-release-v2.2.1.md)（`v2.2.1` 正式版发布，等待质量门、标签推送与 Actions 复验）。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -169,6 +171,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)：`v2.2.1` 正式版已公开发布并成为 stable Latest（2026-10-31 21:25:03 Asia/Singapore）。标签源码 `870c1344`，main CI 与 Release 的 build／sign／publish 全部成功；公开安装器 20,406,184 bytes、SHA256 `b94f311e…40ad` 与侧车摘要、API digest 及实际下载一致，签名 pin 匹配仓库公开证书；正式／Beta 渠道发现、资产选择、下载与摘要复验通过。未自动安装或修改用户数据。
 
 - [TASK-20261031-004](../tasks/completed/2026-10/TASK-20261031-004-build-local-v2.2.1-beta.5-installer.md)：`v2.2.1-beta.5` 本地 production 安装包已构建并通过完整质量门（146 文件／890 项前端测试、51 个 Go 包）、NSIS 打包、Windows 版本资源与发布资产校验（20,366,155 bytes，SHA256 `10d3c066…ef38`）；内容为账号 Token 用量改为终身累计（迁移 045），未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
