@@ -153,7 +153,7 @@ NSIS 统计：`Total size: 20357883 / 81211983 bytes (25.0%)`。比 `v2.2.1-beta
 ## Commit
 
 ```text
-<chore(release) 提交哈希见提交后回填>
+696954f2 chore(release): 构建 2.2.1-beta.4 本地生产安装包
 ```
 
 未推送、未打标签、未签名。
