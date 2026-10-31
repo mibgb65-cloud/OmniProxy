@@ -2,7 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md) 已产出 `v2.2.1-beta.3` 本地 Windows amd64 production 安装包，修正「重置卡」面板里「使用这张卡」按钮变灰：徽标与按钮此前口径不一致（徽标只看状态，按钮还要求 `reset_type` 字面量等于 `codexRateLimits`），官方写法不同就会出现「写着可使用、按钮是灰的」；现由 `usableResetCredit`／`resetCreditUsable` 共用归一判定，后端 `checkResetCredit` 同步放宽，刷新按钮读取期间保持可用并旋转、核对记录时有说明文案。完整质量门（145 文件／887 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,356,443 bytes，SHA256 `5ba8696e9490ab5c57fab45fe79e3bb6a461081e9ea3bf4e7fc80a4f4ff95553`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+本地构建：[TASK-20261031-002](../tasks/completed/2026-10/TASK-20261031-002-build-local-v2.2.1-beta.4-installer.md) 已产出 `v2.2.1-beta.4` 本地 Windows amd64 production 安装包，修正账号页原位展开面板里账号卡片被拉成半个屏幕宽：`bento-accounts.css` 曾用 `repeat(2, minmax(0, 1fr))` 覆盖详情页既有的封顶列宽，2560×1392 全屏时单卡约 1075px、卡片内额度与 Token 信息被摊平；现沿用 `auto-fill` + `clamp(20rem, …, 28rem)` 只覆盖间距，宽屏只增列不增宽（同一容器 2 列 × ≈1075px → 4 列 × 448px），窄面板单列时用满 28rem 上限，并补 3 项 CSS 断言测试禁止再写固定列数。完整质量门（146 文件／890 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,357,883 bytes，SHA256 `85727445caac9adb51d2e2636c42819006d7d5670eada16f9eb9384b4c435475`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
+本地构建：[TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md) 已产出 `v2.2.1-beta.3`（已被 beta.4 取代）本地 Windows amd64 production 安装包，修正「重置卡」面板里「使用这张卡」按钮变灰。安装器 20,356,443 bytes，SHA256 `5ba8696e9490ab5c57fab45fe79e3bb6a461081e9ea3bf4e7fc80a4f4ff95553`。
 
 本地构建：[TASK-20261030-005](../tasks/completed/2026-10/TASK-20261030-005-accounts-dock-pinned-scroll-area.md) 已产出 `v2.2.1-beta.2` 本地 Windows amd64 production 安装包，修正账号页展开态的滚动归属：外层页面滚动区在展开时被锁定（`data-locked` + `overflow-y: clip`）并把偏移归零，覆盖层自身 `overflow: clip`，Dock 所在两行网格改用显式 `data-has-dock`；即使滚动内容里残留 660px 溢出，页面也不可滚动、Dock 坐标不变，只有详情区滚动。完整质量门（145 文件／885 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,354,025 bytes，SHA256 `0d2ad9a56c2edfc44ec6ee1314ef315bc72732e41d8c8b71d1935c031b3d866f`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
@@ -64,7 +66,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**本地构建（未发布）：2.2.1-beta.3** — 2026-10-30 本地 Windows amd64 production 安装包，修正重置卡「使用这张卡」按钮不可用（TASK-20261030-006）：徽标与按钮共用归一后的可用性判定，后端兑换前置检查同步放宽，刷新按钮读取期间保持可用。完整质量门（145 文件／887 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,356,443 bytes，SHA256 `5ba8696e9490ab5c57fab45fe79e3bb6a461081e9ea3bf4e7fc80a4f4ff95553`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md)。
+**本地构建（未发布）：2.2.1-beta.4** — 2026-10-31 本地 Windows amd64 production 安装包，修正账号页展开面板的账号卡片宽度（TASK-20261031-002／TASK-20261031-001，`6c934061`）：恢复单卡 28rem 封顶并按可用宽度自动增列，全屏下每行多列、卡片内部不再被摊平。完整质量门（146 文件／890 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,357,883 bytes，SHA256 `85727445caac9adb51d2e2636c42819006d7d5670eada16f9eb9384b4c435475`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
+**历史本地构建（未发布，已被 beta.4 取代）：2.2.1-beta.3** — 2026-10-30 本地 Windows amd64 production 安装包，修正重置卡「使用这张卡」按钮不可用（TASK-20261030-006）。安装器 20,356,443 bytes，SHA256 `5ba8696e9490ab5c57fab45fe79e3bb6a461081e9ea3bf4e7fc80a4f4ff95553`，记录见 [TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md)。
 
 **历史本地构建（未发布，已被 beta.3 取代）：2.2.1-beta.2** — 2026-10-30 本地 Windows amd64 production 安装包，相对 `2.2.1-beta.1` 修正账号页展开态滚动归属（TASK-20261030-005）：外层页面滚动区锁定为 `overflow-y: clip` 并归零偏移、覆盖层 `overflow: clip`、Dock 行改用 `data-has-dock`，页面不可滚动、只有详情区滚动。完整质量门（145 文件／885 项前端测试）、Windows 版本资源与发布资产校验通过；安装器 20,354,025 bytes，SHA256 `0d2ad9a56c2edfc44ec6ee1314ef315bc72732e41d8c8b71d1935c031b3d866f`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新，记录见 [TASK-20261030-005](../tasks/completed/2026-10/TASK-20261030-005-accounts-dock-pinned-scroll-area.md)。
 
@@ -157,6 +161,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261031-002](../tasks/completed/2026-10/TASK-20261031-002-build-local-v2.2.1-beta.4-installer.md)：`v2.2.1-beta.4` 本地 production 安装包已构建并通过完整质量门（146 文件／890 项前端测试）、NSIS 打包、Windows 版本资源与发布资产校验（20,357,883 bytes，SHA256 `85727445…5475`）；内容为账号页展开面板卡片列宽修复，未签名、未安装、未推送或发布，等待用户本地覆盖更新。
 
 - [TASK-20261031-001](../tasks/completed/2026-10/TASK-20261031-001-bento-panel-card-grid-width.md)：账号页原位展开面板的账号卡片宽度失控——`bento-accounts.css` 用 `repeat(2, minmax(0, 1fr))` 覆盖了详情页既有的封顶列宽，2560×1392 全屏时单卡被拉到约 1075px、卡片内部信息被摊平；改为沿用 `auto-fill` + `clamp(20rem, (100% - gap) / 2, 28rem)` 并只覆盖间距，宽屏只增列不增宽（同一容器修复前 2 列 × ≈1075px → 现在 4 列 × 448px），补 3 项 CSS 断言测试；`task verify` exit 0（146 文件／890 项前端测试、Windows production 构建），原生 WebView2 观感待用户实机确认，运行中的安装版需重新构建。
 

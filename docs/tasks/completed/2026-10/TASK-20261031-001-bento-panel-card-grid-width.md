@@ -189,7 +189,11 @@ PASS（exit 0）
 
 ## Commit
 
-Not committed by Agent.
+```text
+6c934061 fix(accounts): 展开面板账号卡片恢复列宽封顶并按可用宽度增列
+```
+
+包含两份 CSS、新增断言测试与 `node-fs.d.ts`、本任务记录及 CURRENT 回填。未推送、未打标签。
 
 ---
 
@@ -205,4 +209,3 @@ Not committed by Agent.
 # Completed
 
 2026-10-31 12:14
-
