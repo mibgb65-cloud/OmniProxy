@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+发布进行中：[TASK-20261031-005](../tasks/active/TASK-20261031-005-release-v2.2.1.md)，用户确认以 `v2.2.1` 正式版发布，并要求交付 GitHub Actions 托管构建的签名安装器。源码版本源已同步为 `2.2.1`（Windows 数字版本 `2.2.1.0`／NSIS `2.2.1`），新增中英发布说明 `docs/releases/v2.2.1.md` 并更新 UPGRADE。待完成：完整质量门与本地打包校验、提交推送 main 与 `v2.2.1` 标签、跟踪 Actions build → sign → publish、复验公开资产与更新发现。本次交付内容为 2.2.0 之后的 6 项用户可见改动（仪表盘卡片填充与空态体检清单、账号页切换栏固定与滚动锁定、重置卡可用性判定、展开面板卡片列宽、账号 Token 终身累计与迁移 045）。
+
 本地构建：[TASK-20261031-004](../tasks/completed/2026-10/TASK-20261031-004-build-local-v2.2.1-beta.5-installer.md) 已产出 `v2.2.1-beta.5` 本地 Windows amd64 production 安装包，内容为账号 Token 用量改为终身累计（TASK-20261031-003，`c2c538b4`）：账号卡片／配额页此前读受保留上限（默认 10000 条）约束的 `request_records`，与「用量」页相差 1.5–2.4 倍且会随时间下降；迁移 045 新建按记账身份索引的 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史（`rv_1fjif` 卡片 749,404,763 → 1,798,841,626）。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已修复：[TASK-20261031-003](../tasks/completed/2026-10/TASK-20261031-003-account-lifetime-token-usage.md)，账号卡片／配额页的「Token 用量」改为该记账身份的终身累计，不再随请求明细淘汰而变小：此前它读受保留上限（默认 10000 条）约束的 `request_records`，而同账号在「用量」页读不淘汰的每日桶，实测相差 1.5–2.4 倍（`rv_1fjif` 1,798,841,626 对 749,404,763、`mibgb65@gmail.com` 1,029,907,068 对 703,496,436），卡片数值甚至会下降。迁移 045 新建 `usage_accounts`（`subject` 主键），与 `usage_totals`／`usage_buckets`／`usage_provider_models` 在同一记账事务内按差值更新，缓存明细只增不减；建表时从每日桶回填 Token／请求数／完整用量数，并用仍在保留期内的明细回填缓存已知部分（更早的缓存保持下界语义）。`AccountTokenUsage` 改主键读取，`pendingRequests` 仍取留存明细；身份边界与每日桶一致，订阅身份为「提供商类型 + 邮箱 + 工作区」。新增「淘汰 5 条明细后累计仍为 105000」「删除账号行不减少」「同一请求重复缓存快照不重复计入」「迁移回填」四项回归测试。实现提交 `c2c538b4`。
@@ -113,7 +115,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+进行中：[TASK-20261031-005](../tasks/active/TASK-20261031-005-release-v2.2.1.md)（`v2.2.1` 正式版发布，等待质量门、标签推送与 Actions 复验）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
