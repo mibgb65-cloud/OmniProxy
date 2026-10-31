@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -178,7 +178,9 @@ Windows production 构建：bin/omniproxy.exe 23,309,312 bytes
 
 ## Commit
 
-（回填）
+```text
+c2c538b4 fix(accounts): 账号 Token 用量改为终身累计，不再随明细淘汰变小
+```
 
 ---
 
@@ -190,4 +192,4 @@ Windows production 构建：bin/omniproxy.exe 23,309,312 bytes
 
 # Completed
 
-（回填）
+2026-10-31 17:35
