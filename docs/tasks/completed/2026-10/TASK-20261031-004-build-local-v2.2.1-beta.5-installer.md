@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -166,7 +166,11 @@ NSIS 统计：`Total size: 20366155 / 81243687 bytes (25.0%)`。比 `v2.2.1-beta
 
 ## Commit
 
-（回填）
+```text
+e43a377a chore(release): 构建 2.2.1-beta.5 本地生产安装包
+```
+
+未推送、未打标签、未签名。
 
 ---
 
@@ -181,4 +185,4 @@ SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`。
 
 # Completed
 
-（回填）
+2026-10-31 17:58
