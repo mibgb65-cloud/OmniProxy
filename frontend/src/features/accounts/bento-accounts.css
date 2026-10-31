@@ -104,9 +104,23 @@
   padding: 0.25rem 0;
 }
 
+/*
+ * 展开面板沿用 account-card-grid.css 的「列宽封顶 + 按可用宽度自动增列」，
+ * 只放宽间距；这里不能再写固定列数（例如 repeat(2, 1fr)），
+ * 否则宽屏会把每张卡片拉成半个屏幕宽，卡片内部也会被摊平。
+ */
 .bento-panel .account-card-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  --account-card-gap: 1rem;
+}
+
+/*
+ * 面板窄到只放得下一列时（两列至少需要 2 × 20rem + 间距 = 41rem），
+ * 让这一列长到封顶宽度，而不是停在 20rem 最小列宽、右侧留一大片空白；上限仍然生效。
+ */
+@container (max-width: 41rem) {
+  .bento-panel .account-card-grid {
+    grid-template-columns: min(100%, var(--account-card-max-width));
+  }
 }
 
 /* 一条停靠带，而非第二个卡片网格；品牌与文字保留足够宽度，不再挤成省略号。 */
@@ -149,10 +163,13 @@
   min-height: 3.75rem;
 }
 
-/* 按内容区而不是整窗判断；侧栏展开后也不会把双栏账号硬挤到过窄。 */
+/*
+ * 按内容区而不是整窗判断；侧栏展开后也不会把双栏提供商卡片硬挤到过窄。
+ * 账号卡片网格不在此列：它自带 20rem 最小列宽，窄容器下会自己退回单列，
+ * 再用 1fr 覆盖反而会突破 28rem 上限把卡片拉宽。
+ */
 @container (max-width: 44rem) {
-  .bento-accounts,
-  .bento-panel .account-card-grid {
+  .bento-accounts {
     grid-template-columns: minmax(0, 1fr);
   }
 }

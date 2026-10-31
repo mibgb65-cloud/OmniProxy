@@ -1,12 +1,25 @@
 .account-card-grid {
   --account-card-gap: 0.75rem;
+  /* 单张卡片的宽度区间；宽屏只增加列数，不把卡片拉宽。 */
+  --account-card-min-width: 20rem;
+  --account-card-max-width: 28rem;
 
   display: grid;
   gap: var(--account-card-gap);
-  /* 列宽独立于列数连续增长，新增列只改变排列，避免 1fr 均分时突然压窄已有卡片。 */
+  /*
+   * 列宽独立于列数连续增长，新增列只改变排列，避免 1fr 均分时突然压窄已有卡片；
+   * 上限保证超宽窗口下每行多列、单卡仍维持设计宽度。
+   */
   grid-template-columns: repeat(
     auto-fill,
-    min(100%, clamp(20rem, calc((100% - var(--account-card-gap)) / 2), 28rem))
+    min(
+      100%,
+      clamp(
+        var(--account-card-min-width),
+        calc((100% - var(--account-card-gap)) / 2),
+        var(--account-card-max-width)
+      )
+    )
   );
 }
 

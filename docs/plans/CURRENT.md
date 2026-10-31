@@ -158,6 +158,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Recently Completed
 
+- [TASK-20261031-001](../tasks/completed/2026-10/TASK-20261031-001-bento-panel-card-grid-width.md)：账号页原位展开面板的账号卡片宽度失控——`bento-accounts.css` 用 `repeat(2, minmax(0, 1fr))` 覆盖了详情页既有的封顶列宽，2560×1392 全屏时单卡被拉到约 1075px、卡片内部信息被摊平；改为沿用 `auto-fill` + `clamp(20rem, (100% - gap) / 2, 28rem)` 并只覆盖间距，宽屏只增列不增宽（同一容器修复前 2 列 × ≈1075px → 现在 4 列 × 448px），补 3 项 CSS 断言测试；`task verify` exit 0（146 文件／890 项前端测试、Windows production 构建），原生 WebView2 观感待用户实机确认，运行中的安装版需重新构建。
+
 - [TASK-20261030-006](../tasks/completed/2026-10/TASK-20261030-006-reset-credit-usability.md)：重置卡「使用这张卡」按钮变灰——徽标只看官方状态、按钮还要求 `reset_type` 字面量相等，口径分叉导致「写着可使用、按钮是灰的」；改为共用归一判定（`codexRateLimits`／`codex_rate_limits`／`rateLimits` 均可用），后端前置检查同步放宽，刷新按钮读取期间保持可用。含 `v2.2.1-beta.3` 本地安装包（20,356,443 bytes，SHA256 `5ba8696e…5553`），`task verify` exit 0（145 文件／887 项前端测试）。
 
 - [TASK-20261030-005](../tasks/completed/2026-10/TASK-20261030-005-accounts-dock-pinned-scroll-area.md)：账号页展开态「切换提供商」栏不再随页面滚动上移——外层滚动区锁定为 `overflow-y: clip` 并在展开时归零偏移，覆盖层 `overflow: clip`，Dock 行改用显式 `data-has-dock`；注入 660px 残留溢出的隔离 Chromium 核对下页面不可滚动、Dock 坐标不变、详情区正常滚动。含 `v2.2.1-beta.2` 本地安装包（20,354,025 bytes，SHA256 `0d2ad9a5…866f`），`task verify` exit 0（145 文件／885 项前端测试）。
