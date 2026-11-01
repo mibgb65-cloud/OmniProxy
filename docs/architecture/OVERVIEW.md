@@ -1,5 +1,13 @@
 # Architecture Overview
 
+## Codex 订阅目录容量（2026-11-01）
+
+`subscription.Models` 保留隔离官方核心 `model/list` 的公开模型投影，随后经统一受保护凭据入口，
+在同一账号版本下读取固定官方原生目录的默认 `context_window`。`provider/chatgpt` 只做有界 HTTP
+和公开容量解析，不读取用户缓存、不使用 `max_context_window` 扩大默认窗口；合并按精确模型 ID，
+缺失／非法容量使同步失败并保留旧快照。受管客户端目录沿用已有刷新与外部文件保护。
+不新增依赖、迁移或 Core 到桌面框架的依赖，见 TASK-20261101-001。
+
 ## 正式版安装器数据身份（2026-10-26）
 
 安装器通过明确的原安装程序路径传递历史标记来源，`platform/profile.InstallerLocation`

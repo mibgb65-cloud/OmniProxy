@@ -13,6 +13,7 @@ import (
 
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/infrastructure/codex"
+	"omniproxy/internal/provider/chatgpt"
 )
 
 const loginTimeout = 10 * time.Minute
@@ -57,6 +58,8 @@ type Service struct {
 	root              string
 	factory           Factory
 	readToken         func(context.Context, string, string, string, func([]byte, string) error) error
+	modelWindows      func(context.Context, []byte, string, string) (map[string]int64, error)
+	codexVersion      func(context.Context) (string, error)
 	removeCredentials func(string) error
 	current           *session
 	history           map[string]State
@@ -80,7 +83,9 @@ func New(accounts *account.Service, root string, factory Factory) *Service {
 	if factory == nil {
 		factory = codex.Open
 	}
-	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseFreshToken, removeCredentials: codex.DeleteCredentials, history: map[string]State{}}
+	return &Service{accounts: accounts, root: root, factory: factory, readToken: codex.UseFreshToken,
+		modelWindows: chatgpt.New(nil).ModelContextWindows, codexVersion: codex.InstalledVersion,
+		removeCredentials: codex.DeleteCredentials, history: map[string]State{}}
 }
 func failure(code string) error { return errors.New("subscription: " + code) }
 func randomID() (string, error) {

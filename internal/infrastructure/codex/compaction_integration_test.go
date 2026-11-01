@@ -31,6 +31,16 @@ func (s compactQAUpstream) Forward(ctx context.Context, r proxy.Request, c func(
 
 // 用真实本机核心、真实代理和固定假上游验证 V2；不继承用户登录或把请求发送到外网。
 func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
+	for _, automatic := range []bool{false, true} {
+		name := "manual"
+		if automatic {
+			name = "automatic_from_catalog_capacity"
+		}
+		t.Run(name, func(t *testing.T) { installedCodexCompaction(t, automatic) })
+	}
+}
+
+func installedCodexCompaction(t *testing.T, automatic bool) {
 	executable := os.Getenv("OMNIPROXY_CODEX_TEST_EXECUTABLE")
 	if os.Getenv("OMNIPROXY_CODEX_COMPACT_QA") != "1" || executable == "" {
 		t.Skip("显式启用本机离线压缩契约验收")
@@ -41,6 +51,9 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 	home, work := t.TempDir(), t.TempDir()
 	var compactCalls atomic.Int32
 	adapter := chatgpt.New(compactQATransport(func(r *http.Request) (*http.Response, error) {
+		if r.Method == http.MethodGet && r.URL.Path == "/backend-api/codex/models" {
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"models":[{"slug":"gpt-qa","context_window":100000,"max_context_window":1000000}]}`))}, nil
+		}
 		if r.URL.String() != "https://chatgpt.com/backend-api/codex/responses" || r.Header.Get("Authorization") != "Bearer qa-upstream" {
 			t.Error("native compaction escaped the fixed subscription adapter")
 		}
@@ -56,11 +69,16 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 			compactCalls.Add(1)
 			item = map[string]any{"type": "compaction", "id": "cmp_qa", "encrypted_content": "opaque-qa"}
 		}
+		inputTokens := 10
+		if automatic && !compact && compactCalls.Load() == 0 {
+			// 只有合成 usage 越过 90% 默认阈值，不生成或发送真实大上下文。
+			inputTokens = 90001
+		}
 		var data strings.Builder
 		for _, event := range []map[string]any{
 			{"type": "response.created", "response": map[string]any{"id": "resp_qa", "status": "in_progress", "output": []any{}}},
 			{"type": "response.output_item.done", "output_index": 0, "item": item},
-			{"type": "response.completed", "response": map[string]any{"id": "resp_qa", "status": "completed", "output": []any{item}, "usage": map[string]int{"input_tokens": 10, "output_tokens": 1, "total_tokens": 11}}},
+			{"type": "response.completed", "response": map[string]any{"id": "resp_qa", "status": "completed", "output": []any{item}, "usage": map[string]int{"input_tokens": inputTokens, "output_tokens": 1, "total_tokens": inputTokens + 1}}},
 		} {
 			raw, _ := json.Marshal(event)
 			data.WriteString("data: " + string(raw) + "\n\n")
@@ -72,7 +90,12 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer server.Stop(context.Background())
-	models, err := catalog.CodexJSON([]catalog.Entry{{ID: "gpt-qa", Name: "QA", ProviderKind: "openai"}})
+	windows, err := adapter.ModelContextWindows(context.Background(), []byte("qa-upstream"), "qa-account", "0.163.0")
+	if err != nil {
+		t.Fatal("native model capacity fixture failed")
+	}
+	window := windows["gpt-qa"]
+	models, err := catalog.CodexJSON([]catalog.Entry{{ID: "gpt-qa", Name: "QA", ProviderKind: "openai", Metadata: catalog.Metadata{ContextWindow: &window}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +152,12 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 		t.Fatal("isolated turn failed")
 	}
 	waitQAThread(ctx, t, client, started.Thread.ID, false)
-	if err = client.call(ctx, "thread/compact/start", map[string]string{"threadId": started.Thread.ID}, &ignored); err != nil {
+	method, params := "thread/compact/start", map[string]any{"threadId": started.Thread.ID}
+	if automatic {
+		method = "turn/start"
+		params["input"] = []any{map[string]string{"type": "text", "text": "Continue offline QA"}}
+	}
+	if err = client.call(ctx, method, params, &ignored); err != nil {
 		t.Fatal("native compaction request rejected")
 	}
 	waitQAThread(ctx, t, client, started.Thread.ID, true)
@@ -137,48 +165,4 @@ func TestInstalledCodexRemoteCompactionV2ThroughProxy(t *testing.T) {
 		t.Fatal("native V2 compaction was not forwarded exactly once")
 	}
 	t.Log("native Responses V2 compaction and completed contextCompaction item verified through real proxy")
-}
-
-func waitQAThread(ctx context.Context, t *testing.T, client *rpcClient, id string, compact bool) {
-	t.Helper()
-	for range 1000 {
-		var result struct {
-			Thread struct {
-				Turns []struct {
-					Status string `json:"status"`
-					Items  []struct {
-						Type string `json:"type"`
-					} `json:"items"`
-				} `json:"turns"`
-			} `json:"thread"`
-		}
-		if err := client.call(ctx, "thread/read", map[string]any{"threadId": id, "includeTurns": true}, &result); err != nil {
-			// 新线程的 rollout 尚未物化时读取可能暂不可用；有界等待，不能当作压缩已经成功。
-			if err.Error() != "subscription: request_failed" || ctx.Err() != nil {
-				t.Fatal("QA thread state unavailable")
-			}
-		}
-		if turns := result.Thread.Turns; len(turns) > 0 {
-			last := turns[len(turns)-1]
-			if last.Status == "failed" {
-				t.Fatal("isolated native compaction turn failed")
-			}
-			if last.Status == "completed" {
-				if !compact {
-					return
-				}
-				for _, item := range last.Items {
-					if item.Type == "contextCompaction" {
-						return
-					}
-				}
-			}
-		}
-		select {
-		case <-ctx.Done():
-			t.Fatal("QA thread timed out")
-		case <-time.After(20 * time.Millisecond):
-		}
-	}
-	t.Fatal("QA thread did not reach expected completed state")
 }

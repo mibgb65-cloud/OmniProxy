@@ -72,6 +72,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
+**当前源码：2.2.2（待发布）** — 修复 Codex 订阅目录缺失默认容量导致的自动压缩失效，见 [TASK-20261101-001](../tasks/active/TASK-20261101-001-codex-auto-compaction-capacity.md)。本轮按用户要求暂不进行真实客户端验收。
+
 **已发布：2.2.1** — 2026-10-31 21:25:03（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest，取代 2.2.0。标签源码 `870c1344`，Windows 数字版本 `2.2.1.0`。内容为 2.2.0 之后的 6 项用户可见改动：仪表盘卡片自适应填充与空态体检清单（`c6c2f658`）、账号页提供商切换栏固定与滚动锁定（`ab47f044`／`902cc49c`）、重置卡可用性判定统一（`7a53b872`）、展开面板卡片列宽封顶（`6c934061`）、账号 Token 用量改终身累计并新增迁移 045（`c2c538b4`）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`；签名 pin、版本资源、更新发现与下载摘要已核验，实机覆盖安装与迁移 045 首次执行待独立验收，见 [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)。
 
 **历史本地构建（未发布，已被 2.2.1 取代）：2.2.1-beta.5** — 2026-10-31 本地 Windows amd64 production 安装包，账号 Token 用量改为该身份的终身累计（TASK-20261031-004／TASK-20261031-003，`c2c538b4`）：迁移 045 新建 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史，明细淘汰／账号删除／重启都不再让卡片变小。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。其变更已纳入本次 2.2.1 正式版。
@@ -117,7 +119,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261101-001](../tasks/active/TASK-20261101-001-codex-auto-compaction-capacity.md)：修复 Codex 订阅模型容量丢失与自动压缩失效，发布 `2.2.2` 补丁版本；按用户要求暂不做真实客户端人工验收。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

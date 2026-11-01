@@ -16,6 +16,7 @@ import (
 type fakeSubscription struct {
 	fail   bool
 	change func()
+	window *int64
 }
 
 func (s *fakeSubscription) Models(context.Context, string) ([]codex.Model, error) {
@@ -26,7 +27,7 @@ func (s *fakeSubscription) Models(context.Context, string) ([]codex.Model, error
 		return nil, errors.New("upstream-private-data")
 	}
 	return []codex.Model{{ID: "gpt-test", Name: "GPT Test", Metadata: core.Metadata{
-		Description: "Official model", IsDefault: true, DefaultEffort: "high",
+		Description: "Official model", IsDefault: true, DefaultEffort: "high", ContextWindow: s.window,
 		ReasoningEfforts: []core.Effort{{Value: "high"}},
 		ServiceTiers:     []core.ServiceTier{{ID: "priority", Name: "Fast", Description: "Official usage"}},
 	}}}, nil
@@ -54,6 +55,13 @@ func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T)
 	if models[0].Metadata.Description != "Official model" || len(models[0].Metadata.ReasoningEfforts) != 1 || !models[0].Metadata.IsDefault || len(models[0].Metadata.ServiceTiers) != 1 || models[0].Metadata.ServiceTiers[0].ID != "priority" {
 		t.Fatal("official metadata was not persisted")
 	}
+	// 模拟升级前的空容量快照：重新同步必须补齐，而失败不能再清空容量。
+	window := int64(500000)
+	upstream.window = &window
+	models, err = s.Sync(ctx, "a")
+	if err != nil || len(models) != 1 || models[0].Metadata.ContextWindow == nil || *models[0].Metadata.ContextWindow != window {
+		t.Fatal("legacy snapshot capacity was not repaired", err)
+	}
 	upstream.fail = true
 	if _, err = s.Sync(ctx, "a"); err == nil || err.Error() != "models: unavailable" {
 		t.Fatal("failure leaked detail")
@@ -64,6 +72,9 @@ func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T)
 	}
 	if len(models[0].Metadata.ServiceTiers) != 1 || models[0].Metadata.ServiceTiers[0].Description != "Official usage" {
 		t.Fatal("last Fast capability snapshot lost")
+	}
+	if models[0].Metadata.ContextWindow == nil || *models[0].Metadata.ContextWindow != window {
+		t.Fatal("last capacity snapshot lost")
 	}
 	db.Exec(`UPDATE accounts SET name='renamed',updated_at='later' WHERE id='a'`)
 	models, err = s.List(ctx)

@@ -361,4 +361,6 @@ Codex 的对话变更摘要依赖客户端核心生成的 `fileChange`／`turn/d
 
 自动压缩触发阈值由 Codex 的 `model_auto_compact_token_limit` 与模型实际能力决定，独立于请求传输压缩 `enable_request_compression`。用户原有全局上下文窗口／压缩阈值不会被本轮修复改写；配置较大窗口不等于官方已确认该模型可承载同样容量。接口修复不会自动修复既有失败会话或证明真实大上下文压缩已成功。
 
+从 `2.2.2` 起，订阅同步不再尝试从 App Server `model/list` 获取窗口（该公开投影没有此字段）；保留它的可见模型、名称、默认项及档位，同时通过同一已核验账号的受保护令牌访问固定官方原生目录，按精确模型 ID 补齐默认 `context_window`。不读取用户默认缓存，不把 `max_context_window` 当默认容量，不推断缺失值。响应、数量和数值有边界，沿用提供商代理与账号版本保护；容量缺失／非法或读取失败会明确报错并保留旧快照。升级后需为受影响账号同步一次模型，再重新加载 Codex；已有显式用户窗口／阈值仍保留且可能覆盖模型默认值，外部修改过的受管文件仍须预览确认。
+
 协议对照：[官方 App Server 文档](https://learn.chatgpt.com/docs/app-server)、[Codex 配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)、[Responses 压缩说明](https://developers.openai.com/api/docs/guides/compaction)。实际桌面内核的 V2 路径以本机离线契约确认，不根据公共 API 的 legacy 示例推断。

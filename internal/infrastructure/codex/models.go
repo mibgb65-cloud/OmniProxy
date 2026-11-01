@@ -28,7 +28,6 @@ func (c *rpcClient) Models(ctx context.Context) ([]Model, error) {
 					Value       string `json:"reasoningEffort"`
 					Description string `json:"description"`
 				} `json:"supportedReasoningEfforts"`
-				ContextWindow   *int64                `json:"contextWindow"`
 				InputModalities []string              `json:"inputModalities"`
 				ToolUse         *bool                 `json:"supportsToolUse"`
 				IsDefault       bool                  `json:"isDefault"`
@@ -51,7 +50,8 @@ func (c *rpcClient) Models(ctx context.Context) ([]Model, error) {
 				return nil, ErrProtocol
 			}
 			if !seen[item.Model] {
-				metadata := catalog.Metadata{Description: item.Description, ContextWindow: item.ContextWindow, DefaultEffort: item.DefaultEffort, InputModalities: item.InputModalities, ToolUse: item.ToolUse, IsDefault: item.IsDefault}
+				// model/list 是公开投影，不提供上下文容量；由应用层按同一授权补齐原生目录容量。
+				metadata := catalog.Metadata{Description: item.Description, DefaultEffort: item.DefaultEffort, InputModalities: item.InputModalities, ToolUse: item.ToolUse, IsDefault: item.IsDefault}
 				metadata.ServiceTiers = item.ServiceTiers
 				for _, effort := range item.Efforts {
 					metadata.ReasoningEfforts = append(metadata.ReasoningEfforts, catalog.Effort{Value: effort.Value, Description: effort.Description})

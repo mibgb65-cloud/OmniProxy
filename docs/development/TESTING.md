@@ -17,6 +17,12 @@
 
 ## Running tests
 
+Codex 压缩专项可用 `OMNIPROXY_CODEX_COMPACT_QA=1` 与绝对路径
+`OMNIPROXY_CODEX_TEST_EXECUTABLE` 执行
+`go test ./internal/infrastructure/codex -run '^TestInstalledCodexRemoteCompactionV2ThroughProxy$' -count=1 -v`。
+测试仅使用隔离目录、短合成消息、模拟 usage 和假上游，覆盖手动压缩及从原生目录容量触发的自动压缩；
+不读取真实凭据或证明真实大上下文能力。默认测试未设置环境变量时明确跳过该专项。
+
 ```bash
 task test            # Go + frontend
 go test . ./internal/...   # Go only
