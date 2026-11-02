@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+当前 GitHub 正式版：[v2.2.2](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.2)，2026-11-01 23:24:49（Asia/Singapore）公开为 stable Latest，标签源码 `077194e5`。修复 Codex 订阅目录容量丢失与自动压缩触发依据缺失；main CI [41319427444](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427444) 及 Release [41319427603](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427603) 的构建／签名／发布全部成功。升级后同步受影响账号模型并重新加载 Codex；本轮不做真实客户端／覆盖安装验收，完整记录见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。下方保留历史发布与构建记录。
+
 GitHub 发布已完成：[TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)，[v2.2.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.1) 于 2026-10-31 21:25:03（Asia/Singapore）公开为正式 Latest（非草稿、非预发布）。标签源码 `870c1344`，main CI [41204152658](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152658) 与 Release [41204152545](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152545) 全部成功（build／sign／publish）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`，与侧车摘要、GitHub API digest 及实际下载一致；签名证书 `CN=OmniProxy Self-Signed`，SHA256 pin `bfd485e9…c054` 匹配仓库公开证书。生产更新组件的正式／Beta 发现、资产选择、下载与摘要复验全部通过（本次默认传输未再出现 EOF）。实机覆盖安装、迁移 045 首次执行与原生窗口观感保持独立人工验收。
 
 本地构建：[TASK-20261031-004](../tasks/completed/2026-10/TASK-20261031-004-build-local-v2.2.1-beta.5-installer.md) 已产出 `v2.2.1-beta.5` 本地 Windows amd64 production 安装包，内容为账号 Token 用量改为终身累计（TASK-20261031-003，`c2c538b4`）：账号卡片／配额页此前读受保留上限（默认 10000 条）约束的 `request_records`，与「用量」页相差 1.5–2.4 倍且会随时间下降；迁移 045 新建按记账身份索引的 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史（`rv_1fjif` 卡片 749,404,763 → 1,798,841,626）。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、NSIS 打包、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。未签名、未自动安装、未打标签、未推送或公开发布，供用户本地覆盖更新。
@@ -72,9 +74,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**当前源码：2.2.2（待发布）** — 修复 Codex 订阅目录缺失默认容量导致的自动压缩失效，见 [TASK-20261101-001](../tasks/active/TASK-20261101-001-codex-auto-compaction-capacity.md)。本轮按用户要求暂不进行真实客户端验收。
+**已发布：2.2.2** — 2026-11-01 23:24:49（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest，取代 2.2.1。标签源码 `077194e5`，Windows 数字版本 `2.2.2.0`。安装器 20,417,368 bytes，GitHub API SHA256 `e4c44bbf11077aa97d65f739ff505814840aee996ae69e115886b0303123e04c`；托管构建、自签、篡改拒绝、摘要复验及发布全部通过，见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。本轮按用户要求暂不进行真实客户端或覆盖安装验收。
 
-**已发布：2.2.1** — 2026-10-31 21:25:03（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest，取代 2.2.0。标签源码 `870c1344`，Windows 数字版本 `2.2.1.0`。内容为 2.2.0 之后的 6 项用户可见改动：仪表盘卡片自适应填充与空态体检清单（`c6c2f658`）、账号页提供商切换栏固定与滚动锁定（`ab47f044`／`902cc49c`）、重置卡可用性判定统一（`7a53b872`）、展开面板卡片列宽封顶（`6c934061`）、账号 Token 用量改终身累计并新增迁移 045（`c2c538b4`）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`；签名 pin、版本资源、更新发现与下载摘要已核验，实机覆盖安装与迁移 045 首次执行待独立验收，见 [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)。
+**历史已发布：2.2.1** — 2026-10-31 21:25:03（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.2 取代。标签源码 `870c1344`，Windows 数字版本 `2.2.1.0`。内容为 2.2.0 之后的 6 项用户可见改动：仪表盘卡片自适应填充与空态体检清单（`c6c2f658`）、账号页提供商切换栏固定与滚动锁定（`ab47f044`／`902cc49c`）、重置卡可用性判定统一（`7a53b872`）、展开面板卡片列宽封顶（`6c934061`）、账号 Token 用量改终身累计并新增迁移 045（`c2c538b4`）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`；签名 pin、版本资源、更新发现与下载摘要已核验，实机覆盖安装与迁移 045 首次执行待独立验收，见 [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)。
 
 **历史本地构建（未发布，已被 2.2.1 取代）：2.2.1-beta.5** — 2026-10-31 本地 Windows amd64 production 安装包，账号 Token 用量改为该身份的终身累计（TASK-20261031-004／TASK-20261031-003，`c2c538b4`）：迁移 045 新建 `usage_accounts`，与 `usage_totals`／`usage_buckets`／`usage_provider_models` 同事务按差值累计，建表时从每日桶回填历史，明细淘汰／账号删除／重启都不再让卡片变小。完整质量门（146 文件／890 项前端测试、51 个 Go 包）、Windows 版本资源与发布资产校验通过；安装器 20,366,155 bytes，SHA256 `10d3c0664ca7424c6bef4b1a77f5c27ca5f94e1383567eafbc5bafb7f433ef38`，Windows 数字版本 `2.2.1.0`。其变更已纳入本次 2.2.1 正式版。
 
@@ -119,7 +121,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261101-001](../tasks/active/TASK-20261101-001-codex-auto-compaction-capacity.md)：修复 Codex 订阅模型容量丢失与自动压缩失效，发布 `2.2.2` 补丁版本；按用户要求暂不做真实客户端人工验收。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -173,6 +175,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)：修复 Codex 订阅目录默认容量与自动压缩触发依据，完成离线回归和质量门，正式发布 `2.2.2`。
 
 - [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)：`v2.2.1` 正式版已公开发布并成为 stable Latest（2026-10-31 21:25:03 Asia/Singapore）。标签源码 `870c1344`，main CI 与 Release 的 build／sign／publish 全部成功；公开安装器 20,406,184 bytes、SHA256 `b94f311e…40ad` 与侧车摘要、API digest 及实际下载一致，签名 pin 匹配仓库公开证书；正式／Beta 渠道发现、资产选择、下载与摘要复验通过。未自动安装或修改用户数据。
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -56,7 +56,7 @@ In Progress
 - 应用层先释放发现锁，再通过统一 `UseTokenAt` 凭据入口校验同一账号版本并读取容量，保留提供商代理作用域；按精确 ID 合并，不增加不可见模型。容量未知／非法或上游失败统一返回安全错误，既有数据库事务保留上次成功快照。
 - 新增官方响应投影、安全边界、账号变更、旧空容量快照恢复及失败后保留容量回归；扩展本机 CLI／Desktop 原生离线契约，从目录容量和合成 usage 验证自动压缩，不依赖全局窗口／阈值覆盖。
 - 版本源和 Windows 映射提升至 `2.2.2`／`2.2.2.0`，补齐双语发布说明及同步模型／重新加载的升级步骤。不修改用户当前配置、数据或运行中的应用。
-- GitHub 发布待提交与标签推送后执行；按用户要求不做真实长聊天、真实上游摘要质量或覆盖安装验收。
+- 已提交并原子推送 `main` 与注解标签 `v2.2.2`，GitHub Actions 的 build／sign／publish 全部成功，正式版已公开为 stable Latest；按用户要求不做真实长聊天、真实上游摘要质量或覆盖安装验收。
 
 ## Verification
 
@@ -65,6 +65,9 @@ In Progress
 - PASS（退出码 0）：`VITEST_MAX_WORKERS=4 task --force verify BIN_DIR=bin/verify-compaction-222`，格式、lint、类型检查、51 个 Go 测试包、146 文件／890 项前端测试及 Windows production 构建全部通过。保留既有 ESLint react-refresh、jsdom scrollTo 与 Vite 大 chunk 提示。
 - PASS：通过仓库既有 Windows 原生版本 API 读取本地 quality-gate 应用，`ProductVersion=2.2.2`、数字版本 `2.2.2.0`、产品与公司均为 OmniProxy；未把本地构建当作公开安装器。
 - PASS：`git diff --check`；新增主要源码及发布说明 UTF-8 无 BOM、LF 检查。
+- PASS：main CI [41319427444](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427444)；Release [41319427603](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427603) 的 build／sign／publish 全部 success，check-signing 按设计 skipped。签名作业完成项目证书 pin、原生验签、篡改拒绝及摘要校验，发布作业再次核验后才公开。
+- PASS：公开 [v2.2.2](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.2) 的 `draft=false`、`prerelease=false`，`releases/latest` 返回 `v2.2.2`。GitHub 原始 `published_at=2026-11-01T15:24:49Z`，对应 Asia/Singapore `2026-11-01 23:24:49`；发布正文与仓库说明完全一致。
+- PASS：公开资产恰为安装器及 `.sha256` 侧车。安装器 `OmniProxy-Setup-v2.2.2-windows-amd64.exe` 为 20,417,368 bytes，GitHub API digest 为 `sha256:e4c44bbf11077aa97d65f739ff505814840aee996ae69e115886b0303123e04c`；侧车为 107 bytes。摘要／签名的实际文件复验由 Release 工作流执行，本轮不另行下载或安装公开包。
 - 真实客户端／真实大上下文／覆盖安装：按用户要求暂不执行，不能将离线合成 usage 契约等同于真实窗口容量验证。
 
 ## Documentation
@@ -76,11 +79,22 @@ In Progress
 
 - 升级修复沿用显式「同步模型」和既有受管文件刷新，不新增自动联网迁移或覆盖用户配置的后台任务。
 - 用户后续明确要求公开发布，原仅修复范围扩展为 `2.2.2` 正式补丁发布；人工验收按要求延期。
+- GitHub 状态读取偶发 EOF；只对诊断命令做有界重试和临时 HTTP/1.1 读取，没有修改应用传输或用户网络设置。以最终 API 状态及实际成功作业为准，不将 watcher 的网络失败当成发布失败。
 
 ## Git
 
-待完成差异审查及提交。
+```text
+077194e5348b6721da28dfce80859b0fb8a2f7fd fix(codex): 修复自动压缩容量来源并准备 2.2.2
+```
+
+`main` 与注解标签 `v2.2.2` 已原子推送，未改写既有历史或旧标签。原有无关未跟踪任务记录保持原样，未加入提交。
+
+注解标签对象 `b60d7bcf50e4bc8825bbf6b1e4b529f069653152` 指向上述修复提交；后续发布归档只提交文档，不移动已共享标签。
 
 ## Result
 
-进行中。
+模型容量来源已根本修正，旧空容量快照可在「同步模型」后补齐，完整质量门及 CLI／Desktop 离线自动压缩回归通过。`v2.2.2` 已通过既有托管构建、自签与发布流程公开为正式 Latest；用户配置、数据、运行中的客户端及无关任务文件未被修改。升级后同步受影响账号模型并重新加载 Codex；真实客户端验收、真实大上下文摘要质量及覆盖安装按用户要求暂不执行。
+
+## Completed
+
+2026-11-02（Asia/Singapore，发布核对与任务归档）
