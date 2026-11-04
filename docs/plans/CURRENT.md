@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-进行中：[TASK-20261104-002](../tasks/active/TASK-20261104-002-build-local-wails-v3.1.0-beta.md)，准备 `v2.2.3-beta.1` 本地 Windows amd64 生产安装包，包含 Wails `v3.1.0` 升级。按用户要求不重复测试和完整质量门，版本提交后仅执行生产打包与产物校验；不自动安装、不启动、不公开发布。
+本地构建：[TASK-20261104-002](../tasks/completed/2026-11/TASK-20261104-002-build-local-wails-v3.1.0-beta.md) 已产出 `v2.2.3-beta.1` Windows amd64 生产安装包，源码提交 `8399d382`，包含 Wails `v3.1.0` 升级，无新增数据库迁移。按用户要求未重复测试或完整质量门，仅执行生产构建／NSIS 打包及原生版本资源、构建信息、摘要校验。安装器 20,555,019 bytes，SHA256 `e11b86bb53ed1e7605afeecaa8e8d5c8cfe983ce7b877ffebb825441b92e5a61`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已完成：[TASK-20261104-001](../tasks/completed/2026-11/TASK-20261104-001-upgrade-wails-v3.1.0.md)，Wails Go 模块、前端 runtime、本机 CLI 与 CI／Release 已固定升级到正式版 `3.1.0`；保留现有 Taskfile。完整质量门（Vitest 限 4 并发，146 文件／890 项前端测试、51 个 Go 测试包）与隔离 Windows 开发 EXE 构建、原生版本资源核验通过，实现提交 `b74dd234`；未制作安装包、未启动应用、未推送，原生窗口／托盘人工验收仍待执行。
 
