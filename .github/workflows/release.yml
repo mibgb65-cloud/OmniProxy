@@ -73,7 +73,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Task setup failed' }
           go install honnef.co/go/tools/cmd/staticcheck@v0.8.1
           if ($LASTEXITCODE -ne 0) { throw 'staticcheck setup failed' }
-          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.30
+          go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
           if ($LASTEXITCODE -ne 0) { throw 'Wails setup failed' }
           choco install nsis -y --no-progress
           if ($LASTEXITCODE -ne 0) { throw 'NSIS setup failed' }

@@ -167,7 +167,7 @@ Version requirements are documented in [`go.mod`](go.mod), [`.nvmrc`](.nvmrc), a
 
 ```bash
 go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.30
+go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
 task setup
 task dev
 ```

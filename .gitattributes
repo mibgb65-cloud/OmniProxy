@@ -17,6 +17,9 @@
 *.nsh text eol=lf
 *.sh text eol=lf
 
+# Wails 生成器保留文件末尾空行；保持生成结果原样，仅豁免生成目录的此项检查。
+frontend/bindings/** whitespace=-blank-at-eof
+
 # Binary files
 *.png binary
 *.jpg binary

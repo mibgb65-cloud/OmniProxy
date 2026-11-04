@@ -52,7 +52,7 @@ gh workflow run release.yml --ref main -f tag=v2.0.0 -f publish=false
 ./scripts/verify-release-assets.ps1 -Version v2.0.0-beta.1 -AssetDirectory ./release-assets
 ```
 
-所需工具延用 BUILD：Go 1.26、Node 22、pnpm、Task、Wails beta.30、staticcheck、NSIS。Release 工作流固定 pnpm 12.6.0、Task 3.53.1、staticcheck v0.8.1 及 Wails beta.30，不安装新的业务依赖。机器级实际安装需要管理员确认，打包本身不需要安装程序到本机。
+所需工具延用 BUILD：Go 1.26、Node 22、pnpm、Task、Wails v3.1.0、staticcheck、NSIS。Release 工作流固定 pnpm 12.6.0、Task 3.53.1、staticcheck v0.8.1 及 Wails v3.1.0，不安装新的业务依赖。机器级实际安装需要管理员确认，打包本身不需要安装程序到本机。
 
 ## GitHub Actions
 

@@ -50,7 +50,7 @@ const runtimeInfo: RuntimeInfo = {
   proxyPort: 3002,
   controlPort: 3892,
   goVersion: "go1.26.2",
-  wailsVersion: "v3.0.0-beta.25",
+  wailsVersion: "v3.1.0",
   platform: "windows/amd64",
   sqliteVersion: "3.50.4",
   startedAt: new Date(Date.now() - 65_000).toISOString(),
@@ -94,7 +94,7 @@ describe("AboutView", () => {
     await waitFor(() => {
       expect(screen.getByText("go1.26.2")).toBeInTheDocument()
     })
-    expect(screen.getByText("v3.0.0-beta.25")).toBeInTheDocument()
+    expect(screen.getByText("v3.1.0")).toBeInTheDocument()
     expect(screen.getByText("windows/amd64")).toBeInTheDocument()
     expect(screen.getByText("3.50.4")).toBeInTheDocument()
     expect(screen.getByText("3002 / 3892")).toBeInTheDocument()

@@ -23,7 +23,7 @@ export const info = {
   proxyPort: 3002,
   controlPort: 3892,
   goVersion: "go1.26.2",
-  wailsVersion: "v3.0.0-beta.30",
+  wailsVersion: "v3.1.0",
   platform: "windows/amd64",
   sqliteVersion: "3.50.4",
   startedAt: "2026-10-19T00:00:00Z",

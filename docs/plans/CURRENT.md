@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261104-001](../tasks/active/TASK-20261104-001-upgrade-wails-v3.1.0.md)，Wails Go 模块、前端 runtime、本机 CLI 与 CI／Release 已固定升级到正式版 `3.1.0`；保留现有 Taskfile。完整质量门（Vitest 限 4 并发，146 文件／890 项前端测试、51 个 Go 测试包）与隔离 Windows 开发 EXE 构建、原生版本资源核验通过，待提交归档；不制作安装包、不启动应用。
+
 当前 GitHub 正式版：[v2.2.2](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.2)，2026-11-01 23:24:49（Asia/Singapore）公开为 stable Latest，标签源码 `077194e5`。修复 Codex 订阅目录容量丢失与自动压缩触发依据缺失；main CI [41319427444](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427444) 及 Release [41319427603](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427603) 的构建／签名／发布全部成功。升级后同步受影响账号模型并重新加载 Codex；本轮不做真实客户端／覆盖安装验收，完整记录见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。下方保留历史发布与构建记录。
 
 GitHub 发布已完成：[TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)，[v2.2.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.1) 于 2026-10-31 21:25:03（Asia/Singapore）公开为正式 Latest（非草稿、非预发布）。标签源码 `870c1344`，main CI [41204152658](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152658) 与 Release [41204152545](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41204152545) 全部成功（build／sign／publish）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`，与侧车摘要、GitHub API digest 及实际下载一致；签名证书 `CN=OmniProxy Self-Signed`，SHA256 pin `bfd485e9…c054` 匹配仓库公开证书。生产更新组件的正式／Beta 发现、资产选择、下载与摘要复验全部通过（本次默认传输未再出现 EOF）。实机覆盖安装、迁移 045 首次执行与原生窗口观感保持独立人工验收。

@@ -178,7 +178,7 @@ Linux、macOS 及其他架构暂未作为已维护的发行目标。
 
 ```bash
 go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.30
+go install github.com/wailsapp/wails/v3/cmd/wails3@v3.1.0
 ```
 
 桌面开发同样需要 Windows 和 WebView2；生成 NSIS 安装包还需安装 NSIS。
