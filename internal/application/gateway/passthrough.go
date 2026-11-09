@@ -93,6 +93,10 @@ func (s *Service) openFallbackSession(ctx context.Context, model, base string) (
 		AccountUpdatedAt: initial.updatedAt, Model: model, Protocol: "responses",
 		Candidates: candidates,
 	}
+	plan.Candidates, err = s.rotateFallbackCandidates(ctx, initial, plan)
+	if err != nil {
+		return nil, err
+	}
 	return s.newPassthroughSession(ctx, initial, plan, model, base, false)
 }
 

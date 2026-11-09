@@ -69,6 +69,7 @@ func (s *AppService) subscriptionService() (*subscription.Service, error) {
 		if emit != nil {
 			emit()
 		}
+		s.requestOpenAIModelSync()
 	})
 	s.subscription.service = manager
 	return manager, nil
@@ -193,7 +194,11 @@ func (s *AppService) SubscriptionRefresh(id string) (account.Item, error) {
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return service.Refresh(ctx, id)
+	item, err := service.Refresh(ctx, id)
+	if err == nil {
+		s.requestOpenAIModelSync()
+	}
+	return item, err
 }
 
 // SubscriptionLogout 清除该账号系统凭证并保留账号元数据。
@@ -213,7 +218,11 @@ func (s *AppService) SubscriptionLogout(id string) (account.Item, error) {
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return service.Logout(ctx, id)
+	item, err := service.Logout(ctx, id)
+	if err == nil {
+		s.requestOpenAIModelSync()
+	}
+	return item, err
 }
 
 func (s *AppService) bindSubscriptionEvents(app *application.App) {

@@ -11,13 +11,20 @@ import type { ReactNode } from "react"
 import { I18nProvider } from "../../i18n/provider"
 import type { DefaultModelRoute, RouteItem } from "../../services/routing"
 import type { ProviderConfiguration, AccountItem } from "../../services/omniproxy"
-import type { listModelCatalog, syncAccountModels } from "../../services/models"
+import type {
+  getModelCatalogSyncStatus,
+  listModelCatalog,
+  syncAccountModels,
+} from "../../services/models"
 import { Route as RoutingRoute } from "../../app/routes/routing"
 import type { RoutingTab } from "./routing-tabs"
 import { vi } from "vitest"
 const modelMocks = vi.hoisted(() => ({
   listModelCatalog: vi.fn<typeof listModelCatalog>().mockResolvedValue([]),
   syncAccountModels: vi.fn<typeof syncAccountModels>(),
+  getModelCatalogSyncStatus: vi
+    .fn<typeof getModelCatalogSyncStatus>()
+    .mockResolvedValue({ running: false, stale: 0 }),
 }))
 vi.mock("../../services/models", () => modelMocks)
 export const listModelCatalogMock = modelMocks.listModelCatalog

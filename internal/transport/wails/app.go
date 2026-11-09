@@ -73,6 +73,7 @@ type AppService struct {
 	stopActivity     func()
 	subscription     subscriptionState
 	googleAuth       googleSubscriptionState
+	openAISync       openAIModelSyncState
 	updatesMu        sync.Mutex
 	updates          *updater.Service
 	stopUpdateChecks context.CancelFunc
@@ -157,6 +158,7 @@ func (s *AppService) Ping() string { return "pong" }
 func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOptions) error {
 	s.startUpdateChecks()
 	s.startGoogleModelSync()
+	s.startOpenAIModelSync()
 	if s.quotaActivation != nil {
 		s.quotaActivation.Start(context.Background())
 	}
@@ -193,6 +195,7 @@ func (s *AppService) ServiceShutdown() error {
 	if s.stopActivity != nil {
 		s.stopActivity()
 	}
+	s.shutdownOpenAIModelSync()
 	s.shutdownSubscription()
 	s.shutdownGoogleSubscription()
 	s.shutdownLogs()

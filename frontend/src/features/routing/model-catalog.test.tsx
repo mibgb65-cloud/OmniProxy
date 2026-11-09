@@ -5,13 +5,22 @@ import type { ComponentProps } from "react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
-import { listModelCatalog, syncAccountModels } from "../../services/models"
+import {
+  listModelCatalog,
+  getModelCatalogSyncStatus,
+  syncAccountModels,
+} from "../../services/models"
 import { ModelCatalog } from "./model-catalog"
 import { useUIStore } from "../../stores/ui-store"
-vi.mock("../../services/models", () => ({ listModelCatalog: vi.fn(), syncAccountModels: vi.fn() }))
+vi.mock("../../services/models", () => ({
+  listModelCatalog: vi.fn(),
+  syncAccountModels: vi.fn(),
+  getModelCatalogSyncStatus: vi.fn(),
+}))
 beforeEach(() => {
   vi.clearAllMocks()
   useUIStore.setState({ language: "zh" })
+  vi.mocked(getModelCatalogSyncStatus).mockResolvedValue({ running: false, stale: 0 })
 })
 
 const catalogProps: ComponentProps<typeof ModelCatalog> = {
@@ -52,6 +61,23 @@ function renderCatalog(props = catalogProps) {
     </I18nProvider>,
   )
 }
+
+it("展示后台自动同步状态与失败提示，不要求用户操作", async () => {
+  vi.mocked(listModelCatalog).mockResolvedValue([])
+  vi.mocked(getModelCatalogSyncStatus).mockResolvedValue({ running: true, stale: 2 })
+  const view = renderCatalog()
+  expect(await screen.findByText("正在后台同步缺失的模型目录…")).toBeInTheDocument()
+  view.unmount()
+  vi.mocked(getModelCatalogSyncStatus).mockResolvedValue({
+    running: false,
+    stale: 1,
+    lastError: "openai_auto_sync_failed",
+  })
+  renderCatalog()
+  expect(
+    await screen.findByText("自动同步未完成，可手动重试；已有目录保持可用。"),
+  ).toBeInTheDocument()
+})
 
 it("Atria 静态目录显示来源和文本能力，不提供未经确认的账号同步", async () => {
   vi.mocked(listModelCatalog).mockResolvedValue([

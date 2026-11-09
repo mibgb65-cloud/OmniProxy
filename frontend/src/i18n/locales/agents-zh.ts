@@ -255,6 +255,9 @@ export const agentsZh = {
   "models.sync": "同步官方模型",
   "models.syncing": "正在同步…",
   "models.failed": "同步失败，保留上次成功的目录。请检查账号授权与网络。",
+  "models.autoSyncing": "正在后台同步缺失的模型目录…",
+  "models.autoSyncFailed": "自动同步未完成，可手动重试；已有目录保持可用。",
+  "models.autoSyncPending": "有 {{count}} 个账号目录暂未同步，可手动重试。",
   "models.empty":
     "暂无模型。可同步已登录的 ChatGPT 或 DeepSeek、Gemini、MiMo API Key 账号；添加 River、Atria 或 MiMo API Key 账号后自动显示官方预设。",
   "models.synced": "已同步 {{count}} 个账号模型",

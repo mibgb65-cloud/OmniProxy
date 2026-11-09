@@ -125,7 +125,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+Planned（待用户确认）：[TASK-20261107-001](../tasks/active/TASK-20261107-001-auto-catalog-sync-and-rotation-resilience.md)，自动同步 OpenAI 模型目录，并让透明入口在目录失效时仍按同池候选轮换；尚未修改代码。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

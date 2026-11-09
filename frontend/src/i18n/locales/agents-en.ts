@@ -280,6 +280,10 @@ export const agentsEn = {
   "models.syncing": "Syncing…",
   "models.failed":
     "Sync failed. The last successful catalog is preserved. Check authentication and network.",
+  "models.autoSyncing": "Syncing missing model catalogs in the background…",
+  "models.autoSyncFailed":
+    "Automatic sync did not finish. Retry manually; existing catalogs remain available.",
+  "models.autoSyncPending": "{{count}} account catalogs are not synced yet; retry manually.",
   "models.empty":
     "No models yet. Sync a signed-in ChatGPT or a DeepSeek, Gemini, or MiMo API key account; River, Atria and MiMo presets appear when an API key account is added.",
   "models.synced": "Synced {{count}} account models",

@@ -29,7 +29,7 @@ func TestGoogleAutoSyncCoalescesAndCancelsInFlightRequests(t *testing.T) {
 	t.Cleanup(auto.Close)
 	ctx := awaitGoogleSync(t, entered)
 	deadline, limited := ctx.Deadline()
-	if !limited || time.Until(deadline) > googleSyncTimeout {
+	if !limited || time.Until(deadline) > autoSyncTimeout {
 		t.Fatal("每账号请求没有独立超时")
 	}
 	for range 100 {

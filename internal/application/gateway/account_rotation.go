@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 	"sync"
@@ -130,6 +131,27 @@ func (s *Service) rotateAccounts(ctx context.Context, initial target, request pr
 		}
 	}
 	return ordered, nil
+}
+
+// rotateFallbackCandidates 让目录不可用的透明入口也参与同池选号。
+// 只有“全部候选都不可用”保留既有冷却错误；设置读取或候选复核异常时退回原顺序，
+// 避免把平衡配置问题放大成请求失败。
+func (s *Service) rotateFallbackCandidates(ctx context.Context, initial target, request proxy.Request) ([]proxy.AccountCandidate, error) {
+	ordered, err := s.rotateAccounts(ctx, initial, request)
+	if err == nil {
+		return ordered, nil
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return nil, err
+	}
+	var failure *proxy.Error
+	if errors.As(err, &failure) && failure.Code == "account_pool_cooling" {
+		return nil, err
+	}
+	if s.log != nil {
+		s.log.Warn("fallback rotation unavailable", "module", "gateway", "code", "rotation_unavailable")
+	}
+	return request.Candidates, nil
 }
 
 // 平滑加权轮询在锁内完成分配，并发请求不会一起读取同一个轮询位置。

@@ -14,3 +14,13 @@ export interface Item {
     "metadata"?: modelcatalog$0.Metadata;
     "source"?: string;
 }
+
+/**
+ * SyncStatus 是后台目录同步的只读内存状态，不包含账号身份或上游正文。
+ */
+export interface SyncStatus {
+    "running": boolean;
+    "stale": number;
+    "lastError"?: string;
+    "updatedAt"?: string;
+}

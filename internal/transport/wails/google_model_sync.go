@@ -56,9 +56,13 @@ func (s *AppService) requestGoogleModelSync() {
 }
 
 func (s *AppService) bindModelCatalogEvents(app *application.App) {
+	emit := func() { app.Event.Emit("modelcatalog:updated", SubscriptionNotice{Changed: true}) }
 	s.googleAuth.mu.Lock()
-	s.googleAuth.emitModels = func() { app.Event.Emit("modelcatalog:updated", SubscriptionNotice{Changed: true}) }
+	s.googleAuth.emitModels = emit
 	s.googleAuth.mu.Unlock()
+	s.openAISync.mu.Lock()
+	s.openAISync.emit = emit
+	s.openAISync.mu.Unlock()
 }
 
 func (s *AppService) logGoogleModelSyncError() {

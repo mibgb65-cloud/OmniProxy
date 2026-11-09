@@ -85,7 +85,7 @@ accounts need one local place to:
 - Model routing rules.
 - 模型路由首版支持精确别名映射、具体提供商配置与可选固定账号；规则持久化并动态生效，提供不读取密钥的匹配预览，模型发现接口同步可解析别名。
 - 路由页依据已有模型目录自动展示同名初步映射，无需逐条新增规则；同名模型可保存多个服务商的优先级顺序。精确规则优先，默认映射按顺序选择可用服务商，跳过不可用配置，其余候选沿用自动选择；预览／网关／客户端目录保持一致。本次覆盖现有 DeepSeek 和 ChatGPT/Codex 适配器。
-- 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE。已支持默认开启、最多三次的同服务商／认证／计费／地区账号切换，保留固定账号、200 后不重放及一次请求统计；OpenAI 订阅另支持默认队列／平衡轮换，平衡只重排同池请求，不增加生成后重试。具体拒绝类型和 Google 配额限制见 `docs/product/FAILOVER.md`。更广泛的健康／负载调度仍待实现。
+- 网关支持 DeepSeek 与 ChatGPT / Codex 的文本／工具调用，可通过 Chat Completions、Responses、Messages 和 Codex WebSocket 接入；跨协议先收完整结果再输出 SSE。已支持默认开启、最多三次的同服务商／认证／计费／地区账号切换，保留固定账号、200 后不重放及一次请求统计；OpenAI 订阅另支持默认队列／平衡轮换，平衡只重排同池请求，不增加生成后重试。目录过期时透明入口仍按同池候选轮换，并在启动、重新授权和账号更新后自动补齐官方目录；同步失败保留旧快照，普通路由仍按既有规则拒绝。具体拒绝类型和 Google 配额限制见 `docs/product/FAILOVER.md`。更广泛的健康／负载调度仍待实现。
 - River 支持 API Key、六款官方预设与账号模型同步，原生 Chat／Responses JSON 和 SSE、思考与函数工具调用，Messages 通过既有文本／工具转换接入。NVIDIA／GLM／Qwen／Kimi 使用短名称，原版 Flash 与直连 DeepSeek 共用服务商优先级，1017 版本独立显示及路由，`Kimi-K3` 不与直连 `kimi-k3` 合并；DeepSeek Flash／Pro 保留普通和 1M 客户端选项。账号页提供持久化的队列／均衡使用设置，同池持续失败 Key 暂时冷却并供后续请求切换，不重放结果不确定的当前请求。目录、路由、客户端配置与用量统计共用；已按官方契约接入文本与图片输入（含 Claude 工具结果中的截图），不承诺音频、文件、余额或 1M 真实长输入验收。详见 `docs/product/RIVER.md`。
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
 - Oxion AI 支持 API Key 账号（`cc_` 前缀）与官方 `GET /v1/models` 目录同步：只收录官方 `type=chat` 的模型，上下文窗口与 `vision`／`tools` 能力按目录声明，未同步前没有可用模型。上游只有 OpenAI 兼容 Chat Completions，Chat 请求原生透传，Responses／Messages 由网关转换后转发并按原协议回包；官方未声明 `reasoning_effort`，因此不发布档位选择。Embeddings、`web_search` 与余额未接入。详见 `docs/product/OXIONAI.md`。

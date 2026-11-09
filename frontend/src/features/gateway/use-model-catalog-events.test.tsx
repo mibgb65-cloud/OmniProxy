@@ -22,6 +22,7 @@ it("刷新实际目录并清理订阅，不反向触发 Google 发现查询", ()
   act(() => callback?.({ name: "modelcatalog:updated", data: { changed: true } }))
   expect(invalidate.mock.calls.map(([options]) => options?.queryKey)).toEqual([
     ["model-catalog"],
+    ["model-catalog-sync"],
     ["default-routes"],
     ["routes"],
     ["agent-clients"],

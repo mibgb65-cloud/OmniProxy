@@ -537,6 +537,13 @@ export function ModelCatalog(): $CancellablePromise<modelcatalog$0.Item[] | null
     return $Call.ByID(3199922049);
 }
 
+/**
+ * ModelCatalogSyncStatus 返回后台目录同步的只读状态，不包含账号身份或上游正文。
+ */
+export function ModelCatalogSyncStatus(): $CancellablePromise<modelcatalog$0.SyncStatus> {
+    return $Call.ByID(770669248);
+}
+
 export function ModelSync(id: string): $CancellablePromise<modelcatalog$0.Item[] | null> {
     return $Call.ByID(3291025769, id);
 }

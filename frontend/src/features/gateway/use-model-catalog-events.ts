@@ -10,6 +10,7 @@ export function useModelCatalogEvents() {
         // 不刷新 Google 的发现查询：该查询本身会触发同步，反向失效会形成循环。
         for (const key of [
           "model-catalog",
+          "model-catalog-sync",
           "default-routes",
           "routes",
           "agent-clients",

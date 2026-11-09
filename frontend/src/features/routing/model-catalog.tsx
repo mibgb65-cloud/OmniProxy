@@ -6,7 +6,11 @@ import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
-import { listModelCatalog, syncAccountModels } from "../../services/models"
+import {
+  listModelCatalog,
+  getModelCatalogSyncStatus,
+  syncAccountModels,
+} from "../../services/models"
 import { ModelCatalogGroups } from "./model-catalog-groups"
 import { ModelProviderViewToggle, type ModelProviderView } from "./model-provider-view-toggle"
 
@@ -22,6 +26,10 @@ export function ModelCatalog({
   const [accountId, setAccountId] = useState("")
   const [view, setView] = useState<ModelProviderView>("model")
   const catalog = useQuery({ queryKey: ["model-catalog"], queryFn: listModelCatalog })
+  const syncStatus = useQuery({
+    queryKey: ["model-catalog-sync"],
+    queryFn: getModelCatalogSyncStatus,
+  })
   const sync = useMutation({
     mutationFn: (id: string) => syncAccountModels(id),
     onSuccess: async (data) => {
@@ -104,6 +112,19 @@ export function ModelCatalog({
         {sync.isError || catalog.isError ? (
           <p role="alert" className="text-destructive text-sm">
             {t("models.failed")}
+          </p>
+        ) : null}
+        {syncStatus.data?.running ? (
+          <p role="status" className="text-muted-foreground text-xs">
+            {t("models.autoSyncing")}
+          </p>
+        ) : syncStatus.data?.lastError ? (
+          <p role="alert" className="text-destructive text-xs">
+            {t("models.autoSyncFailed")}
+          </p>
+        ) : syncStatus.data?.stale ? (
+          <p role="status" className="text-muted-foreground text-xs">
+            {t("models.autoSyncPending", { count: syncStatus.data.stale })}
           </p>
         ) : null}
         {models.length ? (

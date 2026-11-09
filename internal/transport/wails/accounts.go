@@ -60,6 +60,7 @@ func (s *AppService) UpdateAccount(input account.UpdateInput) (account.UpdateRes
 	result, err := service.Update(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
+		s.requestOpenAIModelSync()
 	}
 	return result, err
 }
@@ -73,6 +74,7 @@ func (s *AppService) SetAccountEnabled(id string, enabled bool) (account.Item, e
 	item, err := service.SetEnabled(context.Background(), id, enabled)
 	if err == nil {
 		s.refreshAgentCatalog()
+		s.requestOpenAIModelSync()
 	}
 	return item, err
 }
