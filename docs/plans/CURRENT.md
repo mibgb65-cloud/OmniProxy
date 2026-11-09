@@ -127,7 +127,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+In Progress：[TASK-20261109-001](../tasks/active/TASK-20261109-001-build-local-v2.2.3-beta.2.md)，准备 `v2.2.3-beta.2` 本地 Beta 生产安装包（目录自动同步与兜底轮换）；版本与文档提交后执行打包，未推送或公开发布。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
