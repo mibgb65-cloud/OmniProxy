@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261109-001](../tasks/completed/2026-11/TASK-20261109-001-build-local-v2.2.3-beta.2.md) 已产出 `v2.2.3-beta.2` Windows amd64 生产安装包，包含 OpenAI 目录自动同步与兜底轮换（TASK-20261107-001，`d6f413b0`），无新增数据库迁移。版本提交 `46745cb1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,572,398 bytes，SHA256 `f0bd1994de7536cdde99468662e75a4ac5204f340e6b8a44f099fe7de5045770`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
 本地构建：[TASK-20261104-002](../tasks/completed/2026-11/TASK-20261104-002-build-local-wails-v3.1.0-beta.md) 已产出 `v2.2.3-beta.1` Windows amd64 生产安装包，源码提交 `8399d382`，包含 Wails `v3.1.0` 升级，无新增数据库迁移。按用户要求未重复测试或完整质量门，仅执行生产构建／NSIS 打包及原生版本资源、构建信息、摘要校验。安装器 20,555,019 bytes，SHA256 `e11b86bb53ed1e7605afeecaa8e8d5c8cfe983ce7b877ffebb825441b92e5a61`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 已完成：[TASK-20261107-001](../tasks/completed/2026-11/TASK-20261107-001-auto-catalog-sync-and-rotation-resilience.md)，OpenAI 订阅模型目录在启动、授权变化与账号更新后后台自动同步；目录过期／为空／同步失败时 `/codex/v1` 透明入口仍按同池候选执行队列／平衡轮换，不再固定第一个账号。同步失败保留旧快照并只记录固定错误码，模型目录页展示只读同步状态。完整 Go／前端测试（146 文件／891 项）、类型检查、lint 与生产构建通过；`task verify` 的 build 依赖在环境中卡住，已用等价 `pnpm build` 与生产标签 `go build` 补足。实现提交 `d6f413b0`，未推送。
@@ -127,7 +129,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-In Progress：[TASK-20261109-001](../tasks/active/TASK-20261109-001-build-local-v2.2.3-beta.2.md)，准备 `v2.2.3-beta.2` 本地 Beta 生产安装包（目录自动同步与兜底轮换）；版本与文档提交后执行打包，未推送或公开发布。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
