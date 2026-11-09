@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -332,8 +332,16 @@ task build                         exit 0
 
 # Git
 
-待提交。
+## Commit
+
+```text
+eb2095dd feat(gateway): support OpenAI API Key accounts
+```
 
 # Result
 
 已实现 OpenAI 按量 API Key 作为可路由上游：账号可同步模型，Codex 保持内置 `openai` 身份通过 `/codex/v1` 使用 API Key 额度，普通 `/v1` 也可调用；订阅与按量分池。余额查询未实现，真实计费与模型权限待用户实机验证。
+
+# Completed
+
+2026-11-09 13:05（Asia/Singapore）

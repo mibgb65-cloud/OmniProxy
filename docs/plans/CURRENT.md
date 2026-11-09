@@ -129,9 +129,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-- [TASK-20261109-002](../tasks/active/TASK-20261109-002-openai-api-key-codex-plan.md)：OpenAI 按量 API Key 接入 Codex —— `/codex/v1` 透明转发按账号切换到 `api.openai.com/v1`，普通 `/v1` 同步支持，模型目录与路由资格已补齐；Codex 身份与客户端配置不变，余额展示暂不做，等待用户实机测试。
-
-`docs/tasks/active/` 仅含上述记录与 `.gitkeep`。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
@@ -185,6 +183,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261109-002](../tasks/completed/2026-11/TASK-20261109-002-openai-api-key-codex-plan.md)：OpenAI 按量 API Key 已接入 Codex——`/codex/v1` 按账号切换到 `api.openai.com/v1`，普通 `/v1` 同步支持，模型目录与路由资格补齐；Codex 身份和客户端配置不变，订阅与按量分池；余额展示未做，等待用户实机验证。实现提交 `eb2095dd`。
 
 - [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)：修复 Codex 订阅目录默认容量与自动压缩触发依据，完成离线回归和质量门，正式发布 `2.2.2`。
 
