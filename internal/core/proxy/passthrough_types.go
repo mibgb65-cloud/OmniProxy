@@ -26,6 +26,8 @@ type PassthroughAttempt struct {
 	BaseURL   string
 	AccountID string
 	Model     string
+	// Effort 是客户端正文携带的推理档位，用于请求明细；空串表示未指定。
+	Effort string
 }
 
 // PassthroughOutcome 描述一次透明转发尝试的结束原因，由宿主换算成冷却或额度阻断。

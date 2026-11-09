@@ -91,6 +91,13 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 		if _, err = db.Exec(string(accountUsageSQL)); err != nil {
 			t.Fatal(err)
 		}
+		effortSQL, err := os.ReadFile("../../../migrations/046_request_reasoning_effort.sql")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = db.Exec(string(effortSQL)); err != nil {
+			t.Fatal(err)
+		}
 		server := proxy.New(proxy.Options{Port: 0, Upstream: service, Models: []string{"deepseek-flash"}, Observer: observer})
 		if _, err = server.Start(); err != nil {
 			t.Fatal(err)

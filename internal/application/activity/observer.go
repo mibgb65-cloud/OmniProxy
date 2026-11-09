@@ -19,7 +19,7 @@ func (s *Service) Begin(ctx context.Context, event proxy.RequestEvent) error {
 		return ErrUnavailable
 	}
 	defer tx.Rollback()
-	result, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO request_records(id,started_at,day,protocol,transport,client_id) VALUES(?,?,?,?,?,?)`, event.ID, timeText(event.StartedAt), event.StartedAt.In(time.Local).Format(time.DateOnly), event.Protocol, event.Transport, event.Client)
+	result, err := tx.ExecContext(ctx, `INSERT OR IGNORE INTO request_records(id,started_at,day,protocol,transport,client_id,reasoning_effort) VALUES(?,?,?,?,?,?,?)`, event.ID, timeText(event.StartedAt), event.StartedAt.In(time.Local).Format(time.DateOnly), event.Protocol, event.Transport, event.Client, proxy.NormalizeEffort(event.Effort))
 	if err != nil {
 		return ErrUnavailable
 	}
@@ -127,6 +127,12 @@ func (s *Service) Update(ctx context.Context, event proxy.RequestEvent) error {
 	_, err = tx.ExecContext(ctx, `UPDATE request_records SET provider_region=?,billing_mode=?,input_model=?,model=?,stream=?,provider_id=?,provider_name=?,account_id=?,account_name=?,email=?,workspace_id=?,subject=?,input_tokens=?,output_tokens=?,input_known=MAX(input_known,?),output_known=MAX(output_known,?),usage_complete=? WHERE id=?`, event.Target.ProviderRegion, event.Target.BillingMode, event.InputModel, event.Model, event.Stream, event.Target.ProviderID, event.Target.ProviderName, event.Target.AccountID, event.Target.AccountName, event.Target.Email, event.Target.WorkspaceID, key, input, output, usage.InputKnown, usage.OutputKnown, complete, event.ID)
 	if err != nil {
 		return ErrUnavailable
+	}
+	// 档位只在非空时写入：后到的用量快照不带档位时不能把已记录的档位抹成未指定。
+	if effort := proxy.NormalizeEffort(event.Effort); effort != "" {
+		if _, err := tx.ExecContext(ctx, `UPDATE request_records SET reasoning_effort=? WHERE id=?`, effort, event.ID); err != nil {
+			return ErrUnavailable
+		}
 	}
 	if usage.InputKnown && usage.CachedInput != nil {
 		// 已知缓存只增不减：缺少缓存字段的中间快照不改写明细，未知与真实零继续区分，重复上报不会重复计入。

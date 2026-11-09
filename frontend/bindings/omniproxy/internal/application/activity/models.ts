@@ -162,6 +162,11 @@ export interface RequestItem {
     "transport": string;
     "inputModel": string;
     "model": string;
+
+    /**
+     * Effort 是本次请求携带的推理档位；空串表示未指定（含历史记录），不推测上游默认值。
+     */
+    "effort"?: string;
     "stream": boolean;
     "providerId": string;
     "providerName": string;

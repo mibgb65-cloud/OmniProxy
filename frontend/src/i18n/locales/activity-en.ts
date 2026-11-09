@@ -27,6 +27,7 @@ export const activityEn = {
   "activity.requestId": "Request ID",
   "activity.time": "Time",
   "activity.model": "Model",
+  "activity.effort": "Reasoning effort",
   "activity.account": "Account",
   "activity.state": "Outcome",
   "activity.latency": "Latency",
@@ -43,6 +44,8 @@ export const activityEn = {
     "Output tokens ÷ generation time. Streamed requests exclude the first-token wait; the value is rounded and approximate.",
   "activity.firstTokenHint":
     "Time from request start to the first valid streamed content; non-streamed requests, historical records and failures without content show —.",
+  "activity.effortHint":
+    "The reasoning level this request actually carried: the client's choice, or the level pinned for the model in this app. Unset and historical records show —, which does not imply the upstream default.",
   "activity.cachedDetail": "Cached {{cached}} / input {{input}}",
   "activity.search": "Search request ID, model, agent, email or account",
   "activity.all": "All outcomes",

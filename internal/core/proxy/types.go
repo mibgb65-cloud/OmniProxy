@@ -38,7 +38,9 @@ type Request struct {
 	ConvertedFromMessages bool
 	Body                  []byte
 	Model                 string
-	Stream                bool
+	// Effort 是本次请求携带的推理档位；空串表示客户端没有指定，不能当成默认值。
+	Effort string
+	Stream bool
 	// 路由目标由受信解析器填入，HTTP 正文不能指定这些字段。
 	ProviderID string
 	AccountID  string

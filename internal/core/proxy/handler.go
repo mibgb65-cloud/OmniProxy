@@ -105,7 +105,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("gateway_busy", 429))
 		return
 	}
-	trace, err := s.beginTrace(r.Context(), protocol, "http", client)
+	// 正文尚未读取，档位在解析后由 Trace.Update 补写。
+	trace, err := s.beginTrace(r.Context(), protocol, "http", client, "")
 	if err != nil {
 		writeFailure(w, err)
 		return

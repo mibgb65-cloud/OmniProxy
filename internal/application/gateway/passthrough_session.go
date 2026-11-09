@@ -160,6 +160,8 @@ func (s *passthroughSession) attemptFor(ctx context.Context, candidate proxy.Acc
 		return proxy.PassthroughAttempt{}, false, nil
 	}
 	s.current = t
+	// 档位来自客户端正文本体，不属于账号身份，换号后仍是同一次请求的选择。
+	attempt.Effort = s.request.Effort
 	return attempt, true, nil
 }
 

@@ -12,7 +12,7 @@ import (
 // fallbackFirst 返回兜底会话实际排在第一位的账号，避免测试依赖内部轮询状态。
 func fallbackFirst(t *testing.T, s *Service) string {
 	t.Helper()
-	session, err := s.openFallbackSession(context.Background(), "", "https://example.invalid")
+	session, err := s.openFallbackSession(context.Background(), "", "", "https://example.invalid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func TestFallbackSessionRejectsCoolingPool(t *testing.T) {
 	access.blocked["a"] = time.Now().Add(time.Hour)
 	access.blocked["b"] = time.Now().Add(time.Hour)
 	access.mu.Unlock()
-	if _, err := s.openFallbackSession(context.Background(), "", "https://example.invalid"); err == nil {
+	if _, err := s.openFallbackSession(context.Background(), "", "", "https://example.invalid"); err == nil {
 		t.Fatal("cooling pool was accepted")
 	} else {
 		var failure *proxy.Error

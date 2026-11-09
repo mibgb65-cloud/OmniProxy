@@ -17,6 +17,7 @@ const item: RequestItem = {
   transport: "http",
   inputModel: "gpt-6-luna",
   model: "gpt-6-luna",
+  effort: "high",
   stream: true,
   providerId: "builtin_openai",
   providerName: "OpenAI",
@@ -103,6 +104,18 @@ it("请求列表新增缓存命中、成本、速度与首字列并带说明提�
   expect(within(row).getByText("$0.114")).toBeInTheDocument()
   expect(within(row).getByText("≈75 tok/s")).toBeInTheDocument()
   expect(within(row).getByText("200 ms")).toBeInTheDocument()
+})
+
+it("请求列表显示推理等级，未指定时保持破折号并带说明提示", () => {
+  mount([item, { ...item, id: "e".repeat(32), effort: undefined }])
+  expect(screen.getByText("推理等级")).toBeInTheDocument()
+  expect(screen.getByRole("button", { name: "推理等级说明" })).toBeInTheDocument()
+  const rows = screen.getAllByRole("row")
+  // 列顺序：时间、模型、推理等级……；未指定档位保持破折号，不填默认值。
+  const chosen = within(rows[1]!).getAllByRole("cell")
+  expect(chosen[2]!.textContent).toBe("high")
+  const missing = within(rows[2]!).getAllByRole("cell")
+  expect(missing[2]!.textContent).toBe("—")
 })
 
 it("请求表在内部滚动视口内滚动，表头吸顶并沿用统一细滑块", () => {

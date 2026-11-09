@@ -121,7 +121,12 @@ func TestPassthroughSocketRecordsTurnUsage(t *testing.T) {
 	socket, ctx := dialAccountingSocket(t, server)
 
 	for turn := 0; turn < 2; turn++ {
-		if err := socket.Write(ctx, websocket.MessageText, []byte(`{"type":"response.create","model":"gpt-6.1-sol","input":[]}`)); err != nil {
+		// 第一轮带推理档位、第二轮不带：逐轮记录必须各自反映那一轮的正文。
+		frame := `{"type":"response.create","model":"gpt-6.1-sol","input":[]}`
+		if turn == 0 {
+			frame = `{"type":"response.create","model":"gpt-6.1-sol","reasoning":{"effort":"medium"},"input":[]}`
+		}
+		if err := socket.Write(ctx, websocket.MessageText, []byte(frame)); err != nil {
 			t.Fatal(err)
 		}
 		for range 3 {
@@ -132,6 +137,9 @@ func TestPassthroughSocketRecordsTurnUsage(t *testing.T) {
 	}
 	records := waitRecords(t, spy, 2)
 	_, attempts := spy.records()
+	if records[0].Effort != "medium" || records[1].Effort != "" {
+		t.Fatalf("逐轮推理档位未记录: %q / %q", records[0].Effort, records[1].Effort)
+	}
 	for _, record := range records {
 		if record.Transport != "websocket" || record.Protocol != "responses" || record.Model != "gpt-6.1-sol" {
 			t.Fatalf("请求归属不正确: %+v", record)

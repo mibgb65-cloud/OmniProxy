@@ -31,7 +31,9 @@ func (s *Server) servePassthrough(w http.ResponseWriter, r *http.Request, path s
 		writeFailure(w, safeFailure(r.Context(), err))
 		return
 	}
-	trace, err := s.beginTrace(r.Context(), passthroughProtocol(path), "http", recordedClient(access.client, r.Header))
+	protocol := passthroughProtocol(path)
+	// 透明转发的正文必须原样转发，档位只能旁路解析；压缩或非 JSON 正文按未指定处理。
+	trace, err := s.beginTrace(r.Context(), protocol, "http", recordedClient(access.client, r.Header), ReasoningEffort(protocol, body))
 	if err != nil {
 		writeFailure(w, err)
 		return
@@ -67,7 +69,7 @@ func (s *Server) forwardPassthrough(w http.ResponseWriter, r *http.Request, requ
 		if err != nil {
 			return s.failPassthrough(w, ctx, lastStatus, lastErr, quotaRejection)
 		}
-		attemptRequest := Request{Model: target.Model, Stream: true}
+		attemptRequest := Request{Model: target.Model, Stream: true, Effort: target.Effort}
 		// 尝试独立记账：被拒绝的账号不能把父记录的归属改写成自己。
 		if beginErr := trace.BeginAttempt(ctx, attemptRequest, target.Snapshot); beginErr != nil {
 			clearAttemptHeaders(target.Header)

@@ -56,6 +56,10 @@ func TestPinnedEffortOverridesClientSelection(t *testing.T) {
 	if effort, _ := read(t, request.Body); effort != "high" {
 		t.Fatalf("client effort changed without a pin: %q", effort)
 	}
+	// 请求明细记录实际携带的档位，而不是客户端原来的选择。
+	if request.Effort != "high" {
+		t.Fatalf("recorded effort without a pin = %q", request.Effort)
+	}
 
 	// 固定档位覆盖客户端选择，并保持思考开启。
 	router.pins = map[string]string{"deepseek-flash": "max"}
@@ -65,6 +69,9 @@ func TestPinnedEffortOverridesClientSelection(t *testing.T) {
 	}
 	if effort, mode := read(t, request.Body); effort != "max" || mode != "adaptive" {
 		t.Fatalf("pinned effort not applied: %q/%q", effort, mode)
+	}
+	if request.Effort != "max" {
+		t.Fatalf("recorded effort kept the overridden client choice: %q", request.Effort)
 	}
 
 	// 其他协议不使用 Messages 的 effort 契约，固定档位不参与改写。

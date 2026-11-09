@@ -165,7 +165,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ac
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
-		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", client)
+		trace, traceErr := s.beginTrace(ctx, "responses", "websocket", client, request.Effort)
 		if traceErr != nil {
 			cancel()
 			<-s.slots

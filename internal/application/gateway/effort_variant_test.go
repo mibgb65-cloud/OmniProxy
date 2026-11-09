@@ -5,23 +5,6 @@ import (
 	"testing"
 )
 
-func TestCarriedEffortReadsEachProtocol(t *testing.T) {
-	cases := map[string]struct {
-		protocol, body, want string
-	}{
-		"messages":  {"messages", `{"output_config":{"effort":"high","format":"kept"}}`, "high"},
-		"responses": {"responses", `{"reasoning":{"effort":"low","summary":"auto"}}`, "low"},
-		"chat":      {"chat", `{"reasoning_effort":"medium"}`, "medium"},
-		"absent":    {"messages", `{"messages":[]}`, ""},
-		"invalid":   {"messages", `{"output_config":[]}`, ""},
-	}
-	for name, tc := range cases {
-		if got := carriedEffort(tc.protocol, []byte(tc.body)); got != tc.want {
-			t.Fatalf("%s = %q, want %q", name, got, tc.want)
-		}
-	}
-}
-
 func TestRewriteEffortVariantReplacesModelAndDropsLevel(t *testing.T) {
 	body, err := rewriteEffortVariant("messages", []byte(`{"model":"base","output_config":{"effort":"high","format":"kept"},"thinking":{"type":"adaptive"},"messages":[]}`), "base-high")
 	if err != nil {

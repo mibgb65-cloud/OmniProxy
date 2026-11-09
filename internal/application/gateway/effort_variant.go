@@ -8,50 +8,13 @@ import (
 	"omniproxy/internal/core/proxy"
 )
 
-// carriedEffort 读取客户端在这条协议上选择的推理档位。
-//
-// Messages 用 output_config.effort，Responses 用 reasoning.effort，Chat 用 reasoning_effort。
-func carriedEffort(protocol string, body []byte) string {
-	var fields map[string]json.RawMessage
-	if json.Unmarshal(body, &fields) != nil {
-		return ""
-	}
-	switch protocol {
-	case "messages":
-		return nestedEffort(fields["output_config"])
-	case "responses":
-		return nestedEffort(fields["reasoning"])
-	default:
-		var level string
-		if json.Unmarshal(fields["reasoning_effort"], &level) != nil {
-			return ""
-		}
-		return level
-	}
-}
-
-func nestedEffort(raw json.RawMessage) string {
-	if len(raw) == 0 {
-		return ""
-	}
-	var container map[string]json.RawMessage
-	if json.Unmarshal(raw, &container) != nil {
-		return ""
-	}
-	var level string
-	if json.Unmarshal(container["effort"], &level) != nil {
-		return ""
-	}
-	return level
-}
-
 // applyEffortVariant 把客户端档位换成目录中实际存在的上游变体模型 ID。
 //
 // Google 系上游用独立型号表达 thinking level（“…-low”）。目录已把这些变体折叠成
 // 一行模型 + 档位枚举，因此请求必须换回具体型号，并移除已经表达的档位字段：
 // 订阅适配器的生成参数是白名单校验，多余的 reasoning_effort 会被直接拒绝。
 func (s *Service) applyEffortVariant(ctx context.Context, request proxy.Request) (proxy.Request, error) {
-	level := carriedEffort(request.Protocol, request.Body)
+	level := proxy.ReasoningEffort(request.Protocol, request.Body)
 	if level == "" || s.router == nil {
 		return request, nil
 	}

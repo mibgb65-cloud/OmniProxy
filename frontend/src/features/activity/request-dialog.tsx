@@ -95,6 +95,7 @@ export function RequestDialog({
                     ["activity.time", requestTime(item.startedAt)],
                     ["activity.protocol", `${item.protocol} / ${item.transport}`],
                     ["activity.model", item.model || item.inputModel || "—"],
+                    ["activity.effort", item.effort || "—"],
                     ["activity.agent", agentKey ? t(agentKey) : "—"],
                     ["activity.provider", item.providerName || "—"],
                     ...(item.providerRegion

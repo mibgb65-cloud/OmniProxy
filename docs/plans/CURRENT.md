@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261109-004](../tasks/active/TASK-20261109-004-request-reasoning-effort.md)，请求明细记录并展示推理等级：迁移 046 增加 `reasoning_effort`，档位在请求时从正文旁路提取（Messages `output_config.effort`／Responses `reasoning.effort`／Chat `reasoning_effort`），以路由改写后的实际档位为准；未指定、历史记录与不可解析正文显示「—」，不推测上游默认值，不参与聚合与计费。列表新增「推理等级」列并带说明提示，详情新增同名字段。
+
 本地构建：[TASK-20261109-003](../tasks/completed/2026-11/TASK-20261109-003-build-local-v2.2.3-beta.3.md) 已产出 `v2.2.3-beta.3` Windows amd64 生产安装包，包含 OpenAI 按量 API Key 账号接入 Codex（TASK-20261109-002，`eb2095dd`），无新增数据库迁移。版本提交 `fc044397`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,587,976 bytes，SHA256 `49a28d0d8fb5c5d5eab65919aded90e4ebca472ed7909c7d7a8a44380e84169b`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 本地构建：[TASK-20261109-001](../tasks/completed/2026-11/TASK-20261109-001-build-local-v2.2.3-beta.2.md) 已产出 `v2.2.3-beta.2` Windows amd64 生产安装包，包含 OpenAI 目录自动同步与兜底轮换（TASK-20261107-001，`d6f413b0`），无新增数据库迁移。版本提交 `46745cb1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,572,398 bytes，SHA256 `f0bd1994de7536cdde99468662e75a4ac5204f340e6b8a44f099fe7de5045770`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
@@ -131,7 +133,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261109-004](../tasks/active/TASK-20261109-004-request-reasoning-effort.md)：请求明细记录并展示推理等级（迁移 046），等待质量门与实机观感确认。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

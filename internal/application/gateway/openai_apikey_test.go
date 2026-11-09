@@ -106,7 +106,7 @@ func TestFallbackSessionUsesAPIKeyPoolWithoutSubscription(t *testing.T) {
 	if _, err := db.Exec(`UPDATE accounts SET provider_id='builtin_openai',auth_method='api_key',auth_state='' WHERE id='a'`); err != nil {
 		t.Fatal(err)
 	}
-	session, err := s.openFallbackSession(context.Background(), "", "")
+	session, err := s.openFallbackSession(context.Background(), "", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}

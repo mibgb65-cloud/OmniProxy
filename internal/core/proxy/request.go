@@ -50,6 +50,7 @@ func parseChatRequest(body []byte, maxBodyBytes, maxMessageBytes int) (Request, 
 		return Request{}, err
 	}
 	request.Body = body
+	request.Effort = ReasoningEffort("chat", body)
 	return request, nil
 }
 

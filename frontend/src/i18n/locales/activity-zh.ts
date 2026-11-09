@@ -27,6 +27,7 @@ export const activityZh = {
   "activity.requestId": "请求 ID",
   "activity.time": "时间",
   "activity.model": "模型",
+  "activity.effort": "推理等级",
   "activity.account": "账号",
   "activity.state": "结果",
   "activity.latency": "耗时",
@@ -42,6 +43,8 @@ export const activityZh = {
   "activity.speedHint": "输出 Token ÷ 生成耗时；流式请求扣除首字等待时间，结果为四舍五入的近似值。",
   "activity.firstTokenHint":
     "从请求开始到首次写出有效流式内容的耗时；非流式、历史记录和未产生内容的失败显示 —。",
+  "activity.effortHint":
+    "网关实际为本次请求携带的推理档位：客户端选择的，或应用内为该模型固定的档位。未指定与历史记录显示 —，不推定上游默认值。",
   "activity.cachedDetail": "缓存 {{cached}} / 输入 {{input}}",
   "activity.search": "搜索请求 ID、模型、Agent、邮箱或账号",
   "activity.all": "全部结果",

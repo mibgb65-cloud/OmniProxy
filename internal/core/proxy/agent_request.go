@@ -47,6 +47,8 @@ func ParseProtocolRequest(body []byte, path string) (Request, error) {
 			return Request{}, Failure("invalid_request", 400)
 		}
 	}
+	// 推理档位只用于请求明细展示；正文仍是唯一来源，缺失或不可用即未指定。
+	request.Effort = ReasoningEffort(request.Protocol, body)
 	// Responses 还包含推理、工具及压缩项，不能套用消息数量上限；完整 JSON 已受大小和深度保护。
 	if request.Protocol == "responses" && len(input) > 0 && input[0] == '[' {
 		return request, nil

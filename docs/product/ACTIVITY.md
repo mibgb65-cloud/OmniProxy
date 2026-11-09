@@ -39,6 +39,8 @@ Team 工作区可包含多个邮箱。订阅统计身份为提供商类型 + 规
 
 以上四项只在请求明细中展示，不进入累计用量、仪表盘聚合或配额估算；聚合统计规则不变。
 
+迁移 046 为请求明细增加推理等级（`reasoning_effort`）。档位在请求时从正文旁路提取，正文本身仍不入库：Messages 取 `output_config.effort`、Responses 取 `reasoning.effort`、Chat 取 `reasoning_effort`，路由改写（模型选择、应用内按模型固定档位、Google 系的档位变体型号）之后以实际携带的档位为准。列表与详情显示原始取值（如 `high`／`medium`／`low`）；客户端未指定、历史记录、透明转发的压缩正文或不可解析正文显示「—」，不按上游默认值或模型名推定。Codex 透明转发的 HTTP 请求与 WebSocket 的每一轮 `response.create` 分别读取。档位只用于展示，不进入累计用量、成本估算、配额或任何聚合统计。
+
 迁移 040 为请求明细增加接入客户端字段：网关用本次请求通过的独立接入 Key 识别受管 Agent（Codex、Claude Code／Desktop、DeepSeek Harness、OpenCode 等），请求列表与详情显示该 Agent，搜索也可按 Agent 名称命中。直接调用、自定义客户端和历史记录没有可确认的归属，显示「—」，不按模型或 User-Agent 猜测。受影响账号的本机 Token 用量同样按此身份隔离。
 
 请求列表每页 50 条；底部显示“第 N 页 / 共 M 页”，总页数按筛选后的记录总数向上取整，空列表显示 1 / 1。记录数量和保留上限在左侧独立展示，不混作页数。

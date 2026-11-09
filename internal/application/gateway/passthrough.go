@@ -33,9 +33,9 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 	if s.accounts == nil {
 		return nil, proxy.Failure("invalid_configuration", 503)
 	}
-	model := passthroughModel(request)
+	model, effort := passthroughModel(request)
 	if model == "" || s.router == nil {
-		return s.openFallbackSession(ctx, model, "")
+		return s.openFallbackSession(ctx, model, effort, "")
 	}
 	decision, candidates, fixed, err := s.resolvePreview(ctx, model)
 	if err != nil {
@@ -43,14 +43,14 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 	}
 	if !decision.Routable {
 		if decision.ErrorCode == "unsupported_model" {
-			return s.openFallbackSession(ctx, model, "")
+			return s.openFallbackSession(ctx, model, effort, "")
 		}
 		return nil, proxy.Failure(routeFailureCode(decision), 503)
 	}
 	plan := proxy.Request{
 		ProviderID: decision.ProviderID, AccountID: decision.AccountID,
 		AccountUpdatedAt: decision.AccountUpdatedAt, Model: decision.Model,
-		Candidates: candidates, FixedAccount: fixed, Protocol: "responses",
+		Effort: effort, Candidates: candidates, FixedAccount: fixed, Protocol: "responses",
 	}
 	initial, err := s.selectRoutedTarget(ctx, plan)
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 // openFallbackSession 在正文没有可用模型时（例如 WebSocket 握手没有正文）按 v1 的取号方式
 // 取第一个可用订阅账号，但保留完整候选序列：只认第一个账号会让一个借不出令牌的账号
 // 直接掐断整条通路，而带模型的 HTTP 请求仍能轮换成功。
-func (s *Service) openFallbackSession(ctx context.Context, model, base string) (proxy.PassthroughSession, error) {
+func (s *Service) openFallbackSession(ctx context.Context, model, effort, base string) (proxy.PassthroughSession, error) {
 	targets, err := s.passthroughFallbackTargets(ctx)
 	if err != nil {
 		return nil, err
@@ -83,7 +83,7 @@ func (s *Service) openFallbackSession(ctx context.Context, model, base string) (
 	}
 	plan := proxy.Request{
 		ProviderID: initial.snapshot.ProviderID, AccountID: initial.accountID,
-		AccountUpdatedAt: initial.updatedAt, Model: model, Protocol: "responses",
+		AccountUpdatedAt: initial.updatedAt, Model: model, Effort: effort, Protocol: "responses",
 		Candidates: candidates,
 	}
 	plan.Candidates, err = s.rotateFallbackCandidates(ctx, initial, plan)
@@ -141,13 +141,13 @@ func (s *Service) passthroughFallbackTargets(ctx context.Context) ([]target, err
 	return targets, nil
 }
 
-// passthroughModel 从正文尽力读取模型；读不到交给取号回退，不能因此拒绝请求。
-func passthroughModel(request proxy.PassthroughRequest) string {
+// passthroughModel 从正文尽力读取模型与推理档位；读不到交给取号回退，不能因此拒绝请求。
+func passthroughModel(request proxy.PassthroughRequest) (string, string) {
 	parsed, err := proxy.ParseProtocolRequest(request.Body, "/v1/responses")
 	if err != nil {
-		return ""
+		return "", ""
 	}
-	return parsed.Model
+	return parsed.Model, parsed.Effort
 }
 
 func routeFailureCode(decision routes.Preview) string {

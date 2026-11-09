@@ -20,6 +20,7 @@ type Column = { key: TranslationKey; hint?: TranslationKey }
 const columns: readonly Column[] = [
   { key: "activity.time" },
   { key: "activity.model" },
+  { key: "activity.effort", hint: "activity.effortHint" },
   { key: "activity.agent" },
   { key: "activity.account" },
   { key: "activity.state" },
@@ -106,6 +107,7 @@ export function RequestTable({
                       </span>
                     </Tooltip>
                   </td>
+                  <td className="px-4 py-3 font-mono text-xs">{item.effort || "—"}</td>
                   <td className="px-4 py-3">
                     <span className="block max-w-32 truncate text-xs">
                       {agentKey ? t(agentKey) : "—"}

@@ -22,13 +22,15 @@ type RequestEvent struct {
 	Client                                 string
 	StartedAt, FinishedAt                  time.Time
 	InputModel, Model, Protocol, Transport string
-	Stream                                 bool
-	Target                                 TargetSnapshot
-	Usage                                  UsageSnapshot
-	State, ErrorCode                       string
-	StatusCode                             int
-	LatencyMS                              int64
-	FirstTokenMS                           *int64
+	// Effort 是本次请求携带的推理档位；空串表示未指定，不从上游默认值推测。
+	Effort           string
+	Stream           bool
+	Target           TargetSnapshot
+	Usage            UsageSnapshot
+	State, ErrorCode string
+	StatusCode       int
+	LatencyMS        int64
+	FirstTokenMS     *int64
 }
 
 // RequestObserver 在转发前持久化，消费上游用量快照时原子累计，结束更新结果。
@@ -55,13 +57,13 @@ type Trace struct {
 	startedAt        time.Time
 }
 
-func (s *Server) beginTrace(ctx context.Context, protocol, transport, client string) (*Trace, error) {
+func (s *Server) beginTrace(ctx context.Context, protocol, transport, client, effort string) (*Trace, error) {
 	value := make([]byte, 16)
 	if _, err := rand.Read(value); err != nil {
 		return nil, Failure("accounting_unavailable", 503)
 	}
 	now := time.Now()
-	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), Client: client, StartedAt: now.UTC(), Protocol: protocol, Transport: transport, State: "pending"}, startedAt: now, observer: s.opts.Observer}
+	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), Client: client, StartedAt: now.UTC(), Protocol: protocol, Transport: transport, Effort: NormalizeEffort(effort), State: "pending"}, startedAt: now, observer: s.opts.Observer}
 	if trace.observer != nil {
 		if err := trace.observer.Begin(ctx, trace.event); err != nil {
 			return nil, Failure("accounting_unavailable", 503)
@@ -86,6 +88,10 @@ func (t *Trace) Update(ctx context.Context, request Request, target TargetSnapsh
 	}
 	t.event.Model = request.Model
 	t.event.Stream = request.Stream
+	// 路由会改写档位（模型固定档位、档位变体），空串不能覆盖已经记录的值。
+	if request.Effort != "" {
+		t.event.Effort = request.Effort
+	}
 	if request.IsCompaction() {
 		t.event.Protocol = "responses/compact"
 	}

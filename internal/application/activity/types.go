@@ -28,14 +28,16 @@ type RequestItem struct {
 	ProviderRegion string        `json:"providerRegion,omitempty"`
 	BillingMode    string        `json:"billingMode,omitempty"`
 	// Client 是发起请求的受管 Agent 标识；直接调用或历史记录为空。
-	Client         string `json:"client,omitempty"`
-	ID             string `json:"id"`
-	StartedAt      string `json:"startedAt"`
-	FinishedAt     string `json:"finishedAt"`
-	Protocol       string `json:"protocol"`
-	Transport      string `json:"transport"`
-	InputModel     string `json:"inputModel"`
-	Model          string `json:"model"`
+	Client     string `json:"client,omitempty"`
+	ID         string `json:"id"`
+	StartedAt  string `json:"startedAt"`
+	FinishedAt string `json:"finishedAt"`
+	Protocol   string `json:"protocol"`
+	Transport  string `json:"transport"`
+	InputModel string `json:"inputModel"`
+	Model      string `json:"model"`
+	// Effort 是本次请求携带的推理档位；空串表示未指定（含历史记录），不推测上游默认值。
+	Effort         string `json:"effort,omitempty"`
 	Stream         bool   `json:"stream"`
 	ProviderID     string `json:"providerId"`
 	ProviderName   string `json:"providerName"`

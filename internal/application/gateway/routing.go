@@ -115,6 +115,9 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 			request.Body = body
 		}
 	}
+	// 请求明细记录实际携带的档位：客户端选择与固定档位都已写回正文，
+	// 档位变体在这一步之后才把档位换成型号，因此必须现在读取。
+	request.Effort = proxy.ReasoningEffort(request.Protocol, request.Body)
 	// 档位变体（Google 的 “…-low” 等）在目录里已折叠成一行模型；请求时必须换回
 	// 实际存在的上游型号，适配器才不会收到它不认识的档位字段。
 	request, err = s.applyEffortVariant(ctx, request)

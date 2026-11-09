@@ -18,6 +18,10 @@ type socketTurnFrame struct {
 	Type     string `json:"type"`
 	Model    string `json:"model"`
 	Generate *bool  `json:"generate"`
+	// Reasoning 只取档位，摘要类型等其他字段不进入记账。
+	Reasoning *struct {
+		Effort string `json:"effort"`
+	} `json:"reasoning"`
 }
 
 // socketAccounting 为透明 WebSocket 补齐逐轮记账。
@@ -63,16 +67,20 @@ func (a *socketAccounting) clientFrame(ctx context.Context, kind websocket.Messa
 	defer a.mu.Unlock()
 	// 上轮没有终结事件就又开始新一轮：先按未完成收尾，不让它一直悬着。
 	a.closeTurn(ctx, socketCancelledStatus, "request_cancelled")
-	return a.beginTurn(ctx, frame.Model)
+	effort := ""
+	if frame.Reasoning != nil {
+		effort = frame.Reasoning.Effort
+	}
+	return a.beginTurn(ctx, frame.Model, effort)
 }
 
 // beginTurn 为新的一轮建立父记录与账号尝试；失败时同时收尾已经建立的记录。
-func (a *socketAccounting) beginTurn(ctx context.Context, model string) error {
+func (a *socketAccounting) beginTurn(ctx context.Context, model, effort string) error {
 	if model == "" {
 		model = a.model
 	}
-	request := Request{Model: model, Stream: true}
-	trace, err := a.server.beginTrace(ctx, a.protocol, "websocket", a.client)
+	request := Request{Model: model, Effort: NormalizeEffort(effort), Stream: true}
+	trace, err := a.server.beginTrace(ctx, a.protocol, "websocket", a.client, request.Effort)
 	if err != nil {
 		a.logFailure()
 		return err
