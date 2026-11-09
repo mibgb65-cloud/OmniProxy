@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261109-003](../tasks/completed/2026-11/TASK-20261109-003-build-local-v2.2.3-beta.3.md) 已产出 `v2.2.3-beta.3` Windows amd64 生产安装包，包含 OpenAI 按量 API Key 账号接入 Codex（TASK-20261109-002，`eb2095dd`），无新增数据库迁移。版本提交 `fc044397`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,587,976 bytes，SHA256 `49a28d0d8fb5c5d5eab65919aded90e4ebca472ed7909c7d7a8a44380e84169b`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
+
 本地构建：[TASK-20261109-001](../tasks/completed/2026-11/TASK-20261109-001-build-local-v2.2.3-beta.2.md) 已产出 `v2.2.3-beta.2` Windows amd64 生产安装包，包含 OpenAI 目录自动同步与兜底轮换（TASK-20261107-001，`d6f413b0`），无新增数据库迁移。版本提交 `46745cb1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,572,398 bytes，SHA256 `f0bd1994de7536cdde99468662e75a4ac5204f340e6b8a44f099fe7de5045770`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
 本地构建：[TASK-20261104-002](../tasks/completed/2026-11/TASK-20261104-002-build-local-wails-v3.1.0-beta.md) 已产出 `v2.2.3-beta.1` Windows amd64 生产安装包，源码提交 `8399d382`，包含 Wails `v3.1.0` 升级，无新增数据库迁移。按用户要求未重复测试或完整质量门，仅执行生产构建／NSIS 打包及原生版本资源、构建信息、摘要校验。安装器 20,555,019 bytes，SHA256 `e11b86bb53ed1e7605afeecaa8e8d5c8cfe983ce7b877ffebb825441b92e5a61`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
@@ -183,6 +185,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261109-003](../tasks/completed/2026-11/TASK-20261109-003-build-local-v2.2.3-beta.3.md)：`v2.2.3-beta.3` 本地 Windows amd64 生产安装包已构建并通过版本映射、NSIS 打包、原生版本资源与发布资产校验（20,587,976 bytes，SHA256 `49a28d0d…e84169b`）；未签名、未安装、未推送或发布，等待用户托管退出后本地覆盖更新。
 
 - [TASK-20261109-002](../tasks/completed/2026-11/TASK-20261109-002-openai-api-key-codex-plan.md)：OpenAI 按量 API Key 已接入 Codex——`/codex/v1` 按账号切换到 `api.openai.com/v1`，普通 `/v1` 同步支持，模型目录与路由资格补齐；Codex 身份和客户端配置不变，订阅与按量分池；余额展示未做，等待用户实机验证。实现提交 `eb2095dd`。
 
