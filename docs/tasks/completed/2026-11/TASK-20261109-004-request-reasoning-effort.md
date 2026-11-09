@@ -139,7 +139,9 @@ Completed
 - 前端：重新生成绑定；请求表在「模型」后新增「推理等级」列（带说明提示），
   请求详情新增同名字段；未指定显示「—」。中英文案同步。
 - 测试：Core 协议／归一化／解析用例，activity 存取与非空覆盖、异常取值用例，
-  网关固定档位写回用例，Codex WebSocket 逐轮档位用例，前端列表列渲染用例。
+  网关固定档位写回用例，Codex WebSocket 逐轮档位用例，前端列表列渲染用例；
+  既有 `TestActualUpstreamUsageAcrossConversionAndStreaming` 增加从 HTTP 入口到 SQLite
+  的端到端档位断言（Responses `low`／Chat `medium`）。
 
 ## Files Changed
 
@@ -243,6 +245,12 @@ go build -tags production -trimpath -buildvcs=false -ldflags="-w -s" -o bin/omni
 
 ```text
 e8dfc47e feat(activity): record reasoning effort per request
+```
+
+后续小改动（同一任务）：
+
+```text
+test(activity): assert recorded effort end to end
 ```
 
 ---

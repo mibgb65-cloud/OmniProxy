@@ -103,10 +103,10 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer server.Stop(context.Background())
-		protocol, body := "responses", `{"model":"deepseek-flash","input":"hello"}`
+		protocol, body := "responses", `{"model":"deepseek-flash","reasoning":{"effort":"low"},"input":"hello"}`
 		if stream {
 			protocol = "chat/completions"
-			body = `{"model":"deepseek-flash","stream":true,"messages":[{"role":"user","content":"hello"}]}`
+			body = `{"model":"deepseek-flash","stream":true,"reasoning_effort":"medium","messages":[{"role":"user","content":"hello"}]}`
 		}
 		response, err := http.Post(server.Status().Address+"/v1/"+protocol, "application/json", strings.NewReader(body))
 		if err != nil {
@@ -124,6 +124,14 @@ func TestActualUpstreamUsageAcrossConversionAndStreaming(t *testing.T) {
 		}
 		if (item.FirstTokenMS != nil) != stream {
 			t.Fatal("first-token timing lost or fabricated across conversion", item)
+		}
+		// 档位从正文旁路写入请求明细，两种协议各自读取自己的字段。
+		wantEffort := "low"
+		if stream {
+			wantEffort = "medium"
+		}
+		if item.Effort != wantEffort {
+			t.Fatalf("effort not recorded end to end: %q", item.Effort)
 		}
 		totals, err := observer.Usage(context.Background())
 		if err != nil || totals.AllTime.TotalTokens != "16" {
