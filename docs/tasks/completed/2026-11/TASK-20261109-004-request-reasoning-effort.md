@@ -250,7 +250,7 @@ e8dfc47e feat(activity): record reasoning effort per request
 后续小改动（同一任务）：
 
 ```text
-test(activity): assert recorded effort end to end
+ff874e28 test(activity): assert recorded effort end to end
 ```
 
 ---
