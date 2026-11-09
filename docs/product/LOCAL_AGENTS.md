@@ -60,6 +60,26 @@ Harness 保持显示建议模型，不提供默认模型写入；保存后仍需
 
 应用成功后，右侧返回已接入模型列表，顶部悬浮显示“配置已保存，原配置已加密备份。”，无需滚动到内容底部；约 5 秒后自动收起，可手动关闭，鼠标悬停或键盘聚焦时暂停计时。提示适配深浅主题与减少动态效果，通过温和的状态播报告知结果；收起通知不会改变已保存状态。
 
+## OpenAI API Key 按量账号
+
+OpenAI 账号支持 ChatGPT 订阅与按量 API Key 两种认证。API Key 账号可添加、启用、同步
+`GET /v1/models` 目录并参与路由；Codex 仍使用内置 `openai` 和原有官方登录身份，
+`…/codex/v1` 透明转发按选中账号把鉴权替换为 `Authorization: Bearer <API Key>`，
+不发送 `ChatGPT-Account-ID`，上游为账号保存的 API 基址（默认 `https://api.openai.com/v1`）。
+
+1. 在「账号 → OpenAI」添加 API Key；名称留空时沿用自动命名。
+2. 在「路由」页选择该账号并「同步官方模型」；目录只保留可进入对话／Codex 的型号，
+   非对话家族（embedding、图片、语音等）不写入目录。
+3. Codex 继续使用现有「一键配置」与受管目录，不需要更换 `model_provider`、
+   不写入接入 Key、不改动官方登录与会话。网关只替换上游凭据。
+4. 订阅账号与 API Key 账号是两个计费池：同池故障切换不会跨认证方式，
+   固定账号仍优先；同一模型同时存在两类账号时按既有账号顺序选号。
+
+API Key 通道消耗 platform.openai.com 的按量额度，官方未提供剩余预付额度查询接口，
+界面不显示官方余额；本机 Token 与请求记录仍按既有口径统计。`/responses/compact`
+与 Responses WebSocket 走同一透明转发路径。模型上下文与多模态能力只使用
+`/v1/models` 已声明的字段，未知项保持未知。真实计费、模型权限和长会话仍需实机验证。
+
 ## Codex Fast 服务档位
 
 OpenAI 订阅模型同步保留官方 `model/list` 公布的 `serviceTiers`，按账号写入现有

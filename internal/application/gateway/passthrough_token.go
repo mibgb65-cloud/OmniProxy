@@ -19,6 +19,17 @@ type codexAuthAccess interface {
 // passthroughAttempt 借出一次令牌并填好上游鉴权头；令牌只活在这一份头部里。
 // 两种凭据来源都收敛到同一个结果：Bearer 访问令牌 + 官方账号标识。
 func (s *Service) passthroughAttempt(ctx context.Context, t target, model, base string) (proxy.PassthroughAttempt, error) {
+	// 按量账号走 api.openai.com 的 Bearer Key，不使用订阅端点或 ChatGPT 账号头。
+	if t.authMethod == account.AuthAPIKey {
+		return s.attemptFromAPIKey(ctx, t, model)
+	}
+	if base == "" {
+		resolved, err := s.codexUpstreamBase(ctx)
+		if err != nil {
+			return proxy.PassthroughAttempt{}, err
+		}
+		base = resolved
+	}
 	if t.authMethod == account.AuthCodexFile {
 		return s.attemptFromCodexAuth(ctx, t, model, base)
 	}
@@ -38,6 +49,25 @@ func newPassthroughAttempt(t target, base, model, accountID, accessToken string)
 	header.Set("Authorization", "Bearer "+accessToken)
 	header.Set("ChatGPT-Account-ID", accountID)
 	return proxy.PassthroughAttempt{Header: header, BaseURL: base, AccountID: t.accountID, Model: model, Snapshot: t.snapshot}
+}
+
+// attemptFromAPIKey 借出一次按量 Key；只设置 Bearer，不发送订阅的 ChatGPT-Account-ID。
+func (s *Service) attemptFromAPIKey(ctx context.Context, t target, model string) (proxy.PassthroughAttempt, error) {
+	var attempt proxy.PassthroughAttempt
+	err := s.useAPIKey(ctx, t, func(key []byte) error {
+		header := make(http.Header, 1)
+		header.Set("Authorization", "Bearer "+string(key))
+		attempt = proxy.PassthroughAttempt{
+			Header: header, BaseURL: t.baseURL, AccountID: t.accountID,
+			Model: model, Snapshot: t.snapshot,
+		}
+		return nil
+	})
+	if err != nil {
+		discardAttemptHeaders(attempt.Header)
+		return proxy.PassthroughAttempt{}, err
+	}
+	return attempt, nil
 }
 
 // attemptFromCodexAuth 走网关自己保管的 auth.json：需要时先自行续期，再把

@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 
+	"omniproxy/internal/application/account"
 	routes "omniproxy/internal/application/routing"
 	"omniproxy/internal/core/proxy"
 )
@@ -32,17 +33,9 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 	if s.accounts == nil {
 		return nil, proxy.Failure("invalid_configuration", 503)
 	}
-	// 两种凭据来源各自可用：官方隔离登录，或网关自己保管的 auth.json（无需官方登录组件）。
-	if _, poolOnly := s.accounts.(codexAuthAccess); s.subscription == nil && !poolOnly {
-		return nil, proxy.Failure("invalid_configuration", 503)
-	}
-	base, err := s.codexUpstreamBase(ctx)
-	if err != nil {
-		return nil, err
-	}
 	model := passthroughModel(request)
 	if model == "" || s.router == nil {
-		return s.openFallbackSession(ctx, model, base)
+		return s.openFallbackSession(ctx, model, "")
 	}
 	decision, candidates, fixed, err := s.resolvePreview(ctx, model)
 	if err != nil {
@@ -50,7 +43,7 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 	}
 	if !decision.Routable {
 		if decision.ErrorCode == "unsupported_model" {
-			return s.openFallbackSession(ctx, model, base)
+			return s.openFallbackSession(ctx, model, "")
 		}
 		return nil, proxy.Failure(routeFailureCode(decision), 503)
 	}
@@ -67,7 +60,7 @@ func (s *Service) OpenPassthrough(ctx context.Context, request proxy.Passthrough
 	if err != nil {
 		return nil, err
 	}
-	return s.newPassthroughSession(ctx, initial, plan, decision.Model, base, fixed)
+	return s.newPassthroughSession(ctx, initial, plan, decision.Model, "", fixed)
 }
 
 // openFallbackSession 在正文没有可用模型时（例如 WebSocket 握手没有正文）按 v1 的取号方式
@@ -114,25 +107,38 @@ func (s *Service) passthroughFallbackTargets(ctx context.Context) ([]target, err
 	if err != nil {
 		return nil, proxy.Failure("configuration_unavailable", 503)
 	}
+	subscriptions := make([]target, 0, len(accounts))
+	apiKeys := make([]target, 0, len(accounts))
 	for _, provider := range providers {
 		if !provider.Enabled || provider.Kind != "openai" {
 			continue
 		}
-		targets := make([]target, 0, len(accounts))
 		for _, item := range accounts {
-			if item.ProviderID != provider.ID || !item.Enabled || item.AuthState != "authenticated" || !codexLoginMethod(item.AuthMethod) {
+			if item.ProviderID != provider.ID || !item.Enabled {
 				continue
 			}
-			targets = append(targets, target{
+			entry := target{
 				authMethod: item.AuthMethod, accountID: item.ID, updatedAt: item.UpdatedAt,
 				baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, item),
-			})
-		}
-		if len(targets) > 0 {
-			return targets, nil
+			}
+			switch {
+			case codexLoginMethod(item.AuthMethod) && item.AuthState == "authenticated":
+				subscriptions = append(subscriptions, entry)
+			case item.AuthMethod == account.AuthAPIKey:
+				apiKeys = append(apiKeys, entry)
+			}
 		}
 	}
-	return nil, proxy.Failure("route_provider_unavailable", 503)
+	// 订阅与按量是两个计费池；握手没有模型可解析时优先保留原有订阅行为，
+	// 没有订阅账号时才使用 API Key 池，不能把两种凭据混在同一条连接里。
+	targets := subscriptions
+	if len(targets) == 0 {
+		targets = apiKeys
+	}
+	if len(targets) == 0 {
+		return nil, proxy.Failure("route_provider_unavailable", 503)
+	}
+	return targets, nil
 }
 
 // passthroughModel 从正文尽力读取模型；读不到交给取号回退，不能因此拒绝请求。

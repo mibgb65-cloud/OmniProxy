@@ -53,6 +53,7 @@ export function ModelCatalog({
             p.kind === "river" ||
             p.kind === "google" ||
             p.kind === "mimo" ||
+            (p.kind === "openai" && a.authMethod === "api_key") ||
             (p.kind === "kimi" && a.kimi != null && a.kimi.billingMode !== "coding") ||
             (p.kind === "minimax" &&
               a.minimax != null &&

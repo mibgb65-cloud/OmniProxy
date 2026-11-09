@@ -33,7 +33,7 @@ OmniProxy 时生效，关闭后恢复手动启动。此偏好独立于 Windows �
 
 选项卡使用 `/gateway?tab=overview|clients|manual|diagnostics` 定位，缺省或非法值回到运行概览，支持刷新及前进／后退。方向键移动页签焦点，Enter／Space 激活。面板首次访问才加载，访问后保留到离开网关页面；往返切换保留手动配置模式、进行中的操作与结果，隐藏面板不接收键盘焦点。切换后内容回到顶部。刷新同步更新网关、资源元数据及已加载的客户端配置，不调用模型。
 
-运行参数只读；资源概况和接入检查覆盖 DeepSeek／River／Atria／Gemini／MiMo／阶跃星辰／Kimi API Key，ChatGPT / Codex 使用已有订阅账号接入。资源数量仅表示配置，不表示密钥有效或目录已同步。手动配置摘要含占位符，不包含完整密钥；独立 Key 继续通过桌面端复制。
+运行参数只读；资源概况和接入检查覆盖 DeepSeek／River／Atria／Gemini／MiMo／阶跃星辰／Kimi API Key，ChatGPT / Codex 可使用订阅账号或 OpenAI API Key 账号接入。资源数量仅表示配置，不表示密钥有效或目录已同步。手动配置摘要含占位符，不包含完整密钥；独立 Key 继续通过桌面端复制。
 
 ## 请求统计与首字耗时
 
@@ -61,6 +61,9 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - Codex CLI／Desktop、Claude Code CLI、Claude Desktop Code 的配置入口；默认模型／路由选择、受控预览、应用、加密备份和恢复。
 - 客户端独立接入 Key，支持复制及启停。复制在桌面端完成，完整 Key 不通过 Wails 绑定返回。
 - Codex 保留 model_provider、官方 auth.json 登录与会话目录。内置 openai 使用固定前缀 `…/codex/v1`，不重定义内置提供商表，配置中不再写入接入 Key。
+- OpenAI 按量 API Key 账号同样从 `…/codex/v1` 接入：网关按账号切换到
+  `api.openai.com/v1`，只替换 `Authorization`，不发送 `ChatGPT-Account-ID`；
+  订阅与按量账号分开取号，不跨计费池切换。
 - Codex 入口按 v1 形态**透明转发**：前缀之后任意路径、客户端头部与正文原样送到
   上游，WebSocket 双向中继，上游基址可配置（默认官方订阅端点）。见
   [ADR 023](../decisions/ADR-023-codex-v1-transparent-passthrough.md)。
@@ -81,7 +84,8 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 - 客户端头部整体透传：`originator`、`session_id`、`conversation_id`、
   `OpenAI-Beta`（含压缩／WS 协商）、`User-Agent` 都保留；只替换
-  `Authorization` 与 `ChatGPT-Account-ID`。
+  `Authorization` 与 `ChatGPT-Account-ID`。按量 API Key 账号不设置后者，
+  上游基址改为账号保存的 API 地址（默认 `https://api.openai.com/v1`）。
 - 登录由网关拥有（v1 语义，见 [ADR 024](../decisions/ADR-024-gateway-owned-codex-login.md)）：
   池账号的 auth.json 存在受保护凭据存储里，可从本机 `~/.codex/auth.json` 导入；
   一键配置会把它写成客户端登录（先备份原登录，恢复时还原）。

@@ -19,6 +19,7 @@ import (
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
+	"omniproxy/internal/provider/openai"
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
@@ -62,6 +63,7 @@ type Service struct {
 	// upstreamBase 读取 Codex 透明转发的上游基址；nil 时用默认官方端点。
 	upstreamBase    func(context.Context) (string, error)
 	chatgpt         *chatgpt.Client
+	openAI          *openai.Client
 	atria           *atria.Client
 	river           *river.Client
 	oxionai         *oxionai.Client
@@ -86,6 +88,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s := &Service{providers: providers, accounts: accounts, client: client, chatgpt: chatgpt.New(nil), log: opts.Logger, timeout: opts.RequestTimeout}
 	s.failover = newFailoverState()
 	s.failoverEnabled = opts.FailoverEnabled
+	s.openAI = openai.New(nil)
 	s.atria = atria.New(nil)
 	s.river = river.New(nil)
 	s.oxionai = oxionai.New(nil)

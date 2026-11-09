@@ -5,6 +5,7 @@ import (
 	catalog "omniproxy/internal/core/modelcatalog"
 	"strings"
 
+	accountmodel "omniproxy/internal/application/account"
 	routes "omniproxy/internal/application/routing"
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
@@ -225,6 +226,10 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				}
 				if provider.Kind == "google" && account.AuthMethod != "api_key" && !(account.AuthMethod == "subscription_login" && account.AuthState == "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
+				}
+				// 按量 API Key 账号与订阅账号共用提供商，但计费与凭据完全不同。
+				if provider.Kind == "openai" && account.AuthMethod == accountmodel.AuthAPIKey {
+					return target{authMethod: account.AuthMethod, accountID: account.ID, updatedAt: account.UpdatedAt, baseURL: provider.BaseURL, kind: provider.Kind, snapshot: snapshotTarget(provider, account)}, nil
 				}
 				// 订阅账号有两种凭据来源：官方隔离登录与网关自己保管的 auth.json。
 				if provider.Kind == "openai" && (!codexLoginMethod(account.AuthMethod) || account.AuthState != "authenticated") {

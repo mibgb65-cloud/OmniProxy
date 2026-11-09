@@ -56,6 +56,18 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			return nil, ErrUnavailable
 		}
 		models, err = s.subscription.Models(ctx, id)
+	} else if kind == "openai" && current.AuthMethod == account.AuthAPIKey {
+		if s.openAI == nil {
+			return nil, ErrUnavailable
+		}
+		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
+			ids, e := s.openAI.DiscoverModels(ctx, base, key)
+			for _, model := range ids {
+				// 官方 /v1/models 不公布上下文窗口、工具或图片能力，保持未知。
+				models = append(models, codex.Model{ID: model, Name: model})
+			}
+			return e
+		})
 	} else if kind == "google" && current.AuthMethod == account.AuthSubscription {
 		if s.googleAuth == nil {
 			return nil, ErrUnavailable

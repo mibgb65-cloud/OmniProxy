@@ -3,7 +3,7 @@
 Google AI / Antigravity 使用独立订阅通道与浏览器授权，详见
 [Google 订阅说明](GOOGLE_SUBSCRIPTION.md)；不共用本文的 Codex 额度、重置卡或系统登录。
 
-OpenAI 账号支持 API Key 与 ChatGPT / Codex 两种认证方式。订阅授权已用于模型目录同步与 Responses 转发，跨协议支持文本和工具；具体权限仍由官方每次请求决定，见 `LOCAL_AGENTS.md`。
+OpenAI 账号支持 API Key 与 ChatGPT / Codex 两种认证方式。订阅授权已用于模型目录同步与 Responses 转发，跨协议支持文本和工具；具体权限仍由官方每次请求决定，见 `LOCAL_AGENTS.md`。API Key 账号可用于 `/codex/v1` 透明转发与普通网关，按量计费与订阅分池，见同文档「OpenAI API Key 按量账号」。
 
 重新授权后旧模型目录按凭据版本失效；应用启动、授权状态变化和账号更新会在后台补齐当前版本的官方目录，不启动网关、不阻塞请求。同步单 worker 串行、每账号每凭据版本最多一次，空目录按该版本终态处理；失败保留旧快照并只记录固定错误码。模型目录页显示同步中／失败状态，可手动重试。
 

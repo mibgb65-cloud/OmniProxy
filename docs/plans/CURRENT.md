@@ -129,7 +129,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
+- [TASK-20261109-002](../tasks/active/TASK-20261109-002-openai-api-key-codex-plan.md)：OpenAI 按量 API Key 接入 Codex —— `/codex/v1` 透明转发按账号切换到 `api.openai.com/v1`，普通 `/v1` 同步支持，模型目录与路由资格已补齐；Codex 身份与客户端配置不变，余额展示暂不做，等待用户实机测试。
+
+`docs/tasks/active/` 仅含上述记录与 `.gitkeep`。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

@@ -54,7 +54,8 @@ func QuotaRejected(prefix []byte, now time.Time) (bool, time.Time) {
 		reset = value.Error.ResetsAt
 	}
 	// 固定协议错误码，禁止按自然语言提示、模糊 quota 字样或一般 200 错误猜测可重试。
-	if code != "usage_limit_reached" {
+	// usage_limit_reached 来自 ChatGPT 订阅；insufficient_quota 来自按量 API 的余额耗尽。
+	if code != "usage_limit_reached" && code != "insufficient_quota" {
 		return false, time.Time{}
 	}
 	seconds, err := reset.Int64()

@@ -16,7 +16,7 @@ type subscriptionQuotaRefresher interface {
 }
 
 func (s *Service) subscriptionQuotaWait(t target, now time.Time) time.Duration {
-	if t.kind != "openai" {
+	if t.kind != "openai" || !codexLoginMethod(t.authMethod) {
 		return 0
 	}
 	if source, ok := s.subscription.(subscriptionQuotaAvailability); ok {
@@ -28,7 +28,7 @@ func (s *Service) subscriptionQuotaWait(t target, now time.Time) time.Duration {
 }
 
 func (s *Service) rememberQuotaRejection(t target, rejected *retryReason) {
-	if rejected == nil || rejected.code != "upstream_quota_exhausted" {
+	if rejected == nil || rejected.code != "upstream_quota_exhausted" || !codexLoginMethod(t.authMethod) {
 		return
 	}
 	if source, ok := s.subscription.(subscriptionQuotaAvailability); ok {
@@ -39,7 +39,7 @@ func (s *Service) rememberQuotaRejection(t target, rejected *retryReason) {
 // refreshQuota 只对刚结束真实请求的 OpenAI 订阅账号刷新额度观察：下一条消息不必再撞
 // 一次已知耗尽的账号，同时不做任何后台全量探测。
 func (s *Service) refreshQuota(t target) {
-	if t.kind != "openai" || t.accountID == "" || t.updatedAt == "" {
+	if t.kind != "openai" || !codexLoginMethod(t.authMethod) || t.accountID == "" || t.updatedAt == "" {
 		return
 	}
 	if source, ok := s.subscription.(subscriptionQuotaRefresher); ok {

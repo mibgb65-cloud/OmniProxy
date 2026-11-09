@@ -31,6 +31,9 @@ func (s *Service) useAPIKey(ctx context.Context, t target, consume func([]byte) 
 type credentialClaimKey struct{}
 
 func (s *Service) useToken(ctx context.Context, t target, consume func([]byte, string) error) error {
+	if s.subscription == nil {
+		return proxy.Failure("credential_unavailable", 503)
+	}
 	if access, ok := s.subscription.(interface {
 		UseTokenAt(context.Context, string, string, func([]byte, string) error) error
 	}); ok {
