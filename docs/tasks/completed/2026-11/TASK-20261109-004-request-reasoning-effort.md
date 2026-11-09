@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -242,7 +242,7 @@ go build -tags production -trimpath -buildvcs=false -ldflags="-w -s" -o bin/omni
 ## Commit
 
 ```text
-Not committed by Agent.
+e8dfc47e feat(activity): record reasoning effort per request
 ```
 
 ---
@@ -258,4 +258,4 @@ Codex 透明转发（HTTP 与 WebSocket 逐轮）都在请求时旁路提取档�
 
 # Completed
 
-待填写。
+2026-11-09 14:52
