@@ -4,6 +4,8 @@
 
 本地构建：[TASK-20261104-002](../tasks/completed/2026-11/TASK-20261104-002-build-local-wails-v3.1.0-beta.md) 已产出 `v2.2.3-beta.1` Windows amd64 生产安装包，源码提交 `8399d382`，包含 Wails `v3.1.0` 升级，无新增数据库迁移。按用户要求未重复测试或完整质量门，仅执行生产构建／NSIS 打包及原生版本资源、构建信息、摘要校验。安装器 20,555,019 bytes，SHA256 `e11b86bb53ed1e7605afeecaa8e8d5c8cfe983ce7b877ffebb825441b92e5a61`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户本地覆盖更新。
 
+已完成：[TASK-20261107-001](../tasks/completed/2026-11/TASK-20261107-001-auto-catalog-sync-and-rotation-resilience.md)，OpenAI 订阅模型目录在启动、授权变化与账号更新后后台自动同步；目录过期／为空／同步失败时 `/codex/v1` 透明入口仍按同池候选执行队列／平衡轮换，不再固定第一个账号。同步失败保留旧快照并只记录固定错误码，模型目录页展示只读同步状态。完整 Go／前端测试（146 文件／891 项）、类型检查、lint 与生产构建通过；`task verify` 的 build 依赖在环境中卡住，已用等价 `pnpm build` 与生产标签 `go build` 补足。实现提交 `d6f413b0`，未推送。
+
 已完成：[TASK-20261104-001](../tasks/completed/2026-11/TASK-20261104-001-upgrade-wails-v3.1.0.md)，Wails Go 模块、前端 runtime、本机 CLI 与 CI／Release 已固定升级到正式版 `3.1.0`；保留现有 Taskfile。完整质量门（Vitest 限 4 并发，146 文件／890 项前端测试、51 个 Go 测试包）与隔离 Windows 开发 EXE 构建、原生版本资源核验通过，实现提交 `b74dd234`；未制作安装包、未启动应用、未推送，原生窗口／托盘人工验收仍待执行。
 
 当前 GitHub 正式版：[v2.2.2](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.2.2)，2026-11-01 23:24:49（Asia/Singapore）公开为 stable Latest，标签源码 `077194e5`。修复 Codex 订阅目录容量丢失与自动压缩触发依据缺失；main CI [41319427444](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427444) 及 Release [41319427603](https://github.com/mibgb65-cloud/OmniProxy/actions/runs/41319427603) 的构建／签名／发布全部成功。升级后同步受影响账号模型并重新加载 Codex；本轮不做真实客户端／覆盖安装验收，完整记录见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。下方保留历史发布与构建记录。
@@ -125,7 +127,7 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-Planned（待用户确认）：[TASK-20261107-001](../tasks/active/TASK-20261107-001-auto-catalog-sync-and-rotation-resilience.md)，自动同步 OpenAI 模型目录，并让透明入口在目录失效时仍按同池候选轮换；尚未修改代码。
+无（`docs/tasks/active/` 仅剩 `.gitkeep`）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

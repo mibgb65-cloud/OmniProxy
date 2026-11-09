@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -33,7 +33,7 @@ In Progress
   3. Codex 走 `/codex/v1` 透明入口；`OpenPassthrough` 把 `unsupported_model` 交给 `openFallbackSession`。
   4. `openFallbackSession` 只按 `accounts.List()` 顺序（`created_at DESC`）取第一个账号，**不调用 `rotateAccounts`**，于是所有请求固定到同一账号。
 - 现有自动同步只有 Google：`modelcatalog.StartGoogleAutoSync` 在启动时和授权变化后串行刷新，失败保留旧目录；OpenAI 只有 `ModelSync` 手动入口。
-- 相关记录：[ADR-018](../../decisions/ADR-018-codex-account-rotation.md)、[ADR-023](../../decisions/ADR-023-codex-v1-transparent-passthrough.md)、[TASK-20261019-017](../completed/2026-10/TASK-20261019-017-openai-account-rotation-settings.md)、[TASK-20261024-016](../completed/2026-10/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)（空目录记录）。
+- 相关记录：[ADR-018](../../../decisions/ADR-018-codex-account-rotation.md)、[ADR-023](../../../decisions/ADR-023-codex-v1-transparent-passthrough.md)、[TASK-20261019-017](../2026-10/TASK-20261019-017-openai-account-rotation-settings.md)、[TASK-20261024-016](../2026-10/TASK-20261024-016-activation-failure-code-and-websocket-toggle.md)（空目录记录）。
 
 ## Scope
 
@@ -171,6 +171,8 @@ In Progress
 
 - 2026-11-07 11:55：创建任务记录，Status = Planned；未修改任何代码或配置，等待用户确认方案。
 - 2026-11-07 12:05：用户确认方案，Status → In Progress；按 B → A → 状态展示 → 文档顺序实施。
+- 2026-11-09 08:20：完成兜底轮换、通用自动同步、状态查询与前端展示；定向测试通过。
+- 2026-11-09 09:02：完整 Go／前端测试、类型检查、lint 与生产构建通过；记录 `task verify` 构建依赖卡住的环境情况并提交。
 
 ---
 
@@ -282,17 +284,18 @@ go build -tags production ...      PASS（bin/omniproxy-verify.exe）
 ## Commit
 
 ```text
-Not committed by Agent.
+d6f413b0 feat(codex): 自动同步模型目录并让兜底入口参与轮换
 ```
+
+- 未推送远端；无关未跟踪任务记录 `TASK-20261029-010-subq-provider.md` 保持原样，未纳入提交。
+- 本次任务记录归档与 CURRENT 收尾单独提交。
 
 ---
 
 # Result
 
-待实现。当前仅完成任务记录，等待用户审阅确认后进入 In Progress。
-
----
+已完成：OpenAI 目录在启动、授权变化与账号更新后后台自动补齐；即使目录过期、为空或同步失败，`/codex/v1` 透明入口仍按同池候选执行 `queue`／`balanced` 轮换，不再固定第一个账号。同步失败保留旧快照并只记录固定错误码，模型目录页以只读状态展示同步中／失败／未同步数量。未改变目录版本语义、普通路由、固定账号、尝试上限与不可重放边界；无迁移或新依赖。完整 Go／前端测试、类型检查、lint 与生产构建通过；`task verify` 的 build 依赖在环境中卡住，已用等价命令补足并记录。
 
 # Completed
 
-Pending
+2026-11-09 09:05（Asia/Singapore）
