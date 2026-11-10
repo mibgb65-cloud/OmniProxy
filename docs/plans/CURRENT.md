@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已完成：[TASK-20261110-003](../tasks/completed/2026-11/TASK-20261110-003-remove-manual-refresh-and-stabilize-log-footer.md)：移除仪表盘「刷新概况」、用量页与请求页的「刷新」按钮（三页本就按记账事件与 5 秒轮询自动更新），日志页脚「回到最新」按钮与「自动跟随最新」提示改为共用固定 32px 槽位，跟随状态切换不再挤压日志列表、页面不再跳动。全量前端测试（限 4 worker，146 文件／893 项）、Go 全部包测试与生产构建通过；`task verify` 在默认并发下因 3 个无关既有文件的 5 秒超时中断，单独重跑与限并发全量均通过。实现提交 `d383ccc7`。
+
 本地构建：[TASK-20261110-002](../tasks/completed/2026-11/TASK-20261110-002-build-local-v2.2.3-beta.5.md) 已产出 `v2.2.3-beta.5` Windows amd64 生产安装包，包含 OpenAI API Key Codex 接入修复（`a175b8ca`），版本提交 `c6e1d167`，无新增迁移。按用户要求不重跑测试；强制生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,597,316 bytes，SHA256 `b25030280c702cdf03db8c7a3bb21f40ee3b612996be56212f9e087106dfd483`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已完成代码修复：[TASK-20261110-001](../tasks/completed/2026-11/TASK-20261110-001-fix-openai-apikey-codex.md) 修复 OpenAI API Key 的 Codex 默认 API 基址、后台模型同步及新增账号同步通知。官方模型目录认证 HTTP 200，后端全量测试、OpenAI 前端 10 项及开发模式 Go 编译通过；前端全量质量门／Task 构建未完成，限制见任务记录。未改生产数据、未替换安装版、未发送真实计费推理。
@@ -193,6 +195,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261110-003](../tasks/completed/2026-11/TASK-20261110-003-remove-manual-refresh-and-stabilize-log-footer.md)：移除仪表盘、用量页与请求页的手动刷新按钮，保留事件与 5 秒轮询自动更新；日志页脚「回到最新」按钮与「自动跟随最新」提示共用固定 32px 行高，切换不再引起页面跳动。限 4 worker 的全量前端测试 146 文件／893 项、Go 测试与 `task build` 通过，实现提交 `d383ccc7`。
 
 - [TASK-20261109-005](../tasks/completed/2026-11/TASK-20261109-005-build-local-v2.2.3-beta.4.md)：`v2.2.3-beta.4` 本地 Windows amd64 生产安装包已构建并通过版本映射、NSIS 打包、原生版本资源与发布资产校验（20,594,633 bytes，SHA256 `367a8d42…bce4f7`）；内容为推理等级记录与展示（迁移 046），未签名、未安装、未推送或发布，等待用户从托盘退出后本地覆盖更新。
 
