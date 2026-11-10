@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地打包中：[TASK-20261110-002](../tasks/active/TASK-20261110-002-build-local-v2.2.3-beta.5.md) 准备 `v2.2.3-beta.5` Windows amd64 生产安装包，包含 OpenAI API Key Codex 接入修复。按用户明确要求不再测试，只执行生产编译、打包及产物核对；不自动安装、启动、推送或公开发布。
+本地构建：[TASK-20261110-002](../tasks/completed/2026-11/TASK-20261110-002-build-local-v2.2.3-beta.5.md) 已产出 `v2.2.3-beta.5` Windows amd64 生产安装包，包含 OpenAI API Key Codex 接入修复（`a175b8ca`），版本提交 `c6e1d167`，无新增迁移。按用户要求不重跑测试；强制生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,597,316 bytes，SHA256 `b25030280c702cdf03db8c7a3bb21f40ee3b612996be56212f9e087106dfd483`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已完成代码修复：[TASK-20261110-001](../tasks/completed/2026-11/TASK-20261110-001-fix-openai-apikey-codex.md) 修复 OpenAI API Key 的 Codex 默认 API 基址、后台模型同步及新增账号同步通知。官方模型目录认证 HTTP 200，后端全量测试、OpenAI 前端 10 项及开发模式 Go 编译通过；前端全量质量门／Task 构建未完成，限制见任务记录。未改生产数据、未替换安装版、未发送真实计费推理。
 
