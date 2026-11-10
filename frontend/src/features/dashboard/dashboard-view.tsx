@@ -1,4 +1,3 @@
-import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { formatAccountTime } from "../accounts/account-display"
@@ -23,34 +22,23 @@ export function DashboardView() {
           <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard.title")}</h1>
           <p className="text-muted-foreground text-sm">{t("dash.description")}</p>
         </div>
-        <div className="flex max-w-full flex-wrap items-center gap-2">
-          <div
-            role="group"
-            aria-label={t("dash.range")}
-            className="bg-muted flex max-w-full flex-wrap gap-1 rounded-lg p-1"
-          >
-            {([1, 7, 30] as const).map((period) => (
-              <Button
-                key={period}
-                variant={data.period === period ? "default" : "ghost"}
-                size="sm"
-                aria-pressed={data.period === period}
-                className={data.period === period ? "shadow-sm" : "text-muted-foreground"}
-                onClick={() => data.setPeriod(period)}
-              >
-                {t(periodLabels[period])}
-              </Button>
-            ))}
-          </div>
-          <Button variant="outline" disabled={data.refreshing} onClick={() => void data.refresh()}>
-            <RefreshCw
-              className={
-                data.refreshing ? "size-4 animate-spin motion-reduce:animate-none" : "size-4"
-              }
-              aria-hidden="true"
-            />
-            {t("dash.refresh")}
-          </Button>
+        <div
+          role="group"
+          aria-label={t("dash.range")}
+          className="bg-muted flex max-w-full flex-wrap gap-1 rounded-lg p-1"
+        >
+          {([1, 7, 30] as const).map((period) => (
+            <Button
+              key={period}
+              variant={data.period === period ? "default" : "ghost"}
+              size="sm"
+              aria-pressed={data.period === period}
+              className={data.period === period ? "shadow-sm" : "text-muted-foreground"}
+              onClick={() => data.setPeriod(period)}
+            >
+              {t(periodLabels[period])}
+            </Button>
+          ))}
         </div>
       </header>
       {data.statistics.isError ? (

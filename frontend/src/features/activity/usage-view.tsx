@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { ArrowDownLeft, ArrowUpRight, RefreshCw, Sigma } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Sigma } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardHeader } from "../../components/ui/card"
 import { formatTokens, readUsage } from "../../services/activity"
 import { UsageChart, UsageBreakdown } from "./usage-breakdown"
@@ -18,15 +17,8 @@ export function UsageView() {
   ] as const
   return (
     <section className="w-full min-w-0 space-y-5 pb-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header>
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.usage.title")}</h1>
-        <Button variant="outline" disabled={query.isFetching} onClick={() => void query.refetch()}>
-          <RefreshCw
-            className={query.isFetching ? "motion-safe:animate-spin" : ""}
-            aria-hidden="true"
-          />
-          {t("activity.refresh")}
-        </Button>
       </header>
       {query.isError ? (
         <p role="alert" className="text-destructive text-sm">

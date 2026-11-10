@@ -1,5 +1,4 @@
 export const activityZh = {
-  "activity.refresh": "刷新",
   "activity.loading": "正在读取记录…",
   "activity.failed": "读取失败，请重试。",
   "activity.total": "累计代理 Token",

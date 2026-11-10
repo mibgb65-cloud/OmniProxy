@@ -80,6 +80,7 @@ it("大整数 Token 保持精确，累计统计和报告覆盖率可见", async 
   mount(<UsageView />)
   expect(await screen.findByText("9,007,199,254,741,000")).toBeInTheDocument()
   expect(screen.getByText("完整用量 1 / 2 请求")).toBeInTheDocument()
+  expect(screen.queryByRole("button", { name: "刷新" })).not.toBeInTheDocument()
 })
 it("已删除账号和部分用量保持可见，详情按 ID 跳到关联日志", async () => {
   vi.mocked(readRequests).mockResolvedValue({

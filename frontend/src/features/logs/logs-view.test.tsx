@@ -1,6 +1,6 @@
 import { selectOption } from "../../test/select-option"
 import { Clipboard } from "@wailsio/runtime"
-import { act, fireEvent, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
@@ -116,6 +116,19 @@ describe("实时日志页面", () => {
     expect(viewport.scrollTop).toBe(0)
     await user.click(screen.getByRole("button", { name: "新增 1 条 · 回到最新" }))
     await waitFor(() => expect(viewport.scrollTop).toBeGreaterThanOrEqual(300))
+  })
+
+  it("自动跟随提示与回到最新按钮共用固定行高，切换不改变页脚高度", async () => {
+    const user = userEvent.setup()
+    const { container } = renderLogs()
+    await screen.findByText("application ready")
+    const slot = container.querySelector<HTMLElement>('[data-slot="log-follow-slot"]')
+    expect(slot).not.toBeNull()
+    expect(slot).toHaveClass("h-8")
+    expect(within(slot!).getByText("自动跟随最新")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "暂停更新" }))
+    expect(within(slot!).getByRole("button", { name: "回到最新" })).toBeInTheDocument()
+    expect(slot).toHaveClass("h-8")
   })
 
   it("清空显示保留服务端记录，并只显示后续新增日志", async () => {

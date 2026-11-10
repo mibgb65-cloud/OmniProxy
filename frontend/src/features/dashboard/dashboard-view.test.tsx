@@ -199,13 +199,19 @@ describe("dashboard overview", () => {
     ).toBeInTheDocument()
   })
 
-  it("shows safe statistics failures and supports a local retry without checking resources", async () => {
-    const user = userEvent.setup()
+  it("shows safe statistics failures and recovers on the next activity event without checking resources", async () => {
     vi.mocked(readDashboard).mockRejectedValueOnce(new Error("private SQL detail"))
     renderDashboard()
     expect(await screen.findByRole("alert")).toHaveTextContent("运行统计读取失败")
     expect(screen.queryByText(/private SQL detail/)).not.toBeInTheDocument()
-    await user.click(screen.getByRole("button", { name: "刷新概况" }))
+    expect(screen.queryByRole("button", { name: "刷新概况" })).not.toBeInTheDocument()
+    const callback = vi
+      .mocked(Events.On)
+      .mock.calls.find(([name]) => name === "activity:updated")?.[1]
+    expect(callback).toBeDefined()
+    await act(async () => {
+      callback?.({ name: "activity:updated", data: "", sender: "" })
+    })
     expect(await screen.findByText("80%")).toBeInTheDocument()
     expect(readSubscriptionQuota).not.toHaveBeenCalled()
     expect(readAccountBalance).not.toHaveBeenCalled()

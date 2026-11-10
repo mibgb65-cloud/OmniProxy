@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
 import { listRoutes } from "../../services/routing"
 import { listAgentClients } from "../../services/agents"
 import { useAccounts } from "../accounts/use-accounts"
@@ -10,27 +9,11 @@ import { useDashboardStatistics } from "./use-dashboard-statistics"
 
 export function useDashboard() {
   const { period, setPeriod, now, statistics } = useDashboardStatistics()
-  const [refreshing, setRefreshing] = useState(false)
   const accounts = useAccounts()
   const providers = useProviders()
   const routes = useQuery({ queryKey: ["routes"], queryFn: listRoutes })
   const agents = useQuery({ queryKey: ["agent-clients"], queryFn: listAgentClients })
   const resources = useDashboardResources(accounts.data ?? [], providers.data ?? [], now)
-  async function refresh() {
-    if (refreshing) return
-    setRefreshing(true)
-    try {
-      await Promise.all([
-        statistics.refetch({ cancelRefetch: false }),
-        accounts.refetch({ cancelRefetch: false }),
-        providers.refetch({ cancelRefetch: false }),
-        routes.refetch({ cancelRefetch: false }),
-        agents.refetch({ cancelRefetch: false }),
-      ])
-    } finally {
-      setRefreshing(false)
-    }
-  }
   const accountList = accounts.data ?? []
   const providerList = providers.data ?? []
   const routeList = routes.data ?? []
@@ -44,8 +27,6 @@ export function useDashboard() {
     providers,
     routes,
     agents,
-    refresh,
-    refreshing: refreshing || statistics.isFetching,
     issues: dashboardIssues(accountList, providerList, routeList, resources.entries),
     checklist: dashboardChecklist(accountList, providerList, routeList, resources.entries),
     metadataError: accounts.isError || providers.isError || routes.isError,

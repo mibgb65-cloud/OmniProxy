@@ -5,7 +5,6 @@ export const dashboardEn: Record<keyof typeof dashboardZh, string> = {
   "dash.today": "Today",
   "dash.week": "Last 7 days",
   "dash.month": "Last 30 days",
-  "dash.refresh": "Refresh overview",
   "dash.requests": "Requests",
   "dash.tokens": "Reported tokens",
   "dash.successRate": "Success rate",
@@ -17,7 +16,7 @@ export const dashboardEn: Record<keyof typeof dashboardZh, string> = {
   "dash.latencyNote": "Full duration of successful and failed requests, including streams",
   "dash.noSample": "No completed requests yet",
   "dash.loading": "Loading request statistics…",
-  "dash.failed": "Could not read request statistics. Refresh to retry.",
+  "dash.failed": "Could not read request statistics. Retrying automatically.",
   "dash.metadataFailed": "Account or routing information is unavailable. Refresh to confirm.",
   "dash.historyPartial":
     "Some pre-upgrade records were removed. This range includes only retained history and newly recorded statistics.",

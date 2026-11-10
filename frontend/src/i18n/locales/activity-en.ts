@@ -1,5 +1,4 @@
 export const activityEn = {
-  "activity.refresh": "Refresh",
   "activity.loading": "Loading records…",
   "activity.failed": "Unable to load. Try again.",
   "activity.total": "Total proxied tokens",

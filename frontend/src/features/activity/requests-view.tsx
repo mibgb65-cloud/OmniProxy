@@ -1,6 +1,5 @@
 import { SelectField } from "../../components/ui/select-field"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { RefreshCw } from "lucide-react"
 import { useDeferredValue, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -34,15 +33,8 @@ export function RequestsView({
   return (
     // 页面占满内容区可视高度：标题、筛选、分页常驻，只有表格内部滚动。
     <section className="app-page-fit flex w-full min-w-0 flex-col gap-5">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+      <header className="shrink-0">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.requests.title")}</h1>
-        <Button variant="outline" disabled={data.isFetching} onClick={() => void data.refetch()}>
-          <RefreshCw
-            className={data.isFetching ? "motion-safe:animate-spin" : ""}
-            aria-hidden="true"
-          />
-          {t("activity.refresh")}
-        </Button>
       </header>
       <div className="flex shrink-0 flex-wrap gap-3">
         <Input

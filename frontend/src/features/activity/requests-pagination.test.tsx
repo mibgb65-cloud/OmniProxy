@@ -38,7 +38,7 @@ it.each([
   [4351, 88],
 ])("%i 条请求按每页 50 条显示共 %i 页", async (total, pages) => {
   mount(total)
-  await waitFor(() => expect(screen.getByRole("button", { name: "刷新" })).toBeEnabled())
+  await waitFor(() => expect(screen.queryByText("正在读取记录…")).not.toBeInTheDocument())
   expect(screen.getByText(`第 1 页 / 共 ${pages} 页`)).toBeInTheDocument()
   expect(screen.getByText(`保留 ${total} 条，上限 10000 条`)).toBeInTheDocument()
   expect(screen.getByRole("button", { name: "上一页" })).toBeDisabled()
@@ -81,7 +81,8 @@ it("英文分页同样显示总页数而非记录数", async () => {
 
 it("请求页占满内容区可视高度，长列表不把整页顶出窗口", async () => {
   mount(50)
-  await waitFor(() => expect(screen.getByRole("button", { name: "刷新" })).toBeEnabled())
+  await waitFor(() => expect(screen.queryByText("正在读取记录…")).not.toBeInTheDocument())
+  expect(screen.queryByRole("button", { name: "刷新" })).not.toBeInTheDocument()
   const page = screen.getByRole("heading", { level: 1 }).closest("section")
   expect(page).toHaveClass("app-page-fit")
   expect(page).toHaveClass("flex-col")
