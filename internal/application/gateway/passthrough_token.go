@@ -8,6 +8,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/infrastructure/codex"
+	"omniproxy/internal/provider/openai"
 )
 
 // codexAuthAccess 只在回调内交出网关自己保管的 auth.json，并可回写续期结果。
@@ -53,12 +54,17 @@ func newPassthroughAttempt(t target, base, model, accountID, accessToken string)
 
 // attemptFromAPIKey 借出一次按量 Key；只设置 Bearer，不发送订阅的 ChatGPT-Account-ID。
 func (s *Service) attemptFromAPIKey(ctx context.Context, t target, model string) (proxy.PassthroughAttempt, error) {
+	base := t.baseURL
+	if base == "" {
+		// 内置提供商用空值表示官方地址，不能沿用订阅基址或把空值交给透明转发。
+		base = openai.DefaultBaseURL
+	}
 	var attempt proxy.PassthroughAttempt
 	err := s.useAPIKey(ctx, t, func(key []byte) error {
 		header := make(http.Header, 1)
 		header.Set("Authorization", "Bearer "+string(key))
 		attempt = proxy.PassthroughAttempt{
-			Header: header, BaseURL: t.baseURL, AccountID: t.accountID,
+			Header: header, BaseURL: base, AccountID: t.accountID,
 			Model: model, Snapshot: t.snapshot,
 		}
 		return nil

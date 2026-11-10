@@ -34,6 +34,7 @@ func (s *AppService) CreateAccount(input account.CreateInput) (account.Item, err
 	item, err := service.Create(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
+		s.requestOpenAIModelSync()
 	}
 	return item, err
 }
@@ -47,6 +48,7 @@ func (s *AppService) CreateAccounts(input account.BatchCreateInput) ([]account.I
 	items, err := service.CreateBatch(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
+		s.requestOpenAIModelSync()
 	}
 	return items, err
 }

@@ -10,7 +10,7 @@ func StartGoogleAutoSync(ctx context.Context, source *Service, refresh func(cont
 	return &GoogleAutoSync{StartAutoSync(ctx, source, "google", false, refresh, report)}
 }
 
-// OpenAIAutoSync 只补齐当前版本没有目录的 OpenAI 订阅账号。
+// OpenAIAutoSync 补齐当前版本没有目录的 OpenAI 订阅及 API Key 账号。
 type OpenAIAutoSync struct{ *AutoSync }
 
 // StartOpenAIAutoSync 在启动、授权变化或账号更新后补齐过期目录。

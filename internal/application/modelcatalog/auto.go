@@ -20,7 +20,7 @@ type SyncStatus struct {
 	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
-// AutoSync 串行发现订阅目录，合并并发通知；staleOnly 时只处理当前版本没有目录的账号。
+// AutoSync 串行发现目录，合并并发通知；staleOnly 时只处理当前版本没有目录的账号。
 type AutoSync struct {
 	source    *Service
 	kind      string
@@ -117,7 +117,10 @@ func (s *AutoSync) sync(ctx context.Context) (error, error) {
 		if ctx.Err() != nil {
 			return ctx.Err(), nil
 		}
-		if !enabled[item.ProviderID] || !item.Enabled || item.AuthMethod != account.AuthSubscription || item.AuthState != "authenticated" {
+		subscriptionReady := item.AuthMethod == account.AuthSubscription && item.AuthState == "authenticated"
+		// API Key 没有订阅登录状态，但同样需要官方模型快照才能参与 Codex 路由。
+		openAIKey := s.kind == "openai" && item.AuthMethod == account.AuthAPIKey
+		if !enabled[item.ProviderID] || !item.Enabled || !subscriptionReady && !openAIKey {
 			continue
 		}
 		if s.staleOnly {

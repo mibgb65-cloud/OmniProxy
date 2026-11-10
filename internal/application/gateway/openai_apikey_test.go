@@ -7,7 +7,41 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"omniproxy/internal/application/account"
+	"omniproxy/internal/core/proxy"
+	"omniproxy/internal/provider/openai"
 )
+
+func TestPassthroughAPIKeyDefaultsToOfficialBase(t *testing.T) {
+	s, _, _, _ := failoverFixture(t, roundTripFunc(func(*http.Request) (*http.Response, error) {
+		t.Fatal("准备凭据不应发送上游请求")
+		return nil, nil
+	}))
+	attempt, err := s.passthroughAttempt(context.Background(), target{
+		accountID: "a", authMethod: account.AuthAPIKey, kind: "openai",
+	}, "gpt-test", defaultCodexUpstreamBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer discardAttemptHeaders(attempt.Header)
+	if attempt.BaseURL != openai.DefaultBaseURL {
+		t.Fatalf("空提供商地址未补齐官方 API 基址: %q", attempt.BaseURL)
+	}
+	for _, path := range []string{"/responses", "/responses/compact", "/v1/responses"} {
+		endpoint, err := proxy.PassthroughURL(attempt.BaseURL, path, "")
+		if err != nil || !strings.HasPrefix(endpoint, openai.DefaultBaseURL+"/responses") {
+			t.Fatalf("HTTP 地址无效: %q %v", endpoint, err)
+		}
+	}
+	endpoint, err := proxy.PassthroughSocketURL(attempt.BaseURL, "/responses", "")
+	if err != nil || endpoint != "wss://api.openai.com/v1/responses" {
+		t.Fatalf("WebSocket 地址无效: %q %v", endpoint, err)
+	}
+	if attempt.Header.Get("ChatGPT-Account-ID") != "" {
+		t.Fatal("API Key 不应携带订阅账号身份")
+	}
+}
 
 // TestPassthroughAPIKeyUsesBearerAndProviderBase 断言 /codex/v1 在账号为
 // OpenAI 按量 API Key 时改走 api.openai.com，且不发送订阅的账号头。

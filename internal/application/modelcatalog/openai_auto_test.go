@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -113,6 +116,59 @@ func TestOpenAIAutoSyncFillsStaleCatalogOncePerVersion(t *testing.T) {
 	}
 }
 
+func TestOpenAIAutoSyncIncludesAPIKeyWithoutSubscriptionState(t *testing.T) {
+	s, db, source := openAIAutoFixture(t)
+	s.accounts = account.NewService(db, apiKeyStore{})
+	var requests atomic.Int32
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
+		if r.URL.Path != "/v1/models" || r.Header.Get("Authorization") != "Bearer sk-test" {
+			t.Error("API Key 目录请求的端点或认证错误")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"data":[{"id":"gpt-test-key"}]}`))
+	}))
+	defer upstream.Close()
+	if _, err := db.Exec(`UPDATE providers SET base_url=? WHERE id='builtin_openai';
+		UPDATE accounts SET auth_method='api_key',auth_state='' WHERE id='b'`, upstream.URL+"/v1"); err != nil {
+		t.Fatal(err)
+	}
+	results := make(chan error, 4)
+	auto := StartOpenAIAutoSync(context.Background(), s, nil, func(err error) { results <- err })
+	t.Cleanup(auto.Close)
+	if err := awaitAuto(t, results); err != nil {
+		t.Fatal(err)
+	}
+	items, err := s.List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, item := range items {
+		found = found || item.AccountID == "b" && item.Model == "gpt-test-key"
+	}
+	if !found || requests.Load() != 1 || source.count() != 1 {
+		t.Fatalf("启动没有分别同步 API Key 与订阅目录: key=%t requests=%d subscription=%d", found, requests.Load(), source.count())
+	}
+	auto.Request()
+	if err := awaitAuto(t, results); err != nil {
+		t.Fatal(err)
+	}
+	if requests.Load() != 1 || auto.Status().Stale != 0 {
+		t.Fatal("已同步的 API Key 目录被重复读取")
+	}
+	if _, err := db.Exec(`UPDATE accounts SET credential_ref='key-v2' WHERE id='b'`); err != nil {
+		t.Fatal(err)
+	}
+	auto.Request()
+	if err := awaitAuto(t, results); err != nil {
+		t.Fatal(err)
+	}
+	if requests.Load() != 2 || source.count() != 1 {
+		t.Fatal("更换 API Key 后没有重新同步独立目录")
+	}
+}
+
 func TestOpenAIAutoSyncEmptyCatalogIsTerminalPerVersion(t *testing.T) {
 	s, _, source := openAIAutoFixture(t)
 	source.set(nil, nil)
@@ -179,7 +235,7 @@ func TestOpenAIAutoSyncSkipsDisabledLoggedOutAndOtherChannels(t *testing.T) {
 	if _, err := db.Exec(`UPDATE accounts SET enabled=0 WHERE id='a';
 		INSERT INTO accounts(id,provider_id,name,credential_ref,created_at,updated_at,auth_method,auth_state)
 		VALUES('out','builtin_openai','Out','cred','now','now','subscription_login','unknown'),
-		('key','builtin_openai','Key','cred','now','now','api_key','authenticated'),
+		('key','builtin_google','Key','cred','now','now','api_key','authenticated'),
 		('google','builtin_google','Google','cred','now','now','subscription_login','authenticated')`); err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +246,7 @@ func TestOpenAIAutoSyncSkipsDisabledLoggedOutAndOtherChannels(t *testing.T) {
 		t.Fatal(err)
 	}
 	if source.count() != 1 || source.calls[0] != "b" {
-		t.Fatal("扫描了禁用、登出、API Key 或其他提供商账号", source.calls)
+		t.Fatal("扫描了禁用、登出或其他提供商账号", source.calls)
 	}
 	if _, err := db.Exec(`UPDATE providers SET enabled=0 WHERE id='builtin_openai'`); err != nil {
 		t.Fatal(err)

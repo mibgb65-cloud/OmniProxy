@@ -63,7 +63,12 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - Codex 保留 model_provider、官方 auth.json 登录与会话目录。内置 openai 使用固定前缀 `…/codex/v1`，不重定义内置提供商表，配置中不再写入接入 Key。
 - OpenAI 按量 API Key 账号同样从 `…/codex/v1` 接入：网关按账号切换到
   `api.openai.com/v1`，只替换 `Authorization`，不发送 `ChatGPT-Account-ID`；
+  内置提供商地址留空时仍使用官方 API 基址，不回退到订阅端点。
   订阅与按量账号分开取号，不跨计费池切换。
+  启动、新增／批量新增、启用或更换 Key 后会在后台补齐当前凭据版本的模型目录，
+  不要求订阅登录状态；失败可在路由页手动重试。
+  同一模型同时支持两类账号时，若要明确使用 API 额度，应创建精确路由并固定 API Key 账号，
+  不能以订阅账号调用成功或模型目录认证成功代替按量推理验收。
 - Codex 入口按 v1 形态**透明转发**：前缀之后任意路径、客户端头部与正文原样送到
   上游，WebSocket 双向中继，上游基址可配置（默认官方订阅端点）。见
   [ADR 023](../decisions/ADR-023-codex-v1-transparent-passthrough.md)。

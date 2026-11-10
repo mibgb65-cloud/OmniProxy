@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已完成代码修复：[TASK-20261110-001](../tasks/completed/2026-11/TASK-20261110-001-fix-openai-apikey-codex.md) 修复 OpenAI API Key 的 Codex 默认 API 基址、后台模型同步及新增账号同步通知。官方模型目录认证 HTTP 200，后端全量测试、OpenAI 前端 10 项及开发模式 Go 编译通过；前端全量质量门／Task 构建未完成，限制见任务记录。未改生产数据、未替换安装版、未发送真实计费推理。
+
 本地构建：[TASK-20261109-005](../tasks/completed/2026-11/TASK-20261109-005-build-local-v2.2.3-beta.4.md) 已产出 `v2.2.3-beta.4` Windows amd64 生产安装包，包含请求明细记录并展示推理等级（TASK-20261109-004，`e8dfc47e`），新增迁移 046（`request_records.reasoning_effort`）。版本提交 `60dda7a3`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过。安装器 20,594,633 bytes，SHA256 `367a8d4240656e3d1d7eb3bc325b6cf8b3c867fdd5e1900e3fa1b9a1f7bce4f7`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出后本地覆盖更新。
 
 已完成：[TASK-20261109-004](../tasks/completed/2026-11/TASK-20261109-004-request-reasoning-effort.md)，请求明细记录并展示推理等级：迁移 046 增加 `reasoning_effort`，档位在请求时从正文旁路提取（Messages `output_config.effort`／Responses `reasoning.effort`／Chat `reasoning_effort`），以路由改写后的实际档位为准；未指定、历史记录与不可解析正文显示「—」，不推测上游默认值，不参与聚合与计费。列表新增「推理等级」列并带说明提示，详情新增同名字段。实现提交 `e8dfc47e`；`go test . ./internal/...`（51 包）、`go vet`、`staticcheck`、前端 typecheck／lint、892 项前端测试（Vitest 限 4 worker）与生产构建全部通过，原生窗口观感待用户实机确认。
