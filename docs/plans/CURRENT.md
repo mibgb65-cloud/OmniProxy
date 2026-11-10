@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地打包中：[TASK-20261110-004](../tasks/active/TASK-20261110-004-build-local-v2.2.3-beta.6.md) 准备 `v2.2.3-beta.6` Windows amd64 生产安装包，包含仪表盘／用量／请求页手动刷新按钮移除与日志页脚固定行高（TASK-20261110-003，`d383ccc7`）。不重跑完整质量门，只执行版本映射、生产编译、打包及产物核对；不自动安装、启动、推送或公开发布。
+本地构建：[TASK-20261110-004](../tasks/completed/2026-11/TASK-20261110-004-build-local-v2.2.3-beta.6.md) 已产出 `v2.2.3-beta.6` Windows amd64 生产安装包，包含仪表盘／用量／请求页手动刷新按钮移除与日志页脚固定行高（TASK-20261110-003，`d383ccc7`），无新增迁移。版本提交 `375e5333`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,599,143 bytes，SHA256 `e691d8caef25d49ccc542663dc496f14d60201ba05f2fe6139bd4399cc373ca5`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已完成：[TASK-20261110-003](../tasks/completed/2026-11/TASK-20261110-003-remove-manual-refresh-and-stabilize-log-footer.md)：移除仪表盘「刷新概况」、用量页与请求页的「刷新」按钮（三页本就按记账事件与 5 秒轮询自动更新），日志页脚「回到最新」按钮与「自动跟随最新」提示改为共用固定 32px 槽位，跟随状态切换不再挤压日志列表、页面不再跳动。全量前端测试（限 4 worker，146 文件／893 项）、Go 全部包测试与生产构建通过；`task verify` 在默认并发下因 3 个无关既有文件的 5 秒超时中断，单独重跑与限并发全量均通过。实现提交 `d383ccc7`。
 
@@ -197,6 +197,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
   未替换（[TASK-20261027-003](../tasks/completed/2026-10/TASK-20261027-003-fix-passthrough-token-accounting.md)）。
 
 ## Recently Completed
+
+- [TASK-20261110-004](../tasks/completed/2026-11/TASK-20261110-004-build-local-v2.2.3-beta.6.md)：`v2.2.3-beta.6` 本地 Windows amd64 生产安装包已构建并通过版本映射、NSIS 打包、原生版本资源与发布资产校验（20,599,143 bytes，SHA256 `e691d8ca…73ca5`）；内容为三页手动刷新按钮移除与日志页脚固定行高，未签名、未安装、未推送或发布，等待用户从托盘退出后本地覆盖更新。
 
 - [TASK-20261110-003](../tasks/completed/2026-11/TASK-20261110-003-remove-manual-refresh-and-stabilize-log-footer.md)：移除仪表盘、用量页与请求页的手动刷新按钮，保留事件与 5 秒轮询自动更新；日志页脚「回到最新」按钮与「自动跟随最新」提示共用固定 32px 行高，切换不再引起页面跳动。限 4 worker 的全量前端测试 146 文件／893 项、Go 测试与 `task build` 通过，实现提交 `d383ccc7`。
 
