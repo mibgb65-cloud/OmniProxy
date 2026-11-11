@@ -28,6 +28,7 @@ import (
 	"omniproxy/internal/infrastructure/credential"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
+	"omniproxy/internal/platform/singleinstance"
 	"omniproxy/internal/transport/httpapi"
 	"omniproxy/internal/version"
 )
@@ -42,6 +43,8 @@ type App struct {
 	Assets   embed.FS
 	DB       *sql.DB
 	LogFiles *logger.Files
+	// Instance 是进程级单实例守卫；取得失败时为 nil，桌面壳按无守卫启动。
+	Instance singleinstance.Guard
 }
 
 // AppService exposes application information to the desktop UI through Wails
@@ -259,6 +262,19 @@ func Run(app *App) error {
 		BackgroundColour: application.NewRGB(9, 9, 11),
 		URL:              "/",
 	})
+	// 重复启动不会再打开第二个窗口：后一次启动只请求这里把主窗口带到前台，
+	// 窗口可能已隐藏到托盘或最小化。Wails 的窗口调用会同步等待主循环，而
+	// 请求可能早于窗口创建到达（注册时补发即在主线程上），因此统一交给独立
+	// 协程，避免主线程等待自己。
+	if app.Instance != nil {
+		app.Instance.OnActivate(func() {
+			app.Service.log.Info("another launch requested the existing window")
+			go func() {
+				window.Show()
+				window.Focus()
+			}()
+		})
+	}
 	app.Service.bindLogEvents(wailsApp, window)
 	app.Service.bindSubscriptionEvents(wailsApp)
 	app.Service.bindActivationEvents(wailsApp)

@@ -312,6 +312,15 @@ the tray instead. The tray menu restores the window or quits through the normal
 shutdown path. Login autostart uses Wails' per-user Windows registration and
 is exposed only in the production profile.
 
+Single instance is enforced before any shared state is touched.
+`internal/platform/singleinstance` takes a named mutex per profile application
+ID from `main.go`, ahead of the configuration, the database, the migrations and
+the logger; a later launch signals the holder's named activation event and
+exits with code 0 without opening the database or rewriting the configuration.
+The holder then shows and focuses its main window, including from the tray or a
+minimised state. Because the identity is the profile application ID, the
+production, development and test profiles still run side by side.
+
 ### Control API (`internal/transport/httpapi`)
 
 A chi router bound to `127.0.0.1:<control port>`. External clients use it to

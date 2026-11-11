@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"errors"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"omniproxy/internal/infrastructure/database"
 	"omniproxy/internal/infrastructure/logger"
 	"omniproxy/internal/platform/profile"
+	"omniproxy/internal/platform/singleinstance"
 	"omniproxy/internal/platform/startup"
 	"omniproxy/internal/transport/httpapi"
 	wailsapp "omniproxy/internal/transport/wails"
@@ -44,6 +46,19 @@ func main() {
 		slog.Error("failed to resolve runtime profile", "error", err)
 		startup.NotifyFailure("无法读取运行配置", "")
 		os.Exit(1)
+	}
+	// 单实例守卫必须在读取或迁移任何共享状态之前取得：应用已在运行时，本次
+	// 启动只把已有窗口带到前台后退出，不打开数据库、不执行迁移、不改写配置，
+	// 也不占用端口与托盘。守卫本身失败不阻断启动。
+	instance, instanceErr := singleinstance.Acquire(prof.AppID)
+	if errors.Is(instanceErr, singleinstance.ErrAlreadyRunning) {
+		return
+	}
+	if instanceErr != nil {
+		slog.Warn("single instance guard unavailable", "error", instanceErr)
+	}
+	if instance != nil {
+		defer func() { _ = instance.Close() }()
 	}
 	if err := resolveDatabaseProfile(prof); err != nil {
 		// 此阶段尚未建立常规日志；先记录并关闭，确保弹窗中的日志可读取。
@@ -108,6 +123,7 @@ func main() {
 		Assets:   assets,
 		DB:       db,
 		LogFiles: logFiles,
+		Instance: instance,
 	}
 	if err := wailsapp.Run(app); err != nil {
 		log.Error("application exited with error", "error", err)
