@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261111-001](../tasks/completed/2026-11/TASK-20261111-001-single-instance-window-activation.md) 补齐单实例：`main()` 在读取配置、打开数据库、执行迁移与初始化日志之前取得 profile 级命名互斥量；重复启动只向已运行实例发送激活事件并以 0 退出，已有实例再显示并聚焦主窗口（托盘隐藏与最小化均可恢复），生产／开发／测试 profile 仍各自独立。生产日志中 2026-11-11 20:31:25 的第二次启动（控制端口 3890 绑定失败）不再发生。`task verify` exit 0（53 个 Go 测试包、前端 146 文件／893 项、Windows production 编译）；进程级验证中重复启动 259 ms 内 exit 0 且未创建数据目录、未写日志。实现提交 `5d6fef11`；原生窗口前台激活待用户实机确认（本会话 WebView2 报 `800700aa`，无法创建窗口控制器）。
+
 本地构建：[TASK-20261110-004](../tasks/completed/2026-11/TASK-20261110-004-build-local-v2.2.3-beta.6.md) 已产出 `v2.2.3-beta.6` Windows amd64 生产安装包，包含仪表盘／用量／请求页手动刷新按钮移除与日志页脚固定行高（TASK-20261110-003，`d383ccc7`），无新增迁移。版本提交 `375e5333`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,599,143 bytes，SHA256 `e691d8caef25d49ccc542663dc496f14d60201ba05f2fe6139bd4399cc373ca5`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已完成：[TASK-20261110-003](../tasks/completed/2026-11/TASK-20261110-003-remove-manual-refresh-and-stabilize-log-footer.md)：移除仪表盘「刷新概况」、用量页与请求页的「刷新」按钮（三页本就按记账事件与 5 秒轮询自动更新），日志页脚「回到最新」按钮与「自动跟随最新」提示改为共用固定 32px 槽位，跟随状态切换不再挤压日志列表、页面不再跳动。全量前端测试（限 4 worker，146 文件／893 项）、Go 全部包测试与生产构建通过；`task verify` 在默认并发下因 3 个无关既有文件的 5 秒超时中断，单独重跑与限并发全量均通过。实现提交 `d383ccc7`。
@@ -660,8 +662,10 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 - Logs displays bounded structured runtime records with batched Wails updates,
   filtering, pause/follow controls, copy and JSONL export. Historical log-file
   search remains pending. See `docs/product/LOGS.md`.
-- Single-instance protection is not wired yet; a manual launch after autostart
-  can start a second process.
+- Single instance is enforced per profile in `main()` before the configuration,
+  database, migrations and logger are opened: a later launch signals the running
+  instance, which shows and focuses its window, and the duplicate process exits
+  0 without touching shared state. See TASK-20261111-001.
 - Proxy HTTP integration tests cover the core flow with isolated providers;
   full desktop E2E (Playwright) remains pending.
 
