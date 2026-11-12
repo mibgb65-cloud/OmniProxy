@@ -34,3 +34,17 @@ func (s *Server) requestTimeout(request Request) time.Duration {
 	}
 	return timeout
 }
+
+// antigravityTimeout 给桌面代理会话的推理留出时间。
+//
+// Antigravity 带着完整工具集和历史发送请求，订阅的思考型模型可能先想数分钟再输出；
+// 沿用普通请求的 120 秒会把正常会话截断成 502。这里只放宽这个客户端，其它客户端不变。
+const antigravityTimeout = 10 * time.Minute
+
+func (s *Server) clientRequestTimeout(client string, request Request) time.Duration {
+	timeout := s.requestTimeout(request)
+	if client == "antigravity" && timeout < antigravityTimeout {
+		return antigravityTimeout
+	}
+	return timeout
+}

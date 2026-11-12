@@ -156,7 +156,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, err)
 		return
 	}
-	ctx, cancel := context.WithTimeout(r.Context(), s.requestTimeout(request))
+	ctx, cancel := context.WithTimeout(r.Context(), s.clientRequestTimeout(client, request))
 	defer cancel()
 	if router, ok := s.opts.Upstream.(RequestRouter); ok {
 		request, err = router.RouteRequest(ctx, request)

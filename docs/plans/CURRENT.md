@@ -2,13 +2,15 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261112-015](../tasks/completed/2026-11/TASK-20261112-015-antigravity-protocol-marker.md) Antigravity 连接后仍然失败的第二个原因：桌面端 Chat 正文走 `ParseAntigravityRequest` → `parseChatRequest`，那里只填了 model／stream／effort，没有标记 `Protocol`，转发层因此把它当成未知协议，任意 Google 模型都返回 `400 unsupported_protocol`（本地 `curl` 已复现）。现在解析层统一标记 `chat`。在隔离实例（生产数据目录副本、端口 3011，未触碰运行中的应用）上验证：`gemini-4-argon` → `-high`、`gemini-4-argon` + medium → `-medium`、`claude-opus-4-6` → `-thinking`、`gpt-oss-120b` → `-medium`、`gemini-3.8-flash` + low 流式全部 200；一次 `-medium` 因上游 30 秒超时返回 502，重试成功。
+已修复：[TASK-20261112-017](../tasks/completed/2026-11/TASK-20261112-017-antigravity-response-header-timeout.md) Antigravity 会话在约 30.1 秒统一变成 `502 operation_failed`：订阅客户端 `ResponseHeaderTimeout` 只有 30 秒，而桌面端使用的思考型模型（Gemini 4 Argon 等）在首个 token 前可能先想一分钟以上，流式响应也要等首个分片才有响应头。响应头等待改为 5 分钟、TLS 握手仍 10 秒；同时新增 `clientRequestTimeout`，Antigravity 整请求至少 10 分钟（普通 120 秒会切断长流），其它客户端时限不变。隔离实例验证：带约 8 KB system 的流式请求 60.3 秒返回 200（修复前必然 30.1 秒失败），常速请求仍 9.1 秒。
 
-已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 桌面端连接后发送消息报 `400 unsupported_model`：桌面端把目录里的 `gemini-4-argon-high` 折叠成家族名 `gemini-4-argon` 加档位再发送，网关按 ID 精确匹配直接拒绝。现在精确匹配失败后会按同提供商的目录变体解析家族名（优先客户端档位，其次 high／medium／low，最后接受唯一变体，精确 ID 不改写，未知家族仍 400），同时推理档位不再在路由前被剥离。实现提交 `c19339b8`。
+已修复：[TASK-20261112-015](../tasks/completed/2026-11/TASK-20261112-015-antigravity-protocol-marker.md) Antigravity 请求缺少 `Protocol` 标记导致任意 Google 模型 `400 unsupported_protocol`：桌面端走 `ParseAntigravityRequest` → `parseChatRequest`，该分支没填协议。现在解析层统一标记 `chat`。
 
-本地构建：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 已产出 `v2.2.3-beta.14` Windows amd64 生产安装包，包含上述两项 Antigravity 修复，无新增迁移。版本提交 `02e2a304`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.13。
+已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 家族模型名（`gemini-4-argon`）解析到目录变体，实现提交 `c19339b8`。
 
-本地构建（已被 beta.14 取代）：[TASK-20261112-014](../tasks/completed/2026-11/TASK-20261112-014-build-local-v2.2.3-beta.13.md) 曾产出 `v2.2.3-beta.13` Windows amd64 生产安装包（家族模型名解析），安装器 20,725,199 bytes，SHA256 `b9f6c09e6bcf9dd28d9caa42d1ffabe5bb5e27cb17899210b74bf4bed83bd767`；用户已安装，因协议标记缺失仍失败，由 beta.14 取代。
+本地构建：[TASK-20261112-018](../tasks/completed/2026-11/TASK-20261112-018-build-local-v2.2.3-beta.15.md) 已产出 `v2.2.3-beta.15` Windows amd64 生产安装包，包含上述三项 Antigravity 修复，无新增迁移。版本提交 `待回填`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,730,171 bytes，SHA256 `ca4d3e87d3e1c46be7bbc1ee1dffc13175104f6b9fa50d9bcf86322624a0c5c5`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.14。
+
+本地构建（已被 beta.15 取代）：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 曾产出 `v2.2.3-beta.14`（协议标记修复），安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`；用户已安装，因 30 秒响应头超时仍失败，由 beta.15 取代。
 
 本地构建：[TASK-20261112-012](../tasks/completed/2026-11/TASK-20261112-012-build-local-v2.2.3-beta.12.md) 已产出 `v2.2.3-beta.12` Windows amd64 生产安装包，把网关页的 Antigravity 入口从整行横幅改为与其它客户端一致的网格卡片（TASK-20261112-011，`b2e501bb`）：品牌图标 + 分组标题 + 描述 + 单条客户端条目（状态徽标按 Antigravity 自身语义显示「已连接本地网关／配置需要检查／尚未配置」，安装状态「已安装／未安装」）+ 分隔线下的整宽操作按钮；提示与 Google 登录说明精简以适配更窄列宽，不再显示拉长卡片的重复模型摘要。仅前端版式与文案，无迁移、无后端变化。版本提交 `89daea9f`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,717,553 bytes，SHA256 `8aecc54d75eaabdf02dc1e60e5ee805c20e9725946e3e873ca393856c93807d1`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.11。
 

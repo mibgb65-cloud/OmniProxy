@@ -55,11 +55,18 @@ type Client struct {
 	}
 }
 
+// responseHeaderTimeout 是等待上游响应头的上限。
+//
+// 订阅的思考型模型（Gemini 4 Argon、Claude thinking 等）在第一个 token 之前可能先想
+// 几十秒到几分钟，流式请求也要等第一个分片才有响应头；30 秒会把正常请求当成网络失败。
+// 连接与 TLS 握手仍有独立上限，真正不可达的主机会更早失败。
+const responseHeaderTimeout = 5 * time.Minute
+
 // New 创建拒绝重定向且具有有限握手等待的客户端。
 func New(transport http.RoundTripper) *Client {
 	if transport == nil {
 		t := http.DefaultTransport.(*http.Transport).Clone()
-		t.ResponseHeaderTimeout = 30 * time.Second
+		t.ResponseHeaderTimeout = responseHeaderTimeout
 		t.TLSHandshakeTimeout = 10 * time.Second
 		transport = netproxy.Wrap(t)
 	}

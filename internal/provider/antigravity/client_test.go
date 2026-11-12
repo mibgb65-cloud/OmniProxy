@@ -16,6 +16,18 @@ import (
 
 type transportFunc func(*http.Request) (*http.Response, error)
 
+// 思考型订阅模型可能先想几分钟才回应；响应头等待必须留出这段时间，
+// 否则正常请求会被当成网络失败（30 秒曾导致所有 Antigravity 会话 502）。
+func TestResponseHeaderTimeoutAllowsLongThinking(t *testing.T) {
+	if responseHeaderTimeout < 2*time.Minute {
+		t.Fatalf("response header timeout too short: %v", responseHeaderTimeout)
+	}
+	client := New(nil)
+	if client.http.Timeout != 0 {
+		t.Fatalf("whole-request timeout would cut long streams: %v", client.http.Timeout)
+	}
+}
+
 func (f transportFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func reply(status int, body string) *http.Response {
 	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body))}
