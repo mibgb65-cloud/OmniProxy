@@ -196,7 +196,7 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.13 -AssetDirectory releas
 dc88968a chore(release): 准备本地 v2.2.3-beta.13 生产版本
 ```
 
-修复提交 `c19339b8`、版本提交 `dc88968a`；归档提交 `TBD`。未打标签、未推送、未公开发布。
+修复提交 `c19339b8`、版本提交 `dc88968a`；归档提交 `af7f0b7f`。未打标签、未推送、未公开发布。
 
 ---
 

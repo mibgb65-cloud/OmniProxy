@@ -183,7 +183,7 @@ task --force verify                                       → exit 0（VERIFY_EX
 c19339b8 fix(gateway): 解析 Antigravity 家族模型名并保留推理档位
 ``` 
 
-本记录随修复提交一起提交；归档提交 `TBD`。未打标签、未推送。
+本记录随修复提交一起提交；归档提交 `af7f0b7f`。未打标签、未推送。
 
 ---
 
