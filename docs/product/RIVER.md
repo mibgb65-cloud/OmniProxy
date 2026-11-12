@@ -24,6 +24,8 @@ River 原版 Flash 显示为 `DeepSeek-V4.1-Flash`，保留 `deepseek-flash` 公
 
 Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函数工具调用、工具结果及官方 usage。Chat 流式请求添加 `stream_options.include_usage`。Responses 无状态，客户端必须发送完整历史；拒绝 `store: true`、`background: true`、`previous_response_id`、`conversation` 和上下文管理引用，不静默丢失历史。仅支持函数工具，不开放托管搜索、计算机等专用工具。
 
+River 不限制函数工具数量：官方 [Limits and support](https://docs.river.ai/guides/inference-limits/) 只公布 50 MiB 请求体、图片格式与超时，[Tools](https://docs.river.ai/guides/inference-tools/) 也未给出数量上限，2026-11-12 用生产 Key 直接向 `POST /v1/chat/completions` 发送 176 个 `type=function` 工具（`max_tokens=1`）实测返回 200。适配器因此不再沿用其他适配器的 128 计数上限——DeepSeek Harness 会把内置工具与多个 MCP 工具合并发送，很容易超过 128 个；此前这类请求被本地拦成笼统的 `400 invalid_request`，实际未曾到达上游。数量只受请求体大小、JSON 深度与上游最终校验约束，本层不截断、不丢弃工具；仍逐条校验 `type=function`、函数名非空且不超过 128 字符。
+
 Messages 使用现有文本／函数工具／图片协议转换，经 Chat 接入。工具调用 ID 和结果保持关联；跨协议先收完整响应，再生成下游 JSON／SSE，不提供原生首 Token 增量输出，也不保证保留跨协议的思考正文。不能将其当作 River 官方 Messages API。
 
 推理强度经客户端原生 effort 传递：Chat 用 `reasoning_effort`，Responses 用 `reasoning.effort`，Messages 用 `output_config.effort`。Codex 目录发布它自己的档位词汇（`none`／`max` 就近映射为 `minimal`／`xhigh`），网关收到后还原成上游取值；Messages → Chat 转换时只透传该模型已确认的档位，非法值返回 400 而不是静默丢弃；请求未带档位时使用上表公布的上游默认档位。Claude 菜单不再按档位派生模型条目，详见 `docs/product/LOCAL_AGENTS.md` 的「推理强度（Claude）」。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。

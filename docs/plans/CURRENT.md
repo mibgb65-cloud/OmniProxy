@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261112-006](../tasks/completed/2026-11/TASK-20261112-006-river-tool-count-limit.md)，River 适配器不再按未核对的 128 个工具上限拒绝请求：DeepSeek Harness 把内置工具与三个 MCP 合并发送共 176 个工具，旧实现 `validateTools` 在 129 个就本地返回笼统的 `400 invalid_request`，请求根本未到达上游（生产日志 3 次同特征 400、0 token）。官方 Limits 只公布 50 MiB 请求体，未公布工具数量上限；用生产 Key 直接对上游发送 176 个函数工具实测 200，故移除计数分支，保留 `type=function`、函数名非空且 ≤128 字符的逐条校验，不截断工具。新增 4 组测试（含走 `Client.Forward` 断言 176 个工具原样到达上游）；`docs/product/RIVER.md` 新增「工具数量」说明。`task --force verify` exit 0（147 文件／895 项前端、全部 Go 包、Windows production 构建）。用户侧已临时停用 OpenPencil MCP 恢复可用，发版后可按备份恢复。
+
 本地构建：[TASK-20261112-004](../tasks/completed/2026-11/TASK-20261112-004-build-local-v2.2.3-beta.9.md) 已产出 `v2.2.3-beta.9` Windows amd64 生产安装包，包含 Google 订阅 Agent 链路对齐（TASK-20261112-002，`d4af73e9`，含设置页「Google 订阅请求」／「按原文发送 system prompt」开关），无新增迁移。版本提交 `9f2d825d`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,678,269 bytes，SHA256 `64221dbddc193f2f3f4cddebc2f977b5f47f29eec1b7b78dd130933a22f9d42f`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已完成：[TASK-20261112-002](../tasks/completed/2026-11/TASK-20261112-002-google-subscription-agent-chain-parity.md)，Google 订阅 Agent 链路对齐参考实现：system prompt 中会被上游当成额度耗尽拒绝的少数行按词打散（设置页「Google 订阅请求」可改为按原文发送）、内容拒绝改报不可重试的 `400 prompt_turned_away`、同 prompt 6 小时预判跳过、容量 429 按上游重置时间休息并在有候选时换号、请求历史修复、模型族生成参数与工具模式（思考档位、`VALIDATED`、跳过签名）、稳定会话标识、模型目录权益与停用过滤、客户端标识与实时协议版本。`task verify` PASS（147 文件／895 项前端、全部 Go 包、Windows production 构建）；真机对照已完成：原文 system prompt 得到 `400 prompt_turned_away`，打散后与删去命中行均为 `200`（1 个订阅账号、`gemini-2.5-flash`、21 工具／约 88.8 KB，各 1 次、无重试）。实现提交 `d4af73e9`。
