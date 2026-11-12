@@ -155,11 +155,15 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-当前无正在实现的任务。`docs/tasks/active/` 仅剩一条已登记、尚未开始的任务：
+当前无正在实现的任务。`docs/tasks/active/` 有两条已登记、尚未开始的任务：
 
 - [TASK-20261112-003](../tasks/active/TASK-20261112-003-gemini-cli-subscription-channel.md)
   （Planned）新增 Gemini CLI 订阅通道（Code Assist Standard / Enterprise），复用
   TASK-20261112-002 的传输层与错误语义，但按原文发送 system prompt。
+- [TASK-20261112-005](../tasks/active/TASK-20261112-005-google-subscription-chat-clients-parity.md)
+  （Planned）Google 订阅覆盖 DSH 等非 Claude/Codex 客户端：先做 DSH 真机验证，再按错误码
+  定点补 Chat 推理档位（`reasoning_effort` 当前 400）、目录档位声明、实测拒绝行与客户端矩阵。
+  协议与目录层面已确认可连通（10 个 Chat 客户端 + Claude 两入口 + Codex）。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）
