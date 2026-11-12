@@ -226,8 +226,8 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.9 -AssetDirectory release
 与 `docs/releases/v2.2.3-beta.9.md`。
 
 功能提交：`d4af73e9`（`feat(google): 对齐 Google 订阅 Agent 请求形态与拒绝处理`），
-文档回填提交 `af053226`、`9ea7c54b`。先提交版本再打包；本记录与 CURRENT 的最终归档单独提交
-（归档提交见本记录所在提交历史）。无关未跟踪文件保持原样，未纳入提交。未打标签、未推送、未公开发布。
+文档回填提交 `af053226`、`9ea7c54b`。先提交版本再打包；本记录与 CURRENT 的归档提交 `5c3c9e49`，
+本行哈希由随后的文档提交回填。无关未跟踪文件保持原样，未纳入提交。未打标签、未推送、未公开发布。
 
 ---
 
