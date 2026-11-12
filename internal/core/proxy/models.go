@@ -37,6 +37,7 @@ func validModelQuery(path, raw string) bool {
 			}) {
 				return false
 			}
+		case path == "/v1/models" && key == "format" && value == "antigravity":
 		case path == "/v1/models" && key == "limit":
 			limit, err := strconv.Atoi(value)
 			if err != nil || limit < 1 || limit > catalog.MaxModels {
@@ -78,7 +79,7 @@ func (s *Server) catalogEntries(ctx context.Context) ([]catalog.Entry, error) {
 	return catalog.Normalize(entries)
 }
 
-func (s *Server) writeModelCatalog(w http.ResponseWriter, r *http.Request, codex bool) {
+func (s *Server) writeModelCatalog(w http.ResponseWriter, r *http.Request, codex bool, client string) {
 	entries, err := s.catalogEntries(r.Context())
 	if err != nil {
 		writeFailure(w, safeFailure(r.Context(), err))
@@ -87,6 +88,8 @@ func (s *Server) writeModelCatalog(w http.ResponseWriter, r *http.Request, codex
 	var body []byte
 	if codex {
 		body, err = catalog.CodexJSON(entries)
+	} else if r.URL.Query().Get("format") == "antigravity" {
+		body, err = catalog.AntigravityJSON(entries)
 	} else {
 		body, err = s.modelListJSON(entries, r.URL.Query())
 	}

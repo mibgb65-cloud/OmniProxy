@@ -22,6 +22,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
    Codex CLI／Desktop、Claude Code CLI／Desktop 使用各自已有的一键接入流程。
    若普通 API Key 和订阅存在同名模型，可创建固定该订阅账号的路由规则来明确使用
    订阅通道；新增账号不会改变既有的默认账号选择顺序。
+7. Antigravity 桌面端（2.15 及以上）在“网关 → 本地 Agent 接入”的 Antigravity
+   卡片一键连接；完全退出并重启 Antigravity 后，模型菜单读取本地网关目录。
+   该模式不需要 Google 登录，也不需要安装证书或修改系统代理；详见下文
+   「Antigravity 桌面端」。
 
 ## 当前能力与边界
 
@@ -54,6 +58,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   模型和额度独立查询、缓存与刷新，
   单项失败不隐藏另一项结果。
 - 不请求付费积分回退，不切换普通 Gemini API Key 重试；上游限流返回 429。
+- Antigravity 桌面端使用官方 Enterprise Gateway（`wireProtocol: "openai"`）接入，
+  不拦截 TLS、不装本地 CA；连接期间桌面端不使用 Google 登录，Google 账号专属的
+  实验与命令（`/boost`、`/teamwork`、`/plugin`、`/generative_ui`）暂时不可用，
+  断开后恢复。目录只发布 Google 订阅账号的 Gemini 模型，不发布 Claude／GPT-OSS。
 
 ### 请求形态与拒绝处理（2026-11-12）
 
@@ -88,6 +96,31 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 可能影响上游前缀缓存，且不能保证上游检查永不变化，不因此宣称账号更安全。
 
 - 本实现使用 Antigravity 客户端内部协议，接口兼容性与真实账号权限需持续验证。
+
+## Antigravity 桌面端
+
+桌面端从以下文件读取网关（两个版本各读自己的文件）：
+
+- 2.30 及以上：`~/.gemini/config/config.json`
+- 2.29 及以前：`~/.antigravity/settings.json`
+
+接入块为 `gateway: {enabled, url, apiKey, wireProtocol: "openai"}` 与
+`models: {defaultModelId, listSource}`；`listSource` 指向
+`http://127.0.0.1:<端口>/v1/models?format=antigravity`。一键连接会同时写入两个
+文件并加密备份原内容；连接期间删除会遮住远端目录的内联 `models.list`，断开时
+按备份恢复。`gateway` 中用户自行添加的其他字段保留。
+
+- 模型目录只返回 Google 订阅账号的 Gemini 文本模型，字段为
+  `modelId`、`displayName`、`maxTokens`、`maxOutputTokens`、`supportsImages`、
+  `supportsThinking`；未知窗口不猜测。
+- 对话走 `<url>/v1/chat/completions`，复用现有 Google 订阅多账号路由、额度冷却、
+  故障切换与请求记录。桌面端自带的 `reasoning_effort`、`service_tier`、
+  `metadata`、`store` 只在 `client=antigravity` 时剥离，不改变其他客户端。
+- 桌面端通过接入 Key 识别归属；Key 只存在本机设置文件与受保护存储中。
+- 先在桌面端启动一次，确保设置文件存在，再回来连接；连接后必须完全退出并重启。
+- 若组织下发了 `admin_settings.json` 的网关，或设置了 `AGY_LLM_GATEWAY_URL`
+  等 `AGY_LLM_GATEWAY_*` 变量，它们优先于用户设置文件，本机卡片写入不会生效；
+  当前版本不自动改写这些外部配置。
 
 ## 失败排查
 
@@ -156,6 +189,11 @@ OAuth、并发刷新、身份变化、目录版本、工具签名两轮、SSE �
 2026-11-12：对齐官方客户端的请求形态与拒绝处理（打散、拒绝分类、两种 429、历史修复、
 模型族参数、会话标识、目录权益、客户端标识），全部由注入 RoundTripper 的契约测试覆盖
 （打散 5 行与幂等、429 分类、按模型族的生成参数、历史修复、跳过与最后候选、权益降级）。
+
+2026-11-12：Antigravity 桌面端接入按官方 Enterprise Gateway 契约实现。配置生成与
+双文件恢复、`format=antigravity` 目录形状与 Gemini 过滤、桌面端请求字段规整由
+契约测试覆盖；当前开发环境未安装桌面端，尚未做真机请求验证。首次使用需按卡片
+提示重启桌面端，并在模型菜单中确认只出现 Google 订阅账号的 Gemini 模型。
 
 2026-11-12 真机对照（用户授权，1 个订阅账号、模型 `gemini-2.5-flash`、21 工具／约 88.8 KB、
 `max_tokens=32000`，各 1 次、无自动重试）：system prompt 按原文发送得到

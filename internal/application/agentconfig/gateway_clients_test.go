@@ -25,6 +25,10 @@ func gatewayClientFixture(t *testing.T) (*Service, *changingCatalog) {
 	s.paths.HarnessWeb = filepath.Join(root, "harness", "profiles", "web", "cordis.patch.yml")
 	s.paths.HarnessDesktop = filepath.Join(root, "harness", "profiles", "desktop", "cordis.patch.yml")
 	s.paths.HarnessCredentials = filepath.Join(root, "harness", ".credentials.yaml")
+	s.paths.Antigravity = filepath.Join(root, "antigravity", ".gemini", "config", "config.json")
+	s.paths.AntigravityLegacy = filepath.Join(root, "antigravity", ".antigravity", "settings.json")
+	writeGatewayFixture(t, s.paths.Antigravity, "{}")
+	writeGatewayFixture(t, s.paths.AntigravityLegacy, "{}")
 	source.entries = []catalog.Entry{{ID: "deepseek-flash", Name: "Flash", Protocols: []string{"chat_completions"}}, {ID: "only-responses", Protocols: []string{"responses"}}}
 	return s, source
 }

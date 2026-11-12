@@ -76,6 +76,11 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 		return preparation{}, err
 	}
 	failed := func(err error) (preparation, error) { clear(body); return preparation{}, err }
+	// Antigravity 还没启动过时没有设置文件；此时写配置只会制造一份客户端不会读取的
+	// 文件，要求用户先启动一次。
+	if input.Client == "antigravity" && !exists {
+		return failed(failure("client_not_found"))
+	}
 	if input.Revision != digest(body, exists) {
 		return failed(failure("config_changed"))
 	}
@@ -143,6 +148,9 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	if isHarness(input.Client) {
 		mode = "harness-model-list"
 	}
+	if input.Client == "antigravity" {
+		mode = "antigravity-model-list"
+	}
 	provider := ""
 	if input.Client == "codex" {
 		var config map[string]any
@@ -196,6 +204,9 @@ func (s *Service) prepare(ctx context.Context, input Input) (preparation, error)
 	}
 	if isHarness(input.Client) {
 		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n凭据文件：%s\n只更新本 profile 的 OmniProxy 提供商及独立凭据引用；应用前保存加密备份。\n保存后在 Harness 中选择 OmniProxy 模型；其他 profile 与启动覆盖保持原样。", path, len(entries), s.paths.HarnessCredentials)
+	}
+	if input.Client == "antigravity" {
+		plan.Summary = fmt.Sprintf("配置文件：%s\n另写：%s\n接入：本地网关 OpenAI Chat API\n默认模型：%s\n只发布 Google 订阅账号的 Gemini 模型；重启 Antigravity 后生效。\n启用网关期间不使用 Google 登录，Google 账号专属实验与命令会暂时不可用；断开后恢复。", s.paths.Antigravity, s.paths.AntigravityLegacy, selected)
 	}
 	if input.Client == "kilocode" || input.Client == "mimo-code" || input.Client == "qwen-code" {
 		plan.Summary = fmt.Sprintf("配置文件：%s\n接入：本地网关 Chat API\n可用模型／路由：%d 个\n默认模型：%s\n保留其他提供商、权限和会话；应用前保存加密备份。\n配置当前本机引擎；桌面宿主的独立数据目录、内联设置或启动覆盖可能优先。", path, len(entries), selected)

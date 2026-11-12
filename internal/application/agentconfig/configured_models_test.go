@@ -12,6 +12,10 @@ import (
 
 func TestConfiguredModelsReadActualManagedMenus(t *testing.T) {
 	for _, client := range Clients() {
+		if client == "antigravity" {
+			// 桌面端目录只发布 Gemini；通用夹具不含 Gemini，由 antigravity_test.go 覆盖。
+			continue
+		}
 		t.Run(client, func(t *testing.T) {
 			s, c := gatewayClientFixture(t)
 			c.entries = []catalog.Entry{{ID: "selected", Name: "Selected", Protocols: []string{"chat_completions", "messages", "responses"}}, {ID: "excluded", Name: "Excluded", Protocols: []string{"chat_completions", "messages", "responses"}}}
@@ -85,6 +89,9 @@ func TestConfiguredModelsProtectExternalEditsAndCatalogFiles(t *testing.T) {
 
 func TestConfiguredModelsDoNotInventUnwrittenModelsForAllSelection(t *testing.T) {
 	for _, client := range Clients() {
+		if client == "antigravity" {
+			continue
+		}
 		t.Run(client, func(t *testing.T) {
 			s, source := gatewayClientFixture(t)
 			source.entries = []catalog.Entry{{ID: "original", Name: "Original"}}

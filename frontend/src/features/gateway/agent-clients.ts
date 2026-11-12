@@ -86,6 +86,9 @@ export const requestAgentTitleKeys = {
 
 /** 请求归属的展示键：运行形态细化优先，其余沿用客户端目录。 */
 export function requestAgentTitleKey(client?: string): TranslationKey | null {
+  if (client === "antigravity") {
+    return "agents.antigravityTitle"
+  }
   if (client && client in requestAgentTitleKeys) {
     return requestAgentTitleKeys[client as keyof typeof requestAgentTitleKeys]
   }

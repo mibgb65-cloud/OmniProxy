@@ -7,7 +7,37 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	catalog "omniproxy/internal/core/modelcatalog"
 )
+
+type catalogUpstream struct{ entries []catalog.Entry }
+
+func (catalogUpstream) Forward(context.Context, Request, func(Response) error) error { return nil }
+func (c catalogUpstream) Catalog(context.Context) ([]catalog.Entry, error) {
+	return c.entries, nil
+}
+
+func TestAntigravityCatalogFormatOnlyPublishesGemini(t *testing.T) {
+	server := New(Options{
+		Upstream:  catalogUpstream{entries: []catalog.Entry{{ID: "gemini-3.8-flash", Name: "Gemini", ProviderKind: "google"}, {ID: "claude-opus-4-6-thinking", Name: "Claude", ProviderKind: "google"}, {ID: "gpt-6.1-sol", Name: "GPT", ProviderKind: "openai"}}},
+		Authorize: func(_ context.Context, key string) (string, bool) { return "antigravity", key == "qa-key" },
+	})
+	request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:0/v1/models?format=antigravity", nil)
+	request.RemoteAddr = "127.0.0.1:12345"
+	request.Header.Set("Authorization", "Bearer qa-key")
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status %d: %s", response.Code, response.Body.String())
+	}
+	var body struct {
+		List []catalog.AntigravityModel `json:"list"`
+	}
+	if json.Unmarshal(response.Body.Bytes(), &body) != nil || len(body.List) != 1 || body.List[0].ModelID != "gemini-3.8-flash" {
+		t.Fatalf("unexpected Antigravity catalog: %s", response.Body.String())
+	}
+}
 
 func TestModelCatalogFormatsAuthenticationAndQueries(t *testing.T) {
 	server := New(Options{Models: []string{"a-model", "b-model"}, Authorize: func(_ context.Context, key string) (string, bool) { return "", key == "qa-key" }})

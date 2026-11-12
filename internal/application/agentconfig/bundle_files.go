@@ -18,6 +18,16 @@ func bundlePaths(client, path string) []string {
 	return []string{path, filepath.Join(filepath.Dir(path), "custom_providers", "omniproxy.json")}
 }
 
+// bundlePaths 返回该客户端要一起备份的两个文件。Antigravity 的两个版本各读
+// 自己的设置文件（2.30 的 ~/.gemini/config/config.json 与 2.29 的
+// ~/.antigravity/settings.json），不能从一个文件推导另一个。
+func (s *Service) bundlePaths(client, path string) []string {
+	if client == "antigravity" {
+		return []string{s.paths.Antigravity, s.paths.AntigravityLegacy}
+	}
+	return bundlePaths(client, path)
+}
+
 func decodeBundle(body []byte) (configBundle, error) {
 	var bundle configBundle
 	if len(body) > maxConfigBytes || json.Unmarshal(body, &bundle) != nil || len(bundle.Files) != 2 {
@@ -48,11 +58,11 @@ func encodeBundle(bundle configBundle) ([]byte, error) {
 	return body, nil
 }
 
-func readBundle(client, path string) ([]byte, bool, error) {
+func (s *Service) readBundle(client, path string) ([]byte, bool, error) {
 	bundle := configBundle{}
 	defer func() { bundle.clear() }()
 	exists := false
-	for _, file := range bundlePaths(client, path) {
+	for _, file := range s.bundlePaths(client, path) {
 		body, found, err := read(file)
 		if err != nil {
 			return nil, false, err
@@ -64,13 +74,13 @@ func readBundle(client, path string) ([]byte, bool, error) {
 	return body, exists, err
 }
 
-func writeBundle(client, path string, body []byte, revision string) error {
+func (s *Service) writeBundle(client, path string, body []byte, revision string) error {
 	target, err := decodeBundle(body)
 	if err != nil {
 		return err
 	}
 	defer target.clear()
-	beforeBody, exists, err := readBundle(client, path)
+	beforeBody, exists, err := s.readBundle(client, path)
 	if err != nil {
 		return err
 	}
@@ -83,7 +93,7 @@ func writeBundle(client, path string, body []byte, revision string) error {
 		return err
 	}
 	defer before.clear()
-	paths := bundlePaths(client, path)
+	paths := s.bundlePaths(client, path)
 	for index, next := range target.Files {
 		old := before.Files[index]
 		expected := digest(old.Body, old.Exists)

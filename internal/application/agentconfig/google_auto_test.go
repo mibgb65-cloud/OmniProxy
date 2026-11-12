@@ -20,6 +20,10 @@ func googleAgentEntries() []catalog.Entry {
 
 func TestGoogleModelsRefreshAllManagedAgentsWithoutExpandingExplicitSelections(t *testing.T) {
 	for _, client := range Clients() {
+		if client == "antigravity" {
+			// 只发布 Google 订阅的 Gemini；通用夹具不含 Gemini，由 antigravity_test.go 覆盖。
+			continue
+		}
 		for _, limited := range []bool{false, true} {
 			name := client + "/all"
 			if limited {
@@ -75,6 +79,9 @@ func TestGoogleModelsRefreshAllManagedAgentsWithoutExpandingExplicitSelections(t
 
 func TestGoogleAutoRefreshDoesNotTakeOverOrOverwriteAgentFiles(t *testing.T) {
 	for _, client := range Clients() {
+		if client == "antigravity" {
+			continue
+		}
 		t.Run(client, func(t *testing.T) {
 			s, source := gatewayClientFixture(t)
 			source.entries = googleAgentEntries()

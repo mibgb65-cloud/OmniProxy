@@ -152,6 +152,46 @@ it("读取失败提供刷新提示，不使用旧数据开放配置操作", asyn
   expect(screen.queryByRole("button", { name: "一键配置" })).not.toBeInTheDocument()
 })
 
+it("Antigravity 卡片使用远程目录选择默认模型并应用连接", async () => {
+  listAgentClientsMock.mockResolvedValue([
+    {
+      client: "antigravity",
+      path: "test/.gemini/config/config.json",
+      exists: true,
+      configured: false,
+      provider: "",
+      canRestore: false,
+      revision: "antigravity-revision",
+      errorCode: "",
+    },
+  ])
+  previewAgentPlanMock.mockResolvedValue({
+    summary: "Antigravity",
+    mode: "antigravity-model-list",
+    defaultModel: "gemini-3.8-flash",
+    models: [{ id: "gemini-3.8-flash", name: "Gemini 3.8 Flash" }],
+    catalogRevision: "catalog-revision",
+  })
+  applyAgentConfigMock.mockResolvedValue([])
+  const user = userEvent.setup()
+  renderGateway("clients")
+  await user.click(await screen.findByRole("button", { name: "连接 Antigravity" }))
+  expect(previewAgentPlanMock).toHaveBeenCalledWith({
+    client: "antigravity",
+    revision: "antigravity-revision",
+  })
+  await user.selectOptions(await screen.findByRole("combobox"), "gemini-3.8-flash")
+  await user.click(screen.getByRole("button", { name: "应用连接" }))
+  await waitFor(() =>
+    expect(applyAgentConfigMock).toHaveBeenCalledWith({
+      client: "antigravity",
+      revision: "antigravity-revision",
+      catalogRevision: "catalog-revision",
+      model: "gemini-3.8-flash",
+    }),
+  )
+})
+
 it("复制、启停和恢复只操作详情页的客户端", async () => {
   const user = userEvent.setup()
   renderGateway("clients", { entry: "/gateway?tab=clients&client=codex" })

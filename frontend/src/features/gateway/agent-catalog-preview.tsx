@@ -23,6 +23,7 @@ const modeLabels = {
   "pi-model-list": "agents.mode.pi",
   "factory-droid-model-list": "agents.mode.factoryDroid",
   "goose-model-list": "agents.mode.goose",
+  "antigravity-model-list": "agents.mode.antigravity",
 } as const
 
 type ModelSelection = {

@@ -22,6 +22,7 @@ export async function rereadAgentConfig(client: string): Promise<AgentClient> {
       "pi",
       "factory-droid",
       "goose",
+      "antigravity",
     ].includes(client)
   )
     throw new Error("agent: invalid_client")
@@ -65,6 +66,7 @@ export function agentError(error: unknown) {
     case "backup_failed":
     case "backup_unavailable":
     case "rollback_failed":
+    case "client_not_found":
       return code
     default:
       return "failed"
@@ -98,6 +100,8 @@ export function agentTitle(client: string) {
       return "agents.factoryDroid"
     case "goose":
       return "agents.goose"
+    case "antigravity":
+      return "agents.antigravityTitle"
     default:
       return "agents.title"
   }

@@ -16,6 +16,9 @@ func (s *Service) clientEntries(ctx context.Context, client string) ([]catalog.E
 	if err != nil {
 		return nil, err
 	}
+	if client == "antigravity" {
+		return antigravityEntries(gatewayEntries(entries)), nil
+	}
 	if isChatClient(client) {
 		return gatewayEntries(entries), nil
 	}
@@ -68,6 +71,9 @@ func upgradeClaudeDefault(entries []catalog.Entry, selected string) string {
 }
 
 func existingModel(client string, body []byte) string {
+	if client == "antigravity" {
+		return antigravityConfiguredModel(body)
+	}
 	if isGatewayAgent(client) {
 		return gatewayAgentModel(client, body)
 	}

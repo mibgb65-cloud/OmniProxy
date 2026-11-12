@@ -16,6 +16,20 @@ func ParseConvertedChatRequest(body []byte) (Request, error) {
 	return parseChatRequest(body, MaxMessagesRequestBytes, MaxMessagesRequestBytes)
 }
 
+// ParseAntigravityRequest 使用 Responses 级别的容量读取桌面端的 Chat 请求：
+// 它的代理会话会携带完整工具结果与历史，不能套用普通 Chat 的 2 MiB 上限。
+func ParseAntigravityRequest(body []byte) (Request, error) {
+	return parseChatRequest(body, MaxResponsesRequestBytes, MaxResponsesRequestBytes)
+}
+
+// ParseClientRequest 只对桌面端放宽 Chat 容量，其他客户端保持既有边界。
+func ParseClientRequest(client, path string, body []byte) (Request, error) {
+	if client == "antigravity" && path == "/v1/chat/completions" {
+		return ParseAntigravityRequest(body)
+	}
+	return ParseProtocolRequest(body, path)
+}
+
 func parseChatRequest(body []byte, maxBodyBytes, maxMessageBytes int) (Request, error) {
 	if err := validateJSONSize(body, maxBodyBytes); err != nil {
 		return Request{}, err

@@ -60,7 +60,7 @@ func (s *Service) Client(ctx context.Context, key string) (string, bool) {
 		return "", false
 	}
 	// 只接受当前受支持客户端的 Key，历史诊断凭据不能继续访问网关。
-	rows, err := s.db.QueryContext(ctx, `SELECT client, credential_ref FROM agent_connections WHERE enabled=1 AND client IN ('codex','claude','claude-desktop','opencode','harness-web','harness-desktop','kilocode','qwen-code','mimo-code','kimi-code','pi','factory-droid','goose') LIMIT 13`)
+	rows, err := s.db.QueryContext(ctx, `SELECT client, credential_ref FROM agent_connections WHERE enabled=1 AND client IN ('codex','claude','claude-desktop','opencode','harness-web','harness-desktop','kilocode','qwen-code','mimo-code','kimi-code','pi','factory-droid','goose','antigravity') LIMIT 14`)
 	if err != nil {
 		return "", false
 	}

@@ -18,6 +18,9 @@ func codexCatalogURL(port int) string {
 }
 
 func (s *Service) buildPlan(client string, body, key []byte, plan Plan) ([]byte, string, error) {
+	if client == "antigravity" {
+		return s.buildAntigravity(body, key, plan)
+	}
 	if isGatewayAgent(client) {
 		var owned bool
 		if s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM agent_backups WHERE client=?)`, client).Scan(&owned) != nil {

@@ -23,6 +23,7 @@ type Paths struct {
 	OpenCode, HarnessWeb, HarnessDesktop, HarnessCredentials string
 	KiloCode, QwenCode, MiMoCode                             string
 	KimiCode, Pi, FactoryDroid, Goose                        string
+	Antigravity, AntigravityLegacy                           string
 	KimiCodeLegacy                                           bool
 }
 type Item struct {
@@ -105,6 +106,8 @@ func (s *Service) path(client string) (string, error) {
 		return s.paths.HarnessWeb, nil
 	case "harness-desktop":
 		return s.paths.HarnessDesktop, nil
+	case "antigravity":
+		return s.paths.Antigravity, nil
 	}
 	return "", failure("invalid_client")
 }

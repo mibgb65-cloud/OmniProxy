@@ -61,11 +61,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if path == "/v1/models" && r.Method == http.MethodGet {
-		s.writeModelCatalog(w, r, false)
+		s.writeModelCatalog(w, r, false, client)
 		return
 	}
 	if path == "/v1/codex-models" && r.Method == http.MethodGet {
-		s.writeModelCatalog(w, r, true)
+		s.writeModelCatalog(w, r, true, client)
 		return
 	}
 	if path != "/v1/chat/completions" && path != "/v1/responses" && path != "/v1/messages" && path != "/v1/responses/compact" {
@@ -120,7 +120,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("request_read_failed", 400))
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, int64(requestBodyLimit(path)))
+	bodyLimit := requestBodyLimit(path)
+	if client == "antigravity" {
+		bodyLimit = MaxResponsesRequestBytes
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, int64(bodyLimit))
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		var tooLarge *http.MaxBytesError
@@ -135,7 +139,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, Failure("request_read_failed", 400))
 		return
 	}
-	request, err := ParseProtocolRequest(body, path)
+	body, err = NormalizeClientBody(client, body)
+	if err != nil {
+		writeFailure(w, err)
+		return
+	}
+	request, err := ParseClientRequest(client, path, body)
 	if err != nil {
 		writeFailure(w, err)
 		return
@@ -155,7 +164,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeFailure(w, safeFailure(ctx, err))
 			return
 		}
-		if len(request.Body) > requestBodyLimit(path) {
+		if len(request.Body) > bodyLimit {
 			writeFailure(w, Failure("request_too_large", 413))
 			return
 		}

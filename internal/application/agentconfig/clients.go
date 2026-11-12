@@ -2,7 +2,7 @@ package agentconfig
 
 // Clients 是客户端配置、密钥及受管目录共用的精确白名单。
 func Clients() []string {
-	return []string{"codex", "claude", "claude-desktop", "opencode", "harness-web", "harness-desktop", "kilocode", "qwen-code", "mimo-code", "kimi-code", "pi", "factory-droid", "goose"}
+	return []string{"codex", "claude", "claude-desktop", "opencode", "harness-web", "harness-desktop", "kilocode", "qwen-code", "mimo-code", "kimi-code", "pi", "factory-droid", "goose", "antigravity"}
 }
 
 func isCompatibleClient(client string) bool {
@@ -10,14 +10,16 @@ func isCompatibleClient(client string) bool {
 }
 
 func isChatClient(client string) bool {
-	return isCompatibleClient(client) || isHarness(client) || client == "qwen-code" || isGatewayAgent(client)
+	return isCompatibleClient(client) || isHarness(client) || client == "qwen-code" || isGatewayAgent(client) || client == "antigravity"
 }
 
 func isGatewayAgent(client string) bool {
 	return client == "kimi-code" || client == "pi" || client == "factory-droid" || client == "goose"
 }
 
-func isBundledClient(client string) bool { return client == "pi" || client == "goose" }
+func isBundledClient(client string) bool {
+	return client == "pi" || client == "goose" || client == "antigravity"
+}
 
 func isHarness(client string) bool { return client == "harness-web" || client == "harness-desktop" }
 

@@ -41,6 +41,8 @@ func DefaultPaths() (Paths, error) {
 		KimiCode: kimiPath, KimiCodeLegacy: kimiLegacy,
 		Pi:           filepath.Join(agentHome(home, "PI_CODING_AGENT_DIR", ".pi", "agent"), "models.json"),
 		FactoryDroid: filepath.Join(home, ".factory", "settings.json"), Goose: gooseConfigPath(home),
+		Antigravity:       filepath.Join(home, ".gemini", "config", "config.json"),
+		AntigravityLegacy: filepath.Join(home, ".antigravity", "settings.json"),
 	}, nil
 }
 

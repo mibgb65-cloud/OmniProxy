@@ -16,6 +16,23 @@ export const agentsEn = {
   "agents.mode.pi": "Pi model list",
   "agents.mode.factoryDroid": "Droid custom models",
   "agents.mode.goose": "Goose custom provider",
+  "agents.mode.antigravity": "Antigravity gateway catalog",
+  "agents.antigravityTitle": "Antigravity desktop",
+  "agents.antigravityDescription":
+    "Use Google subscription accounts from the local gateway in the Antigravity desktop app.",
+  "agents.antigravityHint":
+    "Only Gemini models from Google subscription accounts are published. While connected, Antigravity uses the local gateway without a Google sign-in. Quit and restart it to apply.",
+  "agents.antigravityConnect": "Connect Antigravity",
+  "agents.antigravityApply": "Apply connection",
+  "agents.antigravityDisconnect": "Disconnect and restore",
+  "agents.antigravityNoConfig":
+    "Antigravity settings were not found. Start Antigravity once, then return to connect.",
+  "agents.antigravityDefaultModel": "Default model",
+  "agents.antigravityRestart": "Quit and restart Antigravity to apply.",
+  "agents.antigravityConnected": "Connected to the local gateway",
+  "agents.antigravityGoogleOff":
+    "While connected there is no Google sign-in, so account features such as /boost, /teamwork and /plugin are unavailable until you disconnect.",
+  "agents.antigravityPath": "Settings file",
   "agents.install.kimiCodeCli": "Kimi Code CLI",
   "agents.install.piCli": "Pi CLI",
   "agents.install.factoryDroidCli": "Factory Droid CLI",
@@ -219,6 +236,7 @@ export const agentsEn = {
   "agents.selectModel": "Configure {{model}}",
   "agents.selectAtLeastOneModel": "Select at least one model.",
   "agents.noMatchingModels": "No matching models.",
+  "agents.error.client_not_found": "Antigravity settings were not found. Start the app once first.",
   "agents.error.invalid_model_selection":
     "Invalid model selection. Preview again and select available models.",
   "agents.error.invalid_model": "Choose a default model from the selected models.",

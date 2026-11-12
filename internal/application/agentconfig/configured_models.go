@@ -61,6 +61,19 @@ func (s *Service) ConfiguredModels(ctx context.Context, client string) (Configur
 		result.Models, err = s.configuredCodex(ctx, before.body, entries)
 	case isHarness(client):
 		result.Models, err = configuredHarness(before.body)
+	case client == "antigravity":
+		// 桌面端的模型选择来自远端目录，设置文件只保存默认模型；这里只报告
+		// 已写入的默认模型，不把实时目录误称为已经接入的列表。
+		if result.DefaultModel != "" {
+			name := result.DefaultModel
+			for _, entry := range entries {
+				if entry.ID == result.DefaultModel {
+					name = entry.Name
+					break
+				}
+			}
+			result.Models = []ModelSummary{{ID: result.DefaultModel, Name: name}}
+		}
 	case isChatClient(client):
 		result.Models, err = configuredChat(client, before.body)
 	default:
