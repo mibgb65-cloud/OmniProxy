@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已完成：[TASK-20261112-002](../tasks/completed/2026-11/TASK-20261112-002-google-subscription-agent-chain-parity.md)，Google 订阅 Agent 链路对齐参考实现：system prompt 中会被上游当成额度耗尽拒绝的少数行按词打散（设置页「Google 订阅请求」可改为按原文发送）、内容拒绝改报不可重试的 `400 prompt_turned_away`、同 prompt 6 小时预判跳过、容量 429 按上游重置时间休息并在有候选时换号、请求历史修复、模型族生成参数与工具模式（思考档位、`VALIDATED`、跳过签名）、稳定会话标识、模型目录权益与停用过滤、客户端标识与实时协议版本。`task verify` PASS（147 文件／895 项前端、全部 Go 包、Windows production 构建）；真机单请求对照待用户授权后执行。实现提交 `d4af73e9`。
+已完成：[TASK-20261112-002](../tasks/completed/2026-11/TASK-20261112-002-google-subscription-agent-chain-parity.md)，Google 订阅 Agent 链路对齐参考实现：system prompt 中会被上游当成额度耗尽拒绝的少数行按词打散（设置页「Google 订阅请求」可改为按原文发送）、内容拒绝改报不可重试的 `400 prompt_turned_away`、同 prompt 6 小时预判跳过、容量 429 按上游重置时间休息并在有候选时换号、请求历史修复、模型族生成参数与工具模式（思考档位、`VALIDATED`、跳过签名）、稳定会话标识、模型目录权益与停用过滤、客户端标识与实时协议版本。`task verify` PASS（147 文件／895 项前端、全部 Go 包、Windows production 构建）；真机对照已完成：原文 system prompt 得到 `400 prompt_turned_away`，打散后与删去命中行均为 `200`（1 个订阅账号、`gemini-2.5-flash`、21 工具／约 88.8 KB，各 1 次、无重试）。实现提交 `d4af73e9`。
 
 本地构建：[TASK-20261112-003](../tasks/completed/2026-11/TASK-20261112-003-build-local-v2.2.3-beta.8.md) 已产出 `v2.2.3-beta.8` Windows amd64 生产安装包，包含「保存当前正在使用的端口不再被误判为占用」（TASK-20261112-001，`15842462`），无新增迁移。版本提交 `dc114884`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,611,512 bytes，SHA256 `cc36c202c52770ecc46a1b0e0936bba8509d6e171c6e5920aeabaf663763002e`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 

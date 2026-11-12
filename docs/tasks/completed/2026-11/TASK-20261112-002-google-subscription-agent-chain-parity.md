@@ -421,8 +421,19 @@ OmniProxy 现有实现位置：
   ./internal/application/account/ ./internal/application/googlesubscription/ ./internal/core/proxy/
   ./internal/transport/wails/ ./internal/platform/profile/` 全部通过；网关既有
   `TestGoogleAgentModelsCatalogAndToolContinuation`（6 模型 × 3 协议 × 流式 × 续接）保持通过。
-- [ ] E2E Tests：未执行。真机单请求对照需要用户授权一次真实生成请求，按记录第 1 步的
-  三变量方案另行进行；本轮不以契约测试宣称真实账号已验收。
+- [x] E2E Tests：2026-11-12 经用户授权，在真实订阅账号（`g1-pro-tier`，项目
+  `aicode-consumers`，模型 `gemini-2.5-flash`）上各发 1 次受控请求（21 工具、约 88.8 KB、
+  `max_tokens=32000`），只记录状态与稳定错误码、不保存回复正文：
+
+  | 变体 | system prompt | 结果 |
+  | --- | --- | --- |
+  | written | 原文（含计费行与 SDK 身份行） | `400 prompt_turned_away`（2.0s） |
+  | cloaked | 原文按词打散（新默认） | `200`（1.8s） |
+  | clean | 删去两条命中行 | `200`（1.9s） |
+
+  另发 1 次 `written` 复测确认错误码与状态（`400 prompt_turned_away`，2.0s），共 4 次
+  单次请求，无自动重试。结论：根因是这两行 system prompt 触发的拒绝，不是额度或输出上限；
+  打散后的请求被上游正常接受。
 
 ## Quality Checks
 
@@ -503,9 +514,10 @@ d4af73e9 feat(google): 对齐 Google 订阅 Agent 请求形态与拒绝处理
 时间休息并在有候选时换号、请求历史修复、模型族生成参数与工具模式、稳定的会话标识、
 模型目录权益与停用过滤、客户端标识。全部行为有契约测试；`task verify` PASS。
 
-真实账号的一次性单请求对照（记录第 1 步的三变量方案）尚未执行，因此不宣称完整 Agent
-请求已在真实账号上验收；下一步由用户授权后各发一次受控请求即可闭环。Gemini CLI 第二通道
-另立 [TASK-20261112-003](TASK-20261112-003-gemini-cli-subscription-channel.md)。
+真实账号对照已完成并确认根因：原文 system prompt 返回 `400 prompt_turned_away`，打散后与
+删去命中行均为 `200`；21 工具、约 88.8 KB 的 Agent 形态请求不再被误判为额度耗尽。
+Gemini CLI 第二通道另立
+[TASK-20261112-003](TASK-20261112-003-gemini-cli-subscription-channel.md)。
 
 ---
 
