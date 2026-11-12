@@ -145,9 +145,9 @@ In Progress
 
 - [x] Format：`gofmt -l` 无输出。
 - [x] Lint：`go vet . ./internal/...` exit 0。
-- [ ] Type Check：Go 编译即类型检查；前端未改动。
+- [x] Type Check：`task verify` 内含前端 typecheck 与 Go 编译，exit 0。
 - [x] Test：见上。
-- [ ] Build：由后续构建任务执行 `task verify`／打包。
+- [x] Build：`task --force verify` exit 0（含 Windows production 构建）。
 
 ## Verification Result
 
@@ -159,6 +159,7 @@ go test ./internal/application/gateway/... ./internal/core/proxy/...
 go test . ./internal/...                                   → exit 0
 gofmt -l internal/core/proxy internal/application/gateway   → 无输出
 go vet . ./internal/...                                    → exit 0
+task --force verify                                       → exit 0（VERIFY_EXIT=0）
 ```
 
 新增测试覆盖：家族名 + 档位选中 `gemini-4-argon-medium`；无档位落到 `-high`；只有单一变体
