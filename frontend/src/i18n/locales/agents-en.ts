@@ -17,11 +17,12 @@ export const agentsEn = {
   "agents.mode.factoryDroid": "Droid custom models",
   "agents.mode.goose": "Goose custom provider",
   "agents.mode.antigravity": "Antigravity gateway catalog",
+  "agents.antigravityGroup": "Antigravity",
   "agents.antigravityTitle": "Antigravity desktop",
   "agents.antigravityDescription":
     "Use Google subscription accounts from the local gateway in the Antigravity desktop app.",
   "agents.antigravityHint":
-    "All text models the Google subscription actually provides (Gemini, Claude, GPT-OSS) are published. While connected, Antigravity uses the local gateway without a Google sign-in. Quit and restart it to apply.",
+    "Publishes every subscription model: Gemini, Claude and GPT-OSS. No Google sign-in while connected.",
   "agents.antigravityConnect": "Connect Antigravity",
   "agents.antigravityApply": "Apply connection",
   "agents.antigravityDisconnect": "Disconnect and restore",
@@ -31,7 +32,7 @@ export const agentsEn = {
   "agents.antigravityRestart": "Quit and restart Antigravity to apply.",
   "agents.antigravityConnected": "Connected to the local gateway",
   "agents.antigravityGoogleOff":
-    "While connected there is no Google sign-in, so account features such as /boost, /teamwork and /plugin are unavailable until you disconnect.",
+    "No Google sign-in while connected, so account-only experiments and commands are unavailable until you disconnect.",
   "agents.antigravityPath": "Settings file",
   "agents.install.kimiCodeCli": "Kimi Code CLI",
   "agents.install.piCli": "Pi CLI",

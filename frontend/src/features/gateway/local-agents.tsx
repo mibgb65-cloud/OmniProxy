@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { listAgentClients } from "../../services/agents"
 import { AgentClientDetail } from "./agent-client-detail"
 import { AgentClientGroupTile } from "./agent-client-group-tile"
-import { AntigravityClientCard } from "./antigravity-client-card"
+import { AntigravityGroupTile } from "./antigravity-client-card"
 import { agentClientGroups, type AgentClientEntry } from "./agent-client-groups"
 import { type AgentClientId } from "./agent-clients"
 import { useAgentInstallations } from "./use-agent-installations"
@@ -64,11 +64,11 @@ export function LocalAgents({
             <h2 className="text-base font-semibold">{t("agents.title")}</h2>
             <p className="text-muted-foreground text-sm">{t("agents.selectClient")}</p>
           </div>
-          <AntigravityClientCard
-            item={items.find((item) => item.client === "antigravity")}
-            pending={data.isPending}
-          />
           <div className="agent-client-grid grid min-w-0 gap-4">
+            <AntigravityGroupTile
+              item={items.find((item) => item.client === "antigravity")}
+              pending={data.isPending}
+            />
             {agentClientGroups.map((group) => (
               <AgentClientGroupTile
                 key={group.title}

@@ -16,10 +16,10 @@ export const agentsZh = {
   "agents.mode.factoryDroid": "Droid 自定义模型列表",
   "agents.mode.goose": "Goose 自定义提供商",
   "agents.mode.antigravity": "Antigravity 网关目录",
+  "agents.antigravityGroup": "Antigravity",
   "agents.antigravityTitle": "Antigravity 桌面端",
   "agents.antigravityDescription": "让 Antigravity 桌面端使用本地网关的 Google 订阅账号。",
-  "agents.antigravityHint":
-    "发布 Google 订阅账号实际提供的全部文本模型（Gemini、Claude、GPT-OSS）。连接后 Antigravity 使用本地网关，不使用 Google 登录；完全退出并重新启动后生效。",
+  "agents.antigravityHint": "发布 Gemini、Claude、GPT-OSS 全部订阅模型；连接后不使用 Google 登录。",
   "agents.antigravityConnect": "连接 Antigravity",
   "agents.antigravityApply": "应用连接",
   "agents.antigravityDisconnect": "断开并恢复",
@@ -29,7 +29,7 @@ export const agentsZh = {
   "agents.antigravityRestart": "完全退出并重新启动 Antigravity 后生效。",
   "agents.antigravityConnected": "已连接本地网关",
   "agents.antigravityGoogleOff":
-    "启用期间不使用 Google 登录，/boost、/teamwork、/plugin 等账号功能会暂时不可用；断开后恢复。",
+    "启用期间不使用 Google 登录，账号专属实验与命令暂不可用；断开后恢复。",
   "agents.antigravityPath": "设置文件",
   "agents.install.kimiCodeCli": "Kimi Code CLI",
   "agents.install.piCli": "Pi CLI",

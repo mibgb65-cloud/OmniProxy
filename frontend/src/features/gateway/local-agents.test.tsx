@@ -192,6 +192,60 @@ it("Antigravity 卡片使用远程目录选择默认模型并应用连接", asyn
   )
 })
 
+it("Antigravity 与其它客户端同为网格卡片，并显示安装与连接状态", async () => {
+  listAgentClientsMock.mockResolvedValue([
+    {
+      client: "antigravity",
+      path: "test/.gemini/config/config.json",
+      exists: true,
+      configured: false,
+      provider: "",
+      canRestore: false,
+      revision: "antigravity-revision",
+      errorCode: "",
+    },
+  ])
+  renderGateway("clients")
+  const card = await screen.findByRole("region", { name: "Antigravity" })
+  expect(card.parentElement).toHaveClass("agent-client-grid")
+  expect(within(card).getByRole("heading", { name: "Antigravity 桌面端", level: 4 })).toBeVisible()
+  expect(await within(card).findByText("已安装")).toBeInTheDocument()
+  expect(within(card).getByText("尚未配置")).toBeInTheDocument()
+  expect(within(card).getByRole("button", { name: "连接 Antigravity" })).toBeEnabled()
+})
+
+it("Antigravity 已连接时只提供断开，未检测到设置文件时不能连接", async () => {
+  const connected = {
+    client: "antigravity" as const,
+    path: "test/.gemini/config/config.json",
+    exists: true,
+    configured: true,
+    provider: "",
+    canRestore: true,
+    revision: "antigravity-revision",
+    errorCode: "",
+  }
+  listAgentClientsMock.mockResolvedValue([connected])
+  const { unmount } = renderGateway("clients")
+  const card = await screen.findByRole("region", { name: "Antigravity" })
+  expect(await within(card).findByText("已连接本地网关")).toBeInTheDocument()
+  expect(within(card).getByRole("button", { name: "断开并恢复" })).toBeEnabled()
+  expect(within(card).queryByRole("button", { name: "连接 Antigravity" })).not.toBeInTheDocument()
+  unmount()
+  listAgentClientsMock.mockResolvedValue([
+    { ...connected, exists: false, configured: false, canRestore: false },
+  ])
+  renderGateway("clients")
+  const missing = await screen.findByRole("region", { name: "Antigravity" })
+  expect(await within(missing).findByText("未安装")).toBeInTheDocument()
+  expect(
+    within(missing).getByText(
+      "尚未检测到 Antigravity 设置文件。先启动一次 Antigravity，再回来连接。",
+    ),
+  ).toBeInTheDocument()
+  expect(within(missing).getByRole("button", { name: "连接 Antigravity" })).toBeDisabled()
+})
+
 it("复制、启停和恢复只操作详情页的客户端", async () => {
   const user = userEvent.setup()
   renderGateway("clients", { entry: "/gateway?tab=clients&client=codex" })
