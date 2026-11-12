@@ -206,8 +206,8 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.10 -AssetDirectory releas
 2a51e6ab chore(release): 准备本地 v2.2.3-beta.10 生产版本
 ```
 
-功能提交 `4a62be80`、回填提交 `10adc6f5`。本记录与 CURRENT 的归档提交见随后的文档提交；
-未打标签、未推送、未公开发布。
+功能提交 `4a62be80`、回填提交 `10adc6f5`、版本提交 `2a51e6ab`；本记录与 CURRENT 的归档提交
+`dc1ebc5c`。未打标签、未推送、未公开发布。
 
 ---
 
