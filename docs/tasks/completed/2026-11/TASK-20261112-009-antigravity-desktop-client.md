@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -184,16 +184,19 @@ In Progress
 
 ## Commit
 
-（未开始）
+`3225476f feat(agent): 接入 Antigravity 桌面端官方网关`
 
 ---
 
 # Result
 
-（未开始）
+桌面端可以通过官方 Enterprise Gateway 使用本地网关的 Google 订阅账号池，不需要
+TLS 拦截、本地 CA 或系统代理。配置写入两个版本文件，断开可恢复；目录只发布
+Gemini。代码、契约测试与前端质量门已通过；真实桌面端请求仍需用户按卡片提示
+重启后确认。未处理组织级 `admin_settings.json` 或 `AGY_LLM_GATEWAY_*` 覆盖。
 
 ---
 
 # Completed
 
-（未完成）
+2026-11-12 19:55（Asia/Singapore）
