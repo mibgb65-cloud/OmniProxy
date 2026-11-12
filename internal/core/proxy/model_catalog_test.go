@@ -18,9 +18,9 @@ func (c catalogUpstream) Catalog(context.Context) ([]catalog.Entry, error) {
 	return c.entries, nil
 }
 
-func TestAntigravityCatalogFormatOnlyPublishesGemini(t *testing.T) {
+func TestAntigravityCatalogFormatPublishesAllGoogleModels(t *testing.T) {
 	server := New(Options{
-		Upstream:  catalogUpstream{entries: []catalog.Entry{{ID: "gemini-3.8-flash", Name: "Gemini", ProviderKind: "google"}, {ID: "claude-opus-4-6-thinking", Name: "Claude", ProviderKind: "google"}, {ID: "gpt-6.1-sol", Name: "GPT", ProviderKind: "openai"}}},
+		Upstream:  catalogUpstream{entries: []catalog.Entry{{ID: "gemini-3.8-flash", Name: "Gemini", ProviderKind: "google"}, {ID: "claude-opus-4-6-thinking", Name: "Claude", ProviderKind: "google"}, {ID: "gpt-oss-120b-medium", Name: "GPT-OSS", ProviderKind: "google"}, {ID: "gpt-6.1-sol", Name: "GPT", ProviderKind: "openai"}}},
 		Authorize: func(_ context.Context, key string) (string, bool) { return "antigravity", key == "qa-key" },
 	})
 	request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:0/v1/models?format=antigravity", nil)
@@ -35,8 +35,17 @@ func TestAntigravityCatalogFormatOnlyPublishesGemini(t *testing.T) {
 	var body struct {
 		List []catalog.AntigravityModel `json:"list"`
 	}
-	if json.Unmarshal(response.Body.Bytes(), &body) != nil || len(body.List) != 1 || body.List[0].ModelID != "gemini-3.8-flash" {
+	if json.Unmarshal(response.Body.Bytes(), &body) != nil || len(body.List) != 3 {
 		t.Fatalf("unexpected Antigravity catalog: %s", response.Body.String())
+	}
+	found := map[string]bool{}
+	for _, model := range body.List {
+		found[model.ModelID] = true
+	}
+	for _, want := range []string{"gemini-3.8-flash", "claude-opus-4-6-thinking", "gpt-oss-120b-medium"} {
+		if !found[want] {
+			t.Fatalf("model %q missing from catalog: %s", want, response.Body.String())
+		}
 	}
 }
 

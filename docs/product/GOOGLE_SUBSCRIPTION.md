@@ -61,7 +61,8 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 - Antigravity 桌面端使用官方 Enterprise Gateway（`wireProtocol: "openai"`）接入，
   不拦截 TLS、不装本地 CA；连接期间桌面端不使用 Google 登录，Google 账号专属的
   实验与命令（`/boost`、`/teamwork`、`/plugin`、`/generative_ui`）暂时不可用，
-  断开后恢复。目录只发布 Google 订阅账号的 Gemini 模型，不发布 Claude／GPT-OSS。
+  断开后恢复。目录发布 Google 订阅账号实际提供的全部文本模型（Gemini、Claude、
+  GPT-OSS），不引入 Google 之外的提供商。
 
 ### 请求形态与拒绝处理（2026-11-12）
 
@@ -193,9 +194,10 @@ OAuth、并发刷新、身份变化、目录版本、工具签名两轮、SSE �
 （打散 5 行与幂等、429 分类、按模型族的生成参数、历史修复、跳过与最后候选、权益降级）。
 
 2026-11-12：Antigravity 桌面端接入按官方 Enterprise Gateway 契约实现。配置生成与
-双文件恢复、`format=antigravity` 目录形状与 Gemini 过滤、桌面端请求字段规整由
-契约测试覆盖；当前开发环境未安装桌面端，尚未做真机请求验证。首次使用需按卡片
-提示重启桌面端，并在模型菜单中确认只出现 Google 订阅账号的 Gemini 模型。
+双文件恢复、`format=antigravity` 目录形状与全部 Google 订阅模型（Gemini／Claude／
+GPT-OSS）过滤、桌面端请求字段规整由契约测试覆盖；当前开发环境未安装桌面端，
+尚未做真机请求验证。首次使用需按卡片提示重启桌面端，并在模型菜单中确认出现
+Google 订阅账号实际提供的模型。
 
 2026-11-12 真机对照（用户授权，1 个订阅账号、模型 `gemini-2.5-flash`、21 工具／约 88.8 KB、
 `max_tokens=32000`，各 1 次、无自动重试）：system prompt 按原文发送得到

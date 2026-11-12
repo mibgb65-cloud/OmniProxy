@@ -21,7 +21,7 @@ export const agentsEn = {
   "agents.antigravityDescription":
     "Use Google subscription accounts from the local gateway in the Antigravity desktop app.",
   "agents.antigravityHint":
-    "Only Gemini models from Google subscription accounts are published. While connected, Antigravity uses the local gateway without a Google sign-in. Quit and restart it to apply.",
+    "All text models the Google subscription actually provides (Gemini, Claude, GPT-OSS) are published. While connected, Antigravity uses the local gateway without a Google sign-in. Quit and restart it to apply.",
   "agents.antigravityConnect": "Connect Antigravity",
   "agents.antigravityApply": "Apply connection",
   "agents.antigravityDisconnect": "Disconnect and restore",

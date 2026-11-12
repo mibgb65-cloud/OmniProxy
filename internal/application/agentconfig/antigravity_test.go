@@ -41,7 +41,11 @@ func TestAntigravityDesktopGatewayLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(plan.Models) != 1 || plan.Models[0].ID != "gemini-3.8-flash" || plan.DefaultModel != "gemini-3.8-flash" || plan.Mode != "antigravity-model-list" {
+	foundModels := map[string]bool{}
+	for _, entry := range plan.Models {
+		foundModels[entry.ID] = true
+	}
+	if len(plan.Models) != 2 || !foundModels["gemini-3.8-flash"] || !foundModels["claude-opus-4-6-thinking"] || plan.DefaultModel != "gemini-3.8-flash" || plan.Mode != "antigravity-model-list" {
 		t.Fatalf("catalog or default incorrect: %+v", plan)
 	}
 	input.CatalogRevision = plan.CatalogRevision

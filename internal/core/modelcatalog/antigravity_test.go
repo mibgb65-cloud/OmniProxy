@@ -5,15 +5,16 @@ import (
 	"testing"
 )
 
-func TestAntigravityJSONPublishesGoogleGeminiOnly(t *testing.T) {
+func TestAntigravityJSONPublishesAllGoogleModels(t *testing.T) {
 	window, output := int64(1048576), int64(65536)
 	body, err := AntigravityJSON([]Entry{
 		{ID: "gemini-3.8-flash", Name: "Gemini 3.8 Flash", ProviderKind: "google", Metadata: Metadata{
 			ContextWindow: &window, OutputTokenLimit: &output,
 			InputModalities: []string{"text", "image"}, ReasoningEfforts: []Effort{{Value: "high"}},
 		}},
-		{ID: "claude-opus-4-6-thinking", Name: "Claude", ProviderKind: "google"},
+		{ID: "claude-opus-4-6-thinking", Name: "Claude Opus", ProviderKind: "google"},
 		{ID: "gemini-alias", TargetModel: "gemini-3.8-pro", Name: "Alias", ProviderKind: "google"},
+		{ID: "gpt-oss-120b-medium", Name: "GPT-OSS", ProviderKind: "google"},
 		{ID: "gemini-other", Name: "Other", ProviderKind: "openai"},
 		{ID: "gpt-6.1-sol", Name: "GPT", ProviderKind: "openai"},
 	})
@@ -26,15 +27,21 @@ func TestAntigravityJSONPublishesGoogleGeminiOnly(t *testing.T) {
 	if json.Unmarshal(body, &value) != nil {
 		t.Fatal("invalid catalog JSON")
 	}
-	if len(value.List) != 2 {
-		t.Fatalf("expected two Gemini models, got %+v", value.List)
+	if len(value.List) != 4 {
+		t.Fatalf("expected all four Google subscription models, got %+v", value.List)
 	}
 	first := value.List[0]
 	if first.ModelID != "gemini-3.8-flash" || first.MaxTokens != window || first.MaxOutputTokens != output || !first.SupportsImages || !first.SupportsThinking {
 		t.Fatalf("metadata not published: %+v", first)
 	}
-	if value.List[1].ModelID != "gemini-alias" || value.List[1].MaxTokens != 0 {
-		t.Fatalf("alias or unknown window incorrect: %+v", value.List[1])
+	if value.List[1].ModelID != "claude-opus-4-6-thinking" {
+		t.Fatalf("Claude not published: %+v", value.List[1])
+	}
+	if value.List[2].ModelID != "gemini-alias" || value.List[2].MaxTokens != 0 {
+		t.Fatalf("alias or unknown window incorrect: %+v", value.List[2])
+	}
+	if value.List[3].ModelID != "gpt-oss-120b-medium" {
+		t.Fatalf("GPT-OSS not published: %+v", value.List[3])
 	}
 }
 

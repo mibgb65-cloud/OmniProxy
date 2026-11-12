@@ -3,7 +3,6 @@ package modelcatalog
 import (
 	"encoding/json"
 	"slices"
-	"strings"
 )
 
 // AntigravityModel 是 Antigravity 桌面端远端目录的一项。字段名由客户端读取：
@@ -18,15 +17,12 @@ type AntigravityModel struct {
 }
 
 // AntigravityJSON 生成 GET /v1/models?format=antigravity 的响应。
-// 只发布 Google 订阅账号的 Gemini 文本模型；模型 ID 与网关实际可解析的 ID 一致。
+// 发布 Google 订阅账号实际提供的全部文本模型（Gemini、Claude、GPT-OSS），
+// 不引入 Google 之外的提供商；模型 ID 与网关实际可解析的 ID 一致。
 func AntigravityJSON(entries []Entry) ([]byte, error) {
 	list := make([]AntigravityModel, 0, len(entries))
 	for _, entry := range entries {
-		target := entry.TargetModel
-		if target == "" {
-			target = entry.ID
-		}
-		if entry.ProviderKind != "google" || !strings.HasPrefix(target, "gemini-") {
+		if entry.ProviderKind != "google" {
 			continue
 		}
 		name := entry.Name

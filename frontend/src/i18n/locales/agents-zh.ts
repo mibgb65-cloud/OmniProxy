@@ -19,7 +19,7 @@ export const agentsZh = {
   "agents.antigravityTitle": "Antigravity 桌面端",
   "agents.antigravityDescription": "让 Antigravity 桌面端使用本地网关的 Google 订阅账号。",
   "agents.antigravityHint":
-    "只发布 Google 订阅账号的 Gemini 模型。连接后 Antigravity 使用本地网关，不使用 Google 登录；完全退出并重新启动后生效。",
+    "发布 Google 订阅账号实际提供的全部文本模型（Gemini、Claude、GPT-OSS）。连接后 Antigravity 使用本地网关，不使用 Google 登录；完全退出并重新启动后生效。",
   "agents.antigravityConnect": "连接 Antigravity",
   "agents.antigravityApply": "应用连接",
   "agents.antigravityDisconnect": "断开并恢复",

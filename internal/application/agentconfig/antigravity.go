@@ -221,16 +221,31 @@ func antigravityConfiguredModel(body []byte) string {
 	return config.Models.DefaultModelID
 }
 
-// antigravityEntries 只发布 Google 订阅账号当前可用的 Gemini 文本模型。
-// 桌面端与网关的模型 ID 必须一致；别名沿用它实际指向的模型判断。
+// antigravityDefault 优先官方默认模型，其次 Gemini，最后目录首项。目录按 ID
+// 排序后 Claude 会排在 Gemini 前面；桌面端默认模型仍应优先落在订阅主模型上。
+func antigravityDefault(entries []catalog.Entry) string {
+	for _, entry := range entries {
+		if entry.Metadata.IsDefault {
+			return entry.ID
+		}
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.ID, "gemini-") {
+			return entry.ID
+		}
+	}
+	if len(entries) > 0 {
+		return entries[0].ID
+	}
+	return ""
+}
+
+// antigravityEntries 发布 Google 订阅账号当前可用的全部文本模型，包括
+// Gemini、Claude 与 GPT-OSS；不引入 Google 之外的提供商。
 func antigravityEntries(entries []catalog.Entry) []catalog.Entry {
 	result := make([]catalog.Entry, 0, len(entries))
 	for _, entry := range entries {
-		model := entry.ID
-		if entry.TargetModel != "" {
-			model = entry.TargetModel
-		}
-		if !strings.HasPrefix(model, "gemini-") || entry.ProviderKind != "google" {
+		if entry.ProviderKind != "google" {
 			continue
 		}
 		result = append(result, entry)
