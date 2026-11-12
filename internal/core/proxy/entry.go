@@ -46,6 +46,11 @@ func (s *Server) authorizeEntry(ctx context.Context, r *http.Request, e entry) (
 		key = r.Header.Get("X-OmniProxy-Key")
 	}
 	if key == "" {
+		// Antigravity 的远端目录请求按 Google SDK 习惯可能使用该头；它只能是
+		// 本地接入 Key，不能当作上游凭据。
+		key = r.Header.Get("X-Goog-Api-Key")
+	}
+	if key == "" {
 		key = strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 	}
 	client := ""

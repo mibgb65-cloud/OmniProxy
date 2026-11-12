@@ -25,7 +25,8 @@ func TestAntigravityCatalogFormatOnlyPublishesGemini(t *testing.T) {
 	})
 	request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:0/v1/models?format=antigravity", nil)
 	request.RemoteAddr = "127.0.0.1:12345"
-	request.Header.Set("Authorization", "Bearer qa-key")
+	// 桌面端的远端目录可能按 Google SDK 习惯带这个头，网关只把它当本地接入 Key。
+	request.Header.Set("X-Goog-Api-Key", "qa-key")
 	response := httptest.NewRecorder()
 	server.ServeHTTP(response, request)
 	if response.Code != http.StatusOK {
