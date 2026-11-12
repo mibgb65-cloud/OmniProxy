@@ -165,7 +165,11 @@ gemini-3.8-flash + low，stream=true           → 200，9.1 s，model=gemini-3.
 
 ## Commit
 
-（实现提交与归档提交待回填）
+```text
+042d00be fix(gateway): 放宽 Antigravity 响应头与请求时限并准备 v2.2.3-beta.15
+``` 
+
+修复与版本映射在同一提交；归档提交 `TBD`。未打标签、未推送。
 
 ---
 

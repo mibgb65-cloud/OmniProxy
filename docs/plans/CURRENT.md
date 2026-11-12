@@ -8,7 +8,7 @@
 
 已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 家族模型名（`gemini-4-argon`）解析到目录变体，实现提交 `c19339b8`。
 
-本地构建：[TASK-20261112-018](../tasks/completed/2026-11/TASK-20261112-018-build-local-v2.2.3-beta.15.md) 已产出 `v2.2.3-beta.15` Windows amd64 生产安装包，包含上述三项 Antigravity 修复，无新增迁移。版本提交 `待回填`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,730,171 bytes，SHA256 `ca4d3e87d3e1c46be7bbc1ee1dffc13175104f6b9fa50d9bcf86322624a0c5c5`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.14。
+本地构建：[TASK-20261112-018](../tasks/completed/2026-11/TASK-20261112-018-build-local-v2.2.3-beta.15.md) 已产出 `v2.2.3-beta.15` Windows amd64 生产安装包，包含上述三项 Antigravity 修复，无新增迁移。版本提交 `042d00be`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,730,171 bytes，SHA256 `ca4d3e87d3e1c46be7bbc1ee1dffc13175104f6b9fa50d9bcf86322624a0c5c5`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.14。
 
 本地构建（已被 beta.15 取代）：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 曾产出 `v2.2.3-beta.14`（协议标记修复），安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`；用户已安装，因 30 秒响应头超时仍失败，由 beta.15 取代。
 
