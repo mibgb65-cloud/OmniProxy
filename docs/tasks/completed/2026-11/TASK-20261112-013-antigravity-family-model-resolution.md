@@ -179,7 +179,11 @@ task --force verify                                       → exit 0（VERIFY_EX
 
 ## Commit
 
-（实现提交与归档提交待回填）
+```text
+c19339b8 fix(gateway): 解析 Antigravity 家族模型名并保留推理档位
+``` 
+
+本记录随修复提交一起提交；归档提交 `TBD`。未打标签、未推送。
 
 ---
 
