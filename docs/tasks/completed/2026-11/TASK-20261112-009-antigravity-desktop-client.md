@@ -190,6 +190,8 @@ Completed
 
 `9fc76a87 fix(proxy): 接受 Antigravity 目录的 Google API Key 头`
 
+`8aee0628 fix(agent): Antigravity 断开按字段恢复并支持端口改写`
+
 ---
 
 # Result
