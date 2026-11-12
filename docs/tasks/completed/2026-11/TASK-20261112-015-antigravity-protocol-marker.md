@@ -171,7 +171,11 @@ gemini-3.8-flash + low, stream=true → 200  SSE，model=gemini-3.8-flash-low
 
 ## Commit
 
-（实现提交与归档提交待回填）
+```text
+02e2a304 fix(proxy): 标记 Antigravity Chat 请求协议并准备 v2.2.3-beta.14
+```
+
+修复与紧接着的版本映射在同一个提交里；归档提交 `TBD`。未打标签、未推送。
 
 ---
 

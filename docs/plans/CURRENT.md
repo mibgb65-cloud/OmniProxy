@@ -6,7 +6,7 @@
 
 已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 桌面端连接后发送消息报 `400 unsupported_model`：桌面端把目录里的 `gemini-4-argon-high` 折叠成家族名 `gemini-4-argon` 加档位再发送，网关按 ID 精确匹配直接拒绝。现在精确匹配失败后会按同提供商的目录变体解析家族名（优先客户端档位，其次 high／medium／low，最后接受唯一变体，精确 ID 不改写，未知家族仍 400），同时推理档位不再在路由前被剥离。实现提交 `c19339b8`。
 
-本地构建：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 已产出 `v2.2.3-beta.14` Windows amd64 生产安装包，包含上述两项 Antigravity 修复，无新增迁移。版本提交 `待回填`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.13。
+本地构建：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 已产出 `v2.2.3-beta.14` Windows amd64 生产安装包，包含上述两项 Antigravity 修复，无新增迁移。版本提交 `02e2a304`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.13。
 
 本地构建（已被 beta.14 取代）：[TASK-20261112-014](../tasks/completed/2026-11/TASK-20261112-014-build-local-v2.2.3-beta.13.md) 曾产出 `v2.2.3-beta.13` Windows amd64 生产安装包（家族模型名解析），安装器 20,725,199 bytes，SHA256 `b9f6c09e6bcf9dd28d9caa42d1ffabe5bb5e27cb17899210b74bf4bed83bd767`；用户已安装，因协议标记缺失仍失败，由 beta.14 取代。
 

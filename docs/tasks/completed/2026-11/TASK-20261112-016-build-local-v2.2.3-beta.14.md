@@ -187,10 +187,10 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.14 -AssetDirectory releas
 ## Commit
 
 ```text
-（构建提交待回填） chore(release): 准备本地 v2.2.3-beta.14 生产版本
+02e2a304 fix(proxy): 标记 Antigravity Chat 请求协议并准备 v2.2.3-beta.14
 ```
 
-修复提交待回填；版本提交与归档提交待回填。未打标签、未推送、未公开发布。
+修复与版本映射在同一提交；归档提交 `TBD`。未打标签、未推送、未公开发布。
 
 ---
 
