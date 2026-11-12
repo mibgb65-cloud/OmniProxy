@@ -83,6 +83,20 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 			}
 		}
 	}
+	if !decision.Routable && decision.ErrorCode == "unsupported_model" && !decision.Matched {
+		// 桌面端按自带注册表发送家族名（gemini-4-argon）加档位；目录里只有上游变体。
+		updated, applied, familyErr := s.applyFamilyVariant(ctx, request)
+		if familyErr != nil {
+			return request, familyErr
+		}
+		if applied {
+			request = updated
+			decision, candidates, fixed, err = s.resolvePreview(ctx, request.Model)
+			if err != nil {
+				return request, proxy.Failure("routing_configuration_unavailable", 503)
+			}
+		}
+	}
 	request.Candidates = candidates
 	request.FixedAccount = fixed
 	if !decision.Routable {

@@ -169,6 +169,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// 档位已在路由选型时用掉，转发前必须移除：上游适配器按白名单校验生成参数。
+	request.Body, err = StripClientEffort(client, request.Protocol, request.Body)
+	if err != nil {
+		writeFailure(w, err)
+		return
+	}
 	if !s.supportsModel(request.Model) && request.ProviderID == "" {
 		writeFailure(w, Failure("unsupported_model", 400))
 		return
