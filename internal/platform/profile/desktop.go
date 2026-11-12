@@ -44,6 +44,16 @@ func SetGatewayAutoStart(kind Kind, enabled bool) error {
 	return SaveConfig(kind, cfg)
 }
 
+// SetGooglePromptAsWritten 保存 Google 订阅是否按原文发送 system prompt。
+func SetGooglePromptAsWritten(kind Kind, asWritten bool) error {
+	cfg, err := LoadConfig(kind)
+	if err != nil {
+		return err
+	}
+	cfg.GooglePromptAsWritten = asWritten
+	return SaveConfig(kind, cfg)
+}
+
 // SetProxyPort validates and persists the gateway listen port. Zero restores
 // the profile default; any other value must be a usable TCP port.
 func SetProxyPort(kind Kind, port int) error {

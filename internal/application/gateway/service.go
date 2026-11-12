@@ -74,7 +74,9 @@ type Service struct {
 	minimax         *minimax.Client
 	googleResources GoogleResourceObserver
 	googleAuth      GoogleSubscriptionAccess
-	antigravity     *antigravity.Client
+	// googlePrompt 读取「Google 订阅按原文发送 system prompt」的用户设置；nil 时打散。
+	googlePrompt func() bool
+	antigravity  *antigravity.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。

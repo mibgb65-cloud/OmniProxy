@@ -21,7 +21,7 @@ func TestToolSchemaDialectPreservesJSONSchema(t *testing.T) {
 			body, err := chatPayload(proxy.Request{
 				Protocol: "chat", Model: model,
 				Body: []byte(`{"messages":[{"role":"user","content":"hello"}],"tools":[{"type":"function","function":{"name":"inspect","parameters":` + schema + `}}]}`),
-			}, testCredentials())
+			}, testCredentials(), false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -32,7 +32,7 @@ func TestToolSchemaDialectPreservesJSONSchema(t *testing.T) {
 					} `json:"tools"`
 				} `json:"request"`
 			}
-			if err := json.Unmarshal(body, &envelope); err != nil {
+			if err := json.Unmarshal(body.body, &envelope); err != nil {
 				t.Fatal(err)
 			}
 			if len(envelope.Request.Tools) != 1 || len(envelope.Request.Tools[0].Functions) != 1 {
@@ -59,7 +59,7 @@ func TestToolSchemaInputBoundaries(t *testing.T) {
 			_, err := chatPayload(proxy.Request{
 				Protocol: "chat", Model: "gemini-test",
 				Body: []byte(`{"messages":[{"role":"user","content":"hello"}],"tools":[{"type":"function","function":{"name":"inspect","parameters":` + parameters + `}}]}`),
-			}, testCredentials())
+			}, testCredentials(), false)
 			if err == nil {
 				t.Fatal("non-object schema was accepted")
 			}
@@ -69,8 +69,8 @@ func TestToolSchemaInputBoundaries(t *testing.T) {
 		body, err := chatPayload(proxy.Request{
 			Protocol: "chat", Model: "gemini-test",
 			Body: []byte(`{"messages":[{"role":"user","content":"hello"}],"tools":[{"type":"function","function":{"name":"inspect"` + parameters + `}}]}`),
-		}, testCredentials())
-		if err != nil || strings.Contains(string(body), `"parameters"`) || strings.Contains(string(body), `"parametersJsonSchema"`) {
+		}, testCredentials(), false)
+		if err != nil || strings.Contains(string(body.body), `"parameters"`) || strings.Contains(string(body.body), `"parametersJsonSchema"`) {
 			t.Fatal("absent schema handling changed", err)
 		}
 	}

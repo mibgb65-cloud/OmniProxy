@@ -60,6 +60,7 @@ func (s *AppService) initGateway() {
 	}
 	s.gateway.SetRouter(routes.New(s.db, provider.NewService(s.db), account.NewService(s.db, store)))
 	s.gateway.SetGoogleResources(googlequota.New(s.db))
+	s.gateway.SetGooglePrompt(s.promptAsWritten.Load)
 	google, googleError := s.googleSubscriptionService()
 	if googleError == nil {
 		s.gateway.SetGoogleSubscription(google)

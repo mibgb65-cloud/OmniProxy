@@ -66,6 +66,44 @@ func (c *Client) rememberSignatures(cred Credentials, model string, calls []obje
 	}
 }
 
+// fillUnsignedSignatures 给「整轮都没有 Google 签名」的模型回合补上跳过校验的标记：
+// 跨协议客户端（Claude Code、Codex）不带 Google 签名，缺标记时上游会拒绝该轮；
+// Claude 模型的工具调用尤其如此。缓存回填过的回合保持原样。
+func fillUnsignedSignatures(body []byte) ([]byte, error) {
+	var envelope object
+	if err := json.Unmarshal(body, &envelope); err != nil {
+		return nil, err
+	}
+	request, _ := envelope["request"].(map[string]any)
+	data, _ := request["contents"].([]any)
+	for _, value := range data {
+		content, _ := value.(map[string]any)
+		if content["role"] != "model" {
+			continue
+		}
+		parts, _ := content["parts"].([]any)
+		signed := false
+		for _, part := range parts {
+			if entry, ok := part.(map[string]any); ok && entry["thoughtSignature"] != nil {
+				signed = true
+				break
+			}
+		}
+		if signed {
+			continue
+		}
+		for _, part := range parts {
+			entry, _ := part.(map[string]any)
+			if entry["functionCall"] != nil {
+				entry["thoughtSignature"] = skipSignature
+			}
+		}
+	}
+	return json.Marshal(envelope)
+}
+
+// restoreSignatures 回填跨协议客户端没有携带的 Google 签名（按授权、项目、
+// 模型与完整工具内容摘要隔离），不保存消息正文。
 func (c *Client) restoreSignatures(body []byte, cred Credentials, model string) ([]byte, error) {
 	var payload struct {
 		Request object `json:"request"`

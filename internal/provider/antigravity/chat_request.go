@@ -1,18 +1,19 @@
 package antigravity
 
 import (
-	"crypto/rand"
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"omniproxy/internal/core/proxy"
 )
 
 type object = map[string]any
+
 type chatTool struct {
 	Type     string          `json:"type"`
 	Function json.RawMessage `json:"function"`
 }
+
 type chatMessage struct {
 	Role    string          `json:"role"`
 	Content json.RawMessage `json:"content"`
@@ -28,33 +29,18 @@ type chatMessage struct {
 	} `json:"tool_calls"`
 }
 
-func textContent(raw json.RawMessage) (string, error) {
-	if string(raw) == "null" || len(raw) == 0 {
-		return "", nil
-	}
-	var value string
-	if json.Unmarshal(raw, &value) == nil {
-		return value, nil
-	}
-	var parts []struct {
-		Type string `json:"type"`
-		Text string `json:"text"`
-	}
-	if json.Unmarshal(raw, &parts) != nil || len(parts) > 1000 {
-		return "", proxy.Failure("unsupported_content", 400)
-	}
-	for _, part := range parts {
-		if part.Type != "text" {
-			return "", proxy.Failure("unsupported_content", 400)
-		}
-		value += part.Text
-	}
-	return value, nil
+// payload 是构造好的上游包封，以及发送前的原文 system（未打散）：
+// 拒绝判定与「同 prompt 不再撞一次」的指纹都用原文，不能用打散后的文本。
+type payload struct {
+	body   []byte
+	system string
 }
 
-func chatPayload(request proxy.Request, cred Credentials) ([]byte, error) {
+// chatPayload 把 Chat Completions 请求整形为 Code Assist 的包封。
+// promptAsWritten 为真时按原样发送 system（不打散被拒行）。
+func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) (payload, error) {
 	if request.Protocol != "chat" || !supportedModel(request.Model) {
-		return nil, proxy.Failure("unsupported_protocol", 400)
+		return payload{}, proxy.Failure("unsupported_protocol", 400)
 	}
 	var input struct {
 		Messages   []chatMessage   `json:"messages"`
@@ -62,119 +48,134 @@ func chatPayload(request proxy.Request, cred Credentials) ([]byte, error) {
 		ToolChoice json.RawMessage `json:"tool_choice"`
 	}
 	if json.Unmarshal(request.Body, &input) != nil || len(input.Messages) == 0 || len(input.Messages) > 1000 || len(input.Tools) > 128 {
-		return nil, proxy.Failure("invalid_request", 400)
+		return payload{}, proxy.Failure("invalid_request", 400)
 	}
 	var fields map[string]json.RawMessage
 	if json.Unmarshal(request.Body, &fields) != nil {
-		return nil, proxy.Failure("invalid_request", 400)
+		return payload{}, proxy.Failure("invalid_request", 400)
 	}
 	for _, key := range []string{"response_format", "audio", "modalities", "prediction", "reasoning_effort", "extra_body"} {
 		if value, ok := fields[key]; ok && string(value) != "null" {
-			return nil, proxy.Failure("unsupported_content", 400)
+			return payload{}, proxy.Failure("unsupported_content", 400)
 		}
 	}
+	messages, err := repairedMessages(input.Messages)
+	if err != nil {
+		return payload{}, err
+	}
+	family := familyOf(request.Model)
 	native := object{}
-	contents, systems := []any{}, []any{}
-	calls := map[string]string{}
-	for _, message := range input.Messages {
+	contents := []object{}
+	systems := []object{}
+	systemTexts := []string{}
+	names := map[string]string{}
+	firstUser := ""
+	for _, message := range messages {
 		text, err := textContent(message.Content)
 		if err != nil {
-			return nil, err
+			return payload{}, err
 		}
-		parts := []any{}
+		parts := []object{}
 		if text != "" {
 			parts = append(parts, object{"text": text})
 		}
 		switch message.Role {
 		case "system", "developer":
 			if len(message.Calls) > 0 {
-				return nil, proxy.Failure("unsupported_content", 400)
+				return payload{}, proxy.Failure("unsupported_content", 400)
 			}
-			systems = append(systems, parts...)
+			if text != "" {
+				systems = append(systems, object{"text": text})
+				systemTexts = append(systemTexts, text)
+			}
 			continue
 		case "assistant":
+			callParts, err := assistantParts(message)
+			if err != nil {
+				return payload{}, err
+			}
 			for _, call := range message.Calls {
-				if !safeString(call.ID, 256) || !safeString(call.Function.Name, 128) || call.Type != "function" || calls[call.ID] != "" {
-					return nil, proxy.Failure("invalid_request", 400)
-				}
-				var args object
-				if json.Unmarshal([]byte(call.Function.Arguments), &args) != nil || args == nil {
-					return nil, proxy.Failure("invalid_request", 400)
-				}
-				part := object{"functionCall": object{"id": call.ID, "name": call.Function.Name, "args": args}}
-				if len(call.Extra) > 0 {
-					var extra struct {
-						Google struct {
-							Signature string `json:"thought_signature"`
-						} `json:"google"`
-					}
-					if json.Unmarshal(call.Extra, &extra) != nil || len(extra.Google.Signature) > 65536 {
-						return nil, proxy.Failure("invalid_request", 400)
-					}
-					if extra.Google.Signature != "" {
-						part["thoughtSignature"] = extra.Google.Signature
-					}
-				}
-				parts = append(parts, part)
-				calls[call.ID] = call.Function.Name
+				names[call.ID] = call.Function.Name
 			}
+			parts = append(parts, callParts...)
 		case "tool":
-			name := calls[message.ToolID]
+			name := names[message.ToolID]
 			if name == "" {
-				return nil, proxy.Failure("invalid_request", 400)
+				return payload{}, proxy.Failure("invalid_request", 400)
 			}
-			parts = []any{object{"functionResponse": object{"id": message.ToolID, "name": name, "response": object{"result": text}}}}
-			delete(calls, message.ToolID)
+			parts = []object{{"functionResponse": object{"id": message.ToolID, "name": name, "response": object{"result": text}}}}
+			delete(names, message.ToolID)
 		case "user":
 			if len(message.Calls) > 0 {
-				return nil, proxy.Failure("invalid_request", 400)
+				return payload{}, proxy.Failure("unsupported_content", 400)
+			}
+			if firstUser == "" {
+				firstUser = text
 			}
 		default:
-			return nil, proxy.Failure("unsupported_content", 400)
+			return payload{}, proxy.Failure("unsupported_content", 400)
+		}
+		if len(parts) == 0 {
+			return payload{}, proxy.Failure("unsupported_content", 400)
 		}
 		role := "user"
 		if message.Role == "assistant" {
 			role = "model"
 		}
-		if len(parts) == 0 {
-			return nil, proxy.Failure("unsupported_content", 400)
-		}
 		contents = append(contents, object{"role": role, "parts": parts})
 	}
-	if len(contents) == 0 || len(calls) > 0 {
-		return nil, proxy.Failure("invalid_request", 400)
+	if len(contents) == 0 {
+		return payload{}, proxy.Failure("invalid_request", 400)
 	}
-	native["contents"] = contents
+	native["contents"] = mergeTurns(contents)
+	system := strings.Join(systemTexts, "\n")
 	if len(systems) > 0 {
+		if !promptAsWritten {
+			// 命中行按词插入零宽空格：模型照读，Google 的行匹配看不到。
+			for index := range systems {
+				if text, ok := systems[index]["text"].(string); ok {
+					systems[index]["text"] = cloaked(text)
+				}
+			}
+		}
 		native["systemInstruction"] = object{"parts": systems}
 	}
 	if len(input.Tools) > 0 {
 		declarations, err := toolDeclarations(input.Tools, request.Model)
 		if err != nil {
-			return nil, err
+			return payload{}, err
 		}
-		native["tools"] = []any{object{"functionDeclarations": declarations}}
+		native["tools"] = []object{{"functionDeclarations": declarations}}
 	}
-	choice, err := toolChoice(input.ToolChoice, input.Tools)
+	choice, err := toolChoice(input.ToolChoice, input.Tools, family)
 	if err != nil {
-		return nil, err
+		return payload{}, err
 	}
 	if choice != nil {
 		native["toolConfig"] = choice
 	}
-	config, err := generationOptions(fields)
+	config, maxTokens, err := generationOptions(fields, family)
 	if err != nil {
-		return nil, err
+		return payload{}, err
+	}
+	if thinking := thinkingOptions(request.Effort, request.Model, family, maxTokens); thinking != nil {
+		config["thinkingConfig"] = thinking
+		// Claude 的回答必须在思考之外留出空间：未指定输出上限时按预算补足。
+		if budget, ok := thinking["thinkingBudget"].(int); ok && family == familyClaude && config["maxOutputTokens"] == nil {
+			config["maxOutputTokens"] = budget + 32000
+		}
 	}
 	if len(config) > 0 {
 		native["generationConfig"] = config
 	}
-	var id [16]byte
-	if _, err := rand.Read(id[:]); err != nil {
-		return nil, Failure("operation_failed")
+	native["sessionId"] = sessionID(firstUser)
+	envelope := object{
+		"project": cred.Project, "model": request.Model, "userAgent": "antigravity",
+		"requestType": "agent", "requestId": "agent-" + randomHex(16), "request": native,
 	}
-	id[6] = (id[6] & 15) | 64
-	id[8] = (id[8] & 63) | 128
-	native["sessionId"] = fmt.Sprintf("-%d", uint64(id[0])<<48|uint64(id[1])<<40|uint64(id[2])<<32|uint64(id[3])<<24|uint64(id[4])<<16|uint64(id[5])<<8|uint64(id[7]))
-	return json.Marshal(object{"project": cred.Project, "model": request.Model, "userAgent": "antigravity", "requestType": "agent", "requestId": fmt.Sprintf("agent-%x-%x-%x-%x-%x", id[0:4], id[4:6], id[6:8], id[8:10], id[10:16]), "request": native})
+	body, err := json.Marshal(envelope)
+	if err != nil {
+		return payload{}, proxy.Failure("invalid_request", 400)
+	}
+	return payload{body: body, system: system}, nil
 }

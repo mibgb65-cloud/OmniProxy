@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -83,6 +84,9 @@ type AppService struct {
 	quitForUpdate    func()
 	activationMu     sync.Mutex
 	emitActivation   func(quotaactivation.Status)
+	// googlePromptAsWritten 是「Google 订阅按原文发送 system prompt」的运行时值，
+	// 网关按请求读取，避免每次都读配置文件。
+	promptAsWritten atomic.Bool
 }
 
 // NewAppService creates the bound application service.
@@ -102,6 +106,7 @@ func NewAppService(
 		startedAt: time.Now(),
 	}
 	service.initOutboundProxy()
+	service.loadGooglePromptAsWritten()
 	service.initGateway()
 	service.initAgentInstaller()
 	return service

@@ -93,7 +93,7 @@ func TestStreamingIsIncrementalAndTruncationFails(t *testing.T) {
 
 func TestUnsupportedInputAndCancelledConsumer(t *testing.T) {
 	for _, body := range []string{`{"messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"file:///secret"}}]}]}`, `{"messages":[{"role":"tool","tool_call_id":"missing","content":"data"}]}`, `{"messages":[{"role":"user","content":"hi"}],"response_format":{"type":"json_object"}}`} {
-		if _, err := chatPayload(proxy.Request{Model: "gemini-test", Protocol: "chat", Body: []byte(body)}, testCredentials()); err == nil {
+		if _, err := chatPayload(proxy.Request{Model: "gemini-test", Protocol: "chat", Body: []byte(body)}, testCredentials(), false); err == nil {
 			t.Fatal("unsupported input accepted")
 		}
 	}

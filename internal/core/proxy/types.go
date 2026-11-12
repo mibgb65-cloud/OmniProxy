@@ -40,7 +40,12 @@ type Request struct {
 	Model                 string
 	// Effort 是本次请求携带的推理档位；空串表示客户端没有指定，不能当成默认值。
 	Effort string
-	Stream bool
+	// PromptAsWritten 只由网关按用户设置填入：Google 订阅按原文发送 system prompt，
+	// 不打散会被上游拒绝的行。
+	PromptAsWritten bool
+	// LastCandidate 只由 failover 填入：这是最后一个候选，已记录拒绝的 prompt 仍要发送。
+	LastCandidate bool
+	Stream        bool
 	// 路由目标由受信解析器填入，HTTP 正文不能指定这些字段。
 	ProviderID string
 	AccountID  string

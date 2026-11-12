@@ -14,12 +14,14 @@ type autostartController interface {
 	Disable() error
 }
 
-// DesktopSettings 包含系统开机启动状态、软件启动时的网关偏好与窗口关闭行为。
+// DesktopSettings 包含系统开机启动状态、软件启动时的网关偏好、窗口关闭行为
+// 与 Google 订阅的 system prompt 发送方式。
 type DesktopSettings struct {
-	AutoStart          bool   `json:"autoStart"`
-	AutoStartAvailable bool   `json:"autoStartAvailable"`
-	GatewayAutoStart   bool   `json:"gatewayAutoStart"`
-	CloseBehavior      string `json:"closeBehavior"`
+	AutoStart             bool   `json:"autoStart"`
+	AutoStartAvailable    bool   `json:"autoStartAvailable"`
+	GatewayAutoStart      bool   `json:"gatewayAutoStart"`
+	CloseBehavior         string `json:"closeBehavior"`
+	GooglePromptAsWritten bool   `json:"googlePromptAsWritten"`
 }
 
 // DesktopSettings 从系统读取开机启动状态，从 profile 配置读取网关启动和窗口关闭偏好。
@@ -32,7 +34,7 @@ func (s *AppService) DesktopSettings() (DesktopSettings, error) {
 	if err != nil {
 		return DesktopSettings{}, err
 	}
-	result := DesktopSettings{CloseBehavior: closeBehavior, GatewayAutoStart: cfg.GatewayAutoStart}
+	result := DesktopSettings{CloseBehavior: closeBehavior, GatewayAutoStart: cfg.GatewayAutoStart, GooglePromptAsWritten: cfg.GooglePromptAsWritten}
 	// Dev and production builds use the same output path. Registering a dev
 	// binary would later launch whichever profile last replaced that path.
 	if !s.prof.IsProduction() {
@@ -88,6 +90,31 @@ func (s *AppService) SetGatewayAutoStart(enabled bool) (bool, error) {
 		return false, err
 	}
 	return enabled, nil
+}
+
+// SetGooglePromptAsWritten 保存 Google 订阅是否按原文发送 system prompt；
+// 关闭打散后，命中上游拒绝行的请求会收到 400 prompt_turned_away。
+func (s *AppService) SetGooglePromptAsWritten(asWritten bool) (bool, error) {
+	s.settingsMu.Lock()
+	defer s.settingsMu.Unlock()
+	if err := profile.SetGooglePromptAsWritten(s.prof.Kind, asWritten); err != nil {
+		return false, err
+	}
+	s.promptAsWritten.Store(asWritten)
+	return asWritten, nil
+}
+
+// loadGooglePromptAsWritten 在启动时把持久化设置读入内存，网关照此决定发送方式。
+func (s *AppService) loadGooglePromptAsWritten() {
+	if s.prof == nil {
+		return
+	}
+	cfg, err := profile.LoadConfig(s.prof.Kind)
+	if err != nil {
+		// 读不到配置时保持默认（打散），不阻断启动。
+		return
+	}
+	s.promptAsWritten.Store(cfg.GooglePromptAsWritten)
 }
 
 func (s *AppService) shouldCloseToTray() bool {

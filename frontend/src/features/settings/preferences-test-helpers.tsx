@@ -34,6 +34,7 @@ vi.mock("../../services/omniproxy", () => ({
   getDesktopSettings: vi.fn(),
   setAutoStart: vi.fn(),
   setGatewayAutoStart: vi.fn(),
+  setGooglePromptAsWritten: vi.fn(),
   setCloseBehavior: vi.fn(),
   getProxyPort: vi.fn(),
   setProxyPort: vi.fn(),
@@ -83,6 +84,7 @@ export function resetPreferences() {
     autoStartAvailable: false,
     gatewayAutoStart: false,
     closeBehavior: "exit",
+    googlePromptAsWritten: false,
   })
   vi.mocked(readRetention).mockResolvedValue({
     maxRecords: 10000,

@@ -23,13 +23,15 @@ export interface CleanResult {
 }
 
 /**
- * DesktopSettings 包含系统开机启动状态、软件启动时的网关偏好与窗口关闭行为。
+ * DesktopSettings 包含系统开机启动状态、软件启动时的网关偏好、窗口关闭行为
+ * 与 Google 订阅的 system prompt 发送方式。
  */
 export interface DesktopSettings {
     "autoStart": boolean;
     "autoStartAvailable": boolean;
     "gatewayAutoStart": boolean;
     "closeBehavior": string;
+    "googlePromptAsWritten": boolean;
 }
 
 /**

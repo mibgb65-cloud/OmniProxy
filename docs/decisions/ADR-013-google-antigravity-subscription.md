@@ -40,6 +40,11 @@ Google AI 订阅与 Gemini API Key 独立计费。用户要求参考 CLIProxyAPI
 内部端点及套餐实际权限仍需真实账号验证；参考项目存在实现不代表 Google 提供
 稳定的通用订阅 API 合约。协议能力必须以契约与真实验证逐步扩大。
 
+请求形态向官方客户端对齐（2026-11-12，TASK-20261112-002）：system prompt 中会被上游
+当成额度耗尽拒绝的少数行按词插入零宽空格，内容拒绝改报不可重试的 400，容量耗尽 429 按
+上游重置时间休息账号。打散属于绕开上游内容判定，与本文记录的账号风险同级，可由用户设置
+关闭（按原文发送）。
+
 ## Sources
 
 - https://github.com/router-for-me/CLIProxyAPI/tree/e7003d2a3e2cee2d45f9950c067bf8e02a2ac0f8

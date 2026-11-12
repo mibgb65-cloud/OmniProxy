@@ -11,6 +11,8 @@ import (
 // 订阅模型共用文本／工具适配；跨协议等待完整结果，保留已有 Chat 的增量流。
 func (s *Service) forwardGoogleAgent(ctx context.Context, cred antigravity.Credentials, request proxy.Request, consume func(proxy.Response) error) error {
 	upstream := request
+	// 用户可要求按原文发送 system prompt；默认打散会被上游拒绝的行。
+	upstream.PromptAsWritten = s.promptAsWritten()
 	var kinds map[string]string
 	if request.Protocol != "chat" {
 		if request.Protocol != "responses" && request.Protocol != "messages" {

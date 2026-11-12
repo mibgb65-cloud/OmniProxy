@@ -19,6 +19,14 @@ func (s *Service) SetGoogleSubscription(service GoogleSubscriptionAccess) {
 	s.googleAuth = service
 }
 
+// SetGooglePrompt 安装「按原文发送 Google 订阅 system prompt」的读取器。
+func (s *Service) SetGooglePrompt(read func() bool) { s.googlePrompt = read }
+
+// promptAsWritten 报告用户是否要求按原文发送 system prompt（不打散被拒行）。
+func (s *Service) promptAsWritten() bool {
+	return s.googlePrompt != nil && s.googlePrompt()
+}
+
 type GoogleResourceObserver interface {
 	Record(context.Context, string, string, string, google.Failure) error
 }

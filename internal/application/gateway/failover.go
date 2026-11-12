@@ -45,11 +45,13 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 	lastTarget := initial
 	attempts := 0
 	var wait time.Duration
-	for _, candidate := range request.Candidates {
+	for index, candidate := range request.Candidates {
 		if seen[candidate.AccountID] || attempts >= maxFailoverAttempts {
 			continue
 		}
 		seen[candidate.AccountID] = true
+		// 后面还有可尝试的候选：订阅通道据此决定「已知拒绝的 prompt」是否先跳过该账号。
+		next := hasLaterCandidate(request.Candidates[index+1:], seen) && attempts+1 < maxFailoverAttempts
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
@@ -63,6 +65,7 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 		}
 		current := request
 		current.AccountID, current.AccountUpdatedAt = candidate.AccountID, candidate.UpdatedAt
+		current.LastCandidate = !next
 		t, err := s.selectRoutedTarget(ctx, current)
 		if err != nil {
 			return err
@@ -129,12 +132,37 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 			rejected = &retryReason{code: duplicate.Code}
 			responseStatus = 503
 		}
+		if skipped, ok := refusedBefore(err); ok && !request.FixedAccount {
+			// 该账号 6 小时内拒绝过同一 system prompt：不再发送、不写冷却，直接换下一个候选。
+			s.failover.finish(lease, nil, false)
+			released = true
+			if endErr := request.Trace.EndAttempt(skipped.StatusCode, skipped.Code); endErr != nil {
+				return endErr
+			}
+			continue
+		}
+		if rejected == nil {
+			if quota, ok := quotaExhausted(err); ok && !request.FixedAccount {
+				if !next {
+					// 没有别的候选：把真实错误交还客户端，不伪装成账号池冷却。
+					s.failover.finish(lease, nil, false)
+					released = true
+					if endErr := request.Trace.EndAttempt(quota.StatusCode, quota.Code); endErr != nil {
+						return endErr
+					}
+					return err
+				}
+				// 还有候选：按上游给出的重置时间休息本账号，由下一个候选接替。
+				rejected = &retryReason{code: quota.Code, delay: quotaRetryDelay(quota, s.failover.now())}
+			}
+		}
 		cooldown := rejected
 		if cooldown != nil && cooldown.code == "duplicate_credential" {
 			cooldown = nil
 		}
 		// 已有版本化共享额度观察时，以其窗口重置／新快照恢复为准，避免另存模型冷却阻止重置卡生效。
-		if cooldown != nil && cooldown.code == "upstream_quota_exhausted" {
+		// 这条只针对 Codex 订阅；Google 订阅的额度按账号独立，需要休息本账号。
+		if cooldown != nil && cooldown.code == "upstream_quota_exhausted" && t.kind == "openai" && codexLoginMethod(t.authMethod) {
 			if _, ok := s.subscription.(subscriptionQuotaAvailability); ok {
 				cooldown = nil
 			}

@@ -2,6 +2,7 @@
 package antigravity
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,8 +11,9 @@ import (
 	"net/http"
 	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
-
+	"runtime"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -22,10 +24,35 @@ const authURL = "https://accounts.google.com/o/oauth2/v2/auth"
 const userURL = "https://www.googleapis.com/oauth2/v2/userinfo"
 const maxResponse = 8 << 20
 
+// maxClassifiedBody 是 429 正文的分类上限：只用于识别固定措辞，不保存、不返回。
+const maxClassifiedBody = 8 << 10
+
+// protocolVersionURL 是 Antigravity 更新清单；只读取其中公开的 version 行。
+// 声明为变量以便契约测试指向本地服务。
+var protocolVersionURL = "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/manifest/latest-arm64-mac.yml"
+
+const (
+	protocolVersionFallback = "2.23.0"
+	protocolVersionTTL      = 6 * time.Hour
+)
+
+var protocolVersionState struct {
+	sync.Mutex
+	value    string
+	at       time.Time
+	fetching bool
+}
+
 // Client 只访问固定官方端点；测试通过 RoundTripper 注入契约服务。
 type Client struct {
 	http       *http.Client
 	signatures signatureCache
+	refusals   refusalMarks
+	// tiers 记录被拒绝的 entitlement 套餐，24 小时内不再重复尝试。
+	tiers struct {
+		sync.Mutex
+		refused map[string]time.Time
+	}
 }
 
 // New 创建拒绝重定向且具有有限握手等待的客户端。
@@ -46,13 +73,13 @@ func Failure(code string) error { return errors.New("google_subscription: " + co
 func ProxyError(err error) error {
 	code, status := ErrorCode(err), 502
 	switch code {
-	case "invalid_request":
+	case "invalid_request", codePromptTurnedAway, codePromptRefusedOnce:
 		status = 400
 	case "reauth_required":
 		status = 401
 	case "access_denied":
 		status = 403
-	case "rate_limited":
+	case "rate_limited", codeQuotaExhausted:
 		status = 429
 	}
 	return proxy.Failure(code, status)
@@ -70,7 +97,7 @@ func safeString(value string, max int) bool {
 	return true
 }
 
-func (c *Client) request(ctx context.Context, endpoint string, body []byte, token, contentType string) (*http.Response, error) {
+func (c *Client) request(ctx context.Context, endpoint string, body []byte, token, contentType string, headers map[string]string) (*http.Response, error) {
 	method := http.MethodPost
 	if body == nil {
 		method = http.MethodGet
@@ -86,13 +113,23 @@ func (c *Client) request(ctx context.Context, endpoint string, body []byte, toke
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("Content-Type", contentType)
-	// 内部协议存在最低兼容版本；保留 OmniProxy 身份，不宣称本机 agy 的发行版本。
-	req.Header.Set("User-Agent", "antigravity/2.23.0 OmniProxy")
+	// 采用官方客户端的协议形态；末尾保留 OmniProxy 身份，不宣称已安装 agy 的发行版本。
+	req.Header.Set("User-Agent", userAgent())
+	for name, value := range headers {
+		req.Header.Set(name, value)
+	}
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, proxy.UpstreamFailure(err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if resp.StatusCode == http.StatusTooManyRequests {
+			// 429 的两种语义（内容拒绝 / 容量耗尽）只能从正文措辞区分；
+			// 只做有界读取与固定分类，正文随后关闭且不进入错误、日志或界面。
+			body, _ := io.ReadAll(io.LimitReader(resp.Body, maxClassifiedBody))
+			resp.Body.Close()
+			return nil, classifyFailure(resp.StatusCode, body)
+		}
 		resp.Body.Close()
 		switch resp.StatusCode {
 		case 400:
@@ -106,8 +143,6 @@ func (c *Client) request(ctx context.Context, endpoint string, body []byte, toke
 			return nil, Failure("reauth_required")
 		case 403:
 			return nil, Failure("access_denied")
-		case 429:
-			return nil, Failure("rate_limited")
 		default:
 			return nil, Failure("upstream_unavailable")
 		}
@@ -115,8 +150,79 @@ func (c *Client) request(ctx context.Context, endpoint string, body []byte, toke
 	return resp, nil
 }
 
-func (c *Client) read(ctx context.Context, endpoint string, body []byte, token, contentType string, result any) error {
-	resp, err := c.request(ctx, endpoint, body, token, contentType)
+// userAgent 是官方 Antigravity 客户端的 User-Agent 形态，版本取公开更新清单。
+func userAgent() string {
+	return "antigravity/hub/" + protocolVersion() + " " + runtime.GOOS + "/" + runtime.GOARCH + " OmniProxy"
+}
+
+// protocolVersion 是公开清单里的当前客户端版本，缓存 6 小时；读不到时回退到兼容下限。
+// 清单在后台刷新，请求路径不等网络。
+func protocolVersion() string {
+	protocolVersionState.Lock()
+	value := protocolVersionState.value
+	if value == "" {
+		value = protocolVersionFallback
+	}
+	stale := time.Since(protocolVersionState.at) >= protocolVersionTTL
+	if stale && !protocolVersionState.fetching {
+		protocolVersionState.fetching = true
+		protocolVersionState.at = time.Now()
+		go refreshProtocolVersion()
+	}
+	protocolVersionState.Unlock()
+	return value
+}
+
+// refreshProtocolVersion 读取清单并缓存版本；失败保留原值（或回退值）。
+func refreshProtocolVersion() {
+	value := fetchProtocolVersion()
+	protocolVersionState.Lock()
+	if value != "" {
+		protocolVersionState.value = value
+	}
+	protocolVersionState.fetching = false
+	protocolVersionState.Unlock()
+}
+
+func fetchProtocolVersion() string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, protocolVersionURL, nil)
+	if err != nil {
+		return ""
+	}
+	request.Header.Set("User-Agent", "electron-builder")
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return ""
+	}
+	defer response.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(response.Body, 64<<10))
+	if err != nil {
+		return ""
+	}
+	return parseManifestVersion(string(data))
+}
+
+// parseManifestVersion 取清单里的 version 行；不是纯数字与点的值不采用。
+func parseManifestVersion(manifest string) string {
+	scanner := bufio.NewScanner(strings.NewReader(manifest))
+	for scanner.Scan() {
+		value, ok := strings.CutPrefix(strings.TrimSpace(scanner.Text()), "version:")
+		if !ok {
+			continue
+		}
+		value = strings.Trim(strings.TrimSpace(value), `'"`)
+		if value != "" && strings.Trim(value, "0123456789.") == "" {
+			return value
+		}
+		break
+	}
+	return ""
+}
+
+func (c *Client) read(ctx context.Context, endpoint string, body []byte, token, contentType string, result any, headers map[string]string) error {
+	resp, err := c.request(ctx, endpoint, body, token, contentType, headers)
 	if err != nil {
 		return err
 	}
@@ -130,17 +236,29 @@ func (c *Client) read(ctx context.Context, endpoint string, body []byte, token, 
 }
 
 func (c *Client) post(ctx context.Context, endpoint, token string, payload, result any) error {
+	return c.postWith(ctx, endpoint, token, payload, result, nil)
+}
+
+// postWith 与 post 相同，额外发送少量固定头（`onboardUser` 的客户端标识）。
+func (c *Client) postWith(ctx context.Context, endpoint, token string, payload, result any, headers map[string]string) error {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		return Failure("invalid_request")
 	}
 	defer clear(data)
-	return c.read(ctx, endpoint, data, token, "application/json", result)
+	return c.read(ctx, endpoint, data, token, "application/json", result, headers)
 }
 
 // ErrorCode 只允许已知错误进入 UI，不返回动态正文。
 func ErrorCode(err error) string {
-	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "invalid_request", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed", "quota_changed", "quota_cache_unavailable"} {
+	var upstream *upstreamError
+	if errors.As(err, &upstream) {
+		if upstream.reset > 0 {
+			return codeQuotaExhausted
+		}
+		return codeRateLimited
+	}
+	for _, code := range []string{"agy_unavailable", "client_incompatible", "invalid_input", "invalid_request", "busy", "cancelled", "login_expired", "identity_changed", "reauth_required", "access_denied", "rate_limited", "project_unavailable", "invalid_response", "upstream_unavailable", "credential_unavailable", "browser_failed", "cleanup_failed", "quota_changed", "quota_cache_unavailable", codePromptTurnedAway, codePromptRefusedOnce, codeQuotaExhausted} {
 		if err != nil && strings.Contains(err.Error(), "google_subscription: "+code) {
 			return code
 		}

@@ -750,6 +750,14 @@ export function SetGoogleProject(input: googlequota$0.BindingInput): $Cancellabl
 }
 
 /**
+ * SetGooglePromptAsWritten 保存 Google 订阅是否按原文发送 system prompt；
+ * 关闭打散后，命中上游拒绝行的请求会收到 400 prompt_turned_away。
+ */
+export function SetGooglePromptAsWritten(asWritten: boolean): $CancellablePromise<boolean> {
+    return $Call.ByID(4020948349, asWritten);
+}
+
+/**
  * SetKimiPreferredBillingMode 保存计费顺序并刷新受管目录。
  */
 export function SetKimiPreferredBillingMode(mode: string): $CancellablePromise<routing$0.KimiSettings> {

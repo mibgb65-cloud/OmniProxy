@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已完成：[TASK-20261112-002](../tasks/completed/2026-11/TASK-20261112-002-google-subscription-agent-chain-parity.md)，Google 订阅 Agent 链路对齐参考实现：system prompt 中会被上游当成额度耗尽拒绝的少数行按词打散（设置页「Google 订阅请求」可改为按原文发送）、内容拒绝改报不可重试的 `400 prompt_turned_away`、同 prompt 6 小时预判跳过、容量 429 按上游重置时间休息并在有候选时换号、请求历史修复、模型族生成参数与工具模式（思考档位、`VALIDATED`、跳过签名）、稳定会话标识、模型目录权益与停用过滤、客户端标识与实时协议版本。`task verify` PASS（147 文件／895 项前端、全部 Go 包、Windows production 构建）；真机单请求对照待用户授权后执行。实现提交 `<待回填>`。
+
 本地构建：[TASK-20261112-003](../tasks/completed/2026-11/TASK-20261112-003-build-local-v2.2.3-beta.8.md) 已产出 `v2.2.3-beta.8` Windows amd64 生产安装包，包含「保存当前正在使用的端口不再被误判为占用」（TASK-20261112-001，`15842462`），无新增迁移。版本提交 `dc114884`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,611,512 bytes，SHA256 `cc36c202c52770ecc46a1b0e0936bba8509d6e171c6e5920aeabaf663763002e`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新。
 
 已修复：[TASK-20261112-001](../tasks/completed/2026-11/TASK-20261112-001-fix-proxy-port-self-occupied-adjustment.md) 保存当前正在使用的网关端口不再被误判为占用：软件开着时「保存端口」填当前端口（生产 3000）会被自动避让成 3001 并 `Adjusted=true`，点「恢复默认端口」同样中招。根因是可用性探测只能回答「还能不能再监听一次」，本进程自己持有的端口必然探测失败；状态栏 `proxyPortState` 早已把运行中端口视为可用，保存流程 `applyProxyPort` 漏了同一例外。现由 `listeningPort()` 统一表达「本进程持有的端口」（以 `Runtime.State == running` 为前提，`error`／`stopped` 保留的端口号不算持有）：目标端口等于它时跳过探测并按无变化处理——不重启监听器、不取消在途请求、不改写受管客户端、不落盘新端口；其它端口仍照常探测与避让。新增 3 项回归测试（含以 `StartedAt` 未变化证明监听器未重启，及「被其它程序占用时仍避让」防过度放宽）。format／lint／typecheck／Go 全部包／`task build` 通过；前端全量测试在默认并发下出现 3 项既有超时（`stepfun.test.tsx`、`kimi-code.test.tsx`，与本次改动无关），限 4 worker 重跑 146 文件／893 项全部通过。
@@ -151,14 +153,11 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-当前无正在实现的任务。`docs/tasks/active/` 已登记、尚未进入实现的两条：
+当前无正在实现的任务。`docs/tasks/active/` 仅剩一条已登记、尚未开始的任务：
 
-- [TASK-20261112-002](../tasks/active/TASK-20261112-002-google-subscription-agent-chain-parity.md)
-  （Planned）Google 订阅 Agent 链路对齐参考实现的请求形态与拒绝处理：按 Antigravity 拒绝行打散
-  system prompt、把内容拒绝改报 400、拆开两种 429、补齐会话 ID／思考档位／Claude 跳过签名／
-  `entitlement` 与历史修复。仅建立记录与计划，未改代码，待用户确认后实施。
-- [TASK-20261112-001](../tasks/active/TASK-20261112-001-fix-proxy-port-self-occupied-adjustment.md)
-  （Planned）保存当前正在使用的网关端口不再被误判为占用。
+- [TASK-20261112-003](../tasks/active/TASK-20261112-003-gemini-cli-subscription-channel.md)
+  （Planned）新增 Gemini CLI 订阅通道（Code Assist Standard / Enterprise），复用
+  TASK-20261112-002 的传输层与错误语义，但按原文发送 system prompt。
 
 已撤销：[TASK-20261027-008](../tasks/completed/2026-10/TASK-20261027-008-v2.1.0-development-baseline.md)（`2.1.0`）
 与 [TASK-20261027-009](../tasks/completed/2026-10/TASK-20261027-009-version-baseline-2.0.1.md)（`2.0.1`）

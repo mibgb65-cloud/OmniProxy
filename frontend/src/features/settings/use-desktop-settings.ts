@@ -4,6 +4,7 @@ import {
   setAutoStart,
   setCloseBehavior,
   setGatewayAutoStart,
+  setGooglePromptAsWritten,
   type DesktopSettings,
 } from "../../services/omniproxy"
 
@@ -52,6 +53,19 @@ export function useSetGatewayAutoStart() {
     onSuccess: (enabled) => {
       queryClient.setQueryData<DesktopSettings>(desktopSettingsQuery.queryKey, (old) =>
         old ? { ...old, gatewayAutoStart: enabled } : old,
+      )
+      void queryClient.invalidateQueries({ queryKey: desktopSettingsQuery.queryKey })
+    },
+  })
+}
+
+export function useSetGooglePromptAsWritten() {
+  const queryClient = useQueryClient()
+  return useMutation<boolean, Error, boolean>({
+    mutationFn: (asWritten) => setGooglePromptAsWritten(asWritten),
+    onSuccess: (asWritten) => {
+      queryClient.setQueryData<DesktopSettings>(desktopSettingsQuery.queryKey, (old) =>
+        old ? { ...old, googlePromptAsWritten: asWritten } : old,
       )
       void queryClient.invalidateQueries({ queryKey: desktopSettingsQuery.queryKey })
     },

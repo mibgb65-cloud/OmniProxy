@@ -14,24 +14,32 @@ import (
 
 // Forward 只消费当前订阅基础额度，不携带付费积分类型或跨通道重试。
 func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Request, consume func(proxy.Response) error) error {
-	body, err := chatPayload(request, cred)
+	built, err := chatPayload(request, cred, request.PromptAsWritten)
 	if err != nil {
 		return err
 	}
-	defer clear(body)
-	restored, err := c.restoreSignatures(body, cred, request.Model)
+	defer clear(built.body)
+	// 同一账号 6 小时内拒绝过同一 system prompt：还有其它候选时不再先撞一次；
+	// 最后一个候选（LastCandidate）仍照常发送，避免把失败隐藏成路由问题。
+	if !request.LastCandidate && c.refusedBefore(cred, built.system) {
+		return &proxy.Error{Code: codePromptRefusedOnce, StatusCode: 400}
+	}
+	restored, err := c.restoreSignatures(built.body, cred, request.Model)
 	if err != nil {
 		return proxy.Failure("invalid_request", 400)
 	}
-	body = restored
 	defer clear(restored)
+	body, err := fillUnsignedSignatures(restored)
+	if err != nil {
+		return proxy.Failure("invalid_request", 400)
+	}
 	endpoint := inferenceURL + "/v1internal:generateContent"
 	if request.Stream {
 		endpoint = inferenceURL + "/v1internal:streamGenerateContent?alt=sse"
 	}
-	resp, err := c.request(ctx, endpoint, body, cred.AccessToken, "application/json")
+	resp, err := c.request(ctx, endpoint, body, cred.AccessToken, "application/json", nil)
 	if err != nil {
-		return ProxyError(err)
+		return c.failure(err, cred, built.system)
 	}
 	defer resp.Body.Close()
 	state := responseState{model: request.Model, id: "chatcmpl-" + rand.Text()}

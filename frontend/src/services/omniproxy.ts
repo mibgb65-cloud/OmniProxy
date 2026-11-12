@@ -109,6 +109,14 @@ export function setGatewayAutoStart(enabled: boolean): Promise<boolean> {
   return AppService.SetGatewayAutoStart(enabled)
 }
 
+/**
+ * setGooglePromptAsWritten 保存 Google 订阅是否按原文发送 system prompt；
+ * 关闭后命中上游拒绝行的请求会按原文发送并得到不可重试的 400。
+ */
+export function setGooglePromptAsWritten(asWritten: boolean): Promise<boolean> {
+  return AppService.SetGooglePromptAsWritten(asWritten)
+}
+
 /** getProxyPort 读取本地网关端口、默认端口与占用状态。 */
 export function getProxyPort(): Promise<ProxyPortState> {
   return AppService.ProxyPort()

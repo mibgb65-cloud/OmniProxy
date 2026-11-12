@@ -241,6 +241,14 @@ export const en: Record<keyof typeof zh, string> = {
     "Close the window, stop the app, and run normal shutdown.",
   "settings.desktop.loadFailed": "Could not load desktop behavior: {{error}}",
   "settings.desktop.autoStartFailed": "Could not change startup setting: {{error}}",
+
+  "settings.googlePrompt.title": "Google subscription requests",
+  "settings.googlePrompt.description":
+    "Controls how the Google subscription (Antigravity) sends the system prompt of agents such as Claude Code and Codex.",
+  "settings.googlePrompt.asWritten": "Send the system prompt as written",
+  "settings.googlePrompt.hint":
+    "By default a few identity and billing markers are broken up word by word: Google refuses the whole request as if quota ran out, while the model still reads them the same. Turned on, the prompt is sent verbatim and such requests fail with a non-retryable 400.",
+  "settings.googlePrompt.failed": "Could not change how the system prompt is sent: {{error}}",
   "settings.desktop.closeFailed": "Could not save close behavior: {{error}}",
   "settings.desktop.saving": "Saving…",
 

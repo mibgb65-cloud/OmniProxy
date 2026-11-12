@@ -45,6 +45,9 @@ type Config struct {
 	// ProxyPort is the persisted gateway listen port. 0 means "use the
 	// profile default"; OMNIPROXY_PROXY_PORT always wins over this value.
 	ProxyPort int `json:"proxyPort,omitempty"`
+	// GooglePromptAsWritten 关闭 Google 订阅通道对 system prompt 的行内打散，
+	// 按客户端原文发送；默认关闭（即默认打散会被上游拒绝的行）。
+	GooglePromptAsWritten bool `json:"googlePromptAsWritten,omitempty"`
 }
 
 // ConfigFilePath returns the fixed path of the persisted configuration for

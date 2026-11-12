@@ -231,6 +231,14 @@ export const zh = {
   "settings.desktop.closeToExitDescription": "关闭窗口并停止应用，执行正常退出流程。",
   "settings.desktop.loadFailed": "加载桌面行为设置失败：{{error}}",
   "settings.desktop.autoStartFailed": "更改开机启动失败：{{error}}",
+
+  "settings.googlePrompt.title": "Google 订阅请求",
+  "settings.googlePrompt.description":
+    "控制 Google 订阅（Antigravity）如何发送 Claude Code／Codex 等 Agent 的 system prompt。",
+  "settings.googlePrompt.asWritten": "按原文发送 system prompt",
+  "settings.googlePrompt.hint":
+    "默认会把少数身份与计费标记按词打散：Google 会把这些行当成额度耗尽拒绝整个请求，打散后模型仍按原意阅读。开启后按原文发送，这些请求会收到 400 且不会重试。",
+  "settings.googlePrompt.failed": "更改 system prompt 发送方式失败：{{error}}",
   "settings.desktop.closeFailed": "保存关闭行为失败：{{error}}",
   "settings.desktop.saving": "正在保存…",
 

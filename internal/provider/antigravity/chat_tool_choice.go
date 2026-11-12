@@ -5,7 +5,9 @@ import (
 	"omniproxy/internal/core/proxy"
 )
 
-func toolChoice(raw json.RawMessage, tools []chatTool) (object, error) {
+// toolChoice 把 Chat 的 tool_choice 映射为 functionCallingConfig：
+// Antigravity 的 Claude 模型要求调用按 schema 校验（VALIDATED），其余用 AUTO。
+func toolChoice(raw json.RawMessage, tools []chatTool, family string) (object, error) {
 	if len(raw) > 0 && string(raw) != "null" {
 		var choice string
 		config := object{}
@@ -13,6 +15,9 @@ func toolChoice(raw json.RawMessage, tools []chatTool) (object, error) {
 			mode := map[string]string{"auto": "AUTO", "none": "NONE", "required": "ANY"}[choice]
 			if mode == "" {
 				return nil, proxy.Failure("unsupported_content", 400)
+			}
+			if choice == "auto" && family == familyClaude {
+				mode = "VALIDATED"
 			}
 			config["mode"] = mode
 		} else {

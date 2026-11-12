@@ -45,6 +45,7 @@ describe("DesktopBehavior", () => {
       autoStartAvailable: true,
       closeBehavior: "exit",
       gatewayAutoStart: false,
+      googlePromptAsWritten: false,
     }
     vi.mocked(getDesktopSettings).mockImplementation(async () => ({ ...current }))
     vi.mocked(setAutoStart).mockImplementation(async (enabled) => {

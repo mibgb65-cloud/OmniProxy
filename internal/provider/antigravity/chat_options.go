@@ -41,14 +41,16 @@ func toolDeclarations(tools []chatTool, model string) ([]object, error) {
 	return output, nil
 }
 
-func generationOptions(fields map[string]json.RawMessage) (object, error) {
+// generationOptions 只保留上游客户端会发送的生成参数：
+// maxOutputTokens 仅 Claude 模型发送，Gemini / GPT-OSS 由上游按模型默认值决定。
+func generationOptions(fields map[string]json.RawMessage, family string) (object, int64, error) {
 	allowed := map[string]bool{}
 	for _, key := range []string{"model", "messages", "stream", "stream_options", "tools", "tool_choice", "temperature", "top_p", "max_tokens", "max_completion_tokens", "stop", "n", "user", "parallel_tool_calls"} {
 		allowed[key] = true
 	}
 	for key, value := range fields {
 		if !allowed[key] && string(value) != "null" {
-			return nil, proxy.Failure("unsupported_content", 400)
+			return nil, 0, proxy.Failure("unsupported_content", 400)
 		}
 	}
 	config := object{}
@@ -59,7 +61,7 @@ func generationOptions(fields map[string]json.RawMessage) (object, error) {
 		if raw, ok := fields[field.key]; ok && string(raw) != "null" {
 			var value float64
 			if json.Unmarshal(raw, &value) != nil || value < field.minimum || value > field.maximum {
-				return nil, proxy.Failure("invalid_request", 400)
+				return nil, 0, proxy.Failure("invalid_request", 400)
 			}
 			config[field.native] = value
 		}
@@ -69,24 +71,24 @@ func generationOptions(fields map[string]json.RawMessage) (object, error) {
 		if raw, ok := fields[key]; ok && string(raw) != "null" {
 			var value int64
 			if json.Unmarshal(raw, &value) != nil || value < 1 || value > 1<<20 || tokenLimit != 0 && value != tokenLimit {
-				return nil, proxy.Failure("invalid_request", 400)
+				return nil, 0, proxy.Failure("invalid_request", 400)
 			}
 			tokenLimit = value
 		}
 	}
-	if tokenLimit != 0 {
+	if tokenLimit != 0 && family == familyClaude {
 		config["maxOutputTokens"] = tokenLimit
 	}
 	if raw, ok := fields["n"]; ok && string(raw) != "null" {
 		var count int
 		if json.Unmarshal(raw, &count) != nil || count != 1 {
-			return nil, proxy.Failure("unsupported_content", 400)
+			return nil, 0, proxy.Failure("unsupported_content", 400)
 		}
 	}
 	if raw, ok := fields["parallel_tool_calls"]; ok && string(raw) != "null" {
 		var enabled bool
 		if json.Unmarshal(raw, &enabled) != nil || !enabled {
-			return nil, proxy.Failure("unsupported_content", 400)
+			return nil, 0, proxy.Failure("unsupported_content", 400)
 		}
 	}
 	if raw, ok := fields["stop"]; ok && string(raw) != "null" {
@@ -95,17 +97,17 @@ func generationOptions(fields map[string]json.RawMessage) (object, error) {
 		if json.Unmarshal(raw, &sequence) == nil {
 			sequences = []string{sequence}
 		} else if json.Unmarshal(raw, &sequences) != nil {
-			return nil, proxy.Failure("invalid_request", 400)
+			return nil, 0, proxy.Failure("invalid_request", 400)
 		}
 		if len(sequences) > 5 {
-			return nil, proxy.Failure("invalid_request", 400)
+			return nil, 0, proxy.Failure("invalid_request", 400)
 		}
 		for _, value := range sequences {
 			if len(value) == 0 || len(value) > 256 || !utf8.ValidString(value) {
-				return nil, proxy.Failure("invalid_request", 400)
+				return nil, 0, proxy.Failure("invalid_request", 400)
 			}
 		}
 		config["stopSequences"] = sequences
 	}
-	return config, nil
+	return config, tokenLimit, nil
 }

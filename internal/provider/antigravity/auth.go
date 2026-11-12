@@ -19,11 +19,14 @@ type Credentials struct {
 	Email        string    `json:"email"`
 	Project      string    `json:"project"`
 	Plan         string    `json:"plan"`
+	// Tier 是 loadCodeAssist 给出的付费/当前套餐标识，用作 fetchAvailableModels 的权益；
+	// 免费档不上报，Google 会拒绝。
+	Tier string `json:"tier,omitempty"`
 }
 
 // Valid 检查解密凭据的类型、格式与边界，不以套餐名推断权限。
 func (v Credentials) Valid() bool {
-	return v.ClientID == desktopClientID && clientPattern.MatchString(v.ClientSecret) && len(v.ClientSecret) == 35 && safeString(v.AccessToken, 16384) && safeString(v.RefreshToken, 16384) && safeString(v.Subject, 128) && safeString(v.Email, 320) && safeString(v.Project, 256) && (v.Plan == "" || safeString(v.Plan, 80)) && !v.ExpiresAt.IsZero()
+	return v.ClientID == desktopClientID && clientPattern.MatchString(v.ClientSecret) && len(v.ClientSecret) == 35 && safeString(v.AccessToken, 16384) && safeString(v.RefreshToken, 16384) && safeString(v.Subject, 128) && safeString(v.Email, 320) && safeString(v.Project, 256) && (v.Plan == "" || safeString(v.Plan, 80)) && (v.Tier == "" || safeString(v.Tier, 80)) && !v.ExpiresAt.IsZero()
 }
 
 // AuthorizationURL 使用 PKCE 与随机 state 构造固定 Google 授权地址。
@@ -45,7 +48,7 @@ func (c *Client) token(ctx context.Context, config OAuthConfig, form url.Values,
 	data := []byte(form.Encode())
 	defer clear(data)
 	var value tokenResponse
-	if err := c.read(ctx, tokenURL, data, "", "application/x-www-form-urlencoded", &value); err != nil {
+	if err := c.read(ctx, tokenURL, data, "", "application/x-www-form-urlencoded", &value, nil); err != nil {
 		return err
 	}
 	if !safeString(value.AccessToken, 16384) || value.ExpiresIn < 1 || value.ExpiresIn > 86400 {
@@ -101,7 +104,7 @@ func (c *Client) Identity(ctx context.Context, cred *Credentials) error {
 		Email    string `json:"email"`
 		Verified bool   `json:"verified_email"`
 	}
-	if err := c.read(ctx, userURL, nil, cred.AccessToken, "application/json", &value); err != nil {
+	if err := c.read(ctx, userURL, nil, cred.AccessToken, "application/json", &value, nil); err != nil {
 		return err
 	}
 	if !value.Verified || !safeString(value.ID, 128) || !safeString(value.Email, 320) {

@@ -1,6 +1,7 @@
 import { AppearanceSettings } from "./appearance-settings"
 import { DataDirForm } from "./data-dir-form"
 import { DesktopBehavior } from "./desktop-behavior"
+import { GooglePromptSetting } from "./google-prompt-setting"
 import { ProxyPortSetting } from "./proxy-port-setting"
 import { RequestRetentionSettings } from "./request-retention"
 import { StorageOverview } from "./storage-overview"
@@ -18,6 +19,7 @@ export function SettingsContent({
         <>
           <DesktopBehavior />
           <ProxyPortSetting />
+          <GooglePromptSetting />
           <AppearanceSettings />
         </>
       ) : null}

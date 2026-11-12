@@ -38,7 +38,7 @@ func TestRequestErrorClassification(t *testing.T) {
 				calls++
 				return reply(tt.status, `{"error":"private-upstream-response"}`), nil
 			}))
-			response, err := client.request(context.Background(), tt.endpoint, []byte(`{}`), "private-access-token", "application/json")
+			response, err := client.request(context.Background(), tt.endpoint, []byte(`{}`), "private-access-token", "application/json", nil)
 			if response != nil || err == nil || ErrorCode(err) != tt.code {
 				t.Fatalf("unexpected classification: response=%v error=%v", response != nil, err)
 			}
