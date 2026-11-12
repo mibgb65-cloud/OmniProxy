@@ -198,7 +198,7 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.12 -AssetDirectory releas
 89daea9f chore(release): 准备本地 v2.2.3-beta.12 生产版本
 ```
 
-界面修复提交 `b2e501bb`、版本提交 `89daea9f`；本记录与 CURRENT 的归档提交 `TBD`。
+界面修复提交 `b2e501bb`、版本提交 `89daea9f`；本记录与 CURRENT 的归档提交 `bd1e81ea`。
 未打标签、未推送、未公开发布。
 
 ---

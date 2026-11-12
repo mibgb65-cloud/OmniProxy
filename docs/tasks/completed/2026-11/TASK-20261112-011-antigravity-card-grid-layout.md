@@ -188,7 +188,7 @@ task --force verify                                      → exit 0（VERIFY_EXI
 b2e501bb fix(agents): Antigravity 卡片改为与其它客户端一致的网格卡片
 ```
 
-本记录随实现提交一起提交；归档提交 `TBD`。未打标签、未推送。
+本记录随实现提交一起提交；归档提交 `bd1e81ea`。未打标签、未推送。
 
 ---
 
