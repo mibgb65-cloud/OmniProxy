@@ -190,7 +190,7 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.14 -AssetDirectory releas
 02e2a304 fix(proxy): 标记 Antigravity Chat 请求协议并准备 v2.2.3-beta.14
 ```
 
-修复与版本映射在同一提交；归档提交 `TBD`。未打标签、未推送、未公开发布。
+修复与版本映射在同一提交；归档提交 `4a530c8c`。未打标签、未推送、未公开发布。
 
 ---
 
