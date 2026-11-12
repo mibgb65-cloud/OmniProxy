@@ -195,6 +195,8 @@ Completed
 
 `8aee0628 fix(agent): Antigravity 断开按字段恢复并支持端口改写`
 
+`86462aec feat(agent): 发布 Google 订阅全部模型（含 Claude/GPT-OSS）`
+
 ---
 
 # Result
