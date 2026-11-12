@@ -186,6 +186,8 @@ Completed
 
 `3225476f feat(agent): 接入 Antigravity 桌面端官方网关`
 
+`9fc76a87 fix(proxy): 接受 Antigravity 目录的 Google API Key 头`
+
 ---
 
 # Result
