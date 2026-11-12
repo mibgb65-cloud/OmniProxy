@@ -69,7 +69,9 @@ func (s *Service) RebasePort(ctx context.Context, oldPort, newPort int) (PortReb
 			clear(before.body)
 			continue
 		}
-		if before.revision != expected {
+		// Antigravity 会持续改写自己的设置；端口变化只需替换回环地址，不能因为
+		// userSettings 等字段变化就把用户丢到“手动重新配置”。
+		if before.revision != expected && client != "antigravity" {
 			clear(before.body)
 			fail(client, nil)
 			continue

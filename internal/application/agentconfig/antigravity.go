@@ -1,6 +1,7 @@
 package agentconfig
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -82,6 +83,124 @@ func antigravityFileConfig(body []byte, base, key, model string, port int) ([]by
 		return nil, failure("invalid_config")
 	}
 	return append(encoded, '\n'), nil
+}
+
+// restoreAntigravity 只撤销本应用写入的 gateway 与 models 字段。
+//
+// 桌面端会在连接期间持续改写 userSettings、sidecars 等自己的字段；整文件摘要
+// 变化不能成为拒绝断开的理由，否则用户会被锁在网关模式。识别网关块时只认
+// 本机地址与 openai 协议，用户自行改过的块不覆盖。
+func (s *Service) restoreAntigravity(ctx context.Context, path, ref, currentHash string) ([]Item, error) {
+	data, err := s.store.Get(ref)
+	if err != nil {
+		return nil, failure("backup_unavailable")
+	}
+	defer clear(data)
+	var original backup
+	if json.Unmarshal(data, &original) != nil {
+		return nil, failure("backup_unavailable")
+	}
+	defer clear(original.Body)
+	originalBundle, err := decodeBundle(original.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer originalBundle.clear()
+	current, _, err := s.readClient("antigravity", path)
+	if err != nil {
+		return nil, err
+	}
+	defer clear(current)
+	currentBundle, err := decodeBundle(current)
+	if err != nil {
+		return nil, err
+	}
+	defer currentBundle.clear()
+	base, catalogURL := antigravityGatewayBase(s.port), antigravityCatalogURL(s.port)
+	for index := range currentBundle.Files {
+		body, fileExists, err := mergeAntigravityRestore(currentBundle.Files[index].Body, originalBundle.Files[index], base, catalogURL)
+		if err != nil {
+			return nil, err
+		}
+		currentBundle.Files[index] = backup{Body: body, Exists: fileExists}
+	}
+	encoded, err := encodeBundle(currentBundle)
+	if err != nil {
+		return nil, err
+	}
+	defer clear(encoded)
+	if err := s.writeClient("antigravity", path, encoded, currentHash); err != nil {
+		return nil, err
+	}
+	if err := s.deleteRestoreRecords(ctx, "antigravity", false); err != nil {
+		return nil, err
+	}
+	if err := s.store.Delete(ref); err != nil {
+		return nil, failure("backup_failed")
+	}
+	if err := s.SetEnabled(ctx, "antigravity", false); err != nil {
+		return nil, err
+	}
+	return s.Inspect(ctx)
+}
+
+// mergeAntigravityRestore 把当前文件里的受管字段换回原值；其他字段原样保留。
+func mergeAntigravityRestore(current []byte, original backup, base, catalogURL string) ([]byte, bool, error) {
+	currentConfig := map[string]any{}
+	if len(current) > 0 && strings.TrimSpace(string(current)) != "" {
+		if json.Unmarshal(current, &currentConfig) != nil || currentConfig == nil {
+			return nil, false, failure("invalid_config")
+		}
+	}
+	originalConfig := map[string]any{}
+	if original.Exists && len(original.Body) > 0 {
+		if json.Unmarshal(original.Body, &originalConfig) != nil {
+			return nil, false, failure("backup_unavailable")
+		}
+	}
+	if gateway, ok := currentConfig["gateway"].(map[string]any); ok {
+		if gateway["enabled"] == true && gateway["url"] == base && gateway["wireProtocol"] == "openai" {
+			if value, exists := originalConfig["gateway"]; exists {
+				currentConfig["gateway"] = value
+			} else {
+				delete(currentConfig, "gateway")
+			}
+		}
+	}
+	if models, ok := currentConfig["models"].(map[string]any); ok {
+		originalModels, _ := originalConfig["models"].(map[string]any)
+		if models["listSource"] == catalogURL {
+			if value, exists := originalModels["listSource"]; exists {
+				models["listSource"] = value
+			} else {
+				delete(models, "listSource")
+			}
+		}
+		if value, exists := originalModels["defaultModelId"]; exists {
+			models["defaultModelId"] = value
+		} else {
+			delete(models, "defaultModelId")
+		}
+		// 连接时删掉的内联列表按原样放回；连接期间用户新增的列表不覆盖。
+		if _, exists := models["list"]; !exists {
+			if value, exists := originalModels["list"]; exists {
+				models["list"] = value
+			}
+		}
+		if len(models) == 0 {
+			delete(currentConfig, "models")
+		} else {
+			currentConfig["models"] = models
+		}
+	}
+	if len(currentConfig) == 0 && !original.Exists {
+		return []byte{}, false, nil
+	}
+	encoded, err := json.MarshalIndent(currentConfig, "", "  ")
+	if err != nil {
+		return nil, false, failure("invalid_config")
+	}
+	return append(encoded, '\n'), true, nil
 }
 
 // antigravityConfiguredModel 读取当前设置文件里的默认模型，供预览沿用。

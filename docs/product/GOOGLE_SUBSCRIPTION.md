@@ -107,8 +107,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 接入块为 `gateway: {enabled, url, apiKey, wireProtocol: "openai"}` 与
 `models: {defaultModelId, listSource}`；`listSource` 指向
 `http://127.0.0.1:<端口>/v1/models?format=antigravity`。一键连接会同时写入两个
-文件并加密备份原内容；连接期间删除会遮住远端目录的内联 `models.list`，断开时
-按备份恢复。`gateway` 中用户自行添加的其他字段保留。
+文件并加密备份原内容；连接期间删除会遮住远端目录的内联 `models.list`。断开时
+只撤销本应用写入的 `gateway`／`models` 字段并放回备份中的原值，桌面端在连接
+期间改写的主题、权限等设置保留。`gateway` 中用户自行添加的其他字段保留；
+网关端口变化会同步改写两个文件中的本机地址。
 
 - 模型目录只返回 Google 订阅账号的 Gemini 文本模型，字段为
   `modelId`、`displayName`、`maxTokens`、`maxOutputTokens`、`supportsImages`、

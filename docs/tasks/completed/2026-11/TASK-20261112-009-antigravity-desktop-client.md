@@ -132,12 +132,13 @@ Completed
 - `internal/application/agentconfig`：
   - 新增客户端 `antigravity`，白名单、接入 Key 识别（`LIMIT 14`）、路径
     `~/.gemini/config/config.json` 与 `~/.antigravity/settings.json`。
-  - 双文件 bundle 备份/恢复；`buildAntigravity` 写入
+  - 双文件 bundle 备份；`buildAntigravity` 写入
     `gateway: {enabled, url, apiKey, wireProtocol: "openai"}` 与
     `models: {defaultModelId, listSource}`，保留用户其他字段，删除会遮住远端目录的
-    `models.list`；断开按备份恢复。
+    `models.list`。断开时按字段撤销并放回备份原值，保留桌面端在连接期间改写的
+    `userSettings` 等设置；端口变更通过现有 `RebasePort` 同时改写两个文件。
   - `clientEntries` 只发布 Google 订阅账号的 `gemini-*` 模型；`ConfiguredModels`
-    报告写入的默认模型；端口变更通过现有 `RebasePort` 同时改写两个文件。
+    报告写入的默认模型。
   - 设置文件不存在时返回 `client_not_found`，避免创建桌面端不会读取的文件。
 - `internal/core/modelcatalog`：新增 `AntigravityJSON`，输出
   `{"list":[{modelId,displayName,maxTokens,maxOutputTokens,supportsImages,supportsThinking}]}`，
@@ -157,7 +158,8 @@ Completed
 
 - `gofmt -l main.go internal`：clean。
 - `go vet ./internal/application/agentconfig ./internal/core/proxy ./internal/core/modelcatalog`：通过。
-- `go test . ./internal/... -count=1`：全部通过（52 个包）。
+- `go test . ./internal/... -count=1`：全部通过（52 个包）；覆盖配置生命周期、
+  桌面端改写 `userSettings` 后的字段级断开、端口改写、目录形状与请求规整。
 - `pnpm typecheck`、`pnpm lint`（2 个既有 Fast Refresh warning）、`pnpm format:check`：通过。
 - `pnpm vitest run src/features/gateway --maxWorkers=4`：30 文件／198 项通过。
 - `pnpm test -- --maxWorkers=4`：147 文件／896 项通过。

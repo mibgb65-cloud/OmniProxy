@@ -35,7 +35,9 @@ func (s *Service) Inspect(ctx context.Context) ([]Item, error) {
 			var hash string
 			if s.db.QueryRowContext(ctx, `SELECT applied_hash FROM agent_backups WHERE client=?`, client).Scan(&hash) == nil {
 				i.CanRestore = true
-				if hash != i.Revision {
+				// Antigravity 会持续改写自己的设置；整文件变化不等于受管字段漂移，
+				// 断开时按字段撤销，因此不在这里阻断恢复。
+				if hash != i.Revision && client != "antigravity" {
 					i.ErrorCode = "config_changed"
 				}
 				if client == "codex" && s.checkCatalogFile(ctx) != nil {

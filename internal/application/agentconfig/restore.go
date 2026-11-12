@@ -24,6 +24,11 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 	}
 	revision := digest(body, exists)
 	defer clear(body)
+	// 桌面端会持续改写自己的 userSettings；整文件摘要一变就拒绝恢复会把用户卡在
+	// 网关模式。这里只撤销本应用写入的字段，保留用户在连接期间的其它修改。
+	if client == "antigravity" {
+		return s.restoreAntigravity(ctx, path, ref, revision)
+	}
 	if revision != hash {
 		return nil, failure("config_changed")
 	}

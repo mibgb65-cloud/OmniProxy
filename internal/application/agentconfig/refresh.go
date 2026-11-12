@@ -17,6 +17,11 @@ func (s *Service) RefreshCatalog(ctx context.Context) error {
 	defer s.mu.Unlock()
 	var result error
 	for _, client := range Clients() {
+		// Antigravity 的模型目录由远端 listSource 实时提供，配置文件只存默认模型；
+		// 它还会持续改写 userSettings，不能按整文件摘要刷新。
+		if client == "antigravity" {
+			continue
+		}
 		var expected string
 		err := s.db.QueryRowContext(ctx, `SELECT applied_hash FROM agent_backups WHERE client=?`, client).Scan(&expected)
 		if err == nil {
