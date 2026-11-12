@@ -488,9 +488,11 @@ PASS（exit 0）
 ## Commit
 
 ```text
-<待回填> feat(google): 对齐 Google 订阅 Agent 请求形态与拒绝处理
-<待回填> docs(tasks): 归档 TASK-20261112-002 并回填提交
+d4af73e9 feat(google): 对齐 Google 订阅 Agent 请求形态与拒绝处理
 ```
+
+未推送；工作区仅保留本次任务之前的未跟踪记录
+（`docs/tasks/completed/2026-10/TASK-20261029-010-subq-provider.md`），未改动。
 
 ---
 
