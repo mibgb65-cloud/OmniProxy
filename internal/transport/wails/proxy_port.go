@@ -71,13 +71,34 @@ func (s *AppService) proxyPortState() ProxyPortState {
 		DefaultPort: profile.DefaultProxyPort(s.prof.Kind),
 		EnvLocked:   profile.ProxyPortEnvOverride(),
 	}
-	if s.gateway != nil && s.gateway.Info().Runtime.State == "running" {
+	owned := s.listeningPort()
+	if owned != 0 {
+		state.Running = true
 		// 自己持有的端口当然无法再被探测到，但它是可用的。
-		state.Running, state.Available = true, true
-		return state
+		if owned == state.Port {
+			state.Available = true
+			return state
+		}
 	}
 	state.Available = netport.Available(state.Port)
 	return state
+}
+
+// listeningPort 返回本进程网关正在监听的端口；未运行时返回 0。
+//
+// 该端口由当前进程持有，netport.Available 对它必然返回 false。任何「先探测再换端口」
+// 的判断都必须先排除它，否则会把本应用自己正在使用的端口当成被其它程序占用。
+// 只有 Runtime.State 为 running 才代表监听器真的持有端口：stopping／error／stopped
+// 时保留的 Port 只是配置值，不能当作已持有。
+func (s *AppService) listeningPort() int {
+	if s.gateway == nil {
+		return 0
+	}
+	runtime := s.gateway.Info().Runtime
+	if runtime.State != "running" {
+		return 0
+	}
+	return runtime.Port
 }
 
 // applyProxyPort 解析目标端口、避让冲突、持久化偏好并同步运行时。
@@ -94,7 +115,9 @@ func (s *AppService) applyProxyPort(ctx context.Context, requested int) (ProxyPo
 	if target < 1 || target > 65535 {
 		return update, fmt.Errorf("gateway: invalid port %d", requested)
 	}
-	if !netport.Available(target) {
+	// 本进程正在监听的端口不能拿去做「能否再监听」的探测：那必然失败，而它其实可用。
+	owned := s.listeningPort()
+	if owned != target && !netport.Available(target) {
 		next, err := netport.NextAvailable(target, target+proxyPortSearchSpan)
 		if err != nil {
 			return update, fmt.Errorf("gateway: port %d is unavailable: %w", target, err)
@@ -102,7 +125,7 @@ func (s *AppService) applyProxyPort(ctx context.Context, requested int) (ProxyPo
 		target, update.Adjusted = next, true
 	}
 	old := s.prof.ProxyPort
-	running := s.gateway != nil && s.gateway.Info().Runtime.State == "running"
+	running := owned != 0
 	// 端口未变化时不打断在途请求：运行中的同一个端口本来就是我们自己持有的。
 	if old == target && running {
 		update.State = s.proxyPortState()

@@ -3,8 +3,26 @@ package wails
 import (
 	"testing"
 
+	"omniproxy/internal/application/gateway"
+	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/platform/profile"
 )
+
+// runningGatewayService 让测试网关在真实回环端口上监听，返回服务与该端口。
+func runningGatewayService(t *testing.T) (*AppService, int) {
+	t.Helper()
+	service, _ := startupGatewayService(t)
+	port, listener := occupyPort(t)
+	if err := listener.Close(); err != nil {
+		t.Fatal(err)
+	}
+	service.gateway = gateway.New(proxy.Options{Port: port}, nil, nil, nil)
+	service.prof.ProxyPort = port
+	if _, err := service.GatewayStart(); err != nil {
+		t.Fatalf("GatewayStart error: %v", err)
+	}
+	return service, port
+}
 
 func TestProxyPortReportsProfileDefaults(t *testing.T) {
 	service, prof := newTestService(t)
@@ -145,6 +163,61 @@ func TestSetProxyPortRejectsEnvironmentLockedPort(t *testing.T) {
 	}
 	if !state.EnvLocked {
 		t.Fatal("state does not report the environment lock")
+	}
+}
+
+// TestSetProxyPortKeepsCurrentRunningPort 覆盖「软件开着时保存它自己正在用的端口」：
+// 该端口由本进程持有，探测必然失败，但不能因此避让到下一个端口。
+func TestSetProxyPortKeepsCurrentRunningPort(t *testing.T) {
+	service, port := runningGatewayService(t)
+	before := service.gateway.Info().Runtime
+	update, err := service.SetProxyPort(port)
+	if err != nil {
+		t.Fatalf("SetProxyPort error: %v", err)
+	}
+	if update.Adjusted {
+		t.Fatalf("saving port %d was adjusted away to %d", port, update.State.Port)
+	}
+	if update.Requested != port || update.State.Port != port {
+		t.Fatalf("update = %+v, want port %d", update, port)
+	}
+	if !update.State.Running || !update.State.Available {
+		t.Fatalf("state = %+v, want running and available", update.State)
+	}
+	runtime := service.gateway.Info().Runtime
+	if runtime.State != "running" || runtime.Port != port {
+		t.Fatalf("runtime = %+v, want running on %d", runtime, port)
+	}
+	// 端口没有变化就不该重启监听器，在途请求不会被取消。
+	if runtime.StartedAt != before.StartedAt {
+		t.Fatalf("listener restarted: startedAt %q -> %q", before.StartedAt, runtime.StartedAt)
+	}
+}
+
+// TestProxyPortReportsOwnPortAvailableWhileRunning 断言状态栏把本进程持有的端口报为可用。
+func TestProxyPortReportsOwnPortAvailableWhileRunning(t *testing.T) {
+	service, port := runningGatewayService(t)
+	state, err := service.ProxyPort()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !state.Running || !state.Available || state.Port != port {
+		t.Fatalf("state = %+v, want running and available on %d", state, port)
+	}
+}
+
+// TestSetProxyPortStillAvoidsForeignOccupiedPort 防止「自己的端口不探测」被放宽成「永不探测」：
+// 被其它程序占用的端口在网关运行时仍然必须避让。
+func TestSetProxyPortStillAvoidsForeignOccupiedPort(t *testing.T) {
+	service, _ := runningGatewayService(t)
+	occupied, listener := occupyPort(t)
+	defer listener.Close()
+	update, err := service.SetProxyPort(occupied)
+	if err != nil {
+		t.Fatalf("SetProxyPort error: %v", err)
+	}
+	if !update.Adjusted || update.State.Port == occupied {
+		t.Fatalf("occupied port %d was accepted: %+v", occupied, update)
 	}
 }
 
