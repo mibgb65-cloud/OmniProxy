@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261112-010](../tasks/completed/2026-11/TASK-20261112-010-build-local-v2.2.3-beta.11.md) 已产出 `v2.2.3-beta.11` Windows amd64 生产安装包，包含 Antigravity 桌面端官方 Enterprise Gateway 接入与 Google 订阅全部模型（Gemini／Claude／GPT-OSS，TASK-20261112-009），无新增迁移。版本提交 `待回填`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,715,162 bytes，SHA256 `8354c351a9acc0f68608c258574ab7024ca5247d17d715eb84dcc8710ca28af8`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖更新，再连接 Antigravity 卡片并重启客户端验收。
+
 已实现（待真机）：[TASK-20261112-009](../tasks/completed/2026-11/TASK-20261112-009-antigravity-desktop-client.md)，Antigravity 桌面端通过官方 Enterprise Gateway（`wireProtocol: "openai"`）一键接入本地网关：同时写入 `~/.gemini/config/config.json`（2.30+）与 `~/.antigravity/settings.json`（≤2.29），`models.listSource` 指向 `/v1/models?format=antigravity`，目录发布 Google 订阅账号实际提供的全部文本模型（Gemini、Claude、GPT-OSS）；连接期间不使用 Google 登录，断开按加密备份恢复。桌面端请求复用现有 Google 订阅多账号路由、额度冷却与故障切换，仅对该客户端剥离 `reasoning_effort`／`service_tier`／`metadata`／`store`。Go 全量包测试、前端 typecheck／lint 通过；当前环境未安装桌面端，真机请求验证待用户重启客户端后确认。
 
 已核对：[TASK-20261112-008](../tasks/completed/2026-11/TASK-20261112-008-tool-count-limit-audit.md) 其余五个适配器的 128 工具上限：StepFun（官方 Tool Call 文档写明 “Up to 128 tools are allowed.”）与 Google 订阅（Gemini 函数声明上限 128）**有官方依据，保留**；Kimi、MiniMax、MiMo 三家**没有任何官方或实测依据**，但本机只有 3 个 Google 订阅账号、没有这三家的 Key，本轮无法像 River 那样用真实请求核对，暂未改动。建议后续按 River 方式移除数量分支、保留形状校验并补测试与文档，待有账号时再补一次上游探测。
