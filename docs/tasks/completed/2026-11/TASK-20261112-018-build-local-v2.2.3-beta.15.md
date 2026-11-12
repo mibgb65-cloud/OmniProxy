@@ -185,7 +185,7 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.15 -AssetDirectory releas
 042d00be fix(gateway): 放宽 Antigravity 响应头与请求时限并准备 v2.2.3-beta.15
 ```
 
-归档提交 `TBD`。未打标签、未推送、未公开发布。
+归档提交 `1bad6f6f`。未打标签、未推送、未公开发布。
 
 ---
 
