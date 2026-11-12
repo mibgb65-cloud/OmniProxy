@@ -245,7 +245,7 @@ POST https://api.river.ai/v1/chat/completions  176 个 function 工具
 ## Commit
 
 ```text
-<见提交后回填>
+4a62be80 fix(river): 不再按 128 个工具上限拒绝请求
 ```
 
 ---
