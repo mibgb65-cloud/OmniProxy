@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -197,11 +197,27 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.11 -AssetDirectory releas
 
 ---
 
+# Deviations
+
+- 未调用 `scripts/build-release.ps1`（会强制 `task verify`），沿用本地 Beta 的版本映射 +
+  `task --force package` + 两项校验脚本流程，与 beta.6–beta.10 一致。
+- 版本映射脚本产生的 CRLF 被还原为 LF，避免与 `.gitattributes` 冲突。
+- 未执行 TASK-20261112-009 遗留的真机请求验证：本机没有 Antigravity 桌面端，验证由用户
+  覆盖安装后完成。
+
+---
+
 # Git
 
 ## Commit
 
-（构建提交与归档提交待回填）
+```text
+fbaec345 chore(release): 准备本地 v2.2.3-beta.11 生产版本
+```
+
+Antigravity 实现提交 `3225476f`／`9fc76a87`／`8aee0628`／`86462aec`、回填提交
+`ceaa0a36`／`e2156308`／`bcee5e75`／`6087041e`、版本提交 `fbaec345`；本记录与 CURRENT 的
+归档提交 `TBD`。未打标签、未推送、未公开发布。
 
 ---
 
@@ -216,4 +232,4 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.11 -AssetDirectory releas
 
 # Completed
 
-（提交后填写）
+2026-11-12 20:40
