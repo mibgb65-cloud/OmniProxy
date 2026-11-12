@@ -39,6 +39,9 @@ func parseChatRequest(body []byte, maxBodyBytes, maxMessageBytes int) (Request, 
 		return Request{}, Failure("invalid_request", 400)
 	}
 	var request Request
+	// Chat 协议的客户端可能走 ParseProtocolRequest，也可能走 ParseAntigravityRequest；
+	// 协议必须在解析层统一填好，否则转发层会把它当成未知协议。
+	request.Protocol = "chat"
 	if err := json.Unmarshal(fields["model"], &request.Model); err != nil || !routing.ValidModel(request.Model) {
 		return Request{}, Failure("invalid_model", 400)
 	}

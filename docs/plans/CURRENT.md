@@ -2,9 +2,13 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 桌面端连接后发送消息报 `400 unsupported_model`：桌面端把目录里的 `gemini-4-argon-high` 折叠成家族名 `gemini-4-argon` 加档位再发送，网关按 ID 精确匹配直接拒绝，桌面端显示 “Agent terminated due to error”。现在精确匹配失败后会按同提供商的目录变体解析家族名（优先客户端档位，其次 high／medium／low，最后接受唯一变体，精确 ID 不改写，未知家族仍 400），同时推理档位不再在路由前被剥离——先用于选型，路由完成后、转发前才从正文移除。实现提交 `c19339b8`；`task --force verify` exit 0（147 文件／898 项前端、Go 全部包、Windows production 构建）。
+已修复：[TASK-20261112-015](../tasks/completed/2026-11/TASK-20261112-015-antigravity-protocol-marker.md) Antigravity 连接后仍然失败的第二个原因：桌面端 Chat 正文走 `ParseAntigravityRequest` → `parseChatRequest`，那里只填了 model／stream／effort，没有标记 `Protocol`，转发层因此把它当成未知协议，任意 Google 模型都返回 `400 unsupported_protocol`（本地 `curl` 已复现）。现在解析层统一标记 `chat`。在隔离实例（生产数据目录副本、端口 3011，未触碰运行中的应用）上验证：`gemini-4-argon` → `-high`、`gemini-4-argon` + medium → `-medium`、`claude-opus-4-6` → `-thinking`、`gpt-oss-120b` → `-medium`、`gemini-3.8-flash` + low 流式全部 200；一次 `-medium` 因上游 30 秒超时返回 502，重试成功。
 
-本地构建：[TASK-20261112-014](../tasks/completed/2026-11/TASK-20261112-014-build-local-v2.2.3-beta.13.md) 已产出 `v2.2.3-beta.13` Windows amd64 生产安装包，包含上述 Antigravity 修复，无新增迁移。版本提交 `dc88968a`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,725,199 bytes，SHA256 `b9f6c09e6bcf9dd28d9caa42d1ffabe5bb5e27cb17899210b74bf4bed83bd767`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.12。
+已修复：[TASK-20261112-013](../tasks/completed/2026-11/TASK-20261112-013-antigravity-family-model-resolution.md) Antigravity 桌面端连接后发送消息报 `400 unsupported_model`：桌面端把目录里的 `gemini-4-argon-high` 折叠成家族名 `gemini-4-argon` 加档位再发送，网关按 ID 精确匹配直接拒绝。现在精确匹配失败后会按同提供商的目录变体解析家族名（优先客户端档位，其次 high／medium／low，最后接受唯一变体，精确 ID 不改写，未知家族仍 400），同时推理档位不再在路由前被剥离。实现提交 `c19339b8`。
+
+本地构建：[TASK-20261112-016](../tasks/completed/2026-11/TASK-20261112-016-build-local-v2.2.3-beta.14.md) 已产出 `v2.2.3-beta.14` Windows amd64 生产安装包，包含上述两项 Antigravity 修复，无新增迁移。版本提交 `待回填`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,727,670 bytes，SHA256 `5f913efb24141c9e1a89d38ec4761998cc8fd261feb10cd589867abc2c40df97`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.13。
+
+本地构建（已被 beta.14 取代）：[TASK-20261112-014](../tasks/completed/2026-11/TASK-20261112-014-build-local-v2.2.3-beta.13.md) 曾产出 `v2.2.3-beta.13` Windows amd64 生产安装包（家族模型名解析），安装器 20,725,199 bytes，SHA256 `b9f6c09e6bcf9dd28d9caa42d1ffabe5bb5e27cb17899210b74bf4bed83bd767`；用户已安装，因协议标记缺失仍失败，由 beta.14 取代。
 
 本地构建：[TASK-20261112-012](../tasks/completed/2026-11/TASK-20261112-012-build-local-v2.2.3-beta.12.md) 已产出 `v2.2.3-beta.12` Windows amd64 生产安装包，把网关页的 Antigravity 入口从整行横幅改为与其它客户端一致的网格卡片（TASK-20261112-011，`b2e501bb`）：品牌图标 + 分组标题 + 描述 + 单条客户端条目（状态徽标按 Antigravity 自身语义显示「已连接本地网关／配置需要检查／尚未配置」，安装状态「已安装／未安装」）+ 分隔线下的整宽操作按钮；提示与 Google 登录说明精简以适配更窄列宽，不再显示拉长卡片的重复模型摘要。仅前端版式与文案，无迁移、无后端变化。版本提交 `89daea9f`；生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,717,553 bytes，SHA256 `8aecc54d75eaabdf02dc1e60e5ee805c20e9725946e3e873ca393856c93807d1`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.11。
 

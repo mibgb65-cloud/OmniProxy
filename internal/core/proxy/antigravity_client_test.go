@@ -77,6 +77,23 @@ func TestStripClientEffortRunsAfterRouting(t *testing.T) {
 	}
 }
 
+func TestAntigravityParseKeepsChatProtocol(t *testing.T) {
+	body := []byte(`{"model":"gemini-4-argon","messages":[{"role":"user","content":"hi"}],"reasoning_effort":"high","stream":true}`)
+	request, err := ParseClientRequest("antigravity", "/v1/chat/completions", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.Protocol != "chat" {
+		t.Fatalf("antigravity protocol = %q，转发层会判定为不支持", request.Protocol)
+	}
+	if request.Effort != "high" || !request.Stream {
+		t.Fatalf("effort/stream lost: %q/%v", request.Effort, request.Stream)
+	}
+	if parsed, err := ParseRequest(body); err != nil || parsed.Protocol != "chat" {
+		t.Fatalf("plain chat protocol = %q, %v", parsed.Protocol, err)
+	}
+}
+
 func TestAntigravityModelFormatAccepted(t *testing.T) {
 	if !validModelQuery("/v1/models", "format=antigravity") {
 		t.Fatal("antigravity catalog format rejected")
