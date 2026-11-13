@@ -39,7 +39,8 @@ func (s *Service) Requests(ctx context.Context, q RequestQuery) (RequestPage, er
 	if s.db.QueryRowContext(ctx, `SELECT max_records FROM request_retention WHERE id=1`).Scan(&page.MaxRecords) != nil {
 		return page, ErrUnavailable
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT `+requestColumns+` FROM request_records r LEFT JOIN accounts a ON a.id=r.account_id WHERE `+where+` ORDER BY r.started_at DESC,r.id DESC LIMIT ? OFFSET ?`, append(args, q.Limit, q.Offset)...)
+	// 进行中的记录先排：长请求还没结束时，不会被随后完成的请求挤到中间。
+	rows, err := s.db.QueryContext(ctx, `SELECT `+requestColumns+` FROM request_records r LEFT JOIN accounts a ON a.id=r.account_id WHERE `+where+` ORDER BY CASE WHEN r.state='pending' THEN 0 ELSE 1 END,r.started_at DESC,r.id DESC LIMIT ? OFFSET ?`, append(args, q.Limit, q.Offset)...)
 	if err != nil {
 		return page, ErrUnavailable
 	}

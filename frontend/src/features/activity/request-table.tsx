@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { CircleHelp } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { cn } from "../../lib/utils"
@@ -59,6 +60,10 @@ export function RequestTable({
 }) {
   const { t, i18n } = useTranslation()
   const language = i18n.resolvedLanguage
+  // 进行中的记录固定在上半区，已结束的在下半区；各组内部保持接口给出的先后顺序。
+  const pending = items.filter((item) => item.state === "pending")
+  const finished = items.filter((item) => item.state !== "pending")
+  const rows = [...pending, ...finished]
   return (
     // 外层只负责圆角裁剪与高度分配，滚动交给内层视口：页面不会被 50 行撑出窗口。
     <div className={cn("flex min-h-0 flex-col overflow-hidden rounded-xl border", className)}>
@@ -77,7 +82,7 @@ export function RequestTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => {
+            {rows.map((item, index) => {
               const agentKey = requestAgentTitleKey(item.client)
               const cachedHit = formatCachedHit(
                 item.cachedInputTokens,
@@ -86,106 +91,119 @@ export function RequestTable({
                 item.inputKnown,
               )
               return (
-                <tr key={item.id} className="hover:bg-muted/20 border-t">
-                  <td className="px-4 py-3">
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-xs"
-                      aria-label={t("activity.openDetails", { id: item.id })}
-                      onClick={() => onSelect(item.id)}
-                    >
-                      {requestTime(item.startedAt)}
-                    </Button>
-                    <p className="text-muted-foreground mt-1 font-mono text-[10px]">
-                      {item.id.slice(0, 12)}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs">
-                    <Tooltip content={item.model || item.inputModel}>
-                      <span className="block max-w-48 truncate">
-                        {item.model || item.inputModel || "—"}
-                      </span>
-                    </Tooltip>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs">{item.effort || "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="block max-w-32 truncate text-xs">
-                      {agentKey ? t(agentKey) : "—"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="block max-w-52 truncate text-xs">
-                      {item.email || item.accountName || t("activity.noAccount")}
-                    </span>
-                    {item.workspaceId ? (
-                      <Tooltip content={item.workspaceId}>
-                        <span className="text-muted-foreground font-mono text-[10px]">
-                          {item.workspaceId.slice(0, 8)}…
+                <Fragment key={item.id}>
+                  {index === pending.length && pending.length > 0 && finished.length > 0 ? (
+                    // 两组之间的分隔：进行中的请求随刷新仍停留在分隔线之上。
+                    <tr className="bg-muted/30 border-t" data-testid="finished-divider">
+                      <td
+                        colSpan={columns.length}
+                        className="text-muted-foreground px-4 py-2 text-[11px] font-medium tracking-wide"
+                      >
+                        {t("activity.finishedGroup")}
+                      </td>
+                    </tr>
+                  ) : null}
+                  <tr className="hover:bg-muted/20 border-t">
+                    <td className="px-4 py-3">
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-xs"
+                        aria-label={t("activity.openDetails", { id: item.id })}
+                        onClick={() => onSelect(item.id)}
+                      >
+                        {requestTime(item.startedAt)}
+                      </Button>
+                      <p className="text-muted-foreground mt-1 font-mono text-[10px]">
+                        {item.id.slice(0, 12)}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">
+                      <Tooltip content={item.model || item.inputModel}>
+                        <span className="block max-w-48 truncate">
+                          {item.model || item.inputModel || "—"}
                         </span>
                       </Tooltip>
-                    ) : null}
-                    {item.accountDeleted ? (
-                      <span className="text-muted-foreground block text-[10px]">
-                        {t("activity.deleted")}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">{item.effort || "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className="block max-w-32 truncate text-xs">
+                        {agentKey ? t(agentKey) : "—"}
                       </span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs whitespace-nowrap ${item.state === "success" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : item.state === "failed" ? "bg-red-500/10 text-red-600 dark:text-red-400" : "bg-muted text-muted-foreground"}`}
-                    >
-                      {t(stateLabel(item.state))}
-                    </span>
-                    {(item.attemptCount ?? 0) > 1 ? (
-                      <p className="text-muted-foreground mt-1 text-xs">
-                        {t("failover.switched", { count: (item.attemptCount ?? 1) - 1 })}
-                      </p>
-                    ) : null}
-                    {!item.usageComplete ? (
-                      <p className="text-muted-foreground mt-1 text-[10px]">
-                        {t(
-                          item.inputKnown || item.outputKnown
-                            ? "activity.partial"
-                            : "activity.unknown",
-                        )}
-                      </p>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs tabular-nums">
-                    {item.inputKnown ? formatTokens(item.inputTokens, language) : "—"}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs tabular-nums">
-                    {item.outputKnown ? formatTokens(item.outputTokens, language) : "—"}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs tabular-nums">
-                    {cachedHit === "—" ? (
-                      "—"
-                    ) : (
-                      <Tooltip
-                        content={t("activity.cachedDetail", {
-                          cached: formatTokens(item.cachedInputTokens, language),
-                          input: formatTokens(item.inputTokens, language),
-                        })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="block max-w-52 truncate text-xs">
+                        {item.email || item.accountName || t("activity.noAccount")}
+                      </span>
+                      {item.workspaceId ? (
+                        <Tooltip content={item.workspaceId}>
+                          <span className="text-muted-foreground font-mono text-[10px]">
+                            {item.workspaceId.slice(0, 8)}…
+                          </span>
+                        </Tooltip>
+                      ) : null}
+                      {item.accountDeleted ? (
+                        <span className="text-muted-foreground block text-[10px]">
+                          {t("activity.deleted")}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs whitespace-nowrap ${item.state === "success" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : item.state === "failed" ? "bg-red-500/10 text-red-600 dark:text-red-400" : "bg-muted text-muted-foreground"}`}
                       >
-                        <span className="cursor-default">{cachedHit}</span>
-                      </Tooltip>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
-                    {formatCost(item.costMin, item.costMax, item.costKnown)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
-                    {formatSpeed(item)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
-                    {formatFirstToken(item.firstTokenMs, item.state)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
-                    {item.state === "pending" || item.errorCode === "process_interrupted"
-                      ? "—"
-                      : `${item.latencyMs} ms`}
-                  </td>
-                </tr>
+                        {t(stateLabel(item.state))}
+                      </span>
+                      {(item.attemptCount ?? 0) > 1 ? (
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          {t("failover.switched", { count: (item.attemptCount ?? 1) - 1 })}
+                        </p>
+                      ) : null}
+                      {!item.usageComplete ? (
+                        <p className="text-muted-foreground mt-1 text-[10px]">
+                          {t(
+                            item.inputKnown || item.outputKnown
+                              ? "activity.partial"
+                              : "activity.unknown",
+                          )}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums">
+                      {item.inputKnown ? formatTokens(item.inputTokens, language) : "—"}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums">
+                      {item.outputKnown ? formatTokens(item.outputTokens, language) : "—"}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums">
+                      {cachedHit === "—" ? (
+                        "—"
+                      ) : (
+                        <Tooltip
+                          content={t("activity.cachedDetail", {
+                            cached: formatTokens(item.cachedInputTokens, language),
+                            input: formatTokens(item.inputTokens, language),
+                          })}
+                        >
+                          <span className="cursor-default">{cachedHit}</span>
+                        </Tooltip>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
+                      {formatCost(item.costMin, item.costMax, item.costKnown)}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
+                      {formatSpeed(item)}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap tabular-nums">
+                      {formatFirstToken(item.firstTokenMs, item.state)}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
+                      {item.state === "pending" || item.errorCode === "process_interrupted"
+                        ? "—"
+                        : `${item.latencyMs} ms`}
+                    </td>
+                  </tr>
+                </Fragment>
               )
             })}
           </tbody>

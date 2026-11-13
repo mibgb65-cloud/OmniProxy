@@ -51,6 +51,7 @@ export const activityZh = {
   "activity.failedState": "失败",
   "activity.cancelled": "已取消",
   "activity.pending": "进行中",
+  "activity.finishedGroup": "已结束",
   "activity.deleted": "账号已删除",
   "activity.details": "请求详情",
   "activity.openDetails": "查看请求 {{id}}",

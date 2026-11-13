@@ -52,6 +52,7 @@ export const activityEn = {
   "activity.failedState": "Failed",
   "activity.cancelled": "Cancelled",
   "activity.pending": "In progress",
+  "activity.finishedGroup": "Finished",
   "activity.deleted": "Account deleted",
   "activity.details": "Request details",
   "activity.openDetails": "View request {{id}}",
