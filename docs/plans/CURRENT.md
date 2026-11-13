@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261113-007](../tasks/active/TASK-20261113-007-antigravity-image-input.md) Antigravity 发图片被本地 `400 unsupported_content` 拒绝：整形层只接受纯文本 part，用户消息里的 `image_url` 直接失败。现在用户消息的 `data:` base64 图片转成上游 `inlineData`（白名单 PNG／JPEG／WebP／GIF／HEIC／HEIF，单图 16 MiB），文本与图片并存；远程 URL、非白名单格式与 system／assistant／工具结果里的图片仍明确失败。隔离实例真实请求：非流式与流式各一次 200，1x1 PNG 被上游描述出来，证明图片真的到达模型。
+
 本地构建：[TASK-20261113-006](../tasks/completed/2026-11/TASK-20261113-006-build-local-v2.2.3-beta.17.md) 已产出 `v2.2.3-beta.17` Windows amd64 生产安装包，包含 Google 订阅账号轮换设置（TASK-20261113-005，`40f1f92a`，迁移 047）与变体型号档位优先（TASK-20261113-004，`97d15cdb`）。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,745,659 bytes，SHA256 `a4147c27e2071d6191d3c705f878288efc59657395a07561f52ee0d67fdba637`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.16。
 
 已修复：[TASK-20261113-004](../tasks/completed/2026-11/TASK-20261113-004-antigravity-variant-effort-authority.md) Antigravity 选择 `gemini-4-hydrogen-high` 时「推理等级」显示 `low`：桌面端把变体型号当模型发送，同时又带一个档位字段，旧实现用字段值覆盖了型号本身的档位。现在目录确认型号是档位变体时以型号为准（并从正文移除矛盾的档位字段），显示与上游 `thinkingLevel` 都是 high。

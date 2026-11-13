@@ -35,7 +35,11 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   `claude-sonnet-4-6`、`gpt-oss-120b-medium`；保留已出现的 Sonnet thinking ID 兼容。
   显示名中的 Thinking 不代表模型 ID 含此后缀；未知第三方型号仍显示待接入。
 - 订阅支持 Responses／Messages 的文本／函数工具转换，先读取完整上游结果再编码
-  JSON／SSE；Chat 保留原生增量输出。图片／语音、多模态及不支持选项明确失败。
+  JSON／SSE；Chat 保留原生增量输出。用户消息里的内联图片（`data:` base64，PNG／JPEG／
+  WebP／GIF／HEIC／HEIF，单图 base64 上限 16 MiB）转换为上游 `inlineData`，与文本同一条
+  消息时都保留；Chat 与 Responses／Messages 三条协议都走同一整形层。语音、视频、远程
+  图片 URL（上游不代为下载）、非白名单格式，以及出现在 system／assistant／工具结果里的
+  图片仍明确失败，不静默丢弃或降级成文本。
 - Gemini 函数工具通过 `parametersJsonSchema` 传递完整 JSON Schema，保留 Claude Code
   自带工具的 `$schema`、`exclusiveMinimum`、`additionalProperties` 等定义与约束；
   不再误放进受限的 `parameters` OpenAPI Schema，也不通过删除约束规避错误。

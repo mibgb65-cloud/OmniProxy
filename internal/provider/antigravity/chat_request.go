@@ -71,13 +71,19 @@ func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) 
 	names := map[string]string{}
 	firstUser := ""
 	for _, message := range messages {
-		text, err := textContent(message.Content)
+		var text string
+		parts := []object{}
+		if message.Role == "user" {
+			// 用户消息可以带内联图片：文本与 inlineData 都要保留。
+			text, parts, err = userParts(message.Content)
+		} else {
+			text, err = textContent(message.Content)
+			if text != "" {
+				parts = append(parts, object{"text": text})
+			}
+		}
 		if err != nil {
 			return payload{}, err
-		}
-		parts := []object{}
-		if text != "" {
-			parts = append(parts, object{"text": text})
 		}
 		switch message.Role {
 		case "system", "developer":
