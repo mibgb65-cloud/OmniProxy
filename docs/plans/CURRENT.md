@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261113-012](../tasks/active/TASK-20261113-012-build-local-v2.2.3-beta.20.md) 已产出 `v2.2.3-beta.20` Windows amd64 生产安装包，包含实测有效的变体型号档位修复（TASK-20261113-011，`338261e9`），并继承 beta.19 的 Google 卡片瘦身、Antigravity 内联图片与 Google 轮换设置（迁移 047）。安装器 20,761,087 bytes，SHA256 `e1754bfedb5e4104e4e870017c5a3e70b951908c3cabe8b71ab15f5a5549554c`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 beta.18。
+
 已修复：[TASK-20261113-011](../tasks/active/TASK-20261113-011-variant-effort-without-base-model.md) 上一轮的「型号档位优先」在真实目录下没生效：它依赖目录折叠后的 `Metadata.EffortModels` 映射，而 Google 只发布变体（`gemini-4-hydrogen-high` 等）、没有基础型号 `gemini-4-hydrogen`，折叠因此不会发生，判定恒为假。现在折叠映射不可用时改用同前缀兄弟档位确认（同一前缀下至少两个已知档位），型号后缀即档位；只有一个后缀时保留客户端档位。隔离实例用真实目录复现并验证：`gemini-4-hydrogen-xhigh` + `reasoning_effort: low` → 记录与下发都是 `xhigh`。
 
 本地构建：[TASK-20261113-010](../tasks/completed/2026-11/TASK-20261113-010-build-local-v2.2.3-beta.19.md) 已产出 `v2.2.3-beta.19` Windows amd64 生产安装包，一次性交付 Google 卡片瘦身（`71c97f8c`）、Antigravity 内联图片（`0b55d05d`）、Google 轮换设置（`40f1f92a`，迁移 047）与型号档位修复（`97d15cdb`）。安装器 20,755,171 bytes，SHA256 `f3dbe97bbb4e06eb8bda5511414847b32511c4bfd73900e2eb72c1ef3fbae4d5`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。
