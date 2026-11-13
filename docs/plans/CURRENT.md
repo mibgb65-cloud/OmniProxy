@@ -2,9 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261113-008](../tasks/active/TASK-20261113-008-build-local-v2.2.3-beta.18.md) 已产出 `v2.2.3-beta.18` Windows amd64 生产安装包，包含 Antigravity 内联图片修复（TASK-20261113-007，`0b55d05d`），并沿用 beta.17 的 Google 轮换设置与型号档位修复。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,753,619 bytes，SHA256 `05d5773b45c2b9e2b1d0b43b6ab02652bc9d860904659ba16d75f9d29887f270`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布。
+本地构建：[TASK-20261113-008](../tasks/completed/2026-11/TASK-20261113-008-build-local-v2.2.3-beta.18.md) 已产出 `v2.2.3-beta.18` Windows amd64 生产安装包，包含 Antigravity 内联图片修复（TASK-20261113-007，`0b55d05d`），并沿用 beta.17 的 Google 轮换设置与型号档位修复。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,753,619 bytes，SHA256 `05d5773b45c2b9e2b1d0b43b6ab02652bc9d860904659ba16d75f9d29887f270`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布。
 
-已修复：[TASK-20261113-007](../tasks/active/TASK-20261113-007-antigravity-image-input.md) Antigravity 发图片被本地 `400 unsupported_content` 拒绝：整形层只接受纯文本 part，用户消息里的 `image_url` 直接失败。现在用户消息的 `data:` base64 图片转成上游 `inlineData`（白名单 PNG／JPEG／WebP／GIF／HEIC／HEIF，单图 16 MiB），文本与图片并存；远程 URL、非白名单格式与 system／assistant／工具结果里的图片仍明确失败。隔离实例真实请求：非流式与流式各一次 200，1x1 PNG 被上游描述出来，证明图片真的到达模型。
+已修复：[TASK-20261113-007](../tasks/completed/2026-11/TASK-20261113-007-antigravity-image-input.md) Antigravity 发图片被本地 `400 unsupported_content` 拒绝：整形层只接受纯文本 part，用户消息里的 `image_url` 直接失败。现在用户消息的 `data:` base64 图片转成上游 `inlineData`（白名单 PNG／JPEG／WebP／GIF／HEIC／HEIF，单图 16 MiB），文本与图片并存；远程 URL、非白名单格式与 system／assistant／工具结果里的图片仍明确失败。隔离实例真实请求：非流式与流式各一次 200，1x1 PNG 被上游描述出来，证明图片真的到达模型。
 
 本地构建：[TASK-20261113-006](../tasks/completed/2026-11/TASK-20261113-006-build-local-v2.2.3-beta.17.md) 已产出 `v2.2.3-beta.17` Windows amd64 生产安装包，包含 Google 订阅账号轮换设置（TASK-20261113-005，`40f1f92a`，迁移 047）与变体型号档位优先（TASK-20261113-004，`97d15cdb`）。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,745,659 bytes，SHA256 `a4147c27e2071d6191d3c705f878288efc59657395a07561f52ee0d67fdba637`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.16。
 
