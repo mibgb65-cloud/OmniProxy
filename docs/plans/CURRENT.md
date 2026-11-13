@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261113-021](../tasks/completed/2026-11/TASK-20261113-021-build-local-v2.2.3-beta.24.md) 已产出 `v2.2.3-beta.24` Windows amd64 生产安装包，内容为百度搭子 DuMate 个人版接入（TASK-20261113-020，`741a5d29`：登录态导入与身份绑定、gateway token 合并刷新、Chat 转发与 Responses／Messages 转换、积分与手动签到、迁移 048），并继承 beta.19–beta.23 的用量页分析视图与两栏布局、本机代理探测修复、Google 轮换设置（迁移 047）等。安装器 20,986,834 bytes，SHA256 `56b033b66505a966c243f68c317b43aff2d6c5ab1911d979b4a6999747f953ee`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。真实百度账号验证未执行。实现提交 `de68b5a2`。
+
 已实现：[TASK-20261113-020](../tasks/completed/2026-11/TASK-20261113-020-dumate-provider-integration.md) 新增第十三个内置服务商百度搭子 DuMate 个人版：`provider/dumate` 只读解析桌面端 `auth.json`（AES-256-GCM）或用户粘贴的 Cookie 请求头，经远端 `user/info` 核对身份后以独立 `dumate_cookie` 账号类型写入 DPAPI；网关按账号与凭据版本合并换取 gateway token（401 只清 token），Chat 原生转发、Responses／Messages 经既有转换；积分与手动签到只读公开接口并区分实时／历史快照／失败，自动签到未实现。迁移 048、路由别名（`model-text`、`dm-auto-model/text.L0`）、Wails 绑定与账号导入／积分／签到界面完成。`task verify` exit 0（154 文件／935 项前端测试、全部 Go 包、Windows production 构建）。真实百度账号验证未执行。实现提交 `741a5d29`。
 
 本地构建：[TASK-20261113-019](../tasks/completed/2026-11/TASK-20261113-019-build-local-v2.2.3-beta.23.md) 已产出 `v2.2.3-beta.23` Windows amd64 生产安装包，包含用量页结构区两栏布局（TASK-20261113-018，`d8d673d9`），并继承 beta.22 的用量页分析图表（TASK-20261113-015，`7f642910`）与本机代理探测主机修复（TASK-20261113-016，`fbc0364a`），以及 beta.19–beta.21 的 Google 卡片瘦身、Antigravity 内联图片、Google 轮换设置（迁移 047）、变体档位修复与进行中置顶。安装器 20,793,487 bytes，SHA256 `e5f21d32e57f0ac6cad49fd5ebfc5aa56ea35fd841652018097eed4450ce66af`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 beta.18，首次启动会执行迁移 047。实现提交 `13e4401a`。
