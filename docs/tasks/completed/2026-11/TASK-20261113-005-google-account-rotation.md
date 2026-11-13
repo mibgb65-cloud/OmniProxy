@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -140,23 +140,29 @@ Google 订阅账号总是按路由给出的候选顺序使用，界面上没有�
 
 ## Quality Checks
 
-- [ ] Format
-- [ ] Lint
-- [ ] Type Check
-- [ ] Test
-- [ ] Build
-- [ ] Verify
+- [x] Format
+- [x] Lint
+- [x] Type Check
+- [x] Test
+- [x] Build
+- [x] Verify
 
 ## Verification Result
 
-（未开始）
+```text
+task --force verify
+VERIFY_EXIT=0（148 文件 / 902 项前端测试，全部 Go 包与 Windows production 构建）
+```
+
+- go test ./internal/application/gateway/ -run Google：轮换顺序、API Key 排除、设置校验通过。
+- vitest google-account-settings：4 项通过（保存、失败保留、保存中锁定、读取失败）。
 
 ---
 
 # Documentation
 
 - [x] `docs/product/GOOGLE_SUBSCRIPTION.md`：新增轮换方式与生效范围
-- [ ] CURRENT
+- [x] CURRENT
 
 ---
 
@@ -164,7 +170,11 @@ Google 订阅账号总是按路由给出的候选顺序使用，界面上没有�
 
 ## Commit
 
-（未开始）
+```text
+40f1f92a feat(google): Google 订阅账号支持队列／均衡轮换
+```
+
+未打标签、未推送。
 
 ---
 
@@ -180,4 +190,4 @@ Google 账号页现在有「Google 账号设置」入口，可选择队列轮换
 
 # Completed
 
-（未完成）
+2026-11-13 09:46

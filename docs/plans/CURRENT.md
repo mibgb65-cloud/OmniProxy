@@ -2,9 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261113-004](../tasks/active/TASK-20261113-004-antigravity-variant-effort-authority.md) Antigravity 选择 `gemini-4-hydrogen-high` 时「推理等级」显示 `low`：桌面端把变体型号当模型发送，同时又带一个档位字段，旧实现用字段值覆盖了型号本身的档位。现在目录确认型号是档位变体时以型号为准（并从正文移除矛盾的档位字段），显示与上游 `thinkingLevel` 都是 high。
+已修复：[TASK-20261113-004](../tasks/completed/2026-11/TASK-20261113-004-antigravity-variant-effort-authority.md) Antigravity 选择 `gemini-4-hydrogen-high` 时「推理等级」显示 `low`：桌面端把变体型号当模型发送，同时又带一个档位字段，旧实现用字段值覆盖了型号本身的档位。现在目录确认型号是档位变体时以型号为准（并从正文移除矛盾的档位字段），显示与上游 `thinkingLevel` 都是 high。
 
-已实现：[TASK-20261113-005](../tasks/active/TASK-20261113-005-google-account-rotation.md) Google 账号页新增「Google 账号设置」，可切换队列轮换／平衡切换（迁移 047 新建 `google_settings`）；只对 Google AI 订阅账号生效，API Key 账号与固定账号不参与。截图中的 WebSocket 对 Google 无对应上游传输，不实现；自动激活额度窗口可行但会给账号发送真实消息、消耗额度，待用户确认后另开任务。
+已实现：[TASK-20261113-005](../tasks/completed/2026-11/TASK-20261113-005-google-account-rotation.md) Google 账号页新增「Google 账号设置」，可切换队列轮换／平衡切换（迁移 047 新建 `google_settings`）；只对 Google AI 订阅账号生效，API Key 账号与固定账号不参与。截图中的 WebSocket 对 Google 无对应上游传输，不实现；自动激活额度窗口可行但会给账号发送真实消息、消耗额度，待用户确认后另开任务。
 
 本地构建：[TASK-20261113-003](../tasks/completed/2026-11/TASK-20261113-003-build-local-v2.2.3-beta.16.md) 已产出 `v2.2.3-beta.16` Windows amd64 生产安装包，包含 `xhigh` 思考档位透传（TASK-20261113-001，`1263e1f7`）与导入旧版数据后自动同步模型目录（TASK-20261113-002，`c0c06f2f`），无新增迁移。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,732,136 bytes，SHA256 `d92c88a8b7f549b9c3ee8e034e551ab207c7c92ba73fdaff356edc3910c1a462`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.15。
 

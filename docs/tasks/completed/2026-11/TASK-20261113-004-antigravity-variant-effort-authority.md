@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -123,27 +123,31 @@ status          200
 
 ## Tests
 
-- [ ] Unit Tests
-- [ ] Go 全量
-- [ ] Verify
+- [x] Unit Tests：`go test ./internal/application/gateway/`（含新增折叠目录用例）通过。
+- [x] Go 全量：`go test . ./internal/...` 通过。
+- [x] Verify：`task --force verify` exit 0。
 
 ## Quality Checks
 
-- [ ] Format
-- [ ] Lint
-- [ ] Type Check
-- [ ] Test
-- [ ] Build
+- [x] Format
+- [x] Lint
+- [x] Type Check
+- [x] Test
+- [x] Build
 
 ## Verification Result
 
-（未开始）
+```text
+task --force verify
+VERIFY_EXIT=0 (148 文件 / 902 项前端测试，全部 Go 包与 Windows production 构建)
+```
 
 ---
 
 # Documentation
 
-- [ ] CURRENT
+- [x] CURRENT：记录本修复
+- [x] docs/product/GOOGLE_SUBSCRIPTION.md：说明型号档位优先
 
 ---
 
@@ -151,16 +155,21 @@ status          200
 
 ## Commit
 
-（未开始）
+```text
+97d15cdb fix(gateway): 型号自带档位时不再被客户端档位字段降级
+```
+
+未打标签、未推送。
 
 ---
 
 # Result
 
-（未开始）
+`gemini-4-hydrogen-high` 之类变体型号的档位不再被客户端自带的档位字段降级：请求明细显示
+high，上游 `thinkingLevel` 也是 high；家族名 + 档位与未指定档位的行为保持不变。
 
 ---
 
 # Completed
 
-（未完成）
+2026-11-13 09:44
