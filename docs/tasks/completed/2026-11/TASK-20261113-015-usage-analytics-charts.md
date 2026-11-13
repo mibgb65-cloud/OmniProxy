@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -206,4 +206,4 @@ Test Files  151 passed (151)
 
 # Git
 
-- Commit: TBD
+- Commit: `7f642910`（feat(activity): 用量页增加图表与分析维度）
