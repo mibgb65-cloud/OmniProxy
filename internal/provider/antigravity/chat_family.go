@@ -69,6 +69,7 @@ func budgetOf(effort string) int {
 }
 
 // levelOf 是档位对应的 Gemini 3+ 思考级别：Flash 才接受 medium，其余落在 high。
+// 上游自己发布的档位变体（Hydrogen 的 -xhigh）必须原样透传，否则会把 XHigh 降成 High。
 func levelOf(effort, model string) string {
 	name := strings.ToLower(model)
 	switch strings.ToLower(strings.TrimSpace(effort)) {
@@ -79,6 +80,8 @@ func levelOf(effort, model string) string {
 			return "medium"
 		}
 		return "high"
+	case "xhigh":
+		return "xhigh"
 	}
 	return "high"
 }

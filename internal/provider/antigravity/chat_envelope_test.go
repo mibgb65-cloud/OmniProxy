@@ -44,6 +44,8 @@ func TestGenerationOptionsByModelFamily(t *testing.T) {
 		wantThought bool
 	}{
 		{"gemini3_level", "gemini-3.8-flash-high", "high", 32000, 0, "high", 0, true},
+		// Hydrogen 等新一代模型自带 -xhigh 变体；档位必须原样透传，不能降成 high。
+		{"gemini4_xhigh", "gemini-4-hydrogen-xhigh", "xhigh", 32000, 0, "xhigh", 0, true},
 		{"gemini3_medium_pro", "gemini-3.1-pro-high", "medium", 32000, 0, "high", 0, true},
 		{"gemini25_budget", "gemini-2.5-flash", "low", 32000, 0, "", 4096, true},
 		{"claude_thinking_budget", "claude-opus-4-6-thinking", "high", 2000, 2000, "", 1999, true},
