@@ -2,9 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261113-010](../tasks/active/TASK-20261113-010-build-local-v2.2.3-beta.19.md) 已产出 `v2.2.3-beta.19` Windows amd64 生产安装包，一次性交付 Google 卡片瘦身（`71c97f8c`）、Antigravity 内联图片（`0b55d05d`）、Google 轮换设置（`40f1f92a`，迁移 047）与型号档位修复（`97d15cdb`）。安装器 20,755,171 bytes，SHA256 `f3dbe97bbb4e06eb8bda5511414847b32511c4bfd73900e2eb72c1ef3fbae4d5`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。
+本地构建：[TASK-20261113-010](../tasks/completed/2026-11/TASK-20261113-010-build-local-v2.2.3-beta.19.md) 已产出 `v2.2.3-beta.19` Windows amd64 生产安装包，一次性交付 Google 卡片瘦身（`71c97f8c`）、Antigravity 内联图片（`0b55d05d`）、Google 轮换设置（`40f1f92a`，迁移 047）与型号档位修复（`97d15cdb`）。安装器 20,755,171 bytes，SHA256 `f3dbe97bbb4e06eb8bda5511414847b32511c4bfd73900e2eb72c1ef3fbae4d5`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。
 
-已优化：[TASK-20261113-009](../tasks/active/TASK-20261113-009-google-card-drop-manual-sync.md) Google 账号卡片去掉重复的「重新同步到 AI Agent」按钮与那段长说明：自动同步已覆盖启动／登录／导入／刷新模型列表，而卡片右上角的刷新图标本身就会触发一次同步，等于保留了手动重试。同步说明移入展开的模型列表底部。
+已优化：[TASK-20261113-009](../tasks/completed/2026-11/TASK-20261113-009-google-card-drop-manual-sync.md) Google 账号卡片去掉重复的「重新同步到 AI Agent」按钮与那段长说明：自动同步已覆盖启动／登录／导入／刷新模型列表，而卡片右上角的刷新图标本身就会触发一次同步，等于保留了手动重试。同步说明移入展开的模型列表底部。
 
 本地构建：[TASK-20261113-008](../tasks/completed/2026-11/TASK-20261113-008-build-local-v2.2.3-beta.18.md) 已产出 `v2.2.3-beta.18` Windows amd64 生产安装包，包含 Antigravity 内联图片修复（TASK-20261113-007，`0b55d05d`），并沿用 beta.17 的 Google 轮换设置与型号档位修复。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,753,619 bytes，SHA256 `05d5773b45c2b9e2b1d0b43b6ab02652bc9d860904659ba16d75f9d29887f270`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布。
 
