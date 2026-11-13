@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261113-003](../tasks/active/TASK-20261113-003-build-local-v2.2.3-beta.16.md) 已产出 `v2.2.3-beta.16` Windows amd64 生产安装包，包含 `xhigh` 思考档位透传（TASK-20261113-001，`1263e1f7`）与导入旧版数据后自动同步模型目录（TASK-20261113-002，`c0c06f2f`），无新增迁移。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,732,136 bytes，SHA256 `d92c88a8b7f549b9c3ee8e034e551ab207c7c92ba73fdaff356edc3910c1a462`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.15。
+本地构建：[TASK-20261113-003](../tasks/completed/2026-11/TASK-20261113-003-build-local-v2.2.3-beta.16.md) 已产出 `v2.2.3-beta.16` Windows amd64 生产安装包，包含 `xhigh` 思考档位透传（TASK-20261113-001，`1263e1f7`）与导入旧版数据后自动同步模型目录（TASK-20261113-002，`c0c06f2f`），无新增迁移。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,732,136 bytes，SHA256 `d92c88a8b7f549b9c3ee8e034e551ab207c7c92ba73fdaff356edc3910c1a462`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布，供用户从托盘退出并备份数据后本地覆盖 beta.15。
 
 已完成：[TASK-20261113-002](../tasks/completed/2026-11/TASK-20261113-002-legacy-import-auto-model-sync.md) 导入旧版数据后自动同步模型目录：`ImportLegacyData` 成功后请求既有的 Google／OpenAI 自动同步（后台扫描 → `RefreshCatalog` 重写受管客户端 → `modelcatalog:updated`），用户不再需要逐个账号点「重新同步到 AI Agent」；导入失败不触发同步，手动按钮保留用于重试。回归测试在隔离 profile 中先消费启动扫描、再导入并断言两个通道各收到一次通知。实现提交 `c0c06f2f`。
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -185,10 +185,10 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.16 -AssetDirectory releas
 ## Commit
 
 ```text
-<commit hash> 见归档提交
+43d7d747 chore(release): 准备 v2.2.3-beta.16 本地构建
 ```
 
-未打标签、未推送、未公开发布。
+归档提交见 `docs/tasks/completed/2026-11/`。未打标签、未推送、未公开发布。
 
 ---
 
@@ -202,4 +202,4 @@ scripts/verify-release-assets.ps1 -Version v2.2.3-beta.16 -AssetDirectory releas
 
 # Completed
 
-（未完成）
+2026-11-13 09:05
