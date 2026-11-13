@@ -16,6 +16,7 @@ const brandIcons: Record<
   atria: { file: "atria.png" },
   river: { file: "river.png", fullTile: true },
   oxionai: { file: "oxionai.png" },
+  dumate: { file: "dumate.png", fullTile: true },
 }
 
 function resolveBrandIcon(kind: string, endpoint?: string) {

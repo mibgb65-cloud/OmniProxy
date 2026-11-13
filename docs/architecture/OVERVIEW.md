@@ -1,5 +1,16 @@
 # Architecture Overview
 
+## 百度搭子 DuMate 个人版（2026-11-13）
+
+迁移 048 追加第十三个内置服务商。`provider/dumate` 只访问固定 HTTPS 控制台与推理网关：
+Cookie 登录态来自只读解析桌面端 `auth.json`（AES-256-GCM，密钥在 `.cookie-key`）或用户粘贴的
+请求头；`application/account` 以独立 `dumate_cookie` 类型保存 DPAPI 密文，导入前用
+`/api/dumate/user/info` 核对远端身份，身份不同则新建账号而不是覆盖。网关按账号与凭据版本
+合并并发换取 gateway token（有界内存、401 只清 token），Chat 原生转发，Responses／Messages
+经既有转换链路。`application/dumate` 只读公开积分与签到接口，查询失败回退保留期内的内存快照，
+手动签到先读后领再核对到账；自动签到未实现。模型只公布两条回退别名，不发布未验证容量。
+边界见 `product/DUMATE.md`，任务见 TASK-20261113-020。
+
 ## Codex 订阅目录容量（2026-11-01）
 
 `subscription.Models` 保留隔离官方核心 `model/list` 的公开模型投影，随后经统一受保护凭据入口，
@@ -333,13 +344,13 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages twelve default-enabled
+> Current state: `internal/application/provider` manages thirteen default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`. The gateway forwards DeepSeek,
-> ChatGPT / Codex subscription, River, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat requests; other provider adapters are pending.
+> ChatGPT / Codex subscription, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, and DuMate Chat requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -465,10 +476,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, and OpenAI-compatible endpoints. Twelve named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, Baidu DuMate, and OpenAI-compatible endpoints. Thirteen named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, and Google Chat are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, and DuMate Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

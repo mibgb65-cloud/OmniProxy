@@ -10,6 +10,7 @@ import type {
 } from "../../services/omniproxy"
 import { AccountForm } from "./account-form"
 import { SubscriptionLoginDialog } from "./subscription-login-dialog"
+import { DuMateImportDialog } from "../dumate/dumate-import-dialog"
 
 export function AddAccountDialog({
   provider,
@@ -23,6 +24,11 @@ export function AddAccountDialog({
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const generation = useOpenGeneration(open)
+
+  // DuMate 只有登录态导入，不接受 API Key；不能复用通用账号表单。
+  if (provider.kind === "dumate") {
+    return <DuMateImportDialog providerId={provider.id} />
+  }
 
   const create = async (input: CreateAccountInput) => {
     await onCreate(input)

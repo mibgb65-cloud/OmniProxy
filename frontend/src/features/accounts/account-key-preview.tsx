@@ -6,13 +6,17 @@ import { Button } from "../../components/ui/button"
 import type { AccountItem } from "../../services/omniproxy"
 import { useAccountKeyPreview, useCopyAccountKey } from "./use-account-key"
 import { SubscriptionAccountStatus } from "./subscription-account-status"
+import { DuMateAccountStatus } from "../dumate/dumate-account-status"
 
 export function AccountKeyPreview({ account }: { account: AccountItem }) {
-  return account.authMethod === "subscription_login" ? (
-    <SubscriptionAccountStatus account={account} />
-  ) : (
-    <APIKeyPreview account={account} />
-  )
+  if (account.authMethod === "subscription_login") {
+    return <SubscriptionAccountStatus account={account} />
+  }
+  // Cookie 登录态没有可复制的密钥，只说明导入状态。
+  if (account.authMethod === "dumate_cookie") {
+    return <DuMateAccountStatus account={account} />
+  }
+  return <APIKeyPreview account={account} />
 }
 
 function APIKeyPreview({ account }: { account: AccountItem }) {

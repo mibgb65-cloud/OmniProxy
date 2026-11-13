@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/infrastructure/database"
+	"omniproxy/internal/provider/dumate"
 )
 
 // googlePool 只提供账号快照，不接触凭据或上游。
@@ -17,6 +18,10 @@ type googlePool struct{ items []account.Item }
 
 func (g googlePool) List(context.Context) ([]account.Item, error) { return g.items, nil }
 func (g googlePool) UseAPIKey(context.Context, string, func([]byte) error) error {
+	return proxy.Failure("unused", 500)
+}
+
+func (g googlePool) UseDuMateCredentials(context.Context, string, func(account.Item, dumate.Credentials) error) error {
 	return proxy.Failure("unused", 500)
 }
 

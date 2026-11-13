@@ -3,6 +3,7 @@ package provider
 
 import (
 	"omniproxy/internal/provider/atria"
+	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
@@ -45,6 +46,8 @@ var definitions = []Definition{
 	{Kind: atria.Kind, Name: "Atria", DefaultBaseURL: atria.DefaultBaseURL, Models: atria.Models(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: river.Kind, Name: "River", DefaultBaseURL: river.DefaultBaseURL, Models: river.DisplayModels(), AuthMethods: []string{AuthAPIKey}},
 	{Kind: oxionai.Kind, Name: "Oxion AI", DefaultBaseURL: oxionai.DefaultBaseURL, Models: oxionai.Models(), AuthMethods: []string{AuthAPIKey}, DiscoveryOnly: true},
+	// DuMate 只接受登录态导入，没有 API Key 或订阅 OAuth；模型别名固定，上游无 /models。
+	{Kind: dumate.Kind, Name: dumate.Name, DefaultBaseURL: dumate.DefaultBaseURL, Models: dumate.DisplayModels(), AuthMethods: []string{dumate.AuthMethod}},
 }
 
 // Catalog returns an independent snapshot of the built-in provider kinds.

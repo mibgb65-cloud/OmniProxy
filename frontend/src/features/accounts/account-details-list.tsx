@@ -19,6 +19,7 @@ import { AccountKeyPreview } from "./account-key-preview"
 import { SubscriptionQuota } from "./subscription-quota"
 import { AccountBalance } from "./account-balance"
 import { GoogleAccountResource } from "../google/google-account-resource"
+import { DuMatePoints } from "../dumate/dumate-points"
 
 export function AccountDetailsList({
   accounts,
@@ -59,9 +60,11 @@ export function AccountDetailsList({
               {t(
                 hasSubscriptions
                   ? "subscription.quota.title"
-                  : accounts.every((account) => account.providerId === "builtin_river")
-                    ? "subscription.tokens.title"
-                    : "accounts.detail.balance",
+                  : accounts.every((account) => account.providerId === "builtin_dumate")
+                    ? "dumate.points.title"
+                    : accounts.every((account) => account.providerId === "builtin_river")
+                      ? "subscription.tokens.title"
+                      : "accounts.detail.balance",
               )}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
@@ -131,6 +134,10 @@ export function AccountDetailsList({
                   <MiniMaxResource account={account} />
                 ) : account.stepfun?.billingMode === "step_plan" ? (
                   <StepFunPlanResource account={account} />
+                ) : account.providerId === "builtin_dumate" ? (
+                  <div className="min-w-64">
+                    <DuMatePoints account={account} />
+                  </div>
                 ) : balanceSupported ? (
                   <div className="min-w-64">
                     <AccountBalance account={account} />

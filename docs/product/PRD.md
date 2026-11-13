@@ -59,8 +59,8 @@ accounts need one local place to:
 - 侧栏通顶占据窗口左侧整列（`docs/product/APPEARANCE.md`），品牌标识（图标＋名称）与收展按钮同处顶部品牌栏，标题栏不再重复品牌；侧栏底部提供“设置与关于”统一入口，以带背景模糊的悬浮窗口展示左侧分类和右侧独立滚动内容；分类为通用设置、请求与日志、数据存储、检查更新、关于。通用设置紧凑展示启动／关闭行为与字号。检查更新独立为一级分类，按运行版本摘要、更新设置和离线当前版本日志分组，支持手动检查、可关闭的后台版本检查及默认关闭的自动下载开关；关于页展示官网、开源仓库、免责声明、使用协议、隐私政策五项入口，通过后端固定标识白名单在系统浏览器打开，等待时禁止重复操作，失败显示可重试的安全提示，不在应用内加载协议正文。官网三份独立静态协议已上线并核验标题与正文，不将 HTTP 200 首页回退当作成功。内容视口延伸至底部边框，底部留白随内容滚动，避免卡片提前截断。打开时保留当前工作页面，切换分类保留未保存输入，支持上下键选择分类、键盘关闭和焦点返回。旧 `/settings`、`/about` 链接继续打开对应分类。
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,
-  StepFun, Atria, River, Oxion AI, and OpenAI-compatible endpoints).
-- Twelve named providers are enabled by default and can be switched off; users
+  StepFun, Atria, River, Oxion AI, Baidu DuMate, and OpenAI-compatible endpoints).
+- Thirteen named providers are enabled by default and can be switched off; users
   can add enabled-by-default custom OpenAI-compatible endpoints.
 - 提供商卡片使用与账号一致的电源图标按钮控制启停：绿色表示启用，灰色表示停用，悬浮提示说明下一步操作。
 - Provider cards show a curated model preview and an unauthenticated endpoint

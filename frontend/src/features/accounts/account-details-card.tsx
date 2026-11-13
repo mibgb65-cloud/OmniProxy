@@ -20,6 +20,7 @@ import { AccountBalance } from "./account-balance"
 import { subscriptionTypeKey } from "../providers/provider-labels"
 import type { AccountItem } from "../../services/omniproxy"
 import { GoogleAccountResource } from "../google/google-account-resource"
+import { DuMatePoints } from "../dumate/dumate-points"
 import { AccountUsagePanel } from "./account-usage-panel"
 
 export function AccountDetailsCard({
@@ -55,7 +56,9 @@ export function AccountDetailsCard({
               {t(
                 account.authMethod === "subscription_login"
                   ? subscriptionTypeKey(account.providerId)
-                  : "accounts.apiKey",
+                  : account.authMethod === "dumate_cookie"
+                    ? "dumate.account.cookieType"
+                    : "accounts.apiKey",
               )}
             </p>
           </div>
@@ -113,6 +116,11 @@ export function AccountDetailsCard({
         ) : account.stepfun?.billingMode === "step_plan" ? (
           <>
             <StepFunPlanResource account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : account.providerId === "builtin_dumate" ? (
+          <>
+            <DuMatePoints account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : balanceSupported ? (

@@ -18,6 +18,11 @@ import type {
   UpdateResult as UpdateAccountResult,
 } from "../../bindings/omniproxy/internal/application/account"
 import type {
+  Checkin as DuMateCheckin,
+  ImportResult as DuMateImportResult,
+  Points as DuMatePoints,
+} from "../../bindings/omniproxy/internal/application/dumate"
+import type {
   Configuration as ProviderConfiguration,
   CreateInput as CreateProviderInput,
   Definition as ProviderDefinition,
@@ -46,6 +51,9 @@ export type {
   AccountItem,
   CreateAccountInput,
   CreateAccountsInput,
+  DuMateCheckin,
+  DuMateImportResult,
+  DuMatePoints,
   UpdateAccountInput,
   UpdateAccountResult,
 }
@@ -246,4 +254,27 @@ export function getAccountKeyPreview(id: string): Promise<string> {
 /** 桌面端直接复制；完整密钥不返回浏览器。 */
 export function copyAccountKey(id: string): Promise<void> {
   return AppService.CopyAccountKey(id)
+}
+
+/** 只读导入本机搭子桌面端登录态；Cookie 不返回前端。 */
+export function importDuMateDesktop(providerId: string): Promise<DuMateImportResult> {
+  return AppService.DuMateImportDesktop(providerId)
+}
+
+/** 导入用户粘贴的 Cookie 请求头；Cookie 不返回前端。 */
+export function importDuMateCookie(
+  providerId: string,
+  cookie: string,
+): Promise<DuMateImportResult> {
+  return AppService.DuMateImportCookie(providerId, cookie)
+}
+
+/** 查询公开积分与签到状态；失败由 state／errorCode 表达。 */
+export function getDuMatePoints(accountId: string): Promise<DuMatePoints> {
+  return AppService.DuMatePoints(accountId)
+}
+
+/** 手动签到；结果区分已领取、今日已完成、待到账与失败。 */
+export function checkinDuMate(accountId: string): Promise<DuMateCheckin> {
+  return AppService.DuMateCheckin(accountId)
 }

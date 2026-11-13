@@ -15,6 +15,7 @@ import { dashboardZh } from "./dashboard-zh"
 import { googleZh } from "./google-zh"
 import { googleSettingsZh } from "./google-settings-zh"
 import { quotaUsdZh } from "./quota-usd-zh"
+import { dumateZh } from "./dumate-zh"
 
 /**
  * Chinese translations — the single source of truth for translation keys.
@@ -22,6 +23,7 @@ import { quotaUsdZh } from "./quota-usd-zh"
  * exist there (and vice versa is a compile error).
  */
 export const zh = {
+  ...dumateZh,
   ...riverSettingsZh,
   ...quotaUsdZh,
   ...failoverZh,
@@ -411,6 +413,7 @@ export const zh = {
   "providers.kind.atria": "Atria",
   "providers.kind.river": "River",
   "providers.kind.oxionai": "Oxion AI",
+  "providers.kind.dumate": "百度搭子 DuMate",
 
   "pages.accounts.title": "账号",
   "accounts.loading": "正在加载账号…",

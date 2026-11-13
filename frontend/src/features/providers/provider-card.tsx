@@ -127,6 +127,11 @@ export function ProviderCard({
               {t(subscriptionTypeKey(kind))}
             </span>
           ) : null}
+          {authMethods?.includes("dumate_cookie") ? (
+            <span className="border-border bg-muted/50 rounded-md border px-2 py-0.5 text-xs">
+              {t("dumate.account.cookieType")}
+            </span>
+          ) : null}
           {proxyMode === "proxy" ? (
             <Tooltip content={t("providers.proxy.badgeHint")}>
               <span

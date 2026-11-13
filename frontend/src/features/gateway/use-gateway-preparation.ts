@@ -29,7 +29,10 @@ export function useGatewayPreparation() {
     providers.isSuccess && accounts.isSuccess
       ? getConfiguredResources(
           supportedProviders,
-          accounts.data.filter((item) => item.authMethod !== "subscription_login"),
+          accounts.data.filter(
+            (item) =>
+              item.authMethod !== "subscription_login" && item.authMethod !== "dumate_cookie",
+          ),
         )
       : null
   const providerCount = providers.isSuccess

@@ -7,6 +7,7 @@ import (
 	catalog "omniproxy/internal/core/modelcatalog"
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/atria"
+	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
@@ -76,6 +77,9 @@ func targetSupports(data snapshot, providerID, accountID, model string) bool {
 		if p.ID == providerID && p.Kind == mimo.Kind {
 			return mimoTargetSupports(data, providerID, accountID, model)
 		}
+		if p.ID == providerID && p.Kind == dumate.Kind {
+			return dumateTargetSupports(data, providerID, accountID, model)
+		}
 	}
 	for _, m := range data.models {
 		if m.providerID == providerID && m.model == model && (accountID == "" || m.accountID == accountID) {
@@ -122,6 +126,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == "openai" && codexLogin(a) {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == dumate.Kind && a.AuthMethod == account.AuthDuMateCookie && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 	}

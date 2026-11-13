@@ -15,6 +15,7 @@ import (
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/chatgpt"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/google"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
@@ -34,6 +35,8 @@ type ProviderReader interface {
 type AccountAccess interface {
 	List(context.Context) ([]account.Item, error)
 	UseAPIKey(context.Context, string, func([]byte) error) error
+	// UseDuMateCredentials 只在回调内解密 Cookie 登录态。
+	UseDuMateCredentials(context.Context, string, func(account.Item, dumate.Credentials) error) error
 }
 
 // Info 包含运行快照和本版实际支持的协议。
@@ -79,6 +82,10 @@ type Service struct {
 	// googlePrompt 读取「Google 订阅按原文发送 system prompt」的用户设置；nil 时打散。
 	googlePrompt func() bool
 	antigravity  *antigravity.Client
+	// DuMate 的 token 缓存与 HTTP 客户端跨请求复用，避免每条消息重新换取 token。
+	dumateTokens  *dumate.TokenCache
+	dumateConsole *dumate.Console
+	dumateClient  *dumate.Client
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -102,6 +109,9 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.stepfun = stepfun.New(nil)
 	s.kimi = kimi.New(nil)
 	s.minimax = minimax.New(nil)
+	s.dumateTokens = dumate.NewTokenCache()
+	s.dumateConsole = dumate.NewConsole(nil)
+	s.dumateClient = dumate.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	// Codex 入口走 v1 形态的透明转发；其余入口仍由 Forward 处理。
 	opts.Passthrough = s

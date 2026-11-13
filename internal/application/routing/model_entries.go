@@ -6,6 +6,7 @@ import (
 	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/provider/atria"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
@@ -139,6 +140,13 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 				if a.ID == decision.AccountID && a.StepFun != nil && stepfun.Supports(*a.StepFun, entry.TargetModel, "responses") {
 					entry.Protocols = append(entry.Protocols, "responses")
 				}
+			}
+		}
+		if entry.ProviderKind == dumate.Kind {
+			// 上游只确认 Chat；Responses 与 Messages 由网关经既有转换链路接入。
+			entry.Metadata = dumate.ModelMetadata(entry.TargetModel)
+			if !matched {
+				entry.Name = dumate.ModelName(entry.TargetModel)
 			}
 		}
 		entries = append(entries, entry)

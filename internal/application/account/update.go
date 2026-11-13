@@ -50,6 +50,18 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 	if err != nil {
 		return result, err
 	}
+	if item.AuthMethod == AuthDuMateCookie {
+		// Cookie 登录态不能通过 API Key 字段替换；重新登录走导入流程。
+		if strings.TrimSpace(input.APIKey) != "" {
+			return result, fmt.Errorf("%w: cookie account cannot take an API key", ErrInvalidInput)
+		}
+		updated, err := s.updateDuMateName(ctx, item, input.Name)
+		if err != nil {
+			return result, err
+		}
+		result.Account = updated
+		return result, nil
+	}
 	options, err := s.prepareStep(ctx, item.ProviderID, input.StepFun, &item)
 	if err != nil {
 		return result, err

@@ -117,10 +117,14 @@ export function ProviderAccountsView({
             provider.kind !== "mimo" &&
             provider.kind !== "deepseek" &&
             provider.kind !== "google" &&
+            provider.kind !== "dumate" &&
             (provider.kind !== "openai" ||
             items.some((account) => account.authMethod !== "subscription_login") ? (
               <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>
             ) : null)}
+          {provider.kind === "dumate" ? (
+            <p className="text-muted-foreground text-sm leading-6">{t("dumate.account.hint")}</p>
+          ) : null}
           {provider.kind === "stepfun" ? (
             <p className="text-muted-foreground text-sm leading-6">{t("stepfun.routingHint")}</p>
           ) : null}

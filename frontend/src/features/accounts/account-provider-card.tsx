@@ -120,7 +120,9 @@ export function AccountProviderCard({
                       {t(
                         account.authMethod === "subscription_login"
                           ? subscriptionTypeKey(provider.kind)
-                          : "accounts.apiKey",
+                          : account.authMethod === "dumate_cookie"
+                            ? "dumate.account.cookieType"
+                            : "accounts.apiKey",
                       )}{" "}
                       · {account.enabled ? t("accounts.enabled") : t("accounts.disabled")}
                     </p>

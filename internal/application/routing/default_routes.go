@@ -10,7 +10,7 @@ import (
 func originalModels(data snapshot) []string {
 	seen := make(map[string]bool)
 	for _, provider := range data.providers {
-		if (provider.Kind == "atria" || provider.Kind == "mimo" || provider.Kind == "river") && !hasPresetAccount(data, provider.ID) {
+		if (provider.Kind == "atria" || provider.Kind == "mimo" || provider.Kind == "river" || provider.Kind == "dumate") && !hasPresetAccount(data, provider.ID) {
 			continue
 		}
 		for _, id := range presetModels(provider.Kind) {

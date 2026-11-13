@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/core/proxy"
 	core "omniproxy/internal/core/routing"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/oxionai"
 )
 
@@ -218,7 +219,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		return target{}, proxy.Failure("configuration_unavailable", 503)
 	}
 	for _, provider := range providers {
-		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "oxionai" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax") || !provider.Enabled {
+		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "oxionai" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax" && provider.Kind != dumate.Kind) || !provider.Enabled {
 			continue
 		}
 		for _, account := range accounts {
@@ -242,6 +243,10 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				if provider.Kind == "google" && account.AuthMethod != "api_key" && !(account.AuthMethod == "subscription_login" && account.AuthState == "authenticated") {
+					return target{}, proxy.Failure("route_account_unavailable", 503)
+				}
+				// DuMate 只有登录态账号；Cookie 失效时拒绝转发，提示重新导入。
+				if provider.Kind == dumate.Kind && (account.AuthMethod != accountmodel.AuthDuMateCookie || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				// 按量 API Key 账号与订阅账号共用提供商，但计费与凭据完全不同。

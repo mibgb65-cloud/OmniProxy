@@ -16,12 +16,14 @@ import { dashboardEn } from "./dashboard-en"
 import { googleEn } from "./google-en"
 import { googleSettingsEn } from "./google-settings-en"
 import { quotaUsdEn } from "./quota-usd-en"
+import { dumateEn } from "./dumate-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
  * missing or extra key a compile error.
  */
 export const en: Record<keyof typeof zh, string> = {
+  ...dumateEn,
   ...riverSettingsEn,
   ...quotaUsdEn,
   ...failoverEn,
@@ -428,6 +430,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.atria": "Atria",
   "providers.kind.river": "River",
   "providers.kind.oxionai": "Oxion AI",
+  "providers.kind.dumate": "Baidu DuMate",
 
   "pages.accounts.title": "Accounts",
   "accounts.loading": "Loading accounts…",

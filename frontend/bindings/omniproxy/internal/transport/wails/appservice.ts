@@ -29,6 +29,9 @@ import * as agentinstall$0 from "../../application/agentinstall/models.js";
 import * as balance$0 from "../../application/balance/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as dumate$0 from "../../application/dumate/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as gateway$0 from "../../application/gateway/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -323,6 +326,34 @@ export function DesktopSettings(): $CancellablePromise<$models.DesktopSettings> 
  */
 export function DiscoverProxyPorts(): $CancellablePromise<proxysettings$0.Discovered[] | null> {
     return $Call.ByID(2679691642);
+}
+
+/**
+ * DuMateCheckin 手动签到；结果区分已领取、今日已完成、待到账与失败。
+ */
+export function DuMateCheckin(accountID: string): $CancellablePromise<dumate$0.Checkin> {
+    return $Call.ByID(2210598810, accountID);
+}
+
+/**
+ * DuMateImportCookie 导入用户粘贴的 Cookie 请求头，不会把 Cookie 返回前端。
+ */
+export function DuMateImportCookie(providerID: string, cookie: string): $CancellablePromise<dumate$0.ImportResult> {
+    return $Call.ByID(2643627388, providerID, cookie);
+}
+
+/**
+ * DuMateImportDesktop 只读导入本机搭子桌面端登录态，并核对远端身份。
+ */
+export function DuMateImportDesktop(providerID: string): $CancellablePromise<dumate$0.ImportResult> {
+    return $Call.ByID(3439955998, providerID);
+}
+
+/**
+ * DuMatePoints 查询公开积分与签到状态；查询失败用 State／ErrorCode 表达。
+ */
+export function DuMatePoints(accountID: string): $CancellablePromise<dumate$0.Points> {
+    return $Call.ByID(1798900116, accountID);
 }
 
 /**

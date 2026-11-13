@@ -11,6 +11,7 @@ export const providerNameKeys = {
   atria: "providers.kind.atria",
   river: "providers.kind.river",
   oxionai: "providers.kind.oxionai",
+  dumate: "providers.kind.dumate",
 } as const
 
 export function isKnownProviderKind(kind: string): kind is keyof typeof providerNameKeys {
