@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261113-016](../tasks/completed/2026-11/TASK-20261113-016-proxy-detection-host.md) 「探测本机代理」回填的服务器地址不再带 `auto://` 前缀：探测结果新增 `host` 字段，表单不再从展示文本反解主机；地址含协议、端口或路径时就地提示并禁用测试／保存。`task verify` exit 0（151 文件／924 项前端测试）。实现提交 `fbc0364a`。
+
 已实现：[TASK-20261113-015](../tasks/completed/2026-11/TASK-20261113-015-usage-analytics-charts.md) 用量页补齐图表与分析维度：顶部 6 个 KPI（含近 30 天环比、缓存命中下界、成功率），每日趋势支持 7／14／30 天与 Token／请求数切换，新增 Token 构成环形图、模型与提供商占比、Top 6 模型每日堆叠、24 小时时段分布、近 30 天请求质量与账号成员排行，保留「按提供商与模型」明细。数据只读自现有累计表、`usage_accounts` 与 `dashboard_buckets`，无迁移、无图表库；时段与质量只承诺近 30 天。实现提交 `7f642910`。
 
 本地构建：[TASK-20261113-014](../tasks/completed/2026-11/TASK-20261113-014-build-local-v2.2.3-beta.21.md) 已产出 `v2.2.3-beta.21` Windows amd64 生产安装包，包含请求页进行中置顶与分组分隔（TASK-20261113-013，`b0ac93b1`）、变体型号档位修复（TASK-20261113-011，`338261e9`），并继承 beta.19／beta.20 的 Google 卡片瘦身、Antigravity 内联图片与 Google 轮换设置（迁移 047）。安装器 20,763,665 bytes，SHA256 `c4016808b63836a39f23c955f65efc183ce22ffd125bea5b42213a29226ee338`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 beta.18。

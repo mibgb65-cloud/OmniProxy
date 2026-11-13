@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -182,4 +182,4 @@ Test Files  151 passed (151)
 
 # Git
 
-- Commit: TBD
+- Commit: `fbc0364a`（fix(providers): 本机代理探测只回填主机名）
