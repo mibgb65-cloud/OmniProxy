@@ -17,15 +17,7 @@ export const googleEn: Record<keyof typeof googleZh, string> = {
   "google.models.connected": "Gateway-supported · Chat / Responses / Messages",
   "google.models.pending": "Available upstream · Gateway support pending",
   "google.models.hint":
-    "Sync supported models to select them in AI agents for text and tool calls. Google determines access for each request.",
-  "google.models.autoSync":
-    "Models sync to managed agents after startup, sign-in or model refresh. Confirm first-time setup under Gateway → Client integration. Explicit model selections are preserved.",
-  "google.models.sync": "Resync to AI agents",
-  "google.models.syncing": "Syncing models…",
-  "google.models.synced":
-    "Synced. Select models in client integration; reload model menus in running agents.",
-  "google.models.syncFailed":
-    "Model sync failed. Retry; existing client configurations remain available.",
+    "Model lists sync to managed agents after startup, sign-in, import or a refresh; reload the model menu in running agents. Google determines access for each request.",
   "google.models.noAdapter": "These models are not yet supported by this gateway",
   "google.models.empty": "Google has not returned any selectable models.",
   "google.models.failed":

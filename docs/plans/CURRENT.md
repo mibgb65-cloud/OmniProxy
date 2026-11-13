@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已优化：[TASK-20261113-009](../tasks/active/TASK-20261113-009-google-card-drop-manual-sync.md) Google 账号卡片去掉重复的「重新同步到 AI Agent」按钮与那段长说明：自动同步已覆盖启动／登录／导入／刷新模型列表，而卡片右上角的刷新图标本身就会触发一次同步，等于保留了手动重试。同步说明移入展开的模型列表底部。
+
 本地构建：[TASK-20261113-008](../tasks/completed/2026-11/TASK-20261113-008-build-local-v2.2.3-beta.18.md) 已产出 `v2.2.3-beta.18` Windows amd64 生产安装包，包含 Antigravity 内联图片修复（TASK-20261113-007，`0b55d05d`），并沿用 beta.17 的 Google 轮换设置与型号档位修复。生产编译、NSIS 打包、原生版本资源与发布资产核对通过。安装器 20,753,619 bytes，SHA256 `05d5773b45c2b9e2b1d0b43b6ab02652bc9d860904659ba16d75f9d29887f270`，Windows 数字版本 `2.2.3.0`；未签名、未自动安装、未启动、未打标签、未推送或公开发布。
 
 已修复：[TASK-20261113-007](../tasks/completed/2026-11/TASK-20261113-007-antigravity-image-input.md) Antigravity 发图片被本地 `400 unsupported_content` 拒绝：整形层只接受纯文本 part，用户消息里的 `image_url` 直接失败。现在用户消息的 `data:` base64 图片转成上游 `inlineData`（白名单 PNG／JPEG／WebP／GIF／HEIC／HEIF，单图 16 MiB），文本与图片并存；远程 URL、非白名单格式与 system／assistant／工具结果里的图片仍明确失败。隔离实例真实请求：非流式与流式各一次 200，1x1 PNG 被上游描述出来，证明图片真的到达模型。

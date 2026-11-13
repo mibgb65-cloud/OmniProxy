@@ -6,7 +6,6 @@ import { Button } from "../../components/ui/button"
 import { ScrollRegion } from "../../components/common/scroll-region"
 import type { AccountItem } from "../../services/omniproxy"
 import { useGoogleSubscriptionModels } from "./use-google-subscription-quota"
-import { GoogleModelSync } from "./google-model-sync"
 
 export function GoogleSubscriptionModels({ account }: { account: AccountItem }) {
   const { t } = useTranslation()
@@ -136,11 +135,6 @@ export function GoogleSubscriptionModels({ account }: { account: AccountItem }) 
           {t("google.models.failed")}
         </p>
       ) : null}
-      <GoogleModelSync
-        key={account.updatedAt}
-        accountId={account.id}
-        disabled={!supported.length || !account.enabled}
-      />
     </div>
   )
 }

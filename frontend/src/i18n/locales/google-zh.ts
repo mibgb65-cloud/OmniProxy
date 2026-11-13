@@ -15,13 +15,7 @@ export const googleZh = {
   "google.models.connected": "网关支持 · Chat / Responses / Messages",
   "google.models.pending": "上游可选 · 当前网关待接入",
   "google.models.hint":
-    "同步后可在 AI Agent 中选择已接入模型，支持文本与工具调用。实际权限由 Google 决定。",
-  "google.models.autoSync":
-    "启动、登录或刷新模型后自动同步到已接入的 Agent。首次使用请在「网关 → 客户端接入」确认配置；手动限选不自动扩展。",
-  "google.models.sync": "重新同步到 AI Agent",
-  "google.models.syncing": "正在同步模型…",
-  "google.models.synced": "已同步，可在客户端接入中选择；运行中的 Agent 请重新加载模型菜单。",
-  "google.models.syncFailed": "模型同步失败，请重试；已有客户端配置保持可用。",
+    "启动、登录、导入或刷新模型列表后会自动同步到已接入的 Agent；运行中的 Agent 请重新加载模型菜单。实际权限由 Google 决定。",
   "google.models.noAdapter": "当前网关暂未适配这些模型",
   "google.models.empty": "Google 暂未返回可选模型。",
   "google.models.failed": "模型列表暂时不可读，请刷新重试；额度查询不受影响。",
