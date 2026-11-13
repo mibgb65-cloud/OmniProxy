@@ -23,7 +23,7 @@ export function UsageComposition({ summary }: { summary: Summary }) {
       {total === 0n ? (
         <UsageEmpty>{t("activity.empty")}</UsageEmpty>
       ) : (
-        <div className="flex flex-wrap items-center justify-center gap-5 sm:justify-start">
+        <div className="flex flex-1 flex-wrap items-center justify-center gap-5 sm:justify-start">
           <Donut
             label={t("activity.composition")}
             segments={[

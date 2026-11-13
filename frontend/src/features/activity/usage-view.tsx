@@ -54,10 +54,18 @@ export function UsageView() {
             reliability={reliability}
           />
           <UsageDailyChart days={days} />
-          <div className="grid min-w-0 items-start gap-4 xl:grid-cols-3">
+          <div className="grid min-w-0 gap-4 xl:grid-cols-2">
             <UsageComposition summary={allTime} />
-            <ModelShareCard items={models} total={allTime} />
-            <ProviderShareCard items={providers} total={allTime} />
+            <ProviderShareCard
+              items={providers}
+              total={allTime}
+              className="xl:col-start-1 xl:row-start-2"
+            />
+            <ModelShareCard
+              items={models}
+              total={allTime}
+              className="xl:col-start-2 xl:row-span-2 xl:row-start-1"
+            />
           </div>
           <UsageModelTrend modelDays={modelDays} days={days} />
           <div className="grid min-w-0 gap-4 xl:grid-cols-2">

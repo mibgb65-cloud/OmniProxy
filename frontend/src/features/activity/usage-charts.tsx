@@ -28,7 +28,9 @@ export function UsageCard({
           {action}
         </div>
       </CardHeader>
-      <CardContent className={cn("min-w-0 px-4", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("flex min-h-0 min-w-0 flex-1 flex-col px-4", contentClassName)}>
+        {children}
+      </CardContent>
     </Card>
   )
 }

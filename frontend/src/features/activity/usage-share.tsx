@@ -56,7 +56,15 @@ function shortID(value: string) {
   return `${value.slice(0, 8)}…${value.slice(-6)}`
 }
 
-export function ModelShareCard({ items, total }: { items: Breakdown[]; total: Summary }) {
+export function ModelShareCard({
+  items,
+  total,
+  className,
+}: {
+  items: Breakdown[]
+  total: Summary
+  className?: string
+}) {
   const { t, i18n } = useTranslation()
   const language = i18n.resolvedLanguage ?? "zh"
   const visible = items.slice(0, SHARE_LIMIT)
@@ -65,9 +73,13 @@ export function ModelShareCard({ items, total }: { items: Breakdown[]; total: Su
   const requestMeta = (count: number) =>
     t("activity.requestCount", { value: usageCountLabel(count, language) })
   return (
-    <UsageCard title={t("activity.modelShare")} hint={t("activity.modelShareHint")}>
+    <UsageCard
+      title={t("activity.modelShare")}
+      hint={t("activity.modelShareHint")}
+      className={className}
+    >
       {items.length ? (
-        <ul className="space-y-3">
+        <ul className="flex flex-1 flex-col justify-between gap-3">
           {visible.map((item, index) => (
             <ShareRow
               key={item.key}
@@ -97,11 +109,23 @@ export function ModelShareCard({ items, total }: { items: Breakdown[]; total: Su
   )
 }
 
-export function ProviderShareCard({ items, total }: { items: Breakdown[]; total: Summary }) {
+export function ProviderShareCard({
+  items,
+  total,
+  className,
+}: {
+  items: Breakdown[]
+  total: Summary
+  className?: string
+}) {
   const { t, i18n } = useTranslation()
   const language = i18n.resolvedLanguage ?? "zh"
   return (
-    <UsageCard title={t("activity.providerShare")} hint={t("activity.providerShareHint")}>
+    <UsageCard
+      title={t("activity.providerShare")}
+      hint={t("activity.providerShareHint")}
+      className={className}
+    >
       {items.length ? (
         <ul className="app-scroll max-h-96 space-y-3 overflow-auto pr-1">
           {items.map((item, index) => {
