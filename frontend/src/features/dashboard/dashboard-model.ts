@@ -1,3 +1,10 @@
+import {
+  chartAxisMaximum,
+  chartAxisTicks,
+  chartDuration,
+  chartLabelStep,
+  chartPercent,
+} from "../../lib/chart"
 import type { DashboardQuery } from "../../services/dashboard"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 import type { RouteItem } from "../../services/routing"
@@ -56,11 +63,7 @@ export function dashboardPointLabel(
 }
 
 export function formatDashboardLatency(value: number | null | undefined, language: string) {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "—"
-  const locale = language === "zh" ? "zh-CN" : "en-US"
-  return value < 1000
-    ? `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value)} ms`
-    : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value / 1000)} s`
+  return chartDuration(value, language)
 }
 
 /** 首页只看启用提供商下启用的账号；问题列表与体检清单共用同一口径。 */
@@ -161,30 +164,12 @@ export function dashboardChecklist(
 }
 
 export function dashboardTokenRatio(value: string, maximum: bigint) {
-  return maximum > 0n ? Number((BigInt(value) * 10000n) / maximum) / 100 : 0
+  return chartPercent(BigInt(value), maximum)
 }
 
-/**
- * 趋势图纵轴上限：留 5% 余量后按一位有效数字向上取整，
- * 让刻度落在 0／400／800／1.2K 这类整数上。Token 合计会超出 Number 安全范围，全程使用 BigInt。
- */
-export function dashboardAxisMaximum(maximum: bigint) {
-  if (maximum <= 0n) return 4n
-  const headroom = (maximum * 105n + 99n) / 100n
-  const quarter = (headroom + 3n) / 4n
-  if (quarter <= 1n) return 4n
-  const magnitude = 10n ** BigInt(quarter.toString().length - 1)
-  const step = quarter % magnitude === 0n ? quarter : (quarter / magnitude + 1n) * magnitude
-  return step * 4n
-}
-
-/** 纵轴从上到下的五个刻度值，首项为上限、末项为 0。 */
-export function dashboardAxisTicks(maximum: bigint) {
-  const axis = dashboardAxisMaximum(maximum)
-  return [axis, (axis * 3n) / 4n, axis / 2n, axis / 4n, 0n]
-}
-
-/** 横轴标签抽稀间隔：最多 6 个标签，末位标签始终显示。 */
-export function dashboardLabelStep(count: number) {
-  return count <= 1 ? 1 : Math.max(1, Math.ceil((count - 1) / 5))
+// 仪表盘与用量页共用同一套坐标轴／抽稀算法，保留原有导出名避免调用方和测试改动。
+export {
+  chartAxisMaximum as dashboardAxisMaximum,
+  chartAxisTicks as dashboardAxisTicks,
+  chartLabelStep as dashboardLabelStep,
 }

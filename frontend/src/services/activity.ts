@@ -5,8 +5,22 @@ import type {
   UsageInfo,
   Breakdown,
   ProviderModel,
+  Summary,
+  HourUsage,
+  ModelDay,
+  CacheUsage,
+  Reliability,
 } from "../../bindings/omniproxy/internal/application/activity"
-export type { RequestItem, UsageInfo, Breakdown }
+export type {
+  RequestItem,
+  UsageInfo,
+  Breakdown,
+  Summary,
+  HourUsage,
+  ModelDay,
+  CacheUsage,
+  Reliability,
+}
 export type ProviderModelUsage = ProviderModel
 export const readUsage = () => AppService.UsageRead()
 export const readAccountTokenUsage = (id: string) => AppService.AccountTokenUsage(id)

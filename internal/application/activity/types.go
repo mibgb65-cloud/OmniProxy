@@ -90,12 +90,50 @@ type Breakdown struct {
 	WorkspaceID string  `json:"workspaceId"`
 	Summary     Summary `json:"summary"`
 }
+
+// HourUsage 是近 30 天按本地时刻聚合的用量；0–23 全量返回，空时段保持零。
+type HourUsage struct {
+	Hour    int     `json:"hour"`
+	Summary Summary `json:"summary"`
+}
+
+// ModelDay 是单个模型在近 30 天中某一天的用量，用于模型结构趋势。
+type ModelDay struct {
+	Day     string  `json:"day"`
+	Model   string  `json:"model"`
+	Summary Summary `json:"summary"`
+}
+
+// CacheUsage 是缓存命中的可确认下界：只统计上游明确报告过缓存明细的请求。
+type CacheUsage struct {
+	CachedInputTokens string `json:"cachedInputTokens"`
+	KnownRequests     int64  `json:"knownRequests"`
+}
+
+// Reliability 是近 30 天已结束请求的质量汇总；成功率与仪表盘口径一致。
+type Reliability struct {
+	Requests            int64    `json:"requests"`
+	Success             int64    `json:"success"`
+	Failed              int64    `json:"failed"`
+	Cancelled           int64    `json:"cancelled"`
+	SuccessRate         *float64 `json:"successRate"`
+	AverageLatencyMS    *float64 `json:"averageLatencyMs"`
+	AverageFirstTokenMS *float64 `json:"averageFirstTokenMs"`
+	FirstTokenSamples   int64    `json:"firstTokenSamples"`
+}
+
 type UsageInfo struct {
 	ProviderModels []ProviderModel `json:"providerModels,omitempty"`
+	Previous       Summary         `json:"previous"`
+	Cache          CacheUsage      `json:"cache"`
+	Reliability    Reliability     `json:"reliability"`
 	AllTime        Summary         `json:"allTime"`
 	Days           []Breakdown     `json:"days"`
+	Hours          []HourUsage     `json:"hours"`
+	Providers      []Breakdown     `json:"providers"`
 	Accounts       []Breakdown     `json:"accounts"`
 	Models         []Breakdown     `json:"models"`
+	ModelDays      []ModelDay      `json:"modelDays"`
 }
 type Retention struct {
 	MaxRecords    int `json:"maxRecords"`

@@ -73,9 +73,30 @@ it("大整数 Token 保持精确，累计统计和报告覆盖率可见", async 
       requests: 2,
       completeUsage: 1,
     },
+    previous: {
+      inputTokens: "0",
+      outputTokens: "0",
+      totalTokens: "0",
+      requests: 0,
+      completeUsage: 0,
+    },
     days: [],
+    hours: [],
+    providers: [],
     accounts: [],
     models: [],
+    modelDays: [],
+    cache: { cachedInputTokens: "0", knownRequests: 0 },
+    reliability: {
+      requests: 0,
+      success: 0,
+      failed: 0,
+      cancelled: 0,
+      successRate: null,
+      averageLatencyMs: null,
+      averageFirstTokenMs: null,
+      firstTokenSamples: 0,
+    },
   })
   mount(<UsageView />)
   expect(await screen.findByText("9,007,199,254,741,000")).toBeInTheDocument()

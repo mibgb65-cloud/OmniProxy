@@ -53,6 +53,14 @@ export interface Breakdown {
 }
 
 /**
+ * CacheUsage 是缓存命中的可确认下界：只统计上游明确报告过缓存明细的请求。
+ */
+export interface CacheUsage {
+    "cachedInputTokens": string;
+    "knownRequests": number;
+}
+
+/**
  * DashboardInfo 不包含凭据或请求正文，缺失历史不会推算为完整数据。
  */
 export interface DashboardInfo {
@@ -111,6 +119,23 @@ export interface DashboardSummary {
 }
 
 /**
+ * HourUsage 是近 30 天按本地时刻聚合的用量；0–23 全量返回，空时段保持零。
+ */
+export interface HourUsage {
+    "hour": number;
+    "summary": Summary;
+}
+
+/**
+ * ModelDay 是单个模型在近 30 天中某一天的用量，用于模型结构趋势。
+ */
+export interface ModelDay {
+    "day": string;
+    "model": string;
+    "summary": Summary;
+}
+
+/**
  * ProviderModel 保存具体提供商与实际模型的累计，跨账号汇总且保留历史名称。
  */
 export interface ProviderModel {
@@ -143,6 +168,20 @@ export interface QuotaWindowEstimate {
     "requests": number;
     "unpricedRequests": number;
     "resetAdjusted": boolean;
+}
+
+/**
+ * Reliability 是近 30 天已结束请求的质量汇总；成功率与仪表盘口径一致。
+ */
+export interface Reliability {
+    "requests": number;
+    "success": number;
+    "failed": number;
+    "cancelled": number;
+    "successRate": number | null;
+    "averageLatencyMs": number | null;
+    "averageFirstTokenMs": number | null;
+    "firstTokenSamples": number;
 }
 
 export interface RequestItem {
@@ -230,8 +269,14 @@ export interface Summary {
 
 export interface UsageInfo {
     "providerModels"?: ProviderModel[] | null;
+    "previous": Summary;
+    "cache": CacheUsage;
+    "reliability": Reliability;
     "allTime": Summary;
     "days": Breakdown[] | null;
+    "hours": HourUsage[] | null;
+    "providers": Breakdown[] | null;
     "accounts": Breakdown[] | null;
     "models": Breakdown[] | null;
+    "modelDays": ModelDay[] | null;
 }
