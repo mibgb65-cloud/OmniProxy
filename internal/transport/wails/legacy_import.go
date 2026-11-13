@@ -57,6 +57,13 @@ func (s *AppService) ImportLegacyData(directory, snapshot string) (legacyimport.
 	if err != nil {
 		return legacyimport.Result{}, errors.New("legacy: target_unavailable")
 	}
-	// 导入只新增账号；不触发目录同步，避免同时改写正在使用的客户端配置。
-	return legacyimport.New(s.db, store).Import(context.Background(), directory, snapshot)
+	// 导入只新增账号；目录同步放到后台，导入返回后由自动同步补齐模型与受管客户端，
+	// 不再要求用户逐个账号点「重新同步到 AI Agent」。
+	result, err := legacyimport.New(s.db, store).Import(context.Background(), directory, snapshot)
+	if err != nil {
+		return legacyimport.Result{}, err
+	}
+	s.requestGoogleModelSync()
+	s.requestOpenAIModelSync()
+	return result, nil
 }
