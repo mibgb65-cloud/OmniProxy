@@ -132,6 +132,8 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 - 桌面端把 `-low`／`-medium`／`-high`／`-xhigh` 变体当作独立模型发送，同时还会带一个
   档位字段；型号里的档位即用户的选择，网关以型号为准（并移除矛盾的档位字段），因此
   `gemini-4-hydrogen-high` 的记录与上游 `thinkingLevel` 都是 `high`，不会被字段降级。
+  Google 只发布变体、没有基础型号（`gemini-4-hydrogen`），因此目录折叠不会发生；这种
+  目录用“同一前缀下至少两个已知档位”确认后缀是档位，只有一个后缀时保留客户端档位。
 - 先在桌面端启动一次，确保设置文件存在，再回来连接；连接后必须完全退出并重启。
 - 若组织下发了 `admin_settings.json` 的网关，或设置了 `AGY_LLM_GATEWAY_URL`
   等 `AGY_LLM_GATEWAY_*` 变量，它们优先于用户设置文件，本机卡片写入不会生效；

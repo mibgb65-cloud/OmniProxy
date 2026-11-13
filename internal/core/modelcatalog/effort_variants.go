@@ -139,6 +139,22 @@ func EffortVariantSuffix(model string) (string, bool) {
 	return "", false
 }
 
+// EffortVariantBaseName 把带档位后缀的型号拆成基础名与档位（“…-high” → “…” / “high”）。
+//
+// 上游有时只发布变体、没有基础型号（Google 的 Gemini 4 系列），目录折叠因此不会发生；
+// 这种目录下要靠同族兄弟变体确认后缀是档位而不是型号名的一部分。
+func EffortVariantBaseName(model string) (string, string, bool) {
+	level, ok := EffortVariantSuffix(model)
+	if !ok {
+		return "", "", false
+	}
+	base := strings.TrimSpace(model[:len(model)-len(level)-1])
+	if base == "" {
+		return "", "", false
+	}
+	return base, level, true
+}
+
 // EffortVariantBase 把旧的档位变体 ID（例如 “…-low”）还原为基础模型与档位。
 // 目录折叠后变体不再单独发布，历史选择必须继续可用。
 func EffortVariantBase(entries []Entry, model string) (Entry, string, bool) {

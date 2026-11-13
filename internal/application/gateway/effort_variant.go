@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	catalog "omniproxy/internal/core/modelcatalog"
 	"omniproxy/internal/core/proxy"
@@ -32,7 +33,16 @@ func (s *Service) applyEffortVariant(ctx context.Context, request proxy.Request)
 		return request, nil
 	}
 	if variantShaped {
-		if _, variantLevel, ok := catalog.EffortVariantBase(entries, request.Model); ok {
+		variantLevel, confirmed := "", false
+		if _, level, ok := catalog.EffortVariantBase(entries, request.Model); ok {
+			variantLevel, confirmed = level, true
+		} else if base, level, ok := catalog.EffortVariantBaseName(request.Model); ok &&
+			// 目录折叠需要基础型号存在；上游只发布变体时（Gemini 4 的 …-high／…-xhigh）
+			// 改用同族兄弟档位确认：同一前缀下至少两个已知档位，才认定后缀是档位。
+			siblingEffortLevels(entries, base) >= 2 {
+			variantLevel, confirmed = level, true
+		}
+		if confirmed {
 			request.Effort = variantLevel
 			// 型号已经表达档位：正文里那个档位字段必须移除，否则适配器的白名单会
 			// 收到一个与型号矛盾的取值。
@@ -65,6 +75,33 @@ func (s *Service) applyEffortVariant(ctx context.Context, request proxy.Request)
 		return request, nil
 	}
 	return request, nil
+}
+
+// siblingEffortLevels 数出同一基础名前缀下已确认的档位数量。
+//
+// 只按 ID 后缀计数：同族里存在多个档位变体，说明这个前缀是型号家族、后缀是档位；
+// 只有一个后缀时不作判断，避免把恰好以 “-high” 结尾的普通型号当成档位。
+func siblingEffortLevels(entries []catalog.Entry, base string) int {
+	prefix := base + "-"
+	levels := map[string]bool{}
+	kind := ""
+	for _, entry := range entries {
+		if !strings.HasPrefix(entry.ID, prefix) {
+			continue
+		}
+		level, ok := catalog.EffortVariantSuffix(entry.ID)
+		if !ok {
+			continue
+		}
+		if kind == "" {
+			kind = entry.ProviderKind
+		}
+		if entry.ProviderKind != kind {
+			continue
+		}
+		levels[level] = true
+	}
+	return len(levels)
 }
 
 // rewriteEffortVariant 改写模型 ID 并移除档位字段，保留同级的其他配置。

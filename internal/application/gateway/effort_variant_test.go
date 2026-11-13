@@ -90,6 +90,70 @@ func (r *variantRouter) Resolve(_ context.Context, model string) (routes.Preview
 	return routes.Preview{Routable: false, Matched: false, ErrorCode: "unsupported_model"}, nil
 }
 
+// variantOnlyEntries 复刻真实生产目录：上游只发布档位变体，没有基础型号，
+// 目录折叠因此不会发生（Metadata.EffortModels 为空）。
+func variantOnlyEntries() []catalog.Entry {
+	return []catalog.Entry{
+		{ID: "gemini-4-hydrogen-low", Name: "Gemini 4 Hydrogen (Low)", ProviderKind: "google", ProviderID: "builtin_google"},
+		{ID: "gemini-4-hydrogen-medium", Name: "Gemini 4 Hydrogen (Medium)", ProviderKind: "google", ProviderID: "builtin_google"},
+		{ID: "gemini-4-hydrogen-high", Name: "Gemini 4 Hydrogen (High)", ProviderKind: "google", ProviderID: "builtin_google"},
+		{ID: "gemini-4-hydrogen-xhigh", Name: "Gemini 4 Hydrogen (XHigh)", ProviderKind: "google", ProviderID: "builtin_google"},
+	}
+}
+
+// 只有变体的目录下也必须以型号为准：真实记录里 gemini-4-hydrogen-xhigh 仍是 low。
+func TestVariantOnlyCatalogUsesModelLevel(t *testing.T) {
+	entries := variantOnlyEntries()
+	service := &Service{router: &variantRouter{entries: entries}}
+	for _, test := range []struct{ model, clientLevel, want string }{
+		{"gemini-4-hydrogen-xhigh", "low", "xhigh"},
+		{"gemini-4-hydrogen-high", "low", "high"},
+		{"gemini-4-hydrogen-low", "high", "low"},
+		{"gemini-4-hydrogen-xhigh", "", "xhigh"},
+	} {
+		request, err := service.RouteRequest(context.Background(), proxy.Request{
+			Protocol: "chat",
+			Model:    test.model,
+			Body:     familyBody(test.model, test.clientLevel),
+		})
+		if err != nil {
+			t.Fatalf("%s rejected: %v", test.model, err)
+		}
+		if request.Model != test.model {
+			t.Fatalf("%s rewritten to %q", test.model, request.Model)
+		}
+		if request.Effort != test.want {
+			t.Fatalf("%s effort = %q, want %q", test.model, request.Effort, test.want)
+		}
+		var parsed map[string]any
+		if json.Unmarshal(request.Body, &parsed) != nil {
+			t.Fatalf("%s body unreadable", test.model)
+		}
+		if _, kept := parsed["reasoning_effort"]; kept {
+			t.Fatalf("%s kept a conflicting reasoning_effort", test.model)
+		}
+	}
+}
+
+// 只有一个变体、没有同族兄弟时不猜测：恰好以 “-high” 结尾的普通型号保持客户端档位。
+func TestLoneVariantSuffixDoesNotOverrideClientLevel(t *testing.T) {
+	entries := []catalog.Entry{
+		{ID: "gemini-9-solo-high", Name: "Gemini 9 Solo High", ProviderKind: "google", ProviderID: "builtin_google"},
+	}
+	service := &Service{router: &variantRouter{entries: entries}}
+	request, err := service.RouteRequest(context.Background(), proxy.Request{
+		Protocol: "chat",
+		Model:    "gemini-9-solo-high",
+		Body:     familyBody("gemini-9-solo-high", "low"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if request.Effort != "low" {
+		t.Fatalf("effort = %q, want the client value", request.Effort)
+	}
+}
+
 func TestRewriteEffortVariantReplacesModelAndDropsLevel(t *testing.T) {
 	body, err := rewriteEffortVariant("messages", []byte(`{"model":"base","output_config":{"effort":"high","format":"kept"},"thinking":{"type":"adaptive"},"messages":[]}`), "base-high")
 	if err != nil {
