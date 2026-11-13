@@ -125,6 +125,20 @@ func EffortLevels(entry Entry) []string {
 	return levels
 }
 
+// EffortVariantSuffix 报告模型 ID 是否以上游档位后缀结尾（例如 “…-high”）。
+//
+// 只用于决定要不要再查目录：真正的判定仍以目录里已确认的变体映射为准，
+// 因此恰好同名的普通型号不会被误认。
+func EffortVariantSuffix(model string) (string, bool) {
+	lower := strings.ToLower(strings.TrimSpace(model))
+	for _, level := range variantEffortOrder {
+		if strings.HasSuffix(lower, "-"+level) {
+			return level, true
+		}
+	}
+	return "", false
+}
+
 // EffortVariantBase 把旧的档位变体 ID（例如 “…-low”）还原为基础模型与档位。
 // 目录折叠后变体不再单独发布，历史选择必须继续可用。
 func EffortVariantBase(entries []Entry, model string) (Entry, string, bool) {

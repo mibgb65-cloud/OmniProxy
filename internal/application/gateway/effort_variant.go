@@ -13,14 +13,40 @@ import (
 // Google 系上游用独立型号表达 thinking level（“…-low”）。目录已把这些变体折叠成
 // 一行模型 + 档位枚举，因此请求必须换回具体型号，并移除已经表达的档位字段：
 // 订阅适配器的生成参数是白名单校验，多余的 reasoning_effort 会被直接拒绝。
+//
+// 反过来，客户端直接把变体型号当模型发送时（Antigravity 桌面端会这样），型号本身
+// 就是档位选择：它会同时带一个档位字段（实测为 low），不能让字段把型号降级。
 func (s *Service) applyEffortVariant(ctx context.Context, request proxy.Request) (proxy.Request, error) {
 	level := proxy.ReasoningEffort(request.Protocol, request.Body)
-	if level == "" || s.router == nil {
+	if s.router == nil {
+		return request, nil
+	}
+	// 只有型号长得像变体时才多读一次目录；确认仍以目录里的变体映射为准。
+	_, variantShaped := catalog.EffortVariantSuffix(request.Model)
+	if level == "" && !variantShaped {
 		return request, nil
 	}
 	entries, err := s.Catalog(ctx)
 	if err != nil {
 		// 目录不可用时不改写请求；后面的路由解析仍会给出明确失败码。
+		return request, nil
+	}
+	if variantShaped {
+		if _, variantLevel, ok := catalog.EffortVariantBase(entries, request.Model); ok {
+			request.Effort = variantLevel
+			// 型号已经表达档位：正文里那个档位字段必须移除，否则适配器的白名单会
+			// 收到一个与型号矛盾的取值。
+			if level != "" {
+				body, err := rewriteEffortVariant(request.Protocol, request.Body, request.Model)
+				if err != nil {
+					return request, err
+				}
+				request.Body = body
+			}
+			return request, nil
+		}
+	}
+	if level == "" {
 		return request, nil
 	}
 	for _, entry := range entries {
