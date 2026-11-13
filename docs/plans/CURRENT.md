@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已完成：[TASK-20261113-002](../tasks/completed/2026-11/TASK-20261113-002-legacy-import-auto-model-sync.md) 导入旧版数据后自动同步模型目录：`ImportLegacyData` 成功后请求既有的 Google／OpenAI 自动同步（后台扫描 → `RefreshCatalog` 重写受管客户端 → `modelcatalog:updated`），用户不再需要逐个账号点「重新同步到 AI Agent」；导入失败不触发同步，手动按钮保留用于重试。回归测试在隔离 profile 中先消费启动扫描、再导入并断言两个通道各收到一次通知。实现提交 `c0c06f2f`。
+
+已完成：[TASK-20261113-001](../tasks/completed/2026-11/TASK-20261113-001-gemini-xhigh-thinking-level.md) Gemini 4 Hydrogen 的 `xhigh` 档不再被降级：`levelOf` 之前只映射 `low`／`medium`／其它→`high`，模型 ID 已换成 `-xhigh` 但 `thinkingConfig.thinkingLevel` 仍写 `high`。真实请求确认上游接受 `xhigh`（`gemini-4-hydrogen-xhigh`、以及 `gemini-4-hydrogen` + `reasoning_effort: xhigh` 均 200），故改为透传。实现提交 `1263e1f7`。
+
 已修复：[TASK-20261112-017](../tasks/completed/2026-11/TASK-20261112-017-antigravity-response-header-timeout.md) Antigravity 会话在约 30.1 秒统一变成 `502 operation_failed`：订阅客户端 `ResponseHeaderTimeout` 只有 30 秒，而桌面端使用的思考型模型（Gemini 4 Argon 等）在首个 token 前可能先想一分钟以上，流式响应也要等首个分片才有响应头。响应头等待改为 5 分钟、TLS 握手仍 10 秒；同时新增 `clientRequestTimeout`，Antigravity 整请求至少 10 分钟（普通 120 秒会切断长流），其它客户端时限不变。隔离实例验证：带约 8 KB system 的流式请求 60.3 秒返回 200（修复前必然 30.1 秒失败），常速请求仍 9.1 秒。
 
 已修复：[TASK-20261112-015](../tasks/completed/2026-11/TASK-20261112-015-antigravity-protocol-marker.md) Antigravity 请求缺少 `Protocol` 标记导致任意 Google 模型 `400 unsupported_protocol`：桌面端走 `ParseAntigravityRequest` → `parseChatRequest`，该分支没填协议。现在解析层统一标记 `chat`。

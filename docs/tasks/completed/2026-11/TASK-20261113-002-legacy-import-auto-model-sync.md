@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -158,10 +158,10 @@ PASS
 ## Commit
 
 ```text
-<commit hash> 见归档提交
+c0c06f2f feat(gateway): 导入旧版数据后自动同步模型目录
 ```
 
-未打标签、未推送。
+归档提交见 `docs/tasks/completed/2026-11/`。未打标签、未推送。
 
 ---
 
@@ -173,4 +173,4 @@ PASS
 
 # Completed
 
-（未完成）
+2026-11-13 08:52

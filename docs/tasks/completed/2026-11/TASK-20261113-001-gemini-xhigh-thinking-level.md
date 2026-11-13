@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -159,10 +159,10 @@ gemini-4-hydrogen + reasoning_effort=xhigh   → 200
 ## Commit
 
 ```text
-<commit hash> 见归档提交
+1263e1f7 fix(antigravity): 透传上游 xhigh 思考档位，不再降级为 high
 ```
 
-未打标签、未推送。
+归档提交见 `docs/tasks/completed/2026-11/`。未打标签、未推送。
 
 ---
 
@@ -174,4 +174,4 @@ Antigravity 的 `xhigh` 档位不再被降级成 `high`：模型 ID 与 `thinkin
 
 # Completed
 
-（未完成）
+2026-11-13 08:52
