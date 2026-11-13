@@ -47,6 +47,7 @@ func (s *AppService) initGateway() {
 	s.gateway.SetAccountRotationMode(gateway.NewCodexSettingsService(s.db).AccountRotationMode)
 	s.gateway.SetCodexUpstreamBase(gateway.NewCodexSettingsService(s.db).UpstreamBaseURL)
 	s.gateway.SetRiverAccountRotationMode(gateway.NewRiverSettingsService(s.db).AccountRotationMode)
+	s.gateway.SetGoogleAccountRotationMode(gateway.NewGoogleSettingsService(s.db).AccountRotationMode)
 	s.agents = agentconfig.New(s.db, store, paths, s.prof.ProxyPort, s.gateway)
 	// v1 语义：一键配置时把池账号写进客户端登录，网关拥有登录而不是借用户登录。
 	s.agents.SetCodexLogin(s.codexLoginSource())

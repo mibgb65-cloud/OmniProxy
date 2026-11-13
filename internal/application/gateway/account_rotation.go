@@ -33,6 +33,10 @@ func (s *Service) rotateAccounts(ctx context.Context, initial target, request pr
 	if initial.kind == "river" {
 		return s.rotateRiverAccounts(ctx, initial, request)
 	}
+	// Google 订阅账号与 Codex 订阅一样按同池候选均衡；密钥账号不走这条分支。
+	if initial.kind == "google" && initial.authMethod == account.AuthSubscription {
+		return s.rotateGoogleAccounts(ctx, initial, request)
+	}
 	candidates := request.Candidates
 	if initial.kind != "openai" || initial.authMethod != account.AuthSubscription || request.FixedAccount || s.rotationMode == nil {
 		return candidates, nil

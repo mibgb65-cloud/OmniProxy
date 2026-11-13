@@ -382,6 +382,13 @@ export function GetCodexSettings(): $CancellablePromise<gateway$0.CodexSettings>
 }
 
 /**
+ * GetGoogleSettings 读取 Google 订阅账号的同池轮换设置。
+ */
+export function GetGoogleSettings(): $CancellablePromise<gateway$0.GoogleSettings> {
+    return $Call.ByID(2032894589);
+}
+
+/**
  * GetKimiSettings 读取独立计费及地区偏好，不读取凭据。
  */
 export function GetKimiSettings(): $CancellablePromise<routing$0.KimiSettings> {
@@ -740,6 +747,13 @@ export function SetDataDir(path: string): $CancellablePromise<$models.SetDataDir
  */
 export function SetGatewayAutoStart(enabled: boolean): $CancellablePromise<boolean> {
     return $Call.ByID(3937825228, enabled);
+}
+
+/**
+ * SetGoogleAccountRotationMode 保存 Google 订阅账号的轮换方式，立即影响新请求。
+ */
+export function SetGoogleAccountRotationMode(mode: string): $CancellablePromise<gateway$0.GoogleSettings> {
+    return $Call.ByID(2526273786, mode);
 }
 
 /**

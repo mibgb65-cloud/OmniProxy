@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { RiverAccountSettings } from "./river-account-settings"
+import { GoogleAccountSettings } from "./google-account-settings"
 import { ArrowLeft } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useUIStore } from "../../stores/ui-store"
@@ -95,6 +96,7 @@ export function ProviderAccountsView({
             <div className="flex flex-wrap items-center gap-2">
               {provider.kind === "openai" ? <OpenAIAccountSettings /> : null}
               {provider.kind === "river" ? <RiverAccountSettings /> : null}
+              {provider.kind === "google" ? <GoogleAccountSettings /> : null}
               {provider.kind === "mimo" ? <MiMoAccountSettings /> : null}
               {provider.kind === "stepfun" ? <StepFunAccountSettings /> : null}
               {provider.kind === "kimi" ? <KimiAccountSettings /> : null}

@@ -13,6 +13,7 @@ import { activityZh } from "./activity-zh"
 import { quotaZh } from "./quota-zh"
 import { dashboardZh } from "./dashboard-zh"
 import { googleZh } from "./google-zh"
+import { googleSettingsZh } from "./google-settings-zh"
 import { quotaUsdZh } from "./quota-usd-zh"
 
 /**
@@ -65,6 +66,7 @@ export const zh = {
   "routing.error.ambiguous_minimax_pool":
     "存在多个 MiniMax 平台或 Key 类型，请选择通道模型名或固定账号。",
   ...googleZh,
+  ...googleSettingsZh,
   ...gatewayZh,
   ...routingZh,
   ...logsZh,

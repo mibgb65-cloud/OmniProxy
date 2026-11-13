@@ -51,15 +51,17 @@ type Service struct {
 	failoverEnabled   func(context.Context) (bool, error)
 	rotationMode      func(context.Context) (string, error)
 	riverRotationMode func(context.Context) (string, error)
-	rotation          rotationState
-	server            *proxy.Server
-	providers         ProviderReader
-	accounts          AccountAccess
-	client            *deepseek.Client
-	log               *slog.Logger
-	timeout           time.Duration
-	router            Router
-	subscription      SubscriptionAccess
+	// googleRotationMode 读取 Google 订阅账号的同池轮换方式。
+	googleRotationMode func(context.Context) (string, error)
+	rotation           rotationState
+	server             *proxy.Server
+	providers          ProviderReader
+	accounts           AccountAccess
+	client             *deepseek.Client
+	log                *slog.Logger
+	timeout            time.Duration
+	router             Router
+	subscription       SubscriptionAccess
 	// upstreamBase 读取 Codex 透明转发的上游基址；nil 时用默认官方端点。
 	upstreamBase    func(context.Context) (string, error)
 	chatgpt         *chatgpt.Client

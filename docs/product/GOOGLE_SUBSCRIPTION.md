@@ -58,6 +58,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   模型和额度独立查询、缓存与刷新，
   单项失败不隐藏另一项结果。
 - 不请求付费积分回退，不切换普通 Gemini API Key 重试；上游限流返回 429。
+- 同一提供商下的多个 Google 订阅账号在「Google 账号设置」选择“队列轮换／平衡切换”：
+  队列按候选顺序优先用当前账号，均衡在同池可用账号间轮流分配新请求（只均衡请求数，
+  不均衡 Token）；只对订阅账号生效，API Key 账号不参与，固定账号不切换；设置持久化在
+  `google_settings`，每个请求读取一次以支持热切换。
 - Antigravity 桌面端使用官方 Enterprise Gateway（`wireProtocol: "openai"`）接入，
   不拦截 TLS、不装本地 CA；连接期间桌面端不使用 Google 登录，Google 账号专属的
   实验与命令（`/boost`、`/teamwork`、`/plugin`、`/generative_ui`）暂时不可用，
@@ -120,6 +124,9 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   故障切换与请求记录。桌面端自带的 `reasoning_effort`、`service_tier`、
   `metadata`、`store` 只在 `client=antigravity` 时剥离，不改变其他客户端。
 - 桌面端通过接入 Key 识别归属；Key 只存在本机设置文件与受保护存储中。
+- 桌面端把 `-low`／`-medium`／`-high`／`-xhigh` 变体当作独立模型发送，同时还会带一个
+  档位字段；型号里的档位即用户的选择，网关以型号为准（并移除矛盾的档位字段），因此
+  `gemini-4-hydrogen-high` 的记录与上游 `thinkingLevel` 都是 `high`，不会被字段降级。
 - 先在桌面端启动一次，确保设置文件存在，再回来连接；连接后必须完全退出并重启。
 - 若组织下发了 `admin_settings.json` 的网关，或设置了 `AGY_LLM_GATEWAY_URL`
   等 `AGY_LLM_GATEWAY_*` 变量，它们优先于用户设置文件，本机卡片写入不会生效；

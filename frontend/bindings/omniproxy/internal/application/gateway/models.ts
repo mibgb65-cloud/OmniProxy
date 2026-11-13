@@ -40,6 +40,13 @@ export interface FailoverSettings {
 }
 
 /**
+ * GoogleSettings 是 Google AI 订阅账号的接入设置，不包含凭据或消息内容。
+ */
+export interface GoogleSettings {
+    "accountRotationMode": string;
+}
+
+/**
  * Info 包含运行快照和本版实际支持的协议。
  */
 export interface Info {

@@ -14,6 +14,7 @@ import { activityEn } from "./activity-en"
 import { quotaEn } from "./quota-en"
 import { dashboardEn } from "./dashboard-en"
 import { googleEn } from "./google-en"
+import { googleSettingsEn } from "./google-settings-en"
 import { quotaUsdEn } from "./quota-usd-en"
 
 /**
@@ -66,6 +67,7 @@ export const en: Record<keyof typeof zh, string> = {
   "routing.error.ambiguous_minimax_pool":
     "Multiple MiniMax platforms or Key types are available. Choose a channel model or fixed account.",
   ...googleEn,
+  ...googleSettingsEn,
   ...gatewayEn,
   ...routingEn,
   ...logsEn,
