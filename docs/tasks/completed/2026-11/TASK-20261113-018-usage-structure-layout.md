@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -154,4 +154,4 @@ In Progress
 
 # Git
 
-- Commit: TBD
+- Commit: `d8d673d9`（feat(activity): 用量页结构卡片改为两栏并拉齐高度）
