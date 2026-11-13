@@ -332,6 +332,7 @@ export const zh = {
   "providers.proxy.host": "服务器地址",
   "providers.proxy.port": "端口",
   "providers.proxy.portInvalid": "请输入 1 到 65535 之间的端口。",
+  "providers.proxy.hostInvalid": "服务器地址只填主机名或 IP，不含协议、端口或路径。",
   "providers.proxy.username": "用户名",
   "providers.proxy.password": "密码",
   "providers.proxy.passwordKeep": "已保存密码，留空表示不修改",

@@ -3,6 +3,7 @@ package netproxy
 import (
 	"context"
 	"errors"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -68,5 +69,9 @@ func TestDiscoverFindsDefaultPorts(t *testing.T) {
 	found := Discover(ctx, "127.0.0.1", []int{endpoint.Port})
 	if len(found) != 1 || found[0].Port != endpoint.Port || found[0].Scheme != SchemeSOCKS5 {
 		t.Fatalf("discover = %#v", found)
+	}
+	// Endpoint 是带协议的展示文本，Host 必须是可直接回填表单的主机。
+	if found[0].Host != "127.0.0.1" || found[0].Endpoint != "auto://127.0.0.1:"+strconv.Itoa(endpoint.Port) {
+		t.Fatalf("discovered host/endpoint = %#v", found[0])
 	}
 }

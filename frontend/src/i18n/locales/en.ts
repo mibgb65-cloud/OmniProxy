@@ -347,6 +347,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.proxy.host": "Server address",
   "providers.proxy.port": "Port",
   "providers.proxy.portInvalid": "Enter a port between 1 and 65535.",
+  "providers.proxy.hostInvalid": "Enter only a host name or IP, without a scheme, port, or path.",
   "providers.proxy.username": "Username",
   "providers.proxy.password": "Password",
   "providers.proxy.passwordKeep": "A password is saved; leave blank to keep it",

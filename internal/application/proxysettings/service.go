@@ -82,6 +82,7 @@ type TestResult struct {
 // Discovered 是本地端口发现结果。
 type Discovered struct {
 	Endpoint  string `json:"endpoint"`
+	Host      string `json:"host"`
 	Scheme    string `json:"scheme"`
 	SOCKS5    bool   `json:"socks5"`
 	HTTP      bool   `json:"http"`
@@ -210,7 +211,7 @@ func (s *Service) Discover(ctx context.Context) ([]Discovered, error) {
 	result := make([]Discovered, 0, len(found))
 	for _, item := range found {
 		result = append(result, Discovered{
-			Endpoint: item.Endpoint, Scheme: item.Scheme, SOCKS5: item.SOCKS5,
+			Endpoint: item.Endpoint, Host: item.Host, Scheme: item.Scheme, SOCKS5: item.SOCKS5,
 			HTTP: item.HTTP, Auth: item.Auth, Port: item.Port, LatencyMs: item.LatencyMs,
 		})
 	}

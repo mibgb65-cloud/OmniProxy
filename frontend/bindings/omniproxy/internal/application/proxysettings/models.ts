@@ -6,6 +6,7 @@
  */
 export interface Discovered {
     "endpoint": string;
+    "host": string;
     "scheme": string;
     "socks5": boolean;
     "http": boolean;

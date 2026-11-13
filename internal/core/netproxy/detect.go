@@ -191,7 +191,9 @@ func isDialFailure(err error) bool {
 
 // Discovered 是通过端口发现得到的候选端点。
 type Discovered struct {
+	// Endpoint 是带协议的展示文本；Host/Port 是可直接回填表单的字段，UI 不应反解 Endpoint。
 	Endpoint  string `json:"endpoint"`
+	Host      string `json:"host"`
 	Scheme    string `json:"scheme"`
 	SOCKS5    bool   `json:"socks5"`
 	HTTP      bool   `json:"http"`
@@ -225,7 +227,7 @@ func Discover(ctx context.Context, host string, ports []int) []Discovered {
 				return
 			}
 			results[index] = Discovered{
-				Endpoint: endpoint.String(), Scheme: detection.Scheme, SOCKS5: detection.SOCKS5,
+				Endpoint: endpoint.String(), Host: host, Scheme: detection.Scheme, SOCKS5: detection.SOCKS5,
 				HTTP: detection.HTTP, Auth: detection.Auth, Port: port, LatencyMs: detection.LatencyMs,
 			}
 		}(index, port)

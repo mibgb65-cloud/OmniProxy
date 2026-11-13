@@ -218,7 +218,8 @@ describe("ProxySettingsDialog", () => {
     const user = userEvent.setup()
     vi.mocked(discoverProxyPorts).mockResolvedValue([
       {
-        endpoint: "127.0.0.1:7890",
+        endpoint: "auto://127.0.0.1:7890",
+        host: "127.0.0.1",
         scheme: "socks5",
         socks5: true,
         http: false,
@@ -230,10 +231,31 @@ describe("ProxySettingsDialog", () => {
     renderDialog()
     await openForm()
     await user.click(screen.getByRole("button", { name: "探测本机代理" }))
-    await user.click(await screen.findByRole("button", { name: "127.0.0.1:7890 · SOCKS5" }))
+    await user.click(await screen.findByRole("button", { name: "auto://127.0.0.1:7890 · SOCKS5" }))
     expect(screen.getByLabelText("服务器地址")).toHaveValue("127.0.0.1")
     expect(screen.getByLabelText("端口")).toHaveValue(7890)
     expect(screen.getByLabelText("协议")).toHaveTextContent("SOCKS5")
+    expect(screen.getByRole("button", { name: "保存" })).toBeEnabled()
+  })
+
+  it("explains a server address that still contains a scheme", async () => {
+    const user = userEvent.setup()
+    renderDialog()
+    await openForm()
+    const host = screen.getByLabelText("服务器地址")
+    await user.clear(host)
+    await user.type(host, "auto://127.0.0.1")
+    expect(
+      await screen.findByText("服务器地址只填主机名或 IP，不含协议、端口或路径。"),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "测试" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "保存" })).toBeDisabled()
+    await user.clear(host)
+    await user.type(host, "::1")
+    expect(
+      screen.queryByText("服务器地址只填主机名或 IP，不含协议、端口或路径。"),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "保存" })).toBeEnabled()
   })
 
   it("explains an empty detection result", async () => {

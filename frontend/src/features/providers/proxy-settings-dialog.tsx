@@ -59,11 +59,25 @@ function resolveScheme(scheme: string, socks5: boolean, http: boolean): Scheme {
   return "auto"
 }
 
-/** endpoint 形如 127.0.0.1:10808 或 [::1]:7890，回填时只保留主机部分。 */
-function hostFromEndpoint(endpoint: string, port: number): string {
-  const suffix = `:${port}`
-  const host = endpoint.endsWith(suffix) ? endpoint.slice(0, -suffix.length) : endpoint
-  return host.replace(/^\[|\]$/g, "")
+/** 服务器地址只接受主机名或 IP；协议、端口与路径都是独立字段。规则与后端保持一致。 */
+function isValidHost(value: string): boolean {
+  const host = value.trim()
+  if (host === "") return true
+  if (host.length > 255 || /[\s/\\@]/.test(host)) return false
+  if (host.includes(":")) {
+    try {
+      new URL(`http://[${host}]`)
+      return true
+    } catch {
+      return false
+    }
+  }
+  return (
+    /^[a-zA-Z0-9.-]+$/.test(host) &&
+    !host.startsWith("-") &&
+    !host.endsWith("-") &&
+    !host.startsWith(".")
+  )
 }
 
 /** 后端错误信息可能带上用户输入，回显前先抹掉密码。 */
@@ -253,6 +267,7 @@ function ProxySettingsForm({
 
   const portNumber = Number.parseInt(port, 10)
   const portValid = Number.isInteger(portNumber) && portNumber >= 1 && portNumber <= 65535
+  const hostValid = isValidHost(host)
   const busy = save.isPending
   const hasSavedPassword = initial.hasPassword && !clearPassword
 
@@ -309,7 +324,7 @@ function ProxySettingsForm({
   }
 
   const applyDetected = (item: ProxyDiscovered) => {
-    setHost(hostFromEndpoint(item.endpoint, item.port))
+    setHost(item.host)
     setPort(String(item.port))
     setScheme(resolveScheme(item.scheme, item.socks5, item.http))
     setTestResult(null)
@@ -348,7 +363,7 @@ function ProxySettingsForm({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!portValid) return
+    if (!portValid || !hostValid) return
     setSaveFailed(false)
     setSaveDetail("")
     try {
@@ -462,6 +477,7 @@ function ProxySettingsForm({
                   value={host}
                   disabled={busy}
                   maxLength={255}
+                  aria-invalid={!hostValid}
                   placeholder="127.0.0.1"
                   onChange={(event) => setHost(event.target.value)}
                 />
@@ -484,6 +500,11 @@ function ProxySettingsForm({
                 />
               </div>
             </div>
+            {hostValid ? null : (
+              <p role="alert" className="text-destructive -mt-1 text-xs">
+                {t("providers.proxy.hostInvalid")}
+              </p>
+            )}
             {portValid || port.trim() === "" ? null : (
               <p role="alert" className="text-destructive -mt-1 text-xs">
                 {t("providers.proxy.portInvalid")}
@@ -570,7 +591,7 @@ function ProxySettingsForm({
                   variant="outline"
                   size="sm"
                   onClick={() => void runTest()}
-                  disabled={test.isPending || busy || !portValid}
+                  disabled={test.isPending || busy || !portValid || !hostValid}
                   className="cursor-pointer"
                 >
                   {test.isPending ? t("providers.testing") : t("providers.proxy.test")}
@@ -730,7 +751,11 @@ function ProxySettingsForm({
             {t("providers.proxy.cancel")}
           </Button>
         </Dialog.Close>
-        <Button type="submit" disabled={busy || !portValid} className="min-w-24 cursor-pointer">
+        <Button
+          type="submit"
+          disabled={busy || !portValid || !hostValid}
+          className="min-w-24 cursor-pointer"
+        >
           {busy ? t("providers.saving") : t("providers.proxy.save")}
         </Button>
       </div>
