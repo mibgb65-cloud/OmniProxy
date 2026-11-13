@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -135,4 +135,4 @@ verify-release-assets                → 发布资产校验通过：v2.2.3-beta.
 
 # Git
 
-- Commit: TBD
+- Commit: `13e4401a`（chore(release): 准备 v2.2.3-beta.23 本地构建）
