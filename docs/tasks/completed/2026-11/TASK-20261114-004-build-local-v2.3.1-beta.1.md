@@ -152,7 +152,11 @@ None.
 
 ## Commit
 
-待填写。
+```text
+a970ca6b chore(release): 准备 v2.3.1-beta.1 本地构建
+```
+
+版本映射、发行说明、本记录与 `CURRENT` 在同一提交；未推送、未打标签。
 
 ---
 
