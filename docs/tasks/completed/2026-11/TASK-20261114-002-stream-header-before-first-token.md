@@ -198,7 +198,11 @@ task build                                             → exit 0
 
 ## Commit
 
-见完成记录（实现提交与归档提交）。
+```text
+4347a6d0 fix(gateway): 流式响应在首个 token 前下发响应头并保活
+```
+
+实现提交包含代码、测试、本记录与 `CURRENT` 更新。未推送、未打标签。
 
 ---
 
