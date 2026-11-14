@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261114-004](../tasks/completed/2026-11/TASK-20261114-004-build-local-v2.3.1-beta.1.md) 已产出 `v2.3.1-beta.1` Windows amd64 生产安装包，包含流式响应头／心跳修复（TASK-20261114-002，`4347a6d0`）与 DuMate 图片能力声明（TASK-20261114-003，`313a7833`）。安装器 21,003,545 bytes，SHA256 `5505ad3697e470eeab248f0e1dfc2e121eaabf653cff7e183a1cfa89608ef089`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。Antigravity 桌面端复测与真实 DuMate 发图未执行。
+
 已实现：[TASK-20261114-003](../tasks/completed/2026-11/TASK-20261114-003-dumate-image-modality.md) DuMate 的两个预设别名（`model-text`、`dm-auto-model/text.L0`）在模型目录与受管客户端配置里改为声明 `text` + `image` 输入。依据是搭子桌面端自带的模型目录（`qianfan_desk_xdg\<账号>\config\opencode\opencode.json`）给这些别名标了 `text`+`image`；网关的 Chat 整形本来就保留 `image_url`，Responses／Messages 也会转换图片，阻断点只是能力声明。上下文与输出容量仍不发布。目标包与全仓 Go 测试、format／lint／build 均通过；真实账号发图验证未执行。实现提交 `313a7833`。
 
 已修复：[TASK-20261114-002](../tasks/completed/2026-11/TASK-20261114-002-stream-header-before-first-token.md) 流式请求在上游思考期间不再让下游静默：上游超过 3 秒没有首个可见分片就提交 `200` 与 SSE 响应头，之后每 10 秒发一条 `: keep-alive` 注释（遇到未完成事件会跳过），首个事件即失败仍在宽限期内按 HTTP 错误返回。Antigravity 桌面端 60 秒「等响应头」超时导致的一次任务连续 6 条「已取消／未报告」应不再出现；`copyStream` 迁入 `internal/core/proxy/stream.go`。格式／lint／类型检查／Go 与前端测试（154 文件／935 项）／Windows production 构建全部通过；桌面端真机复测待安装新构建。实现提交 `4347a6d0`。
