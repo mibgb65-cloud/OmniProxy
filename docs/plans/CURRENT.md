@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261114-002](../tasks/completed/2026-11/TASK-20261114-002-stream-header-before-first-token.md) 流式请求在上游思考期间不再让下游静默：上游超过 3 秒没有首个可见分片就提交 `200` 与 SSE 响应头，之后每 10 秒发一条 `: keep-alive` 注释（遇到未完成事件会跳过），首个事件即失败仍在宽限期内按 HTTP 错误返回。Antigravity 桌面端 60 秒「等响应头」超时导致的一次任务连续 6 条「已取消／未报告」应不再出现；`copyStream` 迁入 `internal/core/proxy/stream.go`。格式／lint／类型检查／Go 与前端测试（154 文件／935 项）／Windows production 构建全部通过；桌面端真机复测待安装新构建。实现提交见任务记录。
+
 已发布：[TASK-20261114-001](../tasks/completed/2026-11/TASK-20261114-001-release-v2.3.0.md) `v2.3.0` 已于 2026-11-14 17:40:10（Asia/Singapore）公开为正式 Latest。首次漏提交源码已由 `9ac66518` 修复；用户授权后仅更正未发布标签，托管 CI、完整质量门及 Release build／sign／publish 全成功。公开签名安装器 21,030,576 bytes，SHA256 `72c5d243c9bb26f297abbefd63089d669da75f2974ff7b0e5f18339161f2aacc`；生产更新组件的正式／Beta 发现、资产配对、实际下载和摘要复验通过，公开版本资源及证书 pin 通过。新增迁移 046–048；真实 DuMate 账号、覆盖安装和首次实机迁移未验收。不自动安装、启动或操作真实账号，项目自签不代表系统公开信任。
 
 本地构建：[TASK-20261113-021](../tasks/completed/2026-11/TASK-20261113-021-build-local-v2.2.3-beta.24.md) 已产出 `v2.2.3-beta.24` Windows amd64 生产安装包，内容为百度搭子 DuMate 个人版接入（TASK-20261113-020，`741a5d29`：登录态导入与身份绑定、gateway token 合并刷新、Chat 转发与 Responses／Messages 转换、积分与手动签到、迁移 048），并继承 beta.19–beta.23 的用量页分析视图与两栏布局、本机代理探测修复、Google 轮换设置（迁移 047）等。安装器 20,986,834 bytes，SHA256 `56b033b66505a966c243f68c317b43aff2d6c5ab1911d979b4a6999747f953ee`，Windows 数字版本 `2.2.3.0`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。真实百度账号验证未执行。实现提交 `de68b5a2`。
