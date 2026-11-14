@@ -77,11 +77,12 @@ func ModelName(model string) string {
 	}
 }
 
-// ModelMetadata 只发布可以确认的文本能力；上下文与输出上限未经真机验证，
-// 因此不写入容量，避免客户端据此截断或超发请求。
+// ModelMetadata 声明桌面端目录里的输入能力：搭子自带的模型目录给这些别名标了
+// text+image 输入，网关的 Chat 转发与协议转换也都保留 image_url。上下文与输出
+// 上限未经真机验证，仍不写入容量，避免客户端据此截断或超发请求。
 func ModelMetadata(model string) catalog.Metadata {
 	if !SupportsModel(model) {
 		return catalog.Metadata{}
 	}
-	return catalog.Metadata{InputModalities: []string{"text"}}
+	return catalog.Metadata{InputModalities: []string{"text", "image"}}
 }

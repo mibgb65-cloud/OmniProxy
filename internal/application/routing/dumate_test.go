@@ -44,7 +44,8 @@ func TestDuMatePresetModelsAppearOnlyWithAuthenticatedAccount(t *testing.T) {
 			continue
 		}
 		found[entry.ID] = true
-		if entry.Metadata.ContextWindow != nil || len(entry.Metadata.InputModalities) != 1 || entry.Metadata.InputModalities[0] != "text" {
+		if entry.Metadata.ContextWindow != nil || len(entry.Metadata.InputModalities) != 2 ||
+			entry.Metadata.InputModalities[0] != "text" || entry.Metadata.InputModalities[1] != "image" {
 			t.Fatalf("unverified capacity or modalities published: %+v", entry.Metadata)
 		}
 		if len(entry.Protocols) != 3 {

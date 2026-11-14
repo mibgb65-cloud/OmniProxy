@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261114-003](../tasks/completed/2026-11/TASK-20261114-003-dumate-image-modality.md) DuMate 的两个预设别名（`model-text`、`dm-auto-model/text.L0`）在模型目录与受管客户端配置里改为声明 `text` + `image` 输入。依据是搭子桌面端自带的模型目录（`qianfan_desk_xdg\<账号>\config\opencode\opencode.json`）给这些别名标了 `text`+`image`；网关的 Chat 整形本来就保留 `image_url`，Responses／Messages 也会转换图片，阻断点只是能力声明。上下文与输出容量仍不发布。目标包与全仓 Go 测试、format／lint／build 均通过；真实账号发图验证未执行。
+
 已修复：[TASK-20261114-002](../tasks/completed/2026-11/TASK-20261114-002-stream-header-before-first-token.md) 流式请求在上游思考期间不再让下游静默：上游超过 3 秒没有首个可见分片就提交 `200` 与 SSE 响应头，之后每 10 秒发一条 `: keep-alive` 注释（遇到未完成事件会跳过），首个事件即失败仍在宽限期内按 HTTP 错误返回。Antigravity 桌面端 60 秒「等响应头」超时导致的一次任务连续 6 条「已取消／未报告」应不再出现；`copyStream` 迁入 `internal/core/proxy/stream.go`。格式／lint／类型检查／Go 与前端测试（154 文件／935 项）／Windows production 构建全部通过；桌面端真机复测待安装新构建。实现提交 `4347a6d0`。
 
 已发布：[TASK-20261114-001](../tasks/completed/2026-11/TASK-20261114-001-release-v2.3.0.md) `v2.3.0` 已于 2026-11-14 17:40:10（Asia/Singapore）公开为正式 Latest。首次漏提交源码已由 `9ac66518` 修复；用户授权后仅更正未发布标签，托管 CI、完整质量门及 Release build／sign／publish 全成功。公开签名安装器 21,030,576 bytes，SHA256 `72c5d243c9bb26f297abbefd63089d669da75f2974ff7b0e5f18339161f2aacc`；生产更新组件的正式／Beta 发现、资产配对、实际下载和摘要复验通过，公开版本资源及证书 pin 通过。新增迁移 046–048；真实 DuMate 账号、覆盖安装和首次实机迁移未验收。不自动安装、启动或操作真实账号，项目自签不代表系统公开信任。
