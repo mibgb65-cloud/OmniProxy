@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -359,26 +359,44 @@ EXIT=0
 
 # Deviations
 
-None.
+- **余额只保留「剩余额度」**：原计划（D3）按 OpenAI 兼容口径同时展示额度上限与已用额度。
+  真实 Key 复核发现 `soft_limit_usd`／`system_hard_limit_usd` 与 `hard_limit_usd` 同值，
+  `/dashboard/billing/usage` 的 `total_usage` 恒为 0，不反映真实支出；继续展示会给出误导数字，
+  因此删掉这两项，只读订阅端点。前端的 `balance.limit`／`balance.used` 文案一并移除。
+- **余额不是「现已接入」而是「已实测」**：handbook 未写清字段含义，本轮用用户提供的账号 Key
+  实际复核（12 个模型、一次 200 的 Chat、余额从 50 变为 49.999998），据此确定字段语义；
+  这一条与计划中「首版不做余额」的默认建议相反，因为用户明确选择「现在就做」。
+- **图标来源**：使用官网 `https://howtofix.id/logo.png`（256×256 PNG），
+  已在 `SOURCE.md` 记录来源与 SHA-256；官方素材未声明 MIT，与 River／Oxion AI 先例一致。
+- 未加入 `failover_policy` 的 402 换号分支（D4 取「原样回传」）。
 
 ---
 
 # Git
 
-Not committed by Agent.
+## Commit
+
+```text
+974afdaa feat(provider): 接入 HowToFix 内置服务商与预付余额
+```
+
+任务记录归档与 `CURRENT.md` 概览在同一文档提交中补齐。未推送、无标签、无历史改写。
 
 ---
 
 # Result
 
-结论：HowToFix 是 new-api 系的 OpenAI 兼容网关，可按 Oxion AI 的最小形态新增第十四个内置
-服务商接入——API Key 账号、按账号同步 `/v1/models`、Chat 原生透传、Responses／Messages 网关转换，
-迁移 049，前端标签与图标。现有「自定义服务商」通道不能承载它（路由白名单不含该 kind）。
-模型元数据大面积缺失、原生 Anthropic 路由与余额接口字段均未用真实 Key 验证，
-这些不确定性在方案里被明确限定而不是猜测。
+HowToFix 已作为第十四个内置服务商接入：`api_key` 账号、按账号同步 `/v1/models`
+（目录按分组发放，无预设）、Chat 原生透传、Responses／Messages 经既有转换、
+预付美元余额面板，迁移 049，前端标签与官方图标。建好路由后 Claude Code／Codex／DSH／
+OpenCode 等受管客户端自动出现在模型目录里，不需要额外接线。
+
+真实 Key 复核确认目录、Chat 与余额接口均可用；未接入 Embeddings／Files／签到／分组切换，
+不宣称原生 Anthropic／Gemini 路由，不发布推理档位。`task verify` exit 0
+（155 文件／940 项前端测试、全部 Go 包、Windows production 构建）。
 
 ---
 
 # Completed
 
-（未完成）
+2026-11-15 21:35（Asia/Singapore）

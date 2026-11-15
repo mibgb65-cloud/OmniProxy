@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261115-011](../tasks/completed/2026-11/TASK-20261115-011-howtofix-provider-integration.md) 新增第十四个内置服务商 HowToFix（`https://api.howtofix.id/v1`，new-api 系 OpenAI 兼容网关，`974afdaa`）：`api_key` 账号、按账号分组同步 `GET /v1/models`（无预设，`hy4` 等分组模型不同）、Chat 原生透传、Responses／Messages 经既有 `agentprotocol` 转换；账号卡按 `/v1/dashboard/billing/subscription` 的 `hard_limit_usd` 显示剩余美元余额（实测该字段就是余额、扣费粒度为上游整数额度单位；`/usage` 恒为 0 故不展示已用）。迁移 049、前端标签与官方图标、余额与「接入检查」白名单完成；建好路由后 Claude Code／Codex／DSH 等受管客户端自动可见。真实 Key 复核：目录 12 个模型、Chat 200、余额字段形状；未接入 Embeddings／Files／签到／分组切换，不宣称原生 Anthropic／Gemini 路由、不发布推理档位。`task verify` EXIT=0（155 文件／940 项前端测试、全部 Go 包、Windows production 构建）。
+
 本地构建：[TASK-20261115-010](../tasks/completed/2026-11/TASK-20261115-010-build-local-v2.3.1-beta.6.md) 已产出 `v2.3.1-beta.6` Windows amd64 生产安装包，内容为流式失败分类改进（TASK-20261115-009：上游在 SSE 里主动报错记为 `upstream_error_event`，非法 JSON／非对象形状仍为 `upstream_stream_failed`，日志追加 `upstream_stream_kind`、`upstream_event_type`、`upstream_error_code`）。安装器 21,029,561 bytes，SHA256 `f593af13b41d1427c814f3f54816a321efa04233d0b2af735b6fe3fc73004659`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 `v2.3.1-beta.5`，需覆盖安装后重启 Codex 复测。
 
 已实现：[TASK-20261115-009](../tasks/completed/2026-11/TASK-20261115-009-upstream-stream-error-classification.md) beta.5 安装后 Codex 桌面端 18:47:25–18:47:36 的 6 次请求仍全为 `upstream_stream_failed`（0 Token、200 + SSE）。定位结论：路由与正文形状已经正确——用生产 `CODEX_HOME` 抓到的等价正文（8 个 `namespace` + 11 个 `function` 工具、103 372 字节）经网关顺序重放 18/18 成功，真实 `codex-cli 0.163.0` 一轮对话正常，桌面端独有字段（`personality`、`reasoning.summary`、`text.verbosity`、`service_tier`、`truncation`、`instructions`）逐个探测全部通过；该 11 秒窗口属于上游侧失败。原来两类原因共用一个错误码，客户端只能看到 `error decoding response body`；现在上游主动报错单独记为 `upstream_error_event`，日志带可核实的分类与上游短码（最长 40 字符、只保留字母数字与 `._-`），说明文字仍不回显、不落日志。`task verify` EXIT=0（154 文件／935 项前端测试、全部 Go 包、Windows production 构建）。
@@ -244,14 +246,8 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-当前无正在实现的任务。`docs/tasks/active/` 有三条已登记、尚未开始的任务：
+当前无正在实现的任务。`docs/tasks/active/` 有两条已登记、尚未开始的任务：
 
-- [TASK-20261115-011](../tasks/active/TASK-20261115-011-howtofix-provider-integration.md)
-  （Planned）把 HowToFix（`https://api.howtofix.id/v1`，new-api 系 OpenAI 兼容网关）接成
-  第十四个内置服务商，按 Oxion AI 最小形态：`api_key` 账号、按账号同步 `/v1/models`、
-  Chat 原生透传、Responses／Messages 经既有转换，迁移 049，前端标签与图标。
-  现有「自定义服务商」不能承载（路由白名单不含 `openai-compatible`）。
-  余额接口与原生 Anthropic 路由的声明均未用真实 Key 验证，按 D1–D5 待确认。
 - [TASK-20261112-003](../tasks/active/TASK-20261112-003-gemini-cli-subscription-channel.md)
   （Planned）新增 Gemini CLI 订阅通道（Code Assist Standard / Enterprise），复用
   TASK-20261112-002 的传输层与错误语义，但按原文发送 system prompt。
