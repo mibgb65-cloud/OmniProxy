@@ -148,7 +148,7 @@ Antigravity 在网关模式下读图时，即使客户端把工具结果里的�
       `/v1/chat/completions` 直发 `gemini-4-hydrogen-xhigh` 返回 200，`prompt_tokens` 1173，
       模型答出「浅绿色 / Z3ZVB9 / 深蓝正方形、红色菱形、绿色圆形」，与图片内容一致；
       对照客户端同轮请求只多 329 Token，证明丢图点在客户端而非网关。
-- [ ] Integration Tests：隔离实例真实请求（本任务只改整形层，未新增上游形态）。
+- [x] Integration Tests：N/A（只改 Chat 整形层，未新增上游形态；真实上游通路由直发 `blind_v4.png` 的 200 与真机 E2E 覆盖）。
 - [x] E2E Tests：v2.3.1-beta.3 安装后 Antigravity 真机复测通过（会话 b06b83bb）。工具结果仍只有「Showing binary file of type image/png」占位文本，但模型答出「浅绿底 / Z3ZVB9 / 深蓝正方形、红色菱形、绿色圆形」，与图片内容一致；同轮 input_tokens 16086 → 19442（约 1.1k 为图片），证明回填图片确实到达上游。
 
 ## Quality Checks
@@ -176,7 +176,7 @@ windows production build     bin/omniproxy.exe（24,187,392 bytes）
 
 - [x] `docs/product/GOOGLE_SUBSCRIPTION.md`：客户端缺口与回填边界
 - [x] `docs/plans/CURRENT.md`
-- [ ] `docs/releases/`：随下一版本发行说明
+- [x] `docs/releases/`：已随 `v2.3.1-beta.3` 发布说明写入（`docs/releases/v2.3.1-beta.3.md`）
 
 ---
 
