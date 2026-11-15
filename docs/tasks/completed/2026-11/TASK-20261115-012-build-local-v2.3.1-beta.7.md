@@ -125,7 +125,13 @@ SCRIPT_EXIT=0
 
 # Git
 
-Not committed by Agent.
+## Commit
+
+```text
+7d129fc5 chore(release): 准备 v2.3.1-beta.7 本地构建
+```
+
+版本提升、发行说明、任务记录与 CURRENT 摘要随同一提交落地；未推送、无标签、无历史改写。
 
 ---
 
