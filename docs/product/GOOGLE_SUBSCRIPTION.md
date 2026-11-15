@@ -35,11 +35,16 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   `claude-sonnet-4-6`、`gpt-oss-120b-medium`；保留已出现的 Sonnet thinking ID 兼容。
   显示名中的 Thinking 不代表模型 ID 含此后缀；未知第三方型号仍显示待接入。
 - 订阅支持 Responses／Messages 的文本／函数工具转换，先读取完整上游结果再编码
-  JSON／SSE；Chat 保留原生增量输出。用户消息里的内联图片（`data:` base64，PNG／JPEG／
+  JSON／SSE；Chat 保留原生增量输出。用户消息与工具结果里的内联图片（`data:` base64，PNG／JPEG／
   WebP／GIF／HEIC／HEIF，单图 base64 上限 16 MiB）转换为上游 `inlineData`，与文本同一条
-  消息时都保留；Chat 与 Responses／Messages 三条协议都走同一整形层。语音、视频、远程
-  图片 URL（上游不代为下载）、非白名单格式，以及出现在 system／assistant／工具结果里的
-  图片仍明确失败，不静默丢弃或降级成文本。
+  消息时都保留；工具结果的图片放在同一 user 回合 `functionResponse` 之后的 `inlineData` part，
+  agent 通过 `read_file`／截图工具读到的像素因此能真正到达模型。Chat 与 Responses／Messages
+  三条协议都走同一整形层。语音、视频、远程图片 URL（上游不代为下载）、非白名单格式，以及
+  出现在 system／assistant 回合里的图片仍明确失败，不静默丢弃或降级成文本。
+- 模型目录对 Gemini 型号发布 `text` + `image` 输入（桌面端 `supportsImages: true`），
+  客户端据此才允许附图并让 agent 把图片当像素发送；Google 订阅内的 Claude／GPT-OSS
+  通道没有做过同样的图片验证，目录继续按纯文本发布。能力声明只表示「允许发送」，
+  实际识别仍由上游模型决定。
 - Gemini 函数工具通过 `parametersJsonSchema` 传递完整 JSON Schema，保留 Claude Code
   自带工具的 `$schema`、`exclusiveMinimum`、`additionalProperties` 等定义与约束；
   不再误放进受限的 `parameters` OpenAPI Schema，也不通过删除约束规避错误。
@@ -124,7 +129,10 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
 
 - 模型目录只返回 Google 订阅账号的 Gemini 文本模型，字段为
   `modelId`、`displayName`、`maxTokens`、`maxOutputTokens`、`supportsImages`、
-  `supportsThinking`；未知窗口不猜测。
+  `supportsThinking`；未知窗口不猜测。Gemini 型号的 `supportsImages` 为 `true`
+  （通道已确认能把内联图片转成 `inlineData`），Claude／GPT-OSS 通道仍为 `false`。
+  能力存在本地账号目录里，改版后需要重新「同步官方模型」并重启／重连桌面端，
+  客户端才会拿到新的 `supportsImages`。
 - 对话走 `<url>/v1/chat/completions`，复用现有 Google 订阅多账号路由、额度冷却、
   故障切换与请求记录。桌面端自带的 `reasoning_effort`、`service_tier`、
   `metadata`、`store` 只在 `client=antigravity` 时剥离，不改变其他客户端。

@@ -61,6 +61,48 @@ func inlineImage(raw json.RawMessage) (object, error) {
 	return object{"inlineData": object{"mimeType": strings.ToLower(media), "data": data}}, nil
 }
 
+// toolParts 解析工具结果内容：文本进 functionResponse，内联图片作为同一回合紧随其后的
+// inlineData part。agent 读图（read_file、截图工具）正是通过工具结果把图片带回模型；
+// 网关自己的 Responses／Messages 转换本来就会产出「工具结果 content 数组内含
+// image_url」的 Chat 形态，这里按同一套白名单与容量边界接受它。
+func toolParts(raw json.RawMessage) (string, []object, error) {
+	if string(raw) == "null" || len(raw) == 0 {
+		return "", nil, nil
+	}
+	var value string
+	if json.Unmarshal(raw, &value) == nil {
+		return value, nil, nil
+	}
+	var blocks []json.RawMessage
+	if json.Unmarshal(raw, &blocks) != nil || len(blocks) > 1000 {
+		return "", nil, proxy.Failure("unsupported_content", 400)
+	}
+	texts := []string{}
+	images := []object{}
+	for _, block := range blocks {
+		var head struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		}
+		if json.Unmarshal(block, &head) != nil {
+			return "", nil, proxy.Failure("unsupported_content", 400)
+		}
+		switch head.Type {
+		case "text":
+			texts = append(texts, head.Text)
+		case "image_url", "input_image":
+			image, err := inlineImage(block)
+			if err != nil {
+				return "", nil, err
+			}
+			images = append(images, image)
+		default:
+			return "", nil, proxy.Failure("unsupported_content", 400)
+		}
+	}
+	return strings.Join(texts, ""), images, nil
+}
+
 // userParts 把用户消息内容转成 Gemini parts：文本与内联图片都保留。
 // 文本同时返回拼接结果，供 system 指纹与会话标识使用。
 func userParts(raw json.RawMessage) (string, []object, error) {

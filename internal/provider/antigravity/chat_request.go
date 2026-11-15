@@ -73,10 +73,15 @@ func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) 
 	for _, message := range messages {
 		var text string
 		parts := []object{}
-		if message.Role == "user" {
+		switch message.Role {
+		case "user":
 			// 用户消息可以带内联图片：文本与 inlineData 都要保留。
 			text, parts, err = userParts(message.Content)
-		} else {
+		case "tool":
+			// 工具结果可以带回 agent 读到的图片：文本进 functionResponse，
+			// 图片作为同一回合里紧随其后的 inlineData part。
+			text, parts, err = toolParts(message.Content)
+		default:
 			text, err = textContent(message.Content)
 			if text != "" {
 				parts = append(parts, object{"text": text})
@@ -109,7 +114,7 @@ func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) 
 			if name == "" {
 				return payload{}, proxy.Failure("invalid_request", 400)
 			}
-			parts = []object{{"functionResponse": object{"id": message.ToolID, "name": name, "response": object{"result": text}}}}
+			parts = append([]object{{"functionResponse": object{"id": message.ToolID, "name": name, "response": object{"result": text}}}}, parts...)
 			delete(names, message.ToolID)
 		case "user":
 			if len(message.Calls) > 0 {

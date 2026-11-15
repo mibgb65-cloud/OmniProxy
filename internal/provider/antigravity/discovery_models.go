@@ -139,7 +139,14 @@ func (c *Client) Models(ctx context.Context, cred Credentials) ([]Model, error) 
 			return nil, Failure("invalid_response")
 		}
 		tools := true
-		entry.Metadata = modelcatalog.Metadata{InputModalities: []string{"text"}, ToolUse: &tools}
+		// Gemini 通道已确认能接收内联图片（用户消息与工具结果都转成 inlineData），
+		// 客户端据此才允许附图、才把 agent 读到的图片当像素发送。Claude／GPT-OSS
+		// 通道没有经过同样的图片验证，继续按纯文本发布。
+		modalities := []string{"text"}
+		if strings.HasPrefix(id, "gemini-") {
+			modalities = []string{"text", "image"}
+		}
+		entry.Metadata = modelcatalog.Metadata{InputModalities: modalities, ToolUse: &tools}
 		entries = append(entries, entry)
 	}
 	// 上游用 “(High)／(Low)／(Medium)” 等独立型号表达推理档位；折叠回基础模型，

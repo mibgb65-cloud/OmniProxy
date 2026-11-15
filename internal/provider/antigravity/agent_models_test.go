@@ -16,8 +16,13 @@ func TestAgentDiscoveryRequiresPickerForThirdPartyModels(t *testing.T) {
 		t.Fatal("supported models or legacy Gemini missing", err)
 	}
 	for _, model := range models {
-		if len(model.Metadata.InputModalities) != 1 || model.Metadata.InputModalities[0] != "text" || model.Metadata.ContextWindow != nil {
-			t.Fatal("fabricated model capability")
+		// Gemini 通道已确认接收内联图片；其它第三方通道未验证，必须保持纯文本。
+		want := []string{"text"}
+		if strings.HasPrefix(model.ID, "gemini-") {
+			want = []string{"text", "image"}
+		}
+		if strings.Join(model.Metadata.InputModalities, ",") != strings.Join(want, ",") || model.Metadata.ContextWindow != nil {
+			t.Fatalf("model %s modalities = %v, want %v", model.ID, model.Metadata.InputModalities, want)
 		}
 	}
 	picker, err := client.AccountModels(context.Background(), testCredentials())
