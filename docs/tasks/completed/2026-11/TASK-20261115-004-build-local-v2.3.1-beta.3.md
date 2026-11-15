@@ -160,7 +160,7 @@ build-release.ps1 -Version v2.3.1-beta.3 -OutputDirectory release-assets\v2.3.1-
 # Result
 
 已产出 `v2.3.1-beta.3` 本地 Windows amd64 生产安装包，供用户从托盘退出应用并备份数据后覆盖安装；
-安装后 Antigravity 的 `read_file` 读图由网关回填，模型能看到像素。桌面端真机复测待用户执行。
+安装后 Antigravity 的 `read_file` 读图由网关回填，模型能看到像素。Antigravity 真机复测已通过：工具结果仍只有占位文本，但模型答出「浅绿底 / Z3ZVB9 / 深蓝正方形、红色菱形、绿色圆形」，与图片一致。
 
 ---
 
