@@ -185,7 +185,7 @@ windows production build     bin/omniproxy.exe（24,187,392 bytes）
 ## Commit
 
 ```text
-（见下方回填）
+f85af40b feat(antigravity): 回填被客户端丢弃的工具结果图片
 ```
 
 ---
