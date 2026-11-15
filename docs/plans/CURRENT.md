@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261115-012](../tasks/completed/2026-11/TASK-20261115-012-build-local-v2.3.1-beta.7.md) 已产出 `v2.3.1-beta.7` Windows amd64 生产安装包，内容为 HowToFix 内置服务商接入（TASK-20261115-011，`974afdaa`：迁移 049、按账号分组同步 `/v1/models`、Chat 原生透传与 Responses／Messages 转换、预付美元余额面板、前端图标与文案）。安装器 21,075,467 bytes，SHA256 `ea3b699e608a4b969996cd2dd29bed7c25f5a504ed576a1acb89ff35bae80940`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 `v2.3.1-beta.6`，需从托盘完全退出并备份数据后覆盖安装，首次启动执行迁移 049。
+
 已实现：[TASK-20261115-011](../tasks/completed/2026-11/TASK-20261115-011-howtofix-provider-integration.md) 新增第十四个内置服务商 HowToFix（`https://api.howtofix.id/v1`，new-api 系 OpenAI 兼容网关，`974afdaa`）：`api_key` 账号、按账号分组同步 `GET /v1/models`（无预设，`hy4` 等分组模型不同）、Chat 原生透传、Responses／Messages 经既有 `agentprotocol` 转换；账号卡按 `/v1/dashboard/billing/subscription` 的 `hard_limit_usd` 显示剩余美元余额（实测该字段就是余额、扣费粒度为上游整数额度单位；`/usage` 恒为 0 故不展示已用）。迁移 049、前端标签与官方图标、余额与「接入检查」白名单完成；建好路由后 Claude Code／Codex／DSH 等受管客户端自动可见。真实 Key 复核：目录 12 个模型、Chat 200、余额字段形状；未接入 Embeddings／Files／签到／分组切换，不宣称原生 Anthropic／Gemini 路由、不发布推理档位。`task verify` EXIT=0（155 文件／940 项前端测试、全部 Go 包、Windows production 构建）。
 
 本地构建：[TASK-20261115-010](../tasks/completed/2026-11/TASK-20261115-010-build-local-v2.3.1-beta.6.md) 已产出 `v2.3.1-beta.6` Windows amd64 生产安装包，内容为流式失败分类改进（TASK-20261115-009：上游在 SSE 里主动报错记为 `upstream_error_event`，非法 JSON／非对象形状仍为 `upstream_stream_failed`，日志追加 `upstream_stream_kind`、`upstream_event_type`、`upstream_error_code`）。安装器 21,029,561 bytes，SHA256 `f593af13b41d1427c814f3f54816a321efa04233d0b2af735b6fe3fc73004659`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 `v2.3.1-beta.5`，需覆盖安装后重启 Codex 复测。
