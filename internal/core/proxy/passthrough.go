@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -12,35 +13,64 @@ import (
 const maxPassthroughAttempts = 3
 
 // servePassthrough 按 v1 语义透明转发：路径、头部与正文原样，状态码原样回传。
-func (s *Server) servePassthrough(w http.ResponseWriter, r *http.Request, path string, access socketAccess) {
+//
+// 返回 false 表示宿主判定这次请求不能按字节透明转发：正文已经写回 r.Body，
+// 调用方必须继续走协议入口的处理流程。
+func (s *Server) servePassthrough(w http.ResponseWriter, r *http.Request, path string, access socketAccess) bool {
 	if socketUpgradeRequested(r) {
 		s.servePassthroughSocket(w, r, path, access)
-		return
+		return true
 	}
 	body, ok := s.readPassthroughBody(w, r)
 	if !ok {
-		return
+		return true
 	}
-	defer clearBytes(body)
 	request := PassthroughRequest{
 		Method: r.Method, Path: path, Query: r.URL.RawQuery,
 		Client: access.client, Header: cloneHeader(r.Header), Body: body,
 	}
+	if isPassthroughProtocolPath(path) && !s.transparentPassthrough(r.Context(), request) {
+		// 正文不能被清零：调用方还要把它当作协议正文继续解析。
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		return false
+	}
+	defer clearBytes(body)
 	session, err := s.opts.Passthrough.OpenPassthrough(r.Context(), request)
 	if err != nil {
 		writeFailure(w, safeFailure(r.Context(), err))
-		return
+		return true
 	}
 	protocol := passthroughProtocol(path)
 	// 透明转发的正文必须原样转发，档位只能旁路解析；压缩或非 JSON 正文按未指定处理。
 	trace, err := s.beginTrace(r.Context(), protocol, "http", recordedClient(access.client, r.Header), ReasoningEffort(protocol, body))
 	if err != nil {
 		writeFailure(w, err)
-		return
+		return true
 	}
 	w.Header().Set("X-Request-ID", trace.ID())
 	status, code := s.forwardPassthrough(w, r, request, session, trace)
 	trace.completeLogged(status, code, s.opts.Logger)
+	return true
+}
+
+// transparentPassthrough 询问宿主能否按字节透明转发；未安装策略时保持原行为。
+func (s *Server) transparentPassthrough(ctx context.Context, request PassthroughRequest) bool {
+	policy, ok := s.opts.Passthrough.(TransparentPolicy)
+	if !ok {
+		return true
+	}
+	return policy.Transparent(ctx, request)
+}
+
+// isPassthroughProtocolPath 只让真正的协议端点参与「改走协议入口」的判定：
+// 模型目录、分析事件等路径没有可路由的模型，必须保持透明转发。
+func isPassthroughProtocolPath(path string) bool {
+	switch path {
+	case "/v1/responses", "/v1/responses/compact":
+		return true
+	default:
+		return false
+	}
 }
 
 // readPassthroughBody 只做容量保护，不解压也不解析：压缩正文按原编码转发。

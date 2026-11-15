@@ -97,6 +97,12 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   池账号的 auth.json 存在受保护凭据存储里，可从本机 `~/.codex/auth.json` 导入；
   一键配置会把它写成客户端登录（先备份原登录，恢复时还原）。
 - 正文不改写：网关不强制 `store`／`stream`，不删除采样参数，压缩编码原样转发。
+- 只有 OpenAI 通道按字节透明转发。`/v1/responses`（含 `/compact`）解析出 `model` 后，
+  若路由目标是其它服务商，该请求改由协议入口处理：把公共模型 ID 换成账号对应的官方 ID、
+  把 Codex 档位词汇还原成上游取值，并走该服务商的适配器校验与内容转换；模型目录、
+  分析事件等没有可路由模型的路径仍原样转发。第三方凭据不会被发往 `api.openai.com`，
+  `…/codex/v1` 里选择 River／DeepSeek 等模型不再整池 401。WebSocket 握手没有正文，
+  开启 WebSocket 后这些模型仍只能走 HTTP 回退。
 - 令牌临近过期时由网关自己用 `refresh_token` 续期，并把新 auth.json 写回池记录。
 - 明确拒绝（401／429／5xx）才换同池账号，冷却窗口与协议路径共用；
   已提交的响应不重放。
@@ -137,7 +143,7 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 
 固定入口前缀与接入 Key 必须一致：带 Key 的请求走到别的 Agent 前缀时返回 `403 client_mismatch`。唯一例外是 Codex 前缀 `…/codex/v1`：Codex 在官方登录模式下发送的是 ChatGPT 令牌，网关无法用接入 Key 校验，因此该前缀在 Codex 接入启用时按前缀归属放行（仍受 loopback Host、协议校验与大小限制约束）。Claude CLI 与 Claude Desktop 共用 `…/claude`，归属仍由各自的接入 Key 区分。升级前写入的 `/v1/...` 与 `/agent/codex/<Key>/v1` 继续可用。
 
-Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。Codex 透明转发路径不做协议解析：正文上限 32 MiB，响应按块转发并即时刷新，不设整体期限（只限制响应头到达时间 60 秒）。
+Chat Completions 请求体上限 2 MiB、消息最多 512；Messages 请求体上限 16 MiB、消息最多 512。Responses 与 `/responses/compact` 使用独立 16 MiB 请求上限，不套用消息数量限制，因为历史还包含推理、工具调用／结果及压缩项。所有协议仍拒绝重复 JSON 字段、非法 UTF-8 和超过 32 层的嵌套；请求和 WebSocket 连接并发上限各 16。请求期限 120 秒，普通响应上限 8 MiB，SSE 总量 32 MiB，Responses 单行 SSE 上限 2 MiB。Codex 透明转发路径不做协议解析：正文上限 32 MiB，响应按块转发并即时刷新，不设整体期限（只限制响应头到达时间 60 秒）；只有 `/v1/responses` 与 `/v1/responses/compact` 会旁路读出 `model` 以判定能否透明转发，判定为协议处理后才按 16 MiB 与 120 秒的协议上限执行。
 
 WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整请求仍受 16 MiB 限制；禁止跨连接引用未知 response ID，但允许客户端在重连后显式回放完整历史，不删减、不隐式重试生成。Codex 透明转发路径的 WebSocket 直接拨到上游并双向中继帧，帧大小上限 16 MiB；网关不改写帧内容，只在已转发的帧上旁路识别逐轮请求与用量。「Codex WebSocket」开关在握手时以及每个客户端帧转发前复核：关闭后已建立的连接也不能继续发起新请求，只关闭该连接，不影响普通 HTTP/SSE。协议解析失败保留安全错误码，并只记录协议、传输、状态和固定错误码，不记录请求正文。
 

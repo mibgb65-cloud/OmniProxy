@@ -57,3 +57,10 @@ type PassthroughSession interface {
 type PassthroughBinding interface {
 	OpenPassthrough(context.Context, PassthroughRequest) (PassthroughSession, error)
 }
+
+// TransparentPolicy 是宿主可选的透明转发判定：只有与 Codex 共用同一套上游契约的
+// 通道才能按字节转发。返回 false 时 Core 把已读正文交回协议入口处理，由适配器
+// 改写模型／档位并做校验；未实现该接口时保持原有的透明语义。
+type TransparentPolicy interface {
+	Transparent(context.Context, PassthroughRequest) bool
+}

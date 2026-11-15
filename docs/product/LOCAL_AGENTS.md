@@ -24,7 +24,7 @@ OpenCode CLI／Desktop 共用一张接入卡片；DeepSeek Harness 的 Desktop�
 分别配置 profile。均支持本地 Chat 文本／函数工具目录、独立 Key、加密备份／恢复及目录
 刷新，安装检测和固定官方入口共用原流程。详情见 [HARNESS_OPENCODE.md](HARNESS_OPENCODE.md)。
 
-River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具／图片接入；Messages 转换需要缓冲，不是原生增量流。图片（含截图工具结果）按官方 `image_url` 契约转发，目录标记 `text` + `image`。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。
+River API Key 可用于本地 Codex Responses 与 Claude Messages 文本／工具／图片接入；Messages 转换需要缓冲，不是原生增量流。图片（含截图工具结果）按官方 `image_url` 契约转发，目录标记 `text` + `image`。预设与发现模型均进入同一路由目录，限制见 [RIVER.md](RIVER.md)。Codex 的 `…/codex/v1` 入口按正文模型判定：只有 OpenAI 模型按字节透明转发，River 等其它服务商的模型改为协议入口处理，公共模型 ID 与 Codex 档位词汇在网关内还原。
 
 1. 在账号页登录 ChatGPT / Codex，或添加 DeepSeek／River／Atria／MiMo 普通 API Key。MiMo 可使用官方预设或在路由页同步账号模型，兼容边界见 [MIMO.md](MIMO.md)。
 2. 在路由页选择账号，点击「同步官方模型」。目录按账号保存；失败保留原目录，更换凭据／工作区会使旧目录失效。改名、额度刷新不会清除目录。

@@ -17,10 +17,11 @@ import (
 	"omniproxy/internal/platform/profile"
 )
 
-// liveDeepSeekService 仅显式启用时读取现有数据库和凭证，不创建账号或写用户数据库。
-func liveDeepSeekService(t *testing.T) *Service {
+// liveProfile 仅在显式启用时读取现有配置目录，并以只读方式打开现有数据库。
+// 不创建账号、不写用户数据库，也不修复配置。
+func liveProfile(t *testing.T, envName string) (*profile.Profile, *sql.DB) {
 	t.Helper()
-	if os.Getenv("OMNIPROXY_LIVE_DEEPSEEK") != "1" {
+	if os.Getenv(envName) != "1" {
 		t.Skip("真实提供商验证需显式启用")
 	}
 	if path := os.Getenv("OMNIPROXY_LIVE_ENV_FILE"); path != "" {
@@ -66,6 +67,13 @@ func liveDeepSeekService(t *testing.T) *Service {
 	if err := db.Ping(); err != nil {
 		t.Fatalf("cannot access read-only database: %v", err)
 	}
+	return prof, db
+}
+
+// liveDeepSeekService 仅显式启用时读取现有数据库和凭证，不创建账号或写用户数据库。
+func liveDeepSeekService(t *testing.T) *Service {
+	t.Helper()
+	prof, db := liveProfile(t, "OMNIPROXY_LIVE_DEEPSEEK")
 	store, err := credential.New(prof)
 	if err != nil {
 		t.Fatal("cannot initialize protected credential access")

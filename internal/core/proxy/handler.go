@@ -30,8 +30,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			writeFailure(w, authErr)
 			return
 		}
-		s.servePassthrough(w, r, resolved.path, socketAccess{client: client, key: key, prefix: resolved.prefix, byPrefix: byPrefix})
-		return
+		access := socketAccess{client: client, key: key, prefix: resolved.prefix, byPrefix: byPrefix}
+		// 宿主判定不能透明转发时，正文已写回 r.Body，继续走下面的协议流程。
+		if s.servePassthrough(w, r, resolved.path, access) {
+			return
+		}
 	}
 	path, prefix := resolved.path, resolved.prefix
 	if !validModelQuery(path, r.URL.RawQuery) {

@@ -28,6 +28,35 @@ func (s *Service) codexUpstreamBase(ctx context.Context) (string, error) {
 	return value, nil
 }
 
+// Transparent 报告这次请求能否按字节透明转发。
+//
+// 只有 OpenAI 通道与 Codex 共用同一套 Responses 契约（路径、正文与凭据都一致）；
+// 其他服务商需要网关把公共模型 ID 换成官方 ID、还原推理档位并做适配器校验，
+// 必须回到协议入口处理。无法判定时保持透明转发，不改变既有失败语义。
+func (s *Service) Transparent(ctx context.Context, request proxy.PassthroughRequest) bool {
+	if s.router == nil || s.accounts == nil || s.providers == nil {
+		return true
+	}
+	model, _ := passthroughModel(request)
+	if model == "" {
+		return true
+	}
+	decision, _, _, err := s.resolvePreview(ctx, model)
+	if err != nil || !decision.Routable {
+		return true
+	}
+	providers, err := s.providers.List(ctx)
+	if err != nil {
+		return true
+	}
+	for _, item := range providers {
+		if item.ID == decision.ProviderID {
+			return item.Kind == "openai"
+		}
+	}
+	return true
+}
+
 // OpenPassthrough 把透明转发请求解析成同池候选账号序列（v1 的取号语义）。
 func (s *Service) OpenPassthrough(ctx context.Context, request proxy.PassthroughRequest) (proxy.PassthroughSession, error) {
 	if s.accounts == nil {

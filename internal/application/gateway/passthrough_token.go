@@ -56,7 +56,11 @@ func newPassthroughAttempt(t target, base, model, accountID, accessToken string)
 func (s *Service) attemptFromAPIKey(ctx context.Context, t target, model string) (proxy.PassthroughAttempt, error) {
 	base := t.baseURL
 	if base == "" {
-		// 内置提供商用空值表示官方地址，不能沿用订阅基址或把空值交给透明转发。
+		// 内置提供商用空值表示各自的官方入口，只有 OpenAI 与 Codex 共用同一套契约。
+		// 把第三方 Key 发到 api.openai.com 会让每次请求都变成 401，并连累整池账号冷却。
+		if t.kind != "" && t.kind != "openai" {
+			return proxy.PassthroughAttempt{}, proxy.Failure("unsupported_provider", 400)
+		}
 		base = openai.DefaultBaseURL
 	}
 	var attempt proxy.PassthroughAttempt
