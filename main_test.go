@@ -34,7 +34,7 @@ func TestEmbeddedMigrationsCreateProviderAndAccountTables(t *testing.T) {
 	if err := db.QueryRow(`SELECT COUNT(*) FROM providers WHERE source = 'builtin' AND enabled = 1`).Scan(&builtins); err != nil {
 		t.Fatal(err)
 	}
-	if builtins != 13 {
-		t.Fatalf("embedded migrations created %d enabled providers, want thirteen", builtins)
+	if builtins != 14 {
+		t.Fatalf("embedded migrations created %d enabled providers, want fourteen", builtins)
 	}
 }

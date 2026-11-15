@@ -344,13 +344,13 @@ One package per feature area (account, gateway, provider, quota, routing,
 settings). Both transports call into these services; neither transport
 duplicates business logic.
 
-> Current state: `internal/application/provider` manages thirteen default-enabled
+> Current state: `internal/application/provider` manages fourteen default-enabled
 > built-in providers and custom OpenAI-compatible endpoints in SQLite and is
 > exposed through Wails bindings. It also provides a bounded, unauthenticated
 > endpoint reachability check. `internal/application/account` manages API Key
 > account metadata and protected credentials through Wails bindings. The Control
 > API still exposes only `/healthz`. The gateway forwards DeepSeek,
-> ChatGPT / Codex subscription, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, and DuMate Chat requests; other provider adapters are pending.
+> ChatGPT / Codex subscription, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, HowToFix Chat, and DuMate Chat requests; other provider adapters are pending.
 
 账号单个创建接受空名称并生成 Key 前最多 8 个 Unicode 字符的名称；批量创建只接受提供商 ID 和 1–100 个 Keys，先完整校验，再通过 SQLite 事务统一保存元数据。任一写入失败时回滚本批元数据并清理已写入的凭证；清理失败会向调用方返回错误。自动名称包含用户明确要求的 Key 前缀，不得将名称写入日志。
 
@@ -476,10 +476,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, Baidu DuMate, and OpenAI-compatible endpoints. Thirteen named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, HowToFix, Baidu DuMate, and OpenAI-compatible endpoints. Fourteen named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, and DuMate Chat are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, HowToFix Chat, and DuMate Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/stepfun"
 )
@@ -28,6 +29,7 @@ type Client interface {
 type Info struct {
 	Kimi      *kimi.Balance          `json:"kimi,omitempty"`
 	StepFun   *stepfun.Balance       `json:"stepfun,omitempty"`
+	HowToFix  *howtofix.Balance      `json:"howtofix,omitempty"`
 	Available bool                   `json:"available"`
 	Entries   []deepseek.BalanceInfo `json:"entries"`
 	FetchedAt string                 `json:"fetchedAt"`
@@ -41,13 +43,14 @@ type Service struct {
 	client    Client
 	stepfun   *stepfun.Client
 	kimi      *kimi.Client
+	howtofix  *howtofix.Client
 }
 
 func New(accounts AccountAccess, providers ProviderReader, client Client) *Service {
 	if client == nil {
 		client = officialClient
 	}
-	return &Service{accounts: accounts, providers: providers, client: client, stepfun: stepfun.New(nil), kimi: kimi.New(nil)}
+	return &Service{accounts: accounts, providers: providers, client: client, stepfun: stepfun.New(nil), kimi: kimi.New(nil), howtofix: howtofix.New(nil)}
 }
 
 func failure(code string) error { return errors.New("balance: " + code) }
@@ -74,6 +77,9 @@ func (s *Service) Read(ctx context.Context, id string) (Info, error) {
 		}
 		if value.ID == item.ProviderID && value.Kind == stepfun.Kind {
 			return s.readStep(readCtx, item)
+		}
+		if value.ID == item.ProviderID && value.Kind == howtofix.Kind {
+			return s.readHowToFix(readCtx, item, value.BaseURL)
 		}
 		if value.ID == item.ProviderID && value.Kind == "deepseek" {
 			allowed = true

@@ -44,3 +44,12 @@
 - SHA-256：`e919a69dd05823f4cdf7fbc5a7fa59e1a34d4624e10454dc8460ca5ed3fc375f`。
 - 仅用于识别 DuMate 服务商；商标权归百度权利人，展示不表示合作或背书。
 - `dumate` 类型使用该素材，放在既有浅色图标底块内保持原始比例，离线可用。
+
+## HowToFix
+
+- 文件：`howtofix.png`，256 × 256，保留官方原始 PNG。
+- 来源：[HowToFix 官网 Logo](https://howtofix.id/logo.png)。
+- 获取日期：2026-11-15。
+- SHA-256：`cb132a2460b1d9fdf020c0c9df8e4867025969ba22df2621619f8cbed0ef74d7`。
+- 官方素材未声明 MIT 授权，不属于上述 Lobe Icons 授权范围；仅用于识别 HowToFix 服务商，商标权归对应权利人。
+- `howtofix` 类型使用该素材；放在既有浅色图标底块内保持原始比例，离线可用。

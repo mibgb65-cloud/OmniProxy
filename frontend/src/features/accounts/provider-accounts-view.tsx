@@ -158,7 +158,7 @@ export function ProviderAccountsView({
               onToggle={actions.toggle}
               onDelete={actions.deleteItem}
               onEdit={actions.editItem}
-              balanceSupported={["deepseek", "stepfun", "kimi"].includes(provider.kind)}
+              balanceSupported={["deepseek", "stepfun", "kimi", "howtofix"].includes(provider.kind)}
               googleSupported={provider.kind === "google"}
             />
           ) : (
@@ -171,7 +171,9 @@ export function ProviderAccountsView({
                   onToggle={actions.toggle}
                   onDelete={actions.deleteItem}
                   onEdit={actions.editItem}
-                  balanceSupported={["deepseek", "stepfun", "kimi"].includes(provider.kind)}
+                  balanceSupported={["deepseek", "stepfun", "kimi", "howtofix"].includes(
+                    provider.kind,
+                  )}
                   googleSupported={provider.kind === "google"}
                   googleAccounts={items.filter((item) => item.authMethod === "api_key")}
                 />

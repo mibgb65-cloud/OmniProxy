@@ -414,6 +414,7 @@ export const zh = {
   "providers.kind.river": "River",
   "providers.kind.oxionai": "Oxion AI",
   "providers.kind.dumate": "百度搭子 DuMate",
+  "providers.kind.howtofix": "HowToFix",
 
   "pages.accounts.title": "账号",
   "accounts.loading": "正在加载账号…",

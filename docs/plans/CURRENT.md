@@ -244,8 +244,14 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## In Progress
 
-当前无正在实现的任务。`docs/tasks/active/` 有两条已登记、尚未开始的任务：
+当前无正在实现的任务。`docs/tasks/active/` 有三条已登记、尚未开始的任务：
 
+- [TASK-20261115-011](../tasks/active/TASK-20261115-011-howtofix-provider-integration.md)
+  （Planned）把 HowToFix（`https://api.howtofix.id/v1`，new-api 系 OpenAI 兼容网关）接成
+  第十四个内置服务商，按 Oxion AI 最小形态：`api_key` 账号、按账号同步 `/v1/models`、
+  Chat 原生透传、Responses／Messages 经既有转换，迁移 049，前端标签与图标。
+  现有「自定义服务商」不能承载（路由白名单不含 `openai-compatible`）。
+  余额接口与原生 Anthropic 路由的声明均未用真实 Key 验证，按 D1–D5 待确认。
 - [TASK-20261112-003](../tasks/active/TASK-20261112-003-gemini-cli-subscription-channel.md)
   （Planned）新增 Gemini CLI 订阅通道（Code Assist Standard / Enterprise），复用
   TASK-20261112-002 的传输层与错误语义，但按原文发送 system prompt。

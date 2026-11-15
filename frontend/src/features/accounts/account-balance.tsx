@@ -1,5 +1,6 @@
 import { StepFunBalanceValues } from "./stepfun-resource"
 import { KimiBalanceValues } from "./kimi-balance"
+import { HowToFixBalanceValues } from "./howtofix-balance"
 import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
@@ -56,6 +57,8 @@ export function AccountBalance({ account }: { account: AccountItem }) {
           <StepFunBalanceValues value={data.stepfun} />
         ) : data.kimi ? (
           <KimiBalanceValues value={data.kimi} />
+        ) : data.howtofix ? (
+          <HowToFixBalanceValues value={data.howtofix} />
         ) : entries.length > 0 ? (
           <div className="space-y-3">
             {entries.map((entry) => (

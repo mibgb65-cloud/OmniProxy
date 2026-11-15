@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/google"
+	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/oxionai"
@@ -111,6 +112,15 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 		// 官方 /v1/models 按账号发放，能力与上下文窗口以目录声明为准。
 		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
 			discovered, e := s.oxionai.DiscoverModels(ctx, base, key)
+			for _, item := range discovered {
+				models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: item.Metadata})
+			}
+			return e
+		})
+	} else if kind == howtofix.Kind && current.AuthMethod == account.AuthAPIKey {
+		// 目录按账号所属分组发放，能力与上下文窗口以目录声明为准。
+		err = s.accounts.UseAPIKey(ctx, id, func(key []byte) error {
+			discovered, e := s.howtofix.DiscoverModels(ctx, base, key)
 			for _, item := range discovered {
 				models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: item.Metadata})
 			}

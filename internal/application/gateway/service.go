@@ -17,6 +17,7 @@ import (
 	"omniproxy/internal/provider/deepseek"
 	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/google"
+	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
@@ -72,6 +73,7 @@ type Service struct {
 	atria           *atria.Client
 	river           *river.Client
 	oxionai         *oxionai.Client
+	howtofix        *howtofix.Client
 	google          *google.Client
 	mimo            *mimo.Client
 	stepfun         *stepfun.Client
@@ -103,6 +105,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.atria = atria.New(nil)
 	s.river = river.New(nil)
 	s.oxionai = oxionai.New(nil)
+	s.howtofix = howtofix.New(nil)
 	s.google = google.New(nil)
 	s.antigravity = antigravity.New(nil)
 	s.mimo = mimo.New(nil)

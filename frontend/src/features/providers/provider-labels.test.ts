@@ -21,6 +21,12 @@ describe("provider labels", () => {
     expect(zh["providers.kind.oxionai"]).toBe("Oxion AI")
   })
 
+  it("includes the HowToFix built-in", () => {
+    expect(providerNameKeys.howtofix).toBe("providers.kind.howtofix")
+    expect(en["providers.kind.howtofix"]).toBe("HowToFix")
+    expect(zh["providers.kind.howtofix"]).toBe("HowToFix")
+  })
+
   it("keeps unknown kinds out of the label map", () => {
     expect(isKnownProviderKind("openai-compatible")).toBe(false)
     expect(isKnownProviderKind("unknown-provider")).toBe(false)

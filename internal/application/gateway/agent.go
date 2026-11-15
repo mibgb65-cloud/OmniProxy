@@ -8,6 +8,7 @@ import (
 	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/provider/dumate"
+	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/oxionai"
 )
 
@@ -72,6 +73,9 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	}
 	if target.kind == oxionai.Kind {
 		return s.forwardOxionai(ctx, target, request, consume)
+	}
+	if target.kind == howtofix.Kind {
+		return s.forwardHowToFix(ctx, target, request, consume)
 	}
 	if target.kind == "atria" {
 		return s.useAPIKey(ctx, target, func(key []byte) error {

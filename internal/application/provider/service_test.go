@@ -24,8 +24,8 @@ func testService(t *testing.T) *Service {
 	return NewService(db)
 }
 
-func TestCatalogContainsThirteenProviderKinds(t *testing.T) {
-	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria", "river", "oxionai", "dumate"}
+func TestCatalogContainsFourteenProviderKinds(t *testing.T) {
+	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria", "river", "oxionai", "howtofix", "dumate"}
 	definitions := Catalog()
 	if len(definitions) != len(want) {
 		t.Fatalf("Catalog length = %d, want %d", len(definitions), len(want))
@@ -59,8 +59,8 @@ func TestBuiltInProvidersStartEnabledAndCanOnlyToggle(t *testing.T) {
 	ctx := context.Background()
 	service := testService(t)
 	items, err := service.List(ctx)
-	if err != nil || len(items) != 13 {
-		t.Fatalf("List = (%v, %v), want thirteen built-ins", items, err)
+	if err != nil || len(items) != 14 {
+		t.Fatalf("List = (%v, %v), want fourteen built-ins", items, err)
 	}
 	for _, item := range items {
 		if item.Source != SourceBuiltIn || !item.Enabled || item.ID != "builtin_"+item.Kind {
@@ -94,8 +94,8 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("Create = %+v", item)
 	}
 	items, err := NewService(service.db).List(ctx)
-	if err != nil || len(items) != 14 {
-		t.Fatalf("persisted List = (%v, %v), want fourteen", items, err)
+	if err != nil || len(items) != 15 {
+		t.Fatalf("persisted List = (%v, %v), want fifteen", items, err)
 	}
 	updated, err := service.Update(ctx, item.ID, UpdateInput{Name: "Backup", BaseURL: "https://backup.example.test/v1"})
 	if err != nil || updated.Name != "Backup" || !updated.Enabled {
@@ -112,7 +112,7 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("second Delete = %v, want ErrNotFound", err)
 	}
 	items, err = service.List(ctx)
-	if err != nil || len(items) != 13 {
+	if err != nil || len(items) != 14 {
 		t.Fatalf("List after Delete = (%v, %v)", items, err)
 	}
 }
@@ -137,7 +137,7 @@ func TestCustomProviderValidation(t *testing.T) {
 			t.Errorf("invalid case %d = %v, want ErrInvalidInput", i, err)
 		}
 	}
-	if items, err := service.List(ctx); err != nil || len(items) != 13 {
+	if items, err := service.List(ctx); err != nil || len(items) != 14 {
 		t.Fatalf("invalid inputs wrote rows: %v, %v", items, err)
 	}
 	if _, err := service.Create(ctx, CreateInput{Name: "Local proxy", BaseURL: "http://127.0.0.1:8080/v1"}); err != nil {

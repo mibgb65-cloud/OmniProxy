@@ -1,5 +1,6 @@
 export const balanceEn = {
   "balance.title": "Balance",
+  "balance.remaining": "Remaining",
   "balance.total": "Total balance",
   "balance.availableAmount": "Available balance",
   "balance.voucher": "Voucher balance",

@@ -431,6 +431,7 @@ export const en: Record<keyof typeof zh, string> = {
   "providers.kind.river": "River",
   "providers.kind.oxionai": "Oxion AI",
   "providers.kind.dumate": "Baidu DuMate",
+  "providers.kind.howtofix": "HowToFix",
 
   "pages.accounts.title": "Accounts",
   "accounts.loading": "Loading accounts…",

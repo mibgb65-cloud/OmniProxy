@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/deepseek"
+	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/kimi"
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/minimax"
@@ -50,6 +51,7 @@ type Service struct {
 	mimo         *mimo.Client
 	river        *river.Client
 	oxionai      *oxionai.Client
+	howtofix     *howtofix.Client
 	openAI       *openai.Client
 	googleAuth   GoogleSubscription
 }
@@ -58,7 +60,7 @@ type Service struct {
 func (s *Service) SetGoogleSubscription(service GoogleSubscription) { s.googleAuth = service }
 
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil), river.New(nil), oxionai.New(nil), openai.New(nil), nil}
+	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil), river.New(nil), oxionai.New(nil), howtofix.New(nil), openai.New(nil), nil}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")

@@ -1,5 +1,6 @@
 export const balanceZh = {
   "balance.title": "余额",
+  "balance.remaining": "剩余额度",
   "balance.total": "总余额",
   "balance.availableAmount": "可用余额",
   "balance.voucher": "代金券余额",

@@ -6,6 +6,9 @@
 import * as deepseek$0 from "../../provider/deepseek/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as howtofix$0 from "../../provider/howtofix/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as kimi$0 from "../../provider/kimi/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -14,6 +17,7 @@ import * as stepfun$0 from "../../provider/stepfun/models.js";
 export interface Info {
     "kimi"?: kimi$0.Balance | null;
     "stepfun"?: stepfun$0.Balance | null;
+    "howtofix"?: howtofix$0.Balance | null;
     "available": boolean;
     "entries": deepseek$0.BalanceInfo[] | null;
     "fetchedAt": string;
