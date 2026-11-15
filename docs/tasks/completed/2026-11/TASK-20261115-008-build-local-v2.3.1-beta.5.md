@@ -126,7 +126,7 @@ build-release.ps1 -Version v2.3.1-beta.5 -OutputDirectory release-assets\v2.3.1-
 ## Commit
 
 ```text
-<待回填>
+378ac73d chore(release): 准备 v2.3.1-beta.5 本地构建
 ```
 
 ---
