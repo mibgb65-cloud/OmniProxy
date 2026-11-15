@@ -123,17 +123,21 @@ build-release.ps1 -Version v2.3.1-beta.6 -OutputDirectory release-assets\v2.3.1-
 ## Commit
 
 ```text
-（实施后填写）
+9ccceaf8 chore(release): 准备 v2.3.1-beta.6 本地构建
 ```
 
 ---
 
 # Result
 
-（实施后填写）
+已产出 `v2.3.1-beta.6` 本地 Windows amd64 生产安装包，供用户从托盘完全退出应用并备份数据后
+覆盖安装。版本包含流式失败分类改进：上游在 SSE 里主动报错单独记为 `upstream_error_event`，
+日志带可核实的分类与上游短码，说明文字既不回显也不落日志；非法 JSON 与非对象形状仍为
+`upstream_stream_failed`。原始 6 条失败的上游原因事后无法复现，本版本不声称修复它，
+只让下一次发生能直接判断原因。
 
 ---
 
 # Completed
 
-（实施后填写）
+2026-11-15 19:52（Asia/Singapore）
