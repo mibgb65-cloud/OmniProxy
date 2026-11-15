@@ -45,6 +45,13 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   客户端据此才允许附图并让 agent 把图片当像素发送；Google 订阅内的 Claude／GPT-OSS
   通道没有做过同样的图片验证，目录继续按纯文本发布。能力声明只表示「允许发送」，
   实际识别仍由上游模型决定。
+- 已知客户端缺口与网关兜底：Antigravity 在 Enterprise Gateway 模式（`wireProtocol: openai`）
+  下会把工具结果里的图片剥掉，只留 `Showing binary file of type image/png` 占位文本
+  （实测同一轮请求只多 329 Token，而同一张图经网关直发占 1100+ Token）。网关因此按
+  「同一 `tool_call_id` 的调用参数里带绝对路径 + 结果命中图片占位文本」回读本地文件，
+  内容嗅探确认为 PNG／JPEG／GIF／WebP 且不超过 12 MiB 时补成同一回合的 `inlineData`；
+  路径不存在、非图片、超限或参数里没有路径时保持原样，不报错也不降级。非图片内容
+  不会被读出，因此不构成额外的文件访问能力。
 - Gemini 函数工具通过 `parametersJsonSchema` 传递完整 JSON Schema，保留 Claude Code
   自带工具的 `$schema`、`exclusiveMinimum`、`additionalProperties` 等定义与约束；
   不再误放进受限的 `parameters` OpenAPI Schema，也不通过删除约束规避错误。

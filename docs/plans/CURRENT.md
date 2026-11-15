@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261115-003](../tasks/completed/2026-11/TASK-20261115-003-antigravity-local-image-backfill.md) Antigravity 在 Enterprise Gateway 模式（`wireProtocol: openai`）下会把工具结果里的图片剥成 `Showing binary file of type image/png` 占位文本：客户端侧 `read_file` 确实产出了 media（会话 `transcript.jsonl` 里既有占位文本也有 `media` 指向落盘 PNG），但同轮请求只多 329 Token，而同一张图经网关直发占 1100+ Token，像素没有出客户端。网关现在按「同一 `tool_call_id` 的调用参数里有绝对路径 + 结果命中图片占位文本」回读本地文件，嗅探为 PNG／JPEG／GIF／WebP 且 ≤12 MiB 时补成同一回合 `functionResponse` 之后的 `inlineData`；仅对目录声明了图片输入的 Gemini 族生效，路径缺失、非图片、超限或参数无路径时保持原样。新增 5 组单元测试（命中回填、单层参数、非图片、缺文件／相对路径／无路径参数／文本结果／其它二进制、非 Gemini 不回填）。
+
 本地构建：[TASK-20261115-002](../tasks/completed/2026-11/TASK-20261115-002-build-local-v2.3.1-beta.2.md) 已产出 `v2.3.1-beta.2` Windows amd64 生产安装包，内容为 Gemini 图片能力（TASK-20261115-001，`1d7120c4`：目录声明 `supportsImages: true`、Chat 接受工具结果 `inlineData`）。安装器 21,007,062 bytes，SHA256 `12ea539d3c689967fde1ace883deb5046397c92478bdc0b6e8eaf3b9326b6968`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。升级后需重新「同步官方模型」并重启 Antigravity；真机截图复测未执行。版本提交 `2ba857eb`。
 
 已实现：[TASK-20261115-001](../tasks/completed/2026-11/TASK-20261115-001-gemini-image-capability.md) Antigravity 的 Gemini 模型不再被声明成纯文本：Google 订阅目录对 Gemini 发布 `supportsImages: true`（Claude／GPT-OSS 仍为纯文本），Chat 整形接受工具结果里的内联图片并转成同一 user 回合 `functionResponse` 之后的 `inlineData`；此前 agent 用 `read_file` 读 PNG 只得到占位提示。隔离实例真实请求（生产数据副本、端口 3011）三组均 200：用户消息图片 `Pink`、纯文本工具结果对照组明确说拿不到图片、工具结果图片 `Pink`。`task --force verify` EXIT=0（154 文件／935 项前端测试、全部 Go 包、Windows production 构建）。已有账号需重新「同步官方模型」并重连桌面端才会看到新能力；Antigravity 真机复测未执行。实现提交 `1d7120c4`。

@@ -68,7 +68,9 @@ func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) 
 	contents := []object{}
 	systems := []object{}
 	systemTexts := []string{}
-	names := map[string]string{}
+	// 调用参数跟着 tool_call 一起留到最后一条 tool 结果：客户端把读到的图片
+	// 换成占位文本时，回填要靠这里的路径找回文件。
+	calls := map[string]pendingCall{}
 	firstUser := ""
 	for _, message := range messages {
 		var text string
@@ -106,16 +108,24 @@ func chatPayload(request proxy.Request, cred Credentials, promptAsWritten bool) 
 				return payload{}, err
 			}
 			for _, call := range message.Calls {
-				names[call.ID] = call.Function.Name
+				calls[call.ID] = pendingCall{name: call.Function.Name, arguments: call.Function.Arguments}
 			}
 			parts = append(parts, callParts...)
 		case "tool":
-			name := names[message.ToolID]
-			if name == "" {
+			call := calls[message.ToolID]
+			if call.name == "" {
 				return payload{}, proxy.Failure("invalid_request", 400)
 			}
-			parts = append([]object{{"functionResponse": object{"id": message.ToolID, "name": name, "response": object{"result": text}}}}, parts...)
-			delete(names, message.ToolID)
+			parts = append([]object{{"functionResponse": object{"id": message.ToolID, "name": call.name, "response": object{"result": text}}}}, parts...)
+			if len(parts) == 1 && family == familyGemini {
+				// 内容里没有图片，而结果只是客户端的二进制占位文本：按同一轮调用的
+				// 路径回读文件，把客户端丢掉的像素补回同一回合。只对目录里声明了
+				// 图片输入的 Gemini 族生效，Claude／GPT-OSS 通道保持纯文本。
+				if image := backfillInlineImage(text, call.arguments); image != nil {
+					parts = append(parts, image)
+				}
+			}
+			delete(calls, message.ToolID)
 		case "user":
 			if len(message.Calls) > 0 {
 				return payload{}, proxy.Failure("unsupported_content", 400)
