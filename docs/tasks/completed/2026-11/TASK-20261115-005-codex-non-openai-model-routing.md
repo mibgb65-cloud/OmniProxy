@@ -247,8 +247,9 @@ windows production build     bin/omniproxy.exe（24,197,120 bytes）
 ## Commit
 
 ```text
-6ae6dcae fix(gateway): Codex 入口把非 OpenAI 模型交回协议管线
+74959333 fix(gateway): Codex 入口把非 OpenAI 模型交回协议管线
 ```
+实现、测试与文档在同一提交；本记录的提交号回填为后续文档提交。
 
 ---
 
