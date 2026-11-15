@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261115-001](../tasks/completed/2026-11/TASK-20261115-001-gemini-image-capability.md) Antigravity 的 Gemini 模型不再被声明成纯文本：Google 订阅目录对 Gemini 发布 `supportsImages: true`（Claude／GPT-OSS 仍为纯文本），Chat 整形接受工具结果里的内联图片并转成同一 user 回合 `functionResponse` 之后的 `inlineData`；此前 agent 用 `read_file` 读 PNG 只得到占位提示。隔离实例真实请求（生产数据副本、端口 3011）三组均 200：用户消息图片 `Pink`、纯文本工具结果对照组明确说拿不到图片、工具结果图片 `Pink`。`task --force verify` EXIT=0（154 文件／935 项前端测试、全部 Go 包、Windows production 构建）。已有账号需重新「同步官方模型」并重连桌面端才会看到新能力；Antigravity 真机复测未执行。实现提交 `1d7120c4`。
+
 本地构建：[TASK-20261114-004](../tasks/completed/2026-11/TASK-20261114-004-build-local-v2.3.1-beta.1.md) 已产出 `v2.3.1-beta.1` Windows amd64 生产安装包，包含流式响应头／心跳修复（TASK-20261114-002，`4347a6d0`）与 DuMate 图片能力声明（TASK-20261114-003，`313a7833`）。安装器 21,003,545 bytes，SHA256 `5505ad3697e470eeab248f0e1dfc2e121eaabf653cff7e183a1cfa89608ef089`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。Antigravity 桌面端复测与真实 DuMate 发图未执行。版本提交 `a970ca6b`。
 
 已实现：[TASK-20261114-003](../tasks/completed/2026-11/TASK-20261114-003-dumate-image-modality.md) DuMate 的两个预设别名（`model-text`、`dm-auto-model/text.L0`）在模型目录与受管客户端配置里改为声明 `text` + `image` 输入。依据是搭子桌面端自带的模型目录（`qianfan_desk_xdg\<账号>\config\opencode\opencode.json`）给这些别名标了 `text`+`image`；网关的 Chat 整形本来就保留 `image_url`，Responses／Messages 也会转换图片，阻断点只是能力声明。上下文与输出容量仍不发布。目标包与全仓 Go 测试、format／lint／build 均通过；真实账号发图验证未执行。实现提交 `313a7833`。

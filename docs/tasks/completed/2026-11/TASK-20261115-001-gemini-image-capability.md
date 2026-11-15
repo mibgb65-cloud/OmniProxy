@@ -207,7 +207,7 @@ windows production build          bin/omniproxy.exe（24,176,128 bytes）
 ## Commit
 
 ```text
-（见回填）
+1d7120c4 feat(antigravity): 声明 Gemini 图片输入并接受工具结果图片
 ```
 
 ---
