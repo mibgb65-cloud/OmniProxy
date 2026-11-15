@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -133,30 +133,91 @@ In Progress
 # Progress
 
 - 2026-11-15 19:20：完成定位与排除，建立本记录。
+- 2026-11-15 19:28：实现 Core 分类、Trace 字段与测试，`go test ./internal/...` 全部通过。
+- 2026-11-15 19:34：`task verify` EXIT=0，提交 `0bbe5b59`。
+- 2026-11-15 19:36：开始 `v2.3.1-beta.6` 生产打包（TASK-20261115-010）。
 
 ---
 
 # Implementation Result
 
-（实施后填写）
+## Changes
+
+- `internal/core/proxy/response.go`：新增 `inspectStreamData`，把「上游明确报错」与
+  「数据行不合语法」分开；`upstreamErrorCode` 只从对象形式的 `code`／`type` 取短码，
+  字符串形式的 `error` 只算失败不留文本；`sanitizeStreamSignature` 只保留字母、数字与
+  `._-`，最长 40 字符。`hasUpstreamError` 改为复用同一判定，WebSocket 与 JSON 响应路径
+  行为不变。
+- `internal/core/proxy/stream.go`：`streamLineState` 按分类返回 `upstream_error_event`
+  或 `upstream_stream_failed`，并把分类写进 `Trace`；终结事件与 `[DONE]` 的短路顺序不变。
+- `internal/core/proxy/trace.go`：新增 `streamKind`／`streamEventType`／`upstreamErrorCode`
+  与 `markStreamFailure`，`gateway request finished` 追加 `upstream_stream_kind`、
+  `upstream_event_type`、`upstream_error_code`。
+- 测试：新增 `stream_error_event_test.go`（分类表驱动、短码净化边界、Trace 字段、
+  非对象形状仍不提交响应头）；更新 `TestStreamImmediateFailureStaysUncommitted` 的期望
+  错误码；网关新增 `TestCodexUpstreamErrorEventIsClassifiedWithoutLeakingText`，断言流式
+  `response.failed` 记为 `upstream_error_event`、只尝试一次、上游说明文字不外泄。
+
+## Files Changed
+
+- `internal/core/proxy/response.go`、`stream.go`、`trace.go`
+- `internal/core/proxy/stream_error_event_test.go`（新增）、`stream_headers_test.go`
+- `internal/application/gateway/stream_failure_test.go`
+- `docs/product/GATEWAY.md`、`docs/releases/v2.3.1-beta.6.md`
+- `internal/version/version.go`、`frontend/package.json`（`2.3.1-beta.6`）
+
+## Technical Notes
+
+- 分类只看结构，不看文字：`error` 为字符串时算失败但不保留内容，避免把上游说明写进日志。
+- 终结事件优先于错误判定，保持「已收到 `response.completed` 就当成功」的既有语义。
+- 新错误码只影响记录与日志；HTTP 仍是 502，响应正文仍只有稳定码与内置安全说明。
 
 ---
 
 # Verification
 
-（实施后填写）
+## Tests
+
+- [x] Unit Tests：`go test ./internal/core/proxy/ -count=1` 通过。
+- [x] Go 全量：`go test ./internal/... -count=1` 全部包通过。
+- [x] Integration Tests：`TestCodexUpstreamErrorEventIsClassifiedWithoutLeakingText` 覆盖
+      流式 `response.failed` → `upstream_error_event`、单次尝试、说明文字不外泄。
+- [x] E2E Tests：生产安装包由 TASK-20261115-010 打包，用户安装后在 Codex 复测。
+
+## Quality Checks
+
+- [x] Format
+- [x] Lint
+- [x] Type Check
+- [x] Test
+- [x] Build
+- [x] Verify
+
+## Verification Result
+
+```text
+task verify → EXIT=0（154 文件／935 项前端测试、全部 Go 包、Windows production 构建）
+```
+
+原始 6 条失败的上游原因事后无法复现（同一正文重放 18/18 成功），因此本次验证只覆盖
+「分类正确、文本不外泄、既有失败语义不变」，不声称修复了那次上游失败。
 
 ---
 
 # Documentation
 
-（实施后填写）
+- [x] `docs/product/GATEWAY.md`：协议路径的两种流式失败分类与新日志字段
+- [x] `docs/releases/v2.3.1-beta.6.md`：双语发行说明
+- [x] `docs/plans/CURRENT.md`：当前状态
+- [x] 其它文档无需修改
 
 ---
 
 # Deviations
 
-（实施后填写）
+原始判断（TASK-20261115-005／007 的延续：正文形状导致失败）在复测中被推翻：等价正文
+18/18 成功、真实 CLI 一轮对话成功、桌面端独有字段逐个探测全部通过。因此本任务不修改
+路由或正文，只把不可区分的失败原因变成可核实的分类与日志字段。
 
 ---
 
@@ -165,17 +226,24 @@ In Progress
 ## Commit
 
 ```text
-（实施后填写）
+0bbe5b59 fix(gateway): 区分上游 SSE 错误事件与流中断并记录可核实分类
 ```
 
 ---
 
 # Result
 
-（实施后填写）
+协议路径不再把「上游明确报错」与「流被截断」共用一个错误码：上游在 SSE 里主动报错记为
+`upstream_error_event`，非法 JSON 或非对象形状仍为 `upstream_stream_failed`，两者都把
+可核实的分类写进 `gateway request finished`（`upstream_stream_kind`、
+`upstream_event_type`、`upstream_error_code`），上游说明文字既不回显也不落日志。
+
+原始 6 条失败的上游原因事后无法复现，因此本次不声称修掉那次失败；结论是 beta.5 的路由
+与正文形状已经正确，那 11 秒属于上游侧失败，改动的价值是让下一次发生能直接从请求明细与
+日志判断原因。新错误码已随 `v2.3.1-beta.6` 交付（TASK-20261115-010）。
 
 ---
 
 # Completed
 
-（实施后填写）
+2026-11-15 19:50（Asia/Singapore）
