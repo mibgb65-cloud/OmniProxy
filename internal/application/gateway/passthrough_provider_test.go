@@ -102,7 +102,9 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 	defer service.Stop(context.Background())
 
 	body := `{"model":` + strconv.Quote(publicModel) + `,"input":[{"role":"user","content":"Hi"}],"stream":` +
-		strconv.FormatBool(stream) + `,"reasoning":{"effort":"xhigh"}}`
+		strconv.FormatBool(stream) + `,"reasoning":{"effort":"xhigh"},` +
+		`"tools":[{"type":"function","name":"exec_command","parameters":{"type":"object","properties":{}}},` +
+		`{"type":"namespace","name":"mcp__codex_apps__pets","tools":[{"type":"function","name":"_adopt"}]}]}`
 	response, err := http.Post(service.Info().Runtime.Address+"/codex/v1/responses", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
@@ -129,6 +131,13 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 	}
 	if json.Unmarshal(fields["reasoning"], &reasoning) != nil || reasoning.Effort != "max" {
 		t.Fatalf("codex effort not restored: %s", fields["reasoning"])
+	}
+	var tools []struct {
+		Type string `json:"type"`
+		Name string `json:"name"`
+	}
+	if json.Unmarshal(fields["tools"], &tools) != nil || len(tools) != 1 || tools[0].Type != "function" || tools[0].Name != "exec_command" {
+		t.Fatalf("namespace tool not dropped cleanly: %s", fields["tools"])
 	}
 	item, err := observer.Request(context.Background(), response.Header.Get("X-Request-ID"))
 	wantInput := "9"

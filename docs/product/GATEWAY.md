@@ -103,6 +103,11 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   分析事件等没有可路由模型的路径仍原样转发。第三方凭据不会被发往 `api.openai.com`，
   `…/codex/v1` 里选择 River／DeepSeek 等模型不再整池 401。WebSocket 握手没有正文，
   开启 WebSocket 后这些模型仍只能走 HTTP 回退。
+- 改由协议入口时同样适配客户端正文：Codex 按 OpenAI 契约把 MCP 与多智能体工具包成
+  `type: "namespace"`，而 River 这类服务商只接受 `type: "function"`。网关在路由完成后
+  按目标服务商类型移除这些分组（函数工具与其它字段原样保留），并记录
+  `codex namespace tools dropped` 与数量；被移除的是分组本身，用户消息、历史与函数工具
+  都不受影响，代价是该模型上无法调用这些 MCP／多智能体工具。
 - 令牌临近过期时由网关自己用 `refresh_token` 续期，并把新 auth.json 写回池记录。
 - 明确拒绝（401／429／5xx）才换同池账号，冷却窗口与协议路径共用；
   已提交的响应不重放。

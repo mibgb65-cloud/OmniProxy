@@ -139,6 +139,10 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 	if err != nil {
 		return request, err
 	}
+	// Codex 入口改走协议处理时，客户端正文仍按 OpenAI 契约构造，需要按目标服务商适配。
+	if err := s.adaptCodexEntryBody(ctx, &request); err != nil {
+		return request, err
+	}
 	return request, nil
 }
 

@@ -58,10 +58,18 @@ func TestLiveCodexRiverModel(t *testing.T) {
 // codexEntryReply 用 Codex 客户端的入口与正文形状发一条最短 Responses 请求。
 func codexEntryReply(t *testing.T, service *Service, model string, stream bool) (int, []byte) {
 	t.Helper()
+	// 工具集与真实 Codex 一致：函数工具 + 一个 MCP 命名空间分组。命名空间由网关按
+	// 目标服务商移除，函数工具原样保留；这样验证的就是真实客户端正文形状。
 	body, err := json.Marshal(map[string]any{
 		"model": model, "stream": stream, "max_output_tokens": 16,
 		"reasoning": map[string]string{"effort": "high"},
 		"input":     []map[string]any{{"role": "user", "content": []map[string]string{{"type": "input_text", "text": "Reply with OK only."}}}},
+		"tools": []any{
+			map[string]any{"type": "function", "name": "exec_command", "parameters": map[string]any{"type": "object", "properties": map[string]any{}}},
+			map[string]any{"type": "namespace", "name": "mcp__codex_apps__pets", "tools": []any{
+				map[string]any{"type": "function", "name": "_adopt", "parameters": map[string]any{"type": "object", "properties": map[string]any{}}},
+			}},
+		},
 	})
 	if err != nil {
 		t.Fatal(err)

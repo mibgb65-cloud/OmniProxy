@@ -24,6 +24,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Codex 入口按 v1 语义透明转发：前缀之后不再有端点白名单。
+	fromCodexEntry := false
 	if resolved.passthrough && isTransparentPath(resolved.path) {
 		client, key, byPrefix, authErr := s.authorizeEntry(r.Context(), r, resolved)
 		if authErr != nil {
@@ -35,6 +36,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if s.servePassthrough(w, r, resolved.path, access) {
 			return
 		}
+		fromCodexEntry = true
 	}
 	path, prefix := resolved.path, resolved.prefix
 	if !validModelQuery(path, r.URL.RawQuery) {
@@ -155,6 +157,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request.Trace = trace
 	request.ClientUserAgent = r.UserAgent()
 	request.CodexMetadata = metadata
+	request.FromCodexEntry = fromCodexEntry
 	if err := trace.Update(r.Context(), request, TargetSnapshot{}); err != nil {
 		writeFailure(w, err)
 		return

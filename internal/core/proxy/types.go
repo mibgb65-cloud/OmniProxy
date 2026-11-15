@@ -36,8 +36,11 @@ type Request struct {
 	Protocol         string
 	// 只由网关完成 Messages → Chat 转换后设置，不能从客户端 JSON 赋值。
 	ConvertedFromMessages bool
-	Body                  []byte
-	Model                 string
+	// FromCodexEntry 只由 Codex 透明入口改走协议处理时设置：客户端按 OpenAI 契约
+	// 构造正文，交给其它服务商前需要适配，不能从客户端 JSON 赋值。
+	FromCodexEntry bool
+	Body           []byte
+	Model          string
 	// Effort 是本次请求携带的推理档位；空串表示客户端没有指定，不能当成默认值。
 	Effort string
 	// PromptAsWritten 只由网关按用户设置填入：Google 订阅按原文发送 system prompt，

@@ -26,8 +26,9 @@ func (b policyBinding) Transparent(context.Context, PassthroughRequest) bool { r
 func TestPassthroughFallsBackToProtocolWhenNotTransparent(t *testing.T) {
 	session := &stubSession{attempts: []PassthroughAttempt{{BaseURL: "https://upstream.invalid"}}}
 	var gotModel, gotProtocol string
+	var gotFromCodexEntry bool
 	upstream := upstreamFunc(func(_ context.Context, req Request, consume func(Response) error) error {
-		gotModel, gotProtocol = req.Model, req.Protocol
+		gotModel, gotProtocol, gotFromCodexEntry = req.Model, req.Protocol, req.FromCodexEntry
 		return consume(Response{StatusCode: 200, ContentType: "application/json", Body: strings.NewReader(`{"id":"resp_1","output":[]}`)})
 	})
 	server := New(Options{Port: 0, Passthrough: policyBinding{session: session}, Upstream: upstream, Models: []string{"deepseek-flash"}})
@@ -51,8 +52,8 @@ func TestPassthroughFallsBackToProtocolWhenNotTransparent(t *testing.T) {
 	if response.StatusCode != http.StatusOK {
 		t.Fatalf("status = %d body = %s", response.StatusCode, body)
 	}
-	if gotModel != "deepseek-flash" || gotProtocol != "responses" {
-		t.Fatalf("protocol upstream got model=%q protocol=%q", gotModel, gotProtocol)
+	if gotModel != "deepseek-flash" || gotProtocol != "responses" || !gotFromCodexEntry {
+		t.Fatalf("protocol upstream got model=%q protocol=%q fromCodexEntry=%t", gotModel, gotProtocol, gotFromCodexEntry)
 	}
 	if len(session.done) != 0 || session.index != 0 {
 		t.Fatalf("transparent session was used: attempts=%d", session.index)
