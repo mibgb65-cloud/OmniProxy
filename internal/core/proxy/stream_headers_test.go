@@ -148,7 +148,7 @@ func TestStreamImmediateFailureStaysUncommitted(t *testing.T) {
 	body := strings.NewReader("data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"message\":\"private\"}}}\n\n")
 	err := copyStream(recorder, body, &committed, "responses")
 	var failure *Error
-	if !errors.As(err, &failure) || failure.Code != "upstream_stream_failed" || failure.StatusCode != http.StatusBadGateway {
+	if !errors.As(err, &failure) || failure.Code != "upstream_error_event" || failure.StatusCode != http.StatusBadGateway {
 		t.Fatalf("unexpected failure: %v", err)
 	}
 	if committed || recorder.Body.Len() != 0 {

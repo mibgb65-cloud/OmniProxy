@@ -159,6 +159,8 @@ WebSocket 空闲读超时 60 秒，连接内缓存上下文，合并后的完整
 
 流读取失败返回 `upstream_stream_failed`，单行超限返回 `response_too_large`，客户端写入／刷新失败返回 `client_write_failed`；这些错误不会被误标为凭据不可用。取消及超时仍按既有分类处理。HTTP 已提交 SSE 响应头后保留实际状态码，通过请求失败状态与错误码记录中断；WebSocket 使用错误事件表达失败。开始生成后的中断不触发账号切换或自动重放。
 
+协议路径逐行判定上游 SSE 时区分两种原因：上游在自己交付的事件里明确报错（顶层 `error` 或 `response.error` 非空）记为 `upstream_error_event`，数据行不是合法 JSON 或合法但不是 JSON 对象时仍记为 `upstream_stream_failed`。两类都不回显上游说明文字；日志追加 `upstream_stream_kind`（`upstream_error`／`invalid_json`／`unexpected_shape`）、`upstream_event_type` 与 `upstream_error_code`（只保留可打印短码，最长 40 字符）用于判断是上游故障还是网关中断。Codex 这类客户端因此不再只能看到 `error decoding response body`：它拿到的是明确的上游报错分类。
+
 ChatGPT Responses 原生流式转发；跨协议支持文本和工具关联，收齐结果后返回 JSON 或 SSE。DeepSeek 跨协议关闭思考，多模态及不支持的托管工具显式报错。已支持最多三次的同服务商、同认证／计费／地区账号故障切换，固定账号和成功响应后不重放；完整健康／负载调度仍待实现。开关、触发条件、Google 配额边界和尝试统计见 [账号故障切换](FAILOVER.md)。
 
 River 已按上游官方契约接入图片输入：Messages 的 `image` 块（含

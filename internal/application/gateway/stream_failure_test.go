@@ -20,6 +20,32 @@ func (brokenStreamReader) Read([]byte) (int, error) {
 	return 0, errors.New("private-stream-reader-detail")
 }
 
+func TestCodexUpstreamErrorEventIsClassifiedWithoutLeakingText(t *testing.T) {
+	s, _, observer, _ := subscriptionQuotaFixture(t)
+	var calls atomic.Int32
+	s.chatgpt = chatgpt.New(roundTripFunc(func(*http.Request) (*http.Response, error) {
+		calls.Add(1)
+		stream := "data: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_partial\"}}\n\n" +
+			"data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"server_error\",\"message\":\"private-upstream-detail\"}}}\n\n"
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"text/event-stream"}}, Body: io.NopCloser(strings.NewReader(stream))}, nil
+	}))
+	completed, _, raw := requestQuotaGateway(t, s, "http", "gpt-test")
+	if completed || strings.Contains(raw, "private-upstream-detail") {
+		t.Fatal("upstream error text reached the client")
+	}
+	page, err := observer.Requests(context.Background(), activity.RequestQuery{Limit: 10})
+	if err != nil || len(page.Items) != 1 {
+		t.Fatal("upstream error record missing", err)
+	}
+	item, err := observer.Request(context.Background(), page.Items[0].ID)
+	if err != nil || item.State != "failed" || item.ErrorCode != "upstream_error_event" || item.AttemptCount != 1 || calls.Load() != 1 {
+		t.Fatalf("upstream error event was not classified: request=%+v calls=%d err=%v", item, calls.Load(), err)
+	}
+	if len(item.Attempts) != 1 || item.Attempts[0].ErrorCode != "upstream_error_event" || item.Attempts[0].State != "failed" {
+		t.Fatal("attempt classification lost", item.Attempts)
+	}
+}
+
 func TestCodexStreamIOFailuresKeepSafeClassificationAndSingleAttempt(t *testing.T) {
 	for _, transport := range []string{"http", "websocket"} {
 		for _, scenario := range []string{"read-error", "event-limit"} {

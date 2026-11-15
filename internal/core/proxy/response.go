@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -70,21 +71,99 @@ func streamReadFailure(err error) error {
 	return Failure("upstream_stream_failed", 502)
 }
 
-func hasUpstreamError(data []byte) bool {
+// streamDataKind 是一条 SSE 数据行的可核实分类，只用于错误码选择与日志定位。
+type streamDataKind string
+
+const (
+	streamDataInvalidJSON     streamDataKind = "invalid_json"
+	streamDataUnexpectedShape streamDataKind = "unexpected_shape"
+	streamDataUpstreamError   streamDataKind = "upstream_error"
+)
+
+// streamDataFailure 说明一条数据行为什么不能继续转发：
+// code 是返回客户端的稳定错误码，kind／eventType／upstreamCode 只进日志。
+type streamDataFailure struct {
+	code         string
+	kind         streamDataKind
+	eventType    string
+	upstreamCode string
+}
+
+// inspectStreamData 按可证实的信号分类一条 SSE 数据行：上游明确报错记为
+// upstream_error_event，非法 JSON 或合法但非对象保持 upstream_stream_failed。
+// 上游说明文字不参与分类，也不写日志。
+func inspectStreamData(data []byte) (streamDataFailure, bool) {
+	if !json.Valid(data) {
+		return streamDataFailure{code: "upstream_stream_failed", kind: streamDataInvalidJSON}, true
+	}
 	var envelope struct {
+		Type     string          `json:"type"`
 		Error    json.RawMessage `json:"error"`
 		Response json.RawMessage `json:"response"`
 	}
 	if json.Unmarshal(data, &envelope) != nil {
-		return true
+		return streamDataFailure{code: "upstream_stream_failed", kind: streamDataUnexpectedShape}, true
 	}
-	if len(envelope.Error) > 0 && string(envelope.Error) != "null" {
-		return true
+	eventType := sanitizeStreamSignature(envelope.Type)
+	if code, reported := upstreamErrorCode(envelope.Error); reported {
+		return streamDataFailure{code: "upstream_error_event", kind: streamDataUpstreamError, eventType: eventType, upstreamCode: code}, true
 	}
 	// 只识别 Responses 的嵌套错误，不把其他协议的同名扩展字段误判为失败。
 	var response struct {
 		Error json.RawMessage `json:"error"`
 	}
-	return json.Unmarshal(envelope.Response, &response) == nil &&
-		len(response.Error) > 0 && string(response.Error) != "null"
+	if json.Unmarshal(envelope.Response, &response) == nil {
+		if code, reported := upstreamErrorCode(response.Error); reported {
+			return streamDataFailure{code: "upstream_error_event", kind: streamDataUpstreamError, eventType: eventType, upstreamCode: code}, true
+		}
+	}
+	return streamDataFailure{}, false
+}
+
+// upstreamErrorCode 报告 error 字段是否表达了失败，并取出可核实的短错误码。
+// 只有对象形式的 code／type 会作为错误码保留；字符串与其他形状算失败但不留文本。
+func upstreamErrorCode(raw json.RawMessage) (string, bool) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return "", false
+	}
+	if raw[0] != '{' {
+		return "", true
+	}
+	var detail struct {
+		Code string `json:"code"`
+		Type string `json:"type"`
+	}
+	if json.Unmarshal(raw, &detail) != nil {
+		return "", true
+	}
+	for _, candidate := range []string{detail.Code, detail.Type} {
+		if value := sanitizeStreamSignature(candidate); value != "" {
+			return value, true
+		}
+	}
+	return "", true
+}
+
+// sanitizeStreamSignature 把上游标识压成可打印短码：去掉换行与不可打印字符，
+// 最长 40 个字符，避免把上游文本原样写进日志。
+func sanitizeStreamSignature(value string) string {
+	const limit = 40
+	var builder strings.Builder
+	for _, r := range value {
+		if builder.Len() >= limit {
+			break
+		}
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+			builder.WriteRune(r)
+		case strings.ContainsRune("._-", r):
+			builder.WriteRune(r)
+		}
+	}
+	return builder.String()
+}
+
+func hasUpstreamError(data []byte) bool {
+	_, failed := inspectStreamData(data)
+	return failed
 }

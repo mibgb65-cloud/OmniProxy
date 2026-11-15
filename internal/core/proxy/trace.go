@@ -48,6 +48,11 @@ type Trace struct {
 	terminal bool
 	// streamSide 记录流式转发在哪一侧出错，用于日志定位而不进请求库。
 	streamSide string
+	// streamKind／streamEventType／upstreamErrorCode 记录上游流式失败的固定分类，
+	// 只保留分类名与上游短码，不保存上游说明文字。
+	streamKind        string
+	streamEventType   string
+	upstreamErrorCode string
 	// accountingFailed 表示用量入库失败；它不能中断已经开始的客户端数据流。
 	accountingFailed bool
 	attempt          *AttemptEvent
@@ -134,6 +139,18 @@ func (t *Trace) markStreamSide(side string) {
 	t.streamSide = side
 }
 
+// markStreamFailure 记录上游流式失败的固定分类，供日志判断是上游报错还是流转发中断。
+func (t *Trace) markStreamFailure(failure streamDataFailure) {
+	if t == nil {
+		return
+	}
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.streamKind = string(failure.kind)
+	t.streamEventType = failure.eventType
+	t.upstreamErrorCode = failure.upstreamCode
+}
+
 // markAccountingFailure 只记录用量入库失败，不改变已经交付的数据流。
 func (t *Trace) markAccountingFailure() {
 	if t == nil {
@@ -154,6 +171,15 @@ func (t *Trace) diagnosticLogFields() []any {
 	var fields []any
 	if t.streamSide != "" {
 		fields = append(fields, "stream_error_side", t.streamSide)
+	}
+	if t.streamKind != "" {
+		fields = append(fields, "upstream_stream_kind", t.streamKind)
+	}
+	if t.streamEventType != "" {
+		fields = append(fields, "upstream_event_type", t.streamEventType)
+	}
+	if t.upstreamErrorCode != "" {
+		fields = append(fields, "upstream_error_code", t.upstreamErrorCode)
 	}
 	if t.accountingFailed {
 		fields = append(fields, "accounting_failed", true)

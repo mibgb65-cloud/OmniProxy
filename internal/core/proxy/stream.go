@@ -164,17 +164,22 @@ func streamLineState(line string, trace *Trace) (bool, bool, error) {
 		return false, false, nil
 	}
 	data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
-	done := data == "[DONE]"
-	if !done {
+	if data == "[DONE]" {
+		return true, trace.hasFirstContent([]byte(data)), nil
+	}
+	if data != "" {
 		var event struct {
 			Type string `json:"type"`
 		}
-		if json.Unmarshal([]byte(data), &event) == nil {
-			done = event.Type == "response.completed" || event.Type == "message_stop"
+		if json.Unmarshal([]byte(data), &event) == nil &&
+			(event.Type == "response.completed" || event.Type == "message_stop") {
+			return true, trace.hasFirstContent([]byte(data)), nil
+		}
+		if failure, failed := inspectStreamData([]byte(data)); failed {
+			// 失败原因只保留固定分类与上游短码；说明文字不进日志也不回显。
+			trace.markStreamFailure(failure)
+			return false, false, Failure(failure.code, 502)
 		}
 	}
-	if data != "" && !done && (!json.Valid([]byte(data)) || hasUpstreamError([]byte(data))) {
-		return false, false, Failure("upstream_stream_failed", 502)
-	}
-	return done, trace.hasFirstContent([]byte(data)), nil
+	return false, trace.hasFirstContent([]byte(data)), nil
 }
