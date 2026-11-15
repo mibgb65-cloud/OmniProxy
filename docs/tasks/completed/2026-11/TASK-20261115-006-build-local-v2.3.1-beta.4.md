@@ -167,8 +167,9 @@ build-release.ps1 -Version v2.3.1-beta.4 -OutputDirectory release-assets\v2.3.1-
 ## Commit
 
 ```text
-<待回填>
+5faa2662 chore(release): 准备 v2.3.1-beta.4 本地构建
 ```
+实现与发布准备的提交；本记录的提交号由后续文档提交回填。
 
 ---
 
