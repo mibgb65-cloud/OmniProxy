@@ -29,7 +29,13 @@ export function WorkBuddyCredits({ account }: { account: AccountItem }) {
       className="bg-muted/20 min-w-0 space-y-3 rounded-xl border p-3"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">{t("quota.workbuddy.title")}</span>
+        <span className="flex min-w-0 items-baseline gap-1.5">
+          <span className="text-sm font-medium">{t("quota.workbuddy.title")}</span>
+          {/* 套餐名只有计费接口给得准（登录身份没有该字段）；未知时不显示。 */}
+          {data?.plan ? (
+            <span className="text-muted-foreground truncate text-xs">{data.plan}</span>
+          ) : null}
+        </span>
         <Tooltip content={t("quota.workbuddy.refresh")}>
           <Button
             type="button"

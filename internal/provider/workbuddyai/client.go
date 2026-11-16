@@ -45,6 +45,8 @@ const (
 	bizUserAgent = "WorkBuddy/" + AppVersion + " " + pluginPlatform + "/" + AppVersion + " CLI/" + CLIVersion
 	// loginUserAgent 是插件在登录/轮询接口上的短 UA。
 	loginUserAgent = "WorkBuddy/" + AppVersion
+	// billingUserAgent 是计费接口的 UA；与登录接口同为短形态。
+	billingUserAgent = "WorkBuddy/" + AppVersion
 	// 以下指纹来自桌面 CLI 内置的 openai 6.25.0 与 Electron 的 Node 版本。
 	openAISDKVersion   = "6.25.0"
 	nodeRuntimeVersion = "v22.21.1"
@@ -196,6 +198,23 @@ func (c *Client) applySign(request *http.Request, cred Credentials) {
 	request.Header.Set("X-Agent-Purpose", "conversation")
 	request.Header.Set("Accept", "application/json")
 	// 企业（团队）账号必须带企业头，否则上游按个人版回答目录与额度；个人账号没有。
+	if cred.EnterpriseID != "" {
+		request.Header.Set("X-Enterprise-Id", cred.EnterpriseID)
+		request.Header.Set("X-Tenant-Id", cred.EnterpriseID)
+	}
+}
+
+// applyBilling 是计费接口的头集（照社区插件 meterAsked）：短 UA、POST 空对象正文，
+// 不带对话用的 Agent／Stainless 头；企业账号才带企业头。
+func (c *Client) applyBilling(request *http.Request, cred Credentials) {
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("User-Agent", billingUserAgent)
+	request.Header.Set("Authorization", "Bearer "+cred.AccessToken)
+	request.Header.Set("X-User-Id", cred.UID)
+	request.Header.Set("X-Domain", c.domainOf(cred))
+	request.Header.Set("X-Product", "SaaS")
+	request.Header.Set("X-IDE-Type", "WorkBuddy")
 	if cred.EnterpriseID != "" {
 		request.Header.Set("X-Enterprise-Id", cred.EnterpriseID)
 		request.Header.Set("X-Tenant-Id", cred.EnterpriseID)

@@ -35,13 +35,9 @@ export type WorkBuddyErrorCode = (typeof workbuddyErrorCodes)[number] | "operati
 
 export function workbuddyError(error: unknown): WorkBuddyErrorCode {
   const text = error instanceof Error ? error.message : String(error)
-  // 已是稳定码（登录会话直接返回码）时按原样识别，避免二次包装后丢失语义；
-  // 其余按前缀匹配，忽略错误原文可能附带的上下文。
-  const known = workbuddyErrorCodes.find(
-    (code) =>
-      text === code ||
-      text.includes(`workbuddy_ai: ${code}`) ||
-      text.includes(`subscription: ${code}`),
-  )
+  // 错误可能来自多层：`workbuddy_ai: <code>`（适配器）、`subscription: <code>`（登录会话）、
+  // `gateway: <code>`（核心边界）。按分隔符切词后匹配稳定码，避免被前缀差异吞成通用文案。
+  const tokens = text.toLowerCase().split(/[^a-z_]+/)
+  const known = workbuddyErrorCodes.find((code) => tokens.includes(code))
   return known ?? "operation_failed"
 }

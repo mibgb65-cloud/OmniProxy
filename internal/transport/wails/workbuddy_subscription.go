@@ -87,11 +87,29 @@ func workbuddySession(id string) bool { return strings.HasPrefix(id, "workbuddy_
 func (s *AppService) WorkBuddyQuota(id string) (workbuddy.Quota, error) {
 	manager, err := s.workbuddySubscriptionService()
 	if err != nil {
-		return workbuddy.Quota{}, err
+		return workbuddy.Quota{}, workbuddyFailure(err)
 	}
 	ctx, cancel := subscriptionContext()
 	defer cancel()
-	return manager.ReadQuota(ctx, id)
+	quota, err := manager.ReadQuota(ctx, id)
+	if err != nil {
+		return workbuddy.Quota{}, workbuddyFailure(err)
+	}
+	return quota, nil
+}
+
+// workbuddyFailure 把跨层错误归一成 `workbuddy_ai: <code>`。
+//
+// 核心边界的 proxy.Error 文本是 `gateway: <code>`、账号层是 `account: ...`，
+// 直接透传到前端只会被识别成通用失败；这里只保留稳定码。
+func workbuddyFailure(err error) error {
+	if err == nil {
+		return nil
+	}
+	if code := workbuddyai.ErrorCode(err); code != "" {
+		return workbuddyai.Failure(code)
+	}
+	return err
 }
 
 // WorkBuddyCachedQuota 只返回本机保留的公开额度快照，不调用上游。
@@ -110,12 +128,12 @@ func (s *AppService) WorkBuddyCachedQuota(id string) (*workbuddy.Quota, error) {
 func (s *AppService) startWorkBuddyModelSync() {
 	accounts, err := s.accountService()
 	if err != nil {
-		s.logWorkBuddyModelSyncError()
+		s.logWorkBuddyModelSyncError(err)
 		return
 	}
 	manager, err := s.workbuddySubscriptionService()
 	if err != nil {
-		s.logWorkBuddyModelSyncError()
+		s.logWorkBuddyModelSyncError(err)
 		return
 	}
 	source := modelcatalog.New(s.db, accounts, provider.NewService(s.db), nil)
@@ -132,7 +150,7 @@ func (s *AppService) startWorkBuddyModelSync() {
 		return nil
 	}, func(err error) {
 		if err != nil {
-			s.logWorkBuddyModelSyncError()
+			s.logWorkBuddyModelSyncError(err)
 		}
 		s.workbuddyAuth.mu.Lock()
 		emit := s.workbuddyAuth.emitModels
@@ -166,9 +184,13 @@ func (s *AppService) shutdownWorkBuddySubscription() {
 	}
 }
 
-func (s *AppService) logWorkBuddyModelSyncError() {
+func (s *AppService) logWorkBuddyModelSyncError(err error) {
 	if s.log != nil {
-		// 上游与本地配置错误可能含身份；只记录固定错误码，旧快照继续可用。
-		s.log.Warn("WorkBuddy AI model auto sync incomplete; retry is available", "module", "modelcatalog", "code", "workbuddy_auto_sync_failed")
+		// 上游与本地配置错误可能含身份；只记录稳定错误码，旧快照继续可用。
+		code := "workbuddy_auto_sync_failed"
+		if stable := workbuddyai.ErrorCode(err); stable != "" {
+			code = stable
+		}
+		s.log.Warn("WorkBuddy AI model auto sync incomplete; retry is available", "module", "modelcatalog", "code", code)
 	}
 }

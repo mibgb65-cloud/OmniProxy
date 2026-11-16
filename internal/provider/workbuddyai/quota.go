@@ -51,15 +51,19 @@ type Credits struct {
 
 // ReadCredits 读取账号的 Credits 资源总览。上游结构不固定，因此按字段名容错解析：
 // 只有真的读到可解析数字才输出窗口，任何未知都返回错误而不是当成 0。
+//
+// 计费接口与对话接口的形态不同：它是 POST + 空 JSON 对象正文，UA 用短形式
+// `WorkBuddy/<app>`，并且不带对话用的 Agent／Stainless 头（照社区插件 meterAsked()）。
+// 用 GET 或不带正文会被网关直接 404。
 func (c *Client) ReadCredits(ctx context.Context, cred Credentials) (credits Credits, result error) {
 	if !cred.Valid() {
 		return Credits{}, Failure(CodeCredentialUnavailable)
 	}
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+creditsPath, nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+creditsPath, strings.NewReader("{}"))
 	if err != nil {
 		return Credits{}, proxy.UpstreamFailure(err)
 	}
-	c.applySign(request, cred)
+	c.applyBilling(request, cred)
 	defer request.Header.Del("Authorization")
 	response, err := c.http.Do(request)
 	if err != nil {
@@ -93,6 +97,8 @@ type creditTotals struct {
 // quotaSummary 是从资源总览里容错收集到的数字。
 type quotaSummary struct {
 	plan, extra creditTotals
+	// packageName 是计费接口给出的套餐名（SubscriptionPackageName）；登录身份没有该字段。
+	packageName string
 	// left 是无总量包（预付/钱包）的剩余合计，bags 是这类包的数量。
 	left float64
 	bags int
@@ -125,7 +131,7 @@ func summarizeCredits(data json.RawMessage, plan string) (Credits, error) {
 	if len(windows) == 0 {
 		return Credits{}, Failure(CodeInvalidResponse)
 	}
-	return Credits{Plan: planLabel(plan, summary.isPaid), Windows: windows, FetchedAt: time.Now().UTC()}, nil
+	return Credits{Plan: planLabel(plan, summary.packageName, summary.isPaid), Windows: windows, FetchedAt: time.Now().UTC()}, nil
 }
 
 // quotaWalk 有界遍历任意结构的资源总览。
@@ -137,6 +143,7 @@ type quotaWalk struct {
 	groups       []map[string]any
 	packages     []map[string]any
 	subscription string
+	packageName  string
 	isPaid       bool
 	nodes        int
 }
@@ -150,6 +157,9 @@ func (w *quotaWalk) walk(value any, depth int, inGroups bool) error {
 	case map[string]any:
 		if w.subscription == "" {
 			w.subscription = lookupString(typed, "subscriptionpackagecode")
+		}
+		if w.packageName == "" {
+			w.packageName = lookupString(typed, "subscriptionpackagename")
 		}
 		if paid, found := lookupBool(typed, "ispaiduser"); found {
 			w.isPaid = paid
@@ -193,7 +203,7 @@ func isCapacityObject(object map[string]any) bool {
 
 // summarize 汇总包字段；一个数字都读不到时返回无法识别。
 func (w *quotaWalk) summarize() (*quotaSummary, error) {
-	summary := &quotaSummary{isPaid: w.isPaid}
+	summary := &quotaSummary{isPaid: w.isPaid, packageName: w.packageName}
 	parsed := 0
 	// 份额：CreditGroups 有总量时以它为准，否则用 Packages。
 	counted := w.groups
@@ -371,8 +381,12 @@ func totalWindow(plan, extra CreditWindow) CreditWindow {
 }
 
 // planLabel 只用账号名或上游布尔值给出可展示的计划名，不推断套餐等级。
-func planLabel(plan string, isPaid bool) string {
+func planLabel(plan, packageName string, isPaid bool) string {
 	if trimmed := strings.TrimSpace(plan); trimmed != "" {
+		return trimmed
+	}
+	// 计费接口的 SubscriptionPackageName 才是套餐名的权威来源（登录身份没有该字段）。
+	if trimmed := strings.TrimSpace(packageName); trimmed != "" {
 		return trimmed
 	}
 	if isPaid {

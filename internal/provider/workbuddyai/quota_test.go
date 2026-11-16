@@ -271,3 +271,64 @@ func TestQuotaHelpers(t *testing.T) {
 		}
 	}
 }
+
+// 计费接口与对话接口形态不同：POST + 空对象正文 + 短 UA，不带 Agent 头。
+// 用 GET 会被上游网关 404，这是 beta.16 上 Credits 读不出来而界面只报通用失败的原因。
+func TestReadCreditsUsesBillingRequestShape(t *testing.T) {
+	var method, body string
+	var header http.Header
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		method, header = r.Method, r.Header.Clone()
+		raw, _ := io.ReadAll(r.Body)
+		body = string(raw)
+		io.WriteString(w, `{"code":0,"data":{"SubscriptionPackageName":"Free","IsPaidUser":false,"TotalCredits":"100","CreditGroups":[{"Kind":"plan_base","CycleTotalCapacity":"100","CycleUsedCapacity":"0"}],"Packages":[{"CycleTotalCapacity":"100","CycleRemainCapacity":"100"}]}}`)
+	})
+	if _, err := client.ReadCredits(context.Background(), testCredentials()); err != nil {
+		t.Fatal(err)
+	}
+	if method != http.MethodPost {
+		t.Fatalf("method = %q, want POST", method)
+	}
+	if strings.TrimSpace(body) != "{}" {
+		t.Fatalf("body = %q, want {}", body)
+	}
+	if header.Get("User-Agent") != "WorkBuddy/"+AppVersion {
+		t.Fatalf("billing UA = %q", header.Get("User-Agent"))
+	}
+	if header.Get("Content-Type") != "application/json" || header.Get("X-Product") != "SaaS" || header.Get("X-IDE-Type") != "WorkBuddy" {
+		t.Fatalf("billing headers = %v", header)
+	}
+	// 对话专属头不能出现在计费请求上。
+	for _, name := range []string{"X-Agent-Intent", "X-Agent-Type", "X-Stainless-Lang", "X-Requested-With"} {
+		if header.Get(name) != "" {
+			t.Fatalf("chat header %s leaked into billing request", name)
+		}
+	}
+}
+
+// 真实账号（Free 计划）的资源总览只有 plan_base 有总量：应给一个合计窗口与上游套餐名。
+func TestReadCreditsFreePlanPayload(t *testing.T) {
+	fixture := `{"code":0,"msg":"OK","data":{"Packages":[{"PackageCode":"TCACA_code_035","CycleTotalCapacity":"100","CycleRemainCapacity":"100","CycleUsedCapacity":"0","CapacityUnit":"credits","TotalCount":1}],
+"TotalCredits":"100","SubscriptionPackageCode":"","SubscriptionPackageName":"Free","IsPaidUser":false,
+"CreditGroups":[{"Kind":"plan_base","Name":"Plan Base Credits","CycleTotalCapacity":"100","CycleRemainCapacity":"100","CycleUsedCapacity":"0","CapacityUnit":"credits"},
+{"Kind":"plan_bonus","Name":"Plan Bonus Credits","CycleTotalCapacity":"0","CycleUsedCapacity":"0"},
+{"Kind":"addon","Name":"Top-up Credits","CycleTotalCapacity":"0","CycleUsedCapacity":"0"},
+{"Kind":"benefit","Name":"Platform Reward Credits","CycleTotalCapacity":"0","CycleUsedCapacity":"0"}]}}`
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) { io.WriteString(w, fixture) })
+	cred := testCredentials()
+	cred.Plan = ""
+	credits, err := client.ReadCredits(context.Background(), cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if credits.Plan != "Free" {
+		t.Fatalf("plan = %q, want Free (SubscriptionPackageName)", credits.Plan)
+	}
+	if len(credits.Windows) != 1 {
+		t.Fatalf("windows = %+v", credits.Windows)
+	}
+	window := credits.Windows[0]
+	if window.Name != "Credits" || !closeEnough(window.Used, 0) || !closeEnough(window.Limit, 100) || window.Aside {
+		t.Fatalf("window = %+v", window)
+	}
+}

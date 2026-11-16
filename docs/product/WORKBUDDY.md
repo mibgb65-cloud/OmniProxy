@@ -49,13 +49,24 @@ OpenCode 等）按既有路由投影自动可用。
 
 ## Credits 额度
 
-账号卡与配额页读取 `GET /billing/meter/get-user-resource-summary`（企业账号走
-enterprise meter），展示三种窗口或一种：
+账号卡与配额页读取 `POST /billing/meter/get-user-resource-summary`（空 JSON 对象正文；
+企业账号走 enterprise meter）。**计费接口与对话接口形态不同**：它用短 UA
+`WorkBuddy/<桌面版版本>`，只带 `Accept`／`Content-Type`／`Authorization`／`X-User-Id`／
+`X-Domain`／`X-Product`／`X-IDE-Type`（企业加 `X-Enterprise-Id`／`X-Tenant-Id`），
+**不带**对话用的 Agent／Stainless 头；用 `GET` 会被网关 404。
+
+真实账号（Free 计划）返回示例：`CreditGroups` 里 `plan_base` 有总量、`plan_bonus`／
+`addon`／`benefit` 为 0，`TotalCredits: "100"`，`SubscriptionPackageName: "Free"`。
+窗口按此展示三种或一种：
 
 - **Credits**：套餐每周期授予的基础积分（`aside`，不单独停止账号）；
 - **Extra credits**：bonus、充值、赠送等其余积分（`aside`）；
 - **Total credits**：两者合计，**只有它决定账号是否可用**；
 - **Prepaid credits**：只有余额、没有总量的预付包。
+
+只有一类额度有总量时只给一个合计窗口（Free 计划即此类）。套餐名取自计费接口的
+`SubscriptionPackageName`（登录身份没有该字段），显示在额度卡标题旁；未知时不显示，
+不推断等级。
 
 窗口带周期重置时间与最早到期时间（`runsOutAt`），供「先花快过期的」判断参考；
 **首版额度只用于展示，不参与调度**（不按额度跳过账号），避免把上游解读当成确定规则。
@@ -65,7 +76,9 @@ enterprise meter），展示三种窗口或一种：
 
 ## 错误码
 
-界面与日志只使用稳定错误码，不回显上游原文：
+界面与日志只使用稳定错误码，不回显上游原文。错误可能来自三层
+（适配器 `workbuddy_ai:`、登录会话 `subscription:`、核心边界 `gateway:`），
+界面按错误码切词识别，不依赖前缀：
 
 | 码 | 含义与下一步 |
 | --- | --- |
@@ -96,11 +109,16 @@ enterprise meter），展示三种窗口或一种：
 
 ## 未验证与未接入
 
-- **真实账号验证进度**（2026-11-16，`v2.3.1-beta.15`，用户本人账号）：
-  浏览器登录 → `GET /v2/plugin/auth/token` 取到令牌 → `GET /v2/plugin/login/account`
-  取到身份，这三步在真实账号上已走通（失败点只在本地保存账号，已在 TASK-20261116-018 修复）。
-  **仍未验证**：`/v3/config` 真实目录内容、真实 Chat 转发与计费、Credits 三窗口读数；
-  这些会消耗真实积分，需另行授权后验证。其余协议事实来自社区插件
+- **真实账号验证进度**（2026-11-16，用户本人账号）：
+  1. 浏览器登录 → `GET /v2/plugin/auth/token` 取到令牌 → `GET /v2/plugin/login/account`
+     取到身份：已走通（失败点只在本地保存账号，TASK-20261116-018 修复）。
+  2. `/v3/config` 真实目录：已走通，账号同步到 25 条真实模型
+     （`default-model`、`gpt-6.1-sol`、`glm-5.3`、`kimi-k3.1-pro`、`deepseek-v4.1-flash-sg` 等）。
+  3. Credits：真实令牌按 `POST /billing/meter/get-user-resource-summary` 读到
+     `plan_base 100`、`TotalCredits "100"`、`SubscriptionPackageName "Free"`、
+     `IsPaidUser false`；应用内展示随 TASK-20261116-020 修复（此前用 `GET` 被 404）。
+  **仍未验证**：真实 Chat 转发与计费扣减、付费套餐（plan_bonus／addon／benefit 有值）的
+  窗口形状、企业账号的 enterprise meter。其余协议事实来自社区插件
   `@magpie-community/opencode-workbuddy-auth` 0.2.36；首次使用请以小额度模型验证。
 - 未接入：国内版 WorkBuddy（`copilot.tencent.com`）及其 Claude 模型的 Messages 路由、
   每日签到（国际版无该接口）、桌面登录文件导入（5.6+ 加密不可读）、API Key 认证、
