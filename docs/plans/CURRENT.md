@@ -4,6 +4,8 @@
 
 已实现：[TASK-20261116-004](../tasks/completed/2026-11/TASK-20261116-004-howtofix-quota-balance-usage.md) 配额页不再把 HowToFix 账号标为「暂不支持」（`0a38226d`）：把 `howtofix` 归入既有 `balance` 类资源，卡片上半部分显示官方预付美元剩余额度（缺失或不可解析为待确认，不当作耗尽），下半部分显示该账号本机 Token 用量并注明不是官方账单；单卡刷新、「刷新当前列表」与「可监控账号」统计一并覆盖，首页资源卡片复用同一归类。`task verify` EXIT=0（155 文件／945 项前端测试、全部 Go 包、Windows production 构建）。
 
+本地构建：[TASK-20261116-005](../tasks/completed/2026-11/TASK-20261116-005-build-local-v2.3.1-beta.9.md) 已产出 `v2.3.1-beta.9` Windows amd64 生产安装包，内容为配额页 HowToFix 余额与本机 Token 用量同卡展示（TASK-20261116-004，`0a38226d`）。安装器 21,088,061 bytes，SHA256 `9f19500d862880d483cf7bb964267d192c98c9f257780d153fcb044796ba1af6`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后打开配额页即可看到 HowToFix 余额与 Token 用量。
+
 本地构建：[TASK-20261116-002](../tasks/completed/2026-11/TASK-20261116-002-build-local-v2.3.1-beta.8.md) 已产出 `v2.3.1-beta.8` Windows amd64 生产安装包，内容为 HowToFix 目录自动同步（TASK-20261116-001）：启动与账号／服务商变更后后台补齐缺失目录、路由页可手动重新同步、账号页不再显示过期余额提示。安装器 21,085,494 bytes，SHA256 `2875014e88f930e2ee51ea2e097505922caa3f4f19b8cbd1c19ec2af63acff6c`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 `v2.3.1-beta.7`，需从托盘完全退出并备份数据后覆盖安装；本版本无数据库迁移。
 
 本地构建：[TASK-20261115-012](../tasks/completed/2026-11/TASK-20261115-012-build-local-v2.3.1-beta.7.md) 已产出 `v2.3.1-beta.7` Windows amd64 生产安装包，内容为 HowToFix 内置服务商接入（TASK-20261115-011，`974afdaa`：迁移 049、按账号分组同步 `/v1/models`、Chat 原生透传与 Responses／Messages 转换、预付美元余额面板、前端图标与文案）。安装器 21,075,467 bytes，SHA256 `ea3b699e608a4b969996cd2dd29bed7c25f5a504ed576a1acb89ff35bae80940`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。用户当前运行 `v2.3.1-beta.6`，需从托盘完全退出并备份数据后覆盖安装，首次启动执行迁移 049。
