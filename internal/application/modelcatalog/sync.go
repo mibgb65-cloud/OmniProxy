@@ -21,6 +21,10 @@ import (
 
 // Sync 失败时保留上次成功目录，账号凭据版本改变后旧目录不参与路由。
 func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
+	// 每次同步重新记录失败原因，成功时不留下上一次的残影。
+	s.failureMu.Lock()
+	s.lastSyncError = nil
+	s.failureMu.Unlock()
 	if len(id) == 0 || len(id) > 128 {
 		return nil, ErrUnavailable
 	}
@@ -149,6 +153,9 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 		return nil, ErrUnavailable
 	}
 	if err != nil || len(models) > 1000 {
+		// 对外仍只返回 unavailable（界面只需一句通用提示，也不泄漏上游细节），
+		// 但保留底层错误供调用方记日志时取稳定码。
+		s.noteSyncFailure(err)
 		return nil, ErrUnavailable
 	}
 	tx, err := s.db.BeginTx(ctx, nil)

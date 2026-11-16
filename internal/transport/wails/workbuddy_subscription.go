@@ -131,13 +131,12 @@ func (s *AppService) startWorkBuddyModelSync() {
 		s.logWorkBuddyModelSyncError(err)
 		return
 	}
-	manager, err := s.workbuddySubscriptionService()
-	if err != nil {
+	source := modelcatalog.New(s.db, accounts, provider.NewService(s.db), nil)
+	// 与手动同步共用同一套接线（Google／WorkBuddy），避免只接一路。
+	if err := s.wireModelCatalog(source); err != nil {
 		s.logWorkBuddyModelSyncError(err)
 		return
 	}
-	source := modelcatalog.New(s.db, accounts, provider.NewService(s.db), nil)
-	source.SetWorkBuddySubscription(manager)
 	s.workbuddyAuth.mu.Lock()
 	defer s.workbuddyAuth.mu.Unlock()
 	if s.workbuddyAuth.closed || s.workbuddyAuth.auto != nil {

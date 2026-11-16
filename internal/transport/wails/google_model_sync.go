@@ -16,13 +16,12 @@ func (s *AppService) startGoogleModelSync() {
 		s.logGoogleModelSyncError()
 		return
 	}
-	google, err := s.googleSubscriptionService()
-	if err != nil {
+	source := modelcatalog.New(s.db, accounts, provider.NewService(s.db), nil)
+	// 与手动同步共用同一套接线（Google／WorkBuddy），避免只接一路。
+	if err := s.wireModelCatalog(source); err != nil {
 		s.logGoogleModelSyncError()
 		return
 	}
-	source := modelcatalog.New(s.db, accounts, provider.NewService(s.db), nil)
-	source.SetGoogleSubscription(google)
 	s.googleAuth.mu.Lock()
 	defer s.googleAuth.mu.Unlock()
 	if s.googleAuth.closed || s.googleAuth.auto != nil {

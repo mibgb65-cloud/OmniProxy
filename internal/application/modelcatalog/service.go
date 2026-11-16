@@ -21,6 +21,7 @@ import (
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
 	"omniproxy/internal/provider/workbuddyai"
+	"sync"
 )
 
 type Subscription interface {
@@ -61,6 +62,28 @@ type Service struct {
 	openAI        *openai.Client
 	googleAuth    GoogleSubscription
 	workbuddyAuth WorkBuddySubscription
+
+	failureMu sync.Mutex
+	// lastSyncError 是最近一次 Sync 失败的底层错误，只给调用方记日志取稳定码用；
+	// 对外仍是 ErrUnavailable，不把上游细节带进界面。
+	lastSyncError error
+}
+
+// noteSyncFailure 记录最近一次同步失败的底层错误。
+func (s *Service) noteSyncFailure(err error) {
+	if err == nil {
+		return
+	}
+	s.failureMu.Lock()
+	s.lastSyncError = err
+	s.failureMu.Unlock()
+}
+
+// LastSyncError 返回最近一次失败原因；成功后清空。
+func (s *Service) LastSyncError() error {
+	s.failureMu.Lock()
+	defer s.failureMu.Unlock()
+	return s.lastSyncError
 }
 
 // SetGoogleSubscription 安装独立 Google 授权目录，不混用 Gemini API Key。
