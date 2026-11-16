@@ -8,6 +8,7 @@ import (
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 // presetModels 只提供已有适配器支持的官方预设，不代表实时账号发现。
@@ -30,13 +31,16 @@ func presetModels(kind string) []string {
 	case dumate.Kind:
 		// DuMate 上游没有 /models，只公布参考实现确认的两条别名。
 		return dumate.Models()
+	case workbuddyai.Kind:
+		// WorkBuddy AI 的目录按账号的 /v3/config 发放；同步前没有任何可路由模型。
+		return nil
 	default:
 		return nil
 	}
 }
 
 func supportedProvider(kind string) bool {
-	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind || kind == oxionai.Kind || kind == howtofix.Kind || kind == dumate.Kind
+	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind || kind == oxionai.Kind || kind == howtofix.Kind || kind == dumate.Kind || kind == workbuddyai.Kind
 }
 
 func hasPresetAccount(data snapshot, providerID string) bool {
@@ -44,7 +48,7 @@ func hasPresetAccount(data snapshot, providerID string) bool {
 		if item.ProviderID != providerID {
 			continue
 		}
-		if item.AuthMethod == "api_key" || item.AuthMethod == dumate.AuthMethod {
+		if item.AuthMethod == "api_key" || item.AuthMethod == dumate.AuthMethod || item.AuthMethod == workbuddyai.AuthMethod {
 			return true
 		}
 	}

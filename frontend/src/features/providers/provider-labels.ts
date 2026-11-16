@@ -13,6 +13,7 @@ export const providerNameKeys = {
   oxionai: "providers.kind.oxionai",
   dumate: "providers.kind.dumate",
   howtofix: "providers.kind.howtofix",
+  workbuddy_ai: "providers.kind.workbuddy_ai",
 } as const
 
 export function isKnownProviderKind(kind: string): kind is keyof typeof providerNameKeys {
@@ -22,6 +23,8 @@ export function isKnownProviderKind(kind: string): kind is keyof typeof provider
 // 认证类型由多个提供商共享；品牌名称必须依据 kind 或内置提供商 ID 选择。
 export function subscriptionTypeKey(provider: string | undefined) {
   if (provider === "google" || provider === "builtin_google") return "google.subscriptionType"
+  if (provider === "workbuddy_ai" || provider === "builtin_workbuddy_ai")
+    return "providers.subscriptionType.workbuddyAi"
   if (provider === "openai" || provider === "builtin_openai") return "subscription.type"
   return "providers.subscriptionLogin"
 }

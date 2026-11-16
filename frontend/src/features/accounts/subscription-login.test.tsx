@@ -135,6 +135,29 @@ describe("ChatGPT subscription sign-in", () => {
       fetchedAt: "2026-10-08T00:00:00Z",
     })
   })
+  it("WorkBuddy 只提供浏览器授权并用独立文案与错误码", async () => {
+    const { user, client } = setup(<SubscriptionLoginDialog providerId="builtin_workbuddy_ai" />)
+    await user.click(screen.getByRole("button", { name: "登录 WorkBuddy AI" }))
+    expect(screen.getByRole("dialog", { name: "登录 WorkBuddy AI" })).toBeInTheDocument()
+    expect(
+      screen.getByText("用浏览器完成 WorkBuddy AI 登录；完成后自动返回 OmniProxy。"),
+    ).toBeInTheDocument()
+    expect(screen.getByText("令牌保存在本机受保护存储，不会上传。")).toBeInTheDocument()
+    expect(screen.getByText("浏览器授权")).toBeInTheDocument()
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "开始授权" }))
+    await waitFor(() =>
+      expect(beginSubscription).toHaveBeenCalledWith({
+        providerId: "builtin_workbuddy_ai",
+        accountId: undefined,
+        name: "",
+        mode: "browser",
+      }),
+    )
+    state = { ...state, state: "failed", errorCode: "sign_in_expired", url: "" }
+    await client.invalidateQueries({ queryKey: ["subscription-session"] })
+    expect(await screen.findByRole("alert")).toHaveTextContent("登录已失效，请重新登录。")
+  })
   it("starts browser authorization and refreshes accounts after completion", async () => {
     const { user, client } = setup()
     client.setQueryData(["accounts"], [])

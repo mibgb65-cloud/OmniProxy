@@ -161,7 +161,7 @@ func (s *Service) deleteAccount(ctx context.Context, id string, managed bool) er
 	if err != nil {
 		return err
 	}
-	if item.AuthMethod == AuthSubscription && !managed {
+	if (item.AuthMethod == AuthSubscription || item.AuthMethod == AuthWorkBuddyLogin) && !managed {
 		return fmt.Errorf("%w: managed deletion required", ErrInvalidInput)
 	}
 	result, err := s.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = ?`, id)

@@ -7,6 +7,7 @@ import { useAccounts } from "../accounts/use-accounts"
 import { useProviders } from "../providers/use-providers"
 import { accountBalanceOptions } from "../accounts/use-account-balance"
 import { subscriptionQuotaOptions } from "../accounts/use-subscription-quota"
+import { workbuddyQuotaOptions } from "../accounts/use-workbuddy-quota"
 import { retainQuota } from "../accounts/quota-retention"
 import {
   describeQuotaAccounts,
@@ -52,6 +53,10 @@ export function useQuotaOverview() {
   const subscriptionQueries = useQueries({
     queries: subscriptions.map((item) => subscriptionQuotaOptions(item.account)),
   })
+  const workbuddyAccounts = items.filter((item) => item.kind === "workbuddy")
+  const workbuddyQueries = useQueries({
+    queries: workbuddyAccounts.map((item) => workbuddyQuotaOptions(item.account)),
+  })
   const balanceQueries = useQueries({
     queries: balances.map((item) => accountBalanceOptions(item.account)),
   })
@@ -63,11 +68,17 @@ export function useQuotaOverview() {
   useEffect(() => {
     const versions = new Map<string, string>()
     for (const item of items) {
-      if (!["subscription", "google_subscription"].includes(item.kind) || !item.canQuery) continue
+      if (
+        !["subscription", "google_subscription", "workbuddy"].includes(item.kind) ||
+        !item.canQuery
+      )
+        continue
       const key =
         item.kind === "google_subscription"
           ? googleSubscriptionQuotaOptions(item.account).queryKey
-          : subscriptionQuotaOptions(item.account).queryKey
+          : item.kind === "workbuddy"
+            ? workbuddyQuotaOptions(item.account).queryKey
+            : subscriptionQuotaOptions(item.account).queryKey
       const scope = JSON.stringify(key)
       const oldVersion = previous.current.get(scope)
       versions.set(scope, item.account.updatedAt)
@@ -96,13 +107,18 @@ export function useQuotaOverview() {
   const dumateById = new Map(
     dumateAccounts.map((item, index) => [item.account.id, dumateQueries[index]]),
   )
+  const workbuddyById = new Map(
+    workbuddyAccounts.map((item, index) => [item.account.id, workbuddyQueries[index]]),
+  )
   const entries = items.map((item) => {
     const googleQuery = googleById.get(item.account.id)
     const minimaxQuery = minimaxById.get(item.account.id)
     const quotaQuery = subscriptionById.get(item.account.id)
     const balanceQuery = balanceById.get(item.account.id)
     const dumateQuery = dumateById.get(item.account.id)
-    const query = googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery ?? dumateQuery
+    const workbuddyQuery = workbuddyById.get(item.account.id)
+    const query =
+      googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery ?? dumateQuery ?? workbuddyQuery
     // 瞬时失败沿用上次成功结果：错误置空，值标为本地留存，卡片因此显示“已保留上次获取的信息”。
     // 判定时刻取失败发生的时刻（errorUpdatedAt），避免在渲染期读时钟。
     const google = retainQuota({
@@ -119,7 +135,14 @@ export function useQuotaOverview() {
       error: quotaQuery?.error ?? null,
       now: quotaQuery?.errorUpdatedAt ?? 0,
     })
-    const retained = google.retained || subscription.retained
+    const workbuddy = retainQuota({
+      data: workbuddyQuery?.data,
+      dataUpdatedAt: workbuddyQuery?.dataUpdatedAt ?? 0,
+      isError: workbuddyQuery?.isError ?? false,
+      error: workbuddyQuery?.error ?? null,
+      now: workbuddyQuery?.errorUpdatedAt ?? 0,
+    })
+    const retained = google.retained || subscription.retained || workbuddy.retained
     return makeQuotaEntry(
       item,
       {
@@ -132,6 +155,10 @@ export function useQuotaOverview() {
             : subscription.data,
         balance: balanceQuery?.data,
         dumate: dumateQuery?.data,
+        workbuddy:
+          workbuddy.retained && workbuddy.data
+            ? { ...workbuddy.data, fromCache: true }
+            : workbuddy.data,
         // 停用查询（例如未登录的 DuMate）不算「正在读取」，避免空白卡片一直显示占位。
         pending: item.canQuery && (query?.isPending ?? false),
         fetching: query?.isFetching ?? false,

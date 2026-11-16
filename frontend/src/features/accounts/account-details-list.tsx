@@ -17,6 +17,7 @@ import { AccountItemActions, type AccountItemActionsProps } from "./account-item
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
 import { SubscriptionQuota } from "./subscription-quota"
+import { WorkBuddyCredits } from "./workbuddy-credits"
 import { AccountBalance } from "./account-balance"
 import { GoogleAccountResource } from "../google/google-account-resource"
 import { DuMatePoints } from "../dumate/dumate-points"
@@ -35,7 +36,10 @@ export function AccountDetailsList({
   googleSupported?: boolean
 } & Omit<AccountItemActionsProps, "account">) {
   const { t } = useTranslation()
-  const hasSubscriptions = accounts.some((account) => account.authMethod === "subscription_login")
+  const hasSubscriptions = accounts.some(
+    (account) =>
+      account.authMethod === "subscription_login" || account.authMethod === "workbuddy_login",
+  )
   return (
     <div
       role="region"
@@ -114,6 +118,10 @@ export function AccountDetailsList({
                 {account.authMethod === "subscription_login" ? (
                   <div className="min-w-72">
                     <SubscriptionQuota account={account} />
+                  </div>
+                ) : account.authMethod === "workbuddy_login" ? (
+                  <div className="min-w-72">
+                    <WorkBuddyCredits account={account} />
                   </div>
                 ) : account.providerId === "builtin_river" ? (
                   <div className="min-w-72">

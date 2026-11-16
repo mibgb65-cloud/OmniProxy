@@ -59,8 +59,8 @@ accounts need one local place to:
 - 侧栏通顶占据窗口左侧整列（`docs/product/APPEARANCE.md`），品牌标识（图标＋名称）与收展按钮同处顶部品牌栏，标题栏不再重复品牌；侧栏底部提供“设置与关于”统一入口，以带背景模糊的悬浮窗口展示左侧分类和右侧独立滚动内容；分类为通用设置、请求与日志、数据存储、检查更新、关于。通用设置紧凑展示启动／关闭行为与字号。检查更新独立为一级分类，按运行版本摘要、更新设置和离线当前版本日志分组，支持手动检查、可关闭的后台版本检查及默认关闭的自动下载开关；关于页展示官网、开源仓库、免责声明、使用协议、隐私政策五项入口，通过后端固定标识白名单在系统浏览器打开，等待时禁止重复操作，失败显示可重试的安全提示，不在应用内加载协议正文。官网三份独立静态协议已上线并核验标题与正文，不将 HTTP 200 首页回退当作成功。内容视口延伸至底部边框，底部留白随内容滚动，避免卡片提前截断。打开时保留当前工作页面，切换分类保留未保存输入，支持上下键选择分类、键盘关闭和焦点返回。旧 `/settings`、`/about` 链接继续打开对应分类。
 - Multi-provider access via a unified adapter architecture (OpenAI,
   Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi, MiniMax, Xiaomi MiMo,
-  StepFun, Atria, River, Oxion AI, HowToFix, Baidu DuMate, and OpenAI-compatible endpoints).
-- Fourteen named providers are enabled by default and can be switched off; users
+  StepFun, Atria, River, Oxion AI, HowToFix, Baidu DuMate, WorkBuddy AI, and OpenAI-compatible endpoints).
+- Fifteen named providers are enabled by default and can be switched off; users
   can add enabled-by-default custom OpenAI-compatible endpoints.
 - 提供商卡片使用与账号一致的电源图标按钮控制启停：绿色表示启用，灰色表示停用，悬浮提示说明下一步操作。
 - Provider cards show a curated model preview and an unauthenticated endpoint
@@ -90,6 +90,7 @@ accounts need one local place to:
 - Atria 支持 API Key 账号及 `Atria-Dawn-Preview` 官方预设，256000 上下文、仅文本；Chat Completions／Responses／Messages 使用原生 HTTP 和 SSE，复用路由、客户端目录与用量统计。预设不代表账号认证或额度已经验证，余额及实时模型发现尚未接入。
 - Oxion AI 支持 API Key 账号（`cc_` 前缀）与官方 `GET /v1/models` 目录同步：只收录官方 `type=chat` 的模型，上下文窗口与 `vision`／`tools` 能力按目录声明，未同步前没有可用模型。上游只有 OpenAI 兼容 Chat Completions，Chat 请求原生透传，Responses／Messages 由网关转换后转发并按原协议回包；官方未声明 `reasoning_effort`，因此不发布档位选择。Embeddings、`web_search` 与余额未接入。详见 `docs/product/OXIONAI.md`。
 - HowToFix 支持 API Key 账号与按账号分组的 `GET /v1/models` 目录同步（`vip`／`free`／`cli` 等分组模型不同，例如 `hy4` 仅 `vip`），启动与账号变更后在后台自动补齐缺失目录，路由页也可手动重新同步，未同步前没有可用模型；能力与上下文窗口只按目录声明，缺字段保持未知。上游为 new-api 系 OpenAI 兼容网关，Chat 请求原生透传，Responses／Messages 由网关转换后转发并按原协议回包，不宣称原生 Anthropic／Gemini 路由；不发布推理档位。账号卡按 `dashboard/billing/subscription` 显示预付美元剩余额度，缺失时显示未知；配额页把该余额与本机 Token 用量同卡分区展示，余额缺失或不可解析标为待确认、不当作耗尽；402 余额不足原样回传，不触发同池换号。Embeddings、Files、签到与分组切换未接入。详见 `docs/product/HOWTOFIX.md`。
+- WorkBuddy AI 支持浏览器登录的订阅账号（腾讯 CodeBuddy 计划国际版，`workbuddy_login`，无 API Key／设备码／桌面登录文件导入）：登录令牌经 DPAPI 保存，请求前自动续期且续期不使目录失效；目录按账号 `GET /v3/config` 同步，能力与上下文只按目录声明、缺字段保持未知；上游只接受流式 Chat，Responses／Messages 与「非流式 Chat 客户端」由网关聚合后按原协议回包；账号卡与配额页展示 Credits（计划内，set aside）、Extra credits（set aside）与 Total credits（唯一决定账号可用性），缺失字段显示未知、不补 0；额度只用于展示、不参与调度，免费模型每日 token 窗口未接入；请求形态按官方桌面客户端对齐（UA 与指纹头），账号风险见 ADR-026。国内版 WorkBuddy、签到、桌面登录文件与 API Key 未接入，未用真实账号验证。详见 `docs/product/WORKBUDDY.md`。
 - 小米 MiMo 支持普通按量及 Token Plan 个人／团队 Key、套餐中国／新加坡／欧洲集群，按账号选择计费通道和区域。账号设置可保存 Token Plan／API Key 默认顺序，同名模型统一发布；无合格首选账号时选下一通道，固定账号／旧显式通道继续优先，请求失败不跨通道重试。普通三个 V2.6 对话模型、套餐 Pro／Flash，官方模型同步、路由和客户端目录共用；原生三协议保留文本、思考、函数调用及 JSON／SSE，并记录当次区域／计费归属。预设与账号发现区分，套餐官方剩余未知并提供平台入口；余额、多模态及语音接口未接入，真实 Key／长窗口待验证。详见 `docs/product/MIMO.md`。
 - 阶跃星辰支持账号级国内／海外和按量 API／Step Plan 四组合，账号设置可保存 Step Plan／普通 API Key 默认顺序，同名模型统一发布，固定账号和旧显式通道继续优先；原生文本协议按模型开放，请求失败不跨通道重试。支持普通模型同步、官方普通余额和本机用量，Step Plan 官方剩余保持未知。详见 `docs/product/STEPFUN.md`；真实 Key 与长窗口验收待完成。
 - Kimi 支持普通 API／Kimi Code 订阅 Key 与国内／海外账号、默认计费及地区顺序，同款模型统一展示，固定账号／显式通道及旧 ID 保持兼容。订阅原生三协议、型号映射与真实客户端身份保留；普通 K3 三协议、K2.7 Code／K2.6 Chat／Messages、高速版 Chat 能力保持。普通 API 官方可用／代金券／现金余额按地区查询，国内 CNY、海外 USD；订阅剩余额度未知并提供控制台入口，不推断套餐或 1M 权限，不跨通道失败重试。真实 Key／长窗口仍待验证。详见 `docs/product/KIMI.md`。

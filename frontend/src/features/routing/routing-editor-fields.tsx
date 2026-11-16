@@ -60,6 +60,8 @@ export function RoutingEditorFields({
         p.kind !== "stepfun" &&
         p.kind !== "kimi" &&
         p.kind !== "minimax" &&
+        p.kind !== "howtofix" &&
+        p.kind !== "workbuddy_ai" &&
         !(["openai", "google"].includes(p.kind) && catalog.some((m) => m.providerId === p.id))
       return {
         value: p.id,

@@ -11,6 +11,7 @@ import (
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 // Definition describes a built-in provider kind and its authentication options.
@@ -51,6 +52,9 @@ var definitions = []Definition{
 	{Kind: howtofix.Kind, Name: "HowToFix", DefaultBaseURL: howtofix.DefaultBaseURL, Models: howtofix.Models(), AuthMethods: []string{AuthAPIKey}, DiscoveryOnly: true},
 	// DuMate 只接受登录态导入，没有 API Key 或订阅 OAuth；模型别名固定，上游无 /models。
 	{Kind: dumate.Kind, Name: dumate.Name, DefaultBaseURL: dumate.DefaultBaseURL, Models: dumate.DisplayModels(), AuthMethods: []string{dumate.AuthMethod}},
+	// WorkBuddy AI 只有浏览器登录（没有 API Key），目录按账号的 /v3/config 发放。
+	// WorkBuddy AI 只有浏览器登录，目录按账号的 /v3/config 发放，没有可内置的预设模型。
+	{Kind: workbuddyai.Kind, Name: workbuddyai.Name, DefaultBaseURL: workbuddyai.DefaultBaseURL, Models: nil, AuthMethods: []string{workbuddyai.AuthMethod}, DiscoveryOnly: true},
 }
 
 // Catalog returns an independent snapshot of the built-in provider kinds.

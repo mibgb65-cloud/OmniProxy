@@ -12,6 +12,7 @@ import {
   subscriptionRefreshError,
   transientSubscriptionRefreshError,
 } from "../../services/subscription"
+import { workbuddyError } from "../../services/workbuddy"
 import { SubscriptionLoginDialog } from "./subscription-login-dialog"
 import { SubscriptionPlanBadge } from "./subscription-plan-badge"
 import { SubscriptionAccountID } from "./subscription-account-id"
@@ -27,15 +28,18 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
   })
   const refreshing =
     mutation.variables?.action === "refresh" && account.providerId !== "builtin_google"
-  const errorCode = refreshing
+  // 刷新失败沿用订阅错误字典；WorkBuddy 使用自己的稳定错误码与文案。
+  const workbuddy = account.providerId === "builtin_workbuddy_ai"
+  const subscriptionCode = refreshing
     ? subscriptionRefreshError(mutation.error)
     : subscriptionError(mutation.error)
+  const workbuddyCode = workbuddyError(mutation.error)
   // 后续重新登录或账号更新后，旧操作的失败不再代表当前账号。
   const currentError =
     mutation.isError &&
     mutation.variables?.id === account.id &&
     mutation.variables.version === account.updatedAt
-  const transient = refreshing && transientSubscriptionRefreshError(errorCode)
+  const transient = !workbuddy && refreshing && transientSubscriptionRefreshError(subscriptionCode)
   return (
     <div className="min-w-0 space-y-2 text-xs">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -44,7 +48,7 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
           <SubscriptionAccountID id={account.authAccountId} />
         </div>
         <div className="text-muted-foreground flex shrink-0 items-center gap-1">
-          {account.providerId !== "builtin_google" ? (
+          {account.providerId !== "builtin_google" && !workbuddy ? (
             <ResetCreditsPopover account={account} disabled={mutation.isPending} />
           ) : null}
           <Tooltip content={t("subscription.refresh")}>
@@ -104,12 +108,14 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
         <StatusToast
           key={mutation.submittedAt}
           tone="warning"
-          title={t(`subscription.error.${errorCode}`)}
+          title={t(`subscription.error.${subscriptionCode}`)}
           closeLabel={t("subscription.refreshDismiss")}
         />
       ) : currentError ? (
         <p role="alert" className="text-destructive">
-          {t(`subscription.error.${errorCode}`)}
+          {workbuddy
+            ? t(`workbuddy.error.${workbuddyCode}`)
+            : t(`subscription.error.${subscriptionCode}`)}
         </p>
       ) : null}
     </div>

@@ -206,6 +206,28 @@ it("HowToFix API Key 可手动同步官方模型（目录按账号分组发放�
   expect(syncAccountModels).toHaveBeenCalledWith("a")
 })
 
+it("WorkBuddy AI 浏览器登录账号可手动同步官方模型", async () => {
+  vi.mocked(listModelCatalog).mockResolvedValue([])
+  vi.mocked(syncAccountModels).mockResolvedValue([
+    {
+      accountId: "a",
+      providerId: "p",
+      model: "workbuddy-chat",
+      name: "workbuddy-chat",
+      fetchedAt: "now",
+    },
+  ])
+  renderCatalog({
+    providers: [{ ...catalogProps.providers[0], kind: "workbuddy_ai", name: "WorkBuddy AI" }],
+    accounts: [{ ...catalogProps.accounts[0], authMethod: "workbuddy_login" }],
+  })
+  const user = userEvent.setup()
+  await selectOption(user, screen.getByRole("combobox"), "Account · WorkBuddy AI")
+  await user.click(screen.getByRole("button", { name: "同步官方模型" }))
+  expect(await screen.findByText("workbuddy-chat")).toBeInTheDocument()
+  expect(syncAccountModels).toHaveBeenCalledWith("a")
+})
+
 it("模型与服务商双向分组，同一服务商的账号共用模型标题并保留各自能力", async () => {
   vi.mocked(listModelCatalog).mockResolvedValue([
     {

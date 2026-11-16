@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"omniproxy/internal/infrastructure/database"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 func testService(t *testing.T) *Service {
@@ -24,8 +25,8 @@ func testService(t *testing.T) *Service {
 	return NewService(db)
 }
 
-func TestCatalogContainsFourteenProviderKinds(t *testing.T) {
-	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria", "river", "oxionai", "howtofix", "dumate"}
+func TestCatalogContainsFifteenProviderKinds(t *testing.T) {
+	want := []string{"openai", "anthropic", "google", "deepseek", "zhipu", "kimi", "minimax", "mimo", "stepfun", "atria", "river", "oxionai", "howtofix", "dumate", "workbuddy_ai"}
 	definitions := Catalog()
 	if len(definitions) != len(want) {
 		t.Fatalf("Catalog length = %d, want %d", len(definitions), len(want))
@@ -33,8 +34,15 @@ func TestCatalogContainsFourteenProviderKinds(t *testing.T) {
 	for i, definition := range definitions {
 		if definition.Kind == "dumate" {
 			// DuMate 只有登录态导入，没有 API Key 或订阅 OAuth。
-			if len(definition.AuthMethods) != 1 || definition.AuthMethods[0] != "dumate_cookie" {
+			if definition.Kind != want[i] || len(definition.AuthMethods) != 1 || definition.AuthMethods[0] != "dumate_cookie" {
 				t.Errorf("dumate auth methods = %+v", definition.AuthMethods)
+			}
+			continue
+		}
+		if definition.Kind == workbuddyai.Kind {
+			// WorkBuddy AI 只有浏览器登录，没有 API Key 或订阅 OAuth。
+			if definition.Kind != want[i] || len(definition.AuthMethods) != 1 || definition.AuthMethods[0] != workbuddyai.AuthMethod {
+				t.Errorf("workbuddy_ai auth methods = %+v", definition.AuthMethods)
 			}
 			continue
 		}
@@ -59,8 +67,8 @@ func TestBuiltInProvidersStartEnabledAndCanOnlyToggle(t *testing.T) {
 	ctx := context.Background()
 	service := testService(t)
 	items, err := service.List(ctx)
-	if err != nil || len(items) != 14 {
-		t.Fatalf("List = (%v, %v), want fourteen built-ins", items, err)
+	if err != nil || len(items) != 15 {
+		t.Fatalf("List = (%v, %v), want fifteen built-ins", items, err)
 	}
 	for _, item := range items {
 		if item.Source != SourceBuiltIn || !item.Enabled || item.ID != "builtin_"+item.Kind {
@@ -94,8 +102,8 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("Create = %+v", item)
 	}
 	items, err := NewService(service.db).List(ctx)
-	if err != nil || len(items) != 15 {
-		t.Fatalf("persisted List = (%v, %v), want fifteen", items, err)
+	if err != nil || len(items) != 16 {
+		t.Fatalf("persisted List = (%v, %v), want sixteen", items, err)
 	}
 	updated, err := service.Update(ctx, item.ID, UpdateInput{Name: "Backup", BaseURL: "https://backup.example.test/v1"})
 	if err != nil || updated.Name != "Backup" || !updated.Enabled {
@@ -112,7 +120,7 @@ func TestCustomProviderLifecycle(t *testing.T) {
 		t.Fatalf("second Delete = %v, want ErrNotFound", err)
 	}
 	items, err = service.List(ctx)
-	if err != nil || len(items) != 14 {
+	if err != nil || len(items) != 15 {
 		t.Fatalf("List after Delete = (%v, %v)", items, err)
 	}
 }
@@ -137,7 +145,7 @@ func TestCustomProviderValidation(t *testing.T) {
 			t.Errorf("invalid case %d = %v, want ErrInvalidInput", i, err)
 		}
 	}
-	if items, err := service.List(ctx); err != nil || len(items) != 14 {
+	if items, err := service.List(ctx); err != nil || len(items) != 15 {
 		t.Fatalf("invalid inputs wrote rows: %v, %v", items, err)
 	}
 	if _, err := service.Create(ctx, CreateInput{Name: "Local proxy", BaseURL: "http://127.0.0.1:8080/v1"}); err != nil {

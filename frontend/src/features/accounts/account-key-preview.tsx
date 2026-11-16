@@ -9,7 +9,8 @@ import { SubscriptionAccountStatus } from "./subscription-account-status"
 import { DuMateAccountStatus } from "../dumate/dumate-account-status"
 
 export function AccountKeyPreview({ account }: { account: AccountItem }) {
-  if (account.authMethod === "subscription_login") {
+  // 订阅登录与 WorkBuddy 浏览器登录都只有授权状态，没有可复制的密钥。
+  if (account.authMethod === "subscription_login" || account.authMethod === "workbuddy_login") {
     return <SubscriptionAccountStatus account={account} />
   }
   // Cookie 登录态没有可复制的密钥，只说明导入状态。

@@ -10,6 +10,7 @@ import {
   readGoogleSubscriptionModels,
 } from "../../services/google-subscription"
 import { googleQuotaFixture } from "../google/google-quota-test-helpers"
+import { workbuddyQuota } from "../../services/workbuddy"
 import { useUIStore } from "../../stores/ui-store"
 import { selectOption } from "../../test/select-option"
 import {
@@ -44,6 +45,11 @@ vi.mock("../../services/google-subscription", () => ({
 vi.mock("../../services/activity", async (original) => ({
   ...(await original<typeof import("../../services/activity")>()),
   readAccountTokenUsage: vi.fn(),
+}))
+vi.mock("../../services/workbuddy", async (original) => ({
+  ...(await original<typeof import("../../services/workbuddy")>()),
+  workbuddyQuota: vi.fn(),
+  workbuddyCachedQuota: vi.fn(async () => null),
 }))
 vi.mock("@wailsio/runtime", async (original) => ({
   ...(await original<typeof import("@wailsio/runtime")>()),
@@ -305,6 +311,41 @@ describe("quota overview", () => {
       finish(quota)
     })
     expect(readSubscriptionQuota).toHaveBeenCalledTimes(1)
+  })
+
+  it("shows WorkBuddy AI Credits and reports exhaustion from Total credits", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0]!, id: "builtin_workbuddy_ai", kind: "workbuddy_ai", name: "WorkBuddy AI" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      {
+        ...accounts[3]!,
+        id: "workbuddy-one",
+        providerId: "builtin_workbuddy_ai",
+        name: "WorkBuddy",
+        authMethod: "workbuddy_login",
+        authState: "authenticated",
+        authPlan: "Pro",
+      },
+    ])
+    vi.mocked(workbuddyQuota).mockResolvedValue({
+      plan: "Pro",
+      fetchedAt: "2026-11-16T00:00:00Z",
+      windows: [
+        { name: "Credits", used: 100, amount: 1000, limit: 1000, aside: true },
+        { name: "Extra credits", used: 20, amount: 200, limit: 200, aside: true },
+        { name: "Total credits", used: 120, amount: 1200, limit: 1200 },
+      ],
+    })
+    renderQuota()
+    await ready()
+    const card = within((await screen.findByText("1,200 / 1,200")).closest('[data-slot="card"]')!)
+    expect(card.getByText("Credits 合计")).toBeInTheDocument()
+    expect(card.getByText("计划内 Credits")).toBeInTheDocument()
+    expect(card.getByText("额度耗尽／余额不足")).toBeInTheDocument()
+    expect(card.queryByText("5h 额度")).not.toBeInTheDocument()
+    expect(card.queryByText("一周额度")).not.toBeInTheDocument()
+    expect(workbuddyQuota).toHaveBeenCalledWith("workbuddy-one")
   })
 
   it("does not show fake resource counts after metadata failure and supports retry", async () => {

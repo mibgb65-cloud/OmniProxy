@@ -7,7 +7,9 @@ import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-r
 import { useTranslation } from "react-i18next"
 import { balanceError } from "../../services/balance"
 import { subscriptionError } from "../../services/subscription"
+import { workbuddyError } from "../../services/workbuddy"
 import { SubscriptionQuotaRow } from "../accounts/subscription-quota"
+import { WorkBuddyCreditWindows } from "../accounts/workbuddy-credits"
 import { AccountUsagePanel } from "../accounts/account-usage-panel"
 import { quotaWindows, type QuotaEntry } from "./quota-model"
 import { DuMateQuotaResource } from "./dumate-quota-resource"
@@ -42,6 +44,30 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
   if (entry.kind === "mimo_plan") return <MiMoPlanResource account={entry.account} />
   if (entry.kind === "step_plan") return <StepFunPlanResource account={entry.account} />
   if (entry.kind === "dumate_points") return <DuMateQuotaResource entry={entry} />
+  if (entry.kind === "workbuddy") {
+    const windows = entry.workbuddy?.windows ?? []
+    return (
+      <div className="bg-muted/20 space-y-3 rounded-xl border p-3" aria-busy={entry.fetching}>
+        {windows.length > 0 ? (
+          <WorkBuddyCreditWindows windows={windows} />
+        ) : (
+          <p className="text-muted-foreground text-xs">{t("quota.workbuddy.unknown")}</p>
+        )}
+        {entry.error ? (
+          <p role="alert" className="text-destructive text-xs leading-5">
+            {t(`workbuddy.error.${workbuddyError(entry.error)}`)}
+          </p>
+        ) : entry.status === "stale" ? (
+          <p className="text-muted-foreground text-xs leading-5">{t("quota.staleHint")}</p>
+        ) : entry.status === "unknown" && !entry.pending ? (
+          <p className="text-muted-foreground text-xs leading-5">{t("quota.missingHint")}</p>
+        ) : null}
+        {entry.workbuddy?.fromCache ? (
+          <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
+        ) : null}
+      </div>
+    )
+  }
   if (entry.kind === "unsupported") {
     return (
       <div className="bg-muted/20 space-y-3 rounded-xl border p-3">

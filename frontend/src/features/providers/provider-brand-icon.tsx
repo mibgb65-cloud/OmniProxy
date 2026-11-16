@@ -18,6 +18,7 @@ const brandIcons: Record<
   oxionai: { file: "oxionai.png" },
   dumate: { file: "dumate.png", fullTile: true },
   howtofix: { file: "howtofix.png" },
+  workbuddy_ai: { file: "workbuddy-ai.svg" },
 }
 
 function resolveBrandIcon(kind: string, endpoint?: string) {

@@ -78,7 +78,8 @@ export function AccountEditForm({
             </Dialog.Title>
             <Dialog.Description className="text-muted-foreground text-sm">
               {t(
-                account.authMethod === "subscription_login"
+                account.authMethod === "subscription_login" ||
+                  account.authMethod === "workbuddy_login"
                   ? "subscription.editDescription"
                   : account.authMethod === "dumate_cookie"
                     ? "dumate.account.editHint"
@@ -155,7 +156,9 @@ export function AccountEditForm({
               </p>
             ) : null}
           </div>
-          {account.authMethod !== "subscription_login" && account.authMethod !== "dumate_cookie" ? (
+          {account.authMethod !== "subscription_login" &&
+          account.authMethod !== "dumate_cookie" &&
+          account.authMethod !== "workbuddy_login" ? (
             <>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium">{t("accounts.edit.currentKey")}</p>

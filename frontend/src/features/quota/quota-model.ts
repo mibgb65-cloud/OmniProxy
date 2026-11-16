@@ -4,6 +4,7 @@ import { googleQuotaState } from "../google/google-quota-model"
 import type { AccountItem, DuMatePoints, ProviderConfiguration } from "../../services/omniproxy"
 import type { AccountBalanceInfo } from "../../services/balance"
 import type { SubscriptionQuota } from "../../services/subscription"
+import type { WorkBuddyQuota } from "../../services/workbuddy"
 import { accountDisplayName } from "../accounts/account-display"
 
 export const quotaStatuses = [
@@ -30,6 +31,7 @@ export type QuotaAccount = {
     | "kimi_coding"
     | "minimax_plan"
     | "dumate_points"
+    | "workbuddy"
     | "unsupported"
   canQuery: boolean
 }
@@ -39,6 +41,7 @@ export type QuotaSnapshot = {
   quota?: SubscriptionQuota
   balance?: AccountBalanceInfo
   dumate?: DuMatePoints
+  workbuddy?: WorkBuddyQuota
   pending: boolean
   fetching: boolean
   error: unknown
@@ -87,6 +90,9 @@ export function describeQuotaAccounts(
                         : "unsupported"
     if (provider?.kind === "google" && account.authMethod === "subscription_login")
       kind = "google_subscription"
+    // WorkBuddy 走独立的浏览器登录与 Credits 口径，不能落到余额或 Codex 窗口。
+    if (provider?.kind === "workbuddy_ai" && account.authMethod === "workbuddy_login")
+      kind = "workbuddy"
     const canQuery =
       kind !== "unsupported" &&
       kind !== "google" &&
@@ -156,6 +162,20 @@ export function quotaEntryStatus(
     if (snapshot.error) return "error"
     return snapshot.pending ? "pending" : "unknown"
   }
+  if (item.kind === "workbuddy") {
+    if (snapshot.error) return "error"
+    const windows = snapshot.workbuddy?.windows ?? []
+    if (windows.length === 0) return snapshot.pending ? "pending" : "unknown"
+    // 本机留存快照只表示待确认，不能当成当前耗尽的证据。
+    if (snapshot.workbuddy?.fromCache) return "stale"
+    // Total credits 是唯一决定账号可用性的窗口；只有一类额度时后端只返回合并后的
+    // Credits 窗口（非 aside、非预付余额），同样代表账号整体。
+    const deciding =
+      windows.find((window) => window.name === "Total credits") ??
+      windows.find((window) => !window.aside && !window.prepaid)
+    if (!deciding || !Number.isFinite(deciding.used)) return "unknown"
+    return deciding.used >= 100 ? "exhausted" : "normal"
+  }
   if (item.kind === "unsupported") return "unsupported"
   if (
     item.kind === "google" ||
@@ -212,6 +232,7 @@ export function makeQuotaEntry(
       snapshot.quota?.fetchedAt ??
       snapshot.balance?.fetchedAt ??
       snapshot.dumate?.fetchedAt ??
+      snapshot.workbuddy?.fetchedAt ??
       "",
   }
 }

@@ -60,6 +60,9 @@ func (s *AppService) bindModelCatalogEvents(app *application.App) {
 	s.googleAuth.mu.Lock()
 	s.googleAuth.emitModels = emit
 	s.googleAuth.mu.Unlock()
+	s.workbuddyAuth.mu.Lock()
+	s.workbuddyAuth.emitModels = emit
+	s.workbuddyAuth.mu.Unlock()
 	s.openAISync.mu.Lock()
 	s.openAISync.emit = emit
 	s.openAISync.mu.Unlock()

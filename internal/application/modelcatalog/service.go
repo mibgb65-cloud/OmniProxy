@@ -20,6 +20,7 @@ import (
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 type Subscription interface {
@@ -29,6 +30,11 @@ type Subscription interface {
 // GoogleSubscription 返回与实际授权版本绑定的订阅目录。
 type GoogleSubscription interface {
 	Models(context.Context, string) ([]antigravity.Model, string, error)
+}
+
+// WorkBuddySubscription 返回 WorkBuddy AI 账号自己的 /v3/config 目录与授权版本。
+type WorkBuddySubscription interface {
+	Models(context.Context, string) ([]workbuddyai.Model, string, error)
 }
 type Item struct {
 	AccountID  string        `json:"accountId"`
@@ -40,27 +46,35 @@ type Item struct {
 	Source     string        `json:"source,omitempty"`
 }
 type Service struct {
-	db           *sql.DB
-	accounts     *account.Service
-	providers    *provider.Service
-	subscription Subscription
-	client       *deepseek.Client
-	stepfun      *stepfun.Client
-	kimi         *kimi.Client
-	minimax      *minimax.Client
-	mimo         *mimo.Client
-	river        *river.Client
-	oxionai      *oxionai.Client
-	howtofix     *howtofix.Client
-	openAI       *openai.Client
-	googleAuth   GoogleSubscription
+	db            *sql.DB
+	accounts      *account.Service
+	providers     *provider.Service
+	subscription  Subscription
+	client        *deepseek.Client
+	stepfun       *stepfun.Client
+	kimi          *kimi.Client
+	minimax       *minimax.Client
+	mimo          *mimo.Client
+	river         *river.Client
+	oxionai       *oxionai.Client
+	howtofix      *howtofix.Client
+	openAI        *openai.Client
+	googleAuth    GoogleSubscription
+	workbuddyAuth WorkBuddySubscription
 }
 
 // SetGoogleSubscription 安装独立 Google 授权目录，不混用 Gemini API Key。
 func (s *Service) SetGoogleSubscription(service GoogleSubscription) { s.googleAuth = service }
 
+// SetWorkBuddySubscription 安装 WorkBuddy AI 订阅目录。
+func (s *Service) SetWorkBuddySubscription(service WorkBuddySubscription) { s.workbuddyAuth = service }
+
 func New(db *sql.DB, accounts *account.Service, providers *provider.Service, subscription Subscription) *Service {
-	return &Service{db, accounts, providers, subscription, deepseek.New(nil), stepfun.New(nil), kimi.New(nil), minimax.New(nil), mimo.New(nil), river.New(nil), oxionai.New(nil), howtofix.New(nil), openai.New(nil), nil}
+	return &Service{
+		db: db, accounts: accounts, providers: providers, subscription: subscription,
+		client: deepseek.New(nil), stepfun: stepfun.New(nil), kimi: kimi.New(nil), minimax: minimax.New(nil),
+		mimo: mimo.New(nil), river: river.New(nil), oxionai: oxionai.New(nil), howtofix: howtofix.New(nil), openAI: openai.New(nil),
+	}
 }
 
 var ErrUnavailable = errors.New("models: unavailable")

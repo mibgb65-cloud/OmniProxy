@@ -42,7 +42,7 @@ export function AddAccountDialog({
 
   return (
     <div className="flex flex-wrap gap-2">
-      {["openai", "google"].includes(provider.kind) ? (
+      {["openai", "google", "workbuddy_ai"].includes(provider.kind) ? (
         <SubscriptionLoginDialog providerId={provider.id} />
       ) : null}
       <Dialog.Root open={open} onOpenChange={setOpen}>

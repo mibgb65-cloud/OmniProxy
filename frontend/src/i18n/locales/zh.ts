@@ -16,6 +16,7 @@ import { googleZh } from "./google-zh"
 import { googleSettingsZh } from "./google-settings-zh"
 import { quotaUsdZh } from "./quota-usd-zh"
 import { dumateZh } from "./dumate-zh"
+import { workbuddyZh } from "./workbuddy-zh"
 
 /**
  * Chinese translations — the single source of truth for translation keys.
@@ -24,6 +25,7 @@ import { dumateZh } from "./dumate-zh"
  */
 export const zh = {
   ...dumateZh,
+  ...workbuddyZh,
   ...riverSettingsZh,
   ...quotaUsdZh,
   ...failoverZh,

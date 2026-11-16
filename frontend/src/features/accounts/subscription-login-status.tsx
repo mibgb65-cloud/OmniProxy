@@ -2,12 +2,16 @@ import { AlertCircle, Check, LoaderCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { useSubscriptionLogin } from "./use-subscription-login"
 import { subscriptionInProgress } from "../../services/subscription"
+import { workbuddyError } from "../../services/workbuddy"
 import { SubscriptionLoginLink } from "./subscription-login-link"
 
 export function SubscriptionLoginStatus({
   login,
+  errorNamespace = "subscription",
 }: {
   login: ReturnType<typeof useSubscriptionLogin>
+  /** WorkBuddy 的授权错误有自己的稳定码与文案，其余提供商沿用订阅错误字典。 */
+  errorNamespace?: "subscription" | "workbuddy"
 }) {
   const { t } = useTranslation()
   const waiting = login.view?.state === "waiting"
@@ -101,9 +105,13 @@ export function SubscriptionLoginStatus({
         >
           <AlertCircle className="mt-1 size-4 shrink-0" aria-hidden="true" />
           <p>
-            {t(`subscription.error.${login.error}`, {
-              defaultValue: t("subscription.error.operation_failed"),
-            })}
+            {errorNamespace === "workbuddy"
+              ? t(`workbuddy.error.${workbuddyError(login.error)}`, {
+                  defaultValue: t("workbuddy.error.operation_failed"),
+                })
+              : t(`subscription.error.${login.error}`, {
+                  defaultValue: t("subscription.error.operation_failed"),
+                })}
           </p>
         </div>
       ) : null}

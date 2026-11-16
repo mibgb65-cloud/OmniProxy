@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { en } from "../../i18n/locales/en"
 import { zh } from "../../i18n/locales/zh"
-import { isKnownProviderKind, providerNameKeys } from "./provider-labels"
+import { isKnownProviderKind, providerNameKeys, subscriptionTypeKey } from "./provider-labels"
 
 // 内置服务商新增 kind 时最容易漏掉的是界面名称：检查两套语言都有对应文案，
 // 避免卡片直接显示 `providers.kind.xxx` 原始键。
@@ -25,6 +25,23 @@ describe("provider labels", () => {
     expect(providerNameKeys.howtofix).toBe("providers.kind.howtofix")
     expect(en["providers.kind.howtofix"]).toBe("HowToFix")
     expect(zh["providers.kind.howtofix"]).toBe("HowToFix")
+  })
+
+  it("includes the WorkBuddy AI built-in", () => {
+    expect(providerNameKeys.workbuddy_ai).toBe("providers.kind.workbuddy_ai")
+    expect(en["providers.kind.workbuddy_ai"]).toBe("WorkBuddy AI")
+    expect(zh["providers.kind.workbuddy_ai"]).toBe("WorkBuddy AI")
+    expect(en["providers.subscriptionType.workbuddyAi"]).toBe("WorkBuddy AI subscription")
+    expect(zh["providers.subscriptionType.workbuddyAi"]).toBe("WorkBuddy AI 订阅")
+  })
+
+  it("resolves the subscription brand per provider", () => {
+    expect(subscriptionTypeKey("builtin_workbuddy_ai")).toBe(
+      "providers.subscriptionType.workbuddyAi",
+    )
+    expect(subscriptionTypeKey("workbuddy_ai")).toBe("providers.subscriptionType.workbuddyAi")
+    expect(subscriptionTypeKey("builtin_google")).toBe("google.subscriptionType")
+    expect(subscriptionTypeKey("builtin_openai")).toBe("subscription.type")
   })
 
   it("keeps unknown kinds out of the label map", () => {

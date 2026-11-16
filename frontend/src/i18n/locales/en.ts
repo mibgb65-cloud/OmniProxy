@@ -17,6 +17,7 @@ import { googleEn } from "./google-en"
 import { googleSettingsEn } from "./google-settings-en"
 import { quotaUsdEn } from "./quota-usd-en"
 import { dumateEn } from "./dumate-en"
+import { workbuddyEn } from "./workbuddy-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
@@ -24,6 +25,7 @@ import { dumateEn } from "./dumate-en"
  */
 export const en: Record<keyof typeof zh, string> = {
   ...dumateEn,
+  ...workbuddyEn,
   ...riverSettingsEn,
   ...quotaUsdEn,
   ...failoverEn,

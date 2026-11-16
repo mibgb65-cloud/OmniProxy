@@ -10,6 +10,7 @@ import (
 	"omniproxy/internal/provider/dumate"
 	"omniproxy/internal/provider/howtofix"
 	"omniproxy/internal/provider/oxionai"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 type SubscriptionAccess interface {
@@ -92,6 +93,9 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	}
 	if target.kind == dumate.Kind {
 		return s.forwardDuMate(ctx, target, request, consume)
+	}
+	if target.kind == workbuddyai.Kind {
+		return s.forwardWorkBuddy(ctx, target, request, consume)
 	}
 	if target.kind != "" && target.kind != "deepseek" {
 		return proxy.Failure("adapter_unavailable", 503)

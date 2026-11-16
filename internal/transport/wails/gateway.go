@@ -68,6 +68,12 @@ func (s *AppService) initGateway() {
 	} else if s.log != nil {
 		s.log.Warn("Google subscription unavailable", "module", "gateway", "code", "google_subscription_unavailable")
 	}
+	workbuddy, workbuddyError := s.workbuddySubscriptionService()
+	if workbuddyError == nil {
+		s.gateway.SetWorkBuddySubscription(workbuddy)
+	} else if s.log != nil {
+		s.log.Warn("WorkBuddy AI subscription unavailable", "module", "gateway", "code", "workbuddy_subscription_unavailable")
+	}
 	subscription, err := s.subscriptionService()
 	if err == nil {
 		s.gateway.SetSubscription(subscription)

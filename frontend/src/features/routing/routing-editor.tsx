@@ -73,6 +73,8 @@ export function RoutingEditor({
             item.kind === "atria" ||
             item.kind === "river" ||
             item.kind === "mimo" ||
+            item.kind === "howtofix" ||
+            item.kind === "workbuddy_ai" ||
             (["openai", "google"].includes(item.kind) &&
               catalog.some((model) => model.providerId === item.id))),
       ) ||

@@ -53,3 +53,12 @@
 - SHA-256：`cb132a2460b1d9fdf020c0c9df8e4867025969ba22df2621619f8cbed0ef74d7`。
 - 官方素材未声明 MIT 授权，不属于上述 Lobe Icons 授权范围；仅用于识别 HowToFix 服务商，商标权归对应权利人。
 - `howtofix` 类型使用该素材；放在既有浅色图标底块内保持原始比例，离线可用。
+
+## WorkBuddy AI
+
+- 文件：`workbuddy-ai.svg`，保留官方原始 SVG。
+- 来源：[WorkBuddy AI 官网](https://www.workbuddy.ai/) 使用的官方 logo（`https://download.codebuddy.ai/web/workbuddy/05fd33c3609bc9cf5ae1fc387a142a2ad0fab64e/assets/logo.svg`）。
+- 获取日期：2026-11-16。
+- SHA-256：`10ccbc099e7bc3d5ff12c315c4edd7b21386aa7166c1ec19997b3d55010d5c7d`。
+- 官方素材未声明 MIT 授权，不属于上述 Lobe Icons 授权范围；仅用于识别 WorkBuddy AI 服务商，商标权归腾讯及对应权利人。
+- `workbuddy_ai` 类型使用该素材；彩色图标，放在既有浅色图标底块内保持原始比例，离线可用。

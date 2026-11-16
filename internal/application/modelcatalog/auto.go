@@ -130,8 +130,9 @@ func (s *AutoSync) sync(ctx context.Context) (error, error) {
 		if ctx.Err() != nil {
 			return ctx.Err(), nil
 		}
-		subscriptionReady := item.AuthMethod == account.AuthSubscription && item.AuthState == "authenticated"
+		// 订阅账号（Codex 隔离登录、Google 订阅、WorkBuddy AI）按授权状态判断；
 		// API Key 没有订阅登录状态，但同样需要官方模型快照才能参与路由。
+		subscriptionReady := (item.AuthMethod == account.AuthSubscription || item.AuthMethod == account.AuthWorkBuddyLogin) && item.AuthState == "authenticated"
 		apiKeyReady := s.apiKey && item.AuthMethod == account.AuthAPIKey
 		if !enabled[item.ProviderID] || !item.Enabled || !subscriptionReady && !apiKeyReady {
 			continue

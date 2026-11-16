@@ -62,6 +62,18 @@ func (s *Service) Update(ctx context.Context, input UpdateInput) (result UpdateR
 		result.Account = updated
 		return result, nil
 	}
+	if item.AuthMethod == AuthWorkBuddyLogin {
+		// WorkBuddy AI 订阅只能重新登录换令牌，不能用 API Key 字段替换。
+		if strings.TrimSpace(input.APIKey) != "" {
+			return result, fmt.Errorf("%w: subscription account cannot take an API key", ErrInvalidInput)
+		}
+		updated, err := s.updateWorkBuddyName(ctx, item, input.Name)
+		if err != nil {
+			return result, err
+		}
+		result.Account = updated
+		return result, nil
+	}
 	options, err := s.prepareStep(ctx, item.ProviderID, input.StepFun, &item)
 	if err != nil {
 		return result, err

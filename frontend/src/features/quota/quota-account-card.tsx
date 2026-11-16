@@ -53,10 +53,13 @@ export function QuotaAccountCard({ entry, now }: { entry: QuotaEntry; now: numbe
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               {entry.kind === "subscription" ? (
                 <SubscriptionPlanBadge plan={entry.quota?.plan ?? entry.account.authPlan} />
+              ) : entry.kind === "workbuddy" ? (
+                <SubscriptionPlanBadge plan={entry.workbuddy?.plan ?? entry.account.authPlan} />
               ) : (
                 <span className="text-muted-foreground text-xs">
                   {t(
-                    entry.account.authMethod === "subscription_login"
+                    entry.account.authMethod === "subscription_login" ||
+                      entry.account.authMethod === "workbuddy_login"
                       ? subscriptionTypeKey(entry.provider?.kind ?? entry.account.providerId)
                       : "accounts.apiKey",
                   )}

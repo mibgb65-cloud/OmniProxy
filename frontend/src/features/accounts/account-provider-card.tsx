@@ -118,7 +118,8 @@ export function AccountProviderCard({
                     <KimiPlatformBadge account={account} />
                     <p className="text-muted-foreground text-xs">
                       {t(
-                        account.authMethod === "subscription_login"
+                        account.authMethod === "subscription_login" ||
+                          account.authMethod === "workbuddy_login"
                           ? subscriptionTypeKey(provider.kind)
                           : account.authMethod === "dumate_cookie"
                             ? "dumate.account.cookieType"

@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/provider/minimax"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 // Catalog 使用实际路由决策的账号元数据，不把其他同名模型的能力混入目标。
@@ -147,6 +148,16 @@ func (s *Service) catalog(ctx context.Context, legacyChannels bool) ([]catalog.E
 			entry.Metadata = dumate.ModelMetadata(entry.TargetModel)
 			if !matched {
 				entry.Name = dumate.ModelName(entry.TargetModel)
+			}
+		}
+		if entry.ProviderKind == workbuddyai.Kind {
+			// 上游确认的只有 Chat；Responses 与 Messages 由网关转换后回包。
+			// 目录元数据来自账号自己的 /v3/config，缺失时用静态清单补齐展示名。
+			if !matched {
+				entry.Name = workbuddyai.ModelName(entry.TargetModel)
+			}
+			if entry.Metadata.ContextWindow == nil {
+				entry.Metadata = workbuddyai.ModelMetadata(entry.TargetModel)
 			}
 		}
 		entries = append(entries, entry)

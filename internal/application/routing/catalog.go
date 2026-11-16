@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/provider/mimo"
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 type discoveredModel struct {
@@ -130,6 +131,9 @@ func eligible(data snapshot, a account.Item, model string) bool {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 		if p.Kind == dumate.Kind && a.AuthMethod == account.AuthDuMateCookie && a.AuthState == "authenticated" {
+			return targetSupports(data, p.ID, a.ID, model)
+		}
+		if p.Kind == workbuddyai.Kind && a.AuthMethod == account.AuthWorkBuddyLogin && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 	}

@@ -45,7 +45,8 @@ export function DeleteAccountDialog({
               </AlertDialog.Description>
               <p className="text-muted-foreground text-xs">
                 {t(
-                  target?.authMethod === "subscription_login"
+                  target?.authMethod === "subscription_login" ||
+                    target?.authMethod === "workbuddy_login"
                     ? "subscription.deleteNotice"
                     : "accounts.deleteNotice",
                 )}

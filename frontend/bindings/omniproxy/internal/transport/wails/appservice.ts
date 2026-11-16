@@ -62,6 +62,9 @@ import * as subscription$0 from "../../application/subscription/models.js";
 import * as updater$0 from "../../application/updater/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as workbuddy$0 from "../../application/workbuddy/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as routing$1 from "../../core/routing/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -903,7 +906,7 @@ export function StorageInfo(): $CancellablePromise<$models.StorageInfo> {
 }
 
 /**
- * SubscriptionBegin 按提供商启动独立的 Codex 或 Google 浏览器授权。
+ * SubscriptionBegin 按提供商启动独立的 Codex、Google 或 WorkBuddy AI 浏览器授权。
  */
 export function SubscriptionBegin(input: subscription$0.Input): $CancellablePromise<subscription$0.State> {
     return $Call.ByID(544809649, input);
@@ -1016,4 +1019,18 @@ export function UpdateRoute(id: string, input: routing$0.Input): $CancellablePro
 
 export function UsageRead(): $CancellablePromise<activity$0.UsageInfo> {
     return $Call.ByID(2721413860);
+}
+
+/**
+ * WorkBuddyCachedQuota 只返回本机保留的公开额度快照，不调用上游。
+ */
+export function WorkBuddyCachedQuota(id: string): $CancellablePromise<workbuddy$0.Quota | null> {
+    return $Call.ByID(9849210, id);
+}
+
+/**
+ * WorkBuddyQuota 返回官方 Credits 三窗口；失败时回退保留期内的最近快照。
+ */
+export function WorkBuddyQuota(id: string): $CancellablePromise<workbuddy$0.Quota> {
+    return $Call.ByID(3125634320, id);
 }

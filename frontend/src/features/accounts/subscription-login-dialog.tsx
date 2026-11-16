@@ -10,6 +10,8 @@ import { validAccountName } from "./account-input"
 import { useSubscriptionLogin } from "./use-subscription-login"
 import { SubscriptionLoginStatus } from "./subscription-login-status"
 import { SubscriptionLoginMethod } from "./subscription-login-method"
+import { SubscriptionBrowserLoginCard } from "./subscription-browser-login-card"
+import { subscriptionLoginConfig } from "./subscription-login-config"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { subscriptionInProgress } from "../../services/subscription"
 
@@ -25,13 +27,8 @@ export function SubscriptionLoginDialog({
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const generation = useOpenGeneration(open)
-  const label = t(
-    accountId
-      ? "subscription.relogin"
-      : providerId === "builtin_google"
-        ? "google.subscriptionAdd"
-        : "subscription.add",
-  )
+  const config = subscriptionLoginConfig(providerId)
+  const label = t(accountId ? "subscription.relogin" : config.addKey)
   const trigger = (
     <Dialog.Trigger asChild>
       <Button
@@ -67,9 +64,14 @@ function LoginContent({
   const { t } = useTranslation()
   const id = useId()
   const [name, setName] = useState("")
-  const [mode, setMode] = useState("browser")
+  const [selectedMode, setSelectedMode] = useState("browser")
   const login = useSubscriptionLogin({ providerId, accountId }, { enabled })
-  const google = providerId === "builtin_google"
+  const config = subscriptionLoginConfig(providerId)
+  // Google 的官方组件只接受浏览器模式（后端 Begin 校验 mode === "browser"），
+  // 因此设备码只在 OpenAI 上提供；WorkBuddy 用单张浏览器授权卡片说明方式。
+  const showMethod = config.kind === "openai"
+  const showBrowserCard = !config.deviceCode
+  const mode = config.deviceCode ? selectedMode : "browser"
   const inProgress = subscriptionInProgress(login.view?.state)
   const complete = login.view?.state === "completed"
   const busy = inProgress || login.starting
@@ -89,14 +91,14 @@ function LoginContent({
         <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6 pb-5">
           <div className="flex min-w-0 items-start gap-3.5">
             <div className="border-border/60 flex size-12 shrink-0 items-center justify-center rounded-xl border bg-zinc-950">
-              <ProviderBrandIcon kind={google ? "google" : "openai"} />
+              <ProviderBrandIcon kind={config.brandKind} />
             </div>
             <div className="min-w-0 space-y-1.5 pt-0.5">
               <Dialog.Title className="text-lg font-semibold tracking-tight">
-                {t(google ? "google.subscriptionTitle" : "subscription.title")}
+                {t(config.titleKey)}
               </Dialog.Title>
               <Dialog.Description className="text-muted-foreground text-sm leading-6">
-                {t(google ? "google.subscriptionDescription" : "subscription.description")}
+                {t(config.descriptionKey)}
               </Dialog.Description>
             </div>
           </div>
@@ -120,9 +122,10 @@ function LoginContent({
           }}
         >
           <div className="min-h-0 space-y-5 overflow-y-auto px-6 pb-6">
-            {!google && !busy && !complete ? (
-              <SubscriptionLoginMethod id={id} value={mode} onChange={setMode} />
+            {showMethod && !busy && !complete ? (
+              <SubscriptionLoginMethod id={id} value={mode} onChange={setSelectedMode} />
             ) : null}
+            {showBrowserCard && !busy && !complete ? <SubscriptionBrowserLoginCard /> : null}
             {!accountId && !complete && !busy ? (
               <div className="space-y-1.5">
                 <label htmlFor={id} className="text-sm font-medium">
@@ -145,10 +148,13 @@ function LoginContent({
                 ) : null}
               </div>
             ) : null}
-            <SubscriptionLoginStatus login={login} />
+            <SubscriptionLoginStatus
+              login={login}
+              errorNamespace={config.kind === "workbuddy_ai" ? "workbuddy" : "subscription"}
+            />
             <p className="text-muted-foreground flex items-start gap-2 text-xs leading-5">
               <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-              {t(google ? "google.subscriptionStorage" : "subscription.secureStorage")}
+              {t(config.storageKey)}
             </p>
           </div>
           <div className="bg-muted/20 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t px-6 py-4">

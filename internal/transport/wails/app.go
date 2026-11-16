@@ -77,6 +77,7 @@ type AppService struct {
 	stopActivity     func()
 	subscription     subscriptionState
 	googleAuth       googleSubscriptionState
+	workbuddyAuth    workbuddySubscriptionState
 	openAISync       openAIModelSyncState
 	howtofixSync     howToFixModelSyncState
 	updatesMu        sync.Mutex
@@ -167,6 +168,7 @@ func (s *AppService) Ping() string { return "pong" }
 func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOptions) error {
 	s.startUpdateChecks()
 	s.startGoogleModelSync()
+	s.startWorkBuddyModelSync()
 	s.startOpenAIModelSync()
 	s.startHowToFixModelSync()
 	if s.quotaActivation != nil {
@@ -209,6 +211,7 @@ func (s *AppService) ServiceShutdown() error {
 	s.shutdownHowToFixModelSync()
 	s.shutdownSubscription()
 	s.shutdownGoogleSubscription()
+	s.shutdownWorkBuddySubscription()
 	s.shutdownLogs()
 	var installationErr error
 	if s.installations != nil {

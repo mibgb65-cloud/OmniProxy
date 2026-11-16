@@ -25,6 +25,7 @@ import (
 	"omniproxy/internal/provider/oxionai"
 	"omniproxy/internal/provider/river"
 	"omniproxy/internal/provider/stepfun"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 // ProviderReader 只读取已保存的提供商，不修改其他功能的配置。
@@ -88,6 +89,9 @@ type Service struct {
 	dumateTokens  *dumate.TokenCache
 	dumateConsole *dumate.Console
 	dumateClient  *dumate.Client
+	// WorkBuddy AI 订阅通道：登录令牌由应用层受控借出，客户端只发固定上游请求。
+	workbuddy     *workbuddyai.Client
+	workbuddyAuth WorkBuddySubscriptionAccess
 }
 
 // New 创建尚未启动的网关；测试可注入本机上游传输与临时数据库。
@@ -115,6 +119,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.dumateTokens = dumate.NewTokenCache()
 	s.dumateConsole = dumate.NewConsole(nil)
 	s.dumateClient = dumate.New(nil)
+	s.workbuddy = workbuddyai.New(nil)
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	// Codex 入口走 v1 形态的透明转发；其余入口仍由 Forward 处理。
 	opts.Passthrough = s

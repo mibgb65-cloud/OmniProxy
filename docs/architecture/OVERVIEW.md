@@ -1,5 +1,17 @@
 # Architecture Overview
 
+## WorkBuddy AI 订阅（2026-11-16）
+
+迁移 050 追加第十五个内置服务商（`builtin_workbuddy_ai`）。`provider/workbuddyai` 只访问固定
+HTTPS 上游 `www.workbuddy.ai`：浏览器登录（`/v2/plugin/auth/state` + 轮询 `/v2/plugin/auth/token`）
+取得访问与续期令牌，`application/workbuddy` 负责登录会话与提前 5 分钟的单飞续期，
+`account/workbuddy.go` 用 DPAPI 保存令牌并把目录版本重绑在同一事务里（普通续期不丢模型）。
+Chat 原生转发（上游只接受流式，网关按需聚合后按客户端协议回包）；目录来自账号自己的
+`/v3/config`；额度来自 `/billing/meter/get-user-resource-summary` 的 Credits 三窗口
+（计划内／额外／合计，`aside` 标记不单独停止账号），只展示、不参与调度。请求形态向官方
+桌面客户端对齐（UA 与指纹头），风险与边界见 ADR-026 与 `docs/product/WORKBUDDY.md`。
+只接国际版；国内版、签到、桌面登录文件、API Key 与免费模型日窗未接入，未用真实账号验证。
+
 ## 百度搭子 DuMate 个人版（2026-11-13）
 
 迁移 048 追加第十三个内置服务商。`provider/dumate` 只访问固定 HTTPS 控制台与推理网关：
@@ -476,10 +488,10 @@ Real-time updates reach the UI through Wails events (e.g. `proxy:started`,
 ## External Dependencies
 
 - AI providers: OpenAI, Anthropic, Google, DeepSeek, Zhipu AI, Moonshot AI/Kimi,
-  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, HowToFix, Baidu DuMate, and OpenAI-compatible endpoints. Fourteen named
+  MiniMax, Xiaomi MiMo, StepFun, Atria, River, Oxion AI, HowToFix, Baidu DuMate, WorkBuddy AI, and OpenAI-compatible endpoints. Fifteen named
   provider kinds are persisted and enabled by default, with user-controlled
   switches. Custom OpenAI-compatible endpoints can be added separately;
-  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, HowToFix Chat, and DuMate Chat are pending.
+  request adapters other than DeepSeek, ChatGPT / Codex, River, Atria, MiMo, StepFun, Kimi, MiniMax, Google Chat, HowToFix Chat, WorkBuddy AI Chat, and DuMate Chat are pending.
 - Local AI clients whose configs are managed: Codex, Claude Code, Gemini CLI,
   OpenCode.
 - GitHub Releases + Wails updater for application updates.

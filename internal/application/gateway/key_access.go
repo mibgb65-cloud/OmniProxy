@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/provider/antigravity"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 // useAPIKey 保留已有测试适配口，生产调用将每次尝试绑定到已校验的凭据版本。
@@ -49,4 +50,17 @@ func (s *Service) useGoogleToken(ctx context.Context, t target, consume func(ant
 		return access.UseAt(ctx, t.accountID, t.updatedAt, consume)
 	}
 	return s.googleAuth.Use(ctx, t.accountID, consume)
+}
+
+// useWorkBuddyToken 只在受控回调内借出 WorkBuddy AI 登录令牌，并复核账号版本。
+func (s *Service) useWorkBuddyToken(ctx context.Context, t target, consume func(workbuddyai.Credentials) error) error {
+	if s.workbuddyAuth == nil {
+		return proxy.Failure("credential_unavailable", 503)
+	}
+	if access, ok := s.workbuddyAuth.(interface {
+		UseAt(context.Context, string, string, func(workbuddyai.Credentials) error) error
+	}); ok {
+		return access.UseAt(ctx, t.accountID, t.updatedAt, consume)
+	}
+	return s.workbuddyAuth.Use(ctx, t.accountID, consume)
 }

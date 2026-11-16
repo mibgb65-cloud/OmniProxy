@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { accounts, providers, quota, balance } from "./quota-test-helpers"
 import { googleQuotaAccount, googleQuotaFixture } from "../google/google-quota-test-helpers"
+import type { WorkBuddyQuota } from "../../services/workbuddy"
 import {
   describeQuotaAccounts,
   makeQuotaEntry,
@@ -184,6 +185,89 @@ describe("quota overview model", () => {
     )
     expect(expired).toMatchObject({ kind: "dumate_points", canQuery: false })
     expect(makeQuotaEntry(expired!, base, now).status).toBe("unauthenticated")
+  })
+  it("classifies WorkBuddy browser-login accounts as Credits windows driven by Total credits", () => {
+    const workbuddyProvider = {
+      ...providers[0]!,
+      id: "builtin_workbuddy_ai",
+      kind: "workbuddy_ai",
+      name: "WorkBuddy AI",
+    }
+    const workbuddyAccount = {
+      ...accounts[0]!,
+      id: "workbuddy-one",
+      providerId: "builtin_workbuddy_ai",
+      authMethod: "workbuddy_login",
+      authState: "authenticated",
+    }
+    const [item] = describeQuotaAccounts([workbuddyAccount], [workbuddyProvider])
+    expect(item).toMatchObject({ kind: "workbuddy", canQuery: true })
+    const workbuddyQuota = (
+      totalUsed: number,
+      extra: Partial<WorkBuddyQuota> = {},
+    ): WorkBuddyQuota => ({
+      plan: "Pro",
+      fetchedAt: "2026-10-09T00:00:00Z",
+      windows: [
+        { name: "Credits", used: 10, amount: 100, limit: 1000, aside: true },
+        { name: "Total credits", used: totalUsed, amount: 100, limit: 1000 },
+      ],
+      ...extra,
+    })
+    const live = makeQuotaEntry(item!, { ...base, workbuddy: workbuddyQuota(40) }, now)
+    expect(live).toMatchObject({ status: "normal", fetchedAt: "2026-10-09T00:00:00Z" })
+    expect(quotaSummary([live])).toMatchObject({ monitored: 1, known: 1 })
+    // 只有 Total credits 决定账号可用性：计划内窗口单独用满不算耗尽。
+    expect(
+      makeQuotaEntry(
+        item!,
+        {
+          ...base,
+          workbuddy: {
+            plan: "",
+            fetchedAt: "2026-10-09T00:00:00Z",
+            windows: [
+              { name: "Credits", used: 100, amount: 1000, limit: 1000, aside: true },
+              { name: "Total credits", used: 60, amount: 600, limit: 1000 },
+            ],
+          },
+        },
+        now,
+      ).status,
+    ).toBe("normal")
+    expect(makeQuotaEntry(item!, { ...base, workbuddy: workbuddyQuota(100) }, now).status).toBe(
+      "exhausted",
+    )
+    expect(
+      makeQuotaEntry(item!, { ...base, workbuddy: workbuddyQuota(40, { fromCache: true }) }, now)
+        .status,
+    ).toBe("stale")
+    expect(
+      makeQuotaEntry(item!, { ...base, workbuddy: { plan: "", fetchedAt: "", windows: [] } }, now)
+        .status,
+    ).toBe("unknown")
+    expect(
+      makeQuotaEntry(
+        item!,
+        {
+          ...base,
+          workbuddy: {
+            plan: "",
+            fetchedAt: "",
+            windows: [{ name: "Prepaid credits", used: 0, amount: 300, prepaid: true }],
+          },
+        },
+        now,
+      ).status,
+    ).toBe("unknown")
+    expect(makeQuotaEntry(item!, { ...base, pending: true }, now).status).toBe("pending")
+    expect(
+      makeQuotaEntry(
+        item!,
+        { ...base, workbuddy: workbuddyQuota(40), error: new Error("failed") },
+        now,
+      ).status,
+    ).toBe("error")
   })
   it("does not report zero exhaustion without known results and filters identity/provider/status", () => {
     const pending = makeQuotaEntry(items[0]!, { ...base, pending: true }, now)

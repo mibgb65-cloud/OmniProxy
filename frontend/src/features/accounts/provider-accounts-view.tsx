@@ -119,6 +119,7 @@ export function ProviderAccountsView({
             provider.kind !== "google" &&
             provider.kind !== "howtofix" &&
             provider.kind !== "dumate" &&
+            provider.kind !== "workbuddy_ai" &&
             (provider.kind !== "openai" ||
             items.some((account) => account.authMethod !== "subscription_login") ? (
               <p className="text-muted-foreground text-sm">{t("accounts.detail.balanceNotice")}</p>

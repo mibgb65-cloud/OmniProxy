@@ -15,6 +15,7 @@ import { AccountItemActions, type AccountItemActionsProps } from "./account-item
 import { AccountStatusBadge } from "./account-status-badge"
 import { AccountKeyPreview } from "./account-key-preview"
 import { SubscriptionQuota } from "./subscription-quota"
+import { WorkBuddyCredits } from "./workbuddy-credits"
 import { AccountTimeFooter } from "./account-time-footer"
 import { AccountBalance } from "./account-balance"
 import { subscriptionTypeKey } from "../providers/provider-labels"
@@ -39,6 +40,7 @@ export function AccountDetailsCard({
 }) {
   const { t } = useTranslation()
   const subscription = account.authMethod === "subscription_login"
+  const workbuddy = account.authMethod === "workbuddy_login"
 
   return (
     <Card className="account-details-card dark:bg-card/75 min-w-0 gap-0 py-0 shadow-sm">
@@ -54,7 +56,8 @@ export function AccountDetailsCard({
             <KimiPlatformBadge account={account} />
             <p className="text-muted-foreground text-xs">
               {t(
-                account.authMethod === "subscription_login"
+                account.authMethod === "subscription_login" ||
+                  account.authMethod === "workbuddy_login"
                   ? subscriptionTypeKey(account.providerId)
                   : account.authMethod === "dumate_cookie"
                     ? "dumate.account.cookieType"
@@ -70,7 +73,7 @@ export function AccountDetailsCard({
             onEdit={onEdit}
           />
         </div>
-        {subscription ? (
+        {subscription || workbuddy ? (
           <AccountKeyPreview account={account} />
         ) : (
           <div className="flex min-w-0 items-center justify-between gap-3">
@@ -86,6 +89,11 @@ export function AccountDetailsCard({
         {subscription ? (
           <>
             <SubscriptionQuota account={account} />
+            <AccountTimeFooter account={account} />
+          </>
+        ) : workbuddy ? (
+          <>
+            <WorkBuddyCredits account={account} />
             <AccountTimeFooter account={account} />
           </>
         ) : account.providerId === "builtin_river" ? (

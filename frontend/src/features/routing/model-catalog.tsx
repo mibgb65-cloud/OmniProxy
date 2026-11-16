@@ -62,6 +62,9 @@ export function ModelCatalog({
             a.authMethod === "api_key") ||
           (["openai", "google"].includes(p.kind) &&
             a.authMethod === "subscription_login" &&
+            a.authState === "authenticated") ||
+          (p.kind === "workbuddy_ai" &&
+            a.authMethod === "workbuddy_login" &&
             a.authState === "authenticated")),
     ),
   )
