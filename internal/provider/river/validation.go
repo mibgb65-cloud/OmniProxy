@@ -2,6 +2,7 @@ package river
 
 import (
 	"encoding/json"
+	"strings"
 
 	"omniproxy/internal/core/proxy"
 )
@@ -89,7 +90,9 @@ func textMessages(raw json.RawMessage) bool {
 			case "function_call", "reasoning":
 				continue
 			case "function_call_output":
-				if !supportedContent(item["output"]) {
+				// 工具结果必须用非空 call_id 关联到同一段历史里的工具调用：缺少 call_id
+				// 的结果项会让 River 在响应头之后中断连接，只能在本层明确拒绝。
+				if !supportedToolCallID(item["call_id"]) || !supportedContent(item["output"]) {
 					return false
 				}
 				continue
@@ -103,6 +106,15 @@ func textMessages(raw json.RawMessage) bool {
 		}
 	}
 	return true
+}
+
+// supportedToolCallID 要求工具结果带非空字符串 call_id。
+func supportedToolCallID(raw json.RawMessage) bool {
+	var value string
+	if len(raw) == 0 || json.Unmarshal(raw, &value) != nil {
+		return false
+	}
+	return strings.TrimSpace(value) != ""
 }
 
 // supportedContent 允许官方已公布的 input_image 块，同时继续拒绝 file／audio 等

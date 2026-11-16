@@ -78,6 +78,8 @@ const (
 	streamDataInvalidJSON     streamDataKind = "invalid_json"
 	streamDataUnexpectedShape streamDataKind = "unexpected_shape"
 	streamDataUpstreamError   streamDataKind = "upstream_error"
+	// streamDataIncompleteStream 是读流在终结事件前结束（EOF／读错误），不是数据行问题。
+	streamDataIncompleteStream streamDataKind = "incomplete_stream"
 )
 
 // streamDataFailure 说明一条数据行为什么不能继续转发：

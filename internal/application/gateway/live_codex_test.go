@@ -60,10 +60,17 @@ func codexEntryReply(t *testing.T, service *Service, model string, stream bool) 
 	t.Helper()
 	// 工具集与真实 Codex 一致：函数工具 + 一个 MCP 命名空间分组。命名空间由网关按
 	// 目标服务商移除，函数工具原样保留；这样验证的就是真实客户端正文形状。
+	// 历史里同时带一对合法工具调用／结果与一条没有 call_id 的桌面端 Companion Page
+	// 快照：后者没有对应的工具调用，River 会先返回 200 再中断连接，必须由网关移除。
 	body, err := json.Marshal(map[string]any{
 		"model": model, "stream": stream, "max_output_tokens": 16,
 		"reasoning": map[string]string{"effort": "high"},
-		"input":     []map[string]any{{"role": "user", "content": []map[string]string{{"type": "input_text", "text": "Reply with OK only."}}}},
+		"input": []map[string]any{
+			{"role": "user", "content": []map[string]string{{"type": "input_text", "text": "Reply with OK only."}}},
+			{"type": "function_call", "call_id": "call_live_1", "name": "exec_command", "arguments": "{}"},
+			{"type": "function_call_output", "call_id": "call_live_1", "output": "ok"},
+			{"type": "function_call_output", "name": "codex_apps_open_page", "namespace": "agent", "output": `{"page_id":null}`},
+		},
 		"tools": []any{
 			map[string]any{"type": "function", "name": "exec_command", "parameters": map[string]any{"type": "object", "properties": map[string]any{}}},
 			map[string]any{"type": "namespace", "name": "mcp__codex_apps__pets", "tools": []any{
@@ -94,9 +101,10 @@ func codexEntryReply(t *testing.T, service *Service, model string, stream bool) 
 			t.Error("cannot close gateway response")
 		}
 	}()
-	reply, err := io.ReadAll(io.LimitReader(response.Body, 64<<10))
-	if err != nil {
-		t.Fatal("cannot read gateway response")
+	reply, readErr := io.ReadAll(io.LimitReader(response.Body, 64<<10))
+	if readErr != nil {
+		// 流式失败时网关会中断连接，这里保留已收到的字节供断言与排查。
+		t.Logf("gateway response stopped early: %v after %d bytes", readErr, len(reply))
 	}
 	return response.StatusCode, reply
 }

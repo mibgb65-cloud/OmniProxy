@@ -117,6 +117,62 @@ func TestStreamUpstreamErrorEventRecordsSignature(t *testing.T) {
 	}
 }
 
+// response.incomplete 是 Responses 的收尾事件之一（命中输出上限或内容过滤），
+// 上游随后正常关闭流，不能按「提前收流」记失败。
+func TestStreamIncompleteEventIsTerminal(t *testing.T) {
+	for _, line := range []string{
+		`data: {"type":"response.incomplete","response":{"id":"r1","status":"incomplete"}}`,
+		`data: {"type":"response.completed","response":{"id":"r1","status":"completed"}}`,
+	} {
+		trace := &Trace{}
+		done, _, err := streamLineState(line, trace)
+		if !done || err != nil {
+			t.Fatalf("terminal event %q reported done=%t err=%v", line, done, err)
+		}
+		if fields := trace.diagnosticLogFields(); len(fields) != 0 {
+			t.Fatalf("terminal event %q recorded failure fields: %v", line, fields)
+		}
+	}
+	// 整条流以 incomplete 收尾时，转发必须成功结束，而不是断开下游连接。
+	committed := false
+	recorder := httptest.NewRecorder()
+	trace := &Trace{}
+	writer := &trackedWriter{ResponseWriter: recorder, trace: trace}
+	body := "data: {\"type\":\"response.created\"}\n\n" +
+		"data: {\"type\":\"response.incomplete\",\"response\":{\"status\":\"incomplete\"}}\n\n"
+	if err := copyStream(writer, strings.NewReader(body), &committed, "responses"); err != nil {
+		t.Fatalf("incomplete stream reported failure: %v", err)
+	}
+	if !committed || !strings.Contains(recorder.Body.String(), "response.incomplete") {
+		t.Fatalf("incomplete stream not relayed: committed=%t body=%s", committed, recorder.Body.String())
+	}
+}
+
+// 上游在终结事件之前结束（干净 EOF 或读错误）时，日志必须能与「数据行不合语法」区分开。
+func TestStreamEndsWithoutTerminalEventRecordsIncomplete(t *testing.T) {
+	for _, body := range []string{
+		"data: {\"type\":\"response.created\"}\n\ndata: {\"type\":\"response.in_progress\"}\n\n",
+		"data: {\"type\":\"response.created\"}\n\n",
+	} {
+		committed := false
+		recorder := httptest.NewRecorder()
+		trace := &Trace{}
+		writer := &trackedWriter{ResponseWriter: recorder, trace: trace}
+		err := copyStream(writer, strings.NewReader(body), &committed, "responses")
+		var failure *Error
+		if !errors.As(err, &failure) || failure.Code != "upstream_stream_failed" || failure.StatusCode != http.StatusBadGateway {
+			t.Fatalf("unexpected failure for %q: %v", body, err)
+		}
+		if !committed {
+			t.Fatalf("stream was not committed before upstream ended for %q", body)
+		}
+		fields := trace.diagnosticLogFields()
+		if len(fields) != 2 || fields[0] != "upstream_stream_kind" || fields[1] != "incomplete_stream" {
+			t.Fatalf("unexpected log fields for %q: %v", body, fields)
+		}
+	}
+}
+
 // 合法但不是对象的数据行仍按转发中断处理，并记录各自分类。
 func TestStreamNonObjectDataStaysUncommittedFailure(t *testing.T) {
 	for _, tc := range []struct{ body, kind string }{

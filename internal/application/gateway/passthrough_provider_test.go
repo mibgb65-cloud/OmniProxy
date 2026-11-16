@@ -101,8 +101,11 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 	}
 	defer service.Stop(context.Background())
 
-	body := `{"model":` + strconv.Quote(publicModel) + `,"input":[{"role":"user","content":"Hi"}],"stream":` +
-		strconv.FormatBool(stream) + `,"reasoning":{"effort":"xhigh"},` +
+	body := `{"model":` + strconv.Quote(publicModel) + `,"input":[{"role":"user","content":"Hi"},` +
+		`{"type":"function_call","call_id":"call_1","name":"exec_command","arguments":"{}"},` +
+		`{"type":"function_call_output","call_id":"call_1","output":"ok"},` +
+		`{"type":"function_call_output","name":"codex_apps_open_page","namespace":"agent","output":"{\"page_id\":null}"}],` +
+		`"stream":` + strconv.FormatBool(stream) + `,"reasoning":{"effort":"xhigh"},` +
 		`"tools":[{"type":"function","name":"exec_command","parameters":{"type":"object","properties":{}}},` +
 		`{"type":"namespace","name":"mcp__codex_apps__pets","tools":[{"type":"function","name":"_adopt"}]}]}`
 	response, err := http.Post(service.Info().Runtime.Address+"/codex/v1/responses", "application/json", strings.NewReader(body))
@@ -138,6 +141,29 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 	}
 	if json.Unmarshal(fields["tools"], &tools) != nil || len(tools) != 1 || tools[0].Type != "function" || tools[0].Name != "exec_command" {
 		t.Fatalf("namespace tool not dropped cleanly: %s", fields["tools"])
+	}
+	// 桌面端的 Companion Page 快照是没有 call_id 的伪工具结果：留着会让上游在响应头
+	// 之后中断连接；合法的一对工具调用与结果必须原样保留。
+	var input []struct {
+		Type   string `json:"type"`
+		CallID string `json:"call_id"`
+		Output string `json:"output"`
+	}
+	if json.Unmarshal(fields["input"], &input) != nil || len(input) != 3 {
+		t.Fatalf("orphan tool output not dropped cleanly: %s", fields["input"])
+	}
+	outputs := 0
+	for _, item := range input {
+		if item.Type != "function_call_output" {
+			continue
+		}
+		outputs++
+		if item.CallID != "call_1" || item.Output != "ok" {
+			t.Fatalf("legitimate tool output changed: %+v", item)
+		}
+	}
+	if outputs != 1 || strings.Contains(string(fields["input"]), "codex_apps_open_page") {
+		t.Fatalf("orphan tool output survived adaptation: %s", fields["input"])
 	}
 	item, err := observer.Request(context.Background(), response.Header.Get("X-Request-ID"))
 	wantInput := "9"

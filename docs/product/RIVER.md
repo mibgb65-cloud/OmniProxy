@@ -1,4 +1,4 @@
-# River
+﻿# River
 
 River 是内置 API Key 服务商，默认启用；已有安装通过迁移 029 追加，不重置其他服务商和账号配置。默认入口为 `https://api.river.ai/v1`，使用 `Authorization: Bearer`，密钥沿用 DPAPI 保护及凭证回调。
 
@@ -28,7 +28,7 @@ River 不限制函数工具数量：官方 [Limits and support](https://docs.riv
 
 Messages 使用现有文本／函数工具／图片协议转换，经 Chat 接入。工具调用 ID 和结果保持关联；跨协议先收完整响应，再生成下游 JSON／SSE，不提供原生首 Token 增量输出，也不保证保留跨协议的思考正文。不能将其当作 River 官方 Messages API。
 
-推理强度经客户端原生 effort 传递：Chat 用 `reasoning_effort`，Responses 用 `reasoning.effort`，Messages 用 `output_config.effort`。Codex 目录发布它自己的档位词汇（`none`／`max` 就近映射为 `minimal`／`xhigh`），网关收到后还原成上游取值；Messages → Chat 转换时只透传该模型已确认的档位，非法值返回 400 而不是静默丢弃；请求未带档位时使用上表公布的上游默认档位。从 Codex 的 `…/codex/v1` 入口选择 River 模型时同样走这条协议链路：网关按正文模型判定后不再透明转发，公共 ID（如 `DeepSeek-V4.1-Flash-1017`）与档位词汇都在网关内还原成官方取值，第三方 Key 不会被发往 `api.openai.com`。Codex 会把 MCP 与多智能体工具包成 `type: "namespace"` 分组，River 只接受函数工具，网关在交给 River 前移除这些分组并记日志；函数工具（`exec_command`、`read_file`、`view_image` 等）保持可用，命名空间里的 MCP／多智能体工具在该模型上不可用。Claude 菜单不再按档位派生模型条目，详见 `docs/product/LOCAL_AGENTS.md` 的「推理强度（Claude）」。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。
+推理强度经客户端原生 effort 传递：Chat 用 `reasoning_effort`，Responses 用 `reasoning.effort`，Messages 用 `output_config.effort`。Codex 目录发布它自己的档位词汇（`none`／`max` 就近映射为 `minimal`／`xhigh`），网关收到后还原成上游取值；Messages → Chat 转换时只透传该模型已确认的档位，非法值返回 400 而不是静默丢弃；请求未带档位时使用上表公布的上游默认档位。从 Codex 的 `…/codex/v1` 入口选择 River 模型时同样走这条协议链路：网关按正文模型判定后不再透明转发，公共 ID（如 `DeepSeek-V4.1-Flash-1017`）与档位词汇都在网关内还原成官方取值，第三方 Key 不会被发往 `api.openai.com`。Codex 会把 MCP 与多智能体工具包成 `type: "namespace"` 分组，River 只接受函数工具，网关在交给 River 前移除这些分组并记日志；函数工具（`exec_command`、`read_file`、`view_image` 等）保持可用，命名空间里的 MCP／多智能体工具在该模型上不可用。桌面端还会把 Companion Page 快照注入成没有 `call_id` 的 `function_call_output` 伪结果，River 收到这类条目会在响应头之后中断连接；网关在交给 River 前移除它们并记录 `codex orphan tool outputs dropped`，带 `call_id` 的合法工具结果原样保留，代价是该模型拿不到快照内容。非 Codex 入口出现同样的孤儿工具结果时由适配器返回 `400 unsupported_content`。Claude 菜单不再按档位派生模型条目，详见 `docs/product/LOCAL_AGENTS.md` 的「推理强度（Claude）」。见 [ADR 022](../decisions/ADR-022-effort-vocabulary-and-variants.md)。
 
 首版只接入了文本和图片输入，音频与文件（Files API `file_id`）仍未接入。图片按官方契约转换为 Chat `image_url` 块（base64 data URL 或外部 URL），Claude Code／Desktop 的 Messages 与 Responses 图片历史、工具结果中的截图都会原样转发给上游，不再本地拒绝；目录据此把六款模型标记为 `text` + `image`。图片格式限官方公布的 JPEG／PNG／GIF／WebP，单图 base64 上限 16 MiB（组件有界值，低于官方 32 MiB），`detail` 只透传 `low`／`high`／`auto`／`original`。无法验证的图片形式（未知 `source.type`、`file_id`、非 base64 数据）以及 `input_file`／`input_audio` 仍返回明确的 400，不静默删除内容。现有本地请求体限制、超时与并发继续生效；1M 官方上下文元数据不代表完成长输入或最大输出实测。没有余额／套餐查询，不显示推算剩余额度；不支持官方上游 WebSocket。同池故障切换与轮换方式见下文。
 

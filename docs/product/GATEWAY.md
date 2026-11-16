@@ -108,6 +108,17 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   按目标服务商类型移除这些分组（函数工具与其它字段原样保留），并记录
   `codex namespace tools dropped` 与数量；被移除的是分组本身，用户消息、历史与函数工具
   都不受影响，代价是该模型上无法调用这些 MCP／多智能体工具。
+- 同一路径还会移除没有 `call_id` 的 `function_call_output` 输入项：Codex 桌面端把
+  Companion Page 快照注入成伪工具结果（rollout 里只有 `name`／`namespace`），没有对应的
+  工具调用；River 收到这类条目后会先返回 `200` 与 SSE 开头，随后直接中断连接，客户端只能
+  看到 `error decoding response body`。网关在路由完成后移除这些孤儿结果并记录
+  `codex orphan tool outputs dropped` 与数量，带 `call_id` 的合法工具结果、工具调用与其它
+  历史原样保留；代价是该模型上拿不到 Companion Page 快照。
+- 流式转发的终结事件包含 `response.completed`、`response.incomplete`（命中输出上限或
+  内容过滤时的正常收尾）与 `message_stop`；`response.incomplete` 不再被当成流被截断。
+  上游流在终结事件之前结束（干净 EOF 或读错误）时仍记 `upstream_stream_failed`，
+  但日志带 `upstream_stream_kind=incomplete_stream`，可与「数据行不合语法」
+  （`invalid_json`／`unexpected_shape`）和上游主动报错（`upstream_error`）区分。
 - 令牌临近过期时由网关自己用 `refresh_token` 续期，并把新 auth.json 写回池记录。
 - 明确拒绝（401／429／5xx）才换同池账号，冷却窗口与协议路径共用；
   已提交的响应不重放。

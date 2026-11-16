@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261116-008](../tasks/active/TASK-20261116-008-codex-orphan-tool-outputs.md) 修复 Codex 桌面端 + River `DeepSeek-V4.1-Flash-1017` 的流中断：根因是桌面端把 Companion Page 快照注入成没有 `call_id` 的 `function_call_output` 伪工具结果，River 收到后先返回 `200` 与 SSE 开头再断开连接（真实 Key 上 7 组正文对照复现，加回字符串 `call_id` 即恢复完成）。网关在 Codex 入口改走协议路径时移除这类孤儿结果并记 `codex orphan tool outputs dropped`，River 适配器对非 Codex 入口的同类正文返回 `400 invalid_request`，终结事件前结束的流记录 `upstream_stream_kind=incomplete_stream`。目标版本 `v2.3.1-beta.11`。
+
 本地构建：[TASK-20261116-007](../tasks/completed/2026-11/TASK-20261116-007-build-local-v2.3.1-beta.10.md) 已产出 `v2.3.1-beta.10` Windows amd64 生产安装包，内容为配额页 DuMate 积分与本机 Token 用量同卡展示（TASK-20261116-006，`69f1e1db`），并包含 beta.9 的 HowToFix 余额与 Token 用量接入。安装器 21,092,215 bytes，SHA256 `745703c7c0dd41e270eaab9ad7ce8670e8ab434872dcf6b5c3d44e0be0168632`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后打开配额页即可看到 DuMate 积分与 Token 用量。
 
 已实现：[TASK-20261116-006](../tasks/completed/2026-11/TASK-20261116-006-dumate-quota-points.md) 配额页不再把百度搭子 DuMate 账号标为「暂不支持」（`69f1e1db`）：新增 `dumate_points` 资源类型，卡片展示官方控制台积分（可用积分、已用／总量、到期信息）与该账号本机 Token 用量；实时成功按剩余积分判充足／不足，`stale` 标为待刷新、`unavailable` 标为查询失败，登录态失效显示需要登录且不请求控制台。积分查询与账号页共用查询键与内存快照，纳入单卡／批量刷新与「可监控账号」统计，首页资源卡片复用同一归类。`task verify` EXIT=0（155 文件／948 项前端测试、全部 Go 包、Windows production 构建）。

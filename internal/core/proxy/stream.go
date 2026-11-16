@@ -108,6 +108,11 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol
 				case readErr = <-scanErr:
 				default:
 				}
+				// 没有终结事件就结束的流与「数据行不合语法」同码不同因，日志必须能区分；
+				// 单行超限另有 response_too_large，不算提前收流。
+				if !errors.Is(readErr, bufio.ErrTooLong) {
+					trace.markStreamFailure(streamDataFailure{kind: streamDataIncompleteStream})
+				}
 				return streamReadFailure(readErr)
 			}
 			total += len(line) + 1
@@ -171,8 +176,10 @@ func streamLineState(line string, trace *Trace) (bool, bool, error) {
 		var event struct {
 			Type string `json:"type"`
 		}
+		// Responses 的终结事件有三种：completed、incomplete（命中输出上限或内容过滤）
+		// 与 failed（按错误处理）。incomplete 是完整交付的收尾事件，不能当成流被截断。
 		if json.Unmarshal([]byte(data), &event) == nil &&
-			(event.Type == "response.completed" || event.Type == "message_stop") {
+			(event.Type == "response.completed" || event.Type == "response.incomplete" || event.Type == "message_stop") {
 			return true, trace.hasFirstContent([]byte(data)), nil
 		}
 		if failure, failed := inspectStreamData([]byte(data)); failed {
