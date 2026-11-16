@@ -81,3 +81,68 @@ func TestUnsupportedContentStillFailsExplicitly(t *testing.T) {
 		}
 	}
 }
+
+// Codex 的 view_image 工具结果会带约 1 MB 的 base64 内联图片；此前按 8 KiB URL 上限
+// 判断，合法的工具结果图片被本地拒成 unsupported_content。
+func TestResponsesInlineToolResultImageIsAccepted(t *testing.T) {
+	dataURL := "data:image/png;base64," + strings.Repeat("A", 1<<20)
+	body, err := json.Marshal(map[string]any{
+		"model": DeepSeekFlash,
+		"input": []any{
+			map[string]any{"role": "user", "content": "看看这张截图"},
+			map[string]any{"type": "function_call", "call_id": "call_1", "name": "view_image", "arguments": "{}"},
+			map[string]any{"type": "function_call_output", "call_id": "call_1", "output": []any{
+				map[string]any{"type": "input_image", "image_url": dataURL, "detail": "high"},
+			}},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var forwarded map[string]any
+	client := New(roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		if json.NewDecoder(request.Body).Decode(&forwarded) != nil {
+			t.Error("upstream body changed")
+		}
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(`{"model":"x"}`))}, nil
+	}))
+	if err := client.Forward(context.Background(), "", []byte("test-key"), proxy.Request{
+		Model: DeepSeekFlash, Protocol: "responses", Body: body,
+	}, func(response proxy.Response) error {
+		_, err := io.Copy(io.Discard, response.Body)
+		return err
+	}); err != nil {
+		t.Fatalf("inline tool result image was rejected: %v", err)
+	}
+	input := forwarded["input"].([]any)
+	output := input[2].(map[string]any)["output"].([]any)
+	image := output[0].(map[string]any)["image_url"]
+	if image != dataURL {
+		t.Fatal("inline tool result image changed before upstream")
+	}
+}
+
+// 阈值按形式分档：内联图片与组件一致用 16 MiB，远程地址仍是有界 URL。
+func TestImageURLValidBounds(t *testing.T) {
+	inline := func(n int) string { return "data:image/png;base64," + strings.Repeat("A", n) }
+	for _, tc := range []struct {
+		name string
+		url  string
+		ok   bool
+	}{
+		{name: "inline 1MiB", url: inline(1 << 20), ok: true},
+		{name: "inline at limit", url: inline(imageInlineLimit - len("data:image/png;base64,")), ok: true},
+		{name: "inline over limit", url: inline(imageInlineLimit), ok: false},
+		{name: "inline non image", url: "data:text/plain;base64,AAAA", ok: false},
+		{name: "remote at limit", url: "https://example.invalid/" + strings.Repeat("a", imageRetrievableURLLimit-len("https://example.invalid/")), ok: true},
+		{name: "remote over limit", url: "https://example.invalid/" + strings.Repeat("a", imageRetrievableURLLimit), ok: false},
+		{name: "empty", url: "", ok: false},
+		{name: "control char", url: "data:image/png;base64,AA\x00BB", ok: false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := imageURLValid(tc.url); got != tc.ok {
+				t.Fatalf("imageURLValid(%d chars) = %t, want %t", len(tc.url), got, tc.ok)
+			}
+		})
+	}
+}

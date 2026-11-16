@@ -119,6 +119,10 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   SSE 开头之后中断连接。网关移除该取值（全部被移除时删除 `include` 字段）并记录
   `codex unsupported includes dropped`、数量与取值；`reasoning.encrypted_content`
   实测可用，继续保留。只移除已核实的取值，不替客户端猜测其它 `include`。
+- Codex 的 `view_image` 工具结果以内联 `data:image` 图片出现在请求正文里。网关按组件
+  统一口径放行 16 MiB 字符以内的内联图片（远程图片地址仍受 8 KiB 长度限制），不再把
+  合法的工具结果截图误判成 `400 unsupported_content`；超过上限、非图片 data URL 与
+  未知图片结构仍明确失败，不静默删图。
 - 流式转发的终结事件包含 `response.completed`、`response.incomplete`（命中输出上限或
   内容过滤时的正常收尾）与 `message_stop`；`response.incomplete` 不再被当成流被截断。
   上游流在终结事件之前结束（干净 EOF 或读错误）时仍记 `upstream_stream_failed`，

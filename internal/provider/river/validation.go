@@ -177,7 +177,7 @@ func imageBlockValid(entry json.RawMessage) bool {
 	detail := ""
 	var url string
 	if json.Unmarshal(raw, &url) == nil {
-		if url == "" || len(url) > 8192 || !validURLChars(url) {
+		if !imageURLValid(url) {
 			return false
 		}
 	} else {
@@ -185,7 +185,7 @@ func imageBlockValid(entry json.RawMessage) bool {
 			URL    string `json:"url"`
 			Detail string `json:"detail"`
 		}
-		if json.Unmarshal(raw, &object) != nil || object.URL == "" || len(object.URL) > 8192 || !validURLChars(object.URL) {
+		if json.Unmarshal(raw, &object) != nil || !imageURLValid(object.URL) {
 			return false
 		}
 		detail = object.Detail
@@ -203,6 +203,26 @@ func imageBlockValid(entry json.RawMessage) bool {
 		return true
 	}
 	return false
+}
+
+// 图片地址上限按形式分档：远程地址只需要容纳签名 URL，内联 data 图片与组件其它
+// 图片路径保持同一个 16 MiB 口径。Codex 0.169 的 view_image 工具结果会带约 1 MB 的
+// base64 内联 PNG，按 URL 上限判断会把合法内容误拒成 unsupported_content。
+const (
+	imageRetrievableURLLimit = 8192
+	imageInlineLimit         = 16 << 20
+)
+
+// imageURLValid 校验图片地址：内联 data:image 图片放宽到组件上限，远程地址保持有界
+// 长度；两者都拒绝空值与控制字符，非图片 data URL 不接受。
+func imageURLValid(url string) bool {
+	if url == "" || !validURLChars(url) {
+		return false
+	}
+	if strings.HasPrefix(url, "data:") {
+		return strings.HasPrefix(url, "data:image/") && len(url) <= imageInlineLimit
+	}
+	return len(url) <= imageRetrievableURLLimit
 }
 
 // validURLChars 排除控制字符，避免把任意正文伪装成图片地址。
