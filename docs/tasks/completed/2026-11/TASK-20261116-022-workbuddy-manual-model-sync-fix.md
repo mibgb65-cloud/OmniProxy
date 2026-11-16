@@ -167,7 +167,7 @@ task verify → exit 0
 
 ## Commit
 
-Not committed by Agent.
+87bd9b05 fix(wails): 修复 WorkBuddy AI 手动同步模型失败（目录服务漏接订阅）
 
 ---
 
