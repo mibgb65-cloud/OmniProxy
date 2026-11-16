@@ -92,7 +92,13 @@ No documentation changes required.（结论已写入 `docs/product/HOWTOFIX.md` 
 
 # Git
 
-Not committed by Agent.
+## Commit
+
+```text
+997aa9bd test(agentconfig): 固定 HowToFix 模型进入受管客户端目录
+```
+
+未推送、无标签、无历史改写。
 
 ---
 
