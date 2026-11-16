@@ -106,6 +106,7 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 		`{"type":"function_call_output","call_id":"call_1","output":"ok"},` +
 		`{"type":"function_call_output","name":"codex_apps_open_page","namespace":"agent","output":"{\"page_id\":null}"}],` +
 		`"stream":` + strconv.FormatBool(stream) + `,"reasoning":{"effort":"xhigh"},` +
+		`"include":["reasoning.encrypted_content","output.encrypted_content"],` +
 		`"tools":[{"type":"function","name":"exec_command","parameters":{"type":"object","properties":{}}},` +
 		`{"type":"namespace","name":"mcp__codex_apps__pets","tools":[{"type":"function","name":"_adopt"}]}]}`
 	response, err := http.Post(service.Info().Runtime.Address+"/codex/v1/responses", "application/json", strings.NewReader(body))
@@ -164,6 +165,11 @@ func testCodexEntryNonOpenAIModel(t *testing.T, stream bool) {
 	}
 	if outputs != 1 || strings.Contains(string(fields["input"]), "codex_apps_open_page") {
 		t.Fatalf("orphan tool output survived adaptation: %s", fields["input"])
+	}
+	// 第三方服务商无法表达的 include 取值必须移除，可用的取值保留。
+	var includes []string
+	if json.Unmarshal(fields["include"], &includes) != nil || len(includes) != 1 || includes[0] != "reasoning.encrypted_content" {
+		t.Fatalf("include not adapted: %s", fields["include"])
 	}
 	item, err := observer.Request(context.Background(), response.Header.Get("X-Request-ID"))
 	wantInput := "9"

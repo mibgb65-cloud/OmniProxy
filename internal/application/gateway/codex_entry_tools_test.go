@@ -44,6 +44,35 @@ func TestWithoutOrphanToolOutputsDropsOnlyOrphanResults(t *testing.T) {
 	}
 }
 
+// 第三方服务商无法表达的 include 取值被移除，其余取值与非字符串元素原样保留。
+func TestWithoutUnsupportedIncludesDropsOnlyUnsupportedValues(t *testing.T) {
+	kept, dropped := withoutUnsupportedIncludes(json.RawMessage(`["reasoning.encrypted_content","output.encrypted_content"]`))
+	if len(kept) != 1 || string(kept[0]) != `"reasoning.encrypted_content"` {
+		t.Fatalf("kept = %s", rawOf(kept))
+	}
+	if len(dropped) != 1 || dropped[0] != "output.encrypted_content" {
+		t.Fatalf("dropped = %v", dropped)
+	}
+	kept, dropped = withoutUnsupportedIncludes(json.RawMessage(`["output.encrypted_content"]`))
+	if len(kept) != 0 || len(dropped) != 1 {
+		t.Fatalf("all-unsupported: kept=%s dropped=%v", rawOf(kept), dropped)
+	}
+	kept, dropped = withoutUnsupportedIncludes(json.RawMessage(`["future.value",7]`))
+	if len(dropped) != 0 || len(kept) != 2 || string(kept[0]) != `"future.value"` || string(kept[1]) != `7` {
+		t.Fatalf("unknown values changed: kept=%s dropped=%v", rawOf(kept), dropped)
+	}
+}
+
+// include 缺失、null、非数组时不改动。
+func TestWithoutUnsupportedIncludesKeepsUnexpectedShape(t *testing.T) {
+	for _, raw := range []json.RawMessage{nil, json.RawMessage(`null`), json.RawMessage(`"reasoning.encrypted_content"`), json.RawMessage(`{}`)} {
+		kept, dropped := withoutUnsupportedIncludes(raw)
+		if kept != nil || dropped != nil {
+			t.Fatalf("include %s changed: kept=%v dropped=%v", raw, kept, dropped)
+		}
+	}
+}
+
 // 缺少 input、input 不是数组时不做改动，避免把无法解析的正文改坏。
 func TestWithoutOrphanToolOutputsKeepsUnexpectedInput(t *testing.T) {
 	for _, raw := range []json.RawMessage{nil, json.RawMessage(`null`), json.RawMessage(`"text"`), json.RawMessage(`{}`)} {

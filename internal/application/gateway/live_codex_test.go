@@ -65,6 +65,8 @@ func codexEntryReply(t *testing.T, service *Service, model string, stream bool) 
 	body, err := json.Marshal(map[string]any{
 		"model": model, "stream": stream, "max_output_tokens": 16,
 		"reasoning": map[string]string{"effort": "high"},
+		// Codex 0.169 起默认请求加密输出；第三方服务商无法表达，必须由网关移除。
+		"include": []string{"reasoning.encrypted_content", "output.encrypted_content"},
 		"input": []map[string]any{
 			{"role": "user", "content": []map[string]string{{"type": "input_text", "text": "Reply with OK only."}}},
 			{"type": "function_call", "call_id": "call_live_1", "name": "exec_command", "arguments": "{}"},

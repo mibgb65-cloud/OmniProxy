@@ -8,17 +8,28 @@ import (
 	"omniproxy/internal/core/proxy"
 )
 
+// codexUnsupportedIncludes 是 Codex 会请求、但第三方服务商无法表达的 include 取值。
+//
+// `output.encrypted_content` 是 OpenAI 的加密输出能力（Codex 0.169 起默认请求）；
+// River 这类服务商收到后会在 SSE 开头之后中断连接。加密输出本来也无法从第三方服务商
+// 获得，请求它没有意义。`reasoning.encrypted_content` 实测可用，继续保留。
+var codexUnsupportedIncludes = map[string]bool{
+	"output.encrypted_content": true,
+}
+
 // adaptCodexEntryBody 把 Codex 入口改交给第三方服务商的正文收拾成该服务商能接受的形状。
 //
-// Codex 认为自己在跟 OpenAI 说话，会送出两类 River 这类服务商无法表达的输入：
+// Codex 认为自己在跟 OpenAI 说话，会送出三类 River 这类服务商无法表达的输入：
 //
 //   - 工具分组：MCP 与多智能体工具被包成 `type: namespace`，服务商只接受
 //     `type: function`，留着会让整个请求被本地校验拒成 `unsupported_content`。
 //   - 孤儿工具结果：桌面端把 Companion Page 快照注入成没有 `call_id` 的
 //     `function_call_output`；这类条目没有对应的工具调用，服务商收到后会在 SSE
 //     开头之后直接中断连接，客户端只能看到 `error decoding response body`。
+//   - 加密输出请求：`include` 里的 `output.encrypted_content` 是 OpenAI 专有能力，
+//     服务商收到同样会在 SSE 开头之后中断连接。
 //
-// 这里只移除无法表达的条目，函数工具、合法工具结果与其它字段原样保留，并把移除
+// 这里只移除无法表达的条目与取值，函数工具、合法工具结果与其它字段原样保留，并把移除
 // 数量写进日志，能力差异不静默吞掉。
 func (s *Service) adaptCodexEntryBody(ctx context.Context, request *proxy.Request) error {
 	if !request.FromCodexEntry || s.providers == nil {
@@ -53,6 +64,22 @@ func (s *Service) adaptCodexEntryBody(ctx context.Context, request *proxy.Reques
 		changed = true
 		if s.log != nil {
 			s.log.Info("codex orphan tool outputs dropped", "module", "gateway", "count", dropped)
+		}
+	}
+	if kept, dropped := withoutUnsupportedIncludes(fields["include"]); len(dropped) > 0 {
+		if len(kept) == 0 {
+			delete(fields, "include")
+		} else {
+			encoded, err := json.Marshal(kept)
+			if err != nil {
+				return proxy.Failure("invalid_request", 400)
+			}
+			fields["include"] = encoded
+		}
+		changed = true
+		if s.log != nil {
+			s.log.Info("codex unsupported includes dropped", "module", "gateway", "count", len(dropped),
+				"values", strings.Join(dropped, ","))
 		}
 	}
 	if !changed {
@@ -134,6 +161,30 @@ func orphanToolOutput(item json.RawMessage) bool {
 		return true
 	}
 	return strings.TrimSpace(callID) == ""
+}
+
+// withoutUnsupportedIncludes 从 `include` 数组里移除目标服务商无法表达的取值，
+// 返回保留项（原始 JSON，非字符串元素原样保留）与被移除的取值。`include` 缺失、
+// 为 null 或不是数组时不改动，避免替客户端解释不认识的形状。
+func withoutUnsupportedIncludes(raw json.RawMessage) ([]json.RawMessage, []string) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return nil, nil
+	}
+	var values []json.RawMessage
+	if json.Unmarshal(raw, &values) != nil {
+		return nil, nil
+	}
+	kept := make([]json.RawMessage, 0, len(values))
+	dropped := make([]string, 0)
+	for _, value := range values {
+		var name string
+		if json.Unmarshal(value, &name) == nil && codexUnsupportedIncludes[name] {
+			dropped = append(dropped, name)
+			continue
+		}
+		kept = append(kept, value)
+	}
+	return kept, dropped
 }
 
 // providerKind 只读取已保存提供商的类型，未知目标按空串返回。

@@ -114,6 +114,11 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
   看到 `error decoding response body`。网关在路由完成后移除这些孤儿结果并记录
   `codex orphan tool outputs dropped` 与数量，带 `call_id` 的合法工具结果、工具调用与其它
   历史原样保留；代价是该模型上拿不到 Companion Page 快照。
+- `include` 里只保留目标服务商能表达的取值：Codex 0.169 起默认请求
+  `output.encrypted_content`（OpenAI 的加密输出能力），River 这类服务商收到同样会在
+  SSE 开头之后中断连接。网关移除该取值（全部被移除时删除 `include` 字段）并记录
+  `codex unsupported includes dropped`、数量与取值；`reasoning.encrypted_content`
+  实测可用，继续保留。只移除已核实的取值，不替客户端猜测其它 `include`。
 - 流式转发的终结事件包含 `response.completed`、`response.incomplete`（命中输出上限或
   内容过滤时的正常收尾）与 `message_stop`；`response.incomplete` 不再被当成流被截断。
   上游流在终结事件之前结束（干净 EOF 或读错误）时仍记 `upstream_stream_failed`，
