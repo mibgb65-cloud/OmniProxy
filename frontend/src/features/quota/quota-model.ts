@@ -73,6 +73,7 @@ export function describeQuotaAccounts(
                 : provider?.kind === "openai" && account.authMethod === "subscription_login"
                   ? "subscription"
                   : (provider?.kind === "deepseek" ||
+                        provider?.kind === "howtofix" ||
                         (provider?.kind === "kimi" &&
                           ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
                       (!account.authMethod || account.authMethod === "api_key")
@@ -151,6 +152,12 @@ export function quotaEntryStatus(
   if (item.kind === "balance") {
     if (snapshot.balance?.stepfun) return "unknown"
     if (snapshot.balance?.kimi) return snapshot.balance.available ? "normal" : "exhausted"
+    // HowToFix 只返回剩余金额：金额缺失或不可解析表示未知，不能把 available=false 当作耗尽。
+    if (snapshot.balance?.howtofix) {
+      const { remaining } = snapshot.balance.howtofix
+      if (remaining === "" || !Number.isFinite(Number(remaining))) return "unknown"
+      return snapshot.balance.available ? "normal" : "exhausted"
+    }
     if (!snapshot.balance?.entries?.length) return "unknown"
     return snapshot.balance.available ? "normal" : "exhausted"
   }

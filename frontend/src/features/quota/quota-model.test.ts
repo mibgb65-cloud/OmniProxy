@@ -88,6 +88,33 @@ describe("quota overview model", () => {
         makeQuotaEntry(items[3]!, { ...base, balance: { ...balance, entries } }, now).status,
       ).toBe("unknown")
   })
+  it("treats HowToFix prepaid balance as a supported source", () => {
+    const [item] = describeQuotaAccounts(
+      [{ ...accounts[3]!, id: "howtofix-one", providerId: "builtin_howtofix" }],
+      [{ ...providers[0]!, id: "builtin_howtofix", kind: "howtofix", name: "HowToFix" }],
+    )
+    expect(item).toMatchObject({ kind: "balance", canQuery: true })
+    const howtofix = (remaining: string, available: boolean) => ({
+      available,
+      entries: [],
+      fetchedAt: "2026-10-09T00:00:00Z",
+      howtofix: { currency: "USD", remaining },
+    })
+    expect(
+      makeQuotaEntry(item!, { ...base, balance: howtofix("49.999998", true) }, now).status,
+    ).toBe("normal")
+    expect(makeQuotaEntry(item!, { ...base, balance: howtofix("0", false) }, now).status).toBe(
+      "exhausted",
+    )
+    // 上游没返回金额时必须保持未知，不能把空值误报成余额耗尽。
+    expect(makeQuotaEntry(item!, { ...base, balance: howtofix("", false) }, now).status).toBe(
+      "unknown",
+    )
+    expect(makeQuotaEntry(item!, { ...base, pending: true }, now).status).toBe("pending")
+    expect(
+      quotaSummary([makeQuotaEntry(item!, { ...base, balance: howtofix("1", true) }, now)]),
+    ).toMatchObject({ monitored: 1, known: 1 })
+  })
   it("does not report zero exhaustion without known results and filters identity/provider/status", () => {
     const pending = makeQuotaEntry(items[0]!, { ...base, pending: true }, now)
     expect(quotaSummary([pending])).toMatchObject({ exhausted: null, uncertain: 1 })

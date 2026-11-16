@@ -119,6 +119,35 @@ describe("quota overview", () => {
     expect(readAccountTokenUsage).toHaveBeenCalledWith("unsupported")
   })
 
+  it("shows HowToFix prepaid balance together with locally recorded token usage", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0]!, id: "builtin_howtofix", kind: "howtofix", name: "HowToFix" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      { ...accounts[3]!, id: "howtofix-one", providerId: "builtin_howtofix", name: "howtofix-one" },
+    ])
+    vi.mocked(readAccountBalance).mockResolvedValue({
+      available: true,
+      entries: [],
+      fetchedAt: "2026-10-16T00:00:00Z",
+      howtofix: { currency: "USD", remaining: "49.999998" },
+    })
+    renderQuota()
+    await ready()
+    // 余额来自官方接口，Token 用量来自本机记录，两者必须同卡分区展示。
+    const card = within((await screen.findByText("US$49.999998")).closest('[data-slot="card"]')!)
+    expect(card.getByText("剩余额度")).toBeInTheDocument()
+    expect(card.getByText("Token 用量")).toBeInTheDocument()
+    expect(card.getByLabelText("1,200")).toHaveTextContent("1.2K")
+    expect(card.getByLabelText("300")).toBeInTheDocument()
+    expect(card.getByLabelText("500")).toBeInTheDocument()
+    expect(card.getByText("额度／余额充足")).toBeInTheDocument()
+    expect(card.queryByText("暂不支持")).not.toBeInTheDocument()
+    expect(card.queryByText(/尚未接入/)).not.toBeInTheDocument()
+    expect(readAccountBalance).toHaveBeenCalledExactlyOnceWith("howtofix-one")
+    expect(readAccountTokenUsage).toHaveBeenCalledWith("howtofix-one")
+  })
+
   it("queries Kimi's regional balance, counts exhaustion and skips unconfirmed platforms", async () => {
     vi.mocked(listProviders).mockResolvedValue([
       { ...providers[0]!, id: "builtin_kimi", kind: "kimi", name: "Kimi" },

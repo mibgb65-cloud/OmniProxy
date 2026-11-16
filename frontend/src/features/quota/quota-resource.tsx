@@ -2,6 +2,7 @@ import { MiMoPlanResource } from "../accounts/mimo-resource"
 import { KimiCodeResource } from "../accounts/kimi-code-resource"
 import { MiniMaxResource } from "../accounts/minimax-resource"
 import { KimiBalanceValues } from "../accounts/kimi-balance"
+import { HowToFixBalanceValues } from "../accounts/howtofix-balance"
 import { StepFunBalanceValues, StepFunPlanResource } from "../accounts/stepfun-resource"
 import { useTranslation } from "react-i18next"
 import { balanceError } from "../../services/balance"
@@ -72,6 +73,8 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
         <StepFunBalanceValues value={entry.balance.stepfun} />
       ) : entry.balance?.kimi ? (
         <KimiBalanceValues value={entry.balance.kimi} />
+      ) : entry.balance?.howtofix ? (
+        <HowToFixBalanceValues value={entry.balance.howtofix} />
       ) : entry.balance ? (
         <div className="space-y-3">
           {(entry.balance.entries ?? []).map((item) => (
@@ -118,6 +121,14 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
       ) : null}
       {entry.kind === "subscription" && entry.quota?.fromCache ? (
         <p className="text-muted-foreground text-[10px]">{t("subscription.quota.retained")}</p>
+      ) : null}
+      {entry.kind === "balance" && entry.provider?.kind === "howtofix" ? (
+        <div className="space-y-2">
+          <AccountUsagePanel account={entry.account} />
+          <p className="text-muted-foreground text-[10px] leading-5">
+            {t("quota.unsupportedUsageNote")}
+          </p>
+        </div>
       ) : null}
     </div>
   )
