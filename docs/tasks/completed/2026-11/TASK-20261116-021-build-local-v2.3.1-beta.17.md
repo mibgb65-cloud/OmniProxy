@@ -120,7 +120,7 @@ BUILD_EXIT=0
 
 ## Commit
 
-Not committed by Agent.
+eeadc35d chore(release): 准备 v2.3.1-beta.17 本地构建
 
 ---
 
