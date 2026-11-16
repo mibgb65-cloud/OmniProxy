@@ -1,8 +1,8 @@
-# TASK-20261116-008: Codex 桌面端无 call_id 的工具结果导致 River 流中断
+﻿# TASK-20261116-008: Codex 桌面端无 call_id 的工具结果导致 River 流中断
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -296,7 +296,7 @@ task verify → EXIT=0（155 文件／948 项前端测试、全部 Go 包、Wind
 ## Commit
 
 ```text
-Not committed by Agent.
+69c372b1 fix(gateway): 移除 Codex 桌面端无 call_id 的工具结果，修复 River 流中断
 ```
 
 ---
@@ -309,3 +309,9 @@ Codex 桌面端使用 River `DeepSeek-V4.1-Flash-1017` 的流中断已修复：�
 `400 unsupported_content`；`response.incomplete` 按正常终结事件转发；终结事件前结束的流
 记 `upstream_stream_kind=incomplete_stream`。真实失败正文在新构建上两次
 `200` + `response.completed`，`task verify` EXIT=0。
+
+---
+
+# Completed
+
+2026-11-16 11:48（Asia/Singapore）
