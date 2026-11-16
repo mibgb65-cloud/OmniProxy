@@ -1,8 +1,8 @@
-﻿# Current Development Status
+# Current Development Status
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261116-009](../tasks/active/TASK-20261116-009-build-local-v2.3.1-beta.11.md) 已产出 `v2.3.1-beta.11` Windows amd64 生产安装包，内容为 Codex 桌面端 + River 流中断修复（TASK-20261116-008，`69c372b1`）：安装器 21,096,005 bytes，SHA256 `563e0f2cbfe242c2cb374f6266b01b1b2d72e58ee00f8dd8517ee76a58c5c3ff`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试原会话。
+本地构建：[TASK-20261116-009](../tasks/completed/2026-11/TASK-20261116-009-build-local-v2.3.1-beta.11.md) 已产出 `v2.3.1-beta.11` Windows amd64 生产安装包，内容为 Codex 桌面端 + River 流中断修复（TASK-20261116-008，`69c372b1`）：安装器 21,096,005 bytes，SHA256 `563e0f2cbfe242c2cb374f6266b01b1b2d72e58ee00f8dd8517ee76a58c5c3ff`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试原会话。
 
 已修复：[TASK-20261116-008](../tasks/completed/2026-11/TASK-20261116-008-codex-orphan-tool-outputs.md) Codex 桌面端 + River `DeepSeek-V4.1-Flash-1017` 的流中断（`69c372b1`）：根因是桌面端把 Companion Page 快照注入成没有 `call_id` 的 `function_call_output` 伪工具结果，River 收到后先返回 `200` 与 SSE 开头再断开连接，客户端只看到 `error decoding response body`（真实 Key 上 7 组正文对照复现：加回字符串 `call_id` 即恢复完成）。网关在 Codex 入口改走协议路径时移除这类孤儿结果并记 `codex orphan tool outputs dropped`，River 适配器对非 Codex 入口的同类正文返回 `400 unsupported_content`；同批修正 `response.incomplete`（命中输出上限／内容过滤的正常收尾）不再被当成截断，终结事件前结束的流记录 `upstream_stream_kind=incomplete_stream`。真实失败正文在新构建隔离实例上两次 `200` + `response.completed`，`task verify` EXIT=0（155 文件／948 项前端测试、全部 Go 包、Windows production 构建）。构建：TASK-20261116-009（`v2.3.1-beta.11`）。
 

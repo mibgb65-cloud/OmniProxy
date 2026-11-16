@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -114,7 +114,7 @@ Windows 应用和安装器版本资源校验通过
 ## Commit
 
 ```text
-Not committed by Agent.
+a0915b46 chore(release): 准备 v2.3.1-beta.11 本地构建
 ```
 
 ---
