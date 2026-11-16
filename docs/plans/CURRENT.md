@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261116-020](../tasks/completed/2026-11/TASK-20261116-020-workbuddy-credits-request-fix.md) WorkBuddy AI Credits 读不出来（账号卡显示 `—` 并报通用失败）：计费接口是 `POST /billing/meter/get-user-resource-summary` + 空 JSON 正文 + 短 UA，我们发了 `GET`，被网关 404；而 `proxy.Error` 的文本是 `gateway: <code>`，前端只认 `workbuddy_ai:`／`subscription:` 前缀，于是塌成「操作未完成」。真实账号核对（Free 计划）：`GET` → 404、`POST {}` → 200（`plan_base 100`、`TotalCredits "100"`、`SubscriptionPackageName "Free"`）；目录侧 `/v3/config` 已同步 25 条真实模型。现已按官方客户端形态请求、套餐名取自计费接口并显示在额度卡、三层错误码都能识别。目标版本 `v2.3.1-beta.17`。
+
+本地构建：[TASK-20261116-021](../tasks/active/TASK-20261116-021-build-local-v2.3.1-beta.17.md) 目标 `v2.3.1-beta.17`，内容为 WorkBuddy AI Credits 修复（TASK-20261116-020，`bf809c3e`）——计费接口改为官方客户端形态（`POST {}` + 计费头集）、套餐名取自 `SubscriptionPackageName`、前端识别 `gateway:` 前缀错误码、额度卡显示套餐名；构建中，产物大小与 SHA256 见任务记录。
+
 本地构建：[TASK-20261116-019](../tasks/completed/2026-11/TASK-20261116-019-build-local-v2.3.1-beta.16.md) 已产出 `v2.3.1-beta.16` Windows amd64 生产安装包，内容为 WorkBuddy AI 登录保存修复（TASK-20261116-018，`98484997`）：新建账号的 INSERT 列数与值数不匹配导致浏览器登录成功后建不出账号，现已修正；同时补 `save_failed`／`invalid_input` 错误码、登录失败日志（阶段 + 稳定码）与浏览器授权说明。安装器大小与 SHA256 见任务记录，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无新增数据库迁移（050／051 已在 beta.15 执行）。
 
 已修复：[TASK-20261116-018](../tasks/completed/2026-11/TASK-20261116-018-workbuddy-login-account-save-fix.md) WorkBuddy AI 浏览器登录成功后账号无法保存：新建账号的 `INSERT INTO accounts` 声明 11 列却给了 12 个值（照 Google 版抄写时删掉 `auth_email` 列但没删对应值），SQLite 以 `12 values for 11 columns` 拒绝；账号层错误没有稳定码，最终塌成 `operation_failed`，界面显示「操作未完成，请检查网络和登录状态后重试」。真实账号已验证 `auth/state → auth/token → login/account` 三步走通，失败只在保存；现已修复并新增保存失败码、登录失败日志与登录弹窗说明。目标版本 `v2.3.1-beta.16`。
