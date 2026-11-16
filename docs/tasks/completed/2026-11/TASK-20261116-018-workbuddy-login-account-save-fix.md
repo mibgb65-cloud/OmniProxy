@@ -198,7 +198,7 @@ task verify → exit 0
 
 ## Commit
 
-Not committed by Agent.
+98484997 fix(provider): 修复 WorkBuddy AI 登录后无法保存账号
 
 ---
 

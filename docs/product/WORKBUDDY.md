@@ -111,7 +111,7 @@ enterprise meter），展示三种窗口或一种：
 ## 相关
 
 - 任务记录：`docs/tasks/completed/2026-11/TASK-20261116-015-workbuddy-ai-subscription-provider.md`
-  （接入）、`docs/tasks/active/TASK-20261116-018-workbuddy-login-account-save-fix.md`（登录保存修复）
+  （接入）、`docs/tasks/completed/2026-11/TASK-20261116-018-workbuddy-login-account-save-fix.md`（登录保存修复）
 - ADR：[ADR-026](../decisions/ADR-026-workbuddy-ai-subscription.md)
 - 代码：`internal/provider/workbuddyai/`、`internal/application/workbuddy/`、
   `internal/application/account/workbuddy.go`、`internal/application/gateway/workbuddy.go`
