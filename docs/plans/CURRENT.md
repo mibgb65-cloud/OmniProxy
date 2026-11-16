@@ -2,7 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261116-012](../tasks/active/TASK-20261116-012-inline-image-limit.md) Codex 把 `view_image` 工具结果交给 River 模型时报 `400 unsupported_content`（请求 `d91090a0…` 161 ms 内本地失败）：工具结果是约 1 MB 的 `data:image/png;base64,…` 内联图片，而 River 适配器把所有图片地址都套上 8 KiB 远程 URL 上限。现在按形式校验——内联 `data:image` 放宽到组件统一的 16 MiB，远程地址保持 8 KiB；空地址、非图片 data URL、超限与未知结构仍明确 400。合成 1 MB PNG 复放：旧构建 400，新构建两次 `200` + `response.completed`，模型答出图片颜色。目标版本 `v2.3.1-beta.13`。
+本地构建：[TASK-20261116-013](../tasks/active/TASK-20261116-013-build-local-v2.3.1-beta.13.md) 已产出 `v2.3.1-beta.13` Windows amd64 生产安装包，内容为 River Responses 内联图片校验修复（TASK-20261116-012，`fd6859d7`，并继承 beta.12 的 `include` 修复）：安装器 21,098,055 bytes，SHA256 `3064e84930a0f63ea8c7658045a09d9c34766849b75b524df01dba3ecdac3b23`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试发图。
+
+已修复：[TASK-20261116-012](../tasks/completed/2026-11/TASK-20261116-012-inline-image-limit.md) Codex 把 `view_image` 工具结果交给 River 模型时报 `400 unsupported_content`（请求 `d91090a0…` 161 ms 内本地失败）：工具结果是约 1 MB 的 `data:image/png;base64,…` 内联图片，而 River 适配器把所有图片地址都套上 8 KiB 远程 URL 上限。现在按形式校验——内联 `data:image` 放宽到组件统一的 16 MiB，远程地址保持 8 KiB；空地址、非图片 data URL、超限与未知结构仍明确 400。合成 1 MB PNG 复放：旧构建 400，新构建两次 `200` + `response.completed`，模型答出图片颜色。目标版本 `v2.3.1-beta.13`。
 
 本地构建：[TASK-20261116-011](../tasks/completed/2026-11/TASK-20261116-011-build-local-v2.3.1-beta.12.md) 已产出 `v2.3.1-beta.12` Windows amd64 生产安装包，内容为 Codex 0.169 `include` 取值修复（TASK-20261116-010，`3979c383`，并继承 beta.11 的孤儿工具结果与 beta.12 的 `response.incomplete` 处理）：安装器 21,097,161 bytes，SHA256 `e04b821fdc575548b687779c56ba4b85a0bd388d761baa4be8ed449b4461aa62`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试原会话。
 

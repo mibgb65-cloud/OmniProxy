@@ -1,4 +1,4 @@
-# TASK-20261116-012: 放行内联 data 图片到组件上限，修复 Codex 工具结果图片被本地拒成 unsupported_content
+﻿# TASK-20261116-012: 放行内联 data 图片到组件上限，修复 Codex 工具结果图片被本地拒成 unsupported_content
 
 ## Status
 
@@ -207,7 +207,7 @@ task verify → EXIT=0（155 文件／948 项前端测试、全部 Go 包、Wind
 ## Commit
 
 ```text
-Not committed by Agent.
+fd6859d7 fix(river): 放行内联 data 图片到组件上限，修复 Codex 工具结果图片被误拒
 ```
 
 ---
