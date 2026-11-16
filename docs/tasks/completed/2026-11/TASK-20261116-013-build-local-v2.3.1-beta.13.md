@@ -1,4 +1,4 @@
-# TASK-20261116-013: 构建本地 v2.3.1-beta.13 生产安装包
+﻿# TASK-20261116-013: 构建本地 v2.3.1-beta.13 生产安装包
 
 ## Status
 
@@ -112,7 +112,7 @@ Windows 应用和安装器版本资源校验通过
 ## Commit
 
 ```text
-Not committed by Agent.
+463c6fb7 chore(release): 准备 v2.3.1-beta.13 本地构建
 ```
 
 ---
