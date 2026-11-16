@@ -2,6 +2,7 @@ package mimo
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -74,5 +75,30 @@ func TestInvalidRequestsFailBeforeSendingCredentials(t *testing.T) {
 	request.Stream = true
 	if _, err := validatedBody(request); err == nil {
 		t.Fatal("stream/body mismatch accepted")
+	}
+}
+
+// Codex 长会话的 Responses 输入项会超过 512 条：与 Messages 同口径使用 100,000 上限。
+func TestResponsesInputItemsUseConversationLimit(t *testing.T) {
+	build := func(n int) json.RawMessage {
+		var b strings.Builder
+		b.WriteString("[")
+		for i := 0; i < n; i++ {
+			if i > 0 {
+				b.WriteString(",")
+			}
+			fmt.Fprintf(&b, `{"role":"user","content":"message %d"}`, i)
+		}
+		b.WriteString("]")
+		return json.RawMessage(b.String())
+	}
+	if !textInputs(build(513), true) {
+		t.Fatal("513 input items rejected")
+	}
+	if !textInputs(build(proxy.MaxConversationMessages), true) {
+		t.Fatal("input items at the conversation limit rejected")
+	}
+	if textInputs(build(proxy.MaxConversationMessages+1), true) {
+		t.Fatal("input items above the conversation limit accepted")
 	}
 }

@@ -2,6 +2,8 @@ package atria
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
 
 	"omniproxy/internal/core/proxy"
@@ -50,5 +52,30 @@ func TestNativeToolHistoryRemainsUnchanged(t *testing.T) {
 		if err != nil || string(body) != string(request.Body) {
 			t.Fatalf("%s tool history changed: %v", protocol, err)
 		}
+	}
+}
+
+// Codex 长会话的 Responses 输入项会超过 512 条：与 Messages 同口径使用 100,000 上限。
+func TestResponsesInputItemsUseConversationLimit(t *testing.T) {
+	build := func(n int) json.RawMessage {
+		var b strings.Builder
+		b.WriteString("[")
+		for i := 0; i < n; i++ {
+			if i > 0 {
+				b.WriteString(",")
+			}
+			fmt.Fprintf(&b, `{"role":"user","content":"message %d"}`, i)
+		}
+		b.WriteString("]")
+		return json.RawMessage(b.String())
+	}
+	if !textMessages(build(513), true) {
+		t.Fatal("513 input items rejected")
+	}
+	if !textMessages(build(proxy.MaxConversationMessages), true) {
+		t.Fatal("input items at the conversation limit rejected")
+	}
+	if textMessages(build(proxy.MaxConversationMessages+1), true) {
+		t.Fatal("input items above the conversation limit accepted")
 	}
 }

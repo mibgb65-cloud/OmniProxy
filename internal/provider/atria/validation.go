@@ -66,7 +66,7 @@ func textMessages(raw json.RawMessage, responses bool) bool {
 		return true
 	}
 	var items []map[string]json.RawMessage
-	if json.Unmarshal(raw, &items) != nil || items == nil || len(items) == 0 || len(items) > 512 {
+	if json.Unmarshal(raw, &items) != nil || items == nil || len(items) == 0 || len(items) > proxy.MaxConversationMessages {
 		return false
 	}
 	for _, item := range items {

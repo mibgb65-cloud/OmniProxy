@@ -22,7 +22,7 @@ Kimi-K3 的标准档位只开关思考，默认 `max`；官方 `low`／`high`／
 
 River 原版 Flash 显示为 `DeepSeek-V4.1-Flash`，保留 `deepseek-flash` 公共 ID 和既有优先级。1017 版本单独使用 `DeepSeek-V4.1-Flash-1017` 公共 ID／显示名，只映射到其完整官方 ID，不合并原版或回退到直连 DeepSeek。Nemotron 和 GLM 的显示与映射不变。Qwen 与 Kimi-K3 分别使用 `Qwen3.8-27B-FP8`、`Kimi-K3` 公共 ID；`Kimi-K3` 不与直连 Moonshot 的 `kimi-k3` 合并，两者是不同计费入口，本版不提供跨服务商同款模型优先级。已同步过的账号仍以最近成功的官方目录为准；需要再次「同步官方模型」才能纳入新版本。
 
-Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函数工具调用、工具结果及官方 usage。Chat 流式请求添加 `stream_options.include_usage`。Responses 无状态，客户端必须发送完整历史；拒绝 `store: true`、`background: true`、`previous_response_id`、`conversation` 和上下文管理引用，不静默丢失历史。仅支持函数工具，不开放托管搜索、计算机等专用工具。
+Chat Completions 与 Responses 使用原生 HTTP JSON／SSE，保留思考、函数工具调用、工具结果及官方 usage。Chat 流式请求添加 `stream_options.include_usage`。Responses 无状态，客户端必须发送完整历史；输入项上限与 Messages 同为 100,000 条（真实边界仍是 16 MiB 请求体），Codex 的长会话不会因为历史超过 512 条被本地拒绝。拒绝 `store: true`、`background: true`、`previous_response_id`、`conversation` 和上下文管理引用，不静默丢失历史。仅支持函数工具，不开放托管搜索、计算机等专用工具；Codex 用 apply_patch 产生的 `custom_tool_call`／`custom_tool_call_output` 历史项实测可被上游接受，按原样转发（缺 `call_id` 的自定义工具结果仍拒绝）。
 
 River 不限制函数工具数量：官方 [Limits and support](https://docs.river.ai/guides/inference-limits/) 只公布 50 MiB 请求体、图片格式与超时，[Tools](https://docs.river.ai/guides/inference-tools/) 也未给出数量上限，2026-11-12 用生产 Key 直接向 `POST /v1/chat/completions` 发送 176 个 `type=function` 工具（`max_tokens=1`）实测返回 200。适配器因此不再沿用其他适配器的 128 计数上限——DeepSeek Harness 会把内置工具与多个 MCP 工具合并发送，很容易超过 128 个；此前这类请求被本地拦成笼统的 `400 invalid_request`，实际未曾到达上游。数量只受请求体大小、JSON 深度与上游最终校验约束，本层不截断、不丢弃工具；仍逐条校验 `type=function`、函数名非空且不超过 128 字符。
 

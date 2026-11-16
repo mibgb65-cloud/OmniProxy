@@ -74,7 +74,7 @@ func textMessages(raw json.RawMessage) bool {
 		return true
 	}
 	var items []map[string]json.RawMessage
-	if json.Unmarshal(raw, &items) != nil || items == nil || len(items) == 0 || len(items) > 512 {
+	if json.Unmarshal(raw, &items) != nil || items == nil || len(items) == 0 || len(items) > proxy.MaxConversationMessages {
 		return false
 	}
 	for _, item := range items {
@@ -87,9 +87,9 @@ func textMessages(raw json.RawMessage) bool {
 				return false
 			}
 			switch kind {
-			case "function_call", "reasoning":
+			case "function_call", "reasoning", "custom_tool_call":
 				continue
-			case "function_call_output":
+			case "function_call_output", "custom_tool_call_output":
 				// 工具结果必须用非空 call_id 关联到同一段历史里的工具调用：缺少 call_id
 				// 的结果项会让 River 在响应头之后中断连接，只能在本层明确拒绝。
 				if !supportedToolCallID(item["call_id"]) || !supportedContent(item["output"]) {
