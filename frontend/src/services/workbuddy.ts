@@ -27,6 +27,8 @@ export const workbuddyErrorCodes = [
   "login_expired",
   "identity_changed",
   "configuration_changed",
+  "save_failed",
+  "invalid_input",
   "browser_failed",
 ] as const
 export type WorkBuddyErrorCode = (typeof workbuddyErrorCodes)[number] | "operation_failed"

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"omniproxy/internal/application/account"
 	"omniproxy/internal/provider/workbuddyai"
 )
 
@@ -26,6 +27,40 @@ func TestErrorCodeMapsContextBeforeUpstream(t *testing.T) {
 	}
 	if code := errorCode(errors.New("private upstream text"), context.Background()); code != "operation_failed" {
 		t.Fatalf("unknown code = %q", code)
+	}
+}
+
+// 账号层失败必须换算成各自的码：保存失败可重试，版本冲突要刷新，非法输入要重开。
+func TestErrorCodeMapsAccountLayerFailures(t *testing.T) {
+	ctx := context.Background()
+	cases := []struct {
+		name string
+		err  error
+		want string
+	}{
+		{"save", account.ErrWorkBuddySave, "save_failed"},
+		{"conflict", account.ErrConflict, "configuration_changed"},
+		{"invalid", account.ErrInvalidInput, "invalid_input"},
+		{"joined save", errors.Join(account.ErrWorkBuddySave, errors.New("cleanup failed")), "save_failed"},
+	}
+	for _, item := range cases {
+		if code := errorCode(item.err, ctx); code != item.want {
+			t.Fatalf("%s code = %q, want %q", item.name, code, item.want)
+		}
+	}
+}
+
+// 登录在后台线程结束，失败必须交给诊断钩子，且只带阶段与稳定码。
+func TestReportSendsStageAndCode(t *testing.T) {
+	service := &Service{}
+	var message string
+	var args []any
+	service.SetWarn(func(text string, values ...any) {
+		message, args = text, values
+	})
+	service.report("save", "save_failed")
+	if message == "" || len(args) != 6 || args[3] != "save" || args[5] != "save_failed" {
+		t.Fatalf("report = %q %v", message, args)
 	}
 }
 

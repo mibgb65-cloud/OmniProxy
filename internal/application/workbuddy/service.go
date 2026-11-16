@@ -33,6 +33,7 @@ type Service struct {
 	client   *workbuddyai.Client
 	current  *session
 	onChange func()
+	warn     func(message string, args ...any)
 	closed   bool
 
 	quotaMu sync.Mutex
@@ -64,6 +65,24 @@ func (s *Service) OnChange(listener func()) {
 	s.mu.Lock()
 	s.onChange = listener
 	s.mu.Unlock()
+}
+
+// SetWarn 注册失败诊断输出；登录在后台线程结束，调用方只能靠它拿到失败原因。
+// 回调只接收稳定错误码与阶段，不接收令牌或上游原文。
+func (s *Service) SetWarn(listener func(message string, args ...any)) {
+	s.mu.Lock()
+	s.warn = listener
+	s.mu.Unlock()
+}
+
+// report 在登录失败时交给调用方的诊断钩子；没有钩子时静默（测试与单元场景）。
+func (s *Service) report(stage, code string) {
+	s.mu.Lock()
+	listener := s.warn
+	s.mu.Unlock()
+	if listener != nil {
+		listener("WorkBuddy AI sign-in failed", "module", "workbuddy", "stage", stage, "code", code)
+	}
 }
 
 func (s *Service) notify() {

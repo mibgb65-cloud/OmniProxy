@@ -15,6 +15,9 @@ OpenCode 等）按既有路由投影自动可用。
 
 1. **服务商 → WorkBuddy AI → 添加账号**，选择「登录 WorkBuddy AI」。
 2. 浏览器打开腾讯的登录页；完成登录后 OmniProxy 自动轮询取得令牌（最多 5 分钟）。
+   授权页按「桌面客户端来源」处理（带 `version` 与 `loginSessionId`），登录完成后可能提示
+   返回 WorkBuddy 客户端、甚至拉起本机已安装的客户端——**属正常**，登录结果由 OmniProxy
+   的后台轮询自动接收，不需要在客户端里再做任何操作。
 3. 登录成功后后台自动同步一次 `/v3/config` 模型目录；同步完成前该服务商没有可路由模型。
 4. 在**路由**页为需要的模型建规则（或使用同名默认映射），客户端目录随之出现。
 5. 账号卡显示 Credits 额度与「刷新 / 重新登录 / 退出」。
@@ -80,6 +83,8 @@ enterprise meter），展示三种窗口或一种：
 | `busy` / `cancelled` / `login_expired` | 登录会话状态，重新发起登录 |
 | `identity_changed` | 重新登录的账号与已保存账号不一致；换回原账号 |
 | `configuration_changed` | 请求期间账号被修改；重试 |
+| `save_failed` | 浏览器登录已成功，但本地账号没保存（数据库/受保护存储）；直接重试，失败时查磁盘与权限 |
+| `invalid_input` | 登录请求在本机被拒绝（模式或账号不合法）；关掉弹窗重新开始 |
 | `browser_failed` | 系统浏览器打开失败；手动打开登录页 |
 
 ## 安全与合规
@@ -91,9 +96,12 @@ enterprise meter），展示三种窗口或一种：
 
 ## 未验证与未接入
 
-- **未用真实账号验证**：登录、`/v3/config` 目录、Chat 转发、Credits 三窗口均按社区插件
-  `@magpie-community/opencode-workbuddy-auth` 0.2.36 的协议事实实现，尚未真机核对；
-  首次使用请以小额度模型验证。
+- **真实账号验证进度**（2026-11-16，`v2.3.1-beta.15`，用户本人账号）：
+  浏览器登录 → `GET /v2/plugin/auth/token` 取到令牌 → `GET /v2/plugin/login/account`
+  取到身份，这三步在真实账号上已走通（失败点只在本地保存账号，已在 TASK-20261116-018 修复）。
+  **仍未验证**：`/v3/config` 真实目录内容、真实 Chat 转发与计费、Credits 三窗口读数；
+  这些会消耗真实积分，需另行授权后验证。其余协议事实来自社区插件
+  `@magpie-community/opencode-workbuddy-auth` 0.2.36；首次使用请以小额度模型验证。
 - 未接入：国内版 WorkBuddy（`copilot.tencent.com`）及其 Claude 模型的 Messages 路由、
   每日签到（国际版无该接口）、桌面登录文件导入（5.6+ 加密不可读）、API Key 认证、
   免费模型每日 token 窗口、额度参与调度、队列/平衡轮换。
@@ -102,7 +110,8 @@ enterprise meter），展示三种窗口或一种：
 
 ## 相关
 
-- 任务记录：`docs/tasks/active/TASK-20261116-015-workbuddy-ai-subscription-provider.md`
+- 任务记录：`docs/tasks/completed/2026-11/TASK-20261116-015-workbuddy-ai-subscription-provider.md`
+  （接入）、`docs/tasks/active/TASK-20261116-018-workbuddy-login-account-save-fix.md`（登录保存修复）
 - ADR：[ADR-026](../decisions/ADR-026-workbuddy-ai-subscription.md)
 - 代码：`internal/provider/workbuddyai/`、`internal/application/workbuddy/`、
   `internal/application/account/workbuddy.go`、`internal/application/gateway/workbuddy.go`

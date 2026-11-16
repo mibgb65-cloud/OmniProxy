@@ -12,6 +12,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/subscription"
 	"omniproxy/internal/infrastructure/codex"
+	"omniproxy/internal/provider/workbuddyai"
 )
 
 type subscriptionState struct {
@@ -84,11 +85,14 @@ func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.S
 	if input.ProviderID == "builtin_workbuddy_ai" {
 		manager, err := s.workbuddySubscriptionService()
 		if err != nil {
+			s.logWorkBuddyBeginError(err)
 			return subscription.State{}, err
 		}
 		ctx, cancel := subscriptionContext()
 		defer cancel()
-		return manager.Begin(ctx, input)
+		view, err := manager.Begin(ctx, input)
+		s.logWorkBuddyBeginError(err)
+		return view, err
 	}
 	if input.ProviderID == "builtin_google" {
 		manager, err := s.googleSubscriptionService()
@@ -114,6 +118,12 @@ func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.S
 func (s *AppService) logSubscriptionBeginError(err error) {
 	if err != nil && s.log != nil {
 		s.log.Warn("subscription authorization request failed", "module", "subscription", "operation", "begin", "code", subscription.ErrorCode(err))
+	}
+}
+
+func (s *AppService) logWorkBuddyBeginError(err error) {
+	if err != nil && s.log != nil {
+		s.log.Warn("WorkBuddy AI authorization request failed", "module", "workbuddy", "operation", "begin", "code", workbuddyai.ErrorCode(err))
 	}
 }
 

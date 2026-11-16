@@ -4,6 +4,8 @@ export const workbuddyZh = {
   "workbuddy.loginTitle": "登录 WorkBuddy AI",
   "workbuddy.loginDescription": "用浏览器完成 WorkBuddy AI 登录；完成后自动返回 OmniProxy。",
   "workbuddy.loginNote": "令牌保存在本机受保护存储，不会上传。",
+  "workbuddy.loginReturnHint":
+    "浏览器页面登录后可能提示「返回 WorkBuddy 客户端」，属正常现象；登录结果会自动回到 OmniProxy。",
   "quota.workbuddy.title": "WorkBuddy AI Credits",
   "quota.workbuddy.credits": "计划内 Credits",
   "quota.workbuddy.extraCredits": "额外 Credits",
@@ -32,6 +34,9 @@ export const workbuddyZh = {
   "workbuddy.error.login_expired": "登录已超时，请重新登录。",
   "workbuddy.error.identity_changed": "登录身份与原账号不一致，请使用原账号重新登录，或新增账号。",
   "workbuddy.error.configuration_changed": "账号配置已变化，请刷新后重试。",
+  "workbuddy.error.save_failed":
+    "登录已成功，但账号没能保存。请重试；若持续失败，请检查磁盘空间与目录权限。",
+  "workbuddy.error.invalid_input": "这次登录请求在本机被拒绝，请关闭弹窗后重新开始。",
   "workbuddy.error.browser_failed": "未能打开浏览器，请点击“打开官方授权页面”重试。",
   "workbuddy.error.operation_failed": "操作未完成，请检查网络和登录状态后重试。",
 } as const

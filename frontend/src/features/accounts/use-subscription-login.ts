@@ -16,9 +16,11 @@ import {
 export function useSubscriptionLogin(
   scope: { providerId: string; accountId?: string },
   // 常驻挂载（为了退出动画）时关闭查询，避免没打开弹窗就去读订阅会话。
-  options: { enabled?: boolean } = {},
+  // mapError 让按品牌区分的错误字典（如 WorkBuddy）接管启动与操作失败。
+  options: { enabled?: boolean; mapError?: (error: unknown) => string } = {},
 ) {
   const enabled = options.enabled ?? true
+  const mapError = options.mapError ?? subscriptionError
   const client = useQueryClient()
   const [session, setSession] = useState<SubscriptionSession>()
   const [starting, setStarting] = useState(false)
@@ -77,10 +79,10 @@ export function useSubscriptionLogin(
       try {
         await openSubscription(next.id)
       } catch (cause) {
-        if (alive.current) setError(subscriptionError(cause))
+        if (alive.current) setError(mapError(cause))
       }
     } catch (cause) {
-      if (alive.current) setError(subscriptionError(cause))
+      if (alive.current) setError(mapError(cause))
     } finally {
       pending.current = false
       if (alive.current) setStarting(false)
@@ -92,7 +94,7 @@ export function useSubscriptionLogin(
       await openSubscription(view.id)
       setError("")
     } catch (cause) {
-      setError(subscriptionError(cause))
+      setError(mapError(cause))
     }
   }
   const cancel = async () => {
@@ -101,7 +103,7 @@ export function useSubscriptionLogin(
       await cancelSubscription(view.id)
       await client.invalidateQueries({ queryKey: ["subscription-session", view.id] })
     } catch (cause) {
-      setError(subscriptionError(cause))
+      setError(mapError(cause))
     }
   }
   return {
@@ -110,7 +112,7 @@ export function useSubscriptionLogin(
     error:
       error ||
       (resume.isError
-        ? subscriptionError(resume.error)
+        ? mapError(resume.error)
         : query.isError
           ? "operation_failed"
           : view?.errorCode),

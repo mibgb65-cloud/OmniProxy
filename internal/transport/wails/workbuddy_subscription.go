@@ -32,6 +32,12 @@ func (s *AppService) workbuddySubscriptionService() (*workbuddy.Service, error) 
 			return nil, workbuddyai.Failure("credential_unavailable")
 		}
 		manager := workbuddy.New(accounts, nil)
+		// 登录在后台线程结束，失败只能通过这里留下诊断：只记阶段与稳定码。
+		manager.SetWarn(func(message string, args ...any) {
+			if s.log != nil {
+				s.log.Warn(message, args...)
+			}
+		})
 		manager.OnChange(func() {
 			s.subscription.mu.Lock()
 			emit := s.subscription.emit

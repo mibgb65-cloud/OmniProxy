@@ -14,6 +14,10 @@ import (
 // AuthWorkBuddyLogin 是 WorkBuddy AI 订阅账号的认证类型；登录令牌不能伪装成 API Key。
 const AuthWorkBuddyLogin = workbuddyai.AuthMethod
 
+// ErrWorkBuddySave 表示远端登录已成功，但本地保存失败（数据库或受保护存储）。
+// 与「登录失败」区分：用户不需要重新登录，重试即可，因此单独给稳定码。
+var ErrWorkBuddySave = errors.New("account: save workbuddy login")
+
 // protectedWorkBuddyCredential 是受保护存储正文：登录令牌与待清理的旧引用。
 type protectedWorkBuddyCredential struct {
 	workbuddyai.Credentials
@@ -92,10 +96,10 @@ func (s *Service) createWorkBuddyAccount(ctx context.Context, providerID, name s
 		return Item{}, workbuddyai.Failure(workbuddyai.CodeCredentialUnavailable)
 	}
 	stamp := now()
-	_, err = s.db.ExecContext(ctx, `INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at,auth_method,auth_plan,auth_state,auth_account_id) VALUES(?,?,?,?,1,?,?,?,?,?,'authenticated',?)`,
+	_, err = s.db.ExecContext(ctx, `INSERT INTO accounts(id,provider_id,name,credential_ref,enabled,created_at,updated_at,auth_method,auth_plan,auth_state,auth_account_id) VALUES(?,?,?,?,1,?,?,?,?,'authenticated',?)`,
 		id, providerID, name, ref, stamp, stamp, AuthWorkBuddyLogin, cred.Plan, cred.UID)
 	if err != nil {
-		return Item{}, errors.Join(ErrInvalidInput, s.store.Delete(ref))
+		return Item{}, errors.Join(ErrWorkBuddySave, s.store.Delete(ref))
 	}
 	return s.Metadata(ctx, id)
 }
@@ -141,7 +145,7 @@ func (s *Service) writeWorkBuddyCredentials(ctx context.Context, item Item, cred
 	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return Item{}, errors.Join(err, s.store.Delete(ref))
+		return Item{}, errors.Join(ErrWorkBuddySave, s.store.Delete(ref))
 	}
 	defer tx.Rollback()
 	var oldVersion, newVersion string
@@ -168,7 +172,12 @@ func (s *Service) writeWorkBuddyCredentials(ctx context.Context, item Item, cred
 		err = tx.Commit()
 	}
 	if err != nil {
-		return Item{}, errors.Join(ErrConflict, s.store.Delete(ref))
+		// 版本冲突（同一账号被并发改写）保留 ErrConflict 语义，交给界面提示刷新；
+		// 其余数据库失败统一按保存失败处理。
+		if errors.Is(err, ErrConflict) {
+			return Item{}, errors.Join(ErrConflict, s.store.Delete(ref))
+		}
+		return Item{}, errors.Join(ErrWorkBuddySave, s.store.Delete(ref))
 	}
 	item.AuthPlan, item.AuthState, item.UpdatedAt = cred.Plan, "authenticated", stamp
 	if oldRef != "" {

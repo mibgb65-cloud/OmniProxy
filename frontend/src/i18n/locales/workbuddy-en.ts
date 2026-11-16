@@ -6,6 +6,8 @@ export const workbuddyEn = {
     "Complete the WorkBuddy AI sign-in in your browser; OmniProxy resumes automatically when it finishes.",
   "workbuddy.loginNote":
     "The token is stored in this device's protected storage and is never uploaded.",
+  "workbuddy.loginReturnHint":
+    "The browser page may offer to return to the WorkBuddy app after signing in — that is normal; OmniProxy receives the result automatically.",
   "quota.workbuddy.title": "WorkBuddy AI Credits",
   "quota.workbuddy.credits": "Plan credits",
   "quota.workbuddy.extraCredits": "Extra credits",
@@ -42,6 +44,10 @@ export const workbuddyEn = {
   "workbuddy.error.identity_changed":
     "The signed-in identity differs from this account. Sign in with the original account or add a new one.",
   "workbuddy.error.configuration_changed": "The account configuration changed. Refresh and retry.",
+  "workbuddy.error.save_failed":
+    "The sign-in worked but the account could not be saved. Retry; if it keeps failing, check disk space and permissions.",
+  "workbuddy.error.invalid_input":
+    "The sign-in request was rejected locally. Close this dialog and start again.",
   "workbuddy.error.browser_failed":
     "The browser could not be opened. Use the official authorization page to retry.",
   "workbuddy.error.operation_failed":

@@ -14,6 +14,7 @@ import { SubscriptionBrowserLoginCard } from "./subscription-browser-login-card"
 import { subscriptionLoginConfig } from "./subscription-login-config"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { subscriptionInProgress } from "../../services/subscription"
+import { workbuddyError } from "../../services/workbuddy"
 
 export function SubscriptionLoginDialog({
   providerId,
@@ -65,8 +66,11 @@ function LoginContent({
   const id = useId()
   const [name, setName] = useState("")
   const [selectedMode, setSelectedMode] = useState("browser")
-  const login = useSubscriptionLogin({ providerId, accountId }, { enabled })
   const config = subscriptionLoginConfig(providerId)
+  const login = useSubscriptionLogin(
+    { providerId, accountId },
+    { enabled, mapError: config.kind === "workbuddy_ai" ? workbuddyError : undefined },
+  )
   // Google 的官方组件只接受浏览器模式（后端 Begin 校验 mode === "browser"），
   // 因此设备码只在 OpenAI 上提供；WorkBuddy 用单张浏览器授权卡片说明方式。
   const showMethod = config.kind === "openai"
@@ -125,7 +129,9 @@ function LoginContent({
             {showMethod && !busy && !complete ? (
               <SubscriptionLoginMethod id={id} value={mode} onChange={setSelectedMode} />
             ) : null}
-            {showBrowserCard && !busy && !complete ? <SubscriptionBrowserLoginCard /> : null}
+            {showBrowserCard && !busy && !complete ? (
+              <SubscriptionBrowserLoginCard hintKey={config.browserHintKey} />
+            ) : null}
             {!accountId && !complete && !busy ? (
               <div className="space-y-1.5">
                 <label htmlFor={id} className="text-sm font-medium">

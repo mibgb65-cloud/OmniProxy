@@ -2,6 +2,7 @@ package workbuddy
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"time"
 	"unicode"
@@ -66,10 +67,13 @@ func (s *Service) Begin(ctx context.Context, input subscription.Input) (subscrip
 func (s *Service) complete(ctx context.Context, job *session, state string) {
 	defer close(job.done)
 	defer job.cancel()
+	// stage 只用于失败诊断：登录在后台线程结束，界面之外必须留下「卡在哪一步」。
+	stage := "token"
 	var item account.Item
 	var err error
 	token, err := s.client.WaitForToken(ctx, state)
 	if err == nil {
+		stage = "identity"
 		s.progress(job, "exchanging")
 		operation, cancel := context.WithTimeout(ctx, operationTimeout)
 		var identity workbuddyai.Identity
@@ -85,6 +89,7 @@ func (s *Service) complete(ctx context.Context, job *session, state string) {
 				}
 			}
 			if err == nil {
+				stage = "save"
 				s.progress(job, "saving")
 				s.ops.Lock()
 				if ctx.Err() != nil {
@@ -99,6 +104,7 @@ func (s *Service) complete(ctx context.Context, job *session, state string) {
 	status, code := "completed", ""
 	if err != nil {
 		status, code = "failed", errorCode(err, ctx)
+		s.report(stage, code)
 	}
 	s.mu.Lock()
 	job.view.State, job.view.ErrorCode, job.view.URL = status, code, ""
@@ -119,6 +125,15 @@ func errorCode(err error, ctx context.Context) string {
 	}
 	if code := workbuddyai.ErrorCode(err); code != "" {
 		return code
+	}
+	// 账号与凭据层的错误没有适配器码；按语义换算，避免全部塌成通用失败。
+	switch {
+	case errors.Is(err, account.ErrWorkBuddySave):
+		return "save_failed"
+	case errors.Is(err, account.ErrConflict):
+		return "configuration_changed"
+	case errors.Is(err, account.ErrInvalidInput):
+		return "invalid_input"
 	}
 	return "operation_failed"
 }

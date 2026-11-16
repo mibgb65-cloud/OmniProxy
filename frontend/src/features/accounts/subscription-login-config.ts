@@ -17,6 +17,8 @@ export type SubscriptionLoginConfig = {
    * `mode === "browser"`，WorkBuddy 显示单张浏览器授权卡片。
    */
   deviceCode: boolean
+  /** 浏览器授权卡片额外的一句说明；用于解释上游页面的既有行为。 */
+  browserHintKey?: TranslationKey
 }
 
 const configs: Record<SubscriptionLoginKind, SubscriptionLoginConfig> = {
@@ -46,6 +48,7 @@ const configs: Record<SubscriptionLoginKind, SubscriptionLoginConfig> = {
     storageKey: "workbuddy.loginNote",
     addKey: "workbuddy.loginTitle",
     deviceCode: false,
+    browserHintKey: "workbuddy.loginReturnHint",
   },
 }
 
