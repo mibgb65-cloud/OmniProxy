@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261116-022](../tasks/completed/2026-11/TASK-20261116-022-workbuddy-manual-model-sync-fix.md) 手动同步模型失败：路由 → 模型目录选中 WorkBuddy AI 账号点「同步官方模型」永远报「同步失败」，但自动同步其实已写入 25 条模型（令牌 `GET /v3/config` 也是 200）。根因是 `AppService.modelCatalog()` 只调用了 `SetGoogleSubscription`，`modelcatalog.Sync` 的 WorkBuddy 分支因 `workbuddyAuth == nil` 直接返回 `unavailable`；自动同步用的是另一套已接线服务，于是「模型在库里、按钮一直失败」。现在统一走 `wireModelCatalog` 接线，失败时底层稳定码写日志（界面仍是一句通用提示）。目标版本 `v2.3.1-beta.18`。
+
+本地构建：[TASK-20261116-023](../tasks/active/TASK-20261116-023-build-local-v2.3.1-beta.18.md) 目标 `v2.3.1-beta.18`，内容为上述手动同步修复；构建中，产物大小与 SHA256 见任务记录。
+
 已修复：[TASK-20261116-020](../tasks/completed/2026-11/TASK-20261116-020-workbuddy-credits-request-fix.md) WorkBuddy AI Credits 读不出来（账号卡显示 `—` 并报通用失败）：计费接口是 `POST /billing/meter/get-user-resource-summary` + 空 JSON 正文 + 短 UA，我们发了 `GET`，被网关 404；而 `proxy.Error` 的文本是 `gateway: <code>`，前端只认 `workbuddy_ai:`／`subscription:` 前缀，于是塌成「操作未完成」。真实账号核对（Free 计划）：`GET` → 404、`POST {}` → 200（`plan_base 100`、`TotalCredits "100"`、`SubscriptionPackageName "Free"`）；目录侧 `/v3/config` 已同步 25 条真实模型。现已按官方客户端形态请求、套餐名取自计费接口并显示在额度卡、三层错误码都能识别。目标版本 `v2.3.1-beta.17`。
 
 本地构建：[TASK-20261116-021](../tasks/completed/2026-11/TASK-20261116-021-build-local-v2.3.1-beta.17.md) 已产出 `v2.3.1-beta.17` Windows amd64 生产安装包，内容为 WorkBuddy AI Credits 修复（TASK-20261116-020，`bf809c3e`）：计费接口改为官方客户端形态（`POST {}` + 计费头集）、套餐名取自 `SubscriptionPackageName`、前端识别 `gateway:` 前缀错误码、额度卡显示套餐名。安装器 21,323,209 bytes，SHA256 `b2e63233fb5e0ce8581963e500b68c8838ac87d734ac981d155e7d2a200068f0`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无新增数据库迁移。
