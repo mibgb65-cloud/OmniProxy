@@ -1,8 +1,8 @@
-# TASK-20261116-010: 移除 Codex 无法表达的 include（output.encrypted_content）修复 River 流中断
+﻿# TASK-20261116-010: 移除 Codex 无法表达的 include（output.encrypted_content）修复 River 流中断
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -222,7 +222,7 @@ task verify → EXIT=0（155 文件／948 项前端测试、全部 Go 包、Wind
 ## Commit
 
 ```text
-Not committed by Agent.
+3979c383 fix(gateway): 移除 Codex 无法表达的 include 取值，修复 River 流中断
 ```
 
 ---

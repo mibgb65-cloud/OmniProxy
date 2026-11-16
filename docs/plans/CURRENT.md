@@ -1,8 +1,10 @@
-﻿# Current Development Status
+# Current Development Status
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261116-010](../tasks/active/TASK-20261116-010-codex-unsupported-includes.md) Codex 0.169 起选择 River 模型每轮必失败（`0c372b1` 之后仍复现）：新内核默认请求 `include: ["reasoning.encrypted_content","output.encrypted_content"]`，River 收到 `output.encrypted_content` 会在 `200` 与 SSE 开头之后断开连接。抓到桌面端真实正文（102,957 字节）后逐项对照定位；网关现在在 Codex 入口改走协议路径时移除该取值并记 `codex unsupported includes dropped`（保留 `reasoning.encrypted_content`）。同一正文在新构建隔离实例上两次 `200` + `response.completed`。目标版本 `v2.3.1-beta.12`。
+本地构建：[TASK-20261116-011](../tasks/active/TASK-20261116-011-build-local-v2.3.1-beta.12.md) 已产出 `v2.3.1-beta.12` Windows amd64 生产安装包，内容为 Codex 0.169 `include` 取值修复（TASK-20261116-010，`3979c383`，并继承 beta.11 的孤儿工具结果与 beta.12 的 `response.incomplete` 处理）：安装器 21,097,161 bytes，SHA256 `e04b821fdc575548b687779c56ba4b85a0bd388d761baa4be8ed449b4461aa62`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试原会话。
+
+已修复：[TASK-20261116-010](../tasks/completed/2026-11/TASK-20261116-010-codex-unsupported-includes.md) Codex 0.169 起选择 River 模型每轮必失败（`0c372b1` 之后仍复现）：新内核默认请求 `include: ["reasoning.encrypted_content","output.encrypted_content"]`，River 收到 `output.encrypted_content` 会在 `200` 与 SSE 开头之后断开连接。抓到桌面端真实正文（102,957 字节）后逐项对照定位；网关现在在 Codex 入口改走协议路径时移除该取值并记 `codex unsupported includes dropped`（保留 `reasoning.encrypted_content`）。同一正文在新构建隔离实例上两次 `200` + `response.completed`。目标版本 `v2.3.1-beta.12`。
 
 本地构建：[TASK-20261116-009](../tasks/completed/2026-11/TASK-20261116-009-build-local-v2.3.1-beta.11.md) 已产出 `v2.3.1-beta.11` Windows amd64 生产安装包，内容为 Codex 桌面端 + River 流中断修复（TASK-20261116-008，`69c372b1`）：安装器 21,096,005 bytes，SHA256 `563e0f2cbfe242c2cb374f6266b01b1b2d72e58ee00f8dd8517ee76a58c5c3ff`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可重试原会话。
 
