@@ -13,6 +13,7 @@ vi.mock("../../services/omniproxy", async (original) => ({
   ...(await original<typeof import("../../services/omniproxy")>()),
   listAccounts: vi.fn(),
   listProviders: vi.fn(),
+  getDuMatePoints: vi.fn(),
 }))
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),

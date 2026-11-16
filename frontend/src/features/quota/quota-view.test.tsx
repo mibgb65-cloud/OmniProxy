@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { listAccounts, listProviders } from "../../services/omniproxy"
+import { getDuMatePoints, listAccounts, listProviders } from "../../services/omniproxy"
 import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/subscription"
 import { readAccountBalance } from "../../services/balance"
 import { readAccountTokenUsage } from "../../services/activity"
@@ -12,12 +12,20 @@ import {
 import { googleQuotaFixture } from "../google/google-quota-test-helpers"
 import { useUIStore } from "../../stores/ui-store"
 import { selectOption } from "../../test/select-option"
-import { renderQuota, resetQuotaServices, quota, accounts, providers } from "./quota-test-helpers"
+import {
+  renderQuota,
+  resetQuotaServices,
+  quota,
+  accounts,
+  providers,
+  dumatePoints,
+} from "./quota-test-helpers"
 
 vi.mock("../../services/omniproxy", async (original) => ({
   ...(await original<typeof import("../../services/omniproxy")>()),
   listAccounts: vi.fn(),
   listProviders: vi.fn(),
+  getDuMatePoints: vi.fn(),
 }))
 vi.mock("../../services/subscription", async (original) => ({
   ...(await original<typeof import("../../services/subscription")>()),
@@ -146,6 +154,58 @@ describe("quota overview", () => {
     expect(card.queryByText(/尚未接入/)).not.toBeInTheDocument()
     expect(readAccountBalance).toHaveBeenCalledExactlyOnceWith("howtofix-one")
     expect(readAccountTokenUsage).toHaveBeenCalledWith("howtofix-one")
+  })
+
+  it("shows DuMate official points together with locally recorded token usage", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0]!, id: "builtin_dumate", kind: "dumate", name: "百度搭子 DuMate" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      {
+        ...accounts[3]!,
+        id: "dumate-one",
+        providerId: "builtin_dumate",
+        name: "一口鲜特卤",
+        authMethod: "dumate_cookie",
+        authState: "authenticated",
+      },
+    ])
+    vi.mocked(getDuMatePoints).mockResolvedValue(dumatePoints)
+    renderQuota()
+    await ready()
+    // 积分来自官方控制台，Token 用量来自本机记录，两者同卡分区且不换算。
+    const card = within((await screen.findByText("60 积分")).closest('[data-slot="card"]')!)
+    expect(card.getByText("可用积分")).toBeInTheDocument()
+    expect(card.getByText("已用 / 总量")).toBeInTheDocument()
+    expect(card.getByText("40 / 100")).toBeInTheDocument()
+    expect(card.getByText("Token 用量")).toBeInTheDocument()
+    expect(card.getByLabelText("1,200")).toHaveTextContent("1.2K")
+    expect(card.getByText("额度／余额充足")).toBeInTheDocument()
+    expect(card.queryByText("暂不支持")).not.toBeInTheDocument()
+    expect(card.queryByText(/尚未接入/)).not.toBeInTheDocument()
+    expect(getDuMatePoints).toHaveBeenCalledExactlyOnceWith("dumate-one")
+  })
+
+  it("keeps DuMate points unqueried when the login state needs re-import", async () => {
+    vi.mocked(listProviders).mockResolvedValue([
+      { ...providers[0]!, id: "builtin_dumate", kind: "dumate", name: "百度搭子 DuMate" },
+    ])
+    vi.mocked(listAccounts).mockResolvedValue([
+      {
+        ...accounts[3]!,
+        id: "dumate-expired",
+        providerId: "builtin_dumate",
+        name: "过期的搭子",
+        authMethod: "dumate_cookie",
+        authState: "reauth_required",
+      },
+    ])
+    renderQuota()
+    await waitFor(() => expect(screen.getByText("过期的搭子")).toBeInTheDocument())
+    const card = within(screen.getByText("过期的搭子").closest('[data-slot="card"]')!)
+    expect(card.getByText("需要登录")).toBeInTheDocument()
+    expect(card.getByText("请进入账号详情重新登录后查询额度。")).toBeInTheDocument()
+    expect(getDuMatePoints).not.toHaveBeenCalled()
   })
 
   it("queries Kimi's regional balance, counts exhaustion and skips unconfirmed platforms", async () => {

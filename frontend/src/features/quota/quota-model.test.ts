@@ -115,6 +115,76 @@ describe("quota overview model", () => {
       quotaSummary([makeQuotaEntry(item!, { ...base, balance: howtofix("1", true) }, now)]),
     ).toMatchObject({ monitored: 1, known: 1 })
   })
+  it("treats DuMate login accounts as a points resource with three query states", () => {
+    const dumateProvider = {
+      ...providers[0]!,
+      id: "builtin_dumate",
+      kind: "dumate",
+      name: "百度搭子 DuMate",
+    }
+    const dumateAccount = {
+      ...accounts[3]!,
+      id: "dumate-one",
+      providerId: "builtin_dumate",
+      authMethod: "dumate_cookie",
+      authState: "authenticated",
+    }
+    const [item] = describeQuotaAccounts([dumateAccount], [dumateProvider])
+    expect(item).toMatchObject({ kind: "dumate_points", canQuery: true })
+    const points = (remaining: number) => ({
+      checkinIssued: true,
+      checkinDays: 3,
+      totalPoints: 100,
+      usedPoints: 100 - remaining,
+      remainingPoints: remaining,
+      checkinKnown: true,
+    })
+    const live = makeQuotaEntry(
+      item!,
+      { ...base, dumate: { state: "live", fetchedAt: "2026-10-09T00:00:00Z", points: points(60) } },
+      now,
+    )
+    expect(live).toMatchObject({ status: "normal", fetchedAt: "2026-10-09T00:00:00Z" })
+    expect(
+      makeQuotaEntry(item!, { ...base, dumate: { state: "live", points: points(0) } }, now).status,
+    ).toBe("exhausted")
+    // 控制台暂时失败但有保留快照：只能算待刷新，不能当成当前确认结果。
+    expect(
+      makeQuotaEntry(
+        item!,
+        {
+          ...base,
+          dumate: {
+            state: "stale",
+            errorCode: "console_unavailable",
+            fetchedAt: "2026-10-09T00:00:00Z",
+            points: points(60),
+          },
+        },
+        now,
+      ).status,
+    ).toBe("stale")
+    expect(
+      makeQuotaEntry(
+        item!,
+        { ...base, dumate: { state: "unavailable", errorCode: "console_unavailable" } },
+        now,
+      ).status,
+    ).toBe("error")
+    expect(makeQuotaEntry(item!, { ...base, pending: true }, now).status).toBe("pending")
+    expect(
+      quotaSummary([
+        makeQuotaEntry(item!, { ...base, dumate: { state: "live", points: points(60) } }, now),
+      ]),
+    ).toMatchObject({ monitored: 1, known: 1 })
+    // 登录态失效时不查询，状态为需要登录而不是零积分。
+    const [expired] = describeQuotaAccounts(
+      [{ ...dumateAccount, authState: "reauth_required" }],
+      [dumateProvider],
+    )
+    expect(expired).toMatchObject({ kind: "dumate_points", canQuery: false })
+    expect(makeQuotaEntry(expired!, base, now).status).toBe("unauthenticated")
+  })
   it("does not report zero exhaustion without known results and filters identity/provider/status", () => {
     const pending = makeQuotaEntry(items[0]!, { ...base, pending: true }, now)
     expect(quotaSummary([pending])).toMatchObject({ exhausted: null, uncertain: 1 })

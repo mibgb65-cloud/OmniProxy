@@ -10,6 +10,7 @@ import { subscriptionError } from "../../services/subscription"
 import { SubscriptionQuotaRow } from "../accounts/subscription-quota"
 import { AccountUsagePanel } from "../accounts/account-usage-panel"
 import { quotaWindows, type QuotaEntry } from "./quota-model"
+import { DuMateQuotaResource } from "./dumate-quota-resource"
 import { GoogleQuotaValues } from "../google/google-quota-values"
 import { GoogleSubscriptionModels } from "../google/google-subscription-models"
 
@@ -40,6 +41,7 @@ export function QuotaResource({ entry, now }: { entry: QuotaEntry; now: number }
     return <MiniMaxResource account={entry.account} />
   if (entry.kind === "mimo_plan") return <MiMoPlanResource account={entry.account} />
   if (entry.kind === "step_plan") return <StepFunPlanResource account={entry.account} />
+  if (entry.kind === "dumate_points") return <DuMateQuotaResource entry={entry} />
   if (entry.kind === "unsupported") {
     return (
       <div className="bg-muted/20 space-y-3 rounded-xl border p-3">

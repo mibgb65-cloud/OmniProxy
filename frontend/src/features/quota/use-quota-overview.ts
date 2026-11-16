@@ -1,5 +1,6 @@
 import { miniMaxQuotaOptions } from "../accounts/use-minimax-quota"
 import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
+import { duMatePointsOptions } from "../dumate/use-dumate"
 import { useQueries, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useAccounts } from "../accounts/use-accounts"
@@ -40,6 +41,14 @@ export function useQuotaOverview() {
     queries: minimaxPlans.map((item) => miniMaxQuotaOptions(item.account)),
   })
   const balances = items.filter((item) => item.kind === "balance")
+  // 未登录或需重新导入的 DuMate 账号不发起控制台查询；其余与账号页共用积分查询键。
+  const dumateAccounts = items.filter((item) => item.kind === "dumate_points")
+  const dumateQueries = useQueries({
+    queries: dumateAccounts.map((item) => ({
+      ...duMatePointsOptions(item.account.id),
+      enabled: item.canQuery,
+    })),
+  })
   const subscriptionQueries = useQueries({
     queries: subscriptions.map((item) => subscriptionQuotaOptions(item.account)),
   })
@@ -84,12 +93,16 @@ export function useQuotaOverview() {
   const minimaxById = new Map(
     minimaxPlans.map((item, index) => [item.account.id, minimaxQueries[index]]),
   )
+  const dumateById = new Map(
+    dumateAccounts.map((item, index) => [item.account.id, dumateQueries[index]]),
+  )
   const entries = items.map((item) => {
     const googleQuery = googleById.get(item.account.id)
     const minimaxQuery = minimaxById.get(item.account.id)
     const quotaQuery = subscriptionById.get(item.account.id)
     const balanceQuery = balanceById.get(item.account.id)
-    const query = googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery
+    const dumateQuery = dumateById.get(item.account.id)
+    const query = googleQuery ?? minimaxQuery ?? quotaQuery ?? balanceQuery ?? dumateQuery
     // 瞬时失败沿用上次成功结果：错误置空，值标为本地留存，卡片因此显示“已保留上次获取的信息”。
     // 判定时刻取失败发生的时刻（errorUpdatedAt），避免在渲染期读时钟。
     const google = retainQuota({
@@ -118,7 +131,9 @@ export function useQuotaOverview() {
             ? { ...subscription.data, fromCache: true }
             : subscription.data,
         balance: balanceQuery?.data,
-        pending: query?.isPending ?? false,
+        dumate: dumateQuery?.data,
+        // 停用查询（例如未登录的 DuMate）不算「正在读取」，避免空白卡片一直显示占位。
+        pending: item.canQuery && (query?.isPending ?? false),
         fetching: query?.isFetching ?? false,
         error: retained ? null : (query?.error ?? null),
         refresh: item.canQuery && query ? () => query.refetch({ cancelRefetch: false }) : undefined,

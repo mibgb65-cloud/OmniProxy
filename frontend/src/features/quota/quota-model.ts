@@ -1,7 +1,7 @@
 import type { MiniMaxQuota } from "../../services/minimax"
 import type { GoogleSubscriptionQuota } from "../../services/google-subscription"
 import { googleQuotaState } from "../google/google-quota-model"
-import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
+import type { AccountItem, DuMatePoints, ProviderConfiguration } from "../../services/omniproxy"
 import type { AccountBalanceInfo } from "../../services/balance"
 import type { SubscriptionQuota } from "../../services/subscription"
 import { accountDisplayName } from "../accounts/account-display"
@@ -29,6 +29,7 @@ export type QuotaAccount = {
     | "mimo_plan"
     | "kimi_coding"
     | "minimax_plan"
+    | "dumate_points"
     | "unsupported"
   canQuery: boolean
 }
@@ -37,6 +38,7 @@ export type QuotaSnapshot = {
   minimax?: MiniMaxQuota
   quota?: SubscriptionQuota
   balance?: AccountBalanceInfo
+  dumate?: DuMatePoints
   pending: boolean
   fetching: boolean
   error: unknown
@@ -66,21 +68,23 @@ export function describeQuotaAccounts(
               account.minimax?.billingMode === "subscription" &&
               ["cn", "global"].includes(account.minimax.region)
             ? "minimax_plan"
-            : provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
-              ? "step_plan"
-              : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
-                ? "balance"
-                : provider?.kind === "openai" && account.authMethod === "subscription_login"
-                  ? "subscription"
-                  : (provider?.kind === "deepseek" ||
-                        provider?.kind === "howtofix" ||
-                        (provider?.kind === "kimi" &&
-                          ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
-                      (!account.authMethod || account.authMethod === "api_key")
-                    ? "balance"
-                    : provider?.kind === "google" && account.authMethod === "api_key"
-                      ? "google"
-                      : "unsupported"
+            : provider?.kind === "dumate" && account.authMethod === "dumate_cookie"
+              ? "dumate_points"
+              : provider?.kind === "stepfun" && account.stepfun?.billingMode === "step_plan"
+                ? "step_plan"
+                : provider?.kind === "stepfun" && account.stepfun?.billingMode === "payg"
+                  ? "balance"
+                  : provider?.kind === "openai" && account.authMethod === "subscription_login"
+                    ? "subscription"
+                    : (provider?.kind === "deepseek" ||
+                          provider?.kind === "howtofix" ||
+                          (provider?.kind === "kimi" &&
+                            ["cn", "global"].includes(account.kimi?.region ?? ""))) &&
+                        (!account.authMethod || account.authMethod === "api_key")
+                      ? "balance"
+                      : provider?.kind === "google" && account.authMethod === "api_key"
+                        ? "google"
+                        : "unsupported"
     if (provider?.kind === "google" && account.authMethod === "subscription_login")
       kind = "google_subscription"
     const canQuery =
@@ -89,6 +93,7 @@ export function describeQuotaAccounts(
       kind !== "step_plan" &&
       kind !== "mimo_plan" &&
       kind !== "kimi_coding" &&
+      (kind !== "dumate_points" || account.authState === "authenticated") &&
       (kind !== "google_subscription" || account.authState === "authenticated") &&
       !(
         kind === "subscription" &&
@@ -137,6 +142,19 @@ export function quotaEntryStatus(
     if (windows.length === 0 || windows.some((w) => w.status === "unknown")) return "unknown"
     if (windows.some((w) => w.resetsAt && Date.parse(w.resetsAt) <= now)) return "stale"
     return windows.some((w) => w.remainingPercent === 0) ? "exhausted" : "normal"
+  }
+  if (item.kind === "dumate_points") {
+    if (!item.canQuery) return "unauthenticated"
+    // 积分查询带自己的三态：stale 是控制台暂时失败但保留期内有成功快照，
+    // 不能当成当前确认结果；unavailable 表示没有任何可用数据。
+    if (snapshot.dumate) {
+      if (snapshot.dumate.state === "unavailable") return "error"
+      if (snapshot.dumate.state === "stale") return "stale"
+      const remaining = snapshot.dumate.points?.remainingPoints
+      return remaining === undefined ? "unknown" : remaining > 0 ? "normal" : "exhausted"
+    }
+    if (snapshot.error) return "error"
+    return snapshot.pending ? "pending" : "unknown"
   }
   if (item.kind === "unsupported") return "unsupported"
   if (
@@ -193,6 +211,7 @@ export function makeQuotaEntry(
       snapshot.minimax?.fetchedAt ??
       snapshot.quota?.fetchedAt ??
       snapshot.balance?.fetchedAt ??
+      snapshot.dumate?.fetchedAt ??
       "",
   }
 }

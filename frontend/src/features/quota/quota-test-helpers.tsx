@@ -11,9 +11,11 @@ import type { ReactNode } from "react"
 import { vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import {
+  getDuMatePoints,
   listAccounts,
   listProviders,
   type AccountItem,
+  type DuMatePoints,
   type ProviderConfiguration,
 } from "../../services/omniproxy"
 import { readSubscriptionQuota, type SubscriptionQuota } from "../../services/subscription"
@@ -90,9 +92,26 @@ export const balance: AccountBalanceInfo = {
   fetchedAt: "2026-10-09T00:00:00Z",
 }
 
+export const dumatePoints: DuMatePoints = {
+  state: "live",
+  fetchedAt: "2026-10-09T00:00:00Z",
+  points: {
+    checkinIssued: true,
+    checkinDays: 3,
+    totalPoints: 100,
+    usedPoints: 40,
+    remainingPoints: 60,
+    expiringAt: "2099-11-01T00:00:00Z",
+    expiringPoints: 20,
+    checkinKnown: true,
+  },
+}
+
 export function resetQuotaServices() {
   vi.mocked(listAccounts).mockResolvedValue(accounts)
   vi.mocked(listProviders).mockResolvedValue(providers)
+  // DuMate 积分查询与账号页共用同一查询键，默认给一份实时成功结果。
+  vi.mocked(getDuMatePoints).mockResolvedValue(dumatePoints)
   // 未接入额度查询的账号改用本机留存用量，调用方需要在测试文件中 mock 该服务。
   vi.mocked(readAccountTokenUsage).mockResolvedValue({
     inputTokens: "1200",

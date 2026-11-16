@@ -4,6 +4,7 @@ import { accountBalanceOptions } from "../accounts/use-account-balance"
 import { subscriptionQuotaOptions } from "../accounts/use-subscription-quota"
 import { retainQuota } from "../accounts/quota-retention"
 import { googleSubscriptionQuotaOptions } from "../google/use-google-subscription-quota"
+import { duMatePointsOptions } from "../dumate/use-dumate"
 import { describeQuotaAccounts, makeQuotaEntry, quotaSummary } from "../quota/quota-model"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 
@@ -34,6 +35,13 @@ export function useDashboardResources(
   const balanceQueries = useQueries({
     queries: balances.map((item) => ({ ...accountBalanceOptions(item.account), enabled: false })),
   })
+  const dumateAccounts = items.filter((item) => item.kind === "dumate_points")
+  const dumateQueries = useQueries({
+    queries: dumateAccounts.map((item) => ({
+      ...duMatePointsOptions(item.account.id),
+      enabled: false,
+    })),
+  })
   const quotaById = new Map(subscriptions.map((item, index) => [item.account.id, quotas[index]]))
   const googleById = new Map(
     googleSubscriptions.map((item, index) => [item.account.id, googleQueries[index]]),
@@ -41,11 +49,15 @@ export function useDashboardResources(
   const balanceById = new Map(
     balances.map((item, index) => [item.account.id, balanceQueries[index]]),
   )
+  const dumateById = new Map(
+    dumateAccounts.map((item, index) => [item.account.id, dumateQueries[index]]),
+  )
   const entries = items.map((item) => {
     const google = googleById.get(item.account.id)
     const quota = quotaById.get(item.account.id)
     const balance = balanceById.get(item.account.id)
-    const query = google ?? quota ?? balance
+    const dumate = dumateById.get(item.account.id)
+    const query = google ?? quota ?? balance ?? dumate
     // 首页只订阅共享缓存；瞬时失败同样沿用上次成功结果，避免把旧额度计为当前确认值。
     // 判定时刻取失败发生的时刻（errorUpdatedAt），避免在渲染期读时钟。
     const retainedQuota = retainQuota({
@@ -64,6 +76,7 @@ export function useDashboardResources(
             ? { ...retainedQuota.data, fromCache: true }
             : retainedQuota.data,
         balance: balance?.data,
+        dumate: dumate?.data,
         pending: !!query?.isPending && !!query?.isFetching,
         fetching: query?.isFetching ?? false,
         error: retainedQuota.retained ? null : (query?.error ?? null),
@@ -92,7 +105,8 @@ export function useDashboardResources(
   return {
     entries,
     summary: quotaSummary(entries),
-    checked: entries.filter((item) => item.googleQuota || item.quota || item.balance).length,
+    checked: entries.filter((item) => item.googleQuota || item.quota || item.balance || item.dumate)
+      .length,
     lastChecked: dates.length ? new Date(Math.max(...dates)).toISOString() : "",
     busy,
     result,

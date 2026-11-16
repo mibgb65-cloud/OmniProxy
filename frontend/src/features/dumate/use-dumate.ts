@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   checkinDuMate,
   getDuMatePoints,
@@ -11,14 +11,21 @@ import {
 
 const pointsKey = (accountId: string) => ["dumate-points", accountId] as const
 
+/** 配额页与账号页共用同一查询键，避免同一账号重复访问控制台；失败不重试。 */
+export function duMatePointsOptions(accountId: string) {
+  return queryOptions({
+    queryKey: pointsKey(accountId),
+    queryFn: () => getDuMatePoints(accountId),
+    staleTime: 60_000,
+    retry: false,
+  })
+}
+
 /** 积分只在账号启用且列表需要时查询；失败不重试，按 state 展示。 */
 export function useDuMatePoints(account: AccountItem, enabled = true) {
   return useQuery({
-    queryKey: pointsKey(account.id),
-    queryFn: () => getDuMatePoints(account.id),
+    ...duMatePointsOptions(account.id),
     enabled: enabled && account.enabled,
-    staleTime: 60_000,
-    retry: false,
   })
 }
 
