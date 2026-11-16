@@ -1,4 +1,4 @@
-# TASK-20261116-014: 放开 Responses 输入条数上限，修复长会话 Codex 被本地拒成 unsupported_content
+﻿# TASK-20261116-014: 放开 Responses 输入条数上限，修复长会话 Codex 被本地拒成 unsupported_content
 
 ## Status
 
@@ -215,7 +215,7 @@ task verify → EXIT=0（155 文件／948 项前端测试、全部 Go 包、Wind
 ## Commit
 
 ```text
-Not committed by Agent.
+8f70d45c fix(provider): 放开 Responses 输入条数上限并放行 custom 工具历史
 ```
 
 ---
