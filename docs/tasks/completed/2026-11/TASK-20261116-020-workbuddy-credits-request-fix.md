@@ -161,7 +161,7 @@ POST /billing/meter/get-user-resource-summary {} → 200
 
 ## Commit
 
-Not committed by Agent.
+bf809c3e fix(provider): 修复 WorkBuddy AI Credits 读取并识别边界错误码
 
 ---
 
