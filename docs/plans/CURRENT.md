@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已实现：[TASK-20261116-015](../tasks/active/TASK-20261116-015-workbuddy-ai-subscription-provider.md) 新增第十五个内置服务商 WorkBuddy AI（腾讯 CodeBuddy 计划国际版，迁移 050／051）：浏览器登录的订阅账号（`workbuddy_login`）、DPAPI 令牌与单飞续期（续期在同一事务重绑目录版本，不会再让模型静默消失）、按账号 `/v3/config` 的后台目录同步、Chat 原生流式透传与非流式／Responses／Messages 网关聚合、Credits 三窗口加预付余额额度（只展示不调度）、账号页登录入口与配额页分区；`task verify` 全绿（后端 `go test . ./internal/...`，前端 156 files／961 tests）。真机登录与真实调用未做（消耗积分，需用户授权），协议事实未经真实账号验证，标注见 ADR-026 与 `docs/product/WORKBUDDY.md`。
+已实现：[TASK-20261116-015](../tasks/completed/2026-11/TASK-20261116-015-workbuddy-ai-subscription-provider.md) 新增第十五个内置服务商 WorkBuddy AI（腾讯 CodeBuddy 计划国际版，迁移 050／051）：浏览器登录的订阅账号（`workbuddy_login`）、DPAPI 令牌与单飞续期（续期在同一事务重绑目录版本，不会再让模型静默消失）、按账号 `/v3/config` 的后台目录同步、Chat 原生流式透传与非流式／Responses／Messages 网关聚合、Credits 三窗口加预付余额额度（只展示不调度）、账号页登录入口与配额页分区；`task verify` 全绿（后端 `go test . ./internal/...`，前端 156 files／961 tests）。真机登录与真实调用未做（消耗积分，需用户授权），协议事实未经真实账号验证，标注见 ADR-026 与 `docs/product/WORKBUDDY.md`。
 
 本地构建：[TASK-20261116-016](../tasks/completed/2026-11/TASK-20261116-016-build-local-v2.3.1-beta.14.md) 已产出 `v2.3.1-beta.14` Windows amd64 生产安装包，内容为 Responses 输入条数上限与 custom 工具历史修复（TASK-20261116-014，`8f70d45c`，并继承 beta.13 的内联图片修复）：安装器 21,100,525 bytes，SHA256 `9468a3351b07df3c5341ec60040f3b7dde0e4417cb09fe5d7ca9e41dc91262dd`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；生产编译、NSIS 打包、原生版本资源与发布资产校验通过；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移，覆盖安装后重启 Codex 即可继续长会话。
 

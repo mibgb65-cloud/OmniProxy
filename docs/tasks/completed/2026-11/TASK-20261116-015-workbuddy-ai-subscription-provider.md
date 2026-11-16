@@ -510,7 +510,7 @@ go test ./internal/transport/wails -run 'TestGatewayStartupAvoidsOccupiedPort|Te
 
 ## Commit
 
-Not committed by Agent.
+f7ddb0fa feat(provider): 新增 WorkBuddy AI 浏览器登录订阅通道
 
 ---
 
