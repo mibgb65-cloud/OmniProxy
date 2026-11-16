@@ -183,7 +183,7 @@ Tests       948 passed (948)
 ## Commit
 
 ```text
-待回填
+69f1e1db feat(quota): 配额页显示 DuMate 积分与本机 Token 用量
 ```
 
 未推送、无标签、无历史改写。
