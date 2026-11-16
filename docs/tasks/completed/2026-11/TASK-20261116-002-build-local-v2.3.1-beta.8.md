@@ -61,7 +61,7 @@ Completed
   `2.3.1-beta.8`；`build/config.yml` 与 `wails_tools.nsh` 数字版本不变。
 - 新增双语发行说明 `docs/releases/v2.3.1-beta.8.md`：目录自动同步、手动同步入口、
   账号页提示修正、状态合并语义与验证边界。
-- 版本包含实现提交（见下方 Git）。
+- 版本包含实现提交 `64519404`（TASK-20261116-001：HowToFix 目录自动同步与手动同步入口）。
 
 ## Build and Artifacts
 
@@ -119,7 +119,14 @@ SCRIPT_EXIT=0
 
 # Git
 
-Not committed by Agent.
+## Commit
+
+```text
+e936e0f4 chore(release): 准备 v2.3.1-beta.8 本地构建
+```
+
+版本内容为实现提交 `64519404`（TASK-20261116-001）；任务记录与 CURRENT 摘要随本提交落地。
+未推送、无标签、无历史改写。
 
 ---
 

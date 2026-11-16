@@ -201,7 +201,14 @@ format check（gofmt＋prettier）→ lint（go vet＋staticcheck＋eslint）→
 
 # Git
 
-Not committed by Agent.
+## Commit
+
+```text
+64519404 fix(modelcatalog): HowToFix 目录自动同步与手动同步入口
+```
+
+任务记录随同一提交归档；该提交同时是 `v2.3.1-beta.8` 的内容来源（打包提交 `e936e0f4`）。
+未推送、无标签、无历史改写。
 
 ---
 
