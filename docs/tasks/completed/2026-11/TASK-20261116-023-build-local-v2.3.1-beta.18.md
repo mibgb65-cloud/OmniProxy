@@ -118,7 +118,7 @@ BUILD_EXIT=0
 
 ## Commit
 
-Not committed by Agent.
+f5efb49e chore(release): 准备 v2.3.1-beta.18 本地构建
 
 ---
 
