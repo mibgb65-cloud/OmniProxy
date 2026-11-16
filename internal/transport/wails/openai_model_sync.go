@@ -79,8 +79,8 @@ func (s *AppService) shutdownOpenAIModelSync() {
 	}
 }
 
-// ModelCatalogSyncStatus 返回后台目录同步的只读状态，不包含账号身份或上游正文。
-func (s *AppService) ModelCatalogSyncStatus() modelcatalog.SyncStatus {
+// openAIStatus 返回 OpenAI 后台目录同步的只读状态。
+func (s *AppService) openAIStatus() modelcatalog.SyncStatus {
 	s.openAISync.mu.Lock()
 	auto := s.openAISync.auto
 	s.openAISync.mu.Unlock()

@@ -25,11 +25,14 @@ type AutoSync struct {
 	source    *Service
 	kind      string
 	staleOnly bool
-	refresh   func(context.Context) error
-	report    func(error)
-	pending   chan struct{}
-	cancel    context.CancelFunc
-	done      chan struct{}
+	// apiKey 表示该服务商按 API Key 账号发现目录（OpenAI、HowToFix 等）；
+	// 为 false 时只处理已授权的订阅账号（如 Google 订阅）。
+	apiKey  bool
+	refresh func(context.Context) error
+	report  func(error)
+	pending chan struct{}
+	cancel  context.CancelFunc
+	done    chan struct{}
 
 	mu        sync.Mutex
 	attempted map[string]bool
@@ -41,9 +44,19 @@ type AutoSync struct {
 
 // StartAutoSync 在后台执行首次扫描；不依赖账号页面是否打开，也不启动网关。
 func StartAutoSync(ctx context.Context, source *Service, kind string, staleOnly bool, refresh func(context.Context) error, report func(error)) *AutoSync {
+	return startAutoSync(ctx, source, kind, staleOnly, false, refresh, report)
+}
+
+// StartAPIKeyAutoSync 在后台补齐当前版本没有目录的 API Key 账号；失败保留旧快照，
+// 由下一次配置变更或手动同步重试。
+func StartAPIKeyAutoSync(ctx context.Context, source *Service, kind string, refresh func(context.Context) error, report func(error)) *AutoSync {
+	return startAutoSync(ctx, source, kind, true, true, refresh, report)
+}
+
+func startAutoSync(ctx context.Context, source *Service, kind string, staleOnly, apiKey bool, refresh func(context.Context) error, report func(error)) *AutoSync {
 	ctx, cancel := context.WithCancel(ctx)
 	s := &AutoSync{
-		source: source, kind: kind, staleOnly: staleOnly, refresh: refresh, report: report,
+		source: source, kind: kind, staleOnly: staleOnly, apiKey: apiKey, refresh: refresh, report: report,
 		pending: make(chan struct{}, 1), cancel: cancel, done: make(chan struct{}),
 		attempted: map[string]bool{},
 	}
@@ -118,9 +131,9 @@ func (s *AutoSync) sync(ctx context.Context) (error, error) {
 			return ctx.Err(), nil
 		}
 		subscriptionReady := item.AuthMethod == account.AuthSubscription && item.AuthState == "authenticated"
-		// API Key 没有订阅登录状态，但同样需要官方模型快照才能参与 Codex 路由。
-		openAIKey := s.kind == "openai" && item.AuthMethod == account.AuthAPIKey
-		if !enabled[item.ProviderID] || !item.Enabled || !subscriptionReady && !openAIKey {
+		// API Key 没有订阅登录状态，但同样需要官方模型快照才能参与路由。
+		apiKeyReady := s.apiKey && item.AuthMethod == account.AuthAPIKey
+		if !enabled[item.ProviderID] || !item.Enabled || !subscriptionReady && !apiKeyReady {
 			continue
 		}
 		if s.staleOnly {

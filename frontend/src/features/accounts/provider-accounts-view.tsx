@@ -117,6 +117,7 @@ export function ProviderAccountsView({
             provider.kind !== "mimo" &&
             provider.kind !== "deepseek" &&
             provider.kind !== "google" &&
+            provider.kind !== "howtofix" &&
             provider.kind !== "dumate" &&
             (provider.kind !== "openai" ||
             items.some((account) => account.authMethod !== "subscription_login") ? (

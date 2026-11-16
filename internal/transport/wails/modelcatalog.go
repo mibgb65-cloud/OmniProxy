@@ -40,7 +40,7 @@ func (s *AppService) ModelSync(id string) ([]modelcatalog.Item, error) {
 	items, err := service.Sync(ctx, id)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return items, err
 }

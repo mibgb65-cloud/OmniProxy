@@ -26,7 +26,7 @@ func (s *AppService) UpdateProvider(id string, input provider.UpdateInput) (prov
 	item, err := provider.NewService(s.db).Update(context.Background(), id, input)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }
@@ -36,7 +36,7 @@ func (s *AppService) SetProviderEnabled(id string, enabled bool) (provider.Confi
 	item, err := provider.NewService(s.db).SetEnabled(context.Background(), id, enabled)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }

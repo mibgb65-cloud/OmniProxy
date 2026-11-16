@@ -69,7 +69,7 @@ func (s *AppService) subscriptionService() (*subscription.Service, error) {
 		if emit != nil {
 			emit()
 		}
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	})
 	s.subscription.service = manager
 	return manager, nil
@@ -196,7 +196,7 @@ func (s *AppService) SubscriptionRefresh(id string) (account.Item, error) {
 	defer cancel()
 	item, err := service.Refresh(ctx, id)
 	if err == nil {
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }
@@ -220,7 +220,7 @@ func (s *AppService) SubscriptionLogout(id string) (account.Item, error) {
 	defer cancel()
 	item, err := service.Logout(ctx, id)
 	if err == nil {
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }

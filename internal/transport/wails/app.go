@@ -78,6 +78,7 @@ type AppService struct {
 	subscription     subscriptionState
 	googleAuth       googleSubscriptionState
 	openAISync       openAIModelSyncState
+	howtofixSync     howToFixModelSyncState
 	updatesMu        sync.Mutex
 	updates          *updater.Service
 	stopUpdateChecks context.CancelFunc
@@ -167,6 +168,7 @@ func (s *AppService) ServiceStartup(_ context.Context, _ application.ServiceOpti
 	s.startUpdateChecks()
 	s.startGoogleModelSync()
 	s.startOpenAIModelSync()
+	s.startHowToFixModelSync()
 	if s.quotaActivation != nil {
 		s.quotaActivation.Start(context.Background())
 	}
@@ -204,6 +206,7 @@ func (s *AppService) ServiceShutdown() error {
 		s.stopActivity()
 	}
 	s.shutdownOpenAIModelSync()
+	s.shutdownHowToFixModelSync()
 	s.shutdownSubscription()
 	s.shutdownGoogleSubscription()
 	s.shutdownLogs()

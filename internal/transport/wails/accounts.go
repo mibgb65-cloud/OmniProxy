@@ -34,7 +34,7 @@ func (s *AppService) CreateAccount(input account.CreateInput) (account.Item, err
 	item, err := service.Create(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }
@@ -48,7 +48,7 @@ func (s *AppService) CreateAccounts(input account.BatchCreateInput) ([]account.I
 	items, err := service.CreateBatch(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return items, err
 }
@@ -62,7 +62,7 @@ func (s *AppService) UpdateAccount(input account.UpdateInput) (account.UpdateRes
 	result, err := service.Update(context.Background(), input)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return result, err
 }
@@ -76,7 +76,7 @@ func (s *AppService) SetAccountEnabled(id string, enabled bool) (account.Item, e
 	item, err := service.SetEnabled(context.Background(), id, enabled)
 	if err == nil {
 		s.refreshAgentCatalog()
-		s.requestOpenAIModelSync()
+		s.requestModelSync()
 	}
 	return item, err
 }

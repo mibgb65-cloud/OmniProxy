@@ -64,6 +64,6 @@ func (s *AppService) ImportLegacyData(directory, snapshot string) (legacyimport.
 		return legacyimport.Result{}, err
 	}
 	s.requestGoogleModelSync()
-	s.requestOpenAIModelSync()
+	s.requestModelSync()
 	return result, nil
 }

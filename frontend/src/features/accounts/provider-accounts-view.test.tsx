@@ -138,6 +138,27 @@ describe("ProviderAccountsView", () => {
     expect(screen.getByRole("link", { name: "返回账号" })).toHaveAttribute("href", "/accounts")
   })
 
+  it("hides the stale balance notice for HowToFix, whose balance is live", async () => {
+    const howtofix = { ...provider, id: "builtin_howtofix", kind: "howtofix", name: "HowToFix" }
+    vi.mocked(listProviders).mockResolvedValue([howtofix])
+    vi.mocked(listAccounts).mockResolvedValue([{ ...account, providerId: howtofix.id }])
+    renderPage(howtofix.id)
+    expect(await screen.findByRole("heading", { name: "HowToFix 账号" })).toBeInTheDocument()
+    expect(
+      screen.queryByText("余额查询和密钥有效性检测尚未接入；下方仅显示已保存的账号信息。"),
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps the balance notice for providers without a balance query", async () => {
+    const atria = { ...provider, id: "builtin_atria", kind: "atria", name: "Atria" }
+    vi.mocked(listProviders).mockResolvedValue([atria])
+    vi.mocked(listAccounts).mockResolvedValue([{ ...account, providerId: atria.id }])
+    renderPage(atria.id)
+    expect(
+      await screen.findByText("余额查询和密钥有效性检测尚未接入；下方仅显示已保存的账号信息。"),
+    ).toBeInTheDocument()
+  })
+
   it("labels River usage as retained local tokens instead of an unavailable balance", async () => {
     const river = { ...provider, id: "builtin_river", kind: "river", name: "River" }
     vi.mocked(listProviders).mockResolvedValue([river])

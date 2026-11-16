@@ -63,6 +63,9 @@ func (s *AppService) bindModelCatalogEvents(app *application.App) {
 	s.openAISync.mu.Lock()
 	s.openAISync.emit = emit
 	s.openAISync.mu.Unlock()
+	s.howtofixSync.mu.Lock()
+	s.howtofixSync.emit = emit
+	s.howtofixSync.mu.Unlock()
 }
 
 func (s *AppService) logGoogleModelSyncError() {

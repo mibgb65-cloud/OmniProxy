@@ -577,6 +577,8 @@ export function ModelCatalog(): $CancellablePromise<modelcatalog$0.Item[] | null
 
 /**
  * ModelCatalogSyncStatus 返回后台目录同步的只读状态，不包含账号身份或上游正文。
+ * 多个服务商各自后台同步时合并成一份状态：任一在运行即显示同步中，
+ * 待同步数量求和，错误码取第一个，时间取最近一次。
  */
 export function ModelCatalogSyncStatus(): $CancellablePromise<modelcatalog$0.SyncStatus> {
     return $Call.ByID(770669248);
