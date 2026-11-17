@@ -4,6 +4,8 @@
 
 已修复：[TASK-20261117-004](../tasks/completed/2026-11/TASK-20261117-004-workbuddy-reasoning-effort-fallback.md) WorkBuddy AI 目录里 4 个模型没有推理档位：真实 `/v3/config`（25 个模型）里 `max-model`、`gemini-4-carbon`、`gemini-4-argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`），不给 `supportedEfforts`，而 `normalizeModel` 只读后者，于是这些模型被存成「无档位」，连 `high`／`medium` 的默认值也丢了。它们在上游接受 `low/high/max` 加自身档位（社区插件 `effortsOf()` 的实测口径）；目录现在按这个规则补齐并保留自身档位为默认，`supportsReasoning: false` 或没有 `reasoning` 的模型（`default-model`、`hy-image-3.5`、`kling-video-v3`）仍不发布档位。升级后需在「路由 → 模型目录」同步一次才有新档位。
 
+本地构建：[TASK-20261117-008](../tasks/completed/2026-11/TASK-20261117-008-build-local-v2.3.1-beta.21.md) 已产出 `v2.3.1-beta.21` Windows amd64 生产安装包，内容为 WorkBuddy 国内版接入（`eb7e82f8`）：安装器 21,372,038 bytes，SHA256 `e790b40042c39c4ff1c45a8383768a53a9dcfd5c80fa50202b6ff43f00c5a4e4`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。首次启动执行迁移 052（只追加 `builtin_workbuddy` 提供商行）。
+
 已实现（待真机验证）：[TASK-20261117-007](../tasks/completed/2026-11/TASK-20261117-007-workbuddy-cn-provider.md) WorkBuddy **国内版**（`copilot.tencent.com`）作为独立内置服务商接入（kind `workbuddy`、id `builtin_workbuddy`、迁移 052）：适配器改为按 `Build` 参数化（站点／`platform=workbuddy`／UA `WorkBuddy/5.9.3 WorkBuddy/5.9.3 CLI/2.165.0`／Messages 能力／`glm-*` 图片行为），国内版 Claude 模型用 Messages 协议时原样转发到原生 `POST /v1/messages`（不 gzip、不改写系统提示词），目录为 `claude-*` 追加 `max` 档位；Credits 三窗口复用、卡片标题区分构建；后台目录同步一次覆盖两个 kind。国际版行为不变。契约测试覆盖指纹、目录、Messages 转发、网关分派、迁移幂等；`task verify` exit 0（前端 158 文件／967 项测试）。真实账号登录＋目录＋一次对话待用户执行；签到与云托管企业域名（P2）未接入。ADR-027。
 
 待实施（规划已确认）：[TASK-20261117-006](../tasks/completed/2026-11/TASK-20261117-006-workbuddy-cn-provider-plan.md) WorkBuddy 国内版接入方案与阶段划分（P0/P1 已由 TASK-20261117-007 实现；P2 签到与云托管企业域名待评估）。
