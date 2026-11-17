@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Completed
 
 ## Created
 
@@ -156,17 +156,27 @@ task verify → exit 0
 
 ## Commit
 
-TBD
+d0cde578 fix(provider): 补齐 WorkBuddy 只给 effort 的模型推理档位
 
 ---
 
 # Result
 
-TBD
+WorkBuddy AI 的模型**有**推理档位：真实 `/v3/config` 的 25 个模型里 21 个直接声明
+`supportedEfforts`（如 `glm-5.3` 为 `low/high/max`、`gpt-6.1-sol` 为
+`low/medium/high/xhigh/max`、`hy4std` 只有 `high`），另 4 个（`max-model`、`gemini-4-carbon`、
+`gemini-4-argon`、`kimi-k3`）只给 `reasoning.effort`，`default-model`／`hy-image-3.5`／
+`kling-video-v3` 完全没有推理声明。
+
+之前目录里那 4 个模型没有档位，是因为 `normalizeModel` 只读 `supportedEfforts`；现在按社区
+插件在真实账号上的实测口径补 `low/high/max` 加自身档位（`max-model` → 默认 `high`；
+`gemini-4-*`、`kimi-k3` → `low/medium/high/max`，默认 `medium`）。`task verify` exit 0
+（Go 全包、前端 157 文件／965 项、Windows production 构建）。随 `v2.3.1-beta.20` 构建交付；
+升级后需在「路由 → 模型目录」同步一次才会写入新档位。
 
 ---
 
 # Completed
 
-TBD
+2026-11-17 09:56（Asia/Singapore）
 

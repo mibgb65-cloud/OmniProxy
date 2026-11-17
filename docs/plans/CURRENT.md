@@ -2,7 +2,9 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-已修复：[TASK-20261117-004](../tasks/active/TASK-20261117-004-workbuddy-reasoning-effort-fallback.md) WorkBuddy AI 目录里 4 个模型没有推理档位：真实 `/v3/config`（25 个模型）里 `max-model`、`gemini-4-carbon`、`gemini-4-argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`），不给 `supportedEfforts`，而 `normalizeModel` 只读后者，于是这些模型被存成「无档位」，连 `high`／`medium` 的默认值也丢了。它们在上游接受 `low/high/max` 加自身档位（社区插件 `effortsOf()` 的实测口径）；目录现在按这个规则补齐并保留自身档位为默认，`supportsReasoning: false` 或没有 `reasoning` 的模型（`default-model`、`hy-image-3.5`、`kling-video-v3`）仍不发布档位。目标版本 `v2.3.1-beta.20`；升级后需在「路由 → 模型目录」同步一次才有新档位。
+已修复：[TASK-20261117-004](../tasks/completed/2026-11/TASK-20261117-004-workbuddy-reasoning-effort-fallback.md) WorkBuddy AI 目录里 4 个模型没有推理档位：真实 `/v3/config`（25 个模型）里 `max-model`、`gemini-4-carbon`、`gemini-4-argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`），不给 `supportedEfforts`，而 `normalizeModel` 只读后者，于是这些模型被存成「无档位」，连 `high`／`medium` 的默认值也丢了。它们在上游接受 `low/high/max` 加自身档位（社区插件 `effortsOf()` 的实测口径）；目录现在按这个规则补齐并保留自身档位为默认，`supportsReasoning: false` 或没有 `reasoning` 的模型（`default-model`、`hy-image-3.5`、`kling-video-v3`）仍不发布档位。升级后需在「路由 → 模型目录」同步一次才有新档位。
+
+本地构建：[TASK-20261117-005](../tasks/completed/2026-11/TASK-20261117-005-build-local-v2.3.1-beta.20.md) 已产出 `v2.3.1-beta.20` Windows amd64 生产安装包，内容为上述推理档位补全（`d0cde578`）：安装器 21,346,879 bytes，SHA256 `48cd41fa2364b469360cc784cb58471ab9c1e6d15e4d75d49c87b151558c0a23`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无新增数据库迁移。
 
 已修复：[TASK-20261117-002](../tasks/completed/2026-11/TASK-20261117-002-workbuddy-chat-system-prompt-fix.md) WorkBuddy AI 对话被上游 `11128` 拒绝：真实账号验证（Free 计划）发现 messages 只有 user 时返回 `400 code 11128 "first message is not system prompt"`，首条补 system 后 `200` + SSE（`usage` 26/3/29）。社区插件同样在出站前补齐系统提示词，并在 11128 时把系统提示词下移为用户消息重试一次（渠道校验只读 system／assistant 消息）。适配器现已归一 `developer→system`、`max_completion_tokens→max_tokens`、首条非 system 补默认提示词，并在 11128 后按上述形态重试一次。真实链路（`Client.Forward`，入参无 system）实测 `200` + SSE，回答 `OK`；Free 计划 3 次调用后 credits 仍 0 使用（按每日免费额度计费，付费扣减未验证）。目标版本 `v2.3.1-beta.19`。
 
