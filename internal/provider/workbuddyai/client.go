@@ -126,27 +126,31 @@ func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Re
 	if len(request.Body) == 0 || len(request.Body) > proxy.MaxRequestBytes {
 		return proxy.Failure("invalid_request", 400)
 	}
-	compressed, err := gzipBody(request.Body)
-	if err != nil {
+	// 上游要求首条消息必须是 system：缺了会被 11128 拒绝，这里先补齐形态。
+	prepared := prepareChatBody(request.Body)
+	if len(prepared) == 0 {
+		prepared = request.Body
+	}
+	if len(prepared) > proxy.MaxRequestBytes {
 		return proxy.Failure("invalid_request", 400)
 	}
-	defer clear(compressed)
-	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+chatPath, bytes.NewReader(compressed))
+	reply, err := c.sendChat(ctx, cred, prepared)
 	if err != nil {
-		return proxy.UpstreamFailure(err)
-	}
-	httpRequest.Header.Set("Content-Type", "application/json")
-	httpRequest.Header.Set("Content-Encoding", "gzip")
-	c.applySign(httpRequest, cred)
-	defer httpRequest.Header.Del("Authorization")
-	applyChatHeaders(httpRequest)
-	if err := applyConversationIDs(httpRequest, request.Body); err != nil {
 		return err
 	}
-	response, err := c.http.Do(httpRequest)
-	if err != nil {
-		return proxy.UpstreamFailure(err)
+	// 11128 是渠道校验拒绝了系统提示词。按官方客户端形态把系统提示词读成用户消息重试一次；
+	// 仍被拒才作为 channel_rejected 返回。重试发生在推理之前，不产生计费。
+	if reply.hasCode && reply.code == chatChannelRejected {
+		if retry := systemAsUserBody(prepared); len(retry) > 0 && len(retry) <= proxy.MaxRequestBytes {
+			_ = reply.response.Body.Close()
+			next, retryErr := c.sendChat(ctx, cred, retry)
+			if retryErr != nil {
+				return retryErr
+			}
+			reply = next
+		}
 	}
+	response := reply.response
 	defer func() {
 		if err := response.Body.Close(); err != nil && result == nil {
 			result = proxy.Failure(CodeUpstreamUnavailable, http.StatusBadGateway)
@@ -159,15 +163,14 @@ func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Re
 		return proxy.Failure(CodeRateLimited, http.StatusTooManyRequests)
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		// 非 2xx：先做有界的业务码识别（10085/11128/11159/11158）。识别不了的
+		// 非 2xx：先按已识别的业务码（10085/11128/11159/11158）返回；识别不了的
 		// 状态与正文原样交给网关决定，本适配器不替网关吞掉响应；已读前缀会拼回。
-		prefix, _ := io.ReadAll(io.LimitReader(response.Body, maxClassifiedBytes))
-		if code, found := upstreamBusinessCode(prefix); found {
-			if mapped, known := businessFailure(code); known {
+		if reply.hasCode {
+			if mapped, known := businessFailure(reply.code); known {
 				return mapped
 			}
 		}
-		response.Body = replayedBody{Reader: io.MultiReader(bytes.NewReader(prefix), response.Body), Closer: response.Body}
+		response.Body = replayedBody{Reader: io.MultiReader(bytes.NewReader(reply.prefix), response.Body), Closer: response.Body}
 	}
 	return consume(proxy.Response{
 		StatusCode:  response.StatusCode,
@@ -175,6 +178,48 @@ func (c *Client) Forward(ctx context.Context, cred Credentials, request proxy.Re
 		RetryAfter:  response.Header.Get("Retry-After"),
 		Body:        response.Body,
 	})
+}
+
+// chatReply 是一次对话请求的响应，以及非 2xx 时已读取的错误前缀与业务码。
+type chatReply struct {
+	response *http.Response
+	prefix   []byte
+	code     int
+	hasCode  bool
+}
+
+// sendChat 发一次对话请求：gzip 正文、签名头、会话 ID，并对非 2xx 做有界业务码识别。
+// 已读前缀留给调用方回放，避免把上游正文丢掉。
+func (c *Client) sendChat(ctx context.Context, cred Credentials, body []byte) (*chatReply, error) {
+	compressed, err := gzipBody(body)
+	if err != nil {
+		return nil, proxy.Failure("invalid_request", 400)
+	}
+	defer clear(compressed)
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+chatPath, bytes.NewReader(compressed))
+	if err != nil {
+		return nil, proxy.UpstreamFailure(err)
+	}
+	httpRequest.Header.Set("Content-Type", "application/json")
+	httpRequest.Header.Set("Content-Encoding", "gzip")
+	c.applySign(httpRequest, cred)
+	defer httpRequest.Header.Del("Authorization")
+	applyChatHeaders(httpRequest)
+	if err := applyConversationIDs(httpRequest, body); err != nil {
+		return nil, err
+	}
+	response, err := c.http.Do(httpRequest)
+	if err != nil {
+		return nil, proxy.UpstreamFailure(err)
+	}
+	reply := &chatReply{response: response}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		reply.prefix, _ = io.ReadAll(io.LimitReader(response.Body, maxClassifiedBytes))
+		if code, found := upstreamBusinessCode(reply.prefix); found {
+			reply.code, reply.hasCode = code, true
+		}
+	}
+	return reply, nil
 }
 
 // replayedBody 把已读取的前缀与剩余正文拼回一个可关闭的正文。

@@ -47,6 +47,8 @@ OpenCode 等）按既有路由投影自动可用。
 | 图片 | 仅当目录声明 `supportsImages`；`glm-*` 按文本处理，图片由图片描述模型代读 |
 | 推理档位 | 只发布目录声明的档位；上游未声明时不发布 |
 | 请求形态 | 按官方桌面客户端形态发送（UA、`X-Product`、`X-IDE-*`、`X-Agent-*`、OpenAI SDK 指纹、gzip 请求体、会话 id 头）。上游对不匹配的 UA 返回 `10085` |
+| 会话形态 | **首条消息必须是 `system`**：缺了返回 `400 code 11128 "first message is not system prompt"`。适配器出站前把 `developer` 归一为 `system`、`max_completion_tokens` 改名 `max_tokens`、首条不是 system 时补默认 `"You are a helpful assistant."` |
+| 渠道校验（11128） | 上游只按 system／assistant 消息做整行指纹校验，可能拒绝某些 agent 的系统提示词。被拒时适配器**自动重试一次**：系统提示词下移为首条用户消息（`<instructions>…</instructions>` 包裹），开头换成默认 system；仍被拒才返回 `channel_rejected` |
 | 认证失败 | 401 先尝试续期一次，仍失败才换号；登录失效要重新登录 |
 | 额度不足 | 上游 402/429 按既有错误语义回传，不放大重试 |
 
@@ -87,7 +89,7 @@ OpenCode 等）按既有路由投影自动可用。
 | --- | --- |
 | `sign_in_expired` | 登录已失效，重新登录 |
 | `unauthorized` | 上游拒绝令牌：先自动续期一次，仍失败则重新登录 |
-| `channel_rejected` | 上游按渠道规则拒绝了系统提示（11128）；换模型或稍后重试 |
+| `channel_rejected` | 渠道校验拒绝了系统提示词（11128，首条非 system 或命中整行指纹）；适配器已按官方形态重试一次，仍失败时换模型或稍后重试 |
 | `signature_invalid` | 会话里的思考签名与上游不匹配（11159）；新开对话或换模型 |
 | `model_not_entitled` | 账号套餐不含该模型（11158）；换模型 |
 | `user_agent_refused` | 上游拒绝了客户端标识（10085）；升级 OmniProxy |
@@ -112,17 +114,26 @@ OpenCode 等）按既有路由投影自动可用。
 
 ## 未验证与未接入
 
-- **真实账号验证进度**（2026-11-16，用户本人账号）：
+- **真实账号验证进度**（2026-11-16 / 17，用户本人账号，Free 计划）：
   1. 浏览器登录 → `GET /v2/plugin/auth/token` 取到令牌 → `GET /v2/plugin/login/account`
      取到身份：已走通（失败点只在本地保存账号，TASK-20261116-018 修复）。
   2. `/v3/config` 真实目录：已走通，账号同步到 25 条真实模型
-     （`default-model`、`gpt-6.1-sol`、`glm-5.3`、`kimi-k3.1-pro`、`deepseek-v4.1-flash-sg` 等）。
+     （`default-model`、`gpt-6.1-sol`、`glm-5.3`、`kimi-k3.1-pro`、`deepseek-v4.1-flash-sg` 等），
+     每个模型还有 `credits` 倍率（如 `glm-5.3-flash x0.08`、`max-model x1.33`）。
   3. Credits：真实令牌按 `POST /billing/meter/get-user-resource-summary` 读到
-     `plan_base 100`、`TotalCredits "100"`、`SubscriptionPackageName "Free"`、
+     `plan_base 100` + `benefit 30`、`TotalCredits "130"`、`SubscriptionPackageName "Free"`、
      `IsPaidUser false`；应用内展示随 TASK-20261116-020 修复（此前用 `GET` 被 404）。
-  **仍未验证**：真实 Chat 转发与计费扣减、付费套餐（plan_bonus／addon／benefit 有值）的
-  窗口形状、企业账号的 enterprise meter。其余协议事实来自社区插件
-  `@magpie-community/opencode-workbuddy-auth` 0.2.36；首次使用请以小额度模型验证。
+  4. **真实对话**（TASK-20261117-001/002）：`glm-5.3-flash`、`stream:true`、单轮短问题，
+     经适配器出站：`200` + SSE，回答正确，`usage` 26/3/29。首条消息不是 `system` 时上游
+     返回 `400 code 11128 "first message is not system prompt"`——适配器现在会补齐 system，
+     并在 11128 时把系统提示词下移重试（见上表）。
+  5. **积分扣减未观测到**：同账号连续 3 次调用（29／43／29 tokens）后 `CycleUsedCapacity`
+     仍为 0，`TotalCredits` 保持 130（观察约 15 分钟）。Free 计划很可能按「每日免费额度」
+     计费（`modelPromotions` 的文案也如此说明），credits 只在付费套餐中被消耗。
+  **仍未验证**：付费套餐的积分扣减与 `plan_bonus`／`addon`／`benefit` 非零窗口、
+  企业账号的 enterprise meter、Responses／Messages 客户端经网关的真实回包。
+  其余协议事实来自社区插件 `@magpie-community/opencode-workbuddy-auth` 0.2.36；
+  首次使用请以小额度模型验证。
 - 未接入：国内版 WorkBuddy（`copilot.tencent.com`）及其 Claude 模型的 Messages 路由、
   每日签到（国际版无该接口）、桌面登录文件导入（5.6+ 加密不可读）、API Key 认证、
   免费模型每日 token 窗口、额度参与调度、队列/平衡轮换。
