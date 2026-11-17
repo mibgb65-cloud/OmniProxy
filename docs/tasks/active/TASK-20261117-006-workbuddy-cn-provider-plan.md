@@ -262,7 +262,7 @@ appName 段与 `X-IDE-Version` 的来源不同；`cliAgent()`（第 418–420 �
 
 ## Commit
 
-TBD
+4bcbde3f docs(tasks): 新增 WorkBuddy 国内版接入规划（规划提交；实施提交待后续任务记录）
 
 ---
 
