@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -24,6 +25,13 @@ const (
 	maxModelEfforts = 16
 )
 
+// defaultEfforts 是上游只给 effort、不给档位列表（onlyReasoning）时补的通用档位。
+// 依据：社区插件 0.2.36 的 effortsOf() 对这类模型请求 low/high/max，并在真实账号上可用。
+var defaultEfforts = []string{"low", "high", "max"}
+
+// effortOrder 是补档位时的排序顺序（与社区插件的 EFFORT_ORDER 一致）。
+var effortOrder = []string{"low", "medium", "high", "xhigh", "max"}
+
 // Model 是账号自己的 /v3/config 里可路由的一条模型记录。
 type Model struct {
 	ID   string
@@ -33,7 +41,8 @@ type Model struct {
 	Output  int
 	// Images 是上游声明的图片输入能力；glm-* 如实为 false。
 	Images bool
-	// Efforts 已去掉 "none"；DefaultEffort 不在 Efforts 里时为空。
+	// Efforts 已去掉 "none"；上游只给 effort 的模型补 low/high/max 加它自己的档位。
+	// DefaultEffort 不在 Efforts 里时为空。
 	Efforts       []string
 	DefaultEffort string
 	// Free 需要价格促销信息；本适配器不读 modelPromotions，因此恒为 false（未知）。
@@ -114,7 +123,8 @@ func (c *Client) DiscoverModels(ctx context.Context, cred Credentials) (models [
 	return models, nil
 }
 
-// normalizeModel 只做字段映射与边界收敛：缺失字段保持未知，不补默认值。
+// normalizeModel 只做字段映射与边界收敛：缺失字段保持未知，不补默认值。唯一的补全
+// 是推理档位：上游声明支持推理却只给 effort 时，按实测口径补上通用档位。
 func normalizeModel(item rawModel) Model {
 	model := Model{
 		ID:     item.ID,
@@ -132,16 +142,16 @@ func normalizeModel(item rawModel) Model {
 	if item.Reasoning == nil {
 		return model
 	}
-	seen := map[string]bool{}
-	for _, effort := range item.Reasoning.SupportedEfforts {
-		if effort == "none" || seen[effort] || !effortValue(effort) {
-			continue
-		}
+	model.Efforts = cleanEfforts(item.Reasoning.SupportedEfforts)
+	if len(model.Efforts) == 0 && item.SupportsReasoning != nil && *item.SupportsReasoning {
+		// 上游对 max-model、gemini-4-*、kimi-k3 这类模型只给 reasoning.effort，
+		// 不给 supportedEfforts；它们在真实账号上接受 low/high/max 加自己的档位。
+		model.Efforts = cleanEfforts(append(append([]string{}, defaultEfforts...), item.Reasoning.Effort))
+		sortEfforts(model.Efforts)
+	}
+	seen := make(map[string]bool, len(model.Efforts))
+	for _, effort := range model.Efforts {
 		seen[effort] = true
-		model.Efforts = append(model.Efforts, effort)
-		if len(model.Efforts) >= maxModelEfforts {
-			break
-		}
 	}
 	for _, candidate := range []string{item.Reasoning.DefaultEffort, item.Reasoning.Effort} {
 		if candidate != "" && seen[candidate] {
@@ -150,6 +160,38 @@ func normalizeModel(item rawModel) Model {
 		}
 	}
 	return model
+}
+
+// cleanEfforts 去掉 "none"、重复值与非法拼写，只保留上游真正可请求的档位。
+func cleanEfforts(raw []string) []string {
+	efforts := make([]string, 0, len(raw))
+	seen := map[string]bool{}
+	for _, effort := range raw {
+		if effort == "none" || seen[effort] || !effortValue(effort) {
+			continue
+		}
+		seen[effort] = true
+		efforts = append(efforts, effort)
+		if len(efforts) >= maxModelEfforts {
+			break
+		}
+	}
+	return efforts
+}
+
+// sortEfforts 按 effortOrder 排序；未知档位保持原有相对顺序排在已知档位之后。
+func sortEfforts(efforts []string) {
+	rank := func(effort string) int {
+		for index, known := range effortOrder {
+			if effort == known {
+				return index
+			}
+		}
+		return len(effortOrder)
+	}
+	sort.SliceStable(efforts, func(left, right int) bool {
+		return rank(efforts[left]) < rank(efforts[right])
+	})
 }
 
 // tokenLimit 解析正整数的 token 上限；非法、负数或超限按未知（0）处理。

@@ -30,6 +30,13 @@ OpenCode 等）按既有路由投影自动可用。
 - 来源：`GET /v3/config`（按账号的套餐发放），字段映射：
   `maxInputTokens → ContextWindow`、`maxOutputTokens → OutputTokenLimit`、
   `supportsImages → 图片输入`（`glm-*` 一律按文本处理）、`reasoning.supportedEfforts → 推理档位`。
+- 推理档位有两种上游形态：多数模型直接给 `supportedEfforts`（如 `glm-5.3` 为
+  `low/high/max`、`gpt-6.1-sol` 为 `low/medium/high/xhigh/max`）；`max-model`、
+  `gemini-4-carbon`／`argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`）。
+  后者在真实账号上可用 `low/high/max` 加上自己的档位（与社区插件一致），因此目录补成
+  `low/high/max`／`low/medium/high/max`，并把它的 `effort` 作为默认档位。
+  `supportsReasoning: false` 或完全没有 `reasoning` 的模型（`default-model`、
+  `hy-image-3.5`、`kling-video-v3`）不发布档位。
 - 缺失字段保持**未知**，不补 0、不猜测；`/v3/config` 失败时保留上次成功快照。
 - 目录与授权版本绑定：令牌续期会在同一事务内重绑目录，**不会**因为续期而丢模型。
 - 目录同步失败不阻塞旧路由；修复网络或重新登录后自动重试。
@@ -45,7 +52,7 @@ OpenCode 等）按既有路由投影自动可用。
 | Responses / Messages | 由网关 `agentprotocol` 转换成 Chat 后再转发，并按调用方原协议回包（不是上游原生） |
 | 非流式客户端 | 网关以上游流式拉取、聚合成完整回包后再返回，不把半个工具调用交给客户端 |
 | 图片 | 仅当目录声明 `supportsImages`；`glm-*` 按文本处理，图片由图片描述模型代读 |
-| 推理档位 | 只发布目录声明的档位；上游未声明时不发布 |
+| 推理档位 | 发布目录档位：上游给 `supportedEfforts` 就照抄；只给 `effort` 的模型补 `low/high/max` 加上它自己的档位（实测口径） |
 | 请求形态 | 按官方桌面客户端形态发送（UA、`X-Product`、`X-IDE-*`、`X-Agent-*`、OpenAI SDK 指纹、gzip 请求体、会话 id 头）。上游对不匹配的 UA 返回 `10085` |
 | 会话形态 | **首条消息必须是 `system`**：缺了返回 `400 code 11128 "first message is not system prompt"`。适配器出站前把 `developer` 归一为 `system`、`max_completion_tokens` 改名 `max_tokens`、首条不是 system 时补默认 `"You are a helpful assistant."` |
 | 渠道校验（11128） | 上游只按 system／assistant 消息做整行指纹校验，可能拒绝某些 agent 的系统提示词。被拒时适配器**自动重试一次**：系统提示词下移为首条用户消息（`<instructions>…</instructions>` 包裹），开头换成默认 system；仍被拒才返回 `channel_rejected` |
@@ -120,6 +127,9 @@ OpenCode 等）按既有路由投影自动可用。
   2. `/v3/config` 真实目录：已走通，账号同步到 25 条真实模型
      （`default-model`、`gpt-6.1-sol`、`glm-5.3`、`kimi-k3.1-pro`、`deepseek-v4.1-flash-sg` 等），
      每个模型还有 `credits` 倍率（如 `glm-5.3-flash x0.08`、`max-model x1.33`）。
+     推理档位：25 条里 21 条声明 `supportedEfforts`，`max-model`／`gemini-4-carbon`／
+     `gemini-4-argon`／`kimi-k3` 只有 `effort`（TASK-20261117-004 按实测口径补齐），
+     `default-model`／`hy-image-3.5`／`kling-video-v3` 无推理。
   3. Credits：真实令牌按 `POST /billing/meter/get-user-resource-summary` 读到
      `plan_base 100` + `benefit 30`、`TotalCredits "130"`、`SubscriptionPackageName "Free"`、
      `IsPaidUser false`；应用内展示随 TASK-20261116-020 修复（此前用 `GET` 被 404）。

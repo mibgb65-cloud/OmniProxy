@@ -16,7 +16,9 @@ const catalogFixture = `{"code":0,"msg":"ok","data":{"agents":[{"name":"cli","mo
 {"id":"custom:team|model","name":"Team Model","maxInputTokens":"200000","supportsImages":false},
 {"id":"hy3","maxInputTokens":"192000","maxOutputTokens":64000,"supportsImages":true,"supportsReasoning":false,"reasoning":{"supportedEfforts":["low","high"],"defaultEffort":"low"}},
 {"id":"broken-limits","maxInputTokens":-1,"maxOutputTokens":"abc"},
-{"id":"dedupe-efforts","maxInputTokens":8000,"reasoning":{"supportedEfforts":["low","low","none","high"],"effort":"high"}}
+{"id":"dedupe-efforts","maxInputTokens":8000,"reasoning":{"supportedEfforts":["low","low","none","high"],"effort":"high"}},
+{"id":"effort-only","maxInputTokens":8000,"supportsReasoning":true,"onlyReasoning":true,"reasoning":{"effort":"high","summary":"auto"}},
+{"id":"effort-only-medium","maxInputTokens":8000,"supportsReasoning":true,"onlyReasoning":true,"reasoning":{"effort":"medium","summary":"auto"}}
 ]}}`
 
 func TestDiscoverModelsParsesAccountCatalog(t *testing.T) {
@@ -36,7 +38,7 @@ func TestDiscoverModelsParsesAccountCatalog(t *testing.T) {
 	if header.Get("Authorization") != "Bearer access-token-1" || header.Get("X-User-Id") != "uid-1" || header.Get("X-Domain") != "www.workbuddy.ai" {
 		t.Fatalf("catalog headers = %v", header)
 	}
-	if len(models) != 7 {
+	if len(models) != 9 {
 		t.Fatalf("models = %d", len(models))
 	}
 	deepseek := models[0]
@@ -78,6 +80,15 @@ func TestDiscoverModelsParsesAccountCatalog(t *testing.T) {
 	dedupe := models[6]
 	if len(dedupe.Efforts) != 2 || dedupe.Efforts[0] != "low" || dedupe.Efforts[1] != "high" || dedupe.DefaultEffort != "high" {
 		t.Fatalf("deduped efforts = %+v", dedupe)
+	}
+	// 上游只给 effort 的模型（真实目录里的 max-model／gemini-4-*／kimi-k3）补通用档位。
+	effortOnly := models[7]
+	if len(effortOnly.Efforts) != 3 || effortOnly.Efforts[0] != "low" || effortOnly.Efforts[1] != "high" || effortOnly.Efforts[2] != "max" || effortOnly.DefaultEffort != "high" {
+		t.Fatalf("effort-only model = %+v", effortOnly)
+	}
+	effortOnlyMedium := models[8]
+	if len(effortOnlyMedium.Efforts) != 4 || effortOnlyMedium.Efforts[1] != "medium" || effortOnlyMedium.DefaultEffort != "medium" {
+		t.Fatalf("effort-only medium model = %+v", effortOnlyMedium)
 	}
 }
 
