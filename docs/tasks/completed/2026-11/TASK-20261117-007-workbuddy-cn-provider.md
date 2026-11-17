@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -171,16 +171,26 @@ task verify → exit 0
 
 ## Commit
 
-TBD
+eb7e82f8 feat(provider): 接入 WorkBuddy 国内版（copilot.tencent.com）
 
 ---
 
 # Result
 
-TBD
+WorkBuddy 国内版已作为独立内置服务商接入：`builtin_workbuddy`（kind `workbuddy`、迁移 052）
+与 `builtin_workbuddy_ai` 并列，账号/令牌/目录/额度按构建隔离。适配器只有一份实现，按
+`Build` 区分站点（`copilot.tencent.com`）、登录平台（`platform=workbuddy`）、
+UA（`WorkBuddy/5.9.3 WorkBuddy/5.9.3 CLI/2.165.0`）与能力；国内版 `glm-*` 保留图片输入。
+国内版 Claude 模型在客户端用 Messages 协议时原样转发到原生 `POST /v1/messages`（不 gzip、
+不改写系统提示词、不做 11128 重试），目录为 `claude-*` 追加 `max` 档位；Chat 与 Responses
+客户端仍走既有 Chat 聚合/转换链路。Credits 三窗口与后台/手动目录同步覆盖两个 kind，
+国际版的 UA、端点与行为未变。
+
+`task verify` exit 0（Go 全包、前端 158 文件／967 项测试、Windows production 构建）。
+真实账号验证待用户执行：先登录＋目录，再授权一次对话。签到与云托管企业域名属 P2，未接入。
 
 ---
 
 # Completed
 
-TBD
+2026-11-17 16:32（Asia/Singapore）
