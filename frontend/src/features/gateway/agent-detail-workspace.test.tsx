@@ -14,6 +14,7 @@ import {
   previewAgentPlanMock,
   applyAgentConfigMock,
   restoreAgentConfigMock,
+  rereadAgentConfigMock,
 } from "./gateway-test-helpers"
 
 vi.mock("../../services/gateway", () => ({
@@ -49,6 +50,7 @@ beforeEach(() => {
   vi.mocked(listProviders).mockResolvedValue(providers)
   vi.mocked(listAccounts).mockResolvedValue(accounts)
   listAgentClientsMock.mockResolvedValue([item])
+  rereadAgentConfigMock.mockResolvedValue(item)
   getConfiguredAgentModelsMock.mockResolvedValue({
     models: [{ id: "saved", name: "Saved Model" }],
     defaultModel: "saved",
@@ -89,6 +91,7 @@ it("配置在右侧直接编辑，取消保留原模型并恢复按钮焦点，�
   expect(await screen.findByRole("checkbox", { name: "配置 Model a" })).toBeChecked()
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   expect(screen.queryByRole("heading", { name: "已接入模型" })).not.toBeInTheDocument()
+
   expect(screen.getByRole("button", { name: "恢复原配置" })).toBeDisabled()
   await user.click(screen.getByRole("checkbox", { name: "配置 Model a" }))
   await user.click(screen.getAllByRole("button", { name: "取消配置" })[0]!)
@@ -147,4 +150,30 @@ it("切换客户端隔离模型列表", async () => {
   await user.click(await screen.findByRole("link", { name: "配置 Claude Code CLI" }))
   expect(await screen.findByText("claude saved")).toBeInTheDocument()
   await waitFor(() => expect(screen.queryByText("codex saved")).not.toBeInTheDocument())
+})
+
+it("配置被外部修改时主按钮改为重新读取并应用，应用时接受当前配置", async () => {
+  const user = userEvent.setup()
+  // 文件被其它工具改写：哈希不再匹配，后台目录刷新已停住。
+  const changed = { ...item, revision: "external", errorCode: "config_changed" }
+  listAgentClientsMock.mockResolvedValue([changed])
+  rereadAgentConfigMock.mockResolvedValue(changed)
+  renderGateway("clients", { entry: "/gateway?tab=clients&client=codex" })
+  const button = await screen.findByRole("button", { name: "重新读取并应用" })
+  expect(button).toBeEnabled()
+
+  expect(screen.getByRole("button", { name: "恢复原配置" })).toBeDisabled()
+
+  await user.click(button)
+  await user.click(await screen.findByRole("checkbox", { name: "配置 Model a" }))
+  await user.click(screen.getByRole("button", { name: "应用配置" }))
+  await waitFor(() =>
+    expect(applyAgentConfigMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client: "codex",
+        revision: "external",
+        acceptCurrentConfig: true,
+      }),
+    ),
+  )
 })

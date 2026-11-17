@@ -6,16 +6,21 @@ import (
 	"encoding/json"
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 	catalog "omniproxy/internal/core/modelcatalog"
 )
 
 // RefreshCatalog 只更新已由本应用接管且没有外部改动的目录；不新接管任何客户端。
+//
+// 每个客户端的失败原因按稳定码记录在内存里，由 Inspect 交给界面：只有日志的话，
+// 用户只会看到「模型没更新」，不知道该点哪里。
 func (s *Service) RefreshCatalog(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var result error
+	issues := map[string]string{}
 	for _, client := range Clients() {
 		// Antigravity 的模型目录由远端 listSource 实时提供，配置文件只存默认模型；
 		// 它还会持续改写 userSettings，不能按整文件摘要刷新。
@@ -29,18 +34,75 @@ func (s *Service) RefreshCatalog(ctx context.Context) error {
 			if catalogError == nil {
 				entries, catalogError = s.selectedCatalog(ctx, client, entries)
 			}
+			var clientError error
 			if catalogError != nil {
-				result = errors.Join(result, catalogError)
+				clientError = catalogError
 			} else {
-				result = errors.Join(result, s.refreshClient(ctx, client, expected, entries))
+				clientError = s.refreshClient(ctx, client, expected, entries)
+			}
+			if clientError != nil {
+				result = errors.Join(result, clientError)
+				if code := failureCode(clientError); code != "" {
+					issues[client] = code
+				}
 			}
 		}
 		// 没有受管记录时不读取或修改该客户端；数据库错误仍需报告。
 		if err != nil && err != sql.ErrNoRows {
 			result = errors.Join(result, failure("backup_unavailable"))
+			issues[client] = "backup_unavailable"
 		}
 	}
+	s.setIssues(issues)
 	return result
+}
+
+// failureCode 取本包稳定错误码（错误文本固定为 "agent: <code>"）；识别不了返回空串。
+// errors.Join 的聚合错误按顺序取第一个可识别的码。
+func failureCode(err error) string {
+	if err == nil {
+		return ""
+	}
+	var joined interface{ Unwrap() []error }
+	if errors.As(err, &joined) {
+		for _, inner := range joined.Unwrap() {
+			if code := failureCode(inner); code != "" {
+				return code
+			}
+		}
+		return ""
+	}
+	code, found := strings.CutPrefix(err.Error(), "agent: ")
+	if !found || code == "" || len(code) > 64 {
+		return ""
+	}
+	for _, char := range code {
+		if char >= 'a' && char <= 'z' || char == '_' {
+			continue
+		}
+		return ""
+	}
+	return code
+}
+
+func (s *Service) setIssues(issues map[string]string) {
+	s.issueMu.Lock()
+	s.issues = issues
+	s.issueMu.Unlock()
+}
+
+// issue 返回该客户端最近一次后台刷新的失败码；没有失败返回空串。
+func (s *Service) issue(client string) string {
+	s.issueMu.Lock()
+	defer s.issueMu.Unlock()
+	return s.issues[client]
+}
+
+// clearIssue 在客户端重新应用或恢复成功后清除失败记录。
+func (s *Service) clearIssue(client string) {
+	s.issueMu.Lock()
+	delete(s.issues, client)
+	s.issueMu.Unlock()
 }
 
 func (s *Service) refreshClient(ctx context.Context, client, expected string, entries []catalog.Entry) error {

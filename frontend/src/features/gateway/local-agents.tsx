@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { listAgentClients } from "../../services/agents"
+import { agentTitle, listAgentClients } from "../../services/agents"
+import type { TranslationKey } from "../../i18n/translation"
 import { AgentClientDetail } from "./agent-client-detail"
 import { AgentClientGroupTile } from "./agent-client-group-tile"
 import { AntigravityGroupTile } from "./antigravity-client-card"
@@ -43,11 +44,24 @@ export function LocalAgents({
     previousClient.current = selectedClient
   }, [selectedClient, active])
   const items = data.isError ? [] : (data.data ?? [])
+  // 配置文件被外部改写后后台目录刷新会停住；在列表页就说明影响范围，避免用户
+  // 只在日志里看到 refresh_failed、却以为模型同步坏了。
+  const needsReapply = items.filter((item) => item.errorCode === "config_changed")
   return (
     <section ref={rootRef} className="space-y-5" aria-label={t("agents.title")}>
       {data.isError ? (
         <p role="alert" className="text-destructive text-sm">
           {t("agents.loadFailed")}
+        </p>
+      ) : null}
+      {!selectedClient && needsReapply.length > 0 ? (
+        <p role="status" className="rounded-xl border px-3 py-2 text-sm">
+          {t("agents.reapplyNotice", {
+            count: needsReapply.length,
+            clients: needsReapply
+              .map((item) => t(agentTitle(item.client) as TranslationKey))
+              .join(" / "),
+          })}
         </p>
       ) : null}
       {selectedClient ? (

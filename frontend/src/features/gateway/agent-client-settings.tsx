@@ -23,6 +23,9 @@ export function AgentClientSettings({
   const queryClient = useQueryClient()
   const [reloading, setReloading] = useState(false)
   const [reloadError, setReloadError] = useState<ReturnType<typeof agentError> | null>(null)
+  // 配置被其它工具改过时，后台目录刷新会停住；此时「一键配置」必须可点，
+  // 语义变成「先读回当前文件、再预览并应用」，同一次点击完成恢复。
+  const needsReread = item.errorCode === "config_changed"
   async function reload() {
     setReloading(true)
     setReloadError(null)
@@ -74,11 +77,17 @@ export function AgentClientSettings({
           <div className="flex flex-wrap gap-2 border-t pt-5">
             <Button
               data-agent-configure
-              disabled={editing || actions.busy || !models.length || !!item.errorCode}
-              onClick={() => onConfigure(item)}
+              disabled={
+                editing ||
+                actions.busy ||
+                reloading ||
+                !models.length ||
+                (!!item.errorCode && !needsReread)
+              }
+              onClick={() => (needsReread ? void reload() : onConfigure(item))}
             >
               <Settings2 aria-hidden="true" />
-              {t("agents.configure")}
+              {t(needsReread ? "agents.rereadAndApply" : "agents.configure")}
             </Button>
             {item.canRestore ? (
               <>

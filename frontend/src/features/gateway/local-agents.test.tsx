@@ -259,3 +259,14 @@ it("复制、启停和恢复只操作详情页的客户端", async () => {
   expect(await screen.findByRole("status")).toHaveTextContent("已恢复原配置")
   expect(restoreAgentConfigMock).toHaveBeenCalledWith("codex")
 })
+
+it("列表页汇总提示需要重新应用的客户端", async () => {
+  listAgentClientsMock.mockResolvedValue([
+    { ...codex, errorCode: "config_changed" },
+    { ...codex, client: "harness-desktop", revision: "harness" },
+  ])
+  renderGateway("clients", { entry: "/gateway?tab=clients" })
+  const notice = await screen.findByText(/个客户端的配置文件已被其他工具修改/)
+  expect(notice).toHaveTextContent("Codex")
+  expect(notice).not.toHaveTextContent("DeepSeek Harness")
+})

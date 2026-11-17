@@ -2,6 +2,7 @@ package agentconfig
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -85,4 +86,75 @@ func TestPlanRevisionIncludesClientDirectoryStrategy(t *testing.T) {
 	if _, err := s.Apply(context.Background(), input); err == nil || err.Error() != "agent: catalog_changed" {
 		t.Fatal("strategy changed after preview", err)
 	}
+}
+
+// 后台刷新失败的原因要能被界面读到：只有日志时用户只会看到「模型没更新」。
+func TestInspectSurfacesRefreshIssueCodes(t *testing.T) {
+	s, _ := catalogFixture(t)
+	ctx := context.Background()
+	if _, err := s.Apply(ctx, Input{Client: "claude", Revision: digest(nil, false)}); err != nil {
+		t.Fatal(err)
+	}
+	// 模拟后台刷新写失败（哈希仍匹配，单看文件看不出来），错误码必须出现在 Item 上。
+	s.setIssues(map[string]string{"claude": "write_failed"})
+	items, err := s.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code := itemErrorCode(items, "claude"); code != "write_failed" {
+		t.Fatalf("refresh issue not surfaced: %q", code)
+	}
+	// 文件被外部改写时 config_changed 优先（行动方式相同，且更具体）。
+	external := []byte(`{"external":true}`)
+	if err := os.WriteFile(s.paths.Claude, external, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	items, err = s.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code := itemErrorCode(items, "claude"); code != "config_changed" {
+		t.Fatalf("config_changed not preferred: %q", code)
+	}
+	// 重新应用后失败原因清除。
+	if _, err := s.Apply(ctx, Input{Client: "claude", Revision: digest(external, true), AcceptCurrentConfig: true}); err != nil {
+		t.Fatal(err)
+	}
+	items, err = s.Inspect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if code := itemErrorCode(items, "claude"); code != "" {
+		t.Fatalf("issue survived reapply: %q", code)
+	}
+}
+
+// 失败码只从本包固定前缀的错误里取；聚合错误取第一个可识别的码。
+func TestFailureCodeExtractsStableCodes(t *testing.T) {
+	if code := failureCode(failure("config_changed")); code != "config_changed" {
+		t.Fatalf("single = %q", code)
+	}
+	joined := errors.Join(failure("write_failed"), errors.New("agent: unsafe"))
+	if code := failureCode(joined); code != "write_failed" {
+		t.Fatalf("joined = %q", code)
+	}
+	for _, err := range []error{
+		errors.New("some other failure"),
+		errors.New("agent: bad-Code"),
+		errors.New("agent: " + strings.Repeat("x", 80)),
+		nil,
+	} {
+		if code := failureCode(err); code != "" {
+			t.Fatalf("unexpected code %q for %v", code, err)
+		}
+	}
+}
+
+func itemErrorCode(items []Item, client string) string {
+	for _, item := range items {
+		if item.Client == client {
+			return item.ErrorCode
+		}
+	}
+	return ""
 }

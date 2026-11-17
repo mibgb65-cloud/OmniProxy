@@ -44,6 +44,11 @@ func (s *Service) Inspect(ctx context.Context) ([]Item, error) {
 					i.ErrorCode = "config_changed"
 				}
 			}
+			// 后台刷新失败的原因（写失败、配置被占用、目录为空…）在这里交给界面；
+			// 已经有更具体的 config_changed 时保留它（行动方式相同）。
+			if code := s.issue(client); code != "" && i.ErrorCode == "" {
+				i.ErrorCode = code
+			}
 		}
 		clear(body)
 		items = append(items, i)

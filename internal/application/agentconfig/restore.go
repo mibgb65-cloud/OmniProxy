@@ -88,6 +88,7 @@ func (s *Service) Restore(ctx context.Context, client string) ([]Item, error) {
 	if err = s.SetEnabled(ctx, client, false); err != nil {
 		return nil, err
 	}
+	s.clearIssue(client)
 	return s.Inspect(ctx)
 }
 

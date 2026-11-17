@@ -258,8 +258,11 @@ export const agentsEn = {
   "agents.successNotification": "Configuration saved notification",
   "agents.dismissSuccess": "Dismiss configuration saved notification",
   "agents.restored": "Original configuration restored.",
+  "agents.rereadAndApply": "Re-read and apply",
+  "agents.reapplyNotice":
+    "{{count}} client(s) had their config files changed by other tools, so automatic catalog updates are paused: {{clients}}. Open the client and choose “Re-read and apply” to resume.",
   "agents.error.config_changed":
-    "Another tool modified the file. Reload configuration, preview, and apply again. Current edits are preserved.",
+    "Another tool changed this configuration file, so automatic catalog updates are paused. Choose “Re-read” (or “Re-read and apply”): OmniProxy reloads the current file, previews it and saves without dropping your edits.",
   "agents.error.invalid_config": "Fix the original configuration format first.",
   "agents.error.auth_conflict": "Resolve the provider credential helper conflict first.",
   "agents.error.profile_conflict":

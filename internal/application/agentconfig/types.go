@@ -65,6 +65,10 @@ type Service struct {
 	codexVersion string
 	// codexLogin 给出要写进客户端登录的池账号 auth.json；nil 表示不接管登录。
 	codexLogin func(context.Context) ([]byte, error)
+	// issues 保存每个受管客户端最近一次后台目录刷新的稳定失败码；
+	// 刷新成功或重新应用后清除，供界面说明「为什么目录没有自动更新」。
+	issueMu sync.Mutex
+	issues  map[string]string
 }
 
 // SetCodexVersion 同步启动或安装后的本机核心版本，不自行安装或升级客户端。
@@ -75,7 +79,7 @@ func (s *Service) SetCodexVersion(version string) {
 }
 
 func New(db *sql.DB, store Store, paths Paths, port int, catalog Catalog) *Service {
-	return &Service{db: db, store: store, paths: paths, port: port, catalog: catalog}
+	return &Service{db: db, store: store, paths: paths, port: port, catalog: catalog, issues: map[string]string{}}
 }
 func failure(code string) error { return errors.New("agent: " + code) }
 func (s *Service) path(client string) (string, error) {

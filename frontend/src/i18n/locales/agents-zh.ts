@@ -239,12 +239,15 @@ export const agentsZh = {
   "agents.desktopHint":
     "应用时自动启用第三方网关模式，并选中「OmniProxy · 本地网关」配置。完全退出并重新启动 Claude 后，进入 Code 即可使用本地网关，无需官方账号登录。原设置与会话会保留，恢复原配置可还原启动模式。",
   "agents.noModels": "请先在路由页同步账号模型或配置可用路由，再应用接入配置。",
+  "agents.rereadAndApply": "重新读取并应用",
+  "agents.reapplyNotice":
+    "{{count}} 个客户端的配置文件已被其他工具修改，模型目录暂停自动更新：{{clients}}。打开对应客户端，点「重新读取并应用」即可恢复。",
   "agents.success": "配置已保存，原配置已加密备份。",
   "agents.successNotification": "配置保存通知",
   "agents.dismissSuccess": "关闭保存成功提示",
   "agents.restored": "已恢复原配置。",
   "agents.error.config_changed":
-    "文件已被其他工具修改，请点击「重新读取配置」，再预览并应用；会保留当前改动。",
+    "配置文件已被其他工具修改，模型目录已暂停自动更新。点「重新读取配置」或「重新读取并应用」会读回当前文件、预览后再保存，不会丢掉你的改动。",
   "agents.error.invalid_config": "原配置格式不正确，请先修正。",
   "agents.error.auth_conflict": "原提供商使用了认证助手，请先处理认证配置冲突。",
   "agents.error.profile_conflict": "当前配置存在提供商覆盖或同名条目，请先检查现有设置。",

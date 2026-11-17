@@ -98,6 +98,8 @@ func (s *Service) Apply(ctx context.Context, input Input) (items []Item, resultE
 	if err := s.SetEnabled(ctx, input.Client, true); err != nil {
 		return nil, err
 	}
+	// 重新应用就是「已处理外部改动」，此前记录的刷新失败原因随之失效。
+	s.clearIssue(input.Client)
 	return s.Inspect(ctx)
 }
 
