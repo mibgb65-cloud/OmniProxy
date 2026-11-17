@@ -203,13 +203,17 @@ appName 段与 `X-IDE-Version` 的来源不同；`cliAgent()`（第 418–420 �
 - 云托管企业：`build.go`／`endpoint` 解析加域名白名单（仅 `*.sso.copilot.tencent.com`、
   `*.copilot.qq.com`、`*.sso.codebuddy.cn`，其余域名拒绝并提示），补安全测试
 
-## 待用户确认
+## 已确认决策（2026-11-17 15:52）
 
-1. **服务商建模**：采用推荐方案 A（独立内置服务商「WorkBuddy（国内版）」）？还是 B（账号级地区选项）？
-2. **首版范围**：只要 P0（登录 + 目录 + Chat），还是 P0+P1（含 Claude 模型的 Messages 原生路由）？
-   签到（P2）是否要进首版？
-3. **真实账号验证**：是否有可用的国内版账号（个人／企业）授权登录并发一次对话（消耗额度）？
-   若是企业账号，是否属于云托管域名（`<ent>.sso.copilot.tencent.com` 等），决定 P2 优先级。
+1. **服务商建模**：采用方案 A——新增独立内置服务商「WorkBuddy（国内版）」
+   （kind `workbuddy`、id `builtin_workbuddy`、迁移 052），与国际版 `builtin_workbuddy_ai` 并列。
+2. **首版范围**：P0 + P1（登录／目录／Chat 转发 + Claude 模型走 `/v1/messages` 原生）。
+   P2（手动签到、云托管企业域名）不进首版，另开任务评估；P3（Chat→Messages 转换）不做。
+3. **真实账号验证**：用户有国内版账号。首轮只读验证（登录 + `/v3/config` 目录，不消耗推理额度），
+   通过后再由用户授权一次真实对话（消耗额度）。若为企业账号，需确认是否云托管域名——
+   那是 P2 的前置条件，首版遇到时给明确提示、不猜主机。
+
+首版因此锁定为：`builtin_workbuddy` + build 参数化适配器 + 目录 + Chat 转发 + Claude Messages 原生路由。
 
 ## 验收标准
 
@@ -217,10 +221,11 @@ appName 段与 `X-IDE-Version` 的来源不同；`cliAgent()`（第 418–420 �
       出站 UA 为 `WorkBuddy/<app> WorkBuddy/<app> CLI/<cli>`；登录、续期、退出、重新登录可用
 - [ ] 国内账号目录同步成功，Claude 模型与其它模型的能力／上下文／档位与 `/v3/config` 一致
       （Claude 追加 `max`）；续期不让目录失效
-- [ ] Chat 协议经网关可用；Claude 模型走 `/v1/messages` 原生且档位生效（若纳入 P1）
-- [ ] Credits 三窗口展示正确；签到（若纳入）可手动领取并给出 credit／streak／失败码
+- [ ] Chat 协议经网关可用；Claude 模型走 `/v1/messages` 原生且档位生效
+      （`output_config.effort` 由客户端档位映射，系统提示词不按 chat 规则改写）
+- [ ] Credits 三窗口展示正确
 - [ ] 国际版账号、路由与既有目录不回归；`task verify` 通过
-- [ ] 真实账号登录 + 一次真实对话（用户授权）；未验证项写入文档
+- [ ] 真实账号验证：先只读登录 + 目录，再经用户授权跑一次真实对话；未验证项写入文档
 - [ ] 文档与 ADR 更新：`WORKBUDDY.md`、PRD、OVERVIEW、ADR-026 附录 + 新 ADR
 
 ## 风险与缓解
