@@ -119,7 +119,7 @@ addon / bonus 0
 
 ## Commit
 
-Not committed by Agent.
+b8c5b086 fix(provider): 修复 WorkBuddy AI 对话被 11128 拒绝（首条必须是 system）
 
 ---
 
