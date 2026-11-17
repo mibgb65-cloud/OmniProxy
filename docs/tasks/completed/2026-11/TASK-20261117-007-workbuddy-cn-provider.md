@@ -138,9 +138,20 @@ task verify → exit 0
 | 两版 provider 预设与迁移 052 幂等 | `provider/{service_test,workbuddy_migration_test}.go`、`main_test.go` |
 | 前端品牌/文案/构建隔离 | `provider-labels.test.ts`、`subscription-login-config.test.ts` |
 
+## 真实账号验证（2026-11-17 16:39–16:52，用户账号，国内版）
+
+| 项 | 结果 |
+| --- | --- |
+| 浏览器登录 | 已走通：DB 里 `builtin_workbuddy` 账号（kind `workbuddy`、`workbuddy_login`、`authenticated`），令牌域名 `www.workbuddy.cn` |
+| 目录自动同步 | 已走通：登录完成后后台自动同步 60 个模型（`glm-5.3`、`glm-5.3-flash`、`deepseek-v4.1-flash`、`kimi-k3-1`、`minimax-m3.1-flash`、`hy4std`、`wb-lite`、`codewise-*` 等），`account_catalog_versions` 已绑定凭据版本 |
+| 真实对话（Chat） | 已走通（用户授权）：`glm-5.3-flash`、单轮短问题，经 `NewForBuild(China)` 出站 `200` + SSE，回答 `OK`，`usage` 26/3/29；说明国内版 UA／`platform` 未被 `10085` 拒绝 |
+| 账号目录里的 Claude | 该账号 `/v3/config` 60 个模型里**没有 `claude-*` ID**；显示名带 Claude 的是 `default-1.1`（Claude-3.7-Sonnet）与 `default-1.2`（Claude-4.0-Sonnet）两个别名，按 ID 规则不会走 Messages（与社区插件 `nativeOf` 口径一致） |
+| 路由 | `model_routes` 仍为 0，需用户在路由页建规则后网关才暴露模型 |
+
 ## 未验证
 
-- 国内版真实账号（登录、`/v3/config` 目录、一次对话）未执行；用户账号待验证。
+- 国内版 Messages 原生路由需要账号目录里真有 `claude-*` 模型；本账号没有，因此真实链路的
+  Messages 转发只由契约测试覆盖。
 - 国内版客户端指纹、`platform` 与 Messages 端点来自社区插件 0.2.36，非官方契约。
 - 签到与云托管企业域名不在本期（P2）。
 
