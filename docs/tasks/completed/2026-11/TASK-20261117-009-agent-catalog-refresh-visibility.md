@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -152,7 +152,7 @@ task verify → exit 0
 
 ## Commit
 
-TBD
+e2e53b7d fix(agentconfig): 让受管客户端目录停更可见并能一键恢复
 
 ---
 
