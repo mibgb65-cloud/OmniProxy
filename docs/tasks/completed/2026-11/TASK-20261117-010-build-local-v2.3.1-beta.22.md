@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Completed
 
 ## Created
 
@@ -118,7 +118,7 @@ BUILD_EXIT=0
 
 ## Commit
 
-TBD
+6e059c75 chore(release): 准备 v2.3.1-beta.22 本地构建
 
 ---
 
