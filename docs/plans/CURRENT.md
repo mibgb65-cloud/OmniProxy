@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261117-002](../tasks/completed/2026-11/TASK-20261117-002-workbuddy-chat-system-prompt-fix.md) WorkBuddy AI 对话被上游 `11128` 拒绝：真实账号验证（Free 计划）发现 messages 只有 user 时返回 `400 code 11128 "first message is not system prompt"`，首条补 system 后 `200` + SSE（`usage` 26/3/29）。社区插件同样在出站前补齐系统提示词，并在 11128 时把系统提示词下移为用户消息重试一次（渠道校验只读 system／assistant 消息）。适配器现已归一 `developer→system`、`max_completion_tokens→max_tokens`、首条非 system 补默认提示词，并在 11128 后按上述形态重试一次。真实链路（`Client.Forward`，入参无 system）实测 `200` + SSE，回答 `OK`；Free 计划 3 次调用后 credits 仍 0 使用（按每日免费额度计费，付费扣减未验证）。目标版本 `v2.3.1-beta.19`。
+
+本地构建：[TASK-20261117-003](../tasks/active/TASK-20261117-003-build-local-v2.3.1-beta.19.md) 目标 `v2.3.1-beta.19`，内容为上述对话形态修复；构建中，产物大小与 SHA256 见任务记录。
+
 已修复：[TASK-20261116-022](../tasks/completed/2026-11/TASK-20261116-022-workbuddy-manual-model-sync-fix.md) 手动同步模型失败：路由 → 模型目录选中 WorkBuddy AI 账号点「同步官方模型」永远报「同步失败」，但自动同步其实已写入 25 条模型（令牌 `GET /v3/config` 也是 200）。根因是 `AppService.modelCatalog()` 只调用了 `SetGoogleSubscription`，`modelcatalog.Sync` 的 WorkBuddy 分支因 `workbuddyAuth == nil` 直接返回 `unavailable`；自动同步用的是另一套已接线服务，于是「模型在库里、按钮一直失败」。现在统一走 `wireModelCatalog` 接线，失败时底层稳定码写日志（界面仍是一句通用提示）。目标版本 `v2.3.1-beta.18`。
 
 本地构建：[TASK-20261116-023](../tasks/completed/2026-11/TASK-20261116-023-build-local-v2.3.1-beta.18.md) 已产出 `v2.3.1-beta.18` Windows amd64 生产安装包，内容为上述手动同步修复：安装器 21,328,474 bytes，SHA256 `d0e18021c40be3dcf8810f412c8845cb1311efaa6e942064332a0b4f2660880a`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无新增数据库迁移。
