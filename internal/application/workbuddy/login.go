@@ -32,8 +32,13 @@ func (s *Service) Begin(ctx context.Context, input subscription.Input) (subscrip
 	if busy {
 		return subscription.State{}, workbuddyai.Failure("busy")
 	}
+	build, err := s.accounts.WorkBuddyBuild(ctx, input.ProviderID)
+	if err != nil {
+		return subscription.State{}, workbuddyai.Failure("invalid_input")
+	}
+	client := s.clientFor(build)
 	startCtx, cancelStart := context.WithTimeout(ctx, operationTimeout)
-	signIn, err := s.client.BeginSignIn(startCtx)
+	signIn, err := client.BeginSignIn(startCtx)
 	cancelStart()
 	if err != nil {
 		return subscription.State{}, err
@@ -41,6 +46,7 @@ func (s *Service) Begin(ctx context.Context, input subscription.Input) (subscrip
 	waitCtx, cancel := context.WithTimeout(context.Background(), loginTimeout)
 	job := &session{
 		input:  input,
+		client: client,
 		cancel: cancel,
 		done:   make(chan struct{}),
 		view: subscription.State{
@@ -71,13 +77,13 @@ func (s *Service) complete(ctx context.Context, job *session, state string) {
 	stage := "token"
 	var item account.Item
 	var err error
-	token, err := s.client.WaitForToken(ctx, state)
+	token, err := job.client.WaitForToken(ctx, state)
 	if err == nil {
 		stage = "identity"
 		s.progress(job, "exchanging")
 		operation, cancel := context.WithTimeout(ctx, operationTimeout)
 		var identity workbuddyai.Identity
-		identity, err = s.client.ReadIdentity(operation, token)
+		identity, err = job.client.ReadIdentity(operation, token)
 		cancel()
 		if err == nil {
 			cred := credentialsFrom(token, identity)

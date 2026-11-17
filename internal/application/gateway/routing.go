@@ -225,7 +225,7 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 		return target{}, proxy.Failure("configuration_unavailable", 503)
 	}
 	for _, provider := range providers {
-		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "oxionai" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax" && provider.Kind != howtofix.Kind && provider.Kind != dumate.Kind && provider.Kind != workbuddyai.Kind) || !provider.Enabled {
+		if provider.ID != request.ProviderID || (provider.Kind != "deepseek" && provider.Kind != "openai" && provider.Kind != "atria" && provider.Kind != "river" && provider.Kind != "oxionai" && provider.Kind != "google" && provider.Kind != "mimo" && provider.Kind != "stepfun" && provider.Kind != "kimi" && provider.Kind != "minimax" && provider.Kind != howtofix.Kind && provider.Kind != dumate.Kind && provider.Kind != workbuddyai.Kind && provider.Kind != workbuddyai.ChinaKind) || !provider.Enabled {
 			continue
 		}
 		for _, account := range accounts {
@@ -255,8 +255,8 @@ func (s *Service) selectRoutedTarget(ctx context.Context, request proxy.Request)
 				if provider.Kind == dumate.Kind && (account.AuthMethod != accountmodel.AuthDuMateCookie || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
-				// WorkBuddy AI 只有浏览器登录账号；登录失效时拒绝转发，提示重新登录。
-				if provider.Kind == workbuddyai.Kind && (account.AuthMethod != accountmodel.AuthWorkBuddyLogin || account.AuthState != "authenticated") {
+				// WorkBuddy 两个构建都只有浏览器登录账号；登录失效时拒绝转发，提示重新登录。
+				if (provider.Kind == workbuddyai.Kind || provider.Kind == workbuddyai.ChinaKind) && (account.AuthMethod != accountmodel.AuthWorkBuddyLogin || account.AuthState != "authenticated") {
 					return target{}, proxy.Failure("route_account_unavailable", 503)
 				}
 				// 按量 API Key 账号与订阅账号共用提供商，但计费与凭据完全不同。

@@ -29,7 +29,8 @@ export function SubscriptionAccountStatus({ account }: { account: AccountItem })
   const refreshing =
     mutation.variables?.action === "refresh" && account.providerId !== "builtin_google"
   // 刷新失败沿用订阅错误字典；WorkBuddy 使用自己的稳定错误码与文案。
-  const workbuddy = account.providerId === "builtin_workbuddy_ai"
+  const workbuddy =
+    account.providerId === "builtin_workbuddy_ai" || account.providerId === "builtin_workbuddy"
   const subscriptionCode = refreshing
     ? subscriptionRefreshError(mutation.error)
     : subscriptionError(mutation.error)

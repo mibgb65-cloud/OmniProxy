@@ -14,6 +14,7 @@ export const providerNameKeys = {
   dumate: "providers.kind.dumate",
   howtofix: "providers.kind.howtofix",
   workbuddy_ai: "providers.kind.workbuddy_ai",
+  workbuddy: "providers.kind.workbuddy",
 } as const
 
 export function isKnownProviderKind(kind: string): kind is keyof typeof providerNameKeys {
@@ -25,6 +26,8 @@ export function subscriptionTypeKey(provider: string | undefined) {
   if (provider === "google" || provider === "builtin_google") return "google.subscriptionType"
   if (provider === "workbuddy_ai" || provider === "builtin_workbuddy_ai")
     return "providers.subscriptionType.workbuddyAi"
+  if (provider === "workbuddy" || provider === "builtin_workbuddy")
+    return "providers.subscriptionType.workbuddy"
   if (provider === "openai" || provider === "builtin_openai") return "subscription.type"
   return "providers.subscriptionLogin"
 }

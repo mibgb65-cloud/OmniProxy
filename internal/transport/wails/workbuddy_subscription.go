@@ -83,6 +83,11 @@ func (s *AppService) openWorkBuddySubscription(id string) error {
 
 func workbuddySession(id string) bool { return strings.HasPrefix(id, "workbuddy_") }
 
+// workbuddyProvider 判断内置服务商 ID 是否属于 WorkBuddy 的两个构建（国际版／国内版）。
+func workbuddyProvider(providerID string) bool {
+	return providerID == "builtin_workbuddy_ai" || providerID == "builtin_workbuddy"
+}
+
 // WorkBuddyQuota 返回官方 Credits 三窗口；失败时回退保留期内的最近快照。
 func (s *AppService) WorkBuddyQuota(id string) (workbuddy.Quota, error) {
 	manager, err := s.workbuddySubscriptionService()

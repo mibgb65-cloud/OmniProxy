@@ -7,9 +7,13 @@ import (
 	"omniproxy/internal/provider/workbuddyai"
 )
 
-// workbuddyMetadata 把 WorkBuddy AI 的 /v3/config 条目转成网关目录元数据。
+// workbuddyMetadata 把 WorkBuddy 的 /v3/config 条目转成网关目录元数据。
 // 上游没给的字段保持未知，不补 0，也不猜测上下文或输出上限。
-func workbuddyMetadata(model workbuddyai.Model) core.Metadata {
+//
+// messagesNative 表示该构建把 Claude 模型放在原生 Anthropic Messages 上服务：
+// 这类模型在 Messages 上接受 `max` 档位（社区插件实测 200 且思考更多），即使目录的
+// supportedEfforts 只到 xhigh，因此补上 `max` 让客户端能选到它。
+func workbuddyMetadata(model workbuddyai.Model, messagesNative bool) core.Metadata {
 	metadata := core.Metadata{}
 	if model.Context > 0 {
 		window := int64(model.Context)
@@ -34,6 +38,11 @@ func workbuddyMetadata(model workbuddyai.Model) core.Metadata {
 		}
 		seen[value] = true
 		metadata.ReasoningEfforts = append(metadata.ReasoningEfforts, core.Effort{Value: value})
+	}
+	if messagesNative && len(metadata.ReasoningEfforts) > 0 && !seen["max"] && len(metadata.ReasoningEfforts) < 16 &&
+		strings.HasPrefix(strings.ToLower(model.ID), "claude-") {
+		metadata.ReasoningEfforts = append(metadata.ReasoningEfforts, core.Effort{Value: "max"})
+		seen["max"] = true
 	}
 	if len(metadata.ReasoningEfforts) > 0 && seen[normalizeEffort(model.DefaultEffort)] {
 		metadata.DefaultEffort = normalizeEffort(model.DefaultEffort)

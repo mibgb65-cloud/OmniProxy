@@ -1,5 +1,11 @@
-// Package workbuddyai 接入 WorkBuddy AI（腾讯 CodeBuddy 计划的国际版订阅，
-// https://www.workbuddy.ai）的浏览器登录态、模型目录、Credits 额度与 Chat 转发。
+// Package workbuddyai 接入 WorkBuddy（腾讯 CodeBuddy 计划）的两个订阅构建的浏览器
+// 登录态、模型目录、Credits 额度与对话转发：
+//
+//   - 国际版 `www.workbuddy.ai`（kind `workbuddy_ai`，见 International）；
+//   - 国内版 `copilot.tencent.com`（kind `workbuddy`，见 China）。
+//
+// 两个构建共用同一套插件 API，差异（站点、登录平台标识、UA 中段、是否提供原生
+// Anthropic Messages）由 Build 描述；适配器只有一份实现。
 //
 // 协议事实来自社区插件 @magpie-community/opencode-workbuddy-auth 0.2.36
 // （MIT，packages/workbuddy/index.mjs）的只读调研，**不是官方契约**，也没有用
@@ -17,19 +23,29 @@ import (
 )
 
 const (
-	// Kind 是内置服务商的稳定标识。
+	// Kind 是国际版内置服务商的稳定标识。
 	Kind = "workbuddy_ai"
-	// Name 是界面展示名称。
+	// Name 是国际版界面展示名称。
 	Name = "WorkBuddy AI"
 	// DefaultBaseURL 是国际版固定基址；所有端点都相对它追加。
 	DefaultBaseURL = "https://www.workbuddy.ai"
-	// AuthMethod 是账号表的认证类型；登录令牌不能伪装成 API Key。
+
+	// ChinaKind 是国内版内置服务商的稳定标识。
+	ChinaKind = "workbuddy"
+	// ChinaName 是国内版兜底展示名称（前端 i18n 会覆盖成「WorkBuddy（国内版）」）。
+	ChinaName = "WorkBuddy (China)"
+	// ChinaBaseURL 是国内版固定基址。
+	ChinaBaseURL = "https://copilot.tencent.com"
+
+	// AuthMethod 是账号表的认证类型；登录令牌不能伪装成 API Key。两个构建共用。
 	AuthMethod = "workbuddy_login"
-	// ChatProtocol 是上游唯一可确认的原生协议；其它协议由网关先转换。
+	// ChatProtocol 是上游 Chat Completions 协议；其它协议由网关先转换。
 	ChatProtocol = "chat"
+	// MessagesProtocol 是国内版为 Claude 模型提供的原生 Anthropic Messages 协议。
+	MessagesProtocol = "messages"
 
 	// AppVersion 是上游客户端指纹里的桌面版版本（社区插件 0.2.36 记录，
-	// 对应 WorkBuddy AI 5.9.3.42398134）。
+	// 对应 WorkBuddy 5.9.3.42398134；两个构建同版本）。
 	AppVersion = "5.9.3"
 	// CLIVersion 是桌面版内置 CLI 的版本；UA 与 X-IDE-Version 都带它。
 	CLIVersion = "2.165.0"

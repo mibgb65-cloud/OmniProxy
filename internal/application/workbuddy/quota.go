@@ -43,13 +43,17 @@ func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
 }
 
 func (s *Service) readQuota(ctx context.Context, id string) (Quota, error) {
+	build, err := s.buildOf(ctx, id)
+	if err != nil {
+		return Quota{}, err
+	}
 	cred, err := s.credentials(ctx, id, false)
 	if err != nil {
 		return Quota{}, err
 	}
 	operation, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
-	credits, err := s.client.ReadCredits(operation, cred)
+	credits, err := s.clientFor(build).ReadCredits(operation, cred)
 	if err != nil {
 		return Quota{}, err
 	}

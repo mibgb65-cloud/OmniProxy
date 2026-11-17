@@ -15,5 +15,5 @@ type OpenAIAutoSync struct{ *AutoSync }
 
 // StartOpenAIAutoSync 在启动、授权变化或账号更新后补齐过期目录。
 func StartOpenAIAutoSync(ctx context.Context, source *Service, refresh func(context.Context) error, report func(error)) *OpenAIAutoSync {
-	return &OpenAIAutoSync{startAutoSync(ctx, source, "openai", true, true, refresh, report)}
+	return &OpenAIAutoSync{startAutoSync(ctx, source, []string{"openai"}, true, true, refresh, report)}
 }

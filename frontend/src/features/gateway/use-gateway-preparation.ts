@@ -33,6 +33,7 @@ export function useGatewayPreparation() {
         "kimi",
         "howtofix",
         "workbuddy_ai",
+        "workbuddy",
       ].includes(item.kind),
     ) ?? []
   const resources =

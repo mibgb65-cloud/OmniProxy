@@ -18,23 +18,57 @@ type WorkBuddySubscriptionAccess interface {
 	UseAt(context.Context, string, string, func(workbuddyai.Credentials) error) error
 }
 
-// SetWorkBuddySubscription 安装 WorkBuddy AI 订阅通道。
+// SetWorkBuddySubscription 安装 WorkBuddy 订阅通道（国际版与国内版共用）。
 func (s *Service) SetWorkBuddySubscription(service WorkBuddySubscriptionAccess) {
 	s.workbuddyAuth = service
 }
 
-// forwardWorkBuddy 借出登录令牌后转发；上游只接受流式 Chat，
-// Responses／Messages 与「非流式的 Chat 客户端」都由本进程聚合后按原协议回包。
+// workbuddyClient 返回该构建的客户端；未注册时返回 nil。
+func (s *Service) workbuddyClient(build workbuddyai.Build) *workbuddyai.Client {
+	s.workbuddyMu.Lock()
+	defer s.workbuddyMu.Unlock()
+	if client, ok := s.workbuddy[build.Kind]; ok {
+		return client
+	}
+	client := workbuddyai.NewForBuild(build, nil)
+	s.workbuddy[build.Kind] = client
+	return client
+}
+
+// forwardWorkBuddy 借出登录令牌后转发。
+//
+// 国际版上游只接受流式 Chat：Responses／Messages 与「非流式的 Chat 客户端」都由本进程
+// 聚合后按原协议回包。国内版为 Claude 模型额外提供原生 Anthropic Messages，调用方用
+// Messages 协议访问这类模型时原样转发，不做 Chat 侧的系统提示词改写。
 func (s *Service) forwardWorkBuddy(ctx context.Context, target target, request proxy.Request, consume func(proxy.Response) error) error {
-	if s.workbuddy == nil || s.workbuddyAuth == nil {
+	build, ok := workbuddyai.BuildOf(target.kind)
+	if !ok || s.workbuddyAuth == nil {
 		return proxy.Failure("adapter_unavailable", 503)
 	}
+	client := s.workbuddyClient(build)
+	if client == nil {
+		return proxy.Failure("adapter_unavailable", 503)
+	}
+	native := request.Protocol == workbuddyai.MessagesProtocol && build.MessagesNative(request.Model)
 	return s.useWorkBuddyToken(ctx, target, func(cred workbuddyai.Credentials) error {
-		return s.forwardWorkBuddyChat(ctx, cred, request, consume)
+		if native {
+			return s.forwardWorkBuddyMessages(ctx, client, cred, request, consume)
+		}
+		return s.forwardWorkBuddyChat(ctx, client, cred, request, consume)
 	})
 }
 
-func (s *Service) forwardWorkBuddyChat(ctx context.Context, cred workbuddyai.Credentials, request proxy.Request, consume func(proxy.Response) error) error {
+// forwardWorkBuddyMessages 把 Messages 请求原样送到国内版原生端点；流式与非流式都由
+// 上游决定，网关只观察响应。
+func (s *Service) forwardWorkBuddyMessages(ctx context.Context, client *workbuddyai.Client, cred workbuddyai.Credentials, request proxy.Request, consume func(proxy.Response) error) error {
+	upstream := request
+	upstream.Protocol = workbuddyai.MessagesProtocol
+	return client.ForwardMessages(ctx, cred, upstream, func(response proxy.Response) error {
+		return consume(proxy.ObserveResponse(ctx, request.Trace, response, workbuddyai.MessagesProtocol))
+	})
+}
+
+func (s *Service) forwardWorkBuddyChat(ctx context.Context, client *workbuddyai.Client, cred workbuddyai.Credentials, request proxy.Request, consume func(proxy.Response) error) error {
 	protocol := request.Protocol
 	if protocol == "" {
 		protocol = "chat"
@@ -56,7 +90,7 @@ func (s *Service) forwardWorkBuddyChat(ctx context.Context, cred workbuddyai.Cre
 	upstream.Protocol = "chat"
 	upstream.Body = streamBody
 	upstream.Stream = true
-	return s.workbuddy.Forward(ctx, cred, upstream, func(response proxy.Response) error {
+	return client.Forward(ctx, cred, upstream, func(response proxy.Response) error {
 		response = proxy.ObserveResponse(ctx, request.Trace, response, "chat")
 		if response.StatusCode != 200 {
 			return consume(response)

@@ -133,7 +133,7 @@ func eligible(data snapshot, a account.Item, model string) bool {
 		if p.Kind == dumate.Kind && a.AuthMethod == account.AuthDuMateCookie && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
-		if p.Kind == workbuddyai.Kind && a.AuthMethod == account.AuthWorkBuddyLogin && a.AuthState == "authenticated" {
+		if (p.Kind == workbuddyai.Kind || p.Kind == workbuddyai.ChinaKind) && a.AuthMethod == account.AuthWorkBuddyLogin && a.AuthState == "authenticated" {
 			return targetSupports(data, p.ID, a.ID, model)
 		}
 	}

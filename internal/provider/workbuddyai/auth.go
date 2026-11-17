@@ -49,7 +49,7 @@ type Identity struct {
 
 // BeginSignIn 发起一次浏览器登录，返回 state 与已补上客户端参数的授权页地址。
 func (c *Client) BeginSignIn(ctx context.Context) (SignInState, error) {
-	address := c.base + signInStatePath + "?platform=" + url.QueryEscape(pluginPlatform)
+	address := c.base + signInStatePath + "?platform=" + url.QueryEscape(c.build.Platform)
 	data, err := c.call(ctx, http.MethodPost, address, nil, func(request *http.Request) {
 		// 登录接口明确要求不带任何身份头；四个头缺一个上游就按需要登录处理。
 		for _, name := range []string{"X-No-Authorization", "X-No-User-Id", "X-No-Enterprise-Id", "X-No-Department-Info"} {
@@ -66,7 +66,7 @@ func (c *Client) BeginSignIn(ctx context.Context) (SignInState, error) {
 	if json.Unmarshal(data, &value) != nil || !safeASCII(value.State, maxStateBytes, false) || value.AuthURL == "" {
 		return SignInState{}, Failure(CodeInvalidResponse)
 	}
-	authURL, err := signInURL(value.AuthURL)
+	authURL, err := c.signInURL(value.AuthURL)
 	if err != nil {
 		return SignInState{}, err
 	}
@@ -74,7 +74,7 @@ func (c *Client) BeginSignIn(ctx context.Context) (SignInState, error) {
 }
 
 // signInURL 校验授权页是 HTTPS，并按桌面端形态补 version 与随机 loginSessionId。
-func signInURL(raw string) (string, error) {
+func (c *Client) signInURL(raw string) (string, error) {
 	if len(raw) > maxURLBytes {
 		return "", Failure(CodeInvalidResponse)
 	}
@@ -87,7 +87,7 @@ func signInURL(raw string) (string, error) {
 		return "", proxy.UpstreamFailure(err)
 	}
 	query := parsed.Query()
-	query.Set("version", AppVersion)
+	query.Set("version", c.build.AppVersion)
 	query.Set("loginSessionId", session)
 	parsed.RawQuery = query.Encode()
 	parsed.Fragment = ""
@@ -132,7 +132,7 @@ func (c *Client) pollToken(ctx context.Context, state string) (Token, bool, erro
 		return Token{}, false, proxy.UpstreamFailure(err)
 	}
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent", loginUserAgent)
+	request.Header.Set("User-Agent", c.build.ShortUserAgent())
 	response, err := c.http.Do(request)
 	if err != nil {
 		// 轮询被取消时返回 ctx 错误，让登录编排按「取消」而不是「上游故障」处理。
@@ -291,7 +291,7 @@ func (c *Client) call(ctx context.Context, method, address string, body []byte, 
 	}
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", loginUserAgent)
+	request.Header.Set("User-Agent", c.build.ShortUserAgent())
 	if prepare != nil {
 		prepare(request)
 	}

@@ -115,7 +115,7 @@ func (c *Client) DiscoverModels(ctx context.Context, cred Credentials) (models [
 			return nil, Failure(CodeInvalidResponse)
 		}
 		seen[item.ID] = true
-		models = append(models, normalizeModel(item))
+		models = append(models, normalizeModel(item, c.build))
 	}
 	if len(models) == 0 {
 		return nil, Failure(CodeInvalidResponse)
@@ -125,11 +125,16 @@ func (c *Client) DiscoverModels(ctx context.Context, cred Credentials) (models [
 
 // normalizeModel 只做字段映射与边界收敛：缺失字段保持未知，不补默认值。唯一的补全
 // 是推理档位：上游声明支持推理却只给 effort 时，按实测口径补上通用档位。
-func normalizeModel(item rawModel) Model {
+func normalizeModel(item rawModel, build Build) Model {
+	images := item.SupportsImages != nil && *item.SupportsImages
+	if build.ImagesExceptGLM && strings.HasPrefix(item.ID, "glm-") {
+		// 国际版的 glm-* 声明 supportsImages，但上游会把图片丢掉；国内版实测能读。
+		images = false
+	}
 	model := Model{
 		ID:     item.ID,
 		Name:   item.Name,
-		Images: item.SupportsImages != nil && *item.SupportsImages && !strings.HasPrefix(item.ID, "glm-"),
+		Images: images,
 	}
 	if model.Name == "" {
 		model.Name = item.ID

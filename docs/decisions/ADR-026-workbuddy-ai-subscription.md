@@ -50,7 +50,9 @@ Google 的 OAuth + 网关续期（ADR-013）、DuMate 的登录态导入（Cooki
   来自官方 meter；`Total credits` 才代表账号是否可用。调度不得依据本机对上游额度的解读，
   避免解读错误影响可用性。免费模型每日 token 窗口（需按本机记账重算）不在首版。
 - **只接国际版**：国内版（`copilot.tencent.com`）的 Claude 模型走 Anthropic Messages、
-  另有签到语义，作为独立议题；桌面登录文件（5.6+ 加密）与 API Key 不做。
+  另有签到语义与云托管企业域名，作为独立议题；桌面登录文件（5.6+ 加密）与 API Key 不做。
+  国内版已由 [ADR-027](ADR-027-workbuddy-china-build.md) 作为独立内置服务商接入
+  （kind `workbuddy`）；本 ADR 的请求形态、续期、额度与错误码语义对两个构建同样适用。
 
 ## Alternatives Considered
 

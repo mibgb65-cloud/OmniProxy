@@ -1,6 +1,15 @@
 export const workbuddyEn = {
   "providers.kind.workbuddy_ai": "WorkBuddy AI",
   "providers.subscriptionType.workbuddyAi": "WorkBuddy AI subscription",
+  "providers.kind.workbuddy": "WorkBuddy (China)",
+  "providers.subscriptionType.workbuddy": "WorkBuddy (China) subscription",
+  "workbuddy.cnLoginTitle": "Sign in to WorkBuddy (China)",
+  "workbuddy.cnLoginDescription":
+    "Complete the WorkBuddy (China) sign-in in your browser; OmniProxy resumes automatically when it finishes.",
+  "workbuddy.cnLoginReturnHint":
+    "The browser page may offer to return to the WorkBuddy app; that is expected. OmniProxy picks up the result automatically.",
+  "quota.workbuddyCn.title": "WorkBuddy (China) Credits",
+  "quota.workbuddyCn.refresh": "Refresh WorkBuddy (China) Credits",
   "workbuddy.loginTitle": "Sign in to WorkBuddy AI",
   "workbuddy.loginDescription":
     "Complete the WorkBuddy AI sign-in in your browser; OmniProxy resumes automatically when it finishes.",

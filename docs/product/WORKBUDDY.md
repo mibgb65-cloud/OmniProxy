@@ -1,35 +1,43 @@
-# WorkBuddy AI 订阅通道
+# WorkBuddy 订阅通道（国际版 / 国内版）
 
-WorkBuddy AI 是腾讯 CodeBuddy 计划的国际版桌面 Agent（<https://www.workbuddy.ai>），
-一个账号订阅一套模型（GPT、Gemini、GLM、Kimi、DeepSeek、MiniMax 等）。
-OmniProxy 把它当作**内置订阅服务商**接入：用浏览器完成 WorkBuddy AI 登录后，
-本机网关以 `workbuddy_ai/<model>` 转发请求，受管客户端（Claude Code、Codex、DSH、
-OpenCode 等）按既有路由投影自动可用。
+WorkBuddy 是腾讯 CodeBuddy 桌面 Agent 的两个构建：国际版（<https://www.workbuddy.ai>）与
+国内版（<https://copilot.tencent.com>），一个账号订阅一套模型（GPT、Gemini、GLM、Kimi、
+DeepSeek、MiniMax 等；国内版还有 Claude）。两者是**独立站点与账号体系**，OmniProxy 各用
+一个内置订阅服务商接入；用浏览器完成登录后，本机网关以 `<kind>/<model>` 转发请求，受管
+客户端（Claude Code、Codex、DSH、OpenCode 等）按既有路由投影自动可用。
 
-- 服务商 ID：`builtin_workbuddy_ai`
-- kind：`workbuddy_ai`
-- 认证方式：`workbuddy_login`（只有浏览器登录，没有 API Key、没有设备码）
-- 上游基址：`https://www.workbuddy.ai`
+| 项 | 国际版 | 国内版 |
+| --- | --- | --- |
+| 服务商 ID | `builtin_workbuddy_ai` | `builtin_workbuddy` |
+| kind | `workbuddy_ai` | `workbuddy` |
+| 认证方式 | `workbuddy_login`（只有浏览器登录，没有 API Key、没有设备码） | 同上 |
+| 上游基址 | `https://www.workbuddy.ai` | `https://copilot.tencent.com` |
+| 登录平台标识 | `platform=workbuddy-ai` | `platform=workbuddy` |
+| 客户端 UA | `WorkBuddy/5.9.3 workbuddy-ai/5.9.3 CLI/2.165.0` | `WorkBuddy/5.9.3 WorkBuddy/5.9.3 CLI/2.165.0` |
+| 原生 Messages | 无（一律走 Chat） | Claude 模型可走 `POST /v1/messages` |
+| 每日签到 | 无该接口 | 有（本期未接入） |
 
 ## 使用
 
-1. **服务商 → WorkBuddy AI → 添加账号**，选择「登录 WorkBuddy AI」。
-2. 浏览器打开腾讯的登录页；完成登录后 OmniProxy 自动轮询取得令牌（最多 5 分钟）。
-   授权页按「桌面客户端来源」处理（带 `version` 与 `loginSessionId`），登录完成后可能提示
-   返回 WorkBuddy 客户端、甚至拉起本机已安装的客户端——**属正常**，登录结果由 OmniProxy
-   的后台轮询自动接收，不需要在客户端里再做任何操作。
+1. **服务商 → WorkBuddy AI / WorkBuddy（国内版） → 添加账号**，选择对应的登录按钮。
+2. 浏览器打开腾讯的登录页（国际版或国内版）；完成登录后 OmniProxy 自动轮询取得令牌
+   （最多 5 分钟）。授权页按「桌面客户端来源」处理（带 `version` 与 `loginSessionId`），
+   登录完成后可能提示返回 WorkBuddy 客户端、甚至拉起本机已安装的客户端——**属正常**，
+   登录结果由 OmniProxy 的后台轮询自动接收，不需要在客户端里再做任何操作。
 3. 登录成功后后台自动同步一次 `/v3/config` 模型目录；同步完成前该服务商没有可路由模型。
 4. 在**路由**页为需要的模型建规则（或使用同名默认映射），客户端目录随之出现。
 5. 账号卡显示 Credits 额度与「刷新 / 重新登录 / 退出」。
 
 > 登录令牌保存在本机受保护凭据存储（DPAPI），SQLite 只存不透明引用与可展示身份；
 > 令牌不会返回前端、不写日志。退出会先停用授权再清理密文，清理失败保留引用以便重试。
+> 两个构建的账号按 kind 隔离：令牌不能挂到另一版的服务商下，重新登录也只更新同一构建。
 
 ## 模型目录
 
 - 来源：`GET /v3/config`（按账号的套餐发放），字段映射：
   `maxInputTokens → ContextWindow`、`maxOutputTokens → OutputTokenLimit`、
-  `supportsImages → 图片输入`（`glm-*` 一律按文本处理）、`reasoning.supportedEfforts → 推理档位`。
+  `supportsImages → 图片输入`（国际版的 `glm-*` 一律按文本处理；国内版实测能读图，按目录声明保留）、
+  `reasoning.supportedEfforts → 推理档位`。
 - 推理档位有两种上游形态：多数模型直接给 `supportedEfforts`（如 `glm-5.3` 为
   `low/high/max`、`gpt-6.1-sol` 为 `low/medium/high/xhigh/max`）；`max-model`、
   `gemini-4-carbon`／`argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`）。
@@ -37,6 +45,9 @@ OpenCode 等）按既有路由投影自动可用。
   `low/high/max`／`low/medium/high/max`，并把它的 `effort` 作为默认档位。
   `supportsReasoning: false` 或完全没有 `reasoning` 的模型（`default-model`、
   `hy-image-3.5`、`kling-video-v3`）不发布档位。
+- **国内版的 Claude 模型**：目录的 `supportedEfforts` 常只到 `xhigh`，但原生 Messages 上
+  接受 `max`（社区插件实测 200 且思考更多），因此国内版目录对 `claude-*` 追加 `max`；
+  国际版没有该端点，不追加。
 - 缺失字段保持**未知**，不补 0、不猜测；`/v3/config` 失败时保留上次成功快照。
 - 目录与授权版本绑定：令牌续期会在同一事务内重绑目录，**不会**因为续期而丢模型。
 - 目录同步失败不阻塞旧路由；修复网络或重新登录后自动重试。
@@ -49,12 +60,12 @@ OpenCode 等）按既有路由投影自动可用。
 | 项 | 事实 |
 | --- | --- |
 | Chat Completions | 原生：`POST {base}/v2/chat/completions`，**上游只接受流式** |
-| Responses / Messages | 由网关 `agentprotocol` 转换成 Chat 后再转发，并按调用方原协议回包（不是上游原生） |
+| Responses / Messages | 国际版：由网关 `agentprotocol` 转换成 Chat 后再转发，并按调用方原协议回包（不是上游原生）。国内版：**Claude 模型**用 Messages 协议时原样转发到原生 `POST {base}/v1/messages`（不压缩、不改写系统提示词、不做 11128 重试）；其它模型与其它协议仍走 Chat |
 | 非流式客户端 | 网关以上游流式拉取、聚合成完整回包后再返回，不把半个工具调用交给客户端 |
-| 图片 | 仅当目录声明 `supportsImages`；`glm-*` 按文本处理，图片由图片描述模型代读 |
+| 图片 | 仅当目录声明 `supportsImages`；国际版的 `glm-*` 按文本处理（图片由图片描述模型代读），国内版的 `glm-*` 保留图片输入 |
 | 推理档位 | 发布目录档位：上游给 `supportedEfforts` 就照抄；只给 `effort` 的模型补 `low/high/max` 加上它自己的档位（实测口径） |
-| 请求形态 | 按官方桌面客户端形态发送（UA、`X-Product`、`X-IDE-*`、`X-Agent-*`、OpenAI SDK 指纹、gzip 请求体、会话 id 头）。上游对不匹配的 UA 返回 `10085` |
-| 会话形态 | **首条消息必须是 `system`**：缺了返回 `400 code 11128 "first message is not system prompt"`。适配器出站前把 `developer` 归一为 `system`、`max_completion_tokens` 改名 `max_tokens`、首条不是 system 时补默认 `"You are a helpful assistant."` |
+| 请求形态 | 按官方桌面客户端形态发送（UA、`X-Product`、`X-IDE-*`、`X-Agent-*`、OpenAI SDK 指纹、gzip 请求体、会话 id 头）。UA 第二段国际版是 `workbuddy-ai`、国内版是 `WorkBuddy`；上游对不匹配的 UA 返回 `10085`。Messages 请求不 gzip |
+| 会话形态 | **Chat 的首条消息必须是 `system`**：缺了返回 `400 code 11128 "first message is not system prompt"`。适配器出站前把 `developer` 归一为 `system`、`max_completion_tokens` 改名 `max_tokens`、首条不是 system 时补默认 `"You are a helpful assistant."`。Messages 端点按调用方原文发送，实测 Claude Code 等系统提示词直接通过 |
 | 渠道校验（11128） | 上游只按 system／assistant 消息做整行指纹校验，可能拒绝某些 agent 的系统提示词。被拒时适配器**自动重试一次**：系统提示词下移为首条用户消息（`<instructions>…</instructions>` 包裹），开头换成默认 system；仍被拒才返回 `channel_rejected` |
 | 认证失败 | 401 先尝试续期一次，仍失败才换号；登录失效要重新登录 |
 | 额度不足 | 上游 402/429 按既有错误语义回传，不放大重试 |
@@ -144,16 +155,24 @@ OpenCode 等）按既有路由投影自动可用。
   企业账号的 enterprise meter、Responses／Messages 客户端经网关的真实回包。
   其余协议事实来自社区插件 `@magpie-community/opencode-workbuddy-auth` 0.2.36；
   首次使用请以小额度模型验证。
-- 未接入：国内版 WorkBuddy（`copilot.tencent.com`）及其 Claude 模型的 Messages 路由、
-  每日签到（国际版无该接口）、桌面登录文件导入（5.6+ 加密不可读）、API Key 认证、
+- **国内版（`builtin_workbuddy`，2026-11-17 接入）**：登录、续期、`/v3/config` 目录、
+  Chat 转发、Claude 模型的 `/v1/messages` 原生路由、Credits 三窗口已实现并按契约测试覆盖；
+  真实账号验证待用户执行（先登录＋目录，再授权一次对话）。国内版客户端指纹
+  （`WorkBuddy/5.9.3 WorkBuddy/5.9.3 CLI/2.165.0`）、`platform=workbuddy` 与 Messages
+  端点为插件记录，未在本仓库用真实国内账号验证。
+- 未接入：国内版的每日签到（`/v2/billing/meter/checkin-activity-status` 与
+  `/daily-checkin`）、云托管企业域名（`<ent>.sso.copilot.tencent.com` 等，账号 `domain`
+  需按白名单切主机）、桌面登录文件导入（5.6+ 加密不可读）、API Key 认证、
   免费模型每日 token 窗口、额度参与调度、队列/平衡轮换。
-- 上游版本指纹固定在 WorkBuddy AI 5.9.3 / CLI 2.165.0；官方发版后可能需要更新
-  `internal/provider/workbuddyai` 中的版本常量。
+- 上游版本指纹固定在 WorkBuddy 5.9.3 / CLI 2.165.0（两个构建同版本）；官方发版后可能需要
+  更新 `internal/provider/workbuddyai` 中的版本常量。
 
 ## 相关
 
 - 任务记录：`docs/tasks/completed/2026-11/TASK-20261116-015-workbuddy-ai-subscription-provider.md`
-  （接入）、`docs/tasks/completed/2026-11/TASK-20261116-018-workbuddy-login-account-save-fix.md`（登录保存修复）
-- ADR：[ADR-026](../decisions/ADR-026-workbuddy-ai-subscription.md)
+  （国际版接入）、`TASK-20261116-018`（登录保存修复）、`TASK-20261117-004`（档位补全）、
+  `TASK-20261117-006`（国内版规划）、`TASK-20261117-007`（国内版接入）
+- ADR：[ADR-026](../decisions/ADR-026-workbuddy-ai-subscription.md)（国际版）、
+  [ADR-027](../decisions/ADR-027-workbuddy-china-build.md)（国内版独立服务商）
 - 代码：`internal/provider/workbuddyai/`、`internal/application/workbuddy/`、
   `internal/application/account/workbuddy.go`、`internal/application/gateway/workbuddy.go`

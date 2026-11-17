@@ -10,7 +10,7 @@ Chat 原生转发（上游只接受流式，网关按需聚合后按客户端协
 `/v3/config`；额度来自 `/billing/meter/get-user-resource-summary` 的 Credits 三窗口
 （计划内／额外／合计，`aside` 标记不单独停止账号），只展示、不参与调度。请求形态向官方
 桌面客户端对齐（UA 与指纹头），风险与边界见 ADR-026 与 `docs/product/WORKBUDDY.md`。
-只接国际版；国内版、签到、桌面登录文件、API Key 与免费模型日窗未接入，未用真实账号验证。
+国际版（`workbuddy_ai`）与国内版（`workbuddy`，Claude 模型走原生 Messages）各为一个内置订阅服务商，见 ADR-027；签到、云托管企业域名、桌面登录文件、API Key 与免费模型日窗未接入，未用真实账号验证。
 
 ## 百度搭子 DuMate 个人版（2026-11-13）
 

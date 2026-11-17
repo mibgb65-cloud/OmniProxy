@@ -82,7 +82,7 @@ func subscriptionContext() (context.Context, context.CancelFunc) {
 
 // SubscriptionBegin 按提供商启动独立的 Codex、Google 或 WorkBuddy AI 浏览器授权。
 func (s *AppService) SubscriptionBegin(input subscription.Input) (subscription.State, error) {
-	if input.ProviderID == "builtin_workbuddy_ai" {
+	if workbuddyProvider(input.ProviderID) {
 		manager, err := s.workbuddySubscriptionService()
 		if err != nil {
 			s.logWorkBuddyBeginError(err)
@@ -152,7 +152,7 @@ func (s *AppService) SubscriptionRead(id string) (subscription.State, error) {
 
 // SubscriptionCurrent 恢复仍在运行的后台授权，不启动或刷新登录。
 func (s *AppService) SubscriptionCurrent(providerID, accountID string) (subscription.State, error) {
-	if providerID == "builtin_workbuddy_ai" {
+	if workbuddyProvider(providerID) {
 		manager, err := s.workbuddySubscriptionService()
 		if err != nil {
 			return subscription.State{}, err

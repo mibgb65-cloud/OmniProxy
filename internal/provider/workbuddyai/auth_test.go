@@ -312,7 +312,7 @@ func TestRefreshExchangesTokens(t *testing.T) {
 	if header.Get("Authorization") != "Bearer access-token-1" || header.Get("X-User-Id") != "uid-1" || header.Get("X-Product") != "SaaS" {
 		t.Fatalf("refresh signature headers = %v", header)
 	}
-	if header.Get("User-Agent") != bizUserAgent {
+	if header.Get("User-Agent") != International.UserAgent() {
 		t.Fatalf("refresh user agent = %q", header.Get("User-Agent"))
 	}
 	if token.AccessToken != "access-2" || token.RefreshToken != "refresh-2" || token.Domain != "d.example" {

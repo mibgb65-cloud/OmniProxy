@@ -49,3 +49,34 @@ func TestWorkBuddySyncFailureKeepsStableCodeForDiagnostics(t *testing.T) {
 		t.Fatalf("diagnostic code = %q, want %q", code, workbuddyai.CodeUnauthorized)
 	}
 }
+
+// Claude 模型在国内版的原生 Messages 上接受 max 档位（目录的 supportedEfforts 只到
+// xhigh 时也要补上）；其它模型与国际版保持目录声明不变。
+func TestWorkBuddyMetadataAddsMaxForNativeMessagesModels(t *testing.T) {
+	claude := workbuddyai.Model{
+		ID:      "claude-opus-5.5",
+		Efforts: []string{"low", "medium", "high", "xhigh"},
+	}
+	metadata := workbuddyMetadata(claude, true)
+	values := make([]string, 0, len(metadata.ReasoningEfforts))
+	for _, effort := range metadata.ReasoningEfforts {
+		values = append(values, effort.Value)
+	}
+	if len(values) != 5 || values[4] != "max" {
+		t.Fatalf("china claude efforts = %v", values)
+	}
+	// 国际版没有 Messages 端点，不能凭空发布 max。
+	if international := workbuddyMetadata(claude, false); len(international.ReasoningEfforts) != 4 {
+		t.Fatalf("international claude efforts = %+v", international.ReasoningEfforts)
+	}
+	// 非 Claude 模型即使在国内版也不追加。
+	glm := workbuddyMetadata(workbuddyai.Model{ID: "glm-5.3", Efforts: []string{"low", "high"}}, true)
+	if len(glm.ReasoningEfforts) != 2 {
+		t.Fatalf("glm efforts = %+v", glm.ReasoningEfforts)
+	}
+	// 上游没给任何档位时不凭空补 max。
+	empty := workbuddyMetadata(workbuddyai.Model{ID: "claude-opus-5.5"}, true)
+	if len(empty.ReasoningEfforts) != 0 {
+		t.Fatalf("effortless claude got efforts = %+v", empty.ReasoningEfforts)
+	}
+}

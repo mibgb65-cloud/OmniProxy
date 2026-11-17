@@ -38,15 +38,8 @@ const (
 	refreshPath = "/v2/plugin/auth/token/refresh"
 	// accountPath 按 state 读取登录后的账号身份。
 	accountPath = "/v2/plugin/login/account"
-	// pluginPlatform 是国际版的平台标识；国内版两个 provider 不共用。
-	pluginPlatform = "workbuddy-ai"
-
-	// bizUserAgent 是官方桌面 CLI 的 UA 形态；不是这个形态会被 10085 拒绝。
-	bizUserAgent = "WorkBuddy/" + AppVersion + " " + pluginPlatform + "/" + AppVersion + " CLI/" + CLIVersion
-	// loginUserAgent 是插件在登录/轮询接口上的短 UA。
-	loginUserAgent = "WorkBuddy/" + AppVersion
-	// billingUserAgent 是计费接口的 UA；与登录接口同为短形态。
-	billingUserAgent = "WorkBuddy/" + AppVersion
+	// messagesPath 是国内版为 Claude 模型提供的原生 Anthropic Messages 端点。
+	messagesPath = "/v1/messages"
 	// 以下指纹来自桌面 CLI 内置的 openai 6.25.0 与 Electron 的 Node 版本。
 	openAISDKVersion   = "6.25.0"
 	nodeRuntimeVersion = "v22.21.1"
@@ -73,6 +66,8 @@ const (
 type Client struct {
 	http *http.Client
 	base string
+	// build 决定站点、登录平台标识、UA 与 Messages 能力；国际化与国内版共用本实现。
+	build Build
 	// 登录窗口内的 state 只用于 /v2/plugin/login/account：该接口按 state 选中
 	// 用户刚在浏览器里选的账号，而 ReadIdentity 的契约签名只带 Token。
 	stateMu sync.Mutex
@@ -80,8 +75,13 @@ type Client struct {
 	stateAt time.Time
 }
 
-// New 构造隔离传输；可注入 transport 进行无真实凭据的契约测试。
+// New 构造国际版的隔离传输；可注入 transport 进行无真实凭据的契约测试。
 func New(transport http.RoundTripper) *Client {
+	return NewForBuild(International, transport)
+}
+
+// NewForBuild 按构建构造隔离传输；base 取 build.BaseURL。
+func NewForBuild(build Build, transport http.RoundTripper) *Client {
 	if transport == nil {
 		standard := http.DefaultTransport.(*http.Transport).Clone()
 		standard.ResponseHeaderTimeout = responseHeaderTimeout
@@ -90,19 +90,25 @@ func New(transport http.RoundTripper) *Client {
 		transport = netproxy.Wrap(standard)
 	}
 	return &Client{
-		http: &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
-		base: DefaultBaseURL,
+		http:  &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
+		base:  build.BaseURL,
+		build: build,
 	}
 }
 
-// NewClientAt 用指定基址构造客户端；非 HTTPS 基址只允许回环地址，仅测试使用，
+// NewClientAt 用指定基址构造国际版客户端；非 HTTPS 基址只允许回环地址，仅测试使用，
 // 生产路径始终使用固定基址。
 func NewClientAt(base string, transport http.RoundTripper) (*Client, error) {
+	return NewClientAtFor(International, base, transport)
+}
+
+// NewClientAtFor 按构建与注入基址构造客户端（同样只允许回环 HTTP），用于契约测试。
+func NewClientAtFor(build Build, base string, transport http.RoundTripper) (*Client, error) {
 	validated, err := validateBase(base)
 	if err != nil {
 		return nil, err
 	}
-	client := New(transport)
+	client := NewForBuild(build, transport)
 	client.base = validated
 	return client, nil
 }
@@ -236,8 +242,8 @@ func (c *Client) applySign(request *http.Request, cred Credentials) {
 	request.Header.Set("X-Product", "SaaS")
 	request.Header.Set("X-IDE-Type", "WorkBuddy")
 	request.Header.Set("X-IDE-Name", "WorkBuddy")
-	request.Header.Set("X-IDE-Version", AppVersion)
-	request.Header.Set("User-Agent", bizUserAgent)
+	request.Header.Set("X-IDE-Version", c.build.AppVersion)
+	request.Header.Set("User-Agent", c.build.UserAgent())
 	request.Header.Set("X-Requested-With", "XMLHttpRequest")
 	request.Header.Set("X-Agent-Intent", "craft")
 	request.Header.Set("X-Agent-Purpose", "conversation")
@@ -254,7 +260,7 @@ func (c *Client) applySign(request *http.Request, cred Credentials) {
 func (c *Client) applyBilling(request *http.Request, cred Credentials) {
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", billingUserAgent)
+	request.Header.Set("User-Agent", c.build.ShortUserAgent())
 	request.Header.Set("Authorization", "Bearer "+cred.AccessToken)
 	request.Header.Set("X-User-Id", cred.UID)
 	request.Header.Set("X-Domain", c.domainOf(cred))

@@ -30,7 +30,11 @@ type Service struct {
 	mu       sync.Mutex
 	ops      sync.Mutex
 	accounts *account.Service
-	client   *workbuddyai.Client
+	// clients 按构建缓存客户端（国际版／国内版站点与指纹不同）；
+	// injected 非空时所有构建共用它，供契约测试注入回环客户端。
+	clientMu sync.Mutex
+	clients  map[string]*workbuddyai.Client
+	injected *workbuddyai.Client
 	current  *session
 	onChange func()
 	warn     func(message string, args ...any)
@@ -43,6 +47,7 @@ type Service struct {
 type session struct {
 	view   subscription.State
 	input  subscription.Input
+	client *workbuddyai.Client
 	cancel context.CancelFunc
 	done   chan struct{}
 }
@@ -52,12 +57,37 @@ type quotaSnapshot struct {
 	fetchedAt time.Time
 }
 
-// New 创建独立订阅服务；测试可注入仅访问契约服务的客户端。
+// New 创建独立订阅服务；测试可注入仅访问契约服务的客户端（注入后两个构建共用它）。
 func New(accounts *account.Service, client *workbuddyai.Client) *Service {
-	if client == nil {
-		client = workbuddyai.New(nil)
+	return &Service{accounts: accounts, injected: client, clients: map[string]*workbuddyai.Client{}, quotas: map[string]quotaSnapshot{}}
+}
+
+// clientFor 返回该构建的客户端；未注入时按需创建。
+func (s *Service) clientFor(build workbuddyai.Build) *workbuddyai.Client {
+	s.clientMu.Lock()
+	defer s.clientMu.Unlock()
+	if s.injected != nil {
+		return s.injected
 	}
-	return &Service{accounts: accounts, client: client, quotas: map[string]quotaSnapshot{}}
+	if client, ok := s.clients[build.Kind]; ok {
+		return client
+	}
+	client := workbuddyai.NewForBuild(build, nil)
+	s.clients[build.Kind] = client
+	return client
+}
+
+// buildOf 读取账号所属提供商对应的构建。
+func (s *Service) buildOf(ctx context.Context, id string) (workbuddyai.Build, error) {
+	item, err := s.accounts.Metadata(ctx, id)
+	if err != nil {
+		return workbuddyai.Build{}, workbuddyai.Failure("invalid_input")
+	}
+	build, err := s.accounts.WorkBuddyBuild(ctx, item.ProviderID)
+	if err != nil {
+		return workbuddyai.Build{}, workbuddyai.Failure("invalid_input")
+	}
+	return build, nil
 }
 
 // OnChange 注册只发送变更信号的通知。

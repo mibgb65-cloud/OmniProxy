@@ -4,6 +4,7 @@ package gateway
 import (
 	"context"
 	"log/slog"
+	"sync"
 	"time"
 
 	"omniproxy/internal/application/account"
@@ -89,8 +90,10 @@ type Service struct {
 	dumateTokens  *dumate.TokenCache
 	dumateConsole *dumate.Console
 	dumateClient  *dumate.Client
-	// WorkBuddy AI 订阅通道：登录令牌由应用层受控借出，客户端只发固定上游请求。
-	workbuddy     *workbuddyai.Client
+	// WorkBuddy 订阅通道：登录令牌由应用层受控借出，客户端只发固定上游请求。
+	// 国际版与国内版的站点、指纹与 Messages 能力不同，按 kind 各用一个客户端。
+	workbuddyMu   sync.Mutex
+	workbuddy     map[string]*workbuddyai.Client
 	workbuddyAuth WorkBuddySubscriptionAccess
 }
 
@@ -119,7 +122,7 @@ func New(opts proxy.Options, providers ProviderReader, accounts AccountAccess, c
 	s.dumateTokens = dumate.NewTokenCache()
 	s.dumateConsole = dumate.NewConsole(nil)
 	s.dumateClient = dumate.New(nil)
-	s.workbuddy = workbuddyai.New(nil)
+	s.workbuddy = map[string]*workbuddyai.Client{}
 	opts.Upstream, opts.Models = s, deepseek.Models()
 	// Codex 入口走 v1 形态的透明转发；其余入口仍由 Forward 处理。
 	opts.Passthrough = s

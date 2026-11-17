@@ -35,11 +35,21 @@ describe("provider labels", () => {
     expect(zh["providers.subscriptionType.workbuddyAi"]).toBe("WorkBuddy AI 订阅")
   })
 
+  it("includes the WorkBuddy China built-in", () => {
+    expect(providerNameKeys.workbuddy).toBe("providers.kind.workbuddy")
+    expect(en["providers.kind.workbuddy"]).toBe("WorkBuddy (China)")
+    expect(zh["providers.kind.workbuddy"]).toBe("WorkBuddy（国内版）")
+    expect(en["providers.subscriptionType.workbuddy"]).toBe("WorkBuddy (China) subscription")
+    expect(zh["providers.subscriptionType.workbuddy"]).toBe("WorkBuddy 国内版订阅")
+  })
+
   it("resolves the subscription brand per provider", () => {
     expect(subscriptionTypeKey("builtin_workbuddy_ai")).toBe(
       "providers.subscriptionType.workbuddyAi",
     )
     expect(subscriptionTypeKey("workbuddy_ai")).toBe("providers.subscriptionType.workbuddyAi")
+    expect(subscriptionTypeKey("builtin_workbuddy")).toBe("providers.subscriptionType.workbuddy")
+    expect(subscriptionTypeKey("workbuddy")).toBe("providers.subscriptionType.workbuddy")
     expect(subscriptionTypeKey("builtin_google")).toBe("google.subscriptionType")
     expect(subscriptionTypeKey("builtin_openai")).toBe("subscription.type")
   })

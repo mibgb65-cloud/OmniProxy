@@ -3,6 +3,8 @@ package modelcatalog
 import (
 	"context"
 	"errors"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,7 +25,7 @@ type SyncStatus struct {
 // AutoSync 串行发现目录，合并并发通知；staleOnly 时只处理当前版本没有目录的账号。
 type AutoSync struct {
 	source    *Service
-	kind      string
+	kinds     []string
 	staleOnly bool
 	// apiKey 表示该服务商按 API Key 账号发现目录（OpenAI、HowToFix 等）；
 	// 为 false 时只处理已授权的订阅账号（如 Google 订阅）。
@@ -44,19 +46,25 @@ type AutoSync struct {
 
 // StartAutoSync 在后台执行首次扫描；不依赖账号页面是否打开，也不启动网关。
 func StartAutoSync(ctx context.Context, source *Service, kind string, staleOnly bool, refresh func(context.Context) error, report func(error)) *AutoSync {
-	return startAutoSync(ctx, source, kind, staleOnly, false, refresh, report)
+	return startAutoSync(ctx, source, []string{kind}, staleOnly, false, refresh, report)
+}
+
+// StartKindsAutoSync 与 StartAutoSync 相同，但一次覆盖多个服务商 kind（如 WorkBuddy 的
+// 国际版与国内版），共用去重、错误上报与客户端刷新。
+func StartKindsAutoSync(ctx context.Context, source *Service, kinds []string, staleOnly bool, refresh func(context.Context) error, report func(error)) *AutoSync {
+	return startAutoSync(ctx, source, kinds, staleOnly, false, refresh, report)
 }
 
 // StartAPIKeyAutoSync 在后台补齐当前版本没有目录的 API Key 账号；失败保留旧快照，
 // 由下一次配置变更或手动同步重试。
 func StartAPIKeyAutoSync(ctx context.Context, source *Service, kind string, refresh func(context.Context) error, report func(error)) *AutoSync {
-	return startAutoSync(ctx, source, kind, true, true, refresh, report)
+	return startAutoSync(ctx, source, []string{kind}, true, true, refresh, report)
 }
 
-func startAutoSync(ctx context.Context, source *Service, kind string, staleOnly, apiKey bool, refresh func(context.Context) error, report func(error)) *AutoSync {
+func startAutoSync(ctx context.Context, source *Service, kinds []string, staleOnly, apiKey bool, refresh func(context.Context) error, report func(error)) *AutoSync {
 	ctx, cancel := context.WithCancel(ctx)
 	s := &AutoSync{
-		source: source, kind: kind, staleOnly: staleOnly, apiKey: apiKey, refresh: refresh, report: report,
+		source: source, kinds: kinds, staleOnly: staleOnly, apiKey: apiKey, refresh: refresh, report: report,
 		pending: make(chan struct{}, 1), cancel: cancel, done: make(chan struct{}),
 		attempted: map[string]bool{},
 	}
@@ -118,7 +126,7 @@ func (s *AutoSync) sync(ctx context.Context) (error, error) {
 	}
 	enabled := make(map[string]bool)
 	for _, provider := range providers {
-		enabled[provider.ID] = provider.Enabled && provider.Kind == s.kind
+		enabled[provider.ID] = provider.Enabled && slices.Contains(s.kinds, provider.Kind)
 	}
 	accounts, err := s.source.accounts.List(ctx)
 	if err != nil {
@@ -180,7 +188,7 @@ func (s *AutoSync) finish(err error) {
 	if err == nil || errors.Is(err, context.Canceled) {
 		s.lastError = ""
 	} else {
-		s.lastError = s.kind + "_auto_sync_failed"
+		s.lastError = strings.Join(s.kinds, "_") + "_auto_sync_failed"
 	}
 	s.mu.Unlock()
 }

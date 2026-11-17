@@ -10,8 +10,8 @@ import (
 	"omniproxy/internal/infrastructure/database"
 )
 
-// TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce 断言迁移 050/051 只追加
-// WorkBuddy AI 预设与额度快照表，不改动既有服务商开关、账号与凭证引用，
+// TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce 断言迁移 050/051/052 只追加
+// WorkBuddy（国际版／国内版）预设与额度快照表，不改动既有服务商开关、账号与凭证引用，
 // 并且重复执行不会重复插入。
 func TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce(t *testing.T) {
 	ctx := context.Background()
@@ -26,7 +26,7 @@ func TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce(t *testing.T) {
 	}
 	before := fstest.MapFS{}
 	for _, file := range files {
-		if file.Name() == "050_builtin_workbuddy_ai.sql" || file.Name() == "051_workbuddy_quota_snapshots.sql" {
+		if file.Name() == "050_builtin_workbuddy_ai.sql" || file.Name() == "051_workbuddy_quota_snapshots.sql" || file.Name() == "052_builtin_workbuddy.sql" {
 			continue
 		}
 		body, err := os.ReadFile("../../../migrations/" + file.Name())
@@ -46,21 +46,28 @@ func TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := NewService(db)
-	item, err := s.get(ctx, "builtin_workbuddy_ai")
-	if err != nil || !item.Enabled || item.Kind != "workbuddy_ai" || item.Name != "WorkBuddy AI" || item.Source != SourceBuiltIn || item.BaseURL != "" {
-		t.Fatal("missing preset", item, err)
+	for _, want := range []struct{ id, kind, name string }{
+		{"builtin_workbuddy_ai", "workbuddy_ai", "WorkBuddy AI"},
+		{"builtin_workbuddy", "workbuddy", "WorkBuddy (China)"},
+	} {
+		item, err := s.get(ctx, want.id)
+		if err != nil || !item.Enabled || item.Kind != want.kind || item.Name != want.name || item.Source != SourceBuiltIn || item.BaseURL != "" {
+			t.Fatal("missing preset", want.id, item, err)
+		}
 	}
 	var table int
 	if err := db.QueryRow(`SELECT count(*) FROM sqlite_master WHERE type='table' AND name='workbuddy_quota_snapshots'`).Scan(&table); err != nil || table != 1 {
 		t.Fatal("missing quota snapshot table", table, err)
 	}
-	if _, err := s.SetEnabled(ctx, "builtin_workbuddy_ai", false); err != nil {
-		t.Fatal(err)
+	for _, id := range []string{"builtin_workbuddy_ai", "builtin_workbuddy"} {
+		if _, err := s.SetEnabled(ctx, id, false); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if err := database.Migrate(ctx, db, os.DirFS("../../../migrations")); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"builtin_dumate", "builtin_workbuddy_ai"} {
+	for _, id := range []string{"builtin_dumate", "builtin_workbuddy_ai", "builtin_workbuddy"} {
 		item, err := s.get(ctx, id)
 		if err != nil || item.Enabled {
 			t.Fatal("saved switch reset", id, err)
@@ -70,8 +77,10 @@ func TestWorkBuddyUpgradePreservesExistingStateAndRunsOnce(t *testing.T) {
 	if err := db.QueryRow(`SELECT credential_ref FROM accounts WHERE id='old'`).Scan(&ref); err != nil || ref != "opaque-reference" {
 		t.Fatal("credential reference changed", err)
 	}
-	var count int
-	if err := db.QueryRow(`SELECT count(*) FROM providers WHERE kind='workbuddy_ai'`).Scan(&count); err != nil || count != 1 {
-		t.Fatal("migration not idempotent", err)
+	for kind := range map[string]bool{"workbuddy_ai": true, "workbuddy": true} {
+		var count int
+		if err := db.QueryRow(`SELECT count(*) FROM providers WHERE kind=?`, kind).Scan(&count); err != nil || count != 1 {
+			t.Fatal("migration not idempotent", kind, count, err)
+		}
 	}
 }

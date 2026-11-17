@@ -22,26 +22,30 @@ export function WorkBuddyCredits({ account }: { account: AccountItem }) {
   const query = useWorkBuddyQuota(account)
   const data = query.data
   const windows = data?.windows ?? []
+  // 国内版与国际版共用同一套窗口口径，只有卡片标题区分构建。
+  const china = account.providerId === "builtin_workbuddy"
+  const titleKey = china ? "quota.workbuddyCn.title" : "quota.workbuddy.title"
+  const refreshKey = china ? "quota.workbuddyCn.refresh" : "quota.workbuddy.refresh"
   return (
     <section
-      aria-label={t("quota.workbuddy.title")}
+      aria-label={t(titleKey)}
       aria-busy={query.isFetching}
       className="bg-muted/20 min-w-0 space-y-3 rounded-xl border p-3"
     >
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-baseline gap-1.5">
-          <span className="text-sm font-medium">{t("quota.workbuddy.title")}</span>
+          <span className="text-sm font-medium">{t(titleKey)}</span>
           {/* 套餐名只有计费接口给得准（登录身份没有该字段）；未知时不显示。 */}
           {data?.plan ? (
             <span className="text-muted-foreground truncate text-xs">{data.plan}</span>
           ) : null}
         </span>
-        <Tooltip content={t("quota.workbuddy.refresh")}>
+        <Tooltip content={t(refreshKey)}>
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label={t("quota.workbuddy.refresh")}
+            aria-label={t(refreshKey)}
             disabled={query.isFetching}
             className="text-muted-foreground cursor-pointer"
             onClick={() => void query.refetch({ cancelRefetch: false })}

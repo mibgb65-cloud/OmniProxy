@@ -31,8 +31,8 @@ func presetModels(kind string) []string {
 	case dumate.Kind:
 		// DuMate 上游没有 /models，只公布参考实现确认的两条别名。
 		return dumate.Models()
-	case workbuddyai.Kind:
-		// WorkBuddy AI 的目录按账号的 /v3/config 发放；同步前没有任何可路由模型。
+	case workbuddyai.Kind, workbuddyai.ChinaKind:
+		// WorkBuddy 的目录按账号的 /v3/config 发放；同步前没有任何可路由模型。
 		return nil
 	default:
 		return nil
@@ -40,7 +40,7 @@ func presetModels(kind string) []string {
 }
 
 func supportedProvider(kind string) bool {
-	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind || kind == oxionai.Kind || kind == howtofix.Kind || kind == dumate.Kind || kind == workbuddyai.Kind
+	return kind == river.Kind || kind == "minimax" || kind == "kimi" || kind == "stepfun" || kind == "deepseek" || kind == "openai" || kind == atria.Kind || kind == "google" || kind == mimo.Kind || kind == oxionai.Kind || kind == howtofix.Kind || kind == dumate.Kind || kind == workbuddyai.Kind || kind == workbuddyai.ChinaKind
 }
 
 func hasPresetAccount(data snapshot, providerID string) bool {

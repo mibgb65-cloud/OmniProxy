@@ -19,6 +19,7 @@ const brandIcons: Record<
   dumate: { file: "dumate.png", fullTile: true },
   howtofix: { file: "howtofix.png" },
   workbuddy_ai: { file: "workbuddy-ai.svg" },
+  workbuddy: { file: "workbuddy-ai.svg" },
 }
 
 function resolveBrandIcon(kind: string, endpoint?: string) {

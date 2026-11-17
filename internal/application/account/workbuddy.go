@@ -24,14 +24,28 @@ type protectedWorkBuddyCredential struct {
 	Retired []string `json:"retired,omitempty"`
 }
 
-// CheckWorkBuddyProvider 限定 WorkBuddy AI 账号只能挂在 workbuddy_ai 提供商下。
-func (s *Service) CheckWorkBuddyProvider(ctx context.Context, providerID string) error {
+// WorkBuddyBuild 返回 WorkBuddy 提供商对应的构建（国际版／国内版），
+// 未知或非 WorkBuddy 提供商返回 ErrInvalidInput。
+func (s *Service) WorkBuddyBuild(ctx context.Context, providerID string) (workbuddyai.Build, error) {
 	if validateID(providerID) != nil {
-		return ErrInvalidInput
+		return workbuddyai.Build{}, ErrInvalidInput
 	}
 	var kind string
-	if s.db.QueryRowContext(ctx, "SELECT kind FROM providers WHERE id=?", providerID).Scan(&kind) != nil || kind != workbuddyai.Kind {
-		return ErrInvalidInput
+	if s.db.QueryRowContext(ctx, "SELECT kind FROM providers WHERE id=?", providerID).Scan(&kind) != nil {
+		return workbuddyai.Build{}, ErrInvalidInput
+	}
+	build, ok := workbuddyai.BuildOf(kind)
+	if !ok {
+		return workbuddyai.Build{}, ErrInvalidInput
+	}
+	return build, nil
+}
+
+// CheckWorkBuddyProvider 限定 WorkBuddy 账号只能挂在两个 WorkBuddy 构建的提供商下
+// （国际版 workbuddy_ai／国内版 workbuddy）；令牌不能挂到其它服务商。
+func (s *Service) CheckWorkBuddyProvider(ctx context.Context, providerID string) error {
+	if _, err := s.WorkBuddyBuild(ctx, providerID); err != nil {
+		return err
 	}
 	return nil
 }

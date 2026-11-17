@@ -1,6 +1,14 @@
 export const workbuddyZh = {
   "providers.kind.workbuddy_ai": "WorkBuddy AI",
   "providers.subscriptionType.workbuddyAi": "WorkBuddy AI 订阅",
+  "providers.kind.workbuddy": "WorkBuddy（国内版）",
+  "providers.subscriptionType.workbuddy": "WorkBuddy 国内版订阅",
+  "workbuddy.cnLoginTitle": "登录 WorkBuddy（国内版）",
+  "workbuddy.cnLoginDescription": "用浏览器完成 WorkBuddy 国内版登录；完成后自动返回 OmniProxy。",
+  "workbuddy.cnLoginReturnHint":
+    "浏览器页面登录后可能提示「返回 WorkBuddy 客户端」，属正常现象；登录结果会自动回到 OmniProxy。",
+  "quota.workbuddyCn.title": "WorkBuddy 国内版 Credits",
+  "quota.workbuddyCn.refresh": "刷新 WorkBuddy 国内版 Credits",
   "workbuddy.loginTitle": "登录 WorkBuddy AI",
   "workbuddy.loginDescription": "用浏览器完成 WorkBuddy AI 登录；完成后自动返回 OmniProxy。",
   "workbuddy.loginNote": "令牌保存在本机受保护存储，不会上传。",

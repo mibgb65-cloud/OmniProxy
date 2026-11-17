@@ -131,7 +131,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			}
 			return e
 		})
-	} else if kind == workbuddyai.Kind && current.AuthMethod == account.AuthWorkBuddyLogin {
+	} else if (kind == workbuddyai.Kind || kind == workbuddyai.ChinaKind) && current.AuthMethod == account.AuthWorkBuddyLogin {
 		// 目录来自账号自己的 /v3/config，按授权版本绑定；失败保留上次成功快照。
 		if s.workbuddyAuth == nil {
 			return nil, ErrUnavailable
@@ -139,7 +139,7 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 		var discovered []workbuddyai.Model
 		discovered, initialVersion, err = s.workbuddyAuth.Models(ctx, id)
 		for _, item := range discovered {
-			models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: workbuddyMetadata(item)})
+			models = append(models, codex.Model{ID: item.ID, Name: item.Name, Metadata: workbuddyMetadata(item, kind == workbuddyai.ChinaKind)})
 		}
 	} else if kind == minimax.Kind && current.AuthMethod == account.AuthAPIKey {
 		models, err = s.syncMiniMax(ctx, current)

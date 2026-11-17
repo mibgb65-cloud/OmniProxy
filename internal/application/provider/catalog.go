@@ -52,9 +52,11 @@ var definitions = []Definition{
 	{Kind: howtofix.Kind, Name: "HowToFix", DefaultBaseURL: howtofix.DefaultBaseURL, Models: howtofix.Models(), AuthMethods: []string{AuthAPIKey}, DiscoveryOnly: true},
 	// DuMate 只接受登录态导入，没有 API Key 或订阅 OAuth；模型别名固定，上游无 /models。
 	{Kind: dumate.Kind, Name: dumate.Name, DefaultBaseURL: dumate.DefaultBaseURL, Models: dumate.DisplayModels(), AuthMethods: []string{dumate.AuthMethod}},
-	// WorkBuddy AI 只有浏览器登录（没有 API Key），目录按账号的 /v3/config 发放。
-	// WorkBuddy AI 只有浏览器登录，目录按账号的 /v3/config 发放，没有可内置的预设模型。
+	// WorkBuddy 只有浏览器登录（没有 API Key），目录按账号的 /v3/config 发放。
+	// 国际版（www.workbuddy.ai）与国内版（copilot.tencent.com）是两套独立账号，
+	// 各自一个 kind；国内版的 Claude 模型另有原生 Messages 端点。
 	{Kind: workbuddyai.Kind, Name: workbuddyai.Name, DefaultBaseURL: workbuddyai.DefaultBaseURL, Models: nil, AuthMethods: []string{workbuddyai.AuthMethod}, DiscoveryOnly: true},
+	{Kind: workbuddyai.ChinaKind, Name: workbuddyai.ChinaName, DefaultBaseURL: workbuddyai.ChinaBaseURL, Models: nil, AuthMethods: []string{workbuddyai.AuthMethod}, DiscoveryOnly: true},
 }
 
 // Catalog returns an independent snapshot of the built-in provider kinds.

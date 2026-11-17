@@ -1,7 +1,7 @@
 import type { TranslationKey } from "../../i18n/translation"
 
 /** 订阅登录弹窗按品牌配置；自定义 OpenAI 兼容提供商仍沿用 OpenAI 的文案。 */
-export type SubscriptionLoginKind = "openai" | "google" | "workbuddy_ai"
+export type SubscriptionLoginKind = "openai" | "google" | "workbuddy_ai" | "workbuddy"
 
 export type SubscriptionLoginConfig = {
   kind: SubscriptionLoginKind
@@ -19,6 +19,11 @@ export type SubscriptionLoginConfig = {
   deviceCode: boolean
   /** 浏览器授权卡片额外的一句说明；用于解释上游页面的既有行为。 */
   browserHintKey?: TranslationKey
+}
+
+// 两个 WorkBuddy 构建共用同一套等待/失败文案与错误码字典。
+export function isWorkBuddyLoginKind(kind: SubscriptionLoginKind): boolean {
+  return kind === "workbuddy_ai" || kind === "workbuddy"
 }
 
 const configs: Record<SubscriptionLoginKind, SubscriptionLoginConfig> = {
@@ -50,10 +55,21 @@ const configs: Record<SubscriptionLoginKind, SubscriptionLoginConfig> = {
     deviceCode: false,
     browserHintKey: "workbuddy.loginReturnHint",
   },
+  workbuddy: {
+    kind: "workbuddy",
+    brandKind: "workbuddy",
+    titleKey: "workbuddy.cnLoginTitle",
+    descriptionKey: "workbuddy.cnLoginDescription",
+    storageKey: "workbuddy.loginNote",
+    addKey: "workbuddy.cnLoginTitle",
+    deviceCode: false,
+    browserHintKey: "workbuddy.cnLoginReturnHint",
+  },
 }
 
 export function subscriptionLoginConfig(providerId: string): SubscriptionLoginConfig {
   if (providerId === "builtin_google") return configs.google
   if (providerId === "builtin_workbuddy_ai") return configs.workbuddy_ai
+  if (providerId === "builtin_workbuddy") return configs.workbuddy
   return configs.openai
 }

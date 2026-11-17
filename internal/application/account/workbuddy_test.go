@@ -130,3 +130,33 @@ func TestWorkBuddySaveFailureIsRecognizable(t *testing.T) {
 		t.Fatalf("protected storage failure code = %q (err %v)", code, err)
 	}
 }
+
+// 国内版是独立 kind 的提供商，但复用同一认证类型与受保护凭据结构；
+// 其它服务商仍必须拒绝，避免把 WorkBuddy 令牌挂到不相干的提供商下。
+func TestWorkBuddyChinaProviderIsAccepted(t *testing.T) {
+	service, _ := testService(t)
+	service.store = &batchStore{values: map[string][]byte{}}
+	ctx := context.Background()
+	cred := workbuddyTestCredential()
+
+	item, err := service.SaveWorkBuddyAccount(ctx, "builtin_workbuddy", "", "", cred)
+	if err != nil {
+		t.Fatalf("save china account: %v", err)
+	}
+	if item.ProviderID != "builtin_workbuddy" || item.AuthMethod != AuthWorkBuddyLogin {
+		t.Fatalf("china account = %+v", item)
+	}
+	if _, err := service.SaveWorkBuddyAccount(ctx, "builtin_openai", "", "", cred); err == nil {
+		t.Fatal("workbuddy token accepted under another provider")
+	}
+	build, err := service.WorkBuddyBuild(ctx, "builtin_workbuddy")
+	if err != nil || build.Kind != workbuddyai.ChinaKind || build.BaseURL != workbuddyai.ChinaBaseURL {
+		t.Fatalf("china build = %+v, %v", build, err)
+	}
+	if build, err := service.WorkBuddyBuild(ctx, "builtin_workbuddy_ai"); err != nil || build.Kind != workbuddyai.Kind {
+		t.Fatalf("international build = %+v, %v", build, err)
+	}
+	if _, err := service.WorkBuddyBuild(ctx, "builtin_openai"); err == nil {
+		t.Fatal("non-workbuddy provider resolved a build")
+	}
+}

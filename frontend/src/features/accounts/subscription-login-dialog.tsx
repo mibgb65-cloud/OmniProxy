@@ -11,7 +11,7 @@ import { useSubscriptionLogin } from "./use-subscription-login"
 import { SubscriptionLoginStatus } from "./subscription-login-status"
 import { SubscriptionLoginMethod } from "./subscription-login-method"
 import { SubscriptionBrowserLoginCard } from "./subscription-browser-login-card"
-import { subscriptionLoginConfig } from "./subscription-login-config"
+import { isWorkBuddyLoginKind, subscriptionLoginConfig } from "./subscription-login-config"
 import { ProviderBrandIcon } from "../providers/provider-brand-icon"
 import { subscriptionInProgress } from "../../services/subscription"
 import { workbuddyError } from "../../services/workbuddy"
@@ -69,7 +69,7 @@ function LoginContent({
   const config = subscriptionLoginConfig(providerId)
   const login = useSubscriptionLogin(
     { providerId, accountId },
-    { enabled, mapError: config.kind === "workbuddy_ai" ? workbuddyError : undefined },
+    { enabled, mapError: isWorkBuddyLoginKind(config.kind) ? workbuddyError : undefined },
   )
   // Google 的官方组件只接受浏览器模式（后端 Begin 校验 mode === "browser"），
   // 因此设备码只在 OpenAI 上提供；WorkBuddy 用单张浏览器授权卡片说明方式。
@@ -156,7 +156,7 @@ function LoginContent({
             ) : null}
             <SubscriptionLoginStatus
               login={login}
-              errorNamespace={config.kind === "workbuddy_ai" ? "workbuddy" : "subscription"}
+              errorNamespace={isWorkBuddyLoginKind(config.kind) ? "workbuddy" : "subscription"}
             />
             <p className="text-muted-foreground flex items-start gap-2 text-xs leading-5">
               <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />

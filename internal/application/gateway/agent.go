@@ -94,7 +94,7 @@ func (s *Service) forwardAgent(ctx context.Context, target target, request proxy
 	if target.kind == dumate.Kind {
 		return s.forwardDuMate(ctx, target, request, consume)
 	}
-	if target.kind == workbuddyai.Kind {
+	if target.kind == workbuddyai.Kind || target.kind == workbuddyai.ChinaKind {
 		return s.forwardWorkBuddy(ctx, target, request, consume)
 	}
 	if target.kind != "" && target.kind != "deepseek" {

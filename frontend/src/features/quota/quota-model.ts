@@ -91,7 +91,10 @@ export function describeQuotaAccounts(
     if (provider?.kind === "google" && account.authMethod === "subscription_login")
       kind = "google_subscription"
     // WorkBuddy 走独立的浏览器登录与 Credits 口径，不能落到余额或 Codex 窗口。
-    if (provider?.kind === "workbuddy_ai" && account.authMethod === "workbuddy_login")
+    if (
+      (provider?.kind === "workbuddy_ai" || provider?.kind === "workbuddy") &&
+      account.authMethod === "workbuddy_login"
+    )
       kind = "workbuddy"
     const canQuery =
       kind !== "unsupported" &&
