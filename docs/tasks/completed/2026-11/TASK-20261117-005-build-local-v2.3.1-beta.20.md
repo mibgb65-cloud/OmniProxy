@@ -118,7 +118,7 @@ BUILD_EXIT=0
 
 ## Commit
 
-TBD
+01f51b0e chore(release): 准备 v2.3.1-beta.20 本地构建
 
 ---
 
