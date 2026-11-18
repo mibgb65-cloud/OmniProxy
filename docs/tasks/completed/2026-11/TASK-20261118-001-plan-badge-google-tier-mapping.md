@@ -183,7 +183,9 @@ None.
 
 ## Commit
 
-（完成后填写）
+```text
+2b995410 feat(accounts): 套餐徽章空值显示无套餐并映射 Google 档位名
+```
 
 ---
 
