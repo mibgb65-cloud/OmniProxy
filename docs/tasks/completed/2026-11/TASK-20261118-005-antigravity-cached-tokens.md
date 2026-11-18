@@ -215,7 +215,7 @@ None.
 ## Commit
 
 ```text
-Pending
+9bdd5d42 fix(antigravity): 记录 Google 订阅的缓存命中 Token
 ```
 
 ---
