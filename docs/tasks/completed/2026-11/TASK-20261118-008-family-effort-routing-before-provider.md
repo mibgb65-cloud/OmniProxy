@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -173,7 +173,7 @@ wails3 production build + vite build 通过
 ## Commit
 
 ```text
-Planned
+e7c75b81 fix(routing): 家族名加档位在选服务商前解析到官方变体
 ```
 
 ---
@@ -182,3 +182,9 @@ Planned
 
 Gemini 家族的“家族名 + 档位”请求改由官方订阅承接，WorkBuddy 只在客户端没有指定档位时才会被选中。
 
+
+---
+
+# Completed
+
+2026-11-18 15:05
