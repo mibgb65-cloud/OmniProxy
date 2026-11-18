@@ -68,6 +68,13 @@ func (s *Service) RouteRequest(ctx context.Context, request proxy.Request) (prox
 	if s.router == nil {
 		return request, nil
 	}
+	// 家族名 + 明确档位必须在选服务商之前换成真实变体：否则发布裸型号的中转站会
+	// 先命中，官方订阅的档位变体永远排不进候选。
+	updated, err := s.applyRequestedFamilyVariant(ctx, request)
+	if err != nil {
+		return request, err
+	}
+	request = updated
 	decision, candidates, fixed, err := s.resolvePreview(ctx, request.Model)
 	if err != nil {
 		return request, proxy.Failure("routing_configuration_unavailable", 503)

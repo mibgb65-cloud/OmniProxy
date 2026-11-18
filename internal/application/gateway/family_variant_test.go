@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	routes "omniproxy/internal/application/routing"
@@ -92,5 +93,66 @@ func TestFamilyVariantLeavesUnknownModelsAlone(t *testing.T) {
 	service := &Service{router: router}
 	if _, err := service.RouteRequest(context.Background(), proxy.Request{Protocol: "chat", Model: "gemini-4-carbon", Body: familyBody("gemini-4-carbon", "")}); err == nil {
 		t.Fatal("unknown family accepted")
+	}
+}
+
+// relayFamilyEntries 复现真实目录：裸型号只在中转站，档位变体只在官方订阅。
+func relayFamilyEntries(base string, variants ...string) []catalog.Entry {
+	entries := []catalog.Entry{{ID: base, ProviderKind: "workbuddy_ai", ProviderID: "builtin_workbuddy_ai"}}
+	for _, variant := range variants {
+		entries = append(entries, catalog.Entry{ID: variant, ProviderKind: "google", ProviderID: "builtin_google"})
+	}
+	return entries
+}
+
+// 家族名 + 明确档位必须先解析到官方变体，不能被发布裸型号的中转站截获。
+func TestRequestedFamilyVariantBeatsRelayBaseModel(t *testing.T) {
+	carbon := relayFamilyEntries("gemini-4-carbon", "gemini-4-carbon-high", "gemini-4-carbon-medium", "gemini-4-carbon-low")
+	for _, test := range []struct {
+		name, effort, wantModel, wantProvider string
+	}{
+		{"explicit effort", "high", "gemini-4-carbon-high", "builtin_google"},
+		{"middle effort", "medium", "gemini-4-carbon-medium", "builtin_google"},
+		{"no effort keeps exact match", "", "gemini-4-carbon", "builtin_workbuddy_ai"},
+		{"unknown level is not substituted", "xhigh", "gemini-4-carbon", "builtin_workbuddy_ai"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			router := &familyRouter{entries: carbon}
+			service := &Service{router: router}
+			request, err := service.RouteRequest(context.Background(), proxy.Request{
+				Protocol: "chat", Model: "gemini-4-carbon", Body: familyBody("gemini-4-carbon", test.effort),
+			})
+			if err != nil {
+				t.Fatal("request rejected", err)
+			}
+			if request.Model != test.wantModel || request.ProviderID != test.wantProvider {
+				t.Fatalf("routed %q/%q, want %q/%q", request.Model, request.ProviderID, test.wantModel, test.wantProvider)
+			}
+			// 路由必须直接看到真实型号：裸型号根本不该参与服务商选择。
+			if len(router.seen) == 0 || router.seen[0] != test.wantModel {
+				t.Fatalf("routing resolved %v", router.seen)
+			}
+			if test.effort != "" && test.wantModel != "gemini-4-carbon" {
+				// 档位已经由型号表达：正文里的档位字段必须剥离，记录仍保留档位。
+				if request.Effort != test.effort || strings.Contains(string(request.Body), "reasoning_effort") {
+					t.Fatalf("effort %q kept in body: %s", request.Effort, request.Body)
+				}
+			}
+		})
+	}
+}
+
+// 只有一个档位后缀时不改写：后缀可能只是型号名的一部分，不能凭一个变体判定家族。
+func TestRequestedFamilyVariantRequiresSiblings(t *testing.T) {
+	router := &familyRouter{entries: relayFamilyEntries("gemini-4-x", "gemini-4-x-high")}
+	service := &Service{router: router}
+	request, err := service.RouteRequest(context.Background(), proxy.Request{
+		Protocol: "chat", Model: "gemini-4-x", Body: familyBody("gemini-4-x", "high"),
+	})
+	if err != nil {
+		t.Fatal("request rejected", err)
+	}
+	if request.Model != "gemini-4-x" || request.ProviderID != "builtin_workbuddy_ai" {
+		t.Fatalf("single sibling family rewritten: %q/%q", request.Model, request.ProviderID)
 	}
 }
