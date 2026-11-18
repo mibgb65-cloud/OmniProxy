@@ -13,8 +13,10 @@ const planColors: Record<string, string> = {
   self_serve_business_usage_based:
     "border-cyan-200 bg-cyan-50 text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950 dark:text-cyan-200",
   pro: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200",
-  ultra:
+  "ultra 20x":
     "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-200",
+  "ultra 5x":
+    "border-rose-300 bg-transparent text-rose-700 dark:border-rose-700 dark:text-rose-300",
   prolite:
     "border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-200",
   enterprise:
@@ -22,9 +24,12 @@ const planColors: Record<string, string> = {
 }
 
 // Antigravity（Google 订阅）的档位标识带产品前缀与 tier 后缀（g1-ultra-tier），
-// 原样显示不可读。只映射已知档位；未列出的标识保留原文，不推断价格、额度或等级。
+// 原样显示不可读。Ultra 的 5x 与 20x 两档官方 name 都写「Google AI Ultra」，
+// 只能按 id 区分（g1-ultra-lite-tier = 5x，g1-ultra-tier = 20x）。
+// 只映射已知档位；未列出的标识保留原文，不推断价格、额度或等级。
 const planTiers: Record<string, string> = {
-  "g1-ultra-tier": "Ultra",
+  "g1-ultra-tier": "Ultra 20x",
+  "g1-ultra-lite-tier": "Ultra 5x",
   "g1-pro-tier": "Pro",
   "g1-free-tier": "Free",
   "free-tier": "Free",

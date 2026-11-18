@@ -26,10 +26,18 @@ it("只有空白的套餐字段同样视为无套餐", () => {
   expect(screen.getByText("无套餐")).toBeInTheDocument()
 })
 
-it("Antigravity 的 Ultra 档位映射成可读名称", () => {
+it("Antigravity 的 Ultra 20x 档位映射成可读名称", () => {
   setup("g1-ultra-tier")
-  const badge = screen.getByText("Ultra")
+  const badge = screen.getByText("Ultra 20x")
+  expect(badge.className).toContain("bg-rose-50")
+})
+
+it("Antigravity 的 Ultra 5x 档位单独显示并与 20x 区分", () => {
+  setup("g1-ultra-lite-tier")
+  const badge = screen.getByText("Ultra 5x")
   expect(badge.className).toContain("rose")
+  expect(badge.className).toContain("bg-transparent")
+  expect(badge.className).not.toContain("bg-rose-50")
 })
 
 it("Antigravity 的 Pro 档位映射成可读名称并与 Ultra 配色不同", () => {
