@@ -136,7 +136,9 @@ None.
 
 ## Commit
 
-Pending
+```text
+56b398a9 chore(release): 准备 v2.3.1-beta.25 本地构建
+```
 
 ---
 
