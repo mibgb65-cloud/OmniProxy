@@ -129,7 +129,9 @@ None.
 
 ## Commit
 
-（完成后填写）
+```text
+c8edf0ea feat(accounts): 区分 Google AI Ultra 5x 与 20x 套餐徽章
+```
 
 ---
 
