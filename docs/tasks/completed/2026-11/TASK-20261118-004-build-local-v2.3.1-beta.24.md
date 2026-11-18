@@ -116,7 +116,9 @@ None.
 
 ## Commit
 
-（完成后填写）
+```text
+ac23e483 chore(release): 准备 v2.3.1-beta.24 本地构建
+```
 
 ---
 
