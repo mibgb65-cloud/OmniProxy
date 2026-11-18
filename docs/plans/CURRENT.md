@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-进行中：[TASK-20261118-010](../tasks/active/TASK-20261118-010-dashboard-model-share-and-usage-calendar.md) 仪表盘新增「模型 Token 占比」卡片（跟随今日／7 天／30 天所选时段，前六名之外按同一批数据合并成精确的「其他」），用量页新增「年度活跃度」热图（近 365 个本地日期，可切换 Token／请求数）；两者只读 `usage_buckets` 日汇总，无迁移、无新依赖。
+已实现：[TASK-20261118-010](../tasks/completed/2026-11/TASK-20261118-010-dashboard-model-share-and-usage-calendar.md) 仪表盘新增「模型 Token 占比」卡片（跟随今日／7 天／30 天所选时段，前六名之外按同一批数据合并成精确的「其他」），用量页新增「年度活跃度」热图（近 365 个本地日期，可切换 Token／请求数）；两者只读 `usage_buckets` 日汇总，无迁移、无新依赖。`task verify` EXIT=0（前端 162 文件／990 项测试）。实现提交 `0c6bbe8c`。桌面窗口内的实机目视检查未执行。
 
 本地构建：[TASK-20261118-009](../tasks/completed/2026-11/TASK-20261118-009-build-local-v2.3.1-beta.26.md) 已产出 `v2.3.1-beta.26` Windows amd64 生产安装包，内容为 Google 订阅缓存命中（TASK-20261118-005）、账号级拒绝保留真实错误码并换号（TASK-20261118-007）、家族名 + 档位在选服务商前解析到官方变体（TASK-20261118-008）：安装器 21,398,583 bytes，SHA256 `db8818b6d80bf242ad88a56acb436f0335726ecd68ad0f8839f176d6f005c5eb`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 

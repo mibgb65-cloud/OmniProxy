@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -206,16 +206,20 @@ EXIT=0
 
 ## Commit
 
-（未开始）
+```text
+0c6bbe8c feat(dashboard): 首页模型 Token 占比与用量页年度活跃度热图
+```
 
 ---
 
 # Result
 
-（未开始）
+仪表盘在所选时段（默认今日）新增「模型 Token 占比」，用量页新增「年度活跃度」热图。两者都只读
+`usage_buckets` 的日汇总，与既有指标同一只读事务／同一次 `UsageRead`，没有迁移、没有新依赖，
+也没有改变任何记账口径；`task verify` EXIT=0。
 
 ---
 
 # Completed
 
-（未完成）
+2026-11-18 21:20
