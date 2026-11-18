@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -128,6 +128,7 @@ Windows 数字版本：2.3.1.0；NSIS 基础版本：2.3.1
 
 ```text
 2487335e chore(release): 准备 v2.3.1-beta.26 本地构建
+5ded80c8 chore(release): 记录 v2.3.1-beta.26 构建产物与版本资源
 ```
 
 ---
@@ -135,4 +136,10 @@ Windows 数字版本：2.3.1.0；NSIS 基础版本：2.3.1
 # Result
 
 `v2.3.1-beta.26` 本地安装包已产出并校验通过，包含 beta.25 的缓存命中修复、账号级拒绝换号与服务商截获修复；未签名、未安装、未启动、未打标签、未推送。
+
+---
+
+# Completed
+
+2026-11-18 15:25
 
