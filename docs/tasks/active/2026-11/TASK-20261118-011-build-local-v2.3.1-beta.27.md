@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -87,20 +87,73 @@ In Progress
 
 # Implementation Result
 
-（进行中）
+## Changes
+
+- 新增 `docs/releases/v2.3.1-beta.27.md`（中英版本说明：两处新增界面、无不兼容变更、本地更新步骤、
+  验证边界与未目视确认的范围）。
+- 版本号：`internal/version/version.go`、`frontend/package.json` → `2.3.1-beta.27`；
+  `build/windows/info.json` 的 `ProductVersion` 同步为 `2.3.1-beta.27`。
+- 安装包：`release-assets/v2.3.1-beta.27/OmniProxy-Setup-v2.3.1-beta.27-windows-amd64.exe`
+  （21,410,046 bytes，SHA256 `864c35516877d32a80163b308aef125d41dd185e7fc1f393d811796e42f95327`），
+  附 `.sha256`。
+- 构建脚本自动写入的 `build/config.yml`（数字版本 `2.3.1`）与
+  `build/windows/nsis/wails_tools.nsh`（`INFO_PRODUCTVERSION "2.3.1"`）与既有值相同，没有产生改动。
+
+## Files Changed
+
+- `docs/releases/v2.3.1-beta.27.md`
+- `internal/version/version.go`、`frontend/package.json`、`build/windows/info.json`
+- 产物目录 `release-assets/v2.3.1-beta.27/`（被 `.gitignore` 忽略，不入库）
+
+## Technical Notes
+
+- `scripts/build-release.ps1` 内部依次执行 `task --force verify`、`task --force package`、
+  Windows 应用／安装器版本资源校验与发布资产校验，任一失败即中止。
+- 脚本用 Windows PowerShell 写 `build/windows/info.json` 会产生 CRLF；按仓库 `.gitattributes`
+  的要求已还原为 LF（内容与提交一致，`git diff` 为空）。
+- 安装包未签名（按项目 `codeSigningPolicy`），未自动安装、未启动应用、未打标签、未推送。
 
 ---
 
 # Verification
 
-（待构建完成后填写）
+## Tests
+
+- [x] 构建脚本内置的 `task --force verify`（格式、lint、`tsc --noEmit`、Go 全包、前端 162 文件／990 项测试、Windows 生产构建）
+- [ ] 真实请求验证：本版本只改界面，由用户安装后打开仪表盘与用量页确认
+- [ ] 桌面窗口目视确认：未执行（构建期无法观察 GUI）
+
+## Quality Checks
+
+- [x] Format／Lint／Type Check／Test／Build
+- [x] Windows 版本资源校验：`Windows 应用和安装器版本资源校验通过`
+- [x] 发布资产校验：`发布资产校验通过：v2.3.1-beta.27`
+
+## Verification Result
+
+```text
+scripts\build-release.ps1 -Version v2.3.1-beta.27 -OutputDirectory release-assets\v2.3.1-beta.27
+BUILD_EXIT=0
+安装器：21,410,046 bytes
+SHA256：864c35516877d32a80163b308aef125d41dd185e7fc1f393d811796e42f95327
+Windows 数字版本：2.3.1.0；NSIS 基础版本：2.3.1
+前端测试：162 文件／990 项通过
+```
 
 ---
 
 # Documentation
 
-- [ ] 版本说明 `docs/releases/v2.3.1-beta.27.md`
-- [ ] CURRENT
+- [x] 版本说明 `docs/releases/v2.3.1-beta.27.md`
+- [x] CURRENT
+- [ ] 其它：No documentation changes required.
+
+---
+
+# Deviations
+
+- 计划里写「提交构建脚本生成的 `build/windows/info.json`」，实际该文件的版本字段已在
+  `dc379d4b` 一并提交，构建后只有换行符差异（已还原为 LF），因此本轮没有 info.json 的内容变更。
 
 ---
 
@@ -108,16 +161,19 @@ In Progress
 
 ## Commit
 
-（未开始）
+```text
+dc379d4b chore(release): 准备 v2.3.1-beta.27 本地构建
+```
 
 ---
 
 # Result
 
-（未开始）
+`v2.3.1-beta.27` 本地安装包已产出并校验通过，包含仪表盘「模型 Token 占比」与用量页「年度活跃度」
+两处新增界面；未签名、未安装、未启动、未打标签、未推送，无数据库迁移。
 
 ---
 
 # Completed
 
-（未完成）
+2026-11-18 21:45
