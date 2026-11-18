@@ -163,6 +163,7 @@ Windows 数字版本：2.3.1.0；NSIS 基础版本：2.3.1
 
 ```text
 dc379d4b chore(release): 准备 v2.3.1-beta.27 本地构建
+b45efcf0 chore(release): 记录 v2.3.1-beta.27 构建产物
 ```
 
 ---
