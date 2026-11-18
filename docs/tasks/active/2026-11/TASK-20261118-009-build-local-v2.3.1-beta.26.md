@@ -54,5 +54,85 @@ In Progress
 # Progress
 
 - 2026-11-18 15:06 创建记录，准备版本说明与版本号。
+- 2026-11-18 15:12 `2487335e` 提交版本说明与版本号（`chore(release)`）。
+- 2026-11-18 15:22 构建完成，`BUILD_EXIT=0`，产物校验通过。
 
 ---
+
+# Implementation Result
+
+## Changes
+
+- 新增 `docs/releases/v2.3.1-beta.26.md`（中英版本说明：两处修复、无不兼容变更、本地更新步骤、验证边界）。
+- 版本号：`internal/version/version.go`、`frontend/package.json` → `2.3.1-beta.26`。
+- 安装包：`release-assets/v2.3.1-beta.26/OmniProxy-Setup-v2.3.1-beta.26-windows-amd64.exe`（21,398,583 bytes，SHA256 `db8818b6d80bf242ad88a56acb436f0335726ecd68ad0f8839f176d6f005c5eb`），附 `.sha256`。
+- 构建脚本自动更新的 `build/windows/info.json`：`fixed` 版本 `2.3.1.0`，`ProductVersion` 为 `2.3.1-beta.26`（换行符已还原为 LF）。
+- NSIS 基础版本保持 `2.3.1`（`build/windows/nsis/wails_tools.nsh` 未变化）。
+
+## Files Changed
+
+- `docs/releases/v2.3.1-beta.26.md`
+- `internal/version/version.go`、`frontend/package.json`
+- `build/windows/info.json`（构建脚本生成）
+- 产物目录 `release-assets/v2.3.1-beta.26/`（被 `.gitignore` 忽略，不入库）
+
+## Technical Notes
+
+- 构建脚本内部执行 `task --force verify` 与 `task --force package`，并校验 Windows 应用／安装器版本资源与发布资产名。
+- 安装包未签名（按项目 `codeSigningPolicy`），未自动安装、未启动应用、未打标签、未推送。
+
+---
+
+# Verification
+
+## Tests
+
+- [x] 构建脚本内置的 `task --force verify`（格式、lint、`tsc --noEmit`、Go 全包、前端 159 文件／977 项测试、Windows 生产构建）
+- [ ] 真实请求验证：需要用户安装后发起，构建期不消耗任何订阅／中转额度
+
+## Quality Checks
+
+- [x] Format／Lint／Type Check／Test／Build
+- [x] Windows 版本资源校验：`Windows 应用和安装器版本资源校验通过`
+- [x] 发布资产校验：`发布资产校验通过：v2.3.1-beta.26`
+
+## Verification Result
+
+```text
+scripts\build-release.ps1 -Version v2.3.1-beta.26 -OutputDirectory release-assets\v2.3.1-beta.26
+BUILD_EXIT=0
+安装器：21,398,583 bytes
+SHA256：db8818b6d80bf242ad88a56acb436f0335726ecd68ad0f8839f176d6f005c5eb
+Windows 数字版本：2.3.1.0；NSIS 基础版本：2.3.1
+```
+
+---
+
+# Documentation
+
+- [x] 版本说明 `docs/releases/v2.3.1-beta.26.md`
+- [x] CURRENT
+- [ ] 其它：No documentation changes required.
+
+---
+
+# Deviations
+
+- 计划里只写“记录产物大小与 SHA256”，实际同时把构建生成的 `build/windows/info.json` 纳入提交（否则仓库版本资源与安装包不一致）。
+
+---
+
+# Git
+
+## Commit
+
+```text
+2487335e chore(release): 准备 v2.3.1-beta.26 本地构建
+```
+
+---
+
+# Result
+
+`v2.3.1-beta.26` 本地安装包已产出并校验通过，包含 beta.25 的缓存命中修复、账号级拒绝换号与服务商截获修复；未签名、未安装、未启动、未打标签、未推送。
+

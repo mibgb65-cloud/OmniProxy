@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261118-009](../tasks/completed/2026-11/TASK-20261118-009-build-local-v2.3.1-beta.26.md) 已产出 `v2.3.1-beta.26` Windows amd64 生产安装包，内容为 Google 订阅缓存命中（TASK-20261118-005）、账号级拒绝保留真实错误码并换号（TASK-20261118-007）、家族名 + 档位在选服务商前解析到官方变体（TASK-20261118-008）：安装器 21,398,583 bytes，SHA256 `db8818b6d80bf242ad88a56acb436f0335726ecd68ad0f8839f176d6f005c5eb`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
+
 已修复：[TASK-20261118-008](../tasks/completed/2026-11/TASK-20261118-008-family-effort-routing-before-provider.md) WorkBuddy 中转站截获 Gemini 家族的“家族名 + 档位”请求：桌面端发 `gemini-4-carbon` 加 `reasoning_effort=high`，而裸型号只有中转站发布、官方订阅只发布 `…-high/-low/-medium`，路由按精确 ID 先命中了中转站，档位变体永远进不了候选。现在家族名 + 明确档位在**选服务商之前**就解析到真实变体（同族需 ≥2 个档位确认、只做精确档位匹配、无档位不猜），这类请求改由 Google 订阅承接；中转站只在客户端未指定档位时才会被选中。影响面限定在 `gemini-3.8-flash`／`gemini-4-argon`／`gemini-4-carbon` 三组。跨服务商自动切换未做（候选池按 ADR-015 冻结在服务商内）。`task verify` EXIT=0。
 
 已修复：[TASK-20261118-007](../tasks/completed/2026-11/TASK-20261118-007-account-rejection-failover.md) `gemini-4-carbon` 请求打到没有该模型权益的 WorkBuddy 账号，同池另一个账号从未被尝试：适配器的业务码拒绝（11158 等）只是 `workbuddyai.Failure`，网关失败分类只认 `*proxy.Error`，于是记录被兜底成 `503 credential_unavailable`，也不参与换号、不写冷却，三条请求各只尝试一次。现在业务码在网关边界翻译成稳定错误（同一码、状态按码归类），`model_not_entitled` 与 401 类按账号级拒绝换号（分别冷却 30／5 分钟），没有候选时返回真实 403 而不是伪装成 429 账号池冷却；渠道／签名／UA 拒绝与本地凭据故障仍不换号。路由口径（裸家族名是否优先走 Google 订阅的 `-high` 变体）未改，待单独决定。`task verify` EXIT=0（前端 159 文件／977 项测试）。
