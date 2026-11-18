@@ -99,6 +99,15 @@ export function snapshot(query: DashboardQuery): DashboardInfo {
     historyIncomplete: false,
     capturedFrom: bounds[0] ?? 0,
     updatedAt: new Date().toISOString(),
+    models: [
+      {
+        model: "gpt-test",
+        inputTokens: "900",
+        outputTokens: "100",
+        totalTokens: "1000",
+        requests: 9,
+      },
+    ],
   }
 }
 

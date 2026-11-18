@@ -5,7 +5,7 @@ import {
   chartLabelStep,
   chartPercent,
 } from "../../lib/chart"
-import type { DashboardQuery } from "../../services/dashboard"
+import type { DashboardModel, DashboardQuery } from "../../services/dashboard"
 import type { AccountItem, ProviderConfiguration } from "../../services/omniproxy"
 import type { RouteItem } from "../../services/routing"
 import type { QuotaEntry } from "../quota/quota-model"
@@ -165,6 +165,49 @@ export function dashboardChecklist(
 
 export function dashboardTokenRatio(value: string, maximum: bigint) {
   return chartPercent(BigInt(value), maximum)
+}
+
+export type DashboardModelShare = {
+  key: string
+  label: string
+  percent: number
+  tokens: string
+  requests: number
+  /** 「其他」行合并的模型数量；服务端已返回全部模型，因此余量是精确值。 */
+  count?: number
+}
+
+export const DASHBOARD_MODEL_SHARE_LIMIT = 6
+
+/**
+ * 模型 Token 占比：只取前若干名，余量按同一批数据补成「其他」——
+ * 分母来自模型行之和而不是指标卡，因此两者口径不会因为未知用量而错位。
+ */
+export function dashboardModelShares(
+  models: DashboardModel[],
+  limit = DASHBOARD_MODEL_SHARE_LIMIT,
+): DashboardModelShare[] {
+  const total = models.reduce((sum, item) => sum + BigInt(item.totalTokens || "0"), 0n)
+  if (total <= 0n) return []
+  const rows: DashboardModelShare[] = models.slice(0, limit).map((item) => ({
+    key: item.model || "unknown",
+    label: item.model || "—",
+    percent: chartPercent(BigInt(item.totalTokens || "0"), total),
+    tokens: item.totalTokens || "0",
+    requests: item.requests,
+  }))
+  const rest = models.slice(limit)
+  if (!rest.length) return rows
+  const restTokens = rest.reduce((sum, item) => sum + BigInt(item.totalTokens || "0"), 0n)
+  rows.push({
+    key: "__other",
+    label: "",
+    percent: chartPercent(restTokens, total),
+    tokens: restTokens.toString(),
+    requests: rest.reduce((sum, item) => sum + item.requests, 0),
+    count: rest.length,
+  })
+  return rows
 }
 
 // 仪表盘与用量页共用同一套坐标轴／抽稀算法，保留原有导出名避免调用方和测试改动。

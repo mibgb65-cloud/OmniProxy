@@ -30,6 +30,27 @@ export function chartPercent(value: bigint, total: bigint) {
   return total > 0n ? Number((value * 10000n) / total) / 100 : 0
 }
 
+/** 百分比文案，最多一位小数；调用方自己决定是否显示 0%。 */
+export function chartPercentLabel(value: number, language: string) {
+  const text = new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en-US", {
+    maximumFractionDigits: 1,
+  }).format(value)
+  return `${text}%`
+}
+
+/**
+ * 多系列图表的固定色序：占比条、堆叠趋势与图例共用同一组 class，
+ * 同名列在不同图表中保持同色。
+ */
+export const CHART_SERIES_COLORS = [
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-violet-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+] as const
+
 export function chartCompact(value: bigint, language: string) {
   return new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en-US", {
     notation: "compact",

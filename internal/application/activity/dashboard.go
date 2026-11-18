@@ -83,6 +83,9 @@ func (s *Service) Dashboard(ctx context.Context, query DashboardQuery) (Dashboar
 	if err != nil {
 		return result, ErrUnavailable
 	}
+	if result.Models, err = readDashboardModels(ctx, tx, query.Boundaries); err != nil {
+		return result, err
+	}
 	result.ProviderDistribution, err = readDashboardProviders(ctx, tx)
 	var pending int64
 	// 使用已有全局桶计算未结束请求，避免保留百万条明细时每次刷新扫描整表。
@@ -135,6 +138,41 @@ func readDashboardRecent(ctx context.Context, tx *sql.Tx, from, to int64) ([]Req
 		if err != nil {
 			return nil, ErrUnavailable
 		}
+		items = append(items, item)
+	}
+	if rows.Err() != nil {
+		return nil, ErrUnavailable
+	}
+	return items, nil
+}
+
+// dashboardModelDayRange 把前端生成的本地日边界折回 usage_buckets 的本地日期（含首含尾）。
+// 边界是本地午夜的 UTC 秒，直接截 UTC 日期会错开一天；末边界是开区间，回退一秒取最后一个
+// 被包含的本地日期。
+func dashboardModelDayRange(bounds []int64) (string, string) {
+	from := time.Unix(bounds[0], 0).In(time.Local).Format(time.DateOnly)
+	to := time.Unix(bounds[len(bounds)-1]-1, 0).In(time.Local).Format(time.DateOnly)
+	return from, to
+}
+
+// readDashboardModels 汇总所选时段各模型的已报告 Token。返回全部模型而不是前几名：
+// 模型数量受目录规模约束，前端据此把前六名之外的余量与请求数合并成精确的「其他」。
+func readDashboardModels(ctx context.Context, tx *sql.Tx, bounds []int64) ([]DashboardModel, error) {
+	from, to := dashboardModelDayRange(bounds)
+	rows, err := tx.QueryContext(ctx, `SELECT model,SUM(input_tokens),SUM(output_tokens),SUM(requests) FROM usage_buckets WHERE day>=? AND day<=? GROUP BY model ORDER BY SUM(input_tokens)+SUM(output_tokens) DESC,model`, from, to)
+	if err != nil {
+		return nil, ErrUnavailable
+	}
+	defer rows.Close()
+	items := []DashboardModel{}
+	for rows.Next() {
+		var item DashboardModel
+		var input, output int64
+		if rows.Scan(&item.Model, &input, &output, &item.Requests) != nil {
+			return nil, ErrUnavailable
+		}
+		item.InputTokens, item.OutputTokens = strconv.FormatInt(input, 10), strconv.FormatInt(output, 10)
+		item.TotalTokens = new(big.Int).Add(big.NewInt(input), big.NewInt(output)).String()
 		items = append(items, item)
 	}
 	if rows.Err() != nil {

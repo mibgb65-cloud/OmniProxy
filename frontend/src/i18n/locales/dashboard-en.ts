@@ -39,6 +39,12 @@ export const dashboardEn: Record<keyof typeof dashboardZh, string> = {
   "dash.resourcesUnchecked": "Some resources have not been checked. Run a check or open Quota.",
   "dash.recent": "Recent requests",
   "dash.allRequests": "View requests",
+  "dash.modelShare": "Token share by model",
+  "dash.modelShareHint":
+    "Reported tokens in the selected range split by model; models after the first six are merged into Other.",
+  "dash.modelShareEmpty": "No token usage has been reported in this range yet.",
+  "dash.modelShareOther": "{{count}} other models",
+  "dash.modelShareRequests": "{{value}} requests",
   "dash.requestDetails": "View request {{id}}",
   "dash.recentEmpty": "No request records in this range.",
   "dash.resources": "Resource overview",

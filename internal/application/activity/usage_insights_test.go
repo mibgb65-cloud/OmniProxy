@@ -131,10 +131,50 @@ func TestUsageInsightsEmptyProfile(t *testing.T) {
 	if len(info.Days) != 0 || len(info.Providers) != 0 || len(info.Models) != 0 || len(info.ModelDays) != 0 || len(info.Hours) != 24 {
 		t.Fatalf("empty breakdowns = %+v", info)
 	}
+	if len(info.Calendar) != 0 {
+		t.Fatalf("empty calendar = %+v", info.Calendar)
+	}
 	if info.Reliability.Requests != 0 || info.Reliability.SuccessRate != nil || info.Reliability.AverageLatencyMS != nil {
 		t.Fatalf("empty reliability = %+v", info.Reliability)
 	}
 	if info.Cache.CachedInputTokens != "0" || info.Cache.KnownRequests != 0 {
 		t.Fatalf("empty cache = %+v", info.Cache)
+	}
+}
+
+// 年度热图只覆盖最近 365 个本地日期：更早的用量不返回，空日不补行（由前端补零）。
+func TestUsageCalendarCoversLastYear(t *testing.T) {
+	s := fixture(t)
+	ctx := context.Background()
+	local := time.Now().In(time.Local)
+	today := local.Format(time.DateOnly)
+	edge := local.AddDate(0, 0, -(usageCalendarDays - 1)).Format(time.DateOnly)
+	tooOld := local.AddDate(0, 0, -usageCalendarDays).Format(time.DateOnly)
+	for _, row := range []struct {
+		day, subject, model string
+		requests, input     int64
+		output              int64
+	}{
+		{today, "a", "gpt-test", 2, 10, 5},
+		{today, "b", "gpt-test", 1, 10, 0},
+		{edge, "a", "gpt-test", 1, 0, 0},
+		{tooOld, "a", "gpt-test", 4, 400, 0},
+	} {
+		if _, err := s.db.Exec(`INSERT INTO usage_buckets(day,subject,model,provider_name,account_name,email,workspace_id,requests,completed_usage,input_tokens,output_tokens) VALUES(?,?,?,?,?,?,?,?,?,?,?)`, row.day, row.subject, row.model, "", "", "", "", row.requests, row.requests, row.input, row.output); err != nil {
+			t.Fatal(err)
+		}
+	}
+	info, err := s.Usage(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(info.Calendar) != 2 {
+		t.Fatalf("calendar must drop days outside the year window: %+v", info.Calendar)
+	}
+	if info.Calendar[0].Day != edge || info.Calendar[0].Requests != 1 || info.Calendar[0].TotalTokens != "0" {
+		t.Fatalf("window edge = %+v", info.Calendar[0])
+	}
+	if info.Calendar[1].Day != today || info.Calendar[1].Requests != 3 || info.Calendar[1].InputTokens != "20" || info.Calendar[1].TotalTokens != "25" {
+		t.Fatalf("aggregated day = %+v", info.Calendar[1])
 	}
 }

@@ -189,6 +189,7 @@ describe("dashboard overview", () => {
         },
         points: [],
         recent: [],
+        models: [],
         historyIncomplete: true,
       }
     })

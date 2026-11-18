@@ -161,3 +161,46 @@ func TestDashboardValidatesAndUsesQuarterHourTimezoneBoundaries(t *testing.T) {
 		t.Fatal("local half-hour boundary mismatch", info.Points)
 	}
 }
+
+// 模型占比必须跟随所选时段：只统计被该时段覆盖的本地日期，前一日的用量不得混入。
+func TestDashboardModelShareFollowsSelectedPeriod(t *testing.T) {
+	s := fixture(t)
+	ctx := context.Background()
+	local := time.Now().In(time.Local)
+	start := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, time.Local)
+	query := DashboardQuery{Boundaries: []int64{start.Unix(), start.AddDate(0, 0, 1).Unix()}}
+	for i, row := range []struct {
+		at     time.Time
+		model  string
+		input  int64
+		output int64
+	}{
+		{start.Add(9 * time.Hour), "big", 100, 50},
+		{start.Add(10 * time.Hour), "big", 100, 50},
+		{start.Add(11 * time.Hour), "small", 10, 5},
+		{start.AddDate(0, 0, -1).Add(9 * time.Hour), "stale", 500, 0},
+	} {
+		e := event(i+1, "a@example.invalid", "a")
+		e.StartedAt = row.at
+		e.FinishedAt = row.at.Add(time.Second)
+		e.Model = row.model
+		e.Usage = proxy.UsageSnapshot{Input: row.input, Output: row.output, InputKnown: true, OutputKnown: true, Complete: true}
+		record(t, s, e)
+	}
+	info, err := s.Dashboard(ctx, query)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(info.Models) != 2 {
+		t.Fatalf("models must stay inside the selected period: %+v", info.Models)
+	}
+	if info.Models[0].Model != "big" || info.Models[0].TotalTokens != "300" || info.Models[0].InputTokens != "200" || info.Models[0].Requests != 2 {
+		t.Fatalf("top model = %+v", info.Models[0])
+	}
+	if info.Models[1].Model != "small" || info.Models[1].TotalTokens != "15" {
+		t.Fatalf("second model = %+v", info.Models[1])
+	}
+	if info.Summary.TotalTokens != "315" || info.Summary.Requests != 3 {
+		t.Fatalf("period summary disagrees with model shares: %+v", info.Summary)
+	}
+}

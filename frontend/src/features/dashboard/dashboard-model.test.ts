@@ -4,6 +4,7 @@ import {
   dashboardAxisTicks,
   dashboardChecklist,
   dashboardLabelStep,
+  dashboardModelShares,
   dashboardRange,
   dashboardTokenRatio,
   formatDashboardLatency,
@@ -126,6 +127,34 @@ describe("dashboard checklist", () => {
     expect(checklist.reduce((sum, item) => sum + item.problems, 0)).toBe(
       dashboardIssues(accounts, providers, routes, entries).length,
     )
+  })
+})
+
+describe("dashboard model share", () => {
+  const model = (name: string, tokens: string, requests: number) => ({
+    model: name,
+    inputTokens: tokens,
+    outputTokens: "0",
+    totalTokens: tokens,
+    requests,
+  })
+
+  it("keeps the top six models and merges the remainder exactly", () => {
+    const models = Array.from({ length: 9 }, (_, index) =>
+      model(`m${index}`, String((9 - index) * 10), 9 - index),
+    )
+    const rows = dashboardModelShares(models)
+    expect(rows).toHaveLength(7)
+    expect(rows[0]).toMatchObject({ key: "m0", percent: 20, tokens: "90", requests: 9 })
+    expect(rows[6]).toMatchObject({ key: "__other", count: 3, requests: 6 })
+    // 余量为 m6+m7+m8 = 30+20+10，各行占比之和回到 100%（每行各自四舍五入）。
+    expect(rows[6]?.tokens).toBe("60")
+    expect(rows.reduce((sum, row) => sum + row.percent, 0)).toBeCloseTo(100, 1)
+  })
+
+  it("reports no shares when nothing was reported or every model is zero", () => {
+    expect(dashboardModelShares([])).toEqual([])
+    expect(dashboardModelShares([model("m0", "0", 3)])).toEqual([])
   })
 })
 

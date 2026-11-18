@@ -10,6 +10,7 @@ import (
 const (
 	usageWindowDays      = 30
 	usageModelTrendLimit = 6
+	usageCalendarDays    = 365
 )
 
 func summary(input, output, requests, complete int64) Summary {
@@ -24,6 +25,7 @@ func (s *Service) Usage(ctx context.Context) (UsageInfo, error) {
 	previousFrom := now.AddDate(0, 0, -(usageWindowDays*2 - 1)).Format(time.DateOnly)
 	result := UsageInfo{
 		Days:      []Breakdown{},
+		Calendar:  []DayUsage{},
 		Hours:     make([]HourUsage, 24),
 		Providers: []Breakdown{},
 		Accounts:  []Breakdown{},
@@ -55,6 +57,9 @@ func (s *Service) Usage(ctx context.Context) (UsageInfo, error) {
 		return result, err
 	}
 	if result.ModelDays, err = s.modelDays(ctx, currentFrom); err != nil {
+		return result, err
+	}
+	if result.Calendar, err = s.calendarDays(ctx, now); err != nil {
 		return result, err
 	}
 	if result.Hours, result.Reliability, err = s.usageHours(ctx, now); err != nil {
@@ -113,6 +118,33 @@ func (s *Service) modelDays(ctx context.Context, from string) ([]ModelDay, error
 			return nil, ErrUnavailable
 		}
 		item.Summary = summary(input, output, requests, complete)
+		items = append(items, item)
+	}
+	if rows.Err() != nil {
+		return nil, ErrUnavailable
+	}
+	return items, nil
+}
+
+// calendarDays 读取近一年按本地日期归属的用量，供年度热图。没有记录的日子不返回，
+// 由前端补零——「没有请求」是真实的 0，与「未报告 Token」是两件事。
+func (s *Service) calendarDays(ctx context.Context, now time.Time) ([]DayUsage, error) {
+	local := now.In(time.Local)
+	from := local.AddDate(0, 0, -(usageCalendarDays - 1)).Format(time.DateOnly)
+	rows, err := s.db.QueryContext(ctx, `SELECT day,SUM(input_tokens),SUM(output_tokens),SUM(requests) FROM usage_buckets WHERE day>=? AND day<=? GROUP BY day ORDER BY day`, from, local.Format(time.DateOnly))
+	if err != nil {
+		return nil, ErrUnavailable
+	}
+	defer rows.Close()
+	items := []DayUsage{}
+	for rows.Next() {
+		var item DayUsage
+		var input, output int64
+		if rows.Scan(&item.Day, &input, &output, &item.Requests) != nil {
+			return nil, ErrUnavailable
+		}
+		item.InputTokens, item.OutputTokens = strconv.FormatInt(input, 10), strconv.FormatInt(output, 10)
+		item.TotalTokens = new(big.Int).Add(big.NewInt(input), big.NewInt(output)).String()
 		items = append(items, item)
 	}
 	if rows.Err() != nil {

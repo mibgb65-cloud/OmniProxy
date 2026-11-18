@@ -86,6 +86,7 @@ it("大整数 Token 保持精确，累计统计和报告覆盖率可见", async 
     accounts: [],
     models: [],
     modelDays: [],
+    calendar: [],
     cache: { cachedInputTokens: "0", knownRequests: 0 },
     reliability: {
       requests: 0,

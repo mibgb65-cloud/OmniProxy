@@ -28,6 +28,12 @@ export const activityEn = {
   "activity.metricRequests": "Requests",
   "activity.range": "Range",
   "activity.rangeDays": "{{count}} days",
+  "activity.calendar": "Yearly activity",
+  "activity.calendarHint":
+    "Usage by local date over the past year, one cell per day; days without records stay empty.",
+  "activity.calendarSummary": "{{tokens}} tokens · {{requests}} requests in the past year",
+  "activity.calendarLess": "Less",
+  "activity.calendarMore": "More",
   "activity.composition": "Token composition",
   "activity.compositionHint":
     "Input and output shares; input already includes cached tokens and is not added to output.",

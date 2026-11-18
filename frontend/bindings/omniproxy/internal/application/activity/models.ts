@@ -65,6 +65,7 @@ export interface CacheUsage {
  */
 export interface DashboardInfo {
     "providerDistribution"?: DashboardProvider[] | null;
+    "models"?: DashboardModel[] | null;
     "pendingNow"?: number | null;
     "summary": DashboardSummary;
     "points": DashboardPoint[] | null;
@@ -72,6 +73,18 @@ export interface DashboardInfo {
     "historyIncomplete": boolean;
     "capturedFrom": number;
     "updatedAt": string;
+}
+
+/**
+ * DashboardModel 是所选时段内单个模型已报告的 Token，用于首页占比卡片。
+ * 与 Points 同属一个时段口径，但取自日粒度累计（dashboard_buckets 没有模型维度）。
+ */
+export interface DashboardModel {
+    "model": string;
+    "inputTokens": string;
+    "outputTokens": string;
+    "totalTokens": string;
+    "requests": number;
 }
 
 /**
@@ -116,6 +129,18 @@ export interface DashboardSummary {
     "completeUsage": number;
     "successRate": number | null;
     "averageLatencyMs": number | null;
+}
+
+/**
+ * DayUsage 是一个本地日期按开始时间归属的用量，用于用量页的年度日历热图。
+ * 只包含有记录（含仅请求数）的日期；没有记录的日期由前端补零，不伪造为已统计。
+ */
+export interface DayUsage {
+    "day": string;
+    "inputTokens": string;
+    "outputTokens": string;
+    "totalTokens": string;
+    "requests": number;
 }
 
 /**
@@ -274,6 +299,7 @@ export interface UsageInfo {
     "reliability": Reliability;
     "allTime": Summary;
     "days": Breakdown[] | null;
+    "calendar": DayUsage[] | null;
     "hours": HourUsage[] | null;
     "providers": Breakdown[] | null;
     "accounts": Breakdown[] | null;

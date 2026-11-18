@@ -4,6 +4,7 @@ import { formatAccountTime } from "../accounts/account-display"
 import { DashboardClients } from "./dashboard-clients"
 import { DashboardIssues } from "./dashboard-issues"
 import { DashboardMetrics } from "./dashboard-metrics"
+import { DashboardModelShare } from "./dashboard-model-share"
 import { DashboardRecent } from "./dashboard-recent"
 import { DashboardResources } from "./dashboard-resources"
 import { DashboardTrend } from "./dashboard-trend"
@@ -80,11 +81,17 @@ export function DashboardView() {
           ready={data.accounts.isSuccess && data.providers.isSuccess}
         />
       </div>
-      <DashboardClients
-        items={data.agents.data ?? []}
-        failed={data.agents.isError}
-        loading={data.agents.isPending}
-      />
+      <div className="grid min-w-0 items-stretch gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+        <DashboardModelShare
+          models={statistics?.models ?? []}
+          loading={data.statistics.isPending}
+        />
+        <DashboardClients
+          items={data.agents.data ?? []}
+          failed={data.agents.isError}
+          loading={data.agents.isPending}
+        />
+      </div>
     </section>
   )
 }

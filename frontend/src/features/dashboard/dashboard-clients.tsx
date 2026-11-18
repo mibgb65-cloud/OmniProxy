@@ -15,22 +15,31 @@ export function DashboardClients({
 }) {
   const { t } = useTranslation()
   return (
-    <Card className="min-w-0 py-4">
-      <CardContent className="flex flex-wrap items-center justify-between gap-4 px-4">
-        <h2 className="text-sm font-semibold">{t("dash.clients")}</h2>
-        <div className="flex min-w-0 basis-full flex-wrap gap-3 xl:flex-1 xl:basis-0">
-          {failed ? (
-            <p role="alert" className="text-destructive text-xs">
-              {t("dash.clientsFailed")}
-            </p>
-          ) : items.length ? (
-            items.map((item) => (
-              <span
+    <Card className="flex h-full min-w-0 flex-col gap-3 py-4">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 px-4">
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="text-base font-semibold">{t("dash.clients")}</h2>
+          <Link
+            to="/gateway"
+            className="text-muted-foreground hover:text-foreground inline-flex shrink-0 items-center gap-1 text-xs"
+          >
+            {t("dash.configureClients")}
+            <ArrowUpRight className="size-3" aria-hidden="true" />
+          </Link>
+        </div>
+        {failed ? (
+          <p role="alert" className="text-destructive text-xs">
+            {t("dash.clientsFailed")}
+          </p>
+        ) : items.length ? (
+          <ul className="flex min-w-0 flex-wrap content-start gap-2">
+            {items.map((item) => (
+              <li
                 key={item.client}
-                className="bg-muted/40 inline-flex max-w-full min-w-0 flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+                className="bg-muted/40 inline-flex max-w-full min-w-0 items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs"
               >
-                <span className="font-medium">{t(agentTitle(item.client))}</span>
-                <span className="text-muted-foreground">
+                <span className="truncate font-medium">{t(agentTitle(item.client))}</span>
+                <span className="text-muted-foreground shrink-0">
                   {t(
                     item.errorCode === "key_disabled"
                       ? "dash.clientsDisabled"
@@ -41,21 +50,14 @@ export function DashboardClients({
                           : "dash.clientsMissing",
                   )}
                 </span>
-              </span>
-            ))
-          ) : (
-            <span className="text-muted-foreground text-xs">
-              {t(loading ? "accounts.loading" : "dash.clientsEmpty")}
-            </span>
-          )}
-        </div>
-        <Link
-          to="/gateway"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
-        >
-          {t("dash.configureClients")}
-          <ArrowUpRight className="size-3" aria-hidden="true" />
-        </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-muted-foreground text-xs">
+            {t(loading ? "accounts.loading" : "dash.clientsEmpty")}
+          </span>
+        )}
       </CardContent>
     </Card>
   )

@@ -1,4 +1,4 @@
-import { chartPercent } from "../../lib/chart"
+import { CHART_SERIES_COLORS, chartPercent, chartPercentLabel } from "../../lib/chart"
 import type {
   Breakdown,
   CacheUsage,
@@ -9,14 +9,7 @@ import type {
 } from "../../services/activity"
 
 /** 模型趋势最多展示六款模型，颜色顺序固定，图例与堆叠段使用同一组 class。 */
-export const MODEL_COLORS = [
-  "bg-blue-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-violet-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-] as const
+export const MODEL_COLORS = CHART_SERIES_COLORS
 
 export const OTHER_COLOR = "bg-muted-foreground/40"
 
@@ -102,10 +95,7 @@ export function usageShare(part: string | bigint | number, total: string | bigin
 }
 
 export function usagePercentLabel(value: number, language: string) {
-  const text = new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en-US", {
-    maximumFractionDigits: 1,
-  }).format(value)
-  return `${text}%`
+  return chartPercentLabel(value, language)
 }
 
 export function usageCountLabel(value: number, language: string) {

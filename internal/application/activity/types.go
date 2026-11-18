@@ -104,6 +104,16 @@ type ModelDay struct {
 	Summary Summary `json:"summary"`
 }
 
+// DayUsage 是一个本地日期按开始时间归属的用量，用于用量页的年度日历热图。
+// 只包含有记录（含仅请求数）的日期；没有记录的日期由前端补零，不伪造为已统计。
+type DayUsage struct {
+	Day          string `json:"day"`
+	InputTokens  string `json:"inputTokens"`
+	OutputTokens string `json:"outputTokens"`
+	TotalTokens  string `json:"totalTokens"`
+	Requests     int64  `json:"requests"`
+}
+
 // CacheUsage 是缓存命中的可确认下界：只统计上游明确报告过缓存明细的请求。
 type CacheUsage struct {
 	CachedInputTokens string `json:"cachedInputTokens"`
@@ -129,6 +139,7 @@ type UsageInfo struct {
 	Reliability    Reliability     `json:"reliability"`
 	AllTime        Summary         `json:"allTime"`
 	Days           []Breakdown     `json:"days"`
+	Calendar       []DayUsage      `json:"calendar"`
 	Hours          []HourUsage     `json:"hours"`
 	Providers      []Breakdown     `json:"providers"`
 	Accounts       []Breakdown     `json:"accounts"`

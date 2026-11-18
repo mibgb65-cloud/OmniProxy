@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { readUsage } from "../../services/activity"
 import { ProviderModelUsageView } from "./provider-model-usage"
+import { UsageCalendar } from "./usage-calendar"
 import { UsageComposition } from "./usage-composition"
 import { UsageDailyChart } from "./usage-daily"
 import { UsageHours } from "./usage-hours"
@@ -18,6 +19,7 @@ export function UsageView() {
   const allTime = data?.allTime ?? EMPTY_SUMMARY
   const previous = data?.previous ?? EMPTY_SUMMARY
   const days = data?.days ?? []
+  const calendar = data?.calendar ?? []
   const accounts = data?.accounts ?? []
   const models = data?.models ?? []
   const providers = data?.providers ?? []
@@ -54,6 +56,7 @@ export function UsageView() {
             reliability={reliability}
           />
           <UsageDailyChart days={days} />
+          <UsageCalendar days={calendar} />
           <div className="grid min-w-0 gap-4 xl:grid-cols-2">
             <UsageComposition summary={allTime} />
             <ProviderShareCard

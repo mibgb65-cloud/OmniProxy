@@ -32,6 +32,7 @@ type DashboardPoint struct {
 // DashboardInfo 不包含凭据或请求正文，缺失历史不会推算为完整数据。
 type DashboardInfo struct {
 	ProviderDistribution []DashboardProvider `json:"providerDistribution,omitempty"`
+	Models               []DashboardModel    `json:"models,omitempty"`
 	PendingNow           *int64              `json:"pendingNow,omitempty"`
 	Summary              DashboardSummary    `json:"summary"`
 	Points               []DashboardPoint    `json:"points"`
@@ -39,6 +40,16 @@ type DashboardInfo struct {
 	HistoryIncomplete    bool                `json:"historyIncomplete"`
 	CapturedFrom         int64               `json:"capturedFrom"`
 	UpdatedAt            string              `json:"updatedAt"`
+}
+
+// DashboardModel 是所选时段内单个模型已报告的 Token，用于首页占比卡片。
+// 与 Points 同属一个时段口径，但取自日粒度累计（dashboard_buckets 没有模型维度）。
+type DashboardModel struct {
+	Model        string `json:"model"`
+	InputTokens  string `json:"inputTokens"`
+	OutputTokens string `json:"outputTokens"`
+	TotalTokens  string `json:"totalTokens"`
+	Requests     int64  `json:"requests"`
 }
 
 // DashboardProvider 使用与明细保留期独立的累计路由计数，不冒充所选时段的分布。
