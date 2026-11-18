@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已调整：[TASK-20261118-001](../tasks/completed/2026-11/TASK-20261118-001-plan-badge-google-tier-mapping.md) 账号卡套餐徽章：没有返回套餐字段时由「套餐未知」改为「无套餐」；Antigravity 的 `g1-ultra-tier`／`g1-pro-tier`／`g1-free-tier`／`free-tier` 显示为 Ultra／Pro／Free 并分别配色，其它标识仍原样显示。WorkBuddy 账号卡因此显示「无套餐」，额度卡标题旁仍显示计费接口的套餐名（`体验版`／`Free`）——两者是不同来源，本次未合并。
+
 已修复：[TASK-20261117-004](../tasks/completed/2026-11/TASK-20261117-004-workbuddy-reasoning-effort-fallback.md) WorkBuddy AI 目录里 4 个模型没有推理档位：真实 `/v3/config`（25 个模型）里 `max-model`、`gemini-4-carbon`、`gemini-4-argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`），不给 `supportedEfforts`，而 `normalizeModel` 只读后者，于是这些模型被存成「无档位」，连 `high`／`medium` 的默认值也丢了。它们在上游接受 `low/high/max` 加自身档位（社区插件 `effortsOf()` 的实测口径）；目录现在按这个规则补齐并保留自身档位为默认，`supportsReasoning: false` 或没有 `reasoning` 的模型（`default-model`、`hy-image-3.5`、`kling-video-v3`）仍不发布档位。升级后需在「路由 → 模型目录」同步一次才有新档位。
 
 已修复：[TASK-20261117-009](../tasks/completed/2026-11/TASK-20261117-009-agent-catalog-refresh-visibility.md) 受管客户端目录停止自动更新时界面不说原因：客户端或其它工具改写配置后，后台刷新按安全策略停止覆盖，但只在日志记 `refresh_failed`，卡片上「一键配置」还是禁用状态，用户不知道模型为什么不更新（DSH 里看不到 WorkBuddy 国内版新模型就是这个原因）。现在每个客户端的刷新失败码进入 `Item.ErrorCode` 显示在卡片上，列表页汇总「N 个客户端的配置文件已被其他工具修改，模型目录暂停自动更新」，`config_changed` 时主按钮改为「重新读取并应用」，一次点击读回当前文件、预览并带 `acceptCurrentConfig` 应用，成功后清除记录并恢复自动刷新。`task verify` exit 0（前端 158 文件／969 项测试）。目标版本 `v2.3.1-beta.22`。

@@ -264,7 +264,7 @@ describe("ChatGPT subscription sign-in", () => {
     )
     expect(screen.getByRole("heading", { name: item.name })).toBeInTheDocument()
     expect(screen.getByText("需要重新登录")).toBeInTheDocument()
-    expect(screen.getByText("套餐未知")).toBeInTheDocument()
+    expect(screen.getByText("无套餐")).toBeInTheDocument()
   })
   it("keeps logged-out status visible and removes the logout action", () => {
     setup(<AccountKeyPreview account={{ ...item, authState: "logged_out" }} />)

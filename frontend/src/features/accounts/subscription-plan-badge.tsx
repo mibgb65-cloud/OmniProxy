@@ -13,16 +13,28 @@ const planColors: Record<string, string> = {
   self_serve_business_usage_based:
     "border-cyan-200 bg-cyan-50 text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950 dark:text-cyan-200",
   pro: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200",
+  ultra:
+    "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-200",
   prolite:
     "border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-200",
   enterprise:
     "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200",
 }
 
+// Antigravity（Google 订阅）的档位标识带产品前缀与 tier 后缀（g1-ultra-tier），
+// 原样显示不可读。只映射已知档位；未列出的标识保留原文，不推断价格、额度或等级。
+const planTiers: Record<string, string> = {
+  "g1-ultra-tier": "Ultra",
+  "g1-pro-tier": "Pro",
+  "g1-free-tier": "Free",
+  "free-tier": "Free",
+}
+
 export function SubscriptionPlanBadge({ plan }: { plan?: string }) {
   const { t } = useTranslation()
-  // 套餐大类无法可靠推断价格或额度档位，保留服务端标识以免显示虚假的等级。
-  const value = plan?.trim()
+  // 没有套餐字段与「有值但未识别」是两种情况：前者明确显示「无套餐」。
+  const raw = plan?.trim()
+  const value = raw ? (planTiers[raw.toLowerCase()] ?? raw) : ""
   const color = value ? planColors[value.toLowerCase()] : undefined
   return (
     <span
@@ -31,7 +43,7 @@ export function SubscriptionPlanBadge({ plan }: { plan?: string }) {
         color || "border-border bg-muted text-muted-foreground",
       )}
     >
-      {value || t("subscription.planUnknown")}
+      {value || t("subscription.planNone")}
     </span>
   )
 }

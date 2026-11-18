@@ -161,7 +161,7 @@ export const subscriptionZh = {
   "subscription.relogin": "重新登录",
   "subscription.refresh": "刷新状态",
   "subscription.logout": "退出登录",
-  "subscription.planUnknown": "套餐未知",
+  "subscription.planNone": "无套餐",
   "subscription.identityUnknown": "身份未知",
   "subscription.cleanupWarning": "账号已保存，旧授权清理仍需重试。退出登录或删除账号会再次清理。",
   "subscription.authentication": "认证信息",

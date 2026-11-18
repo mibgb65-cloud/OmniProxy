@@ -193,7 +193,7 @@ export const subscriptionEn = {
   "subscription.relogin": "Sign in again",
   "subscription.refresh": "Refresh status",
   "subscription.logout": "Sign out",
-  "subscription.planUnknown": "Unknown plan",
+  "subscription.planNone": "No plan",
   "subscription.identityUnknown": "Unknown identity",
   "subscription.cleanupWarning":
     "Account saved; previous authorization cleanup needs a retry. Signing out or deleting the account retries cleanup.",
