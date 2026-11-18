@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261118-005](../tasks/completed/2026-11/TASK-20261118-005-antigravity-cached-tokens.md) Google 订阅（Antigravity）的请求记录一直不显示缓存命中：Chat 转换只拼了 `prompt_tokens`／`completion_tokens`／`total_tokens`，把上游 `usageMetadata.cachedContentTokenCount` 丢在转换层，本机近 7 天 4,473 条 Google 订阅请求的 `cached_input_tokens` 全为 `NULL`（同期 River／OpenAI 正常）。现在该字段映射为 `usage.prompt_tokens_details.cached_tokens`（Gemini 的 `promptTokenCount` 已包含该子集），请求页会显示真实命中率与成本折扣；字段缺失或大于提示词总数时保持未知，历史记录仍显示 `—`。质量门结果见任务记录。
+
 本地构建：[TASK-20261118-004](../tasks/completed/2026-11/TASK-20261118-004-build-local-v2.3.1-beta.24.md) 已产出 `v2.3.1-beta.24` Windows amd64 生产安装包，内容为 Antigravity「Ultra 5x／Ultra 20x」套餐徽章区分（TASK-20261118-003，`c8edf0ea`）：安装器 21,385,746 bytes，SHA256 `942e5bad8aa3208bf03fbcc8713ad007c7b13497e73f6ca90ae0a9b2836b8f97`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已调整：[TASK-20261118-003](../tasks/completed/2026-11/TASK-20261118-003-plan-badge-ultra-5x-20x.md) Antigravity 账号卡把两个 Ultra 档位分开显示：`g1-ultra-tier` → 「Ultra 20x」（rose 实底）、`g1-ultra-lite-tier` → 「Ultra 5x」（rose 描边）。两档官方 `paidTier.name` 都写「Google AI Ultra」，只能按 `paidTier.id` 区分。`task verify` EXIT=0（前端 159 文件／977 项测试）。

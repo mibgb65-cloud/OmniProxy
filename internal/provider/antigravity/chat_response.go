@@ -28,10 +28,11 @@ type nativeResponse struct {
 		Finish string `json:"finishReason"`
 	} `json:"candidates"`
 	Usage *struct {
-		Input    int64 `json:"promptTokenCount"`
-		Output   int64 `json:"candidatesTokenCount"`
-		Thinking int64 `json:"thoughtsTokenCount"`
-		Total    int64 `json:"totalTokenCount"`
+		Input    int64  `json:"promptTokenCount"`
+		Output   int64  `json:"candidatesTokenCount"`
+		Thinking int64  `json:"thoughtsTokenCount"`
+		Cached   *int64 `json:"cachedContentTokenCount"`
+		Total    int64  `json:"totalTokenCount"`
 	} `json:"usageMetadata"`
 	ResponseID string `json:"responseId"`
 }
@@ -40,8 +41,11 @@ type responseState struct {
 	text              strings.Builder
 	calls             []object
 	usage             object
-	created           int64
-	remember          func([]object)
+	// cached 是上游报告的提示词缓存命中量：Gemini 的 promptTokenCount 已包含它。
+	// 流式逐帧累计，后帧缺少该字段时保留最近一次已知值，不补零也不抹成未知。
+	cached   *int64
+	created  int64
+	remember func([]object)
 }
 
 func (s *responseState) accept(data []byte) (object, error) {
@@ -114,15 +118,30 @@ func (s *responseState) accept(data []byte) (object, error) {
 	}
 	if value.Usage != nil {
 		usage := value.Usage
-		if usage.Input < 0 || usage.Output < 0 || usage.Thinking < 0 || usage.Total < 0 || usage.Input > 1e12 || usage.Output > 1e12 || usage.Thinking > 1e12 || usage.Total > 3e12 {
+		if usage.Input < 0 || usage.Output < 0 || usage.Thinking < 0 || usage.Total < 0 || usage.Input > 1e12 || usage.Output > 1e12 || usage.Thinking > 1e12 || usage.Total > 3e12 ||
+			(usage.Cached != nil && (*usage.Cached < 0 || *usage.Cached > 1e12)) {
 			return nil, proxy.Failure("invalid_upstream_response", 502)
 		}
-		s.usage = object{"prompt_tokens": usage.Input, "completion_tokens": usage.Output + usage.Thinking, "total_tokens": usage.Total}
+		if usage.Cached != nil {
+			s.cached = usage.Cached
+		}
+		s.usage = chatUsage(usage.Input, usage.Output+usage.Thinking, usage.Total, s.cached)
 	}
 	if s.text.Len() > 16<<20 || len(s.calls) > 128 {
 		return nil, proxy.Failure("invalid_upstream_response", 502)
 	}
 	return delta, nil
+}
+
+// chatUsage 合成 OpenAI Chat 的 usage。缓存命中量是提示词总数的子集（Gemini 口径：
+// promptTokenCount 已包含 cachedContentTokenCount），只在有值且自洽时写成
+// prompt_tokens_details.cached_tokens；缺失或互相矛盾时保持未知，不补零。
+func chatUsage(input, output, total int64, cached *int64) object {
+	usage := object{"prompt_tokens": input, "completion_tokens": output, "total_tokens": total}
+	if cached != nil && *cached <= input {
+		usage["prompt_tokens_details"] = object{"cached_tokens": *cached}
+	}
+	return usage
 }
 
 func (s *responseState) envelope(stream bool, delta object) object {

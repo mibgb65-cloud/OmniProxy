@@ -61,7 +61,9 @@ Google 账号支持普通 Gemini API Key 和独立 Antigravity 订阅登录。�
   不伪造签名，可能需重新开始工具轮次。Claude 工具调用的 `OTHER` 终态只在存在完整
   工具块时接受，不把未知文本终态当成功。
 - 工具调用在流结束时输出完整参数与签名；普通文本逐段输出。缺少终态的流返回失败。
-- 思考正文暂不公开，思考 Token 纳入输出用量；本机用量沿用现有记录与统计。
+- 思考正文暂不公开，思考 Token 纳入输出用量；本机用量沿用现有记录与统计。上游
+  `usageMetadata.cachedContentTokenCount` 记为缓存命中（`promptTokenCount` 已包含它），
+  请求页因此显示真实命中率与成本折扣；字段缺失或大于提示词总数时保持未知，不补零。
 - 账号详情卡片／列表和配额总览显示 Google 官方额度分组、剩余百分比和重置倒计时，
   提供手动刷新。只展示实际返回的窗口，不套用 Codex 套餐或重置卡。
 - 账号卡套餐徽章显示 `loadCodeAssist` 的档位标识：`g1-ultra-tier`／`g1-ultra-lite-tier`／
