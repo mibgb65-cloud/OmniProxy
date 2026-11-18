@@ -125,7 +125,9 @@ BUILD_EXIT=0
 
 ## Commit
 
-（回填后填写）
+```text
+245ade08 chore(release): 准备 v2.3.1-beta.23 本地构建
+```
 
 ---
 
