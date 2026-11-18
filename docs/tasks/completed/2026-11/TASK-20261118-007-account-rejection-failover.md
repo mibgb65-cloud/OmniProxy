@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -197,7 +197,7 @@ wails3 production build + vite build 通过
 ## Commit
 
 ```text
-Planned
+8e7b1566 fix(gateway): 账号级拒绝保留真实错误码并换号
 ```
 
 ---
@@ -205,4 +205,10 @@ Planned
 # Result
 
 `gemini-4-carbon` 这类“同池有账号没权限”的失败不再静默：错误码真实可见，同池其它账号会被自动尝试，没有权益的账号按（账号，模型）冷却，单候选时保留真实 403 而不是伪装成限流。路由口径（裸家族名是否优先走 Google 订阅的档位变体）仍待单独决定。
+
+---
+
+# Completed
+
+2026-11-18 14:22
 
