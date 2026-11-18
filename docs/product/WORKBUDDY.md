@@ -68,6 +68,7 @@ DeepSeek、MiniMax 等；国内版还有 Claude）。两者是**独立站点与�
 | 会话形态 | **Chat 的首条消息必须是 `system`**：缺了返回 `400 code 11128 "first message is not system prompt"`。适配器出站前把 `developer` 归一为 `system`、`max_completion_tokens` 改名 `max_tokens`、首条不是 system 时补默认 `"You are a helpful assistant."`。Messages 端点按调用方原文发送，实测 Claude Code 等系统提示词直接通过 |
 | 渠道校验（11128） | 上游只按 system／assistant 消息做整行指纹校验，可能拒绝某些 agent 的系统提示词。被拒时适配器**自动重试一次**：系统提示词下移为首条用户消息（`<instructions>…</instructions>` 包裹），开头换成默认 system；仍被拒才返回 `channel_rejected` |
 | 认证失败 | 401 先尝试续期一次，仍失败才换号；登录失效要重新登录 |
+| 账号级拒绝 | 业务码拒绝在网关边界翻译成稳定错误（同一码，状态按码归类），记录与日志显示真实原因；`model_not_entitled` 属账号级拒绝，同池有其它账号时换号并冷却该账号的该模型 30 分钟，`sign_in_expired` 等 401 类换号并冷却 5 分钟。渠道／签名／UA 拒绝是服务商级，不换号 |
 | 额度不足 | 上游 402/429 按既有错误语义回传，不放大重试 |
 
 ## Credits 额度
@@ -113,7 +114,7 @@ DeepSeek、MiniMax 等；国内版还有 Claude）。两者是**独立站点与�
 | `unauthorized` | 上游拒绝令牌：先自动续期一次，仍失败则重新登录 |
 | `channel_rejected` | 渠道校验拒绝了系统提示词（11128，首条非 system 或命中整行指纹）；适配器已按官方形态重试一次，仍失败时换模型或稍后重试 |
 | `signature_invalid` | 会话里的思考签名与上游不匹配（11159）；新开对话或换模型 |
-| `model_not_entitled` | 账号套餐不含该模型（11158）；换模型 |
+| `model_not_entitled` | 账号套餐不含该模型（11158）；同池有其它账号时自动换号并冷却 30 分钟，没有候选时换模型 |
 | `user_agent_refused` | 上游拒绝了客户端标识（10085）；升级 OmniProxy |
 | `rate_limited` | 上游限流；按 `Retry-After` 等待 |
 | `upstream_unavailable` | 上游不可达或 5xx；稍后重试 |

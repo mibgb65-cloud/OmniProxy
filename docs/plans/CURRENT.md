@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261118-007](../tasks/completed/2026-11/TASK-20261118-007-account-rejection-failover.md) `gemini-4-carbon` 请求打到没有该模型权益的 WorkBuddy 账号，同池另一个账号从未被尝试：适配器的业务码拒绝（11158 等）只是 `workbuddyai.Failure`，网关失败分类只认 `*proxy.Error`，于是记录被兜底成 `503 credential_unavailable`，也不参与换号、不写冷却，三条请求各只尝试一次。现在业务码在网关边界翻译成稳定错误（同一码、状态按码归类），`model_not_entitled` 与 401 类按账号级拒绝换号（分别冷却 30／5 分钟），没有候选时返回真实 403 而不是伪装成 429 账号池冷却；渠道／签名／UA 拒绝与本地凭据故障仍不换号。路由口径（裸家族名是否优先走 Google 订阅的 `-high` 变体）未改，待单独决定。`task verify` EXIT=0（前端 159 文件／977 项测试）。
+
 本地构建：[TASK-20261118-006](../tasks/completed/2026-11/TASK-20261118-006-build-local-v2.3.1-beta.25.md) 已产出 `v2.3.1-beta.25` Windows amd64 生产安装包，内容为 Google 订阅（Antigravity）缓存命中 Token 修复（TASK-20261118-005，`9bdd5d42`）：安装器 21,390,388 bytes，SHA256 `ff6ff50210cc25ca085b0bd68477f199817cf88178b566d0d7dd2ab312ee9f76`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已修复：[TASK-20261118-005](../tasks/completed/2026-11/TASK-20261118-005-antigravity-cached-tokens.md) Google 订阅（Antigravity）的请求记录一直不显示缓存命中：Chat 转换只拼了 `prompt_tokens`／`completion_tokens`／`total_tokens`，把上游 `usageMetadata.cachedContentTokenCount` 丢在转换层，本机近 7 天 4,473 条 Google 订阅请求的 `cached_input_tokens` 全为 `NULL`（同期 River／OpenAI 正常）。现在该字段映射为 `usage.prompt_tokens_details.cached_tokens`（Gemini 的 `promptTokenCount` 已包含该子集），请求页会显示真实命中率与成本折扣；字段缺失或大于提示词总数时保持未知，历史记录仍显示 `—`。质量门结果见任务记录。

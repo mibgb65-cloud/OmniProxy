@@ -50,12 +50,15 @@ func (s *Service) forwardWorkBuddy(ctx context.Context, target target, request p
 		return proxy.Failure("adapter_unavailable", 503)
 	}
 	native := request.Protocol == workbuddyai.MessagesProtocol && build.MessagesNative(request.Model)
-	return s.useWorkBuddyToken(ctx, target, func(cred workbuddyai.Credentials) error {
+	err := s.useWorkBuddyToken(ctx, target, func(cred workbuddyai.Credentials) error {
 		if native {
 			return s.forwardWorkBuddyMessages(ctx, client, cred, request, consume)
 		}
 		return s.forwardWorkBuddyChat(ctx, client, cred, request, consume)
 	})
+	// 业务码拒绝与登录失效在本包是稳定码而不是边界错误：不翻译就只剩兜底码，
+	// 既看不出原因，也不会被失败分类当成账号级拒绝。
+	return workbuddyai.ProxyError(err)
 }
 
 // forwardWorkBuddyMessages 把 Messages 请求原样送到国内版原生端点；流式与非流式都由

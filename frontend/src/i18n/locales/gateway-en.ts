@@ -188,6 +188,13 @@ export const gatewayEn: Record<keyof typeof gatewayZh, string> = {
   "gateway.error.response":
     "The provider did not return a valid reply. Check the model and request, then retry.",
   "gateway.error.upstream": "Could not connect to the provider. Try again later.",
+  "gateway.error.entitlement":
+    "This account's plan does not include the model. Another account was tried, or pick a different model.",
+  "gateway.error.signIn": "This account's sign-in expired. Sign in again.",
+  "gateway.error.channel": "The provider rejected this request's channel or system prompt.",
+  "gateway.error.signature":
+    "The reasoning signature does not match this conversation. Start a new conversation.",
+  "gateway.error.fingerprint": "The provider rejected this client's request fingerprint.",
   "gateway.error.unknown": "Could not complete the operation. Please try again.",
   "gateway.links.routing": "Model routing",
   "gateway.links.routingHint": "Review model mapping rules",

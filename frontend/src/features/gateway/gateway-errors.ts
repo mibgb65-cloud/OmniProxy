@@ -27,6 +27,13 @@ const errorKeys = new Map<string, TranslationKey>([
   ["invalid_upstream_response", "gateway.error.response"],
   ["upstream_rejected_request", "gateway.error.response"],
   ["upstream_unavailable", "gateway.error.upstream"],
+  // 适配器稳定码：账号级拒绝（模型权益、登录失效）与服务商级拒绝分别给固定文案。
+  ["model_not_entitled", "gateway.error.entitlement"],
+  ["sign_in_expired", "gateway.error.signIn"],
+  ["refresh_rejected", "gateway.error.signIn"],
+  ["channel_rejected", "gateway.error.channel"],
+  ["signature_invalid", "gateway.error.signature"],
+  ["user_agent_refused", "gateway.error.fingerprint"],
 ])
 
 /** 未知代码和绑定错误只返回固定文案，不将原始错误或上游正文显示在页面。 */

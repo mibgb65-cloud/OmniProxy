@@ -42,6 +42,7 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 	}
 	seen := map[string]bool{}
 	var last *proxy.Response
+	var lastRejection error
 	lastTarget := initial
 	attempts := 0
 	var wait time.Duration
@@ -156,6 +157,21 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 				rejected = &retryReason{code: quota.Code, delay: quotaRetryDelay(quota, s.failover.now())}
 			}
 		}
+		if rejected == nil && !request.FixedAccount {
+			if reason, refusal := accountRejection(err); reason != nil {
+				if !next {
+					// 没有别的候选：把真实错误交还客户端，不伪装成账号池冷却。
+					s.failover.finish(lease, nil, false)
+					released = true
+					if endErr := request.Trace.EndAttempt(refusal.StatusCode, refusal.Code); endErr != nil {
+						return endErr
+					}
+					return err
+				}
+				// 还有候选：按真实状态休息本账号的该模型，由下一个候选接替。
+				rejected, responseStatus, lastRejection = reason, refusal.StatusCode, err
+			}
+		}
 		cooldown := rejected
 		if cooldown != nil && cooldown.code == "duplicate_credential" {
 			cooldown = nil
@@ -220,6 +236,10 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 			return err
 		}
 		return consume(*last)
+	}
+	if lastRejection != nil {
+		// 全部候选都被账号级拒绝：交还最后一次真实错误，不伪装成账号池冷却。
+		return lastRejection
 	}
 	return &proxy.Error{Code: "account_pool_cooling", StatusCode: 429, RetryAfter: strconv.Itoa(max(1, int(wait.Seconds())))}
 }

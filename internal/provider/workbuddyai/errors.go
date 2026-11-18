@@ -63,6 +63,45 @@ func ErrorCode(err error) string {
 	return ""
 }
 
+// ProxyError 把本包的稳定错误翻译成网关边界错误。
+//
+// 业务码拒绝（11158 等）默认只是 *Error，而网关的失败分类、冷却与请求记录只认
+// *proxy.Error：不翻译就会被兜底成 credential_unavailable，既看不出真实原因，也无法
+// 按“账号级拒绝”换号。已经是边界错误或无法识别的错误原样返回。
+func ProxyError(err error) error {
+	if err == nil {
+		return nil
+	}
+	var boundary *proxy.Error
+	if errors.As(err, &boundary) {
+		return err
+	}
+	var failure *Error
+	if !errors.As(err, &failure) {
+		return err
+	}
+	return proxy.Failure(failure.Code, proxyStatus(failure.Code))
+}
+
+// proxyStatus 按稳定码给出客户端可见状态：只有已分类的码改状态，未知码保持 502。
+func proxyStatus(code string) int {
+	switch code {
+	case CodeSignInExpired, CodeRefreshRejected, CodeUnauthorized:
+		return 401
+	case CodeModelNotEntitled:
+		// 账号没有该模型的权益：换号有机会成功，交给 failover 判断。
+		return 403
+	case CodeChannelRejected, CodeSignatureInvalid, CodeUserAgentRefused, "invalid_input", "invalid_request":
+		return 400
+	case CodeRateLimited:
+		return 429
+	case CodeCredentialUnavailable, "configuration_changed", "busy", "cleanup_failed", "quota_cache_unavailable":
+		return 503
+	default:
+		return 502
+	}
+}
+
 // SignInExpired 报告错误是否意味着需要重新登录。
 func SignInExpired(err error) bool {
 	var failure *Error
