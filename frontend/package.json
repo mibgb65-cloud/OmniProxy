@@ -1,7 +1,7 @@
 {
   "name": "omniproxy-frontend",
   "private": true,
-  "version": "2.3.1-beta.22",
+  "version": "2.3.1-beta.23",
   "type": "module",
   "engines": {
     "node": ">=22 <23"

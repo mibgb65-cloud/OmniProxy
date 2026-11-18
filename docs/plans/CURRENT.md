@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261118-002](../tasks/completed/2026-11/TASK-20261118-002-build-local-v2.3.1-beta.23.md) 已产出 `v2.3.1-beta.23` Windows amd64 生产安装包，内容为套餐徽章「无套餐」与 Antigravity 档位名／配色映射（TASK-20261118-001，`2b995410`）：安装器 21,383,326 bytes，SHA256 `9f75ca1a81e9f72ce96593967867b7c09d3917a3c53c7c5c86555589eef6ce99`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
+
 已调整：[TASK-20261118-001](../tasks/completed/2026-11/TASK-20261118-001-plan-badge-google-tier-mapping.md) 账号卡套餐徽章：没有返回套餐字段时由「套餐未知」改为「无套餐」；Antigravity 的 `g1-ultra-tier`／`g1-pro-tier`／`g1-free-tier`／`free-tier` 显示为 Ultra／Pro／Free 并分别配色，其它标识仍原样显示。WorkBuddy 账号卡因此显示「无套餐」，额度卡标题旁仍显示计费接口的套餐名（`体验版`／`Free`）——两者是不同来源，本次未合并。
 
 已修复：[TASK-20261117-004](../tasks/completed/2026-11/TASK-20261117-004-workbuddy-reasoning-effort-fallback.md) WorkBuddy AI 目录里 4 个模型没有推理档位：真实 `/v3/config`（25 个模型）里 `max-model`、`gemini-4-carbon`、`gemini-4-argon`、`kimi-k3` 只给 `reasoning.effort`（`onlyReasoning: true`），不给 `supportedEfforts`，而 `normalizeModel` 只读后者，于是这些模型被存成「无档位」，连 `high`／`medium` 的默认值也丢了。它们在上游接受 `low/high/max` 加自身档位（社区插件 `effortsOf()` 的实测口径）；目录现在按这个规则补齐并保留自身档位为默认，`supportsReasoning: false` 或没有 `reasoning` 的模型（`default-model`、`hy-image-3.5`、`kling-video-v3`）仍不发布档位。升级后需在「路由 → 模型目录」同步一次才有新档位。
