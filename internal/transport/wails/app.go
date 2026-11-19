@@ -72,20 +72,23 @@ type AppService struct {
 	logActions       sync.Mutex
 	selectLogExport  func(string) (string, error)
 	openLogDirectory func(string) error
-	openAgentURL     func(string) error
-	stopLogs         func()
-	stopActivity     func()
-	subscription     subscriptionState
-	googleAuth       googleSubscriptionState
-	workbuddyAuth    workbuddySubscriptionState
-	openAISync       openAIModelSyncState
-	howtofixSync     howToFixModelSyncState
-	updatesMu        sync.Mutex
-	updates          *updater.Service
-	stopUpdateChecks context.CancelFunc
-	quitForUpdate    func()
-	activationMu     sync.Mutex
-	emitActivation   func(quotaactivation.Status)
+	// requestsExportMu 串行化导出，避免两次对话框同时写同一个目标。
+	requestsExportMu     sync.Mutex
+	selectRequestsExport func(string) (string, error)
+	openAgentURL         func(string) error
+	stopLogs             func()
+	stopActivity         func()
+	subscription         subscriptionState
+	googleAuth           googleSubscriptionState
+	workbuddyAuth        workbuddySubscriptionState
+	openAISync           openAIModelSyncState
+	howtofixSync         howToFixModelSyncState
+	updatesMu            sync.Mutex
+	updates              *updater.Service
+	stopUpdateChecks     context.CancelFunc
+	quitForUpdate        func()
+	activationMu         sync.Mutex
+	emitActivation       func(quotaactivation.Status)
 	// googlePromptAsWritten 是「Google 订阅按原文发送 system prompt」的运行时值，
 	// 网关按请求读取，避免每次都读配置文件。
 	promptAsWritten atomic.Bool
@@ -287,6 +290,7 @@ func Run(app *App) error {
 		})
 	}
 	app.Service.bindLogEvents(wailsApp, window)
+	app.Service.bindActivityExport(wailsApp, window)
 	app.Service.bindSubscriptionEvents(wailsApp)
 	app.Service.bindActivationEvents(wailsApp)
 	tray := wailsApp.SystemTray.New()

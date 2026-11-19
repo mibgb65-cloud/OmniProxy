@@ -675,6 +675,27 @@ export function ProxyPort(): $CancellablePromise<$models.ProxyPortState> {
     return $Call.ByID(2033408652);
 }
 
+/**
+ * RequestContentClear 删除全部已保存正文，返回删除条数。
+ */
+export function RequestContentClear(): $CancellablePromise<number> {
+    return $Call.ByID(48816988);
+}
+
+/**
+ * RequestContentRead 按需读取一条请求正文；未记录时返回 Available=false。
+ */
+export function RequestContentRead(id: string): $CancellablePromise<activity$0.RequestContent> {
+    return $Call.ByID(4274283559, id);
+}
+
+/**
+ * RequestContentSet 切换请求正文记录开关；关闭后只停止记录新正文。
+ */
+export function RequestContentSet(enabled: boolean): $CancellablePromise<activity$0.Retention> {
+    return $Call.ByID(1046789041, enabled);
+}
+
 export function RequestRead(id: string): $CancellablePromise<activity$0.RequestItem> {
     return $Call.ByID(3283823074, id);
 }
@@ -685,6 +706,13 @@ export function RequestRetention(): $CancellablePromise<activity$0.Retention> {
 
 export function RequestRetentionSet(limit: number): $CancellablePromise<activity$0.Retention> {
     return $Call.ByID(46001136, limit);
+}
+
+/**
+ * RequestsExport 按当前筛选导出全部匹配记录；文件路径只能来自原生保存对话框。
+ */
+export function RequestsExport(query: activity$0.RequestQuery, language: string): $CancellablePromise<$models.RequestExportResult> {
+    return $Call.ByID(2275361281, query, language);
 }
 
 export function RequestsRead(query: activity$0.RequestQuery): $CancellablePromise<activity$0.RequestPage> {

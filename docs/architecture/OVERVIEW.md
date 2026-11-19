@@ -1,5 +1,15 @@
 # Architecture Overview
 
+## 请求正文记录与 XLSX 导出（2026-11-19）
+
+迁移 053 在保留设置表增加默认关闭的 `record_content` 开关，并新增与请求 ID 一对一的
+`request_contents`。Core `proxy.Trace` 在 HTTP、Codex 透明 HTTP、Responses WebSocket
+与透明 WebSocket 的实际发送边界采集客户端正文，有界（256 KiB）、折叠长 Base64 内联数据并
+按 UTF-8 边界截断；采集失败只写稳定错误码日志，不阻断请求。`application/activity` 分表持久化、
+按需读取、随请求明细淘汰并提供手动清除；Wails 暴露正文读取／开关／清除与按当前筛选导出
+XLSX 的绑定，`infrastructure/xlsx` 用标准库写单工作表 OOXML（无新增依赖），单元格按 Excel
+32767 字符上限截断。隐私与边界见 ADR-028、`docs/product/ACTIVITY.md` 与 `PRIVACY.md`。
+
 ## WorkBuddy AI 订阅（2026-11-16）
 
 迁移 050 追加第十五个内置服务商（`builtin_workbuddy_ai`）。`provider/workbuddyai` 只访问固定

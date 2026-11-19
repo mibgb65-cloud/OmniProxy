@@ -209,6 +209,17 @@ export interface Reliability {
     "firstTokenSamples": number;
 }
 
+/**
+ * RequestContent 是请求详情里的正文快照；Available 为假表示未开启记录或历史记录。
+ */
+export interface RequestContent {
+    "content": string;
+    "originalBytes": number;
+    "storedBytes": number;
+    "available": boolean;
+    "truncated": boolean;
+}
+
 export interface RequestItem {
     "attemptCount"?: number;
     "attempts"?: AttemptItem[] | null;
@@ -282,6 +293,7 @@ export interface Retention {
     "maxRecords": number;
     "storedRecords": number;
     "logCapacity": number;
+    "contentEnabled": boolean;
 }
 
 export interface Summary {

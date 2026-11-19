@@ -1,10 +1,11 @@
 import { SelectField } from "../../components/ui/select-field"
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query"
+import { Download } from "lucide-react"
 import { useDeferredValue, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { readRequests } from "../../services/activity"
+import { exportRequests, readRequests } from "../../services/activity"
 import { RequestTable } from "./request-table"
 import { RequestDialog } from "./request-dialog"
 
@@ -17,24 +18,37 @@ export function RequestsView({
   requestId?: string
   onOpenLogs?: (id: string) => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [search, setSearch] = useState(requestId)
   const [state, setState] = useState("")
   const [offset, setOffset] = useState(0)
   const [selected, setSelected] = useState<string | null>(requestId || null)
   const deferred = useDeferredValue(search)
+  const language = i18n.resolvedLanguage === "zh" ? "zh" : "en"
   const data = useQuery({
     queryKey: ["requests", deferred, state, offset],
     queryFn: () => readRequests({ search: deferred, state, offset, limit: REQUEST_PAGE_SIZE }),
     placeholderData: keepPreviousData,
     refetchInterval: 5000,
   })
+  const exportAction = useMutation({
+    mutationFn: () => exportRequests({ search: deferred, state, offset: 0, limit: 1 }, language),
+  })
   const items = data.data?.items ?? []
   return (
     // 页面占满内容区可视高度：标题、筛选、分页常驻，只有表格内部滚动。
     <section className="app-page-fit flex w-full min-w-0 flex-col gap-5">
-      <header className="shrink-0">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pages.requests.title")}</h1>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={exportAction.isPending || !data.data?.total}
+          onClick={() => exportAction.mutate()}
+        >
+          <Download aria-hidden="true" />
+          {t(exportAction.isPending ? "activity.exporting" : "activity.exportXlsx")}
+        </Button>
       </header>
       <div className="flex shrink-0 flex-wrap gap-3">
         <Input
@@ -70,6 +84,17 @@ export function RequestsView({
       {data.isError ? (
         <p role="alert" className="text-destructive shrink-0 text-sm">
           {t("activity.failed")}
+        </p>
+      ) : null}
+      {exportAction.isError ? (
+        <p role="alert" className="text-destructive shrink-0 text-sm">
+          {t("activity.exportFailed")}
+        </p>
+      ) : null}
+      {exportAction.data && !exportAction.data.cancelled ? (
+        <p role="status" className="text-muted-foreground shrink-0 text-xs">
+          {t("activity.exported", { count: exportAction.data.count })}
+          {exportAction.data.limited ? ` ${t("activity.exportLimited")}` : null}
         </p>
       ) : null}
       {data.isPending ? (

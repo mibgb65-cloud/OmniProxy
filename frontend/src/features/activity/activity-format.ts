@@ -97,3 +97,11 @@ export function formatFirstToken(firstTokenMs?: number | null, state = "success"
   if (firstTokenMs === null || firstTokenMs === undefined || state === "pending") return "—"
   return `${firstTokenMs} ms`
 }
+
+/** 请求正文大小按二进制单位展示；未知或非正数显示 —，不推测内容长度。 */
+export function formatBytes(value: number) {
+  if (!Number.isFinite(value) || value <= 0) return "—"
+  if (value < 1024) return `${value} B`
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`
+  return `${(value / (1024 * 1024)).toFixed(1)} MiB`
+}

@@ -3,13 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
-import { readRequests } from "../../services/activity"
+import { exportRequests, readRequests } from "../../services/activity"
 import { useUIStore } from "../../stores/ui-store"
 import { RequestsView } from "./requests-view"
 
 vi.mock("../../services/activity", () => ({
   readRequests: vi.fn(),
   readRequest: vi.fn(),
+  readRequestContent: vi.fn(),
+  exportRequests: vi.fn(),
 }))
 vi.mock("@wailsio/runtime", () => ({ Clipboard: { SetText: vi.fn() } }))
 
@@ -71,6 +73,21 @@ it("不满一页的末页禁用下一页，返回及搜索使用同一个分页�
     }),
   )
   expect(screen.getByText("第 1 页 / 共 2 页")).toBeInTheDocument()
+})
+
+it("请求页按当前筛选导出 XLSX 并报告条数", async () => {
+  const user = userEvent.setup()
+  mount(1)
+  vi.mocked(exportRequests).mockResolvedValue({ count: 1, limited: false, cancelled: false })
+  await screen.findByText("第 1 页 / 共 1 页")
+  await user.click(screen.getByRole("button", { name: "导出 XLSX" }))
+  await waitFor(() =>
+    expect(exportRequests).toHaveBeenCalledWith(
+      { search: "", state: "", offset: 0, limit: 1 },
+      "zh",
+    ),
+  )
+  expect(await screen.findByRole("status")).toHaveTextContent("已导出 1 条请求记录。")
 })
 
 it("英文分页同样显示总页数而非记录数", async () => {

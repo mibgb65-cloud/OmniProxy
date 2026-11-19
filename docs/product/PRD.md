@@ -104,7 +104,7 @@ accounts need one local place to:
 - Request history with success/failure classification.
 - 网关运行概览展示真实请求指标、成功／失败趋势、可筛选最近记录、累计上游分布和接入信息。新增首字耗时按下游有效流式内容写出计时，区分旧数据／非流式未知与真实 0，均值显示成功流式样本数；共用本地记账与独立聚合，不调用模型。详见 `docs/product/GATEWAY.md`。
 - 仪表盘提供本地今日／7 天／30 天运行总览、请求／Token／成功率／完整耗时、结果趋势、所选时段的模型 Token 占比、待处理问题、最近请求及资源／客户端配置概况；资源默认读缓存，官方查询由用户主动触发。独立时间桶保留明细清理后的聚合，历史缺口明确标示。详见 `docs/product/DASHBOARD.md`。
-- 已实现持久请求明细、输入／输出 Token 累计及每日／成员／模型汇总；删除账号与明细淘汰不减少累计。账号卡片／配额页的本机 Token 同口径，迁移 045 按记账身份保存终身累计。用量页在累计与分析卡片之外提供近一年按本地日期的活跃度热图（每天一格，可切换 Token／请求数）。请求默认保存 10000、设置可调整，日志缓存最多 5000，request_id 双向关联。Team 同时按邮箱和 account_id 识别。迁移 046 为非敏感地记录并展示请求携带的推理等级（未指定与历史记录显示「—」，不推测上游默认值，不参与聚合与计费）。详见 `docs/product/ACTIVITY.md`。
+- 已实现持久请求明细、输入／输出 Token 累计及每日／成员／模型汇总；删除账号与明细淘汰不减少累计。账号卡片／配额页的本机 Token 同口径，迁移 045 按记账身份保存终身累计。用量页在累计与分析卡片之外提供近一年按本地日期的活跃度热图（每天一格，可切换 Token／请求数）。请求默认保存 10000、设置可调整，日志缓存最多 5000，request_id 双向关联。Team 同时按邮箱和 account_id 识别。迁移 046 为非敏感地记录并展示请求携带的推理等级（未指定与历史记录显示「—」，不推测上游默认值，不参与聚合与计费）。迁移 053 增加默认关闭的「记录请求正文」：开启后按请求保存客户端正文（每条最多 256 KiB，响应正文不保存），详情可回看，请求页可按当前筛选导出 XLSX（正文按 Excel 单元格上限截断）。详见 `docs/product/ACTIVITY.md` 与 ADR-028。
 - Provider health detection.
 - Client integration management for external AI tools.
 - Kimi Code、Pi coding agent、Factory Droid CLI 与 Goose CLI／Desktop 支持本地网关模型接入、默认模型、独立 Key、备份恢复和官方软件入口；Pi／Goose 的关联文件共同校验。详见 `docs/product/KIMI_PI_DROID_GOOSE.md`。

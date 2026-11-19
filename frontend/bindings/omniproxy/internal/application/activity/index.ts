@@ -19,6 +19,7 @@ export type {
     QuotaEstimate,
     QuotaWindowEstimate,
     Reliability,
+    RequestContent,
     RequestItem,
     RequestPage,
     RequestQuery,

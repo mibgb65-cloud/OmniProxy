@@ -147,7 +147,8 @@ type UsageInfo struct {
 	ModelDays      []ModelDay      `json:"modelDays"`
 }
 type Retention struct {
-	MaxRecords    int `json:"maxRecords"`
-	StoredRecords int `json:"storedRecords"`
-	LogCapacity   int `json:"logCapacity"`
+	MaxRecords     int  `json:"maxRecords"`
+	StoredRecords  int  `json:"storedRecords"`
+	LogCapacity    int  `json:"logCapacity"`
+	ContentEnabled bool `json:"contentEnabled"`
 }

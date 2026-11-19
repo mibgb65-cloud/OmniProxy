@@ -108,6 +108,15 @@ export interface ProxyPortUpdate {
 }
 
 /**
+ * RequestExportResult 报告导出条数与是否因行数上限被截断；取消不是导出成功。
+ */
+export interface RequestExportResult {
+    "count": number;
+    "limited": boolean;
+    "cancelled": boolean;
+}
+
+/**
  * RuntimeInfo is a snapshot of the application runtime for the About page.
  */
 export interface RuntimeInfo {

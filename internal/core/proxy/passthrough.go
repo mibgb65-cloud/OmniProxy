@@ -48,6 +48,8 @@ func (s *Server) servePassthrough(w http.ResponseWriter, r *http.Request, path s
 		return true
 	}
 	w.Header().Set("X-Request-ID", trace.ID())
+	// 透明转发按字节中继，正文只作为旁路副本保存，不改变转发内容。
+	s.recordRequestContent(r.Context(), trace, body)
 	status, code := s.forwardPassthrough(w, r, request, session, trace)
 	trace.completeLogged(status, code, s.opts.Logger)
 	return true

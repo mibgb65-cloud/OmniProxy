@@ -175,6 +175,8 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request, ac
 		request.Trace = trace
 		err = trace.Update(ctx, request, TargetSnapshot{})
 		if err == nil {
+			// 这一轮已经拼好历史与输入，保存的就是实际发给上游的正文。
+			s.recordRequestContent(ctx, trace, request.Body)
 			request, err = s.routeSocketRequest(ctx, request)
 		}
 		completed := false

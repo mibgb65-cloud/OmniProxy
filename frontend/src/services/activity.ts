@@ -1,7 +1,9 @@
 import { AppService } from "../../bindings/omniproxy/internal/transport/wails"
+import type { RequestExportResult } from "../../bindings/omniproxy/internal/transport/wails"
 import type {
   RequestQuery,
   RequestItem,
+  RequestContent,
   UsageInfo,
   Breakdown,
   DayUsage,
@@ -14,6 +16,8 @@ import type {
 } from "../../bindings/omniproxy/internal/application/activity"
 export type {
   RequestItem,
+  RequestContent,
+  RequestExportResult,
   UsageInfo,
   Breakdown,
   DayUsage,
@@ -28,8 +32,14 @@ export const readUsage = () => AppService.UsageRead()
 export const readAccountTokenUsage = (id: string) => AppService.AccountTokenUsage(id)
 export const readRequests = (query: RequestQuery) => AppService.RequestsRead(query)
 export const readRequest = (id: string) => AppService.RequestRead(id)
+export const readRequestContent = (id: string) => AppService.RequestContentRead(id)
 export const readRetention = () => AppService.RequestRetention()
 export const setRetention = (limit: number) => AppService.RequestRetentionSet(limit)
+export const setRequestContentRecording = (enabled: boolean) =>
+  AppService.RequestContentSet(enabled)
+export const clearRequestContent = () => AppService.RequestContentClear()
+export const exportRequests = (query: RequestQuery, language: string) =>
+  AppService.RequestsExport(query, language)
 
 export function formatTokens(value: string, language = "zh") {
   try {

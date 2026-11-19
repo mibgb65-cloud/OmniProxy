@@ -71,11 +71,11 @@ func (a *socketAccounting) clientFrame(ctx context.Context, kind websocket.Messa
 	if frame.Reasoning != nil {
 		effort = frame.Reasoning.Effort
 	}
-	return a.beginTurn(ctx, frame.Model, effort)
+	return a.beginTurn(ctx, frame.Model, effort, data)
 }
 
 // beginTurn 为新的一轮建立父记录与账号尝试；失败时同时收尾已经建立的记录。
-func (a *socketAccounting) beginTurn(ctx context.Context, model, effort string) error {
+func (a *socketAccounting) beginTurn(ctx context.Context, model, effort string, frame []byte) error {
 	if model == "" {
 		model = a.model
 	}
@@ -86,6 +86,7 @@ func (a *socketAccounting) beginTurn(ctx context.Context, model, effort string) 
 		return err
 	}
 	a.turn = &socketTurn{trace: trace}
+	a.server.recordRequestContent(ctx, trace, frame)
 	if err = trace.BeginAttempt(ctx, request, a.snapshot); err == nil {
 		// 父记录必须带上真实账号身份：额度估算按账号／成员／工作区过滤本机记录。
 		err = trace.Update(ctx, request, a.snapshot)

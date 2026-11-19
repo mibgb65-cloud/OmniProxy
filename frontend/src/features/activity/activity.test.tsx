@@ -5,6 +5,7 @@ import { beforeEach, expect, it, vi } from "vitest"
 import { I18nProvider } from "../../i18n/provider"
 import {
   readRequest,
+  readRequestContent,
   readRequests,
   readUsage,
   formatTokens,
@@ -18,6 +19,8 @@ vi.mock("../../services/activity", async (importOriginal) => ({
   readUsage: vi.fn(),
   readRequests: vi.fn(),
   readRequest: vi.fn(),
+  readRequestContent: vi.fn(),
+  exportRequests: vi.fn(),
 }))
 vi.mock("@wailsio/runtime", () => ({ Clipboard: { SetText: vi.fn() } }))
 function mount(element: React.ReactNode) {
@@ -112,6 +115,13 @@ it("已删除账号和部分用量保持可见，详情按 ID 跳到关联日志
     maxRecords: 10000,
   })
   vi.mocked(readRequest).mockResolvedValue(item)
+  vi.mocked(readRequestContent).mockResolvedValue({
+    content: `{"model":"gpt-test","messages":[{"role":"user","content":"hi"}]}`,
+    originalBytes: 64,
+    storedBytes: 64,
+    available: true,
+    truncated: false,
+  })
   const open = vi.fn()
   const user = userEvent.setup()
   mount(<RequestsView onOpenLogs={open} />)
@@ -120,6 +130,8 @@ it("已删除账号和部分用量保持可见，详情按 ID 跳到关联日志
   expect(screen.getAllByRole("cell").some((cell) => cell.textContent === "—")).toBe(true)
   await user.click(screen.getByRole("button", { name: `查看请求 ${item.id}` }))
   expect(await screen.findByRole("dialog")).toBeInTheDocument()
+  expect(await screen.findByText("请求内容")).toBeInTheDocument()
+  expect(screen.getByText(/"model": "gpt-test"/)).toBeInTheDocument()
   await user.click(screen.getByRole("button", { name: "关联日志" }))
   expect(open).toHaveBeenCalledWith(item.id)
 })

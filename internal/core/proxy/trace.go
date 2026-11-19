@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
 	"sync"
 	"time"
 )
@@ -55,11 +56,15 @@ type Trace struct {
 	upstreamErrorCode string
 	// accountingFailed 表示用量入库失败；它不能中断已经开始的客户端数据流。
 	accountingFailed bool
-	attempt          *AttemptEvent
-	mu               sync.Mutex
-	event            RequestEvent
-	observer         RequestObserver
-	startedAt        time.Time
+	// contentRecorded 防止同一请求重复写入正文；contentFailed 只用于诊断，不改请求结果。
+	contentRecorded bool
+	contentFailed   bool
+	attempt         *AttemptEvent
+	mu              sync.Mutex
+	event           RequestEvent
+	observer        RequestObserver
+	logger          *slog.Logger
+	startedAt       time.Time
 }
 
 func (s *Server) beginTrace(ctx context.Context, protocol, transport, client, effort string) (*Trace, error) {
@@ -68,7 +73,7 @@ func (s *Server) beginTrace(ctx context.Context, protocol, transport, client, ef
 		return nil, Failure("accounting_unavailable", 503)
 	}
 	now := time.Now()
-	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), Client: client, StartedAt: now.UTC(), Protocol: protocol, Transport: transport, Effort: NormalizeEffort(effort), State: "pending"}, startedAt: now, observer: s.opts.Observer}
+	trace := &Trace{event: RequestEvent{ID: hex.EncodeToString(value), Client: client, StartedAt: now.UTC(), Protocol: protocol, Transport: transport, Effort: NormalizeEffort(effort), State: "pending"}, startedAt: now, observer: s.opts.Observer, logger: s.opts.Logger}
 	if trace.observer != nil {
 		if err := trace.observer.Begin(ctx, trace.event); err != nil {
 			return nil, Failure("accounting_unavailable", 503)
@@ -183,6 +188,9 @@ func (t *Trace) diagnosticLogFields() []any {
 	}
 	if t.accountingFailed {
 		fields = append(fields, "accounting_failed", true)
+	}
+	if t.contentFailed {
+		fields = append(fields, "request_content_failed", true)
 	}
 	return fields
 }

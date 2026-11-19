@@ -153,4 +153,30 @@ export const activityEn = {
   "activity.saved": "Settings saved",
   "activity.saveFailed": "Unable to save. Try again.",
   "activity.invalidLimit": "Enter an integer between 100 and 1000000.",
+  "activity.exportXlsx": "Export XLSX",
+  "activity.exporting": "Exporting…",
+  "activity.exported": "Exported {{count}} request records.",
+  "activity.exportLimited":
+    "More than 100000 records matched; only the first 100000 were exported.",
+  "activity.exportFailed": "Export failed. Try again.",
+  "activity.contentTitle": "Request content",
+  "activity.contentLoading": "Reading request content…",
+  "activity.contentFailed": "Unable to read request content.",
+  "activity.contentMissing": "No content was saved for this request.",
+  "activity.contentMissingHint":
+    "Turn on “Record request content” in Settings → Requests and logs. Only new requests are saved; history is not backfilled.",
+  "activity.contentSize": "Stored {{stored}}, original {{original}}",
+  "activity.contentTruncated":
+    "Content exceeded 256 KiB and was truncated (original {{original}}).",
+  "activity.contentCopy": "Copy request content",
+  "activity.contentSettingTitle": "Record request content",
+  "activity.contentSettingDescription":
+    "Save each inference request's client body (system prompt, messages, tool definitions) to the local database, up to 256 KiB per request. Content may include code or secrets; review the tradeoff before enabling.",
+  "activity.contentRetentionHint":
+    "Turning it off only stops recording new requests. Existing content stays until its request record is evicted or you clear it.",
+  "activity.contentClear": "Clear saved content",
+  "activity.contentClearing": "Clearing…",
+  "activity.contentCleared": "Cleared {{count}} request content entries.",
+  "activity.contentClearFailed": "Unable to clear. Try again.",
+  "activity.contentSettingFailed": "Unable to save the recording setting. Try again.",
 } as const

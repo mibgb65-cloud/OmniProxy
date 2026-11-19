@@ -17,6 +17,7 @@ import {
 import { useLastValue } from "../../lib/use-last-value"
 import { requestAgentTitleKey } from "../gateway/agent-clients"
 import { RequestAttempts } from "./request-attempts"
+import { RequestContentSection } from "./request-content"
 
 export function RequestDialog({
   id,
@@ -160,6 +161,7 @@ export function RequestDialog({
                 ))}
               </dl>
             ) : null}
+            {data.isSuccess && item ? <RequestContentSection id={item.id} /> : null}
             {item?.errorCode === "unsupported_content" ? (
               <p className="text-muted-foreground mt-3 text-sm">{t("gateway.error.content")}</p>
             ) : null}

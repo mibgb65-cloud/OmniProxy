@@ -1,15 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Database, Save } from "lucide-react"
-import { useState } from "react"
+import { Database, Save, Trash2 } from "lucide-react"
+import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
-import { readRetention, setRetention } from "../../services/activity"
+import { Switch } from "../../components/ui/switch"
+import {
+  clearRequestContent,
+  readRetention,
+  setRequestContentRecording,
+  setRetention,
+} from "../../services/activity"
 
 export function RequestRetentionSettings() {
   const { t } = useTranslation()
   const client = useQueryClient()
+  const contentToggleId = useId()
   const [edited, setEdited] = useState<string | null>(null)
   const query = useQuery({ queryKey: ["request-retention"], queryFn: readRetention })
   const value = edited ?? String(query.data?.maxRecords ?? 10000)
@@ -22,6 +29,19 @@ export function RequestRetentionSettings() {
       client.setQueryData(["request-retention"], data)
       setEdited(null)
       await client.invalidateQueries({ queryKey: ["requests"] })
+    },
+  })
+  const contentToggle = useMutation({
+    mutationFn: (enabled: boolean) => setRequestContentRecording(enabled),
+    onSuccess: async (data) => {
+      client.setQueryData(["request-retention"], data)
+      await client.invalidateQueries({ queryKey: ["request-content"] })
+    },
+  })
+  const contentClear = useMutation({
+    mutationFn: clearRequestContent,
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["request-content"] })
     },
   })
   return (
@@ -88,6 +108,52 @@ export function RequestRetentionSettings() {
             {t("activity.saved")}
           </p>
         ) : null}
+        <div className="space-y-3 border-t pt-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <label htmlFor={contentToggleId} className="text-sm font-medium">
+                {t("activity.contentSettingTitle")}
+              </label>
+              <p className="text-muted-foreground mt-1 text-xs leading-5">
+                {t("activity.contentSettingDescription")}
+              </p>
+            </div>
+            <Switch
+              id={contentToggleId}
+              checked={query.data?.contentEnabled ?? false}
+              disabled={!query.isSuccess || contentToggle.isPending}
+              onCheckedChange={(checked) => contentToggle.mutate(checked)}
+            />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-muted-foreground text-xs leading-5">
+              {t("activity.contentRetentionHint")}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!query.isSuccess || contentClear.isPending}
+              onClick={() => contentClear.mutate()}
+            >
+              <Trash2 aria-hidden="true" />
+              {t(contentClear.isPending ? "activity.contentClearing" : "activity.contentClear")}
+            </Button>
+          </div>
+          {contentToggle.isError || contentClear.isError ? (
+            <p role="alert" className="text-destructive text-sm">
+              {t(
+                contentToggle.isError
+                  ? "activity.contentSettingFailed"
+                  : "activity.contentClearFailed",
+              )}
+            </p>
+          ) : null}
+          {contentClear.data !== undefined ? (
+            <p role="status" className="text-sm text-emerald-600 dark:text-emerald-400">
+              {t("activity.contentCleared", { count: contentClear.data })}
+            </p>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   )

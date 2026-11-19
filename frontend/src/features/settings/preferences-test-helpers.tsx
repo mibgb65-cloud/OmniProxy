@@ -25,7 +25,12 @@ import { OpenPreferencesRoute } from "./open-preferences-route"
 vi.mock("../../features/gateway/sidebar-gateway-status", () => ({
   SidebarGatewayStatus: () => <section aria-label="网关" />,
 }))
-vi.mock("../../services/activity", () => ({ readRetention: vi.fn(), setRetention: vi.fn() }))
+vi.mock("../../services/activity", () => ({
+  readRetention: vi.fn(),
+  setRetention: vi.fn(),
+  setRequestContentRecording: vi.fn(),
+  clearRequestContent: vi.fn(),
+}))
 vi.mock("../../services/omniproxy", () => ({
   getStorageInfo: vi.fn(),
   setDataDir: vi.fn(),
@@ -90,11 +95,13 @@ export function resetPreferences() {
     maxRecords: 10000,
     storedRecords: 4,
     logCapacity: 5000,
+    contentEnabled: false,
   })
   vi.mocked(setRetention).mockResolvedValue({
     maxRecords: 20000,
     storedRecords: 4,
     logCapacity: 5000,
+    contentEnabled: false,
   })
   vi.mocked(getProxyPort).mockResolvedValue({
     port: 3002,

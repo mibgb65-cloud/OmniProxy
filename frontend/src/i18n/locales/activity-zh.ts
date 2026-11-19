@@ -143,4 +143,28 @@ export const activityZh = {
   "activity.saved": "设置已保存",
   "activity.saveFailed": "保存失败，请重试。",
   "activity.invalidLimit": "请输入 100–1000000 之间的整数。",
+  "activity.exportXlsx": "导出 XLSX",
+  "activity.exporting": "正在导出…",
+  "activity.exported": "已导出 {{count}} 条请求记录。",
+  "activity.exportLimited": "匹配记录超过 100000 条，只导出了前 100000 条。",
+  "activity.exportFailed": "导出失败，请重试。",
+  "activity.contentTitle": "请求内容",
+  "activity.contentLoading": "正在读取请求内容…",
+  "activity.contentFailed": "无法读取请求内容。",
+  "activity.contentMissing": "该请求没有保存正文。",
+  "activity.contentMissingHint":
+    "在「设置 → 请求与日志」开启「记录请求正文」后，新请求才会保存；历史记录不会补录。",
+  "activity.contentSize": "保存 {{stored}}，原始 {{original}}",
+  "activity.contentTruncated": "正文超过 256 KiB，已截断（原始 {{original}}）。",
+  "activity.contentCopy": "复制请求内容",
+  "activity.contentSettingTitle": "记录请求正文",
+  "activity.contentSettingDescription":
+    "开启后把每次推理请求的客户端正文（系统提示词、消息、工具定义）保存在本机数据库，每条最多 256 KiB。正文可能包含代码或密钥，请自行评估后再开启。",
+  "activity.contentRetentionHint":
+    "关闭后只停止记录新请求；已有正文保留到请求明细被淘汰或手动清除。",
+  "activity.contentClear": "清除已保存的正文",
+  "activity.contentClearing": "正在清除…",
+  "activity.contentCleared": "已清除 {{count}} 条请求正文。",
+  "activity.contentClearFailed": "清除失败，请重试。",
+  "activity.contentSettingFailed": "无法保存记录设置，请重试。",
 } as const

@@ -52,3 +52,27 @@ func (s *AppService) RequestRetentionSet(limit int) (activity.Retention, error) 
 	}
 	return s.activity.SetRetention(context.Background(), limit)
 }
+
+// RequestContentRead 按需读取一条请求正文；未记录时返回 Available=false。
+func (s *AppService) RequestContentRead(id string) (activity.RequestContent, error) {
+	if s.activity == nil {
+		return activity.RequestContent{}, activity.ErrUnavailable
+	}
+	return s.activity.RequestContent(context.Background(), id)
+}
+
+// RequestContentSet 切换请求正文记录开关；关闭后只停止记录新正文。
+func (s *AppService) RequestContentSet(enabled bool) (activity.Retention, error) {
+	if s.activity == nil {
+		return activity.Retention{}, activity.ErrUnavailable
+	}
+	return s.activity.SetContentCapture(context.Background(), enabled)
+}
+
+// RequestContentClear 删除全部已保存正文，返回删除条数。
+func (s *AppService) RequestContentClear() (int64, error) {
+	if s.activity == nil {
+		return 0, activity.ErrUnavailable
+	}
+	return s.activity.ClearRequestContents(context.Background())
+}

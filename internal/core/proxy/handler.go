@@ -162,6 +162,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeFailure(w, err)
 		return
 	}
+	// 客户端正文只在这里采集一次：路由改写后的正文属于上游请求形态，不再重复保存。
+	s.recordRequestContent(r.Context(), trace, request.Body)
 	ctx, cancel := context.WithTimeout(r.Context(), s.clientRequestTimeout(client, request))
 	defer cancel()
 	if router, ok := s.opts.Upstream.(RequestRouter); ok {

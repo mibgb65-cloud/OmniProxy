@@ -98,7 +98,9 @@ type Status struct {
 type Options struct {
 	FailoverEnabled  func(context.Context) (bool, error)
 	WebSocketAllowed func(context.Context) (bool, error)
-	Observer         RequestObserver
+	// RecordRequestContent 报告是否保存请求正文；nil 表示不记录。
+	RecordRequestContent func(context.Context) (bool, error)
+	Observer             RequestObserver
 	// Authorize 校验接入 Key，并在通过时返回受管客户端标识；空标识表示无法归属。
 	Authorize func(context.Context, string) (string, bool)
 	// PrefixAccess 在接入 Key 不可用时判定固定入口前缀是否放行，返回归属客户端。
