@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261119-006](../tasks/completed/2026-11/TASK-20261119-006-request-content-capture-and-xlsx-export.md) 请求正文可选记录（默认关闭，ADR-028）与请求记录 XLSX 导出：设置开关、详情回看、保留淘汰与清除、导出上限与表格兼容性验证；实现提交 `3b412e7`。`task verify` EXIT=0（前端 163 文件／1002 项测试、全部 Go 包、Windows production 构建）。桌面端实机目视检查未执行。
+
 已发布：[TASK-20261119-005](../tasks/completed/2026-11/TASK-20261119-005-release-v2.4.0.md) [v2.4.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.4.0) 于 2026-11-19 15:31:14（Asia/Singapore）公开为最新正式版。新增 HowToFix、WorkBuddy AI、WorkBuddy 国内版三家内置服务商与迁移 049–052（纯追加），并含 Google 订阅额度选号、Codex／River 兼容修复及用量分析改进。经用户授权，仅将未发行的 `v2.4.0` 标签迁至补齐 WorkBuddy AI 源码的 `cf6cc102`；GitHub 托管打包、签名、发布及公开资产下载复验通过。未运行安装器或进行实机升级。
 
 本地构建：[TASK-20261119-004](../tasks/completed/2026-11/TASK-20261119-004-build-local-v2.3.1-beta.29.md) 已产出 `v2.3.1-beta.29` Windows amd64 生产安装包，内容为 Google 订阅账号按额度窗口参与选号（TASK-20261119-003，`dca88996`）：安装器 21,435,843 bytes，SHA256 `2d6ae07d33fb1e9bd6b7f6b23a1551f7bd25b40ea49755753ae625e311b79fd5`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
