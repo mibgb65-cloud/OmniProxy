@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+发布中：[TASK-20261119-005](../tasks/completed/2026-11/TASK-20261119-005-release-v2.4.0.md) `v2.4.0` 正式版汇总 v2.3.0 以来 121 个提交（12 项新增 + 19 项修复），新增 HowToFix、WorkBuddy AI、WorkBuddy 国内版三家内置服务商与迁移 049–052（纯追加，无 `ALTER`／`DROP`／`UPDATE`／`DELETE`），并含 Google 订阅额度窗口选号与 429 换号冷却、Codex／River 九条兼容修复、受管客户端目录停更可见与恢复、首页模型 Token 占比与用量页年度活跃度热图。本地打包通过：安装器 21,455,376 bytes，SHA256 `48715865815efade4959ca07ca5f07782713226c4745a061a517a548c241ac55`，Windows 数字版本 `2.4.0.0`、NSIS 基础版本 `2.4.0`。号位按 SemVer 取 minor（与 v2.3.0 同为「十几项新增」量级）；29 个本机构建沿用 `2.3.1-beta.N` 命名，未重命名。
+
 本地构建：[TASK-20261119-004](../tasks/completed/2026-11/TASK-20261119-004-build-local-v2.3.1-beta.29.md) 已产出 `v2.3.1-beta.29` Windows amd64 生产安装包，内容为 Google 订阅账号按额度窗口参与选号（TASK-20261119-003，`dca88996`）：安装器 21,435,843 bytes，SHA256 `2d6ae07d33fb1e9bd6b7f6b23a1551f7bd25b40ea49755753ae625e311b79fd5`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已修复：[TASK-20261119-003](../tasks/completed/2026-11/TASK-20261119-003-google-quota-aware-routing.md) Google 订阅账号的 5h／周额度耗尽后仍被反复选中：上游 429 没有 `quota will reset after` 正文时只归成 `rate_limited`，而 `rejectedAccount` 对 `kind == "google"` 的 429 明确不分类（原意是普通 API Key 共享项目额度），于是既不换号也不写冷却，`balanced` 轮换下每 9 个请求就撞一次。现在订阅账号的 429 是账号级拒绝：同一请求内换下一个同池账号，并把该（账号，模型）冷却到快照里的真实重置时间（未知时 60 秒）；选号前还按额度快照预筛——该模型所属分组（Gemini／第三方／Gemini 4 Argon）任一窗口 0% 且未到重置就直接不发送，429 后异步刷新一次快照让同组其它模型也被跳过。API Key 账号与 Codex 路径不变，无法归类或快照不可信时 fail-open。`task verify` EXIT=0（新增 13 项测试）。实现提交 `dca88996`。
