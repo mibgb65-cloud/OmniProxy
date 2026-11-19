@@ -9,12 +9,15 @@ import { isKnownProviderKind, providerNameKeys } from "../providers/provider-lab
 import { useProviders } from "../providers/use-providers"
 import { AccountDetailsCard } from "./account-details-card"
 import { AccountDetailsList } from "./account-details-list"
+import { AccountQuotaGroupSection } from "./account-quota-group-section"
 import { AccountViewToggle } from "./account-view-toggle"
 import { AddAccountDialog } from "./add-account-dialog"
 import { DeleteAccountDialog } from "./delete-account-dialog"
 import { EditAccountDialog } from "./edit-account-dialog"
 import { useAccountActions } from "./use-account-actions"
 import { useAccounts } from "./use-accounts"
+import { useGoogleQuotaGroupSections } from "../google/use-google-quota-group-sections"
+import type { AccountItem } from "../../services/omniproxy"
 import { OpenAIAccountSettings } from "./openai-account-settings"
 import { MiMoAccountSettings } from "./mimo-account-settings"
 import { StepFunAccountSettings } from "./stepfun-account-settings"
@@ -43,6 +46,46 @@ export function ProviderAccountsView({
       : (provider?.name ?? "")
   const items = accounts.data?.filter((account) => account.providerId === providerId) ?? []
   const Title = embedded ? "h2" : "h1"
+  /**
+   * Google 账号页按额度分组集合分区：含 Gemini 4 Argon 之类额外分组的账号自成一区，
+   * 分组相同的账号相邻。只有一个分区时退回原来的平铺，不显示多余标题。
+   */
+  const googleProvider = provider?.kind === "google"
+  const sections = useGoogleQuotaGroupSections(items, googleProvider)
+  const showSections = googleProvider && sections.length > 1
+  const balanceSupported = ["deepseek", "stepfun", "kimi", "howtofix"].includes(
+    provider?.kind ?? "",
+  )
+
+  const cardGrid = (list: AccountItem[]) => (
+    <div className="account-card-grid">
+      {list.map((account) => (
+        <AccountDetailsCard
+          key={account.id}
+          account={account}
+          busy={actions.busy}
+          onToggle={actions.toggle}
+          onDelete={actions.deleteItem}
+          onEdit={actions.editItem}
+          balanceSupported={balanceSupported}
+          googleSupported={googleProvider}
+          googleAccounts={items.filter((item) => item.authMethod === "api_key")}
+        />
+      ))}
+    </div>
+  )
+
+  const accountList = (list: AccountItem[]) => (
+    <AccountDetailsList
+      accounts={list}
+      busy={actions.busy}
+      onToggle={actions.toggle}
+      onDelete={actions.deleteItem}
+      onEdit={actions.editItem}
+      balanceSupported={balanceSupported}
+      googleSupported={googleProvider}
+    />
+  )
 
   return (
     <section className={embedded ? "w-full min-w-0 space-y-5" : "w-full min-w-0 space-y-6 pb-6"}>
@@ -154,34 +197,21 @@ export function ProviderAccountsView({
             <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-sm">
               {t("accounts.empty")}
             </p>
-          ) : view === "list" ? (
-            <AccountDetailsList
-              accounts={items}
-              busy={actions.busy}
-              onToggle={actions.toggle}
-              onDelete={actions.deleteItem}
-              onEdit={actions.editItem}
-              balanceSupported={["deepseek", "stepfun", "kimi", "howtofix"].includes(provider.kind)}
-              googleSupported={provider.kind === "google"}
-            />
-          ) : (
-            <div className="account-card-grid">
-              {items.map((account) => (
-                <AccountDetailsCard
-                  key={account.id}
-                  account={account}
-                  busy={actions.busy}
-                  onToggle={actions.toggle}
-                  onDelete={actions.deleteItem}
-                  onEdit={actions.editItem}
-                  balanceSupported={["deepseek", "stepfun", "kimi", "howtofix"].includes(
-                    provider.kind,
-                  )}
-                  googleSupported={provider.kind === "google"}
-                  googleAccounts={items.filter((item) => item.authMethod === "api_key")}
-                />
+          ) : showSections ? (
+            <div className="space-y-6">
+              <p className="text-muted-foreground text-xs leading-5">
+                {t("accounts.quotaGroup.hint")}
+              </p>
+              {sections.map((section) => (
+                <AccountQuotaGroupSection key={section.key} section={section}>
+                  {view === "list" ? accountList(section.accounts) : cardGrid(section.accounts)}
+                </AccountQuotaGroupSection>
               ))}
             </div>
+          ) : view === "list" ? (
+            accountList(items)
+          ) : (
+            cardGrid(items)
           )}
         </>
       ) : null}

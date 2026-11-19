@@ -433,6 +433,12 @@ export const zh = {
   "accounts.multipleHint": "同一提供商可添加多个 API Key 账号。",
   "accounts.close": "关闭添加账号窗口",
   "accounts.empty": "暂无账号",
+  "accounts.quotaGroup.apiKey": "API Key 账号",
+  "accounts.quotaGroup.unknown": "额度分组未知",
+  "accounts.quotaGroup.unknownHint":
+    "额度尚未获取（未登录、尚未刷新或读取失败）；刷新成功后会自动归入对应分区。",
+  "accounts.quotaGroup.hint":
+    "按账号实际返回的额度分组分区：分组更多的账号在前，API Key 账号与额度未知的账号在最后。",
   "accounts.providerDisabled": "此提供商已停用。",
   "accounts.name": "账号名称",
   "accounts.namePlaceholder": "例如：我的主账号",

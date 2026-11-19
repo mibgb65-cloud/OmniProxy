@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import type { GoogleQuotaBucket, GoogleSubscriptionQuota } from "../../services/google-subscription"
 import { QuotaResetTime } from "../accounts/quota-reset-time"
-import { googleQuotaPercent, googleQuotaState } from "./google-quota-model"
+import { googleQuotaGroupLabel, googleQuotaPercent, googleQuotaState } from "./google-quota-model"
 
 export function GoogleQuotaValues({
   quota,
@@ -26,12 +26,7 @@ export function GoogleQuotaValues({
   return (
     <div className="space-y-4">
       {quota.groups.map((group) => {
-        const name =
-          group.name === "Gemini Models"
-            ? t("google.quota.gemini")
-            : group.name === "Claude and GPT models"
-              ? t("google.quota.thirdParty")
-              : group.name
+        const name = googleQuotaGroupLabel(group.name, t)
         return (
           <section key={group.name} aria-label={name} className="min-w-0 space-y-2.5">
             <h4 className="text-xs font-medium wrap-anywhere">{name}</h4>

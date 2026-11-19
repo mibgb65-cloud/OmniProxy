@@ -1,4 +1,15 @@
+import type { TFunction } from "i18next"
 import type { GoogleSubscriptionQuota } from "../../services/google-subscription"
+
+/**
+ * 官方额度分组名的展示文案：只映射已知分组，其余保留上游原文，不推测含义。
+ * 分组名同时用于卡片内的分组标题和账号页的分区标题，不能两处各写一份。
+ */
+export function googleQuotaGroupLabel(name: string, t: TFunction): string {
+  if (name === "Gemini Models") return t("google.quota.gemini")
+  if (name === "Claude and GPT models") return t("google.quota.thirdParty")
+  return name
+}
 
 export function googleQuotaBuckets(quota?: GoogleSubscriptionQuota) {
   return (quota?.groups ?? []).flatMap((group) => group.buckets ?? [])

@@ -25,6 +25,10 @@ import { useUIStore } from "../../stores/ui-store"
 import { ProviderAccountsView } from "./provider-accounts-view"
 import { readAccountBalance } from "../../services/balance"
 import { readGoogleResources, openGoogleConsole } from "../../services/google"
+import {
+  readGoogleSubscriptionModels,
+  readGoogleSubscriptionQuota,
+} from "../../services/google-subscription"
 import { readAccountTokenUsage } from "../../services/activity"
 
 vi.mock("../../services/activity", async (original) => ({
@@ -37,6 +41,12 @@ vi.mock("../../services/google", () => ({
   openGoogleConsole: vi.fn(),
   setGoogleProject: vi.fn(),
   googleError: () => "failed",
+}))
+
+vi.mock("../../services/google-subscription", () => ({
+  readGoogleSubscriptionQuota: vi.fn(),
+  readCachedGoogleSubscriptionQuota: vi.fn(async () => null),
+  readGoogleSubscriptionModels: vi.fn(async () => []),
 }))
 
 vi.mock("../../services/balance", () => ({
@@ -107,6 +117,31 @@ function renderPage(providerId: string) {
   }
 }
 
+function googleSubscriptionAccount(id: string, name: string): AccountItem {
+  return {
+    ...account,
+    id,
+    name,
+    providerId: "builtin_google",
+    authMethod: "subscription_login",
+    authState: "authenticated",
+    authPlan: "g1-pro-tier",
+    authAccountId: id,
+    authEmail: `${id}@example.invalid`,
+  }
+}
+
+/** 额度分组名按上游顺序给出；extra 模拟部分账号多出的额度分组。 */
+function googleQuotaGroups(extra: string[] = []) {
+  return {
+    fetchedAt: "2026-11-19T01:30:00Z",
+    groups: ["Gemini Models", "Claude and GPT models", ...extra].map((name) => ({
+      name,
+      buckets: [],
+    })),
+  }
+}
+
 describe("ProviderAccountsView", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -117,6 +152,7 @@ describe("ProviderAccountsView", () => {
     vi.mocked(deleteAccount).mockResolvedValue(undefined)
     vi.mocked(getAccountKeyPreview).mockResolvedValue("sk-t••••••••1234")
     vi.mocked(copyAccountKey).mockResolvedValue(undefined)
+    vi.mocked(readGoogleSubscriptionModels).mockResolvedValue([])
   })
 
   it("shows account metadata and live DeepSeek balance", async () => {
@@ -221,6 +257,96 @@ describe("ProviderAccountsView", () => {
     const table = screen.getByRole("table")
     expect(within(table).getAllByRole("region", { name: "Gemini 项目资源" })).toHaveLength(2)
     expect(readGoogleResources).toHaveBeenCalledTimes(1)
+  })
+
+  it("groups Google subscription accounts by the quota groups they report", async () => {
+    const google = { ...provider, id: "builtin_google", kind: "google", name: "Google" }
+    const plain = googleSubscriptionAccount("acct-plain", "普通 Pro")
+    const argon = googleSubscriptionAccount("acct-argon", "含 Argon")
+    vi.mocked(listProviders).mockResolvedValue([google])
+    vi.mocked(listAccounts).mockResolvedValue([plain, argon])
+    vi.mocked(readGoogleSubscriptionQuota).mockImplementation(async (id: string) =>
+      id === argon.id ? googleQuotaGroups(["Gemini 4 Argon"]) : googleQuotaGroups(),
+    )
+    const user = userEvent.setup()
+    renderPage(google.id)
+
+    const argonTitle = "Gemini 模型 · 第三方模型（Claude / GPT） · Gemini 4 Argon"
+    const plainTitle = "Gemini 模型 · 第三方模型（Claude / GPT）"
+    const argonSection = await screen.findByRole("region", { name: argonTitle })
+    expect(
+      within(argonSection).getByRole("heading", { name: "acct-argon@example.invalid" }),
+    ).toBeInTheDocument()
+    expect(
+      within(argonSection).queryByRole("heading", { name: "acct-plain@example.invalid" }),
+    ).not.toBeInTheDocument()
+    expect(within(argonSection).getByText("1 个账号")).toBeInTheDocument()
+
+    const plainSection = screen.getByRole("region", { name: plainTitle })
+    expect(
+      within(plainSection).getByRole("heading", { name: "acct-plain@example.invalid" }),
+    ).toBeInTheDocument()
+    expect(
+      within(plainSection).queryByRole("heading", { name: "acct-argon@example.invalid" }),
+    ).not.toBeInTheDocument()
+
+    // 分组更多的账号排在前面；卡片标题是 h3、额度分组是 h4，h2 只属于分区标题。
+    expect(screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent)).toEqual([
+      argonTitle,
+      plainTitle,
+    ])
+    expect(screen.getByText(/按账号实际返回的额度分组分区/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole("radio", { name: "列表展示" }))
+    const tables = screen.getAllByRole("table")
+    expect(tables).toHaveLength(2)
+    expect(
+      within(tables[0]).getByRole("rowheader", { name: /acct-argon@example.invalid/ }),
+    ).toBeInTheDocument()
+    expect(
+      within(tables[1]).getByRole("rowheader", { name: /acct-plain@example.invalid/ }),
+    ).toBeInTheDocument()
+  })
+
+  it("keeps the plain grid when every Google account reports the same groups", async () => {
+    const google = { ...provider, id: "builtin_google", kind: "google", name: "Google" }
+    const left = googleSubscriptionAccount("acct-left", "左 Pro")
+    const right = googleSubscriptionAccount("acct-right", "右 Pro")
+    vi.mocked(listProviders).mockResolvedValue([google])
+    vi.mocked(listAccounts).mockResolvedValue([left, right])
+    vi.mocked(readGoogleSubscriptionQuota).mockResolvedValue(googleQuotaGroups())
+    renderPage(google.id)
+    await screen.findByRole("heading", { name: "acct-left@example.invalid" })
+    await waitFor(() => expect(readGoogleSubscriptionQuota).toHaveBeenCalledTimes(2))
+    expect(screen.queryByText(/按账号实际返回的额度分组分区/)).not.toBeInTheDocument()
+    expect(screen.queryAllByRole("heading", { level: 2 })).toHaveLength(0)
+    expect(screen.queryAllByRole("table")).toHaveLength(0)
+  })
+
+  it("keeps unreadable Google quota in its own unknown section", async () => {
+    const google = { ...provider, id: "builtin_google", kind: "google", name: "Google" }
+    const known = googleSubscriptionAccount("acct-known", "可读")
+    const unreadable = googleSubscriptionAccount("acct-unreadable", "读不到")
+    vi.mocked(listProviders).mockResolvedValue([google])
+    vi.mocked(listAccounts).mockResolvedValue([known, unreadable])
+    vi.mocked(readGoogleSubscriptionQuota).mockImplementation(async (id: string) => {
+      if (id === unreadable.id) throw new Error("google_subscription: upstream_unavailable")
+      return googleQuotaGroups()
+    })
+    renderPage(google.id)
+    const unknown = await screen.findByRole("region", { name: "额度分组未知" })
+    expect(within(unknown).getByText(/额度尚未获取/)).toBeInTheDocument()
+    expect(
+      within(unknown).getByRole("heading", { name: "acct-unreadable@example.invalid" }),
+    ).toBeInTheDocument()
+    const grouped = screen.getByRole("region", { name: "Gemini 模型 · 第三方模型（Claude / GPT）" })
+    expect(
+      within(grouped).getByRole("heading", { name: "acct-known@example.invalid" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent)).toEqual([
+      "Gemini 模型 · 第三方模型（Claude / GPT）",
+      "额度分组未知",
+    ])
   })
 
   it("handles a deleted or unknown provider ID", async () => {

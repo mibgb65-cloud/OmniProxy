@@ -450,6 +450,12 @@ export const en: Record<keyof typeof zh, string> = {
   "accounts.multipleHint": "You can add multiple API Key accounts for this provider.",
   "accounts.close": "Close add account dialog",
   "accounts.empty": "No accounts yet",
+  "accounts.quotaGroup.apiKey": "API Key accounts",
+  "accounts.quotaGroup.unknown": "Quota groups unknown",
+  "accounts.quotaGroup.unknownHint":
+    "Quota has not been read yet (signed out, not refreshed, or the read failed). Accounts move to their section after a successful refresh.",
+  "accounts.quotaGroup.hint":
+    "Accounts are grouped by the quota groups Google actually returns: accounts with more groups come first, API Key accounts and unknown quota last.",
   "accounts.providerDisabled": "This provider is disabled.",
   "accounts.name": "Account name",
   "accounts.namePlaceholder": "For example: My primary account",
