@@ -83,6 +83,8 @@ type Service struct {
 	minimax         *minimax.Client
 	googleResources GoogleResourceObserver
 	googleAuth      GoogleSubscriptionAccess
+	// googleQuota 是 Google 订阅的额度预筛；nil 时只看运行期冷却。
+	googleQuota GoogleQuotaGate
 	// googlePrompt 读取「Google 订阅按原文发送 system prompt」的用户设置；nil 时打散。
 	googlePrompt func() bool
 	antigravity  *antigravity.Client

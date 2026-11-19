@@ -67,6 +67,13 @@ func (s *Service) rotateGoogleAccounts(ctx context.Context, initial target, requ
 			}
 			continue
 		}
+		// 已观察到的额度耗尽同样不参与均分：不让它先撞一次再换号。
+		if delay := s.googleQuotaWait(ctx, current, request.Model, s.failover.now()); delay > 0 {
+			if wait == 0 || delay < wait {
+				wait = delay
+			}
+			continue
+		}
 		eligible, weights = append(eligible, index), append(weights, 1)
 	}
 	if len(eligible) == 0 {

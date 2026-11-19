@@ -121,6 +121,9 @@ func (s *passthroughSession) attemptFor(ctx context.Context, candidate proxy.Acc
 		if s.service.subscriptionQuotaWait(t, s.service.failover.now()) > 0 {
 			return proxy.PassthroughAttempt{}, false, nil
 		}
+		if s.service.googleQuotaWait(ctx, t, s.model, s.service.failover.now()) > 0 {
+			return proxy.PassthroughAttempt{}, false, nil
+		}
 		lease, available, _ := s.service.failover.acquire(t, s.model)
 		if !available {
 			return proxy.PassthroughAttempt{}, false, nil

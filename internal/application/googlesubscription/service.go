@@ -3,6 +3,7 @@ package googlesubscription
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -22,6 +23,10 @@ type Service struct {
 	current    *session
 	onChange   func()
 	closed     bool
+	// log 记录后台额度刷新的稳定码；为空时不写日志。
+	log *slog.Logger
+	// observed 保存「429 后刷新额度」的按账号去重时间。
+	observed map[string]time.Time
 }
 
 type session struct {
@@ -41,6 +46,9 @@ func New(accounts *account.Service, client *antigravity.Client) *Service {
 
 // OnChange 注册只发送变更信号的通知。
 func (s *Service) OnChange(listener func()) { s.mu.Lock(); s.onChange = listener; s.mu.Unlock() }
+
+// SetLogger 安装后台额度刷新的日志；不影响请求路径与授权状态。
+func (s *Service) SetLogger(log *slog.Logger) { s.mu.Lock(); s.log = log; s.mu.Unlock() }
 
 func (s *Service) notify() {
 	s.mu.Lock()

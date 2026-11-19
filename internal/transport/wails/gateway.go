@@ -9,6 +9,7 @@ import (
 	"omniproxy/internal/application/agentconfig"
 	"omniproxy/internal/application/gateway"
 	"omniproxy/internal/application/googlequota"
+	"omniproxy/internal/application/googlesubscription"
 	"omniproxy/internal/application/provider"
 	"omniproxy/internal/application/quotaactivation"
 	routes "omniproxy/internal/application/routing"
@@ -62,8 +63,11 @@ func (s *AppService) initGateway() {
 	s.gateway.SetRouter(routes.New(s.db, provider.NewService(s.db), account.NewService(s.db, store)))
 	s.gateway.SetGoogleResources(googlequota.New(s.db))
 	s.gateway.SetGooglePrompt(s.promptAsWritten.Load)
+	// 额度预筛只读已保存快照：耗尽的分组不再被选中，也不额外发起官方查询。
+	s.gateway.SetGoogleQuotaGate(googlesubscription.NewQuotaGate(s.db))
 	google, googleError := s.googleSubscriptionService()
 	if googleError == nil {
+		google.SetLogger(s.log)
 		s.gateway.SetGoogleSubscription(google)
 	} else if s.log != nil {
 		s.log.Warn("Google subscription unavailable", "module", "gateway", "code", "google_subscription_unavailable")

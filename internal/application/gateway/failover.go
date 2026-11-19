@@ -81,6 +81,13 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 				}
 				continue
 			}
+			// Google 订阅的额度按账号独立：快照里该模型所属分组已耗尽就不发送。
+			if delay := s.googleQuotaWait(ctx, t, request.Model, s.failover.now()); delay > 0 {
+				if wait == 0 || delay < wait {
+					wait = delay
+				}
+				continue
+			}
 		}
 		lease := healthLease{}
 		if enabled && !request.FixedAccount {
@@ -169,6 +176,23 @@ func (s *Service) forwardWithFailover(ctx context.Context, request proxy.Request
 					return err
 				}
 				// 还有候选：按真实状态休息本账号的该模型，由下一个候选接替。
+				rejected, responseStatus, lastRejection = reason, refusal.StatusCode, err
+			}
+		}
+		if rejected == nil && !request.FixedAccount {
+			if reason, refusal := s.googleRateLimited(ctx, t, request.Model, err); reason != nil {
+				// 先让快照刷新：下一次请求（可能是同组另一个模型）就能直接跳过该账号。
+				s.refreshGoogleQuota(t)
+				if !next {
+					// 没有别的候选：把真实 429 交还客户端，不伪装成账号池冷却。
+					s.failover.finish(lease, nil, false)
+					released = true
+					if endErr := request.Trace.EndAttempt(refusal.StatusCode, refusal.Code); endErr != nil {
+						return endErr
+					}
+					return err
+				}
+				// 还有候选：Google 订阅额度按账号独立，休息本账号的该模型并换下一个。
 				rejected, responseStatus, lastRejection = reason, refusal.StatusCode, err
 			}
 		}
