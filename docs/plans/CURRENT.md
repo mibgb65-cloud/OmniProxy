@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261119-003](../tasks/completed/2026-11/TASK-20261119-003-google-quota-aware-routing.md) Google 订阅账号的 5h／周额度耗尽后仍被反复选中：上游 429 没有 `quota will reset after` 正文时只归成 `rate_limited`，而 `rejectedAccount` 对 `kind == "google"` 的 429 明确不分类（原意是普通 API Key 共享项目额度），于是既不换号也不写冷却，`balanced` 轮换下每 9 个请求就撞一次。现在订阅账号的 429 是账号级拒绝：同一请求内换下一个同池账号，并把该（账号，模型）冷却到快照里的真实重置时间（未知时 60 秒）；选号前还按额度快照预筛——该模型所属分组（Gemini／第三方／Gemini 4 Argon）任一窗口 0% 且未到重置就直接不发送，429 后异步刷新一次快照让同组其它模型也被跳过。API Key 账号与 Codex 路径不变，无法归类或快照不可信时 fail-open。`task verify` EXIT=0（新增 13 项测试）。实现提交 `dca88996`。
+
 本地构建：[TASK-20261119-002](../tasks/completed/2026-11/TASK-20261119-002-build-local-v2.3.1-beta.28.md) 已产出 `v2.3.1-beta.28` Windows amd64 生产安装包，内容为 Google 账号页按额度分组分区（TASK-20261119-001，`da458b60`）：安装器 21,415,807 bytes，SHA256 `acc3f0986328496be0d8688c238fd6cfdbaf4d3602543270e2ab5a222f1fc97c`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已实现：[TASK-20261119-001](../tasks/completed/2026-11/TASK-20261119-001-google-quota-group-sections.md) Google 账号页按官方额度分组集合分区：含 `Gemini 4 Argon` 等额外分组的账号自成一区并排在前面，分组相同的账号相邻，API Key 账号与额度未知的账号排在最后；分区标题显示分组名与账号数，只有一个分区时不显示标题，卡片视图与列表视图都生效。分区复用卡片已有的额度查询与本地快照，不额外请求上游，也不读套餐档位（因此与「自费 Pro／学生 Pro」无关）。`task verify` EXIT=0（前端 163 文件／1000 项测试）。实现提交 `da458b60`。
