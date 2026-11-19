@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261119-001](../tasks/completed/2026-11/TASK-20261119-001-google-quota-group-sections.md) Google 账号页按官方额度分组集合分区：含 `Gemini 4 Argon` 等额外分组的账号自成一区并排在前面，分组相同的账号相邻，API Key 账号与额度未知的账号排在最后；分区标题显示分组名与账号数，只有一个分区时不显示标题，卡片视图与列表视图都生效。分区复用卡片已有的额度查询与本地快照，不额外请求上游，也不读套餐档位（因此与「自费 Pro／学生 Pro」无关）。`task verify` EXIT=0（前端 163 文件／1000 项测试）。实现提交 `da458b60`。
+
 本地构建：[TASK-20261118-011](../tasks/completed/2026-11/TASK-20261118-011-build-local-v2.3.1-beta.27.md) 已产出 `v2.3.1-beta.27` Windows amd64 生产安装包，内容为仪表盘「模型 Token 占比」与用量页「年度活跃度」热图（TASK-20261118-010，`0c6bbe8c`）：安装器 21,410,046 bytes，SHA256 `864c35516877d32a80163b308aef125d41dd185e7fc1f393d811796e42f95327`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已实现：[TASK-20261118-010](../tasks/completed/2026-11/TASK-20261118-010-dashboard-model-share-and-usage-calendar.md) 仪表盘新增「模型 Token 占比」卡片（跟随今日／7 天／30 天所选时段，前六名之外按同一批数据合并成精确的「其他」），用量页新增「年度活跃度」热图（近 365 个本地日期，可切换 Token／请求数）；两者只读 `usage_buckets` 日汇总，无迁移、无新依赖。`task verify` EXIT=0（前端 162 文件／990 项测试）。实现提交 `0c6bbe8c`。桌面窗口内的实机目视检查未执行。
