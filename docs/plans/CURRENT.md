@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-发布中：[TASK-20261119-005](../tasks/completed/2026-11/TASK-20261119-005-release-v2.4.0.md) `v2.4.0` 正式版汇总 v2.3.0 以来 121 个提交（12 项新增 + 19 项修复），新增 HowToFix、WorkBuddy AI、WorkBuddy 国内版三家内置服务商与迁移 049–052（纯追加，无 `ALTER`／`DROP`／`UPDATE`／`DELETE`），并含 Google 订阅额度窗口选号与 429 换号冷却、Codex／River 九条兼容修复、受管客户端目录停更可见与恢复、首页模型 Token 占比与用量页年度活跃度热图。本地打包通过：安装器 21,455,376 bytes，SHA256 `48715865815efade4959ca07ca5f07782713226c4745a061a517a548c241ac55`，Windows 数字版本 `2.4.0.0`、NSIS 基础版本 `2.4.0`。号位按 SemVer 取 minor（与 v2.3.0 同为「十几项新增」量级）；29 个本机构建沿用 `2.3.1-beta.N` 命名，未重命名。
+已发布：[TASK-20261119-005](../tasks/completed/2026-11/TASK-20261119-005-release-v2.4.0.md) [v2.4.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.4.0) 于 2026-11-19 15:31:14（Asia/Singapore）公开为最新正式版。新增 HowToFix、WorkBuddy AI、WorkBuddy 国内版三家内置服务商与迁移 049–052（纯追加），并含 Google 订阅额度选号、Codex／River 兼容修复及用量分析改进。经用户授权，仅将未发行的 `v2.4.0` 标签迁至补齐 WorkBuddy AI 源码的 `cf6cc102`；GitHub 托管打包、签名、发布及公开资产下载复验通过。未运行安装器或进行实机升级。
 
 本地构建：[TASK-20261119-004](../tasks/completed/2026-11/TASK-20261119-004-build-local-v2.3.1-beta.29.md) 已产出 `v2.3.1-beta.29` Windows amd64 生产安装包，内容为 Google 订阅账号按额度窗口参与选号（TASK-20261119-003，`dca88996`）：安装器 21,435,843 bytes，SHA256 `2d6ae07d33fb1e9bd6b7f6b23a1551f7bd25b40ea49755753ae625e311b79fd5`，Windows 数字版本 `2.3.1.0`、NSIS 基础版本 `2.3.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
@@ -293,7 +293,9 @@ GitHub 发布已完成：[TASK-20261026-005](../tasks/completed/2026-10/TASK-202
 
 ## Current Version
 
-**已发布：2.2.2** — 2026-11-01 23:24:49（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布且为 stable Latest，取代 2.2.1。标签源码 `077194e5`，Windows 数字版本 `2.2.2.0`。安装器 20,417,368 bytes，GitHub API SHA256 `e4c44bbf11077aa97d65f739ff505814840aee996ae69e115886b0303123e04c`；托管构建、自签、篡改拒绝、摘要复验及发布全部通过，见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。本轮按用户要求暂不进行真实客户端或覆盖安装验收。
+**最新正式版：2.4.0** — 标签源码 `cf6cc102`，Windows 数字版本 `2.4.0.0`。公开自签安装器 21,499,256 bytes，SHA256 `3babedd715d5acb5e58a32c8ada542ac1d88a660fced6cc6573ef4e71faa8015`。
+
+**历史已发布：2.2.2** — 2026-11-01 23:24:49（Asia/Singapore）公开 Windows amd64 正式版，曾取代 2.2.1 成为 stable Latest。标签源码 `077194e5`，Windows 数字版本 `2.2.2.0`。安装器 20,417,368 bytes，GitHub API SHA256 `e4c44bbf11077aa97d65f739ff505814840aee996ae69e115886b0303123e04c`；托管构建、自签、篡改拒绝、摘要复验及发布全部通过，见 [TASK-20261101-001](../tasks/completed/2026-11/TASK-20261101-001-codex-auto-compaction-capacity.md)。本轮按用户要求暂不进行真实客户端或覆盖安装验收。
 
 **历史已发布：2.2.1** — 2026-10-31 21:25:03（Asia/Singapore）公开 Windows amd64 正式版，非草稿／非预发布，曾为 stable Latest，现由 2.2.2 取代。标签源码 `870c1344`，Windows 数字版本 `2.2.1.0`。内容为 2.2.0 之后的 6 项用户可见改动：仪表盘卡片自适应填充与空态体检清单（`c6c2f658`）、账号页提供商切换栏固定与滚动锁定（`ab47f044`／`902cc49c`）、重置卡可用性判定统一（`7a53b872`）、展开面板卡片列宽封顶（`6c934061`）、账号 Token 用量改终身累计并新增迁移 045（`c2c538b4`）。公开安装器 20,406,184 bytes，SHA256 `b94f311eb8c12a4ad92f21fd8076dc454470e865fb6e01bb743bfbf4574040ad`；签名 pin、版本资源、更新发现与下载摘要已核验，实机覆盖安装与迁移 045 首次执行待独立验收，见 [TASK-20261031-005](../tasks/completed/2026-10/TASK-20261031-005-release-v2.2.1.md)。
 
