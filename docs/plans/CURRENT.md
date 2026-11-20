@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261120-007](../tasks/completed/2026-11/TASK-20261120-007-build-local-v2.4.1-beta.4.md) 已产出 `v2.4.1-beta.4` Windows amd64 生产安装包，内容为用量统计按模型家族合并推理档位变体（TASK-20261120-006，`c1a79484`）：安装器 21,592,674 bytes，SHA256 `b4738184894be37825aff16fe0d261b64c408e85aab66519681c1fc6239e558e`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
+
+已修复：[TASK-20261120-006](../tasks/completed/2026-11/TASK-20261120-006-merge-effort-variants-in-usage.md) 用量页把同一个 Gemini 模型的推理档位变体当成不同模型（`gemini-4-neon-high` 672 请求、`-xhigh` 612 请求各一行）：统计以「实际模型 ID」分组，而上游用独立 ID 表达思考程度。现在模型维度按模型家族归并——「按提供商与模型」、模型占比、模型每日用量与仪表盘模型 Token 占比都算同一个模型，请求数与 Token 相加，合并行悬浮可看被合并的原始型号；只合并有证据的家族（同基础名 ≥2 个档位后缀，或基础名本身是已知模型），`-thinking`／`-tiered`／`-lite` 等不合并。归并在读取时完成，无迁移、不改写入路径，请求明细／记录页／导出仍保留每次实际使用的型号。本机库只读核对：`builtin_google` 由 11 行降到 8 行，neon 两档合并为 1,284 请求。见 [ADR-030](../decisions/ADR-030-merge-reasoning-level-variants-in-usage.md)。`task verify` EXIT=0（前端 164 文件／1006 项测试、全部 Go 包、Windows production 构建）。实现提交 `c1a79484`。
+
 本地构建：[TASK-20261120-005](../tasks/completed/2026-11/TASK-20261120-005-build-local-v2.4.1-beta.3.md) 已产出 `v2.4.1-beta.3` Windows amd64 生产安装包，内容为同一订阅身份重新登录复用原账号（TASK-20261120-004，`eca6346c`）：安装器 21,562,763 bytes，SHA256 `72fa62e0bce5845ec74db60becb906be92c1986d6a7ae5d4e4f5f099c584e08f`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已修复：[TASK-20261120-004](../tasks/completed/2026-11/TASK-20261120-004-subscription-identity-reuse.md) 同一 Google 账号在账号页同时出现两条记录（一条「已退出登录」、一条有额度）：账号页「添加账号」不携带本地账号 ID，保存授权时只看有没有 ID，于是同一账号再次授权必然 `INSERT` 出第二条记录；两条记录 `auth_email`／`auth_account_id` 相同却各自持有目录与额度快照，网关还会把同一个上游账号当成两个轮换候选。现在保存授权前按订阅身份（提供商 + 规范化邮箱 + 官方 `account_id`）查已有记录并更新它（保留 ID、名称、创建时间与启停状态），Google 与 ChatGPT／Codex 两条订阅登录路径一致；旧记录缺少 `account_id` 时由重新登录补全，双方 `account_id` 不同（同工作区不同成员）仍各自新增。不改动历史数据：已有重复卡片由用户手动删除，用量累计按身份保存在 `usage_accounts.subject`，删除卡片不减少累计。见 [ADR-029](../decisions/ADR-029-subscription-identity-uniqueness.md)。`task verify` EXIT=0（前端 164 文件／1005 项测试、全部 Go 包、Windows production 构建）。实现提交 `eca6346c`。
