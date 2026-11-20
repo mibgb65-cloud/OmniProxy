@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-	"unicode/utf8"
 )
 
 type contentSpy struct {
@@ -27,28 +26,28 @@ func testTrace(spy *contentSpy) *Trace {
 	return &Trace{event: RequestEvent{ID: strings.Repeat("a", 32)}, observer: spy}
 }
 
-func TestPrepareRequestContentFoldsInlineDataAndTruncates(t *testing.T) {
+func TestPrepareRequestContentFoldsInlineDataAndKeepsFullBody(t *testing.T) {
 	small := []byte(`{"messages":[{"role":"user","content":"hello"}]}`)
-	content, truncated, original := prepareRequestContent(small)
-	if truncated || content != string(small) || original != len(small) {
-		t.Fatalf("small content changed: %q %v %d", content, truncated, original)
+	content, original := prepareRequestContent(small)
+	if content != string(small) || original != len(small) {
+		t.Fatalf("small content changed: %q %d", content, original)
 	}
 	// 长 Base64 内联图片只保留占位文本，避免正文被一张图占满。
 	image := `{"input":[{"type":"image_url","url":"data:image/png;base64,` + strings.Repeat("A", 4096) + `"}]}`
-	content, truncated, _ = prepareRequestContent([]byte(image))
-	if truncated || strings.Contains(content, strings.Repeat("A", 4096)) || !strings.Contains(content, "<omitted>") || !strings.Contains(content, "data:application/octet-stream") {
+	content, _ = prepareRequestContent([]byte(image))
+	if strings.Contains(content, strings.Repeat("A", 4096)) || !strings.Contains(content, "<omitted>") || !strings.Contains(content, "data:application/octet-stream") {
 		t.Fatalf("inline data not folded: %q", content)
 	}
-	// 超过保存上限时按 UTF-8 边界截断并标记。
-	huge := []byte(`{"x":"` + strings.Repeat("中", MaxRequestContentBytes) + `"}`)
-	content, truncated, original = prepareRequestContent(huge)
-	if !truncated || len(content) > MaxRequestContentBytes || original != len(huge) || !utf8.ValidString(content) {
-		t.Fatalf("huge content not bounded: len=%d truncated=%v original=%d valid=%v", len(content), truncated, original, utf8.ValidString(content))
+	// 完整保存：超过旧 256 KiB 上限的正文不再截断。
+	huge := []byte(`{"x":"` + strings.Repeat("中", 300<<10) + `"}`)
+	content, original = prepareRequestContent(huge)
+	if len(content) != len(huge) || original != len(huge) || !strings.HasSuffix(content, `"}`) {
+		t.Fatalf("large content was altered: len=%d original=%d", len(content), original)
 	}
 	// 压缩或二进制正文不保存：返回空内容而不是把乱码写进数据库。
-	content, truncated, original = prepareRequestContent([]byte{0x1f, 0x8b, 0x08, 0x00, 0xff})
-	if content != "" || truncated || original != 5 {
-		t.Fatalf("binary content accepted: %q %v %d", content, truncated, original)
+	content, original = prepareRequestContent([]byte{0x1f, 0x8b, 0x08, 0x00, 0xff})
+	if content != "" || original != 5 {
+		t.Fatalf("binary content accepted: %q %d", content, original)
 	}
 }
 

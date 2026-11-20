@@ -76,3 +76,11 @@ func (s *AppService) RequestContentClear() (int64, error) {
 	}
 	return s.activity.ClearRequestContents(context.Background())
 }
+
+// RecordedRequestsRead 返回已保存正文的请求摘要，供「记录」页集中浏览。
+func (s *AppService) RecordedRequestsRead(query activity.RecordedQuery) (activity.RecordedPage, error) {
+	if s.activity == nil {
+		return activity.RecordedPage{}, activity.ErrUnavailable
+	}
+	return s.activity.RecordedRequests(context.Background(), query)
+}

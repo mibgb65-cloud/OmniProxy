@@ -676,6 +676,13 @@ export function ProxyPort(): $CancellablePromise<$models.ProxyPortState> {
 }
 
 /**
+ * RecordedRequestsRead 返回已保存正文的请求摘要，供「记录」页集中浏览。
+ */
+export function RecordedRequestsRead(query: activity$0.RecordedQuery): $CancellablePromise<activity$0.RecordedPage> {
+    return $Call.ByID(3009580071, query);
+}
+
+/**
  * RequestContentClear 删除全部已保存正文，返回删除条数。
  */
 export function RequestContentClear(): $CancellablePromise<number> {

@@ -17,6 +17,7 @@ import { googleSettingsZh } from "./google-settings-zh"
 import { quotaUsdZh } from "./quota-usd-zh"
 import { dumateZh } from "./dumate-zh"
 import { workbuddyZh } from "./workbuddy-zh"
+import { recordsZh } from "./records-zh"
 
 /**
  * Chinese translations — the single source of truth for translation keys.
@@ -26,6 +27,7 @@ import { workbuddyZh } from "./workbuddy-zh"
 export const zh = {
   ...dumateZh,
   ...workbuddyZh,
+  ...recordsZh,
   ...riverSettingsZh,
   ...quotaUsdZh,
   ...failoverZh,
@@ -109,6 +111,7 @@ export const zh = {
   "nav.quota": "配额",
   "nav.usage": "用量",
   "nav.requests": "请求",
+  "nav.records": "记录",
   "nav.logs": "日志",
   "nav.settings": "设置",
   "nav.about": "关于",

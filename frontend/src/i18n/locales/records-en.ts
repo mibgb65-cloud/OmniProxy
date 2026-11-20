@@ -1,0 +1,26 @@
+export const recordsEn = {
+  "nav.records": "Records",
+  "records.title": "Records",
+  "records.description":
+    "Requests whose body was saved. New requests appear here after recording is enabled.",
+  "records.search": "Search request ID, model, agent or account",
+  "records.offTitle": "Request content recording is off",
+  "records.offHint":
+    "Turn on “Record request content” in Settings → Requests and logs. Only new requests are saved; history is not backfilled.",
+  "records.offWithHistory": "Recording is off. Entries below were saved earlier.",
+  "records.waitingTitle": "Recording is on, waiting for new requests",
+  "records.waitingHint": "A request with a saved body will appear here after the next call.",
+  "records.empty": "No request bodies have been saved yet.",
+  "records.noMatches": "No matching records.",
+  "records.loading": "Reading records…",
+  "records.failed": "Unable to read records. Try again later.",
+  "records.truncated": "Truncated",
+  "records.noPreview": "No previewable text.",
+  "records.size": "Original {{original}} · compressed {{stored}}",
+  "records.openRequest": "View request details",
+  "records.openRecord": "View the request recorded at {{time}}",
+  "records.retained": "{{count}} saved request bodies",
+  "records.previous": "Previous",
+  "records.next": "Next",
+  "records.page": "Page {{page}} / {{totalPages}} pages",
+} as const

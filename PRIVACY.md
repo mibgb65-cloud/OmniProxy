@@ -24,13 +24,14 @@ DPAPI context; SQLite stores credential references rather than complete credenti
 DPAPI 保护，SQLite 保存凭据引用而不是完整凭据包。
 
 The gateway forwards request and response content in memory. Request content is not stored by default.
-An optional, off-by-default setting can save each inference request's client body locally (up to 256 KiB per request,
-evicted with request history, clearable at any time) for review and XLSX export; response content is never stored.
+An optional, off-by-default setting can save each inference request's client body locally (full body,
+gzip-compressed, with a 512 MiB total budget; oldest bodies are evicted when it is exceeded, and all of it
+can be cleared at any time) for review and XLSX export; response content is never stored.
 Managed external-client configurations can contain local gateway access keys; review their files and backups before sharing them.
 
 网关在内存中转发请求与响应内容，默认不保存请求正文。用户可选择开启「记录请求正文」，把每次推理请求的
-客户端正文保存在本机（每条最多 256 KiB，随请求明细淘汰，可随时清除），用于回看与导出 XLSX；响应正文始终不保存。
-外部客户端的受管配置可能包含本机网关接入 Key，共享配置文件或备份前请自行检查。
+客户端正文完整保存在本机（gzip 压缩，总预算 512 MiB，超出后删除最旧正文，可随时清除），用于回看与导出 XLSX；
+响应正文始终不保存。外部客户端的受管配置可能包含本机网关接入 Key，共享配置文件或备份前请自行检查。
 
 ## Network requests / 网络请求
 

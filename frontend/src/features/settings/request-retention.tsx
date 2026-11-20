@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { Switch } from "../../components/ui/switch"
+import { formatBytes } from "../activity/activity-format"
 import {
   clearRequestContent,
   readRetention,
@@ -139,6 +140,12 @@ export function RequestRetentionSettings() {
               {t(contentClear.isPending ? "activity.contentClearing" : "activity.contentClear")}
             </Button>
           </div>
+          <p className="text-muted-foreground text-xs leading-5 tabular-nums">
+            {t("activity.contentUsage", {
+              used: formatBytes(query.data?.contentBytes ?? 0),
+              budget: formatBytes(query.data?.contentBudget ?? 0),
+            })}
+          </p>
           {contentToggle.isError || contentClear.isError ? (
             <p role="alert" className="text-destructive text-sm">
               {t(

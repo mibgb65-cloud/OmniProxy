@@ -127,7 +127,8 @@ describe("AppSidebar", () => {
     await user.click(screen.getByRole("button", { name: "折叠" }))
     expect(isInaccessible(screen.getByText("仪表盘"))).toBe(true)
     expect(screen.getByRole("link", { name: "仪表盘" })).toHaveAttribute("href", "/")
-    expect(screen.getAllByRole("link")).toHaveLength(9)
+    expect(screen.getByRole("link", { name: "记录" })).toHaveAttribute("href", "/records")
+    expect(screen.getAllByRole("link")).toHaveLength(10)
     expect(screen.getByRole("button", { name: "展开" })).toHaveAttribute("aria-expanded", "false")
 
     await user.click(screen.getByRole("button", { name: "展开" }))

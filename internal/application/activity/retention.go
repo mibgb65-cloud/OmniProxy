@@ -34,6 +34,10 @@ func (s *Service) Retention(ctx context.Context) (Retention, error) {
 	if s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM request_records`).Scan(&result.StoredRecords) != nil {
 		return result, ErrUnavailable
 	}
+	if s.db.QueryRowContext(ctx, `SELECT COALESCE(SUM(stored_bytes),0) FROM request_contents`).Scan(&result.ContentBytes) != nil {
+		return result, ErrUnavailable
+	}
+	result.ContentBudget = contentStoreBudget
 	return result, nil
 }
 func (s *Service) SetRetention(ctx context.Context, limit int) (Retention, error) {

@@ -18,6 +18,7 @@ import { googleSettingsEn } from "./google-settings-en"
 import { quotaUsdEn } from "./quota-usd-en"
 import { dumateEn } from "./dumate-en"
 import { workbuddyEn } from "./workbuddy-en"
+import { recordsEn } from "./records-en"
 
 /**
  * English translations. The `Record<keyof typeof zh, string>` type makes any
@@ -26,6 +27,7 @@ import { workbuddyEn } from "./workbuddy-en"
 export const en: Record<keyof typeof zh, string> = {
   ...dumateEn,
   ...workbuddyEn,
+  ...recordsEn,
   ...riverSettingsEn,
   ...quotaUsdEn,
   ...failoverEn,
@@ -111,6 +113,7 @@ export const en: Record<keyof typeof zh, string> = {
   "nav.quota": "Quota",
   "nav.usage": "Usage",
   "nav.requests": "Requests",
+  "nav.records": "Records",
   "nav.logs": "Logs",
   "nav.settings": "Settings",
   "nav.about": "About",

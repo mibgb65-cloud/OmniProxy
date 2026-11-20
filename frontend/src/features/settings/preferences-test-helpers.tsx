@@ -96,12 +96,16 @@ export function resetPreferences() {
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: false,
+    contentBytes: 0,
+    contentBudget: 536870912,
   })
   vi.mocked(setRetention).mockResolvedValue({
     maxRecords: 20000,
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: false,
+    contentBytes: 0,
+    contentBudget: 536870912,
   })
   vi.mocked(getProxyPort).mockResolvedValue({
     port: 3002,

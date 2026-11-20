@@ -4,6 +4,9 @@ import type {
   RequestQuery,
   RequestItem,
   RequestContent,
+  RecordedItem,
+  RecordedPage,
+  RecordedQuery,
   UsageInfo,
   Breakdown,
   DayUsage,
@@ -17,6 +20,9 @@ import type {
 export type {
   RequestItem,
   RequestContent,
+  RecordedItem,
+  RecordedPage,
+  RecordedQuery,
   RequestExportResult,
   UsageInfo,
   Breakdown,
@@ -33,6 +39,7 @@ export const readAccountTokenUsage = (id: string) => AppService.AccountTokenUsag
 export const readRequests = (query: RequestQuery) => AppService.RequestsRead(query)
 export const readRequest = (id: string) => AppService.RequestRead(id)
 export const readRequestContent = (id: string) => AppService.RequestContentRead(id)
+export const readRecordedRequests = (query: RecordedQuery) => AppService.RecordedRequestsRead(query)
 export const readRetention = () => AppService.RequestRetention()
 export const setRetention = (limit: number) => AppService.RequestRetentionSet(limit)
 export const setRequestContentRecording = (enabled: boolean) =>

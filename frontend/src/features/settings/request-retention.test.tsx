@@ -24,12 +24,16 @@ it("读取真实保留设置、校验整数边界并保存", async () => {
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: false,
+    contentBytes: 0,
+    contentBudget: 536870912,
   })
   vi.mocked(setRetention).mockResolvedValue({
     maxRecords: 20000,
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: false,
+    contentBytes: 0,
+    contentBudget: 536870912,
   })
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
@@ -61,12 +65,16 @@ it("开启请求正文记录并清除已保存正文", async () => {
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: false,
+    contentBytes: 0,
+    contentBudget: 536870912,
   })
   vi.mocked(setRequestContentRecording).mockResolvedValue({
     maxRecords: 10000,
     storedRecords: 4,
     logCapacity: 5000,
     contentEnabled: true,
+    contentBytes: 4096,
+    contentBudget: 536870912,
   })
   vi.mocked(clearRequestContent).mockResolvedValue(3)
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

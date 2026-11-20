@@ -2,6 +2,7 @@ import { Tooltip } from "../ui/tooltip"
 import { Link } from "@tanstack/react-router"
 import {
   BarChart3,
+  FileText,
   Gauge,
   History,
   LayoutDashboard,
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
   { to: "/quota", labelKey: "nav.quota", icon: Gauge },
   { to: "/usage", labelKey: "nav.usage", icon: BarChart3 },
   { to: "/requests", labelKey: "nav.requests", icon: History },
+  { to: "/records", labelKey: "nav.records", icon: FileText },
   { to: "/logs", labelKey: "nav.logs", icon: ScrollText },
 ]
 

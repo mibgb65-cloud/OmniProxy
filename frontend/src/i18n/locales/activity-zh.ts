@@ -154,14 +154,16 @@ export const activityZh = {
   "activity.contentMissing": "该请求没有保存正文。",
   "activity.contentMissingHint":
     "在「设置 → 请求与日志」开启「记录请求正文」后，新请求才会保存；历史记录不会补录。",
-  "activity.contentSize": "保存 {{stored}}，原始 {{original}}",
-  "activity.contentTruncated": "正文超过 256 KiB，已截断（原始 {{original}}）。",
+  "activity.contentSize": "原始 {{original}} · 压缩后 {{stored}}",
+  "activity.contentTruncated": "该记录由历史版本保存，已在 256 KiB 处截断（原始 {{original}}）。",
   "activity.contentCopy": "复制请求内容",
   "activity.contentSettingTitle": "记录请求正文",
   "activity.contentSettingDescription":
-    "开启后把每次推理请求的客户端正文（系统提示词、消息、工具定义）保存在本机数据库，每条最多 256 KiB。正文可能包含代码或密钥，请自行评估后再开启。",
+    "开启后把每次推理请求的客户端正文（系统提示词、消息、工具定义）完整保存在本机数据库，使用 gzip 压缩。正文可能包含代码或密钥，请自行评估后再开启。",
   "activity.contentRetentionHint":
-    "关闭后只停止记录新请求；已有正文保留到请求明细被淘汰或手动清除。",
+    "关闭后只停止记录新请求；已有正文保留到请求明细被淘汰、超出总预算或手动清除。",
+  "activity.contentUsage":
+    "正文占用 {{used}} / 上限 {{budget}}（压缩后）；超出后自动删除最旧正文。",
   "activity.contentClear": "清除已保存的正文",
   "activity.contentClearing": "正在清除…",
   "activity.contentCleared": "已清除 {{count}} 条请求正文。",

@@ -165,15 +165,17 @@ export const activityEn = {
   "activity.contentMissing": "No content was saved for this request.",
   "activity.contentMissingHint":
     "Turn on “Record request content” in Settings → Requests and logs. Only new requests are saved; history is not backfilled.",
-  "activity.contentSize": "Stored {{stored}}, original {{original}}",
+  "activity.contentSize": "Original {{original}} · compressed {{stored}}",
   "activity.contentTruncated":
-    "Content exceeded 256 KiB and was truncated (original {{original}}).",
+    "Saved by an earlier version and truncated at 256 KiB (original {{original}}).",
   "activity.contentCopy": "Copy request content",
   "activity.contentSettingTitle": "Record request content",
   "activity.contentSettingDescription":
-    "Save each inference request's client body (system prompt, messages, tool definitions) to the local database, up to 256 KiB per request. Content may include code or secrets; review the tradeoff before enabling.",
+    "Save each inference request's client body (system prompt, messages, tool definitions) in full to the local database, gzip-compressed. Content may include code or secrets; review the tradeoff before enabling.",
   "activity.contentRetentionHint":
-    "Turning it off only stops recording new requests. Existing content stays until its request record is evicted or you clear it.",
+    "Turning it off only stops recording new requests. Existing content stays until its request record is evicted, the total budget is exceeded, or you clear it.",
+  "activity.contentUsage":
+    "Stored content {{used}} / budget {{budget}} (compressed); the oldest bodies are removed when the budget is exceeded.",
   "activity.contentClear": "Clear saved content",
   "activity.contentClearing": "Clearing…",
   "activity.contentCleared": "Cleared {{count}} request content entries.",

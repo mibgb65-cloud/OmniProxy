@@ -11,7 +11,7 @@ import (
 // MaxExportRows 限制单次 XLSX 导出的行数，避免一次导出占满内存与磁盘。
 const MaxExportRows = 100000
 
-const exportColumns = `r.id,r.started_at,r.state,r.protocol,r.transport,r.input_model,r.model,r.reasoning_effort,r.provider_name,r.account_name,r.email,r.workspace_id,r.client_id,r.input_tokens,r.output_tokens,r.input_known,r.output_known,r.cached_input_tokens,r.usage_complete,r.status_code,r.error_code,r.latency_ms,r.first_token_ms,COALESCE(c.content,''),COALESCE(c.original_bytes,0),COALESCE(c.stored_bytes,0),COALESCE(c.truncated,0),(c.request_id IS NOT NULL)`
+const exportColumns = `r.id,r.started_at,r.state,r.protocol,r.transport,r.input_model,r.model,r.reasoning_effort,r.provider_name,r.account_name,r.email,r.workspace_id,r.client_id,r.input_tokens,r.output_tokens,r.input_known,r.output_known,r.cached_input_tokens,r.usage_complete,r.status_code,r.error_code,r.latency_ms,r.first_token_ms,c.data,COALESCE(c.format,''),COALESCE(c.original_bytes,0),COALESCE(c.stored_bytes,0),COALESCE(c.truncated,0),(c.request_id IS NOT NULL)`
 
 // ExportRequest 是导出的一行：请求元数据加可选正文快照。
 type ExportRequest struct {
@@ -75,12 +75,14 @@ func scanExportRow(row scanner) (ExportRequest, error) {
 	var cached sql.NullInt64
 	var bytesOriginal, bytesStored int64
 	var truncated, available int
+	var contentData []byte
+	var contentFormat string
 	if err := row.Scan(
 		&item.ID, &item.StartedAt, &item.State, &item.Protocol, &item.Transport,
 		&item.InputModel, &item.Model, &item.Effort, &item.ProviderName, &item.AccountName,
 		&item.Email, &item.WorkspaceID, &item.Client, &input, &output, &item.InputKnown,
 		&item.OutputKnown, &cached, &item.UsageComplete, &item.StatusCode, &item.ErrorCode,
-		&item.LatencyMS, &item.FirstTokenMS, &result.Content.Content, &bytesOriginal, &bytesStored,
+		&item.LatencyMS, &item.FirstTokenMS, &contentData, &contentFormat, &bytesOriginal, &bytesStored,
 		&truncated, &available,
 	); err != nil {
 		return ExportRequest{}, err
@@ -96,5 +98,12 @@ func scanExportRow(row scanner) (ExportRequest, error) {
 	result.Content.Truncated = truncated != 0
 	result.Content.OriginalBytes = bytesOriginal
 	result.Content.StoredBytes = bytesStored
+	if result.Content.Available && len(contentData) > 0 {
+		content, err := decodeContent(contentData, contentFormat)
+		if err != nil {
+			return ExportRequest{}, err
+		}
+		result.Content.Content = content
+	}
 	return result, nil
 }

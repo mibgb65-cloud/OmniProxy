@@ -196,6 +196,44 @@ export interface QuotaWindowEstimate {
 }
 
 /**
+ * RecordedItem 是已保存正文的一条摘要；完整正文通过 RequestContent 按需读取。
+ */
+export interface RecordedItem {
+    "id": string;
+    "startedAt": string;
+    "capturedAt": string;
+    "model": string;
+    "providerName": string;
+    "accountName": string;
+    "client": string;
+    "state": string;
+    "protocol": string;
+    "transport": string;
+    "preview": string;
+    "originalBytes": number;
+    "storedBytes": number;
+    "truncated": boolean;
+}
+
+/**
+ * RecordedPage 是按保存时间倒序的一页记录。
+ */
+export interface RecordedPage {
+    "items": RecordedItem[] | null;
+    "total": number;
+    "limit": number;
+}
+
+/**
+ * RecordedQuery 是「记录」页的搜索与分页参数；只匹配元数据，不检索完整正文。
+ */
+export interface RecordedQuery {
+    "search": string;
+    "offset": number;
+    "limit": number;
+}
+
+/**
  * Reliability 是近 30 天已结束请求的质量汇总；成功率与仪表盘口径一致。
  */
 export interface Reliability {
@@ -210,7 +248,8 @@ export interface Reliability {
 }
 
 /**
- * RequestContent 是请求详情里的正文快照；Available 为假表示未开启记录或历史记录。
+ * RequestContent 是请求详情里的完整正文快照；Available 为假表示未开启记录或历史记录。
+ * Truncated 只对迁移前的历史记录可能为真，新记录始终完整保存。
  */
 export interface RequestContent {
     "content": string;
@@ -294,6 +333,8 @@ export interface Retention {
     "storedRecords": number;
     "logCapacity": number;
     "contentEnabled": boolean;
+    "contentBytes": number;
+    "contentBudget": number;
 }
 
 export interface Summary {

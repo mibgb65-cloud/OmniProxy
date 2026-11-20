@@ -16,6 +16,7 @@ import { Route as GatewayRouteImport } from './routes/gateway'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as ProvidersRouteImport } from './routes/providers'
 import { Route as QuotaRouteImport } from './routes/quota'
+import { Route as RecordsRouteImport } from './routes/records'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as RoutingRouteImport } from './routes/routing'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -57,6 +58,11 @@ const QuotaRoute = QuotaRouteImport.update({
   path: '/quota',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordsRoute = RecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RequestsRoute = RequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/logs': typeof LogsRoute
   '/providers': typeof ProvidersRoute
   '/quota': typeof QuotaRoute
+  '/records': typeof RecordsRoute
   '/requests': typeof RequestsRoute
   '/routing': typeof RoutingRoute
   '/settings': typeof SettingsRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/logs': typeof LogsRoute
   '/providers': typeof ProvidersRoute
   '/quota': typeof QuotaRoute
+  '/records': typeof RecordsRoute
   '/requests': typeof RequestsRoute
   '/routing': typeof RoutingRoute
   '/settings': typeof SettingsRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/logs': typeof LogsRoute
   '/providers': typeof ProvidersRoute
   '/quota': typeof QuotaRoute
+  '/records': typeof RecordsRoute
   '/requests': typeof RequestsRoute
   '/routing': typeof RoutingRoute
   '/settings': typeof SettingsRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/providers'
     | '/quota'
+    | '/records'
     | '/requests'
     | '/routing'
     | '/settings'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/providers'
     | '/quota'
+    | '/records'
     | '/requests'
     | '/routing'
     | '/settings'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/providers'
     | '/quota'
+    | '/records'
     | '/requests'
     | '/routing'
     | '/settings'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   LogsRoute: typeof LogsRoute
   ProvidersRoute: typeof ProvidersRoute
   QuotaRoute: typeof QuotaRoute
+  RecordsRoute: typeof RecordsRoute
   RequestsRoute: typeof RequestsRoute
   RoutingRoute: typeof RoutingRoute
   SettingsRoute: typeof SettingsRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuotaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/records': {
+      id: '/records'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/requests': {
       id: '/requests'
       path: '/requests'
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogsRoute: LogsRoute,
   ProvidersRoute: ProvidersRoute,
   QuotaRoute: QuotaRoute,
+  RecordsRoute: RecordsRoute,
   RequestsRoute: RequestsRoute,
   RoutingRoute: RoutingRoute,
   SettingsRoute: SettingsRoute,
