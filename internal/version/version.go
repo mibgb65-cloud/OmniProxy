@@ -4,4 +4,4 @@
 package version
 
 // Version is the current application version.
-var Version = "2.4.1-beta.2"
+var Version = "2.4.1-beta.3"
