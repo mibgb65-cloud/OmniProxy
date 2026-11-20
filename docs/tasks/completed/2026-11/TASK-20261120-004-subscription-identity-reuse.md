@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Completed
 
 ## Created
 
@@ -200,7 +200,7 @@ Go 全部包通过；前端 164 文件／1005 项测试通过；Windows producti
 ## Commit
 
 ```text
-待回填
+eca6346c fix(accounts): 同一订阅身份重新登录复用原账号
 ```
 
 ---
@@ -214,5 +214,5 @@ Go 全部包通过；前端 164 文件／1005 项测试通过；Windows producti
 
 # Completed
 
-待回填
+2026-11-20 09:22
 

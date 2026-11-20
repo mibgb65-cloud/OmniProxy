@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261120-005](../tasks/completed/2026-11/TASK-20261120-005-build-local-v2.4.1-beta.3.md) 已产出 `v2.4.1-beta.3` Windows amd64 生产安装包，内容为同一订阅身份重新登录复用原账号（TASK-20261120-004，`eca6346c`）：安装器 21,562,763 bytes，SHA256 `72fa62e0bce5845ec74db60becb906be92c1986d6a7ae5d4e4f5f099c584e08f`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
+
+已修复：[TASK-20261120-004](../tasks/completed/2026-11/TASK-20261120-004-subscription-identity-reuse.md) 同一 Google 账号在账号页同时出现两条记录（一条「已退出登录」、一条有额度）：账号页「添加账号」不携带本地账号 ID，保存授权时只看有没有 ID，于是同一账号再次授权必然 `INSERT` 出第二条记录；两条记录 `auth_email`／`auth_account_id` 相同却各自持有目录与额度快照，网关还会把同一个上游账号当成两个轮换候选。现在保存授权前按订阅身份（提供商 + 规范化邮箱 + 官方 `account_id`）查已有记录并更新它（保留 ID、名称、创建时间与启停状态），Google 与 ChatGPT／Codex 两条订阅登录路径一致；旧记录缺少 `account_id` 时由重新登录补全，双方 `account_id` 不同（同工作区不同成员）仍各自新增。不改动历史数据：已有重复卡片由用户手动删除，用量累计按身份保存在 `usage_accounts.subject`，删除卡片不减少累计。见 [ADR-029](../decisions/ADR-029-subscription-identity-uniqueness.md)。`task verify` EXIT=0（前端 164 文件／1005 项测试、全部 Go 包、Windows production 构建）。实现提交 `eca6346c`。
+
 本地构建：[TASK-20261120-003](../tasks/completed/2026-11/TASK-20261120-003-build-local-v2.4.1-beta.2.md) 已产出 `v2.4.1-beta.2` Windows amd64 生产安装包，内容为「记录」页面与完整正文的 gzip 存储（TASK-20261120-001／002，`99da7c5`）：安装器 21,555,718 bytes，SHA256 `e4d690d0a933bbe9fd08a22103cff3d37d1ab1e1b4551bf38d73fb885508eb77`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。首次启动执行迁移 054（重建正文表并迁移旧明文行，正文记录默认关闭）。
 
 已实现：[TASK-20261120-001](../tasks/completed/2026-11/TASK-20261120-001-recorded-requests-page.md) 侧边栏新增「记录」页面：集中列出已保存正文的请求，显示时间、结果、模型、客户端、账号、原始／压缩后大小、历史截断标记与对话预览，支持搜索、分页与跳转请求详情；记录关闭／等待／历史状态有明确说明。`task verify` EXIT=0（前端 164 文件／1005 项测试）。
