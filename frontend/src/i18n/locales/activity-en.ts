@@ -42,7 +42,7 @@ export const activityEn = {
   "activity.inputOutputRatio": "Input / output ratio",
   "activity.modelShare": "Model share",
   "activity.modelShareHint":
-    "Sorted by lifetime total tokens; models beyond the top six are merged as “Other”.",
+    "Sorted by lifetime total tokens; variants that differ only by reasoning level count as one model; models beyond the top six are merged as “Other”.",
   "activity.otherModels": "{{count}} other models",
   "activity.providerShare": "Provider share",
   "activity.providerShareHint":
@@ -53,7 +53,7 @@ export const activityEn = {
   "activity.otherAccounts": "{{count}} other accounts",
   "activity.modelTrend": "Daily usage by model",
   "activity.modelTrendHint":
-    "Daily totals stacked by model for the last 30 days; models beyond the top six are merged as “Other”.",
+    "Daily totals stacked by model for the last 30 days; reasoning-level variants count as one model; models beyond the top six are merged as “Other”.",
   "activity.modelTrendEmpty": "No model usage yet.",
   "activity.other": "Other",
   "activity.hours": "Requests by hour",
@@ -76,7 +76,8 @@ export const activityEn = {
   "activity.models": "By model",
   "activity.providerModels": "By provider and model",
   "activity.providerModelsHint":
-    "Input, output and total tokens per provider and model, including usage from deleted accounts.",
+    "Input, output and total tokens per provider and model, including usage from deleted accounts. Variants that differ only by reasoning level (…-high / …-xhigh) are merged into one row; hover to see which model IDs were merged.",
+  "activity.mergedVariants": "{{count}} reasoning-level variants merged",
   "activity.modelCount": "{{count}} models",
   "activity.legacyProvider": "Historical attribution unconfirmed",
   "activity.empty": "No usage yet. Requests through the local gateway are counted automatically.",

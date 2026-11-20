@@ -3,13 +3,16 @@ package activity
 import (
 	"context"
 	"math/big"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
 const (
 	usageWindowDays      = 30
 	usageModelTrendLimit = 6
+	usageModelsLimit     = 1000
 	usageCalendarDays    = 365
 )
 
@@ -40,7 +43,10 @@ func (s *Service) Usage(ctx context.Context) (UsageInfo, error) {
 		return result, ErrUnavailable
 	}
 	result.AllTime = summary(input, output, requests, complete)
-	var err error
+	families, err := loadModelFamilies(ctx, s.db)
+	if err != nil {
+		return result, err
+	}
 	if result.Previous, err = s.previous(ctx, previousFrom, currentFrom); err != nil {
 		return result, err
 	}
@@ -53,10 +59,10 @@ func (s *Service) Usage(ctx context.Context) (UsageInfo, error) {
 	if result.Accounts, err = s.breakdown(ctx, `SELECT subject,MAX(account_name),MAX(email),MAX(workspace_id),SUM(input_tokens),SUM(output_tokens),SUM(requests),SUM(completed_usage) FROM usage_buckets GROUP BY subject ORDER BY SUM(input_tokens)+SUM(output_tokens) DESC LIMIT 1000`); err != nil {
 		return result, err
 	}
-	if result.Models, err = s.breakdown(ctx, `SELECT model,model,'','',SUM(input_tokens),SUM(output_tokens),SUM(requests),SUM(completed_usage) FROM usage_buckets GROUP BY model ORDER BY SUM(input_tokens)+SUM(output_tokens) DESC LIMIT 1000`); err != nil {
+	if result.Models, err = s.modelsBreakdown(ctx, families); err != nil {
 		return result, err
 	}
-	if result.ModelDays, err = s.modelDays(ctx, currentFrom); err != nil {
+	if result.ModelDays, err = s.modelDays(ctx, currentFrom, families); err != nil {
 		return result, err
 	}
 	if result.Calendar, err = s.calendarDays(ctx, now); err != nil {
@@ -68,7 +74,7 @@ func (s *Service) Usage(ctx context.Context) (UsageInfo, error) {
 	if result.Cache, err = s.cacheUsage(ctx); err != nil {
 		return result, err
 	}
-	result.ProviderModels, err = s.providerModels(ctx)
+	result.ProviderModels, err = s.providerModels(ctx, families)
 	return result, err
 }
 
@@ -103,25 +109,124 @@ func (s *Service) providers(ctx context.Context) ([]Breakdown, error) {
 	return items, nil
 }
 
-// modelDays 只返回近 30 天用量最高的若干模型，其余由前端按每日总量合并为「其他」。
-func (s *Service) modelDays(ctx context.Context, from string) ([]ModelDay, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT day,model,SUM(input_tokens),SUM(output_tokens),SUM(requests),SUM(completed_usage) FROM usage_buckets WHERE day>=? AND model IN (SELECT model FROM usage_buckets WHERE day>=? GROUP BY model ORDER BY SUM(input_tokens)+SUM(output_tokens) DESC,model LIMIT ?) GROUP BY day,model ORDER BY day,model`, from, from, usageModelTrendLimit)
+// modelsBreakdown 汇总累计各模型的用量，并按模型家族归并推理档位变体。
+// 归并后才排序与截断，避免同一家族的多个变体挤占列表名额。
+func (s *Service) modelsBreakdown(ctx context.Context, families map[string]string) ([]Breakdown, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT model,SUM(input_tokens),SUM(output_tokens),SUM(requests),SUM(completed_usage) FROM usage_buckets GROUP BY model`)
 	if err != nil {
 		return nil, ErrUnavailable
 	}
 	defer rows.Close()
-	items := []ModelDay{}
+	totals := map[string]*modelTotals{}
+	order := []string{}
 	for rows.Next() {
-		var item ModelDay
+		var model string
 		var input, output, requests, complete int64
-		if rows.Scan(&item.Day, &item.Model, &input, &output, &requests, &complete) != nil {
+		if rows.Scan(&model, &input, &output, &requests, &complete) != nil {
 			return nil, ErrUnavailable
 		}
-		item.Summary = summary(input, output, requests, complete)
-		items = append(items, item)
+		name := modelFamilyName(families, model)
+		total := totals[name]
+		if total == nil {
+			total = &modelTotals{}
+			totals[name] = total
+			order = append(order, name)
+		}
+		total.add(input, output, requests, complete)
 	}
 	if rows.Err() != nil {
 		return nil, ErrUnavailable
+	}
+	sortModelTotals(order, totals)
+	items := []Breakdown{}
+	for _, name := range order {
+		if len(items) >= usageModelsLimit {
+			break
+		}
+		item := Breakdown{Key: name, Name: name}
+		item.Summary = totals[name].summary()
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+// sortModelTotals 按合计 Token 降序、名称升序排列归并后的模型行。
+func sortModelTotals(order []string, totals map[string]*modelTotals) {
+	sort.SliceStable(order, func(i, j int) bool {
+		left, right := totals[order[i]], totals[order[j]]
+		if left.weightsMore(*right) || right.weightsMore(*left) {
+			return left.weightsMore(*right)
+		}
+		return strings.ToLower(order[i]) < strings.ToLower(order[j])
+	})
+}
+
+// modelDays 只返回近 30 天用量最高的若干模型家族，其余由前端按每日总量合并为「其他」。
+// 先按家族归并再取前六：否则同一模型的多个档位变体会占满名额，其它模型被挤进「其他」。
+func (s *Service) modelDays(ctx context.Context, from string, families map[string]string) ([]ModelDay, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT day,model,SUM(input_tokens),SUM(output_tokens),SUM(requests),SUM(completed_usage) FROM usage_buckets WHERE day>=? GROUP BY day,model ORDER BY day,model`, from)
+	if err != nil {
+		return nil, ErrUnavailable
+	}
+	defer rows.Close()
+	type dayModel struct{ day, model string }
+	daily := map[dayModel]*modelTotals{}
+	totals := map[string]*modelTotals{}
+	order := []string{}
+	days := map[string]bool{}
+	for rows.Next() {
+		var day, model string
+		var input, output, requests, complete int64
+		if rows.Scan(&day, &model, &input, &output, &requests, &complete) != nil {
+			return nil, ErrUnavailable
+		}
+		name := modelFamilyName(families, model)
+		key := dayModel{day: day, model: name}
+		entry := daily[key]
+		if entry == nil {
+			entry = &modelTotals{}
+			daily[key] = entry
+		}
+		entry.add(input, output, requests, complete)
+		if totals[name] == nil {
+			totals[name] = &modelTotals{}
+			order = append(order, name)
+		}
+		totals[name].add(input, output, requests, complete)
+		days[day] = true
+	}
+	if rows.Err() != nil {
+		return nil, ErrUnavailable
+	}
+	sortModelTotals(order, totals)
+	selected := map[string]bool{}
+	for index, name := range order {
+		if index >= usageModelTrendLimit {
+			break
+		}
+		selected[name] = true
+	}
+	names := make([]string, 0, len(selected))
+	for name := range selected {
+		names = append(names, name)
+	}
+	sort.SliceStable(names, func(i, j int) bool {
+		return strings.ToLower(names[i]) < strings.ToLower(names[j])
+	})
+	dayOrder := make([]string, 0, len(days))
+	for day := range days {
+		dayOrder = append(dayOrder, day)
+	}
+	sort.Strings(dayOrder)
+	items := []ModelDay{}
+	for _, day := range dayOrder {
+		for _, name := range names {
+			entry, ok := daily[dayModel{day: day, model: name}]
+			if !ok {
+				continue
+			}
+			items = append(items, ModelDay{Day: day, Model: name, Summary: entry.summary()})
+		}
 	}
 	return items, nil
 }

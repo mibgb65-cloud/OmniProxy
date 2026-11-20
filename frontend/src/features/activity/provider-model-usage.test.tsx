@@ -45,3 +45,33 @@ it("同名模型在不同提供商下显示各自输入输出与总量", () => {
   expect(openai.getByRole("cell", { name: "110" })).toBeInTheDocument()
   expect(deepseek.getByRole("cell", { name: "220" })).toBeInTheDocument()
 })
+
+it("合并后的推理档位变体只显示基础模型名并计入同一行", () => {
+  useUIStore.setState({ language: "zh" })
+  render(
+    <I18nProvider>
+      <ProviderModelUsageView
+        items={[
+          {
+            providerId: "builtin_google",
+            providerName: "Google",
+            model: "gemini-4-neon",
+            variants: ["gemini-4-neon-high", "gemini-4-neon-xhigh"],
+            summary: {
+              inputTokens: "92,210,840",
+              outputTokens: "1,161,618",
+              totalTokens: "93,372,458",
+              requests: 1284,
+              completeUsage: 1284,
+            },
+          },
+        ]}
+      />
+    </I18nProvider>,
+  )
+  const google = within(screen.getByRole("region", { name: "Google" }))
+  expect(google.getByRole("cell", { name: "gemini-4-neon" })).toBeInTheDocument()
+  expect(google.queryByRole("cell", { name: "gemini-4-neon-high" })).toBeNull()
+  expect(google.getByText("1 个模型")).toBeInTheDocument()
+  expect(google.getByText("1284")).toBeInTheDocument()
+})

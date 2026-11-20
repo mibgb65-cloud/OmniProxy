@@ -162,11 +162,13 @@ export interface ModelDay {
 
 /**
  * ProviderModel 保存具体提供商与实际模型的累计，跨账号汇总且保留历史名称。
+ * Model 是统计显示名：推理档位变体已按家族归并；Variants 仅在被归并时给出原始型号 ID。
  */
 export interface ProviderModel {
     "providerId": string;
     "providerName": string;
     "model": string;
+    "variants"?: string[] | null;
     "summary": Summary;
 }
 

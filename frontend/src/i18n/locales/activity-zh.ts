@@ -38,7 +38,8 @@ export const activityZh = {
   "activity.perRequestOutput": "每请求输出",
   "activity.inputOutputRatio": "输入／输出比",
   "activity.modelShare": "模型用量占比",
-  "activity.modelShareHint": "按累计合计 Token 排序；前六款之外合并为「其他」。",
+  "activity.modelShareHint":
+    "按累计合计 Token 排序；只按推理档位区分的变体合并为同一模型；前六款之外合并为「其他」。",
   "activity.otherModels": "其他 {{count}} 个模型",
   "activity.providerShare": "提供商用量占比",
   "activity.providerShareHint": "按提供商配置分别累计，历史归属待确认的用量单独标记。",
@@ -47,7 +48,8 @@ export const activityZh = {
     "按累计合计 Token 排序，包含已删除账号的历史用量；条形宽度为占比，内部按输入／输出拆分。",
   "activity.otherAccounts": "其他 {{count}} 个账号",
   "activity.modelTrend": "模型每日用量",
-  "activity.modelTrendHint": "近 30 天每日合计按模型堆叠；未进入前六的模型合并为「其他」。",
+  "activity.modelTrendHint":
+    "近 30 天每日合计按模型堆叠，推理档位变体合并为同一模型；未进入前六的模型合并为「其他」。",
   "activity.modelTrendEmpty": "还没有模型用量。",
   "activity.other": "其他",
   "activity.hours": "请求时段分布",
@@ -68,7 +70,8 @@ export const activityZh = {
   "activity.models": "按模型",
   "activity.providerModels": "按提供商与模型",
   "activity.providerModelsHint":
-    "每个提供商分别累计各模型的输入、输出和总 Token，包含已删除账号的历史用量。",
+    "每个提供商分别累计各模型的输入、输出和总 Token，包含已删除账号的历史用量；只按推理档位区分的变体（…-high／…-xhigh）合并为一行，悬浮可看合并了哪些型号。",
+  "activity.mergedVariants": "已合并 {{count}} 个推理档位变体",
   "activity.modelCount": "{{count}} 个模型",
   "activity.legacyProvider": "历史归属待确认",
   "activity.empty": "还没有用量记录。通过本地网关发送请求后会自动统计。",

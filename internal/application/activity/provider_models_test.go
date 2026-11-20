@@ -90,7 +90,7 @@ func TestProviderModelMigrationPreservesHistoricalBuckets(t *testing.T) {
 	if err = database.Migrate(ctx, db, os.DirFS("../../../migrations")); err != nil {
 		t.Fatal(err)
 	}
-	rows, err := New(db).providerModels(ctx)
+	rows, err := New(db).providerModels(ctx, modelFamilies([]string{"same-model"}))
 	if err != nil || len(rows) != 3 {
 		t.Fatal("migration failed", err)
 	}

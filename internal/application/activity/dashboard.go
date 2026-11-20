@@ -155,28 +155,45 @@ func dashboardModelDayRange(bounds []int64) (string, string) {
 	return from, to
 }
 
-// readDashboardModels 汇总所选时段各模型的已报告 Token。返回全部模型而不是前几名：
-// 模型数量受目录规模约束，前端据此把前六名之外的余量与请求数合并成精确的「其他」。
+// readDashboardModels 汇总所选时段各模型的已报告 Token，并按模型家族归并推理档位变体。
+// 返回全部家族而不是前几名：模型数量受目录规模约束，前端据此把前六名之外的余量与请求数
+// 合并成精确的「其他」；归并必须发生在这个截断之前。
 func readDashboardModels(ctx context.Context, tx *sql.Tx, bounds []int64) ([]DashboardModel, error) {
 	from, to := dashboardModelDayRange(bounds)
-	rows, err := tx.QueryContext(ctx, `SELECT model,SUM(input_tokens),SUM(output_tokens),SUM(requests) FROM usage_buckets WHERE day>=? AND day<=? GROUP BY model ORDER BY SUM(input_tokens)+SUM(output_tokens) DESC,model`, from, to)
+	families, err := loadModelFamilies(ctx, tx)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT model,SUM(input_tokens),SUM(output_tokens),SUM(requests) FROM usage_buckets WHERE day>=? AND day<=? GROUP BY model`, from, to)
 	if err != nil {
 		return nil, ErrUnavailable
 	}
 	defer rows.Close()
-	items := []DashboardModel{}
+	totals := map[string]*modelTotals{}
+	order := []string{}
 	for rows.Next() {
-		var item DashboardModel
-		var input, output int64
-		if rows.Scan(&item.Model, &input, &output, &item.Requests) != nil {
+		var model string
+		var input, output, requests int64
+		if rows.Scan(&model, &input, &output, &requests) != nil {
 			return nil, ErrUnavailable
 		}
-		item.InputTokens, item.OutputTokens = strconv.FormatInt(input, 10), strconv.FormatInt(output, 10)
-		item.TotalTokens = new(big.Int).Add(big.NewInt(input), big.NewInt(output)).String()
-		items = append(items, item)
+		name := modelFamilyName(families, model)
+		total := totals[name]
+		if total == nil {
+			total = &modelTotals{}
+			totals[name] = total
+			order = append(order, name)
+		}
+		total.add(input, output, requests, 0)
 	}
 	if rows.Err() != nil {
 		return nil, ErrUnavailable
+	}
+	sortModelTotals(order, totals)
+	items := []DashboardModel{}
+	for _, name := range order {
+		total := totals[name]
+		items = append(items, DashboardModel{Model: name, InputTokens: strconv.FormatInt(total.input, 10), OutputTokens: strconv.FormatInt(total.output, 10), TotalTokens: new(big.Int).Add(big.NewInt(total.input), big.NewInt(total.output)).String(), Requests: total.requests})
 	}
 	return items, nil
 }

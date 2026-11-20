@@ -41,7 +41,7 @@ export const dashboardEn: Record<keyof typeof dashboardZh, string> = {
   "dash.allRequests": "View requests",
   "dash.modelShare": "Token share by model",
   "dash.modelShareHint":
-    "Reported tokens in the selected range split by model; models after the first six are merged into Other.",
+    "Reported tokens in the selected range split by model; variants that differ only by reasoning level count as one model, and models after the first six are merged into Other.",
   "dash.modelShareEmpty": "No token usage has been reported in this range yet.",
   "dash.modelShareOther": "{{count}} other models",
   "dash.modelShareRequests": "{{value}} requests",

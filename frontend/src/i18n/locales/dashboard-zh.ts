@@ -38,7 +38,8 @@ export const dashboardZh = {
   "dash.recent": "最近请求",
   "dash.allRequests": "查看请求记录",
   "dash.modelShare": "模型 Token 占比",
-  "dash.modelShareHint": "所选时段已报告的 Token 按模型拆分；前六名之外合并为「其他」。",
+  "dash.modelShareHint":
+    "所选时段已报告的 Token 按模型拆分，只按推理档位区分的变体算同一模型；前六名之外合并为「其他」。",
   "dash.modelShareEmpty": "所选时段尚未收到 Token 用量报告。",
   "dash.modelShareOther": "其他 {{count}} 个模型",
   "dash.modelShareRequests": "{{value}} 请求",

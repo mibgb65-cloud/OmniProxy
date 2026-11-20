@@ -60,7 +60,7 @@ export function ProviderModelUsageView({ items }: { items: ProviderModelUsage[] 
                     {group.items.map((item) => (
                       <tr key={item.model} className="border-t">
                         <td className="px-4 py-3">
-                          <Tooltip content={item.model}>
+                          <Tooltip content={<ModelNameTooltip item={item} />}>
                             <span className="block max-w-52 truncate font-mono">
                               {item.model || t("activity.noModel")}
                             </span>
@@ -88,5 +88,25 @@ export function ProviderModelUsageView({ items }: { items: ProviderModelUsage[] 
         )}
       </CardContent>
     </Card>
+  )
+}
+
+/**
+ * 模型名提示：合并后的行显示基础模型名，并列出被合并的推理档位变体，
+ * 让「只是思考程度不同」的原始型号仍可查。
+ */
+function ModelNameTooltip({ item }: { item: ProviderModelUsage }) {
+  const { t } = useTranslation()
+  if (!item.variants?.length) {
+    return item.model ? <span className="font-mono">{item.model}</span> : null
+  }
+  return (
+    <span className="block space-y-1">
+      <span className="block font-mono">{item.model}</span>
+      <span className="text-muted-foreground block">
+        {t("activity.mergedVariants", { count: item.variants.length })}
+      </span>
+      <span className="block font-mono">{item.variants.join(" · ")}</span>
+    </span>
   )
 }
