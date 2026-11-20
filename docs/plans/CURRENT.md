@@ -2,6 +2,10 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已实现：[TASK-20261120-001](../tasks/completed/2026-11/TASK-20261120-001-recorded-requests-page.md) 侧边栏新增「记录」页面：集中列出已保存正文的请求，显示时间、结果、模型、客户端、账号、原始／压缩后大小、历史截断标记与对话预览，支持搜索、分页与跳转请求详情；记录关闭／等待／历史状态有明确说明。`task verify` EXIT=0（前端 164 文件／1005 项测试）。
+
+已实现：[TASK-20261120-002](../tasks/completed/2026-11/TASK-20261120-002-full-request-content-storage.md) 取消 256 KiB 正文截断：迁移 054 将正文改为 gzip 压缩的完整 BLOB 并保存预览，压缩后总占用超过 512 MiB 时删除最旧正文；旧明文行原地迁移并保留历史截断标记，设置页显示占用与预算。两项共用实现提交 `99da7c5`。
+
 本地构建：[TASK-20261119-007](../tasks/completed/2026-11/TASK-20261119-007-build-local-v2.4.1-beta.1.md) 已产出 `v2.4.1-beta.1` Windows amd64 生产安装包，内容为请求正文可选记录与请求记录 XLSX 导出（TASK-20261119-006，`3b412e7`）：安装器 21,533,202 bytes，SHA256 `ea8fa2ce31511864075b49ef611e519fd316b46b8c088d5953ee1d6617388c82`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。首次启动执行迁移 053（纯追加，正文记录默认关闭）。
 
 已实现：[TASK-20261119-006](../tasks/completed/2026-11/TASK-20261119-006-request-content-capture-and-xlsx-export.md) 请求正文可选记录（默认关闭，ADR-028）与请求记录 XLSX 导出：设置开关、详情回看、保留淘汰与清除、导出上限与表格兼容性验证；实现提交 `3b412e7`。`task verify` EXIT=0（前端 163 文件／1002 项测试、全部 Go 包、Windows production 构建）。桌面端实机目视检查未执行。
