@@ -216,7 +216,7 @@ scheme=socks5 elapsed=5535ms status=200 body="9.142.31.120" detections=[]
 ## Commit
 
 ```text
-Not committed by Agent.
+ab16e41c fix(netproxy): 显式协议首次使用前握手确认并在必要时自愈
 ```
 
 ---
