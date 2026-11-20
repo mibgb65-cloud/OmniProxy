@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -228,7 +228,7 @@ cd frontend && pnpm test                       → exit 0（164 文件／1006 �
 ## Commit
 
 ```text
-Pending
+ac4b6c06 fix(gateway): Antigravity 流式请求在等上游响应头时先下发响应头并保活
 ```
 
 ---
@@ -243,4 +243,4 @@ Antigravity 桌面端的流式请求在等待上游响应头期间就能拿到 `
 
 # Completed
 
-Pending
+2026-11-21 07:10（Asia/Singapore）
