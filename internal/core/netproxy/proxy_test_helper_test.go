@@ -16,7 +16,7 @@ import (
 // fakeProxy 是测试用的混合代理：按首字节区分 SOCKS5 与 HTTP CONNECT。
 type fakeProxy struct {
 	listener  net.Listener
-	mode      string // mixed | http | socks5
+	mode      string // mixed | http | socks5 | socks5-silent
 	hits      int32
 	closeOnce sync.Once
 }
@@ -66,6 +66,10 @@ func (p *fakeProxy) handle(conn net.Conn) {
 	case first[0] == 0x05 && p.mode != "http":
 		atomic.AddInt32(&p.hits, 1)
 		p.serveSOCKS(conn, reader)
+	case p.mode == "socks5-silent":
+		// 只监听 SOCKS5 的远端代理：错误协议照收 TCP，但不回应也不断开，
+		// 让配置成 HTTP 的客户端一直挂到调用方超时。
+		_, _ = io.Copy(io.Discard, reader)
 	default:
 		if p.mode == "socks5" {
 			return

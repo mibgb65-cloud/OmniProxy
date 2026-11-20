@@ -18,6 +18,8 @@ const (
 	proxyDialFailTTL    = 5 * time.Second
 	protocolSwitchGuard = 60 * time.Second
 	detectRecordTimeout = 2 * time.Second
+	// confirmTimeout 与单协议握手预算一致：远端带认证的 SOCKS5 代理握手可能近 3 秒。
+	confirmTimeout = detectAttemptTimeout
 )
 
 // Resolver 由应用层实现（数据库 + 缓存）；Core 只消费快照。
@@ -190,6 +192,8 @@ func (t *Transport) ensureReachable(ctx context.Context, address string) error {
 }
 
 // schemeFor 依次取运行期缓存、持久化识别结果、显式配置，最后现场探测。
+// 显式配置的协议也要先确认：远端纯 SOCKS5 端口对 HTTP CONNECT 既不回应也不断开，
+// 直接信任配置会让每个请求都挂到调用方超时，而这时纠偏拿不到任何协议类错误。
 func (t *Transport) schemeFor(ctx context.Context, snapshot Snapshot, address string) string {
 	t.mu.Lock()
 	state := t.endpoints[address]
@@ -201,9 +205,20 @@ func (t *Transport) schemeFor(ctx context.Context, snapshot Snapshot, address st
 		t.remember(address, snapshot.Detected)
 		return snapshot.Detected
 	}
-	if snapshot.Endpoint.Scheme == SchemeHTTP || snapshot.Endpoint.Scheme == SchemeSOCKS5 {
-		t.remember(address, snapshot.Endpoint.Scheme)
-		return snapshot.Endpoint.Scheme
+	if configured := snapshot.Endpoint.Scheme; configured == SchemeHTTP || configured == SchemeSOCKS5 {
+		if t.confirm(ctx, snapshot.Endpoint, configured) {
+			t.remember(address, configured)
+			return configured
+		}
+		other := otherScheme(configured)
+		if t.confirm(ctx, snapshot.Endpoint, other) {
+			t.remember(address, other)
+			t.recordDetection(other)
+			return other
+		}
+		// 两种协议都不应答：保留用户配置，让真实请求暴露问题，而不是把抖动升级成硬错误。
+		t.remember(address, configured)
+		return configured
 	}
 	detectCtx, cancel := context.WithTimeout(ctx, 2*detectAttemptTimeout)
 	defer cancel()
@@ -217,6 +232,13 @@ func (t *Transport) schemeFor(ctx context.Context, snapshot Snapshot, address st
 	// 探测失败时先猜 HTTP：纯 HTTP 端口上它必然成功，纯 SOCKS 端口由纠偏兜住。
 	t.remember(address, SchemeHTTP)
 	return SchemeHTTP
+}
+
+// confirm 用一次有界握手确认协议；探测连接在返回前关闭，不进连接池。
+func (t *Transport) confirm(ctx context.Context, endpoint Endpoint, scheme string) bool {
+	probeCtx, cancel := context.WithTimeout(ctx, confirmTimeout)
+	defer cancel()
+	return Confirm(probeCtx, endpoint, scheme)
 }
 
 func (t *Transport) remember(address, scheme string) {

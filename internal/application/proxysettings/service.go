@@ -22,7 +22,8 @@ const (
 	cacheTTL       = 5 * time.Second
 	maxNoProxyLen  = 512
 	maxUsernameLen = 256
-	testTimeout    = 5 * time.Second
+	// testTimeout 要覆盖两种协议各一次握手：远端带认证的代理单次握手可能接近 3 秒。
+	testTimeout = 10 * time.Second
 )
 
 var (
@@ -155,8 +156,8 @@ func (s *Service) Save(ctx context.Context, input SaveInput) (Settings, error) {
 		passwordRef = ref
 	}
 	detected := current.detected
-	if current.host != normalized.Host || current.port != normalized.Port || current.username != normalized.Username {
-		// 端点变化后旧的协议识别结果不再成立。
+	if current.host != normalized.Host || current.port != normalized.Port || current.username != normalized.Username || current.scheme != normalized.Scheme {
+		// 端点或协议变化后旧的协议识别结果不再成立；否则历史识别会压过新的显式选择。
 		detected = ""
 	}
 	updatedAt := s.now().UTC().Format(time.RFC3339Nano)

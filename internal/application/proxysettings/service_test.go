@@ -175,6 +175,28 @@ func TestSnapshotInvalidatedBySaveAndEndpointChangeClearsDetection(t *testing.T)
 	}
 }
 
+func TestSaveClearsDetectionWhenSchemeChanges(t *testing.T) {
+	service, _ := newTestService(t)
+	ctx := context.Background()
+	if _, err := service.Save(ctx, SaveInput{Enabled: true, Scheme: netproxy.SchemeAuto, Host: "127.0.0.1", Port: 10808}); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	if err := service.RememberDetectedScheme(ctx, netproxy.SchemeSOCKS5); err != nil {
+		t.Fatalf("remember: %v", err)
+	}
+	// 显式换协议后，旧的识别结果不能继续压过用户的选择。
+	if _, err := service.Save(ctx, SaveInput{Enabled: true, Scheme: netproxy.SchemeHTTP, Host: "127.0.0.1", Port: 10808}); err != nil {
+		t.Fatalf("resave: %v", err)
+	}
+	read, err := service.Read(ctx)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if read.DetectedScheme != "" {
+		t.Fatalf("expected detection cleared after scheme change, got %q", read.DetectedScheme)
+	}
+}
+
 func TestSnapshotWithoutMigrationFallsBackToDisabled(t *testing.T) {
 	db, err := database.Open(database.Config{Path: filepath.Join(t.TempDir(), "empty.db")})
 	if err != nil {

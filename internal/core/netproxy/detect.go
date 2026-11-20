@@ -14,7 +14,9 @@ import (
 )
 
 const (
-	detectAttemptTimeout = 2 * time.Second
+	// detectAttemptTimeout 是单协议握手的预算。本机代理毫秒级即可完成；远端带认证的
+	// SOCKS5 代理一次 greeting + 认证子协商可能接近 3 秒，2 秒会把合法端口误判成不成立。
+	detectAttemptTimeout = 4 * time.Second
 	discoverDialTimeout  = 300 * time.Millisecond
 	discoverBudget       = 2 * time.Second
 	detectReadLimit      = 512
@@ -56,6 +58,22 @@ func Detect(ctx context.Context, endpoint Endpoint) (Detection, error) {
 type probeResult struct {
 	OK   bool
 	Auth bool
+}
+
+// Confirm 验证端点是否真的在说给定协议，复用同一套握手探测，不产生真实出网流量。
+// 它用于显式配置的协议：端口接受 TCP 却不回应这种协议时，普通请求会一直挂到调用方超时，
+// 提前用有界探测把「配置错了协议」和「网络慢」区分开。
+func Confirm(ctx context.Context, endpoint Endpoint, scheme string) bool {
+	switch scheme {
+	case SchemeHTTP:
+		probe, err := probeHTTP(ctx, endpoint)
+		return err == nil && probe.OK
+	case SchemeSOCKS5:
+		probe, err := probeSOCKS5(ctx, endpoint)
+		return err == nil && probe.OK
+	default:
+		return false
+	}
 }
 
 // probeSOCKS5 只做 greeting（必要时补一轮用户名密码子协商），不发起 CONNECT：

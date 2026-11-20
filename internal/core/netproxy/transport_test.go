@@ -95,6 +95,51 @@ func TestTransportDetectsMixedPortAndRecordsScheme(t *testing.T) {
 	}
 }
 
+// 远端纯 SOCKS5 端口对 HTTP CONNECT 既不回应也不断开：显式 HTTP 配置必须在建池前
+// 被握手确认拦下，否则每个请求都挂到调用方超时，纠偏永远拿不到协议类错误。
+func TestTransportConfirmsConfiguredSchemeBeforeUse(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer upstream.Close()
+	proxy := newFakeProxy(t, "socks5-silent")
+	resolver := &fakeResolver{}
+	snapshot := newSnapshot(proxy.Endpoint(), map[string]string{"prov_proxy": ModeProxy})
+	snapshot.Endpoint.Scheme = SchemeHTTP
+	resolver.Set(snapshot)
+	installFake(t, resolver)
+
+	body, err := get(t, NewClient(8*time.Second), upstream.URL, Scope{ProviderID: "prov_proxy"})
+	if err != nil || body != "ok" {
+		t.Fatalf("request with a silent wrong protocol: body=%q err=%v", body, err)
+	}
+	detections := resolver.Detections()
+	if len(detections) != 1 || detections[0] != SchemeSOCKS5 {
+		t.Fatalf("expected the confirmed scheme to be recorded as socks5, got %#v", detections)
+	}
+}
+
+// 显式协议真的成立时不能被探测改成另一种：mixed 端口配置 HTTP 仍然走 HTTP。
+func TestTransportKeepsConfirmedConfiguredScheme(t *testing.T) {
+	proxy := newFakeProxy(t, "mixed")
+	resolver := &fakeResolver{}
+	snapshot := newSnapshot(proxy.Endpoint(), map[string]string{"prov_proxy": ModeProxy})
+	snapshot.Endpoint.Scheme = SchemeHTTP
+	resolver.Set(snapshot)
+	installFake(t, resolver)
+
+	transport, ok := Wrap(nil).(*Transport)
+	if !ok {
+		t.Fatal("expected a wrapping transport")
+	}
+	if scheme := transport.schemeFor(context.Background(), snapshot, snapshot.Endpoint.Address()); scheme != SchemeHTTP {
+		t.Fatalf("confirmed explicit scheme must be kept, got %q", scheme)
+	}
+	if detections := resolver.Detections(); len(detections) != 0 {
+		t.Fatalf("confirmed explicit scheme must not be rewritten, got %#v", detections)
+	}
+}
+
 func TestTransportCorrectsWrongProtocol(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("ok"))
