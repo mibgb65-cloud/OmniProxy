@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+本地构建：[TASK-20261120-009](../tasks/completed/2026-11/TASK-20261120-009-build-local-v2.4.1-beta.5.md) 已产出 `v2.4.1-beta.5` Windows amd64 生产安装包，内容为显式代理协议的握手确认与自愈（TASK-20261120-008，`ab16e41c`）：安装器 21,598,293 bytes，SHA256 `a9abe118ca031d3b9cd733b54374fc70cc301e0a8936c6176cd41d6500cb1593`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
+
 已修复：[TASK-20261120-008](../tasks/completed/2026-11/TASK-20261120-008-proxy-scheme-confirmation.md) 远端代理填成 HTTP 后所有请求挂起：用户给的 `http://user:pass@9.142.31.120:5278` 实际只监听 SOCKS5（`curl -x socks5h://` 200、`-x http://` 25 秒 0 字节），而 `netproxy` 对显式协议不做任何验证，`http.Transport` 的 `CONNECT` 一直等到调用方超时，错误码为空、运行期纠偏（只认协议类错误）也不触发。现在显式 `http`／`socks5` 在首次使用时做一次有界握手确认，成立才用；不成立而另一种协议成立时自动切换并回写 `detected_scheme`；单次握手预算由 2 秒提到 4 秒（远端带认证的 SOCKS5 握手实测 1.9–2.6 秒）。改协议时清除旧识别结果。实测同一代理 `auto`／`http`／`socks5` 三种配置均 200（出口 `9.142.31.120`）。`task verify` EXIT=0（前端 164 文件／1006 项测试、全部 Go 包、Windows production 构建）。
 
 本地构建：[TASK-20261120-007](../tasks/completed/2026-11/TASK-20261120-007-build-local-v2.4.1-beta.4.md) 已产出 `v2.4.1-beta.4` Windows amd64 生产安装包，内容为用量统计按模型家族合并推理档位变体（TASK-20261120-006，`c1a79484`）：安装器 21,592,674 bytes，SHA256 `b4738184894be37825aff16fe0d261b64c408e85aab66519681c1fc6239e558e`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
