@@ -56,6 +56,8 @@ Codex 官方高成本解密的受保护进程内缓存与工作区回收见 [ADR
 
 首字耗时与网关真实请求统计见 [ADR-014](ADR-014-first-token-latency.md)。
 
+订阅账号身份唯一与重新登录复用见 [ADR-029](ADR-029-subscription-identity-uniqueness.md)。
+
 MiMo 默认通道选择与目录去重见 [ADR-010](ADR-010-mimo-default-billing-order.md)。
 StepFun 同款设置与有限复用见 [ADR-011](ADR-011-stepfun-default-billing-order.md)。
 Kimi Code 订阅 Key、计费／地区顺序与身份保留见 [ADR-012](ADR-012-kimi-coding-and-default-order.md)。
@@ -70,3 +72,4 @@ Kimi Code 订阅 Key、计费／地区顺序与身份保留见 [ADR-012](ADR-012
 | [ADR-008](ADR-008-client-model-catalog.md)                    | Accepted| 统一模型目录、客户端格式与安全自动配置   |
 | [ADR-025](ADR-025-provider-outbound-proxy.md)                    | Accepted| 提供商出站代理：mixed 协议识别与三态路由  |
 | [ADR-028](ADR-028-request-content-capture.md)                    | Accepted| 可选记录请求正文与请求记录 XLSX 导出     |
+| [ADR-029](ADR-029-subscription-identity-uniqueness.md)           | Accepted| 订阅账号身份唯一，重新登录复用原记录     |

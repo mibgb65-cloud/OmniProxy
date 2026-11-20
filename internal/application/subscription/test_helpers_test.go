@@ -56,6 +56,7 @@ type testClient struct {
 	failLogout           bool
 	requireRefresh       bool
 	metadataUnavailable  bool
+	metadataFailure      bool
 	accountIDUnavailable bool
 	rateLimits           *codex.RateLimits
 	failQuota            bool
@@ -103,6 +104,9 @@ func (c *testClient) Wait(ctx context.Context, _ string) error {
 func (c *testClient) Account(_ context.Context, refresh bool) (*codex.Account, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.metadataFailure {
+		return nil, errors.New("private-metadata-error")
+	}
 	if c.identity == nil || c.metadataUnavailable || c.requireRefresh && !refresh {
 		return nil, nil
 	}

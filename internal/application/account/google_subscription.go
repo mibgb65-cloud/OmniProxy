@@ -54,13 +54,24 @@ func (s *Service) UseGoogleCredentials(ctx context.Context, id string, consume f
 }
 
 // SaveGoogleSubscription 在新授权确认成功后写入独立受保护凭证，重新登录必须保持身份。
+// 未指定账号时先按订阅身份找已有记录：同一账号再次授权更新它，不再新增重复卡片。
 func (s *Service) SaveGoogleSubscription(ctx context.Context, providerID, id, name string, cred antigravity.Credentials) (Item, error) {
 	if s.CheckGoogleProvider(ctx, providerID) != nil || !cred.Valid() {
 		return Item{}, ErrInvalidInput
 	}
+	if id == "" {
+		existing, found, err := s.IdentityAccount(ctx, providerID, cred.Email, cred.Subject)
+		if err != nil {
+			return Item{}, err
+		}
+		if found {
+			id = existing.ID
+		}
+	}
 	if id != "" {
 		item, err := s.Metadata(ctx, id)
-		if err != nil || item.ProviderID != providerID || item.AuthMethod != AuthSubscription || item.AuthAccountID != cred.Subject {
+		// 旧记录可能还没有 account_id，由这次授权补全；已有不同身份仍然拒绝。
+		if err != nil || item.ProviderID != providerID || item.AuthMethod != AuthSubscription || item.AuthAccountID != "" && item.AuthAccountID != cred.Subject {
 			return Item{}, antigravity.Failure("identity_changed")
 		}
 		return s.writeGoogleCredentials(ctx, item, cred, false)
@@ -100,7 +111,8 @@ func (s *Service) RotateGoogleCredentials(ctx context.Context, expected Item, cr
 
 func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred antigravity.Credentials, preserve bool) (Item, error) {
 	current, oldRef, err := s.get(ctx, item.ID)
-	if err != nil || current.UpdatedAt != item.UpdatedAt || current.AuthAccountID != cred.Subject {
+	// 旧记录可能缺少 account_id，这次授权会一并补全；已有不同身份不能覆盖。
+	if err != nil || current.UpdatedAt != item.UpdatedAt || current.AuthAccountID != "" && current.AuthAccountID != cred.Subject {
 		return Item{}, ErrConflict
 	}
 	stamp, err := nowAfter(item.UpdatedAt)
@@ -136,7 +148,7 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 	var oldVersion, newVersion string
 	err = tx.QueryRowContext(ctx, "SELECT version FROM account_catalog_versions WHERE id=?", item.ID).Scan(&oldVersion)
 	if err == nil {
-		result, e := tx.ExecContext(ctx, `UPDATE accounts SET credential_ref=?,auth_email=?,auth_plan=?,auth_state='authenticated',updated_at=? WHERE id=? AND credential_ref=? AND updated_at=? AND auth_method=?`, ref, cred.Email, cred.Plan, stamp, item.ID, oldRef, item.UpdatedAt, AuthSubscription)
+		result, e := tx.ExecContext(ctx, `UPDATE accounts SET credential_ref=?,auth_email=?,auth_plan=?,auth_state='authenticated',auth_account_id=?,updated_at=? WHERE id=? AND credential_ref=? AND updated_at=? AND auth_method=?`, ref, cred.Email, cred.Plan, cred.Subject, stamp, item.ID, oldRef, item.UpdatedAt, AuthSubscription)
 		err = e
 		if e == nil {
 			count, e := result.RowsAffected()
@@ -162,6 +174,7 @@ func (s *Service) writeGoogleCredentials(ctx context.Context, item Item, cred an
 		return Item{}, errors.Join(ErrConflict, s.store.Delete(ref))
 	}
 	item.AuthEmail, item.AuthPlan, item.AuthState, item.UpdatedAt = cred.Email, cred.Plan, "authenticated", stamp
+	item.AuthAccountID = cred.Subject
 	if oldRef != "" {
 		if err = s.store.Delete(oldRef); err != nil {
 			return item, antigravity.Failure("cleanup_failed")

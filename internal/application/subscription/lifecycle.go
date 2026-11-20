@@ -112,16 +112,30 @@ func (s *Service) complete(ctx context.Context, job *session) {
 	// 否则 Read 会随保存一起阻塞，前端无法显示 saving 或及时取消。
 	s.mu.Unlock()
 	var item account.Item
-	if job.input.AccountID != "" {
-		previous, readErr := s.accounts.Metadata(saveCtx, job.input.AccountID)
-		if readErr != nil || previous.AuthEmail != "" && !strings.EqualFold(previous.AuthEmail, identity.Email) {
-			err = failure("identity_changed")
-		} else {
-			item, err = s.accounts.ReplaceSubscription(saveCtx, job.input.AccountID, job.profile, meta)
+	// 未携带账号时先按订阅身份复用已有记录：重新授权同一账号不能再新增一张卡片。
+	targetID := job.input.AccountID
+	var saveErr error
+	if targetID == "" && !metadataPending && meta.AccountID != "" {
+		existing, found, lookupErr := s.accounts.IdentityAccount(saveCtx, job.input.ProviderID, meta.Email, meta.AccountID)
+		if lookupErr != nil {
+			saveErr = failure("account_unavailable")
+		} else if found {
+			targetID = existing.ID
 		}
-	} else {
-		item, err = s.accounts.CreateSubscription(saveCtx, job.input.ProviderID, job.input.Name, job.profile, meta)
 	}
+	if saveErr == nil {
+		if targetID != "" {
+			previous, readErr := s.accounts.Metadata(saveCtx, targetID)
+			if readErr != nil || previous.AuthEmail != "" && !strings.EqualFold(previous.AuthEmail, identity.Email) {
+				saveErr = failure("identity_changed")
+			} else {
+				item, saveErr = s.accounts.ReplaceSubscription(saveCtx, targetID, job.profile, meta)
+			}
+		} else {
+			item, saveErr = s.accounts.CreateSubscription(saveCtx, job.input.ProviderID, job.input.Name, job.profile, meta)
+		}
+	}
+	err = saveErr
 	if err != nil && item.ID == "" {
 		state := "failed"
 		code := safeCode(err)
@@ -135,7 +149,7 @@ func (s *Service) complete(ctx context.Context, job *session) {
 		return
 	}
 	warning := err != nil
-	if job.input.AccountID != "" {
+	if targetID != "" {
 		if cleanupErr := s.cleanRetired(saveCtx, item.ID); cleanupErr != nil {
 			warning = true
 		}

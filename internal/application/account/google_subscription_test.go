@@ -121,3 +121,98 @@ func TestGoogleFailedRotationCleanupIsRecoveredOnLogout(t *testing.T) {
 		t.Fatal("retired credential was orphaned")
 	}
 }
+
+func TestGoogleFreshLoginReusesExistingIdentity(t *testing.T) {
+	service, _ := testService(t)
+	service.store = &batchStore{values: map[string][]byte{}}
+	ctx := context.Background()
+	cred := googleTestCredential()
+	first, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 用户先退出登录，再用「添加账号」重新授权同一个 Google 账号。
+	if _, err := service.LogoutGoogleSubscription(ctx, first.ID); err != nil {
+		t.Fatal(err)
+	}
+	cred.AccessToken = "fake-relogin-access"
+	second, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.ID != first.ID {
+		t.Fatal("relogin created a duplicate account for the same identity")
+	}
+	if second.CreatedAt != first.CreatedAt || second.Name != first.Name || !second.Enabled {
+		t.Fatal("identity reuse did not keep the original account")
+	}
+	if second.AuthState != "authenticated" || second.AuthAccountID != cred.Subject || second.AuthEmail != cred.Email {
+		t.Fatal("identity reuse did not apply the new authorization")
+	}
+	if second.UpdatedAt == first.UpdatedAt {
+		t.Fatal("identity reuse did not advance the update time")
+	}
+	var count int
+	if err := service.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM accounts WHERE provider_id='builtin_google'`).Scan(&count); err != nil || count != 1 {
+		t.Fatalf("google accounts after relogin = (%d, %v)", count, err)
+	}
+	item, ref, err := service.get(ctx, second.ID)
+	if err != nil || ref == "" || item.AuthState != "authenticated" {
+		t.Fatal("reused account lost its protected credential")
+	}
+}
+
+func TestGoogleFreshLoginKeepsDistinctIdentity(t *testing.T) {
+	service, _ := testService(t)
+	service.store = &batchStore{values: map[string][]byte{}}
+	ctx := context.Background()
+	cred := googleTestCredential()
+	first, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	other := cred
+	other.Subject, other.Email = "2002", "other@example.test"
+	second, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", other)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.ID == first.ID {
+		t.Fatal("different google identity reused an unrelated account")
+	}
+	// Team 工作区同 account_id 的不同成员邮箱是不同账号。
+	member := cred
+	member.Email = "member@example.test"
+	third, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", member)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if third.ID == first.ID || third.ID == second.ID {
+		t.Fatal("workspace member reused another mailbox account")
+	}
+}
+
+func TestGoogleFreshLoginCompletesMissingIdentity(t *testing.T) {
+	service, _ := testService(t)
+	service.store = &batchStore{values: map[string][]byte{}}
+	ctx := context.Background()
+	cred := googleTestCredential()
+	created, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 旧记录可能在 account_id 功能之前创建，登录时应按邮箱认领并补全。
+	if _, err := service.db.ExecContext(ctx, `UPDATE accounts SET auth_account_id='' WHERE id=?`, created.ID); err != nil {
+		t.Fatal(err)
+	}
+	again, err := service.SaveGoogleSubscription(ctx, "builtin_google", "", "", cred)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again.ID != created.ID {
+		t.Fatal("legacy account without account_id was duplicated")
+	}
+	if again.AuthAccountID != cred.Subject || again.AuthState != "authenticated" {
+		t.Fatal("relogin did not complete the missing identity")
+	}
+}
