@@ -188,9 +188,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	committed := false
+	// Antigravity 桌面端的响应头预算只有 60 秒，而上游可能先想几分钟才回第一个分片；
+	// 先提交响应头并保活，避免把「上游还在思考」显示成网关无响应。
+	var stopStreamHeaders func()
+	if needsEarlyStreamHeaders(client, request.Stream) {
+		stopStreamHeaders = startStreamHeaderKeeper(w, &committed)
+		defer stopStreamHeaders()
+	}
 	err = s.opts.Upstream.Forward(ctx, request, func(response Response) error {
+		if stopStreamHeaders != nil {
+			stopStreamHeaders()
+		}
 		return copyResponse(w, response, request.Stream, &committed, responseProtocol(request))
 	})
+	if stopStreamHeaders != nil {
+		// 失败时也先停保活，保证错误响应不与心跳并发写。
+		stopStreamHeaders()
+	}
 	if err != nil && !committed {
 		writeFailure(w, safeFailure(ctx, err))
 	}

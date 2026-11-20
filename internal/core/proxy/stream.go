@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -27,6 +28,95 @@ var (
 	streamHeartbeatPeriod  = streamHeartbeatInterval
 )
 
+// needsEarlyStreamHeaders 判断是否要在等上游响应头时先提交下游 SSE 响应头。
+//
+// 只有 Antigravity 桌面端把响应头等待限制在 60 秒（Antigravity 日志表现为
+// `timeout awaiting response headers`），而订阅的思考型模型可能先想几分钟才回第一个
+// 分片。其它客户端维持原有语义：失败仍以真实 HTTP 状态码返回。
+func needsEarlyStreamHeaders(client string, stream bool) bool {
+	return stream && client == "antigravity"
+}
+
+// startStreamHeaderKeeper 在等待上游响应头期间先提交下游 SSE 响应头并保活。
+//
+// provider 的 Forward 只有在拿到上游响应头后才回调 consume，因此这段时间网关原本一个
+// 字节都不写；对 60 秒响应头预算的桌面端来说就是无响应。这里先提交 200 与 SSE 响应头，
+// 再按既有心跳间隔发注释行，直到正文开始复制。
+//
+// 返回的函数可重复调用：首次调用关闭保活并等待协程退出，此后写响应只属于调用方，
+// 保证保活与正文复制不会并发写 ResponseWriter。
+func startStreamHeaderKeeper(w http.ResponseWriter, committed *bool) func() {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("X-Accel-Buffering", "no")
+	stop := make(chan struct{})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		grace := time.NewTimer(streamHeaderGraceDelay)
+		defer grace.Stop()
+		select {
+		case <-grace.C:
+		case <-stop:
+			return
+		}
+		// 提交失败说明客户端已断开：不再重试，由请求主流程结束这次请求。
+		if commitStreamHeaders(w, committed) != nil {
+			return
+		}
+		heartbeat := time.NewTicker(streamHeartbeatPeriod)
+		defer heartbeat.Stop()
+		for {
+			select {
+			case <-heartbeat.C:
+				if writeStreamFrame(w, streamHeartbeatFrame) != nil {
+					return
+				}
+			case <-stop:
+				return
+			}
+		}
+	}()
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			close(stop)
+			<-done
+		})
+	}
+}
+
+// commitStreamHeaders 提交 200 与调用方已设置的响应头并立即刷新。
+// committed 用来让之后的复制知道状态码已发出，不能重复 WriteHeader。
+func commitStreamHeaders(w http.ResponseWriter, committed *bool) error {
+	controller := http.NewResponseController(w)
+	if err := controller.SetWriteDeadline(time.Now().Add(streamWriteTimeout)); err != nil && !errors.Is(err, http.ErrNotSupported) {
+		return Failure("client_write_failed", 502)
+	}
+	w.WriteHeader(http.StatusOK)
+	if committed != nil {
+		*committed = true
+	}
+	if err := controller.Flush(); err != nil {
+		return Failure("client_write_failed", 502)
+	}
+	return nil
+}
+
+// writeStreamFrame 写入一个完整 SSE 帧并刷新；帧内容由调用方保证完整。
+func writeStreamFrame(w http.ResponseWriter, frame string) error {
+	controller := http.NewResponseController(w)
+	if err := controller.SetWriteDeadline(time.Now().Add(streamWriteTimeout)); err != nil && !errors.Is(err, http.ErrNotSupported) {
+		return Failure("client_write_failed", 502)
+	}
+	if _, err := io.WriteString(w, frame); err != nil {
+		return Failure("client_write_failed", 502)
+	}
+	if err := controller.Flush(); err != nil {
+		return Failure("client_write_failed", 502)
+	}
+	return nil
+}
+
 // copyStream 逐行转发 SSE，并在上游静默期先提交响应头、再发心跳注释。
 // 读取放在独立协程，写入仍只发生在调用协程，避免并发写 ResponseWriter。
 func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol ...string) error {
@@ -34,7 +124,6 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol
 	if tracked, ok := w.(*trackedWriter); ok {
 		trace = tracked.trace
 	}
-	controller := http.NewResponseController(w)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("X-Accel-Buffering", "no")
 	scanner := bufio.NewScanner(io.LimitReader(body, maxStreamBytes+1))
@@ -47,37 +136,23 @@ func copyStream(w http.ResponseWriter, body io.Reader, committed *bool, protocol
 	lines, scanErr, stop := pumpStream(scanner)
 	defer close(stop)
 
-	headersSent := false
+	headersSent := committed != nil && *committed
 	// commitHeaders 只执行一次；响应头发出后无法再改状态码。
 	commitHeaders := func() error {
 		if headersSent {
 			return nil
 		}
-		if err := controller.SetWriteDeadline(time.Now().Add(streamWriteTimeout)); err != nil && !errors.Is(err, http.ErrNotSupported) {
-			return Failure("client_write_failed", 502)
+		if err := commitStreamHeaders(w, committed); err != nil {
+			return err
 		}
-		w.WriteHeader(http.StatusOK)
-		*committed = true
 		headersSent = true
-		if err := controller.Flush(); err != nil {
-			return Failure("client_write_failed", 502)
-		}
 		return nil
 	}
 	writeFrame := func(frame string) error {
 		if err := commitHeaders(); err != nil {
 			return err
 		}
-		if err := controller.SetWriteDeadline(time.Now().Add(streamWriteTimeout)); err != nil && !errors.Is(err, http.ErrNotSupported) {
-			return Failure("client_write_failed", 502)
-		}
-		if _, err := io.WriteString(w, frame); err != nil {
-			return Failure("client_write_failed", 502)
-		}
-		if err := controller.Flush(); err != nil {
-			return Failure("client_write_failed", 502)
-		}
-		return nil
+		return writeStreamFrame(w, frame)
 	}
 
 	grace := time.NewTimer(streamHeaderGraceDelay)

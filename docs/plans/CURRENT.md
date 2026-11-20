@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+已修复：[TASK-20261120-010](../tasks/completed/2026-11/TASK-20261120-010-antigravity-early-stream-headers.md) Antigravity 桌面端又出现「已取消／未报告」的一串记录：这次不是 TASK-20261114-002 那类「上游已回头、body 静默」，而是网关连上游响应头都没拿到——`request_attempts.status_code` 是 499（不是 200），取消全部卡在 60 秒，生成端日志同一时刻是 `net/http: timeout awaiting response headers`，4 秒后重发的同一请求（正文 SHA256 相同）51 秒成功。`copyStream` 的 3 秒宽限只在 provider 拿到上游响应头后才会启动，而订阅思考型模型可能先想几分钟才回第一个分片（`client.go` 的 `ResponseHeaderTimeout` 因此是 5 分钟）；桌面端只给响应头 60 秒，于是它先撤。现在 Antigravity 的流式请求在受理 3 秒后仍未拿到上游响应头时，先下发 `200` 与 SSE 响应头并每 10 秒 `: keep-alive`，上游响应头到达后由 `copyStream` 接管（不重复写状态码）；其它客户端不收提前响应头，错误仍以真实 HTTP 状态码返回。代价是 Antigravity 响应头提交后的失败只能中断连接，账号轮换仍在网关内部按真实结果完成。
+
 本地构建：[TASK-20261120-009](../tasks/completed/2026-11/TASK-20261120-009-build-local-v2.4.1-beta.5.md) 已产出 `v2.4.1-beta.5` Windows amd64 生产安装包，内容为显式代理协议的握手确认与自愈（TASK-20261120-008，`ab16e41c`）：安装器 21,598,293 bytes，SHA256 `a9abe118ca031d3b9cd733b54374fc70cc301e0a8936c6176cd41d6500cb1593`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已修复：[TASK-20261120-008](../tasks/completed/2026-11/TASK-20261120-008-proxy-scheme-confirmation.md) 远端代理填成 HTTP 后所有请求挂起：用户给的 `http://user:pass@9.142.31.120:5278` 实际只监听 SOCKS5（`curl -x socks5h://` 200、`-x http://` 25 秒 0 字节），而 `netproxy` 对显式协议不做任何验证，`http.Transport` 的 `CONNECT` 一直等到调用方超时，错误码为空、运行期纠偏（只认协议类错误）也不触发。现在显式 `http`／`socks5` 在首次使用时做一次有界握手确认，成立才用；不成立而另一种协议成立时自动切换并回写 `detected_scheme`；单次握手预算由 2 秒提到 4 秒（远端带认证的 SOCKS5 握手实测 1.9–2.6 秒）。改协议时清除旧识别结果。实测同一代理 `auto`／`http`／`socks5` 三种配置均 200（出口 `9.142.31.120`）。`task verify` EXIT=0（前端 164 文件／1006 项测试、全部 Go 包、Windows production 构建）。

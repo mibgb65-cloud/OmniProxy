@@ -131,6 +131,10 @@ Gemini 使用 Google 官方 OpenAI 兼容 Chat 端点，受控 Key 仅放在上�
 - 令牌临近过期时由网关自己用 `refresh_token` 续期，并把新 auth.json 写回池记录。
 - 明确拒绝（401／429／5xx）才换同池账号，冷却窗口与协议路径共用；
   已提交的响应不重放。
+- Antigravity 桌面端只给响应头 60 秒：它的流式请求受理 3 秒后仍未拿到上游响应头时，
+  网关先下发 `200` 与 `text/event-stream`，之后每 10 秒发 `: keep-alive`，把上游长时间
+  思考与「网关没有响应」区分开。响应头提交后的失败只能中断连接（账号轮换仍在内部按
+  真实结果完成）；其它客户端不收提前的响应头，失败仍以真实 HTTP 状态码返回。
 - WebSocket 握手没有正文，读不到模型时按全部已授权订阅账号建立候选序列再顺序取号；
   借不出凭据返回 `credential_unavailable`（503），不折叠成 `502 upstream_unavailable`。
   上游明确拒绝握手仍回原状态码与 `upstream_socket_rejected`，并写
