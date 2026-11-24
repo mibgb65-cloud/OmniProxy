@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Completed
 
 ## Created
 
@@ -238,7 +238,9 @@ None.
 
 ## Commit
 
-Not committed by Agent.
+```text
+71fc1664 fix(proxy): 额度、目录与续期等资源调用按提供商走代理
+```
 
 ---
 
@@ -250,3 +252,5 @@ Not committed by Agent.
 ---
 
 # Completed
+
+2026-11-24 09:49

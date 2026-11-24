@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-进行中：[TASK-20261124-001](../tasks/active/TASK-20261124-001-provider-proxy-covers-resource-calls.md) 按提供商配置的代理此前只覆盖网关推理、透明转发与探针；额度、余额、模型目录、登录轮询与令牌续期只靠目标主机名回退，而 Google 订阅与 Codex 订阅的官方主机（`daily-cloudcode-pa.googleapis.com`、`chatgpt.com`、`auth.openai.com` 等）不在 `providers.base_url` 匹配表内，于是显式「走代理」被绕过、静默直连（用户截图里额度有旧快照、可选模型报「暂时不可读」）。现在账号服务提供 `OutboundContext`，上述资源类调用在凭据版本复核后写入 `ProviderID`，与推理共用同一代理策略；登录完成前的授权码交换、WorkBuddy 登录轮询、透明转发借令牌时的续期与激活请求也一并覆盖。回归测试断言假客户端在 `ctx` 中读到提供商作用域。详见任务记录与 `docs/product/NETWORK_PROXY.md`。
+已修复：[TASK-20261124-001](../tasks/completed/2026-11/TASK-20261124-001-provider-proxy-covers-resource-calls.md) 按提供商配置的代理此前只覆盖网关推理、透明转发与探针；额度、余额、模型目录、登录轮询与令牌续期只靠目标主机名回退，而 Google 订阅与 Codex 订阅的官方主机（`daily-cloudcode-pa.googleapis.com`、`chatgpt.com`、`auth.openai.com` 等）不在 `providers.base_url` 匹配表内，于是显式「走代理」被绕过、静默直连（用户截图里额度有旧快照、可选模型报「暂时不可读」）。现在账号服务提供 `OutboundContext`，上述资源类调用在凭据版本复核后写入 `ProviderID`，与推理共用同一代理策略；登录完成前的授权码交换、WorkBuddy 登录轮询、透明转发借令牌时的续期与激活请求也一并覆盖。回归测试断言假客户端在 `ctx` 中读到提供商作用域。实现提交 `71fc1664`。详见任务记录与 `docs/product/NETWORK_PROXY.md`。
 
 本地构建：[TASK-20261121-001](../tasks/completed/2026-11/TASK-20261121-001-build-local-v2.4.1-beta.6.md) 已产出 `v2.4.1-beta.6` Windows amd64 生产安装包，内容为 Antigravity 流式请求在等待上游响应头期间提前下发响应头并保活（TASK-20261120-010，`ac4b6c06`）：安装器 21,604,916 bytes，SHA256 `0555bcf42ad2581c6510005c49744c5d485bee0857a1e29290ab7c431e43cc26`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
