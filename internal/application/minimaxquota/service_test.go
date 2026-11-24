@@ -4,6 +4,7 @@ import (
 	"context"
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/provider"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/database"
 	"omniproxy/internal/provider/minimax"
 	"os"
@@ -57,6 +58,9 @@ func TestQueryCannotPublishResourcesAfterRegionOrKeyTypeChanges(t *testing.T) {
 				calls++
 				if o.Region != "cn" || o.BillingMode != "subscription" || string(key) != "placeholder-minimax-key" {
 					t.Fatal("incorrect credential scope")
+				}
+				if scope, ok := netproxy.ScopeFrom(ctx); !ok || scope.ProviderID != a.ProviderID {
+					t.Fatalf("quota scope = %+v, ok = %v", scope, ok)
 				}
 				next := *a.MiniMax
 				replacement := ""

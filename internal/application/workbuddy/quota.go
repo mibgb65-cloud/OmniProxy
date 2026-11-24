@@ -43,7 +43,7 @@ func (s *Service) ReadQuota(ctx context.Context, id string) (Quota, error) {
 }
 
 func (s *Service) readQuota(ctx context.Context, id string) (Quota, error) {
-	build, err := s.buildOf(ctx, id)
+	build, item, err := s.buildOf(ctx, id)
 	if err != nil {
 		return Quota{}, err
 	}
@@ -53,7 +53,8 @@ func (s *Service) readQuota(ctx context.Context, id string) (Quota, error) {
 	}
 	operation, cancel := context.WithTimeout(ctx, operationTimeout)
 	defer cancel()
-	credits, err := s.clientFor(build).ReadCredits(operation, cred)
+	// Credits 接口按提供商代理策略分流，不能只靠目标主机名回退。
+	credits, err := s.clientFor(build).ReadCredits(item.OutboundContext(operation), cred)
 	if err != nil {
 		return Quota{}, err
 	}

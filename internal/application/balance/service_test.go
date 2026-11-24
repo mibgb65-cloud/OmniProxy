@@ -9,6 +9,7 @@ import (
 
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/provider"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/database"
 	"omniproxy/internal/provider/deepseek"
 )
@@ -23,12 +24,15 @@ func (s *balanceStore) Get(string) ([]byte, error) {
 func (s *balanceStore) Delete(string) error { return nil }
 
 type balanceClient struct {
-	calls int
-	fail  bool
+	calls  int
+	fail   bool
+	scope  netproxy.Scope
+	scoped bool
 }
 
-func (c *balanceClient) Balance(_ context.Context, key []byte) (deepseek.Balance, error) {
+func (c *balanceClient) Balance(ctx context.Context, key []byte) (deepseek.Balance, error) {
 	c.calls++
+	c.scope, c.scoped = netproxy.ScopeFrom(ctx)
 	if string(key) != "placeholder-balance-key" {
 		return deepseek.Balance{}, errors.New("bad-key")
 	}
@@ -57,6 +61,9 @@ func TestBalanceUsesProtectedKeyOnlyForDeepSeekAndClearsIt(t *testing.T) {
 	info, err := service.Read(context.Background(), item.ID)
 	if err != nil || len(info.Entries) != 1 || info.Entries[0].Total != "110.00" || info.FetchedAt == "" {
 		t.Fatal("balance query failed")
+	}
+	if !client.scoped || client.scope.ProviderID != "builtin_deepseek" {
+		t.Fatalf("balance scope = %+v, scoped = %v", client.scope, client.scoped)
 	}
 	for _, b := range store.last {
 		if b != 0 {

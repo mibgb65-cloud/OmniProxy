@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"omniproxy/internal/application/account"
+	"omniproxy/internal/core/netproxy"
 	providerdumate "omniproxy/internal/provider/dumate"
 )
 
@@ -54,7 +55,7 @@ func (s *Service) ImportCookie(ctx context.Context, providerID, raw string) (Imp
 
 // save 先用远端 user/info 核对身份，再按身份创建或更新账号。
 func (s *Service) save(ctx context.Context, providerID string, credentials providerdumate.Credentials) (ImportResult, error) {
-	verifyCtx, cancel := context.WithTimeout(ctx, importTimeout)
+	verifyCtx, cancel := context.WithTimeout(netproxy.WithProvider(ctx, providerID, providerdumate.Kind), importTimeout)
 	defer cancel()
 	identity, err := s.console.UserInfo(verifyCtx, credentials)
 	if err != nil {

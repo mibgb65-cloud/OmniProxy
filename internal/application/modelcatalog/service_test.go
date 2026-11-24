@@ -6,6 +6,7 @@ import (
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/provider"
 	core "omniproxy/internal/core/modelcatalog"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/infrastructure/database"
 	"os"
@@ -17,9 +18,12 @@ type fakeSubscription struct {
 	fail   bool
 	change func()
 	window *int64
+	scope  netproxy.Scope
+	scoped bool
 }
 
-func (s *fakeSubscription) Models(context.Context, string) ([]codex.Model, error) {
+func (s *fakeSubscription) Models(ctx context.Context, _ string) ([]codex.Model, error) {
+	s.scope, s.scoped = netproxy.ScopeFrom(ctx)
 	if s.change != nil {
 		s.change()
 	}
@@ -51,6 +55,10 @@ func TestSnapshotPreservedOnFailureAndInvalidatedByCredentialsOnly(t *testing.T)
 	models, err := s.Sync(ctx, "a")
 	if err != nil || len(models) != 1 {
 		t.Fatal("sync failed", err)
+	}
+	// 目录同步必须带上账号所属提供商，否则按提供商配置的代理不会生效。
+	if !upstream.scoped || upstream.scope.ProviderID != "builtin_openai" || upstream.scope.ProviderKind != "openai" {
+		t.Fatalf("sync scope = %+v, scoped = %v", upstream.scope, upstream.scoped)
 	}
 	if models[0].Metadata.Description != "Official model" || len(models[0].Metadata.ReasoningEfforts) != 1 || !models[0].Metadata.IsDefault || len(models[0].Metadata.ServiceTiers) != 1 || models[0].Metadata.ServiceTiers[0].ID != "priority" {
 		t.Fatal("official metadata was not persisted")

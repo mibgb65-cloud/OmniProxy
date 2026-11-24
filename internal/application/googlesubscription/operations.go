@@ -8,14 +8,19 @@ import (
 	"omniproxy/internal/provider/antigravity"
 )
 
-func (s *Service) credentials(ctx context.Context, id string, force bool) (antigravity.Credentials, error) {
+// credentials 读取账号令牌，临近到期时续期；同时返回账号项供调用方写出站作用域。
+func (s *Service) credentials(ctx context.Context, id string, force bool) (antigravity.Credentials, account.Item, error) {
 	if s.busy(id) {
-		return antigravity.Credentials{}, antigravity.Failure("busy")
+		return antigravity.Credentials{}, account.Item{}, antigravity.Failure("busy")
 	}
 	var current antigravity.Credentials
+	var currentItem account.Item
 	err := s.accounts.UseGoogleCredentials(ctx, id, func(item account.Item, cred antigravity.Credentials) error {
+		currentItem = item
+		// 续期、身份与项目核对也属于该提供商的出站流量，按同一代理策略分流。
+		scoped := item.OutboundContext(ctx)
 		if force || time.Until(cred.ExpiresAt) < 5*time.Minute {
-			operation, cancel := context.WithTimeout(ctx, 30*time.Second)
+			operation, cancel := context.WithTimeout(scoped, 30*time.Second)
 			defer cancel()
 			if err := s.client.Refresh(operation, &cred); err != nil {
 				return err
@@ -35,7 +40,7 @@ func (s *Service) credentials(ctx context.Context, id string, force bool) (antig
 		current = cred
 		return nil
 	})
-	return current, err
+	return current, currentItem, err
 }
 
 // Use 在受控回调获取短暂 token 快照，推理不占用全局刷新锁。
@@ -53,7 +58,7 @@ func (s *Service) UseAt(ctx context.Context, id, expectedAt string, consume func
 			return antigravity.Failure("configuration_changed")
 		}
 	}
-	cred, err := s.credentials(ctx, id, false)
+	cred, _, err := s.credentials(ctx, id, false)
 	s.ops.Unlock()
 	if err != nil {
 		return err
@@ -67,7 +72,7 @@ func (s *Service) UseAt(ctx context.Context, id, expectedAt string, consume func
 // Models 返回与当前凭据版本绑定的真实账号目录。
 func (s *Service) Models(ctx context.Context, id string) ([]antigravity.Model, string, error) {
 	s.ops.Lock()
-	cred, err := s.credentials(ctx, id, false)
+	cred, item, err := s.credentials(ctx, id, false)
 	version := ""
 	if err == nil {
 		version, err = s.accounts.CatalogVersion(ctx, id)
@@ -76,7 +81,7 @@ func (s *Service) Models(ctx context.Context, id string) ([]antigravity.Model, s
 	if err != nil {
 		return nil, "", err
 	}
-	models, err := s.client.Models(ctx, cred)
+	models, err := s.client.Models(item.OutboundContext(ctx), cred)
 	return models, version, err
 }
 
@@ -84,7 +89,7 @@ func (s *Service) Models(ctx context.Context, id string) ([]antigravity.Model, s
 func (s *Service) Refresh(ctx context.Context, id string) (account.Item, error) {
 	s.ops.Lock()
 	defer s.ops.Unlock()
-	if _, err := s.credentials(ctx, id, true); err != nil {
+	if _, _, err := s.credentials(ctx, id, true); err != nil {
 		return account.Item{}, err
 	}
 	s.notify()

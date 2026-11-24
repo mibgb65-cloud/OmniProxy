@@ -77,17 +77,17 @@ func (s *Service) clientFor(build workbuddyai.Build) *workbuddyai.Client {
 	return client
 }
 
-// buildOf 读取账号所属提供商对应的构建。
-func (s *Service) buildOf(ctx context.Context, id string) (workbuddyai.Build, error) {
+// buildOf 读取账号所属提供商对应的构建与账号项。
+func (s *Service) buildOf(ctx context.Context, id string) (workbuddyai.Build, account.Item, error) {
 	item, err := s.accounts.Metadata(ctx, id)
 	if err != nil {
-		return workbuddyai.Build{}, workbuddyai.Failure("invalid_input")
+		return workbuddyai.Build{}, account.Item{}, workbuddyai.Failure("invalid_input")
 	}
 	build, err := s.accounts.WorkBuddyBuild(ctx, item.ProviderID)
 	if err != nil {
-		return workbuddyai.Build{}, workbuddyai.Failure("invalid_input")
+		return workbuddyai.Build{}, account.Item{}, workbuddyai.Failure("invalid_input")
 	}
-	return build, nil
+	return build, item, nil
 }
 
 // OnChange 注册只发送变更信号的通知。

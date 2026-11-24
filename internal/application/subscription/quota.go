@@ -45,6 +45,9 @@ func (s *Service) readQuota(ctx context.Context, id string, display bool) (Quota
 	if err != nil {
 		return Quota{}, quotaFailure(readCtx, "account", "invalid_account", failure("invalid_account"))
 	}
+	// 额度接口在 chatgpt.com，不在 providers.base_url；必须带上账号所属提供商，
+	// 否则「只给这个提供商配置了代理」会被主机名回退绕过而直连。
+	readCtx = item.OutboundContext(readCtx)
 	if item.AuthState == "logged_out" || item.AuthState == "reauth_required" {
 		return Quota{}, quotaFailure(readCtx, "account", "quota_not_authenticated", failure("quota_not_authenticated"))
 	}

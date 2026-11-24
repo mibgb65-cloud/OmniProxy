@@ -66,6 +66,8 @@ func (s *Service) Read(ctx context.Context, id string) (Info, error) {
 	if item.AuthMethod != account.AuthAPIKey {
 		return Info{}, failure("unsupported")
 	}
+	// 余额查询也属于该提供商的出站流量，按它的代理策略分流。
+	readCtx = item.OutboundContext(readCtx)
 	providers, err := s.providers.List(readCtx)
 	if err != nil {
 		return Info{}, failure("configuration_unavailable")

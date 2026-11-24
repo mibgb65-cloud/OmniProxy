@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 )
 
@@ -131,6 +132,8 @@ func (s *passthroughSession) attemptFor(ctx context.Context, candidate proxy.Acc
 		s.lease = lease
 	}
 	prepareCtx, cancel := proxy.SocketCredentialContext(ctx)
+	// 借令牌可能触发 OAuth 续期（auth.openai.com）；按已选定提供商的策略分流。
+	prepareCtx = netproxy.WithProvider(prepareCtx, t.snapshot.ProviderID, t.kind)
 	stage := proxy.BeginSocketStage(prepareCtx, "credential_prepare", max(1, len(s.seen)))
 	attempt, tokenErr := s.service.passthroughAttempt(prepareCtx, t, s.model, s.base)
 	stage(tokenErr)

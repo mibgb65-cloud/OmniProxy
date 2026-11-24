@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/codex"
 )
 
@@ -17,11 +18,14 @@ type fixedUsage struct {
 	creditN int
 	token   []byte
 	id      string
+	scope   netproxy.Scope
+	scoped  bool
 }
 
-func (u *fixedUsage) Read(_ context.Context, token []byte, accountID string) (codex.RateLimits, error) {
+func (u *fixedUsage) Read(ctx context.Context, token []byte, accountID string) (codex.RateLimits, error) {
 	u.calls++
 	u.token, u.id = append([]byte(nil), token...), accountID
+	u.scope, u.scoped = netproxy.ScopeFrom(ctx)
 	return u.result, u.err
 }
 
@@ -76,6 +80,10 @@ func TestQuotaUsesOfficialHTTPInterfaceWithoutStartingComponent(t *testing.T) {
 	}
 	if *opened || usage.calls != 1 || string(usage.token) != "access-token" {
 		t.Fatal("quota read did not go through the official HTTP interface")
+	}
+	// 官方额度在 chatgpt.com，必须按账号所属提供商分流，不能只靠主机名回退。
+	if !usage.scoped || usage.scope.ProviderID != "builtin_openai" {
+		t.Fatalf("quota scope = %+v, scoped = %v", usage.scope, usage.scoped)
 	}
 	if quota.Plan != "plus" || quota.FiveHour == nil || quota.FiveHour.RemainingPercent != 80 || quota.Weekly == nil {
 		t.Fatal("official usage response was not normalized into display windows")

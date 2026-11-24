@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"omniproxy/internal/application/account"
+	"omniproxy/internal/core/netproxy"
 	providerdumate "omniproxy/internal/provider/dumate"
 )
 
@@ -82,9 +83,16 @@ type fakeConsole struct {
 	bonus     func() (providerdumate.LoginBonus, error)
 	claim     func() error
 	userCalls int
+	scope     netproxy.Scope
+	scoped    bool
 }
 
-func (f *fakeConsole) UserInfo(_ context.Context, credentials providerdumate.Credentials) (providerdumate.Identity, error) {
+func (f *fakeConsole) record(ctx context.Context) {
+	f.scope, f.scoped = netproxy.ScopeFrom(ctx)
+}
+
+func (f *fakeConsole) UserInfo(ctx context.Context, credentials providerdumate.Credentials) (providerdumate.Identity, error) {
+	f.record(ctx)
 	f.userCalls++
 	if f.userInfo == nil {
 		return providerdumate.Identity{AccountID: credentials.AccountID, DisplayName: "Tester"}, nil
@@ -92,21 +100,24 @@ func (f *fakeConsole) UserInfo(_ context.Context, credentials providerdumate.Cre
 	return f.userInfo(credentials)
 }
 
-func (f *fakeConsole) Overview(context.Context, providerdumate.Credentials) (providerdumate.Overview, error) {
+func (f *fakeConsole) Overview(ctx context.Context, _ providerdumate.Credentials) (providerdumate.Overview, error) {
+	f.record(ctx)
 	if f.overview == nil {
 		return providerdumate.Overview{TotalPoints: 100, UsedPoints: 40}, nil
 	}
 	return f.overview()
 }
 
-func (f *fakeConsole) LoginBonus(context.Context, providerdumate.Credentials) (providerdumate.LoginBonus, error) {
+func (f *fakeConsole) LoginBonus(ctx context.Context, _ providerdumate.Credentials) (providerdumate.LoginBonus, error) {
+	f.record(ctx)
 	if f.bonus == nil {
 		return providerdumate.LoginBonus{}, nil
 	}
 	return f.bonus()
 }
 
-func (f *fakeConsole) ClaimLoginBonus(context.Context, providerdumate.Credentials) error {
+func (f *fakeConsole) ClaimLoginBonus(ctx context.Context, _ providerdumate.Credentials) error {
+	f.record(ctx)
 	if f.claim == nil {
 		return nil
 	}
@@ -137,6 +148,10 @@ func TestImportDesktopUsesRemoteIdentity(t *testing.T) {
 	}
 	if len(accounts.saved) != 1 || accounts.saved[0].credentials.AccountID != "1001" || accounts.saved[0].name != "Tester" {
 		t.Fatalf("saved = %+v", accounts.saved)
+	}
+	// 导入时的身份核对同样按该提供商的代理策略分流。
+	if !console.scoped || console.scope.ProviderID != "builtin_dumate" {
+		t.Fatalf("import scope = %+v, scoped = %v", console.scope, console.scoped)
 	}
 	if _, err := service.ImportDesktop(context.Background(), "builtin_openai"); err == nil {
 		t.Fatal("non-dumate provider accepted")
@@ -174,6 +189,9 @@ func TestPointsFallsBackToRetainedSnapshot(t *testing.T) {
 	live, err := service.Points(context.Background(), "acct_dumate")
 	if err != nil || live.State != "live" || live.Points == nil || live.Points.RemainingPoints != 60 {
 		t.Fatalf("live = (%+v, %v)", live, err)
+	}
+	if !console.scoped || console.scope.ProviderID != "builtin_dumate" {
+		t.Fatalf("points scope = %+v, scoped = %v", console.scope, console.scoped)
 	}
 	console.overview = func() (providerdumate.Overview, error) {
 		return providerdumate.Overview{}, providerdumate.Failure(providerdumate.CodeConsoleUnavailable)

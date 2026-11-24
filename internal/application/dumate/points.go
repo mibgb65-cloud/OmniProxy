@@ -19,16 +19,17 @@ type Points struct {
 
 // Points 查询账号积分与签到状态；控制台暂时失败时回退到保留期内的成功快照。
 func (s *Service) Points(ctx context.Context, accountID string) (Points, error) {
-	if _, err := s.accountFor(ctx, accountID); err != nil {
+	item, err := s.accountFor(ctx, accountID)
+	if err != nil {
 		return Points{}, err
 	}
-	readCtx, cancel := context.WithTimeout(ctx, pointsTimeout)
+	readCtx, cancel := context.WithTimeout(item.OutboundContext(ctx), pointsTimeout)
 	defer cancel()
 	var overview providerdumate.Overview
 	var bonus providerdumate.LoginBonus
 	var bonusKnown bool
 	var queryErr error
-	err := s.accounts.UseDuMateCredentials(readCtx, accountID, func(_ account.Item, credentials providerdumate.Credentials) error {
+	err = s.accounts.UseDuMateCredentials(readCtx, accountID, func(_ account.Item, credentials providerdumate.Credentials) error {
 		overview, queryErr = s.console.Overview(readCtx, credentials)
 		if queryErr != nil {
 			return nil

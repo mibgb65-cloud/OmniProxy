@@ -16,6 +16,7 @@ import (
 
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/subscription"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/provider/antigravity"
 )
 
@@ -141,6 +142,8 @@ func (s *Service) complete(ctx context.Context, job *session, server *http.Serve
 		}
 		s.progress(job, "exchanging")
 		operation, cancel := context.WithTimeout(ctx, 30*time.Second)
+		// 登录完成前的令牌交换已经知道提供商身份，不能因为还没有账号而直连。
+		operation = netproxy.WithProvider(operation, job.input.ProviderID, "google")
 		cred, e := s.client.Exchange(operation, config, code, verifier, redirect)
 		err = e
 		if err == nil {

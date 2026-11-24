@@ -42,6 +42,8 @@ func (s *MessageSender) Send(ctx context.Context, expected account.Item, plan Se
 	if err := waitForPreflight(ctx, plan); err != nil {
 		return err
 	}
+	// 激活请求也是该提供商的出站流量；额度、目录与令牌读取共享同一作用域。
+	ctx = expected.OutboundContext(ctx)
 	fresh, err := s.access.ReadQuota(ctx, expected.ID)
 	if err != nil {
 		return errors.Join(ErrNotSent, failure("quota_unavailable"))

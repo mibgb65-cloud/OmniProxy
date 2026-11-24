@@ -22,10 +22,11 @@ type Checkin struct {
 
 // Checkin 先读今日状态，再领取并核对到账；不凭 POST 成功就显示已领取。
 func (s *Service) Checkin(ctx context.Context, accountID string) (Checkin, error) {
-	if _, err := s.accountFor(ctx, accountID); err != nil {
+	item, err := s.accountFor(ctx, accountID)
+	if err != nil {
 		return Checkin{}, err
 	}
-	checkCtx, cancel := context.WithTimeout(ctx, checkinTimeout)
+	checkCtx, cancel := context.WithTimeout(item.OutboundContext(ctx), checkinTimeout)
 	defer cancel()
 	result := Checkin{CheckedAt: fetchedAt(s.now())}
 	credentialErr := s.accounts.UseDuMateCredentials(checkCtx, accountID, func(_ account.Item, credentials providerdumate.Credentials) error {

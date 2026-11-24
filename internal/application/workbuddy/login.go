@@ -10,6 +10,7 @@ import (
 
 	"omniproxy/internal/application/account"
 	"omniproxy/internal/application/subscription"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/provider/workbuddyai"
 )
 
@@ -37,13 +38,15 @@ func (s *Service) Begin(ctx context.Context, input subscription.Input) (subscrip
 		return subscription.State{}, workbuddyai.Failure("invalid_input")
 	}
 	client := s.clientFor(build)
-	startCtx, cancelStart := context.WithTimeout(ctx, operationTimeout)
+	// 登录阶段还没有账号记录，但提供商身份已经确定；轮询与身份读取同样走该提供商的代理。
+	scope := netproxy.WithProvider(ctx, input.ProviderID, build.Kind)
+	startCtx, cancelStart := context.WithTimeout(scope, operationTimeout)
 	signIn, err := client.BeginSignIn(startCtx)
 	cancelStart()
 	if err != nil {
 		return subscription.State{}, err
 	}
-	waitCtx, cancel := context.WithTimeout(context.Background(), loginTimeout)
+	waitCtx, cancel := context.WithTimeout(netproxy.WithProvider(context.Background(), input.ProviderID, build.Kind), loginTimeout)
 	job := &session{
 		input:  input,
 		client: client,

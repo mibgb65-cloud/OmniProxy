@@ -11,6 +11,7 @@ import (
 
 	"omniproxy/internal/application/subscription"
 	catalog "omniproxy/internal/core/modelcatalog"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/core/proxy"
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/chatgpt"
@@ -59,6 +60,10 @@ func TestMinimalMessageUsesOriginalAccountAndNoTools(t *testing.T) {
 		calls++
 		if request.URL.String() != "https://chatgpt.com/backend-api/codex/responses" || request.Header.Get("ChatGPT-Account-ID") != "official-one" {
 			t.Fatal("wrong account or endpoint")
+		}
+		// 激活请求必须带提供商作用域，否则按提供商配置的代理不生效。
+		if scope, ok := netproxy.ScopeFrom(request.Context()); !ok || scope.ProviderID != f.accounts.item.ProviderID {
+			t.Fatalf("activation scope = %+v, ok = %v", scope, ok)
 		}
 		var body struct {
 			Model        string

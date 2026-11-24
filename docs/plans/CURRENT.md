@@ -2,6 +2,8 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
+进行中：[TASK-20261124-001](../tasks/active/TASK-20261124-001-provider-proxy-covers-resource-calls.md) 按提供商配置的代理此前只覆盖网关推理、透明转发与探针；额度、余额、模型目录、登录轮询与令牌续期只靠目标主机名回退，而 Google 订阅与 Codex 订阅的官方主机（`daily-cloudcode-pa.googleapis.com`、`chatgpt.com`、`auth.openai.com` 等）不在 `providers.base_url` 匹配表内，于是显式「走代理」被绕过、静默直连（用户截图里额度有旧快照、可选模型报「暂时不可读」）。现在账号服务提供 `OutboundContext`，上述资源类调用在凭据版本复核后写入 `ProviderID`，与推理共用同一代理策略；登录完成前的授权码交换、WorkBuddy 登录轮询、透明转发借令牌时的续期与激活请求也一并覆盖。回归测试断言假客户端在 `ctx` 中读到提供商作用域。详见任务记录与 `docs/product/NETWORK_PROXY.md`。
+
 本地构建：[TASK-20261121-001](../tasks/completed/2026-11/TASK-20261121-001-build-local-v2.4.1-beta.6.md) 已产出 `v2.4.1-beta.6` Windows amd64 生产安装包，内容为 Antigravity 流式请求在等待上游响应头期间提前下发响应头并保活（TASK-20261120-010，`ac4b6c06`）：安装器 21,604,916 bytes，SHA256 `0555bcf42ad2581c6510005c49744c5d485bee0857a1e29290ab7c431e43cc26`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
 已修复：[TASK-20261120-010](../tasks/completed/2026-11/TASK-20261120-010-antigravity-early-stream-headers.md) Antigravity 桌面端又出现「已取消／未报告」的一串记录：这次不是 TASK-20261114-002 那类「上游已回头、body 静默」，而是网关连上游响应头都没拿到——`request_attempts.status_code` 是 499（不是 200），取消全部卡在 60 秒，生成端日志同一时刻是 `net/http: timeout awaiting response headers`，4 秒后重发的同一请求（正文 SHA256 相同）51 秒成功。`copyStream` 的 3 秒宽限只在 provider 拿到上游响应头后才会启动，而订阅思考型模型可能先想几分钟才回第一个分片（`client.go` 的 `ResponseHeaderTimeout` 因此是 5 分钟）；桌面端只给响应头 60 秒，于是它先撤。现在 Antigravity 的流式请求在受理 3 秒后仍未拿到上游响应头时，先下发 `200` 与 SSE 响应头并每 10 秒 `: keep-alive`，上游响应头到达后由 `copyStream` 接管（不重复写状态码）；其它客户端不收提前响应头，错误仍以真实 HTTP 状态码返回。代价是 Antigravity 响应头提交后的失败只能中断连接，账号轮换仍在网关内部按真实结果完成。

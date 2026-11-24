@@ -23,7 +23,7 @@ func readGoogleResource[T any](s *Service, ctx context.Context, id string, read 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	s.ops.Lock()
-	cred, err := s.credentials(ctx, id, false)
+	cred, item, err := s.credentials(ctx, id, false)
 	version := ""
 	if err == nil {
 		version, err = s.accounts.CatalogVersion(ctx, id)
@@ -32,7 +32,8 @@ func readGoogleResource[T any](s *Service, ctx context.Context, id string, read 
 	if err != nil {
 		return empty, err
 	}
-	value, err := read(ctx, cred)
+	// 额度与可选模型也按账号所属提供商的代理策略分流，不能只靠目标主机名回退。
+	value, err := read(item.OutboundContext(ctx), cred)
 	if err != nil {
 		return empty, err
 	}

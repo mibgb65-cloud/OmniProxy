@@ -64,6 +64,8 @@ func (s *Service) prepareToken(ctx context.Context, id, expectedAt string) ([]by
 	if err != nil {
 		return nil, "", err
 	}
+	// 令牌续期访问 auth.openai.com，同样按账号所属提供商分流。
+	ctx = item.OutboundContext(ctx)
 	var key []byte
 	var officialID string
 	// 读取器核对同一份受保护材料的邮箱及工作区；不再每次启动官方组件强制联网刷新。

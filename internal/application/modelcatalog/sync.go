@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"omniproxy/internal/application/account"
 	core "omniproxy/internal/core/modelcatalog"
+	"omniproxy/internal/core/netproxy"
 	"omniproxy/internal/infrastructure/codex"
 	"omniproxy/internal/provider/antigravity"
 	"omniproxy/internal/provider/deepseek"
@@ -52,6 +53,8 @@ func (s *Service) Sync(ctx context.Context, id string) ([]Item, error) {
 			kind, base = p.Kind, p.BaseURL
 		}
 	}
+	// 目录同步是提供商出站流量：带上身份，按该提供商的代理策略分流。
+	ctx = netproxy.WithProvider(ctx, current.ProviderID, kind)
 	models := []codex.Model{}
 	var initialVersion string
 	if s.db.QueryRowContext(ctx, `SELECT version FROM account_catalog_versions WHERE id=?`, id).Scan(&initialVersion) != nil {

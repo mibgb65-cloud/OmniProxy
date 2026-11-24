@@ -61,6 +61,8 @@ func (s *Service) Read(ctx context.Context, id string) (minimax.Quota, error) {
 	if !allowed {
 		return failure("invalid_configuration")
 	}
+	// 额度查询与推理使用同一提供商的代理策略。
+	ctx = a.OutboundContext(ctx)
 	var quota minimax.Quota
 	err = s.accounts.UseAPIKeyAt(ctx, id, a.UpdatedAt, func(key []byte) error {
 		var err error

@@ -13,15 +13,16 @@ func (s *Service) credentials(ctx context.Context, id string, force bool) (workb
 	if s.busy(id) {
 		return workbuddyai.Credentials{}, workbuddyai.Failure("busy")
 	}
-	build, err := s.buildOf(ctx, id)
+	build, item, err := s.buildOf(ctx, id)
 	if err != nil {
 		return workbuddyai.Credentials{}, err
 	}
 	client := s.clientFor(build)
+	scoped := item.OutboundContext(ctx)
 	var current workbuddyai.Credentials
 	err = s.accounts.UseWorkBuddyCredentials(ctx, id, func(item account.Item, cred workbuddyai.Credentials) error {
 		if force || cred.ExpiresAt.IsZero() || time.Until(cred.ExpiresAt) < refreshMargin {
-			operation, cancel := context.WithTimeout(ctx, operationTimeout)
+			operation, cancel := context.WithTimeout(scoped, operationTimeout)
 			defer cancel()
 			token, err := client.Refresh(operation, cred)
 			if err != nil {
@@ -78,7 +79,7 @@ func (s *Service) UseAt(ctx context.Context, id, expectedAt string, consume func
 
 // Models 返回与当前凭据版本绑定的账号目录。
 func (s *Service) Models(ctx context.Context, id string) ([]workbuddyai.Model, string, error) {
-	build, err := s.buildOf(ctx, id)
+	build, item, err := s.buildOf(ctx, id)
 	if err != nil {
 		return nil, "", err
 	}
@@ -93,7 +94,7 @@ func (s *Service) Models(ctx context.Context, id string) ([]workbuddyai.Model, s
 	if err != nil {
 		return nil, "", err
 	}
-	operation, cancel := context.WithTimeout(ctx, operationTimeout)
+	operation, cancel := context.WithTimeout(item.OutboundContext(ctx), operationTimeout)
 	defer cancel()
 	models, err := client.DiscoverModels(operation, cred)
 	return models, version, err
