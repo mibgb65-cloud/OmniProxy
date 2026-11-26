@@ -282,11 +282,11 @@ func relaySocket(ctx context.Context, client, upstream *websocket.Conn, guard fu
 				return socketRelayFailure(ctx, err, "upstream_disconnected")
 			}
 		}
-		if err := client.Write(ctx, kind, data); err != nil {
+		if err := accounting.forwardUpstreamFrame(ctx, kind, data, func() error {
+			return client.Write(ctx, kind, data)
+		}); err != nil {
 			return socketRelayFailure(ctx, err, "client_write_failed")
 		}
-		// 字节已经交给客户端，统计失败不能再改变这一轮的交付结果。
-		accounting.upstreamFrame(ctx, kind, data)
 	}
 }
 

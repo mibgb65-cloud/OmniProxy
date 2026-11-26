@@ -99,27 +99,41 @@ func (a *socketAccounting) beginTurn(ctx context.Context, model, effort string, 
 	return nil
 }
 
-// upstreamFrame 在帧已交给客户端之后读取首字与用量，统计失败不影响已送达的字节。
-func (a *socketAccounting) upstreamFrame(ctx context.Context, kind websocket.MessageType, data []byte) {
+// forwardUpstreamFrame 在帧成功交付后才读取首字与用量；统计失败不改变交付结果。
+func (a *socketAccounting) forwardUpstreamFrame(ctx context.Context, kind websocket.MessageType, data []byte, write func() error) error {
 	if a == nil || kind != websocket.MessageText {
-		return
+		return write()
 	}
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	terminal := terminalStreamEvent(data, a.protocol)
+	if terminal {
+		// 客户端可能在 Write 返回前就收到终结帧并发起下一轮。必须锁住交付到结算的
+		// 间隙，否则新一轮会抢先把上一轮记为取消，或让上一轮的用量落到新一轮。
+		a.mu.Lock()
+		defer a.mu.Unlock()
+	}
+	if err := write(); err != nil {
+		return err
+	}
+	if !terminal {
+		// 普通数据帧不在锁内写出，避免在网络背压时阻塞另一方向的轮次处理。
+		a.mu.Lock()
+		defer a.mu.Unlock()
+	}
 	if a.turn == nil {
-		return
+		return nil
 	}
-	if !terminalStreamEvent(data, a.protocol) {
+	if !terminal {
 		if a.turn.trace.hasFirstContent(data) {
 			a.turn.trace.markFirstToken()
 		}
-		return
+		return nil
 	}
 	// 与 HTTP 流一致：终结事件就是这一轮的结束边界，之后连接仍可继续下一轮。
 	if a.turn.trace.Report(ctx, ParseUsage(data, a.protocol, true)) != nil {
 		a.logFailure()
 	}
 	a.closeTurn(ctx, http.StatusOK, "")
+	return nil
 }
 
 // closeTurn 结束当前一轮并清空；没有终结事件就断开时按未完成的回答收尾。

@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -89,6 +90,57 @@ func dialAccountingSocket(t *testing.T, server *Server) (*websocket.Conn, contex
 	}
 	t.Cleanup(func() { socket.CloseNow() })
 	return socket, ctx
+}
+
+func TestPassthroughSocketTerminalDeliverySerializesTurnAccounting(t *testing.T) {
+	ctx := context.Background()
+	writeErr := errors.New("synthetic downstream write failure")
+	terminal := []byte(`{"type":"response.completed","response":{"usage":{"input_tokens":12,"output_tokens":4}}}`)
+	create := []byte(`{"type":"response.create","model":"synthetic-model"}`)
+	for _, tc := range []struct {
+		name string
+		err  error
+	}{
+		{"delivered", nil},
+		{"write failed", writeErr},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			spy := &accountingSpy{}
+			accounting := newSocketAccounting(New(Options{Observer: spy}), "codex", PassthroughAttempt{}, "/v1/responses")
+			if err := accounting.clientFrame(ctx, websocket.MessageText, create); err != nil {
+				t.Fatal(err)
+			}
+			err := accounting.forwardUpstreamFrame(ctx, websocket.MessageText, terminal, func() error {
+				// 模拟客户端收到帧的时刻。此时不能先记账，也不能让下一轮抢到状态锁。
+				if records, _ := spy.records(); len(records) != 0 {
+					t.Fatal("终结帧交付前已结算")
+				}
+				if accounting.mu.TryLock() {
+					accounting.mu.Unlock()
+					t.Fatal("终结帧交付时未锁住轮次")
+				}
+				return tc.err
+			})
+			if !errors.Is(err, tc.err) {
+				t.Fatalf("终结帧写结果不匹配: %v", err)
+			}
+			records, _ := spy.records()
+			if tc.err != nil {
+				if len(records) != 0 {
+					t.Fatalf("交付失败但已结算: %+v", records)
+				}
+				accounting.close(ctx, Failure("client_write_failed", http.StatusBadGateway))
+				records, _ = spy.records()
+				if len(records) != 1 || records[0].State != "failed" || records[0].Usage.Complete {
+					t.Fatalf("交付失败未按错误收尾: %+v", records)
+				}
+				return
+			}
+			if len(records) != 1 || records[0].State != "success" || !records[0].Usage.Complete || records[0].Usage.Input != 12 || records[0].Usage.Output != 4 {
+				t.Fatalf("交付成功未按终结帧结算: %+v", records)
+			}
+		})
+	}
 }
 
 // TestPassthroughSocketRecordsTurnUsage 断言透明中继的每一轮都落地请求与 token 记录。
