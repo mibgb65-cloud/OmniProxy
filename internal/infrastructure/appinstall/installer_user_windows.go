@@ -4,6 +4,7 @@ package appinstall
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"unsafe"
@@ -16,7 +17,15 @@ import (
 // 与卸载登记身份一样，隔离验收仅允许链接时改名，不读取管理员继承的运行时环境变量。
 var installerAppName = profile.AppName
 
-func desktopUserToken() (windows.Token, error) {
+// SHGetKnownFolderPath 接收显式用户令牌时要求 TOKEN_IMPERSONATE；仅查令牌信息能成功不代表查目录也能成功。
+const installerDataTokenAccess = windows.TOKEN_QUERY | windows.TOKEN_DUPLICATE | windows.TOKEN_IMPERSONATE
+
+var (
+	errInstallerUserContext = errors.New("installer: user_context")
+	errInstallerAppData     = errors.New("installer: roaming_appdata")
+)
+
+func desktopUserToken(access uint32) (windows.Token, error) {
 	hwnd, _, _ := user32.NewProc("GetShellWindow").Call()
 	var pid uint32
 	user32.NewProc("GetWindowThreadProcessId").Call(hwnd, uintptr(unsafe.Pointer(&pid)))
@@ -29,7 +38,7 @@ func desktopUserToken() (windows.Token, error) {
 	}
 	defer windows.CloseHandle(process)
 	var token windows.Token
-	if err := windows.OpenProcessToken(process, windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE, &token); err != nil {
+	if err := windows.OpenProcessToken(process, access, &token); err != nil {
 		return 0, err
 	}
 	if token.IsElevated() {
@@ -41,10 +50,10 @@ func desktopUserToken() (windows.Token, error) {
 
 func installerUserToken() (windows.Token, error) {
 	if windows.GetCurrentProcessToken().IsElevated() {
-		return desktopUserToken()
+		return desktopUserToken(installerDataTokenAccess)
 	}
 	var token windows.Token
-	err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE, &token)
+	err := windows.OpenProcessToken(windows.CurrentProcess(), installerDataTokenAccess, &token)
 	return token, err
 }
 
@@ -56,7 +65,7 @@ func installerLocation(token windows.Token, target string) (profile.InstallerLoc
 	// KnownFolder 查询使用目标用户令牌，不受提权账号的 APPDATA 或 OMNIPROXY_* 环境污染。
 	root, err := token.KnownFolderPath(windows.FOLDERID_RoamingAppData, 0)
 	if err != nil {
-		return profile.InstallerLocation{}, err
+		return profile.InstallerLocation{}, fmt.Errorf("%w: %w", errInstallerAppData, err)
 	}
 	base := filepath.Join(root, installerAppName)
 	return profile.InstallerLocation{ConfigDir: base, DefaultDataDir: base, InstallDir: filepath.Dir(target)}, nil
@@ -68,7 +77,7 @@ func withInstallerUser(target string, action func(profile.InstallerLocation) err
 	}
 	token, err := installerUserToken()
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %w", errInstallerUserContext, err)
 	}
 	defer token.Close()
 	run := func() error {
@@ -88,7 +97,7 @@ func runAsInstallerUser(token windows.Token, action func() error) error {
 	var impersonation windows.Token
 	if err := windows.DuplicateTokenEx(token, windows.TOKEN_QUERY|windows.TOKEN_IMPERSONATE, nil,
 		windows.SecurityImpersonation, windows.TokenImpersonation, &impersonation); err != nil {
-		return err
+		return fmt.Errorf("%w: %w", errInstallerUserContext, err)
 	}
 	defer impersonation.Close()
 	done := make(chan error)
@@ -96,7 +105,7 @@ func runAsInstallerUser(token windows.Token, action func() error) error {
 		runtime.LockOSThread()
 		if err := windows.SetThreadToken(nil, impersonation); err != nil {
 			runtime.UnlockOSThread()
-			done <- err
+			done <- fmt.Errorf("%w: %w", errInstallerUserContext, err)
 			return
 		}
 		var result error
@@ -104,9 +113,11 @@ func runAsInstallerUser(token windows.Token, action func() error) error {
 			err := windows.RevertToSelf()
 			if err == nil {
 				runtime.UnlockOSThread()
+			} else {
+				// 恢复失败时不解锁线程；协程退出后运行时销毁它，不能把模拟身份泄漏给其他任务。
+				result = errors.Join(result, fmt.Errorf("%w: %w", errInstallerUserContext, err))
 			}
-			// 恢复失败时不解锁线程；协程退出后运行时销毁它，不能把模拟身份泄漏给其他任务。
-			done <- errors.Join(result, err)
+			done <- result
 		}()
 		result = action()
 	}()

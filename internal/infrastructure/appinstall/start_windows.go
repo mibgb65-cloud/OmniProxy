@@ -24,7 +24,7 @@ func startInstalled(target string) error {
 		return cmd.Process.Release()
 	}
 	// 只使用当前交互桌面的 shell 身份；没有普通用户桌面时提示手动启动。
-	token, err := desktopUserToken()
+	token, err := desktopUserToken(windows.TOKEN_QUERY | windows.TOKEN_DUPLICATE)
 	if err != nil {
 		return err
 	}

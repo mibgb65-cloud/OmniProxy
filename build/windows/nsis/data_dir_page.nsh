@@ -31,18 +31,33 @@ Function DataDirPageCreate
         ${IfNot} ${Errors}
             ; 显式 UTF-16LE 协议，避免 nsExec 的系统代码页损坏中文数据路径。
             FileReadUTF16LE $2 $1
+            ${If} ${Errors}
+                StrCpy $1 ""
+            ${EndIf}
             FileClose $2
         ${EndIf}
-    ${EndIf}
-    Delete "$PLUGINSDIR\omniproxy-data-dir.txt"
-    ${If} $0 == "0"
-    ${AndIf} $1 != ""
         StrCpy $DataDirPath $1
         Call DataDirTrimNewLines
         StrCpy $DataDirCurrent $DataDirPath
-    ${Else}
-        ; 无法确认实际使用者或原数据位置时，不能猜默认值后继续写配置。
-        MessageBox MB_OK|MB_ICONSTOP "$(OMNI_DATADIR_READ_FAILED)"
+    ${EndIf}
+    Delete "$PLUGINSDIR\omniproxy-data-dir.txt"
+    ${If} $DataDirPath == ""
+        ; 与 Go 的 -read-file 退出码对应；仅展示固定文案，不展示助手原始输出。
+        ${If} $0 == "error"
+            StrCpy $1 "$(OMNI_DATADIR_READ_START)"
+        ${ElseIf} $0 == "10"
+            StrCpy $1 "$(OMNI_DATADIR_READ_USER)"
+        ${ElseIf} $0 == "11"
+            StrCpy $1 "$(OMNI_DATADIR_READ_APPDATA)"
+        ${ElseIf} $0 == "2"
+            StrCpy $1 "$(OMNI_DATADIR_READ_CONFIG)"
+        ${ElseIf} $0 == "12"
+        ${OrIf} $0 == "0"
+            StrCpy $1 "$(OMNI_DATADIR_READ_RESULT)"
+        ${Else}
+            StrCpy $1 "$(OMNI_DATADIR_READ_UNEXPECTED)"
+        ${EndIf}
+        MessageBox MB_OK|MB_ICONSTOP "$(OMNI_DATADIR_READ_FAILED)$\r$\n$\r$\n$1"
         SetErrorLevel 67
         Quit
     ${EndIf}

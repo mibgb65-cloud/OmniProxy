@@ -22,6 +22,25 @@ import (
 	"omniproxy/internal/version"
 )
 
+// 这些退出码仅用于 -read-file 协议，与 NSIS data_dir_page.nsh 对应。
+const (
+	installerDataReadFailed    = 2
+	installerDataUserFailed    = 10
+	installerDataAppDataFailed = 11
+	installerDataResultFailed  = 12
+)
+
+func installerDataReadExitCode(err error) int {
+	switch {
+	case errors.Is(err, errInstallerUserContext):
+		return installerDataUserFailed
+	case errors.Is(err, errInstallerAppData):
+		return installerDataAppDataFailed
+	default:
+		return installerDataReadFailed
+	}
+}
+
 // HandleMode 必须在 profile／数据库初始化前调用；参数不经过 shell。
 func HandleMode(args []string) (bool, int) {
 	if len(args) == 2 && args[0] == "--omniproxy-installer-launch" {
@@ -42,6 +61,7 @@ func HandleMode(args []string) (bool, int) {
 	}
 	// 原安装程序路径必须显式传入；临时助手所在目录和管理员环境都不是用户数据来源。
 	if len(args) == 2 && (args[0] == "--omniproxy-installer-data-dir-read" || args[0] == "--omniproxy-installer-data-dir-read-file") {
+		readFile := args[0] == "--omniproxy-installer-data-dir-read-file"
 		var dir string
 		err := withInstallerUser(args[1], func(location profile.InstallerLocation) error {
 			var err error
@@ -49,17 +69,20 @@ func HandleMode(args []string) (bool, int) {
 			return err
 		})
 		if err != nil {
+			if readFile {
+				// 安装器只消费固定的诊断码，不把含用户路径的文件错误输出到向导。
+				return true, installerDataReadExitCode(err)
+			}
 			fmt.Fprintln(os.Stderr, err)
 			return true, 2
 		}
-		if args[0] == "--omniproxy-installer-data-dir-read-file" {
+		if readFile {
 			executable, err := os.Executable()
 			if err == nil {
 				err = writeInstallerDirectoryResult(executable, dir)
 			}
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return true, 2
+				return true, installerDataResultFailed
 			}
 		} else {
 			fmt.Println(dir)

@@ -4,6 +4,7 @@ package appinstall
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -16,7 +17,8 @@ import (
 
 func TestInstallerLocationUsesTokenInsteadOfInheritedEnvironment(t *testing.T) {
 	var token windows.Token
-	if err := windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY|windows.TOKEN_DUPLICATE, &token); err != nil {
+	// 使用与生产查询相同的权限，再让 KnownFolder 校验真实 Windows 令牌。
+	if err := windows.OpenProcessToken(windows.CurrentProcess(), installerDataTokenAccess, &token); err != nil {
 		t.Fatal(err)
 	}
 	defer token.Close()
@@ -46,6 +48,23 @@ func TestInstallerLocationUsesTokenInsteadOfInheritedEnvironment(t *testing.T) {
 		return
 	}
 	defer selected.Close()
+	// 有些 Windows 版本即使权限不足也能查到本地 AppData，因此另外用同权限的
+	// 模拟令牌验证实际句柄具备 TOKEN_IMPERSONATE。这里不访问任何使用者文件。
+	var sameAccess windows.Token
+	if err := windows.DuplicateTokenEx(selected, 0, nil, windows.SecurityImpersonation, windows.TokenImpersonation, &sameAccess); err != nil {
+		t.Fatal(err)
+	}
+	defer sameAccess.Close()
+	runtime.LockOSThread()
+	if err := windows.SetThreadToken(nil, sameAccess); err != nil {
+		runtime.UnlockOSThread()
+		t.Fatalf("installer data token cannot impersonate: %v", err)
+	}
+	if err := windows.RevertToSelf(); err != nil {
+		t.Fatal(err) // 恢复失败保持线程锁定，退出测试协程时销毁线程。
+	}
+	runtime.UnlockOSThread()
+
 	selectedRoot, err := selected.KnownFolderPath(windows.FOLDERID_RoamingAppData, 0)
 	if err != nil {
 		t.Fatal(err)
@@ -110,13 +129,38 @@ func TestInstallerUserRunsOnDedicatedImpersonatedThread(t *testing.T) {
 
 func TestInstallerUserFailsClosedWithoutValidTokenOrTarget(t *testing.T) {
 	visited := false
-	if err := runAsInstallerUser(0, func() error { visited = true; return nil }); err == nil || visited {
+	if err := runAsInstallerUser(0, func() error { visited = true; return nil }); !errors.Is(err, errInstallerUserContext) || visited {
 		t.Fatal("invalid identity was allowed to run")
 	}
 	for _, target := range []string{"", "OmniProxy.exe", `C:\OmniProxy.exe`, `C:\Tools\notepad.exe`} {
 		err := withInstallerUser(target, func(profile.InstallerLocation) error { visited = true; return nil })
 		if err == nil || visited {
 			t.Fatalf("invalid target was allowed: %q", target)
+		}
+	}
+}
+
+func TestInstallerDataReadExitCodes(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		err  error
+		code int
+	}{
+		{"token", fmt.Errorf("wrapped: %w", errInstallerUserContext), 10},
+		{"known folder", fmt.Errorf("wrapped: %w", errInstallerAppData), 11},
+		{"config", errors.New("unreadable config"), 2},
+		{"failed to revert identity", errors.Join(errInstallerAppData, errInstallerUserContext), 10},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if code := installerDataReadExitCode(tc.err); code != tc.code {
+				t.Fatalf("data directory helper returned %d, want %d", code, tc.code)
+			}
+		})
+	}
+	// 无需查看真实 AppData；相对路径在解析身份前即被拒绝，两种读模式都保留退出码 2。
+	for _, mode := range []string{"--omniproxy-installer-data-dir-read", "--omniproxy-installer-data-dir-read-file"} {
+		if handled, code := HandleMode([]string{mode, "OmniProxy.exe"}); !handled || code != 2 {
+			t.Fatalf("%s returned handled=%v, code=%d", mode, handled, code)
 		}
 	}
 }
