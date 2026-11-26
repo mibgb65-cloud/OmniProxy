@@ -10,6 +10,8 @@
 
 升级前从托盘完全退出并做包含 SQLite WAL（如果存在）的一致性备份；不要用旧版本写入迁移后的数据库。开启正文记录后，分享数据备份或 XLSX 前请检查是否包含不应公开的内容。
 
+[v2.5.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.5.0) 已于 2026-11-26 11:33:21（Asia/Singapore）公开为正式 Latest。托管签名、篡改拒绝和公开资产复验通过；数据库迁移通过隔离测试，未执行实机覆盖安装。详见 [发布任务记录](../tasks/completed/2026-11/TASK-20261126-001-release-v2.5.0.md)。
+
 ## v2.3.0 → v2.4.0
 
 本版汇总仅在本机构建的 `v2.3.1-beta.1`–`beta.29`，内容包括三家新内置服务商（HowToFix、

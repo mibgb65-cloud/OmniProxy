@@ -2,7 +2,7 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-正式发布进行中：[TASK-20261126-001](../tasks/active/2026-11/TASK-20261126-001-release-v2.5.0.md) 将 `v2.4.0` 以来的七轮本地 Beta 汇总为 `v2.5.0`，准备 Windows 安装包及 GitHub 稳定渠道发布。
+正式发布：[v2.5.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.5.0) 已于 2026-11-26 11:33（Asia/Singapore）公开为 GitHub Latest，汇总 `v2.4.0` 以来的七轮本地 Beta，并修复透明 WebSocket 逐轮记账竞态。托管质量门、项目自签、篡改拒绝及公开下载的版本和 SHA256 检查通过，未执行实机覆盖安装。详见 [TASK-20261126-001](../tasks/completed/2026-11/TASK-20261126-001-release-v2.5.0.md)。
 
 本地构建：[TASK-20261124-002](../tasks/completed/2026-11/TASK-20261124-002-build-local-v2.4.1-beta.7.md) 已产出 `v2.4.1-beta.7` Windows amd64 生产安装包，内容为提供商代理覆盖额度、目录与授权续期等全部出站调用（TASK-20261124-001，`71fc1664`）：安装器 21,614,227 bytes，SHA256 `3d55833d3877f26cab33475a625d3f07039a270acd15560202816e0b73a6bd0f`，Windows 数字版本 `2.4.1.0`、NSIS 基础版本 `2.4.1`；未签名、未自动安装、未启动、未打标签、未推送。本版本无数据库迁移。
 
