@@ -2,9 +2,11 @@
 
 当前状态看板。完整任务信息见 `docs/tasks/`（Source of Truth）。
 
-本地构建：[TASK-20261126-003](../tasks/completed/2026-11/TASK-20261126-003-build-local-v2.5.1-beta.1.md) 已产出 `v2.5.1-beta.1` Windows amd64 生产安装包，包含数据目录查询权限和诊断改进（`7e81b8f6`）。完整质量门、NSIS 打包、版本资源和 SHA256 校验通过。未签名、未安装、未打标签、未推送；[v2.5.1 正式发布草稿](../releases/v2.5.1.md) 已准备，待本地覆盖更新验收。
+正式发布：[v2.5.1](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.5.1) 已于 2026-11-26 14:00（Asia/Singapore）公开为 GitHub Latest，包含 Windows 安装器 AppData 查询权限与诊断修复，无新增数据库迁移。托管质量门、项目自签与公开下载复验均通过，未执行 Win10 实机首装。详见 [TASK-20261126-004](../tasks/completed/2026-11/TASK-20261126-004-release-v2.5.1.md)。
 
-本地修复：[TASK-20261126-002](../tasks/completed/2026-11/TASK-20261126-002-installer-data-directory-compatibility.md) 补齐安装器查询实际使用者 AppData 所需的 Windows 令牌权限，并新增不含用户路径的 `OMNI-DATA-*` 诊断码。Win11 专项回归和隔离的原生 NSIS 夹具通过；未在 Win10 实机复测，未发布新安装包。实现提交 `7e81b8f6`。
+本地构建：[TASK-20261126-003](../tasks/completed/2026-11/TASK-20261126-003-build-local-v2.5.1-beta.1.md) 已产出 `v2.5.1-beta.1` Windows amd64 生产安装包，包含数据目录查询权限和诊断改进（`7e81b8f6`）。完整质量门、NSIS 打包、版本资源和 SHA256 校验通过。该 Beta 仅本地构建，未签名、未替用户安装、未公开发布。
+
+已修复：[TASK-20261126-002](../tasks/completed/2026-11/TASK-20261126-002-installer-data-directory-compatibility.md) 补齐安装器查询实际使用者 AppData 所需的 Windows 令牌权限，并新增不含用户路径的 `OMNI-DATA-*` 诊断码。Win11 专项回归和隔离的原生 NSIS 夹具通过；未在 Win10 实机复测。实现提交 `7e81b8f6`，已随 v2.5.1 发布。
 
 正式发布：[v2.5.0](https://github.com/mibgb65-cloud/OmniProxy/releases/tag/v2.5.0) 已于 2026-11-26 11:33（Asia/Singapore）公开为 GitHub Latest，汇总 `v2.4.0` 以来的七轮本地 Beta，并修复透明 WebSocket 逐轮记账竞态。托管质量门、项目自签、篡改拒绝及公开下载的版本和 SHA256 检查通过，未执行实机覆盖安装。详见 [TASK-20261126-001](../tasks/completed/2026-11/TASK-20261126-001-release-v2.5.0.md)。
 
